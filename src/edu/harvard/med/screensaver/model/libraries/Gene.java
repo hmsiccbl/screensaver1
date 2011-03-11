@@ -12,13 +12,13 @@ package edu.harvard.med.screensaver.model.libraries;
 import java.util.Set;
 
 import javax.persistence.Column;
+import javax.persistence.ElementCollection;
 import javax.persistence.Entity;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
 import javax.persistence.JoinColumn;
 import javax.persistence.JoinTable;
-import javax.persistence.OrderBy;
 
 import com.google.common.collect.Sets;
 import org.hibernate.annotations.Immutable;
@@ -26,7 +26,6 @@ import org.hibernate.annotations.Immutable;
 import edu.harvard.med.screensaver.model.AbstractEntity;
 import edu.harvard.med.screensaver.model.AbstractEntityVisitor;
 import edu.harvard.med.screensaver.model.DataModelViolationException;
-import edu.harvard.med.screensaver.model.annotations.CollectionOfElements;
 import edu.harvard.med.screensaver.model.annotations.ContainedEntity;
 import edu.harvard.med.screensaver.model.meta.PropertyPath;
 import edu.harvard.med.screensaver.model.meta.RelationshipPath;
@@ -41,7 +40,7 @@ import edu.harvard.med.screensaver.model.meta.RelationshipPath;
 @Entity
 @Immutable
 @org.hibernate.annotations.Proxy
-@ContainedEntity(containingEntityClass=SilencingReagent.class)
+@ContainedEntity(containingEntityClass = SilencingReagent.class, autoCreated = true)
 public class Gene extends AbstractEntity<Integer>
 {
   private static final long serialVersionUID = 0L;
@@ -138,8 +137,8 @@ public class Gene extends AbstractEntity<Integer>
     return this;
   }
 
-  @org.hibernate.annotations.CollectionOfElements
-  @CollectionOfElements(hasNonconventionalMutation=true)
+  @ElementCollection
+  @edu.harvard.med.screensaver.model.annotations.ElementCollection(hasNonconventionalMutation = true)
   @Column(name="entrezgeneSymbol", nullable=false)
   @JoinTable(name="geneSymbol", joinColumns=@JoinColumn(name="geneId"))
   @org.hibernate.annotations.Type(type="text")
@@ -165,11 +164,10 @@ public class Gene extends AbstractEntity<Integer>
     return this;
   }
 
-  @org.hibernate.annotations.CollectionOfElements
-  @CollectionOfElements(hasNonconventionalMutation=true)
+  @ElementCollection
+  @edu.harvard.med.screensaver.model.annotations.ElementCollection(hasNonconventionalMutation = true)
   @Column(name="genbankAccessionNumber", nullable=false)
   @JoinTable(name="geneGenbankAccessionNumber", joinColumns=@JoinColumn(name="geneId"))
-  @OrderBy("genbankAccessionNumber")
   @org.hibernate.annotations.Type(type="text")
   @org.hibernate.annotations.ForeignKey(name="fk_gene_genbank_accession_number_to_gene")
   public Set<String> getGenbankAccessionNumbers()

@@ -13,6 +13,7 @@ import java.beans.IntrospectionException;
 
 import junit.framework.TestSuite;
 import org.joda.time.LocalDate;
+import org.springframework.beans.factory.annotation.Autowired;
 
 import edu.harvard.med.screensaver.db.DAOTransaction;
 import edu.harvard.med.screensaver.model.AbstractEntityInstanceTest;
@@ -24,22 +25,26 @@ import edu.harvard.med.screensaver.model.libraries.Library;
 import edu.harvard.med.screensaver.model.libraries.Plate;
 import edu.harvard.med.screensaver.model.users.AdministratorUser;
 import edu.harvard.med.screensaver.model.users.ScreeningRoomUser;
+import edu.harvard.med.screensaver.service.libraries.LibraryScreeningDerivedPropertiesUpdater;
 
 public class LibraryScreeningTest extends AbstractEntityInstanceTest<LibraryScreening>
 {
+  @Autowired
+  protected LibraryScreeningDerivedPropertiesUpdater libraryScreeningDerivedPropertiesUpdater;
+
   public static TestSuite suite()
   {
     return buildTestSuite(LibraryScreeningTest.class, LibraryScreening.class);
   }
 
-  public LibraryScreeningTest() throws IntrospectionException
+  public LibraryScreeningTest()
   {
     super(LibraryScreening.class);
   }
   
   public void testScreenedExperimentalWellCount()
   {
-    schemaUtil.truncateTablesOrCreateSchema();
+    schemaUtil.truncateTables();
     
     genericEntityDao.doInTransaction(new DAOTransaction()
     {
@@ -51,20 +56,21 @@ public class LibraryScreeningTest extends AbstractEntityInstanceTest<LibraryScre
         Copy lib2Copy = library2.createCopy((AdministratorUser) library2.getCreatedBy(), CopyUsageType.LIBRARY_SCREENING_PLATES, "A");
         Plate plate1000 = lib1Copy.findPlate(1000).withWellVolume(new Volume(0));
         Plate plate1001 = lib1Copy.findPlate(1001).withWellVolume(new Volume(0));
-        genericEntityDao.saveOrUpdateEntity(library1);
-        genericEntityDao.saveOrUpdateEntity(library2);
-        genericEntityDao.flush();
+        genericEntityDao.persistEntity(library1);
+        genericEntityDao.persistEntity(library2);
+        genericEntityDao.flush(); // necessary, since LibraryScreeningEntityUpdater queries for library 
         
         Screen screen = MakeDummyEntities.makeDummyScreen(1, ScreenType.SMALL_MOLECULE);
-        AdministratorUser admin = new AdministratorUser("Admin", "User", "", "", "", "", "", "");
+        AdministratorUser admin = new AdministratorUser("Admin", "User");
         ScreeningRoomUser user = new ScreeningRoomUser("Screener", "User");
         LibraryScreening libraryScreening = screen.createLibraryScreening(admin, user, new LocalDate());
-        genericEntityDao.saveOrUpdateEntity(screen);
+        genericEntityDao.persistEntity(screen);
         
         libraryScreening.setNumberOfReplicates(1);
         libraryScreening.addAssayPlatesScreened(plate1000);
         libraryScreening.addAssayPlatesScreened(plate1001);
-        libraryScreening.update();
+        genericEntityDao.flush();
+        libraryScreeningDerivedPropertiesUpdater.updateScreeningStatistics(libraryScreening);
         
     
         //libraryScreenings = genericEntityDao.findAllEntitiesOfType(LibraryScreening.class).get(0);
@@ -76,20 +82,20 @@ public class LibraryScreeningTest extends AbstractEntityInstanceTest<LibraryScre
         Plate plate2001 = lib2Copy.findPlate(2001).withWellVolume(new Volume(0));
         libraryScreening.addAssayPlatesScreened(plate2000);
         libraryScreening.addAssayPlatesScreened(plate2001);
-        libraryScreening.update();
+        libraryScreeningDerivedPropertiesUpdater.updateScreeningStatistics(libraryScreening);
         assertEquals(384 * 4, libraryScreening.getScreenedExperimentalWellCount());
         assertEquals(4, libraryScreening.getLibraryPlatesScreenedCount());
         assertEquals(2, libraryScreening.getLibrariesScreenedCount());
 
         libraryScreening.removeAssayPlatesScreened(plate2000);
         libraryScreening.removeAssayPlatesScreened(plate2001);
-        libraryScreening.update();
+        libraryScreeningDerivedPropertiesUpdater.updateScreeningStatistics(libraryScreening);
         assertEquals(384 * 2, libraryScreening.getScreenedExperimentalWellCount());
         assertEquals(2, libraryScreening.getLibraryPlatesScreenedCount());
         assertEquals(1, libraryScreening.getLibrariesScreenedCount());
 
         libraryScreening.addAssayPlatesScreened(plate2001);
-        libraryScreening.update();
+        libraryScreeningDerivedPropertiesUpdater.updateScreeningStatistics(libraryScreening);
         assertEquals(384 * 3, libraryScreening.getScreenedExperimentalWellCount());
         assertEquals(3, libraryScreening.getLibraryPlatesScreenedCount());
         assertEquals(2, libraryScreening.getLibrariesScreenedCount());
@@ -100,7 +106,7 @@ public class LibraryScreeningTest extends AbstractEntityInstanceTest<LibraryScre
         libraryScreening.setNumberOfReplicates(2);
         libraryScreening.addAssayPlatesScreened(plate2000);
         genericEntityDao.saveOrUpdateEntity(libraryScreening);
-        libraryScreening.update();
+        libraryScreeningDerivedPropertiesUpdater.updateScreeningStatistics(libraryScreening);
         assertEquals(384 * 1, libraryScreening.getScreenedExperimentalWellCount());
         assertEquals(1, libraryScreening.getLibraryPlatesScreenedCount());
         assertEquals(1, libraryScreening.getLibrariesScreenedCount());

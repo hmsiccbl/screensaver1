@@ -22,7 +22,7 @@ public class PublicationTest extends AbstractEntityInstanceTest<Publication>
     return buildTestSuite(PublicationTest.class, Publication.class);
   }
 
-  public PublicationTest() throws IntrospectionException
+  public PublicationTest()
   {
     super(Publication.class);
   }

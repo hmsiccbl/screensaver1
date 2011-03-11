@@ -11,16 +11,12 @@ package edu.harvard.med.screensaver.model.annotations;
 
 import javax.persistence.Transient;
 
-import edu.harvard.med.screensaver.domainlogic.EntityUpdater;
-
 /**
- * Marks a model property as being derived (computed). Implies that an
- * {@link EntityUpdater} will be used to compute and store its value. Unless the
- * property is also {@link Transient}, the computed property value will be
- * persisted in the database.
+ * Marks a model property as being derived (computed). Implies that a service-layer method will be used to compute and
+ * store its value. Unless the property is also {@link Transient}, the computed property value will be persisted in the
+ * database.
  * 
  * @author atolopko
  */
 public @interface Derived {
-
 }

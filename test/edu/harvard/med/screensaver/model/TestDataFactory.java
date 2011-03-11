@@ -1,4 +1,3 @@
-
 // $HeadURL$
 // $Id$
 //
@@ -10,76 +9,379 @@
 
 package edu.harvard.med.screensaver.model;
 
-import java.io.IOException;
-import java.io.InputStream;
-import java.io.StringReader;
-import java.lang.reflect.Array;
 import java.lang.reflect.Constructor;
 import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
 import java.math.BigDecimal;
-import java.sql.Blob;
 import java.util.Arrays;
 import java.util.Comparator;
-import java.util.HashMap;
-import java.util.Map;
+import java.util.List;
 import java.util.SortedSet;
+import java.util.regex.Pattern;
 
+import javax.persistence.EntityManagerFactory;
+import javax.persistence.metamodel.ManagedType;
+
+import com.google.common.collect.ArrayListMultimap;
+import com.google.common.collect.Iterables;
+import com.google.common.collect.Lists;
+import com.google.common.collect.Multimap;
 import com.google.common.collect.Sets;
 import org.apache.log4j.Logger;
-import org.hibernate.Hibernate;
-import org.hibernate.lob.ReaderInputStream;
 import org.joda.time.DateTime;
 import org.joda.time.LocalDate;
+import org.springframework.transaction.annotation.Transactional;
 
 import edu.harvard.med.screensaver.ScreensaverConstants;
+import edu.harvard.med.screensaver.db.GenericEntityDAO;
 import edu.harvard.med.screensaver.model.annotations.ContainedEntity;
+import edu.harvard.med.screensaver.model.cherrypicks.CherryPickAssayProtocolsFollowed;
+import edu.harvard.med.screensaver.model.cherrypicks.CherryPickFollowupResultsStatus;
+import edu.harvard.med.screensaver.model.cherrypicks.CherryPickLiquidTransferStatus;
 import edu.harvard.med.screensaver.model.cherrypicks.CherryPickRequest;
 import edu.harvard.med.screensaver.model.cherrypicks.LabCherryPick;
 import edu.harvard.med.screensaver.model.cherrypicks.RNAiCherryPickRequest;
-import edu.harvard.med.screensaver.model.cherrypicks.ScreenerCherryPick;
 import edu.harvard.med.screensaver.model.cherrypicks.SmallMoleculeCherryPickRequest;
+import edu.harvard.med.screensaver.model.entitytesters.ModelIntrospectionUtil;
 import edu.harvard.med.screensaver.model.libraries.Copy;
+import edu.harvard.med.screensaver.model.libraries.CopyUsageType;
 import edu.harvard.med.screensaver.model.libraries.Gene;
 import edu.harvard.med.screensaver.model.libraries.Library;
-import edu.harvard.med.screensaver.model.libraries.LibraryContentsVersion;
+import edu.harvard.med.screensaver.model.libraries.LibraryScreeningStatus;
 import edu.harvard.med.screensaver.model.libraries.LibraryType;
 import edu.harvard.med.screensaver.model.libraries.LibraryWellType;
 import edu.harvard.med.screensaver.model.libraries.MolecularFormula;
 import edu.harvard.med.screensaver.model.libraries.NaturalProductReagent;
 import edu.harvard.med.screensaver.model.libraries.Plate;
+import edu.harvard.med.screensaver.model.libraries.PlateSize;
+import edu.harvard.med.screensaver.model.libraries.PlateStatus;
+import edu.harvard.med.screensaver.model.libraries.PlateType;
 import edu.harvard.med.screensaver.model.libraries.Reagent;
 import edu.harvard.med.screensaver.model.libraries.ReagentVendorIdentifier;
 import edu.harvard.med.screensaver.model.libraries.SilencingReagent;
 import edu.harvard.med.screensaver.model.libraries.SilencingReagentType;
 import edu.harvard.med.screensaver.model.libraries.SmallMoleculeReagent;
+import edu.harvard.med.screensaver.model.libraries.Solvent;
 import edu.harvard.med.screensaver.model.libraries.Well;
 import edu.harvard.med.screensaver.model.libraries.WellKey;
 import edu.harvard.med.screensaver.model.libraries.WellName;
 import edu.harvard.med.screensaver.model.screenresults.AnnotationType;
 import edu.harvard.med.screensaver.model.screenresults.AnnotationValue;
 import edu.harvard.med.screensaver.model.screenresults.AssayWell;
-import edu.harvard.med.screensaver.model.screenresults.AssayWellControlType;
+import edu.harvard.med.screensaver.model.screenresults.ConfirmedPositiveValue;
 import edu.harvard.med.screensaver.model.screenresults.DataColumn;
+import edu.harvard.med.screensaver.model.screenresults.PartitionedValue;
 import edu.harvard.med.screensaver.model.screenresults.ResultValue;
 import edu.harvard.med.screensaver.model.screenresults.ScreenResult;
+import edu.harvard.med.screensaver.model.screens.AssayProtocolType;
+import edu.harvard.med.screensaver.model.screens.AssayReadoutType;
 import edu.harvard.med.screensaver.model.screens.LabActivity;
 import edu.harvard.med.screensaver.model.screens.LibraryScreening;
+import edu.harvard.med.screensaver.model.screens.ProjectPhase;
 import edu.harvard.med.screensaver.model.screens.Screen;
 import edu.harvard.med.screensaver.model.screens.ScreenAttachedFileType;
+import edu.harvard.med.screensaver.model.screens.ScreenDataSharingLevel;
 import edu.harvard.med.screensaver.model.screens.ScreenType;
 import edu.harvard.med.screensaver.model.screens.Screening;
+import edu.harvard.med.screensaver.model.screens.StatusValue;
+import edu.harvard.med.screensaver.model.screens.StudyType;
 import edu.harvard.med.screensaver.model.users.AdministratorUser;
+import edu.harvard.med.screensaver.model.users.AffiliationCategory;
+import edu.harvard.med.screensaver.model.users.ChecklistItemGroup;
+import edu.harvard.med.screensaver.model.users.FacilityUsageRole;
 import edu.harvard.med.screensaver.model.users.ScreeningRoomUser;
 import edu.harvard.med.screensaver.model.users.ScreeningRoomUserClassification;
 import edu.harvard.med.screensaver.model.users.ScreensaverUser;
+import edu.harvard.med.screensaver.model.users.UserAttachedFileType;
+import edu.harvard.med.screensaver.util.DevelopmentException;
+import edu.harvard.med.screensaver.util.StringUtils;
 
+/**
+ * Generates <i>persisted</i> instances of domain model entities. Use {@link #newInstance(Class)} to generate an entity
+ * of the
+ * specified type. If the entity has required relationships with other entities, these other entities will be generated
+ * as well (e.g., if the requested entity type has a parent, the parent will be generated and associated).
+ * <p/>
+ * All entity property values will be set to arbitrary values, unless a custom {@link Builder}, {@link PreCreateHook},
+ * or {@link PostCreateHook} has been configured to modify the default creation behavior. See
+ * {@link #addBuilder(Builder)}, {@link #addPreCreateHook(Class, PreCreateHook)}, and
+ * {@link #addPostCreateHook(Class, PostCreateHook)}.
+ * <p/>
+ * TODO:
+ * <ul>
+ * <li>describe "call stack"</li>
+ * <li>describe patterns for entity instantiation customization, using Builders and {Pre,Post}CreateHooks.</li>
+ * 
+ * @author atolopko
+ */
 public class TestDataFactory
 {
   private static Logger log = Logger.getLogger(TestDataFactory.class);
   
   private static String STRING_TEST_VALUE_PREFIX = "test-";
   private static int STRING_TEST_VALUE_RADIX = 36;
+
+  private GenericEntityDAO genericEntityDao;
+  private EntityManagerFactory entityManagerFactory;
+
+  /**
+   * A hook into a Builder's object instantiation process that allows customization of instantiation arguments prior to
+   * instantiating the object.
+   */
+  public interface PreCreateHook<T>
+  {
+    void preCreate(String callStack, Object[] args);
+  }
+
+  /**
+   * A hook into a Builder's object instantiation process that allows customization of the instantiated object, after it
+   * has been instantiated.
+   */
+  public interface PostCreateHook<T>
+  {
+    void postCreate(String callStack, T o);
+  }
+
+  /**
+   * Instantiates an instance of a specific entity type, if the Builder is {@link #isApplicable(String) applicable} to
+   * the current "call stack".
+   */
+  public interface Builder<T>
+  {
+    Class<T> getTargetClass();
+
+    boolean isApplicable(String callStack);
+
+    Builder<T> addPreCreateHook(PreCreateHook<T> preCreateHook);
+
+    Builder<T> addPostCreateHook(PostCreateHook<T> postCreateHook);
+
+    T newInstance(String callStack);
+  }
+
+  public abstract static class AbstractBuilder<T> implements Builder<T>
+  {
+    private Class<T> type;
+    private Pattern pattern;
+    protected List<PreCreateHook<T>> preCreateHooks = Lists.newLinkedList();
+    protected List<PostCreateHook<T>> postCreateHooks = Lists.newLinkedList();
+
+    public AbstractBuilder(Class<T> type)
+    {
+      this(type, "");
+    }
+
+    public AbstractBuilder(Class<T> type,
+                           String patternSuffix)
+    {
+      this.type = type;
+      if (StringUtils.isEmpty(patternSuffix)) {
+        this.pattern = Pattern.compile(Pattern.quote(type.getName()) + "(\\|.*)?");
+      }
+      else {
+        this.pattern = Pattern.compile(Pattern.quote(type.getName() + "|") + patternSuffix);
+      }
+    }
+
+    public boolean isApplicable(String callStack)
+    {
+      return pattern.matcher(callStack).matches();
+    }
+
+    @Override
+    public Class<T> getTargetClass()
+    {
+      return type;
+    }
+
+    public Builder<T> addPreCreateHook(PreCreateHook<T> preCreateHook)
+    {
+      preCreateHooks.add(preCreateHook);
+      return this;
+    }
+
+    public Builder<T> addPostCreateHook(PostCreateHook<T> postCreateHook)
+    {
+      postCreateHooks.add(postCreateHook);
+      return this;
+    }
+
+    protected void applyPreCreateHooks(String callStack, Object[] args)
+    {
+      for (PreCreateHook<T> preCreateHook : preCreateHooks) {
+        preCreateHook.preCreate(callStack, args);
+      }
+    }
+
+    protected void applyPostCreateHooks(String callStack, T newEntity)
+    {
+      for (PostCreateHook<T> postCreateHook : postCreateHooks) {
+        postCreateHook.postCreate(callStack, newEntity);
+      }
+    }
+
+    @Override
+    public String toString()
+    {
+      return type.getName() + ":" + pattern;
+    }
+  }
+
+  public static abstract class AbstractEntityBuilder<T extends AbstractEntity> extends AbstractBuilder<T>
+  {
+    protected GenericEntityDAO dao;
+    protected TestDataFactory dataFactory;
+
+    public AbstractEntityBuilder(Class<T> type,
+                                 GenericEntityDAO dao,
+                                 TestDataFactory dataFactory)
+    {
+      this(type, "", dao, dataFactory);
+    }
+
+    public AbstractEntityBuilder(Class<T> type,
+                                 String patternSuffix,
+                                 GenericEntityDAO dao,
+                                 TestDataFactory dataFactory)
+    {
+      super(type, patternSuffix);
+      this.dao = dao;
+      this.dataFactory = dataFactory;
+    }
+
+    protected Object[] getArgumentsForParameterTypes(String callStack, Class[] parameterTypes, String methodName) throws DomainModelDefinitionException
+    {
+      Object[] arguments = new Object[parameterTypes.length];
+      for (int i = 0; i < arguments.length; i++) {
+        Class<?> parameterType = parameterTypes[i];
+        Object arg = arguments[i] = dataFactory.newInstance(parameterType, newCallStack(methodName, i, callStack));
+        if (arg instanceof AbstractEntity) {
+          dao.persistEntity((AbstractEntity) arg);
+          log.debug("persisted " + arg);
+        }
+      }
+      return arguments;
+    }
+
+  }
+
+  public static class EntityBuilder<T extends AbstractEntity> extends AbstractEntityBuilder<T>
+  {
+    private Constructor cstr;
+
+    public EntityBuilder(Class<T> entityClass,
+                         GenericEntityDAO dao,
+                         TestDataFactory dataFactory)
+    {
+      this(entityClass, findMaxArgConstructor(entityClass), "", dao, dataFactory);
+    }
+
+    public EntityBuilder(Class<T> entityClass,
+                         Constructor cstr,
+                         String patternSuffix,
+                         GenericEntityDAO dao,
+                         TestDataFactory dataFactory)
+    {
+      super(entityClass, patternSuffix, dao, dataFactory);
+      this.cstr = cstr;
+    }
+    
+    @Override
+    public T newInstance(String callStack)
+    {
+      try {
+        Object[] args = getArgumentsForParameterTypes(callStack, cstr.getParameterTypes(), cstr.getName());
+        applyPreCreateHooks(callStack, args);
+        T newEntity = (T) cstr.newInstance(args);
+        log.debug("constructed new entity " + newEntity + " with args " + Arrays.asList(args));
+        applyPostCreateHooks(callStack, newEntity);
+        dao.persistEntity(newEntity);
+        return newEntity;
+      }
+      catch (Exception e) {
+        throw new DomainModelDefinitionException("could not invoke constructor " + cstr.getName(), e);
+      }
+    }
+  }
+
+  /**
+   * PreCreateHook that for parented entities that provides access to the instantiated parent, allowing the parent to be
+   * modified before the child is instantiated and/or to access the parent's properties if they are needed to generate
+   * arguments for child instantiation.
+   */
+  public static abstract class ParentedPreCreateHook<T,P extends AbstractEntity> implements PreCreateHook<T>
+  {
+    protected P parent;
+
+    public void setParent(P parent)
+    {
+      this.parent = parent;
+    }
+
+    @Override
+    public void preCreate(String callStack, Object[] args)
+    {}
+  }
+
+  public static class ParentedEntityBuilder<C extends AbstractEntity,P extends AbstractEntity> extends AbstractEntityBuilder<C>
+  {
+    private Class<P> parentClass;
+    private Method instantiationMethod;
+
+    public ParentedEntityBuilder(Class<C> entityClass,
+                                 GenericEntityDAO dao,
+                                 TestDataFactory dataFactory)
+    {
+      this(entityClass, findParentFactoryMethod(entityClass), "", dao, dataFactory);
+    }
+
+    public ParentedEntityBuilder(Class<C> entityClass,
+                                 Method instantiationMethod,
+                                 String patternSuffix,
+                                 GenericEntityDAO dao, TestDataFactory dataFactory)
+    {
+      super(entityClass, patternSuffix, dao, dataFactory);
+      parentClass = (Class<P>) ModelIntrospectionUtil.getParent(entityClass);
+      this.instantiationMethod = instantiationMethod;
+    }
+
+    @Override
+    public C newInstance(String callStack)
+    {
+      try {
+        P parent = newParent(callStack);
+        Object[] args = getArgumentsForParameterTypes(callStack, instantiationMethod.getParameterTypes(), instantiationMethod.getName());
+        applyPreCreateHooks(callStack, args, parent);
+        C newEntity = (C) instantiationMethod.invoke(parent, args);
+        log.debug("constructed new entity (via parent entity's factory method) " + newEntity + " with args " +
+          Arrays.asList(args));
+        applyPostCreateHooks(callStack, newEntity);
+        dao.persistEntity(parent);
+        assert !newEntity.isTransient() : "persisting of parent should have cascaded to child";
+        return newEntity;
+      }
+      catch (Exception e) {
+        throw new DomainModelDefinitionException("could not invoke parent bean factory method " +
+                                                 parentClass.getName() + "." + instantiationMethod.getName(), e);
+      }
+    }
+
+    protected P newParent(String callStack)
+    {
+      P parent = dataFactory.newInstance(parentClass, callStack);
+      return parent;
+    }
+
+    protected void applyPreCreateHooks(String callStack, Object[] args, P parent)
+    {
+      for (PreCreateHook<C> preCreateHook : preCreateHooks) {
+        if (preCreateHook instanceof ParentedPreCreateHook) {
+          ((ParentedPreCreateHook<C,P>) preCreateHook).setParent(parent);
+        }
+        preCreateHook.preCreate(callStack, args);
+      }
+    }
+  }
 
   private Integer _integerTestValue = 77;
   private double  _doubleTestValue = 77.1;
@@ -91,540 +393,710 @@ public class TestDataFactory
   private int     _wellNameTestValueIndex = 0;
   private WellKey _wellKeyTestValue = new WellKey("00001:A01");
 
-  @SuppressWarnings("unchecked")
-  public <T> T getTestValueForType(Class<T> type) throws DomainModelDefinitionException
+  private Multimap<Class,Builder> builders = ArrayListMultimap.create();
+
+  protected TestDataFactory()
+  {}
+
+  public TestDataFactory(GenericEntityDAO dao,
+                         EntityManagerFactory entityManagerFactory) throws SecurityException, NoSuchMethodException
   {
-    if (type.equals(Integer.class) || type.equals(Integer.TYPE)) {
-      _integerTestValue += 1;
-      return (T) _integerTestValue;
-    }
-    if (type.equals(Double.class)) {
-      _doubleTestValue *= 1.32;
-      return (T) new Double(new Double(_doubleTestValue * 1000).intValue() / 1000);
-    }
-    if (type.equals(BigDecimal.class)) {
-      BigDecimal val = new BigDecimal(((Double) getTestValueForType(Double.class)).doubleValue());
-      // 2 is the default scale used in our Hibernate mapping
-      val = val.setScale(2);
-      return (T) val;
-    }
-    if (type.equals(Volume.class)) {
-      Volume val = new Volume(((Integer) getTestValueForType(Integer.class)).longValue());
-      return (T) val;
-    }
-    if (type.equals(MolarConcentration.class)) {
-      MolarConcentration val = new MolarConcentration(((Integer) getTestValueForType(Integer.class)).longValue());
-      return (T) val;
-    }
-    if (type.equals(Boolean.class)) {
-      _booleanTestValue = ! _booleanTestValue;
-      return (T) Boolean.valueOf(_booleanTestValue);
-    }
-    if (type.equals(Boolean.TYPE)) {
-      _booleanTestValue = ! _booleanTestValue;
-      return (T) Boolean.valueOf(_booleanTestValue);
-    }
-    if (type.equals(String.class)) {
-      return (T) getStringTestValue();
-    }
-    if (type.equals(Blob.class)) {
-      return (T) Hibernate.createBlob(getStringTestValue().getBytes());
-    }
-    if (type.equals(Character.class)) {
-      _characterTestValue++;
-      return (T) _characterTestValue;
-    }
-    if (type.equals(LocalDate.class)) {
-      _dateMilliseconds += 1000 * 60 * 60 * 24 * 1.32;
-      return (T) new LocalDate(_dateMilliseconds);
-    }
-    if (type.equals(DateTime.class)) {
-      _dateMilliseconds += 1000 * 60 * 60 * 24 * 1.32;
-      return (T) new DateTime(_dateMilliseconds);
-    }
-    if (AbstractEntity.class.isAssignableFrom(type)) {
-      return (T) newInstance((Class<AbstractEntity>) type);
-    }
-    if (VocabularyTerm.class.isAssignableFrom(type)) {
-      // TODO: move these special cases to appropriate TestDataFactory.EntityFactory classes
-      if (type.equals(AssayWellControlType.class)) {
-        return (T) AssayWellControlType.ASSAY_CONTROL;
-      }
-      if (type.equals(LibraryWellType.class)) {
-        return (T) LibraryWellType.LIBRARY_CONTROL;
-      }
-      if (type.equals(ScreeningRoomUserClassification.class)) {
-        // avoid selecting SRUC.PRINCIPAL_INVESTIGATOR, since this value cannot be used for non-lab head ScreeningRoomUsers
-        return (T) ScreeningRoomUserClassification.ICCBL_NSRB_STAFF;
-      }
-      Method valuesMethod = null; 
-      try {
-        valuesMethod = type.getMethod("values");
-        Object values = (Object) valuesMethod.invoke(null);
-        int numValues = Array.getLength(values);
-        int valuesIndex = ++ _vocabularyTermCounter % numValues;
-        return (T) Array.get(values, valuesIndex);
-      }
-      catch (Exception e) {
-        throw new DomainModelDefinitionException("could not invoke " + valuesMethod, e);
-      }
-    }
-    if (WellKey.class.isAssignableFrom(type)) {
-      return (T) nextWellKey();
-    }
-    if (WellName.class.isAssignableFrom(type)) {
-      return (T) new WellName(nextWellKey().getWellName());
-    }
-    if (ReagentVendorIdentifier.class.isAssignableFrom(type)) {
-      return (T) new ReagentVendorIdentifier(getStringTestValue(), getStringTestValue());
-    }
-    if (MolecularFormula.class.isAssignableFrom(type)) {
-      return (T) new MolecularFormula("CH3M2");
-    }
-    if (InputStream.class.isAssignableFrom(type)) {
-      return (T) new ReaderInputStream(new StringReader(getTestValueForType(String.class)));
-    }
-    throw new IllegalArgumentException(
-      "can't create test values for type: " + type.getName());
+    this.genericEntityDao = dao;
+    this.entityManagerFactory = entityManagerFactory;
+    initializeBuilders();
   }
 
-  private String getStringTestValue()
+  private void initializeBuilders() throws NoSuchMethodException
   {
-    return STRING_TEST_VALUE_PREFIX + Integer.toString(++_stringTestValueIndex, STRING_TEST_VALUE_RADIX);
-  }
+    // add builders for abstract entity types, which map to concrete entity types
+    addBuilder(new AbstractBuilder<ScreensaverUser>(ScreensaverUser.class) {
+      @Override
+      public ScreensaverUser newInstance(String callStack)
+      {
+        return TestDataFactory.this.newInstance(AdministratorUser.class, callStack);
+      }
+    });
+    addBuilder(new AbstractBuilder<CherryPickRequest>(CherryPickRequest.class) {
+      @Override
+      public CherryPickRequest newInstance(String callStack)
+      {
+        return TestDataFactory.this.newInstance(SmallMoleculeCherryPickRequest.class, callStack);
+      }
+    });
+    addBuilder(new AbstractBuilder<Activity>(Activity.class) {
+      @Override
+      public Activity newInstance(String callStack)
+      {
+        return TestDataFactory.this.newInstance(LibraryScreening.class, callStack);
+      }
+    });
+    addBuilder(new AbstractBuilder<LabActivity>(LabActivity.class) {
+      @Override
+      public LabActivity newInstance(String callStack)
+      {
+        return TestDataFactory.this.newInstance(LibraryScreening.class, callStack);
+      }
+    });
+    addBuilder(new AbstractBuilder<Screening>(Screening.class) {
+      @Override
+      public Screening newInstance(String callStack)
+      {
+        return TestDataFactory.this.newInstance(LibraryScreening.class, callStack);
+      }
+    });
+    addBuilder(new AbstractBuilder<Reagent>(Reagent.class) {
+      @Override
+      public Reagent newInstance(String callStack)
+      {
+        return TestDataFactory.this.newInstance(SmallMoleculeReagent.class, callStack);
+      }
+    });
+    addBuilder(new AbstractEntityBuilder<AttachedFileType>(AttachedFileType.class, genericEntityDao, this) {
+      @Override
+      public AttachedFileType newInstance(String callStack)
+      {
+        if (callStack.contains(ScreeningRoomUser.class.getName())) {
+          return new UserAttachedFileType("x");
+        }
+        return new ScreenAttachedFileType("y");
+      }
+    });
 
-  protected WellKey nextWellKey()
-  {
-    int col = _wellKeyTestValue.getColumn() + 1;
-    int row = _wellKeyTestValue.getRow();
-    int plateNumber = _wellKeyTestValue.getPlateNumber();
-    if (col >= ScreensaverConstants.DEFAULT_PLATE_SIZE.getColumns()) {
-      col = 0;
-      ++row;
+    addBuilder(new AbstractBuilder<Integer>(Integer.class) {
+      @Override
+      public Integer newInstance(String callStack)
+      {
+        _integerTestValue += 1;
+        return _integerTestValue;
+      }
+    });
+    addBuilder(new AbstractBuilder<Integer>(Integer.TYPE) {
+      @Override
+      public Integer newInstance(String callStack)
+      {
+        _integerTestValue += 1;
+        return _integerTestValue;
+      }
+    });
+    addBuilder(new AbstractBuilder<Double>(Double.class) {
+      @Override
+      public Double newInstance(String callStack)
+      {
+        _doubleTestValue *= 1.32;
+        return new Double(new Double(_doubleTestValue * 1000).intValue() / 1000);
+      }
+    });
+    addBuilder(new AbstractBuilder<Double>(Double.TYPE) {
+      @Override
+      public Double newInstance(String callStack)
+      {
+        _doubleTestValue *= 1.32;
+        return new Double(new Double(_doubleTestValue * 1000).intValue() / 1000);
+      }
+    });
+    addBuilder(new AbstractBuilder<Boolean>(Boolean.class) {
+      @Override
+      public Boolean newInstance(String callStack)
+      {
+        _booleanTestValue = ! _booleanTestValue;
+        return Boolean.valueOf(_booleanTestValue);
+      }
+    });
+    addBuilder(new AbstractBuilder<Boolean>(Boolean.TYPE) {
+      @Override
+      public Boolean newInstance(String callStack)
+      {
+        _booleanTestValue = !_booleanTestValue;
+        return Boolean.valueOf(_booleanTestValue);
+      }
+    });
+    addBuilder(new AbstractBuilder<BigDecimal>(BigDecimal.class) {
+      @Override
+      public BigDecimal newInstance(String callStack)
+      {
+        BigDecimal val = new BigDecimal((TestDataFactory.this.newInstance(Double.class)).doubleValue());
+        // 2 is the default scale used in our Hibernate mapping
+        val = val.setScale(2);
+        return val;
+      }
+    });
+    addBuilder(new AbstractBuilder<Volume>(Volume.class) {
+      @Override
+      public Volume newInstance(String callStack)
+      {
+        return new Volume(TestDataFactory.this.newInstance(Integer.class), VolumeUnit.DEFAULT);
+      }
+    });
+    addBuilder(new AbstractBuilder<MolarConcentration>(MolarConcentration.class) {
+      @Override
+      public MolarConcentration newInstance(String callStack)
+      {
+        return new MolarConcentration(TestDataFactory.this.newInstance(Integer.class));
+      }
+    });
+    addBuilder(new AbstractBuilder<String>(String.class) {
+      @Override
+      public String newInstance(String callStack)
+      {
+        return STRING_TEST_VALUE_PREFIX + Integer.toString(++_stringTestValueIndex, STRING_TEST_VALUE_RADIX);
+      }
+    });
+    addBuilder(new AbstractBuilder<Character>(Character.class) {
+      @Override
+      public Character newInstance(String callStack)
+      {
+        return _characterTestValue++;
+      }
+    });
+    addBuilder(new AbstractBuilder<Character>(Character.TYPE) {
+      @Override
+      public Character newInstance(String callStack)
+      {
+        return _characterTestValue++;
+      }
+    });
+    addBuilder(new AbstractBuilder<LocalDate>(LocalDate.class) {
+      @Override
+      public LocalDate newInstance(String callStack)
+      {
+        _dateMilliseconds += 1000 * 60 * 60 * 24 * 1.32;
+        return new LocalDate(_dateMilliseconds);
+      }
+    });
+    addBuilder(new AbstractBuilder<DateTime>(DateTime.class) {
+      @Override
+      public DateTime newInstance(String callStack)
+      {
+        _dateMilliseconds += 1000 * 60 * 60 * 24 * 1.32;
+        return new DateTime(_dateMilliseconds);
+      }
+    });
+
+    addBuilder(new AbstractBuilder<WellKey>(WellKey.class) {
+      @Override
+      public WellKey newInstance(String callStack)
+      {
+        int col = _wellKeyTestValue.getColumn() + 1;
+        int row = _wellKeyTestValue.getRow();
+        int plateNumber = _wellKeyTestValue.getPlateNumber();
+        if (col >= ScreensaverConstants.DEFAULT_PLATE_SIZE.getColumns()) {
+          col = 0;
+          ++row;
+        }
+        if (row >= ScreensaverConstants.DEFAULT_PLATE_SIZE.getRows()) {
+          row = 0;
+          ++plateNumber;
+        }
+        _wellKeyTestValue = new WellKey(plateNumber, row, col);
+        return _wellKeyTestValue;
+      }
+    });
+    addBuilder(new AbstractBuilder<WellName>(WellName.class) {
+      @Override
+      public WellName newInstance(String callStack)
+      {
+        return new WellName(TestDataFactory.this.newInstance(WellKey.class).getWellName());
+      }
+    });
+    addBuilder(new AbstractBuilder<ReagentVendorIdentifier>(ReagentVendorIdentifier.class) {
+      @Override
+      public ReagentVendorIdentifier newInstance(String callStack)
+      {
+        return new ReagentVendorIdentifier(TestDataFactory.this.newInstance(String.class),
+                                           TestDataFactory.this.newInstance(String.class));
+      }
+    });
+    addBuilder(new AbstractBuilder<MolecularFormula>(MolecularFormula.class) {
+      @Override
+      public MolecularFormula newInstance(String callStack)
+      {
+        return new MolecularFormula("CH3M2");
+      }
+    });
+    addBuilder(new AbstractBuilder<ScreenType>(ScreenType.class) {
+      @Override
+      public ScreenType newInstance(String callStack)
+      {
+        return ScreenType.SMALL_MOLECULE;
+      }
+    });
+    addBuilder(new AbstractBuilder<LibraryType>(LibraryType.class) {
+      @Override
+      public LibraryType newInstance(String callStack)
+      {
+        return LibraryType.COMMERCIAL;
+      }
+    });
+    addBuilder(new AbstractBuilder<PlateSize>(PlateSize.class) {
+      @Override
+      public PlateSize newInstance(String callStack)
+      {
+        return PlateSize.WELLS_384;
+      }
+    });
+    addBuilder(new AbstractBuilder<ScreeningRoomUserClassification>(ScreeningRoomUserClassification.class) {
+      @Override
+      public ScreeningRoomUserClassification newInstance(String callStack)
+      {
+        return ScreeningRoomUserClassification.UNASSIGNED;
+      }
+    });
+    addBuilder(new AbstractBuilder<AffiliationCategory>(AffiliationCategory.class) {
+      @Override
+      public AffiliationCategory newInstance(String callStack)
+      {
+        return AffiliationCategory.HMS;
+      }
+    });
+    addBuilder(new AbstractBuilder<LibraryWellType>(LibraryWellType.class) {
+      @Override
+      public LibraryWellType newInstance(String callStack)
+      {
+        return LibraryWellType.UNDEFINED;
+      }
+    });
+    addBuilder(new AbstractBuilder<StudyType>(StudyType.class) {
+      @Override
+      public StudyType newInstance(String callStack)
+      {
+        return StudyType.IN_SILICO;
+      }
+    });
+    addBuilder(new AbstractBuilder<ProjectPhase>(ProjectPhase.class) {
+      @Override
+      public ProjectPhase newInstance(String callStack)
+      {
+        return ProjectPhase.PRIMARY_SCREEN;
+      }
+    });
+    addBuilder(new AbstractBuilder<PlateType>(PlateType.class) {
+      @Override
+      public PlateType newInstance(String callStack)
+      {
+        return PlateType.ABGENE;
+      }
+    });
+    addBuilder(new AbstractBuilder<PlateStatus>(PlateStatus.class) {
+      @Override
+      public PlateStatus newInstance(String callStack)
+      {
+        return PlateStatus.AVAILABLE;
+      }
+    });
+    addBuilder(new AbstractBuilder<CherryPickLiquidTransferStatus>(CherryPickLiquidTransferStatus.class) {
+      @Override
+      public CherryPickLiquidTransferStatus newInstance(String callStack)
+      {
+        return CherryPickLiquidTransferStatus.SUCCESSFUL;
+      }
+    });
+    addBuilder(new AbstractBuilder<AssayProtocolType>(AssayProtocolType.class) {
+      @Override
+      public AssayProtocolType newInstance(String callStack)
+      {
+        return AssayProtocolType.ESTABLISHED;
+      }
+    });
+    addBuilder(new AbstractBuilder<FacilityUsageRole>(FacilityUsageRole.class) {
+      @Override
+      public FacilityUsageRole newInstance(String callStack)
+      {
+        return FacilityUsageRole.SMALL_MOLECULE_SCREENER;
+      }
+    });
+    addBuilder(new AbstractBuilder<AssayReadoutType>(AssayReadoutType.class) {
+      @Override
+      public AssayReadoutType newInstance(String callStack)
+      {
+        return AssayReadoutType.FP;
+      }
+    });
+    addBuilder(new AbstractBuilder<CopyUsageType>(CopyUsageType.class) {
+      @Override
+      public CopyUsageType newInstance(String callStack)
+      {
+        return CopyUsageType.LIBRARY_SCREENING_PLATES;
+      }
+    });
+    addBuilder(new AbstractBuilder<CherryPickAssayProtocolsFollowed>(CherryPickAssayProtocolsFollowed.class) {
+      @Override
+      public CherryPickAssayProtocolsFollowed newInstance(String callStack)
+      {
+        return CherryPickAssayProtocolsFollowed.SAME_PROTOCOL_AS_PRIMARY_ASSAY;
+      }
+    });
+    addBuilder(new AbstractBuilder<CherryPickFollowupResultsStatus>(CherryPickFollowupResultsStatus.class) {
+      @Override
+      public CherryPickFollowupResultsStatus newInstance(String callStack)
+      {
+        return CherryPickFollowupResultsStatus.NOT_RECEIVED;
+      }
+    });
+    addBuilder(new AbstractBuilder<ScreenDataSharingLevel>(ScreenDataSharingLevel.class) {
+      @Override
+      public ScreenDataSharingLevel newInstance(String callStack)
+      {
+        return ScreenDataSharingLevel.SHARED;
+      }
+    });
+    addBuilder(new AbstractBuilder<AdministrativeActivityType>(AdministrativeActivityType.class) {
+      @Override
+      public AdministrativeActivityType newInstance(String callStack)
+      {
+        return AdministrativeActivityType.ENTITY_UPDATE;
+      }
+    });
+    addBuilder(new AbstractBuilder<SilencingReagentType>(SilencingReagentType.class) {
+      @Override
+      public SilencingReagentType newInstance(String callStack)
+      {
+        return SilencingReagentType.SIRNA;
+      }
+    });
+    addBuilder(new AbstractBuilder<StatusValue>(StatusValue.class) {
+      @Override
+      public StatusValue newInstance(String callStack)
+      {
+        return StatusValue.ACCEPTED;
+      }
+    });
+    addBuilder(new AbstractBuilder<ChecklistItemGroup>(ChecklistItemGroup.class) {
+      @Override
+      public ChecklistItemGroup newInstance(String callStack)
+      {
+        return ChecklistItemGroup.FORMS;
+      }
+    });
+    addBuilder(new AbstractBuilder<LibraryScreeningStatus>(LibraryScreeningStatus.class) {
+      @Override
+      public LibraryScreeningStatus newInstance(String callStack)
+      {
+        return LibraryScreeningStatus.ALLOWED;
+      }
+    });
+    addBuilder(new AbstractBuilder<Solvent>(Solvent.class) {
+      @Override
+      public Solvent newInstance(String callStack)
+      {
+        if (callStack.matches("Library\\|.*SilencingReagent")) {
+          return Solvent.RNAI_BUFFER;
+        }
+        return Solvent.DMSO;
+      }
+    });
+    addBuilder(new AbstractBuilder<ConfirmedPositiveValue>(ConfirmedPositiveValue.class) {
+      @Override
+      public ConfirmedPositiveValue newInstance(String callStack)
+      {
+        return ConfirmedPositiveValue.CONFIRMED_POSITIVE;
+      }
+    });
+    addBuilder(new AbstractBuilder<PartitionedValue>(PartitionedValue.class) {
+      @Override
+      public PartitionedValue newInstance(String callStack)
+      {
+        return PartitionedValue.STRONG;
+      }
+    });
+
+    // special-case builder for Plate, which is auto-created by parent Copy
+    addBuilder(new AbstractEntityBuilder<Plate>(Plate.class, genericEntityDao, this) {
+      @Override
+      public Plate newInstance(String callStack)
+      {
+        Copy copy = TestDataFactory.this.newInstance(Copy.class, callStack);
+        return copy.findPlate(copy.getLibrary().getStartPlate());
+      }
+    });
+
+    // special-case builder for Gene, which is auto-created by parent SilencingReagent
+    addBuilder(new AbstractEntityBuilder<Gene>(Gene.class, genericEntityDao, this) {
+      @Override
+      public Gene newInstance(String callStack)
+      {
+        SilencingReagent silencingReagent = TestDataFactory.this.newInstance(SilencingReagent.class, callStack);
+        return  silencingReagent.getVendorGene();
+      }
+    });
+
+    // create special-case builders for Reagent types, in order to choose the correct parent factory method (the one w/o the updateReagentsRelationship param)
+    // TODO: add these as spring beans which are then injected into TestDataFactory, thereby moving these special-case, domain model-specific builders into a deploy-time configurable location
+    addBuilder(new ParentedEntityBuilder<SilencingReagent,Well>(SilencingReagent.class,
+                                                                Well.class.getMethod("createSilencingReagent", new Class[] {
+                                                                  ReagentVendorIdentifier.class, SilencingReagentType.class,
+                                                                  String.class }), "", genericEntityDao, this)
+                                                                  .addPostCreateHook(new PostCreateHook<SilencingReagent>() {
+
+                                                                    @Override
+                                                                    public void postCreate(String callStack, SilencingReagent sr)
+                                                                {
+                                                                  // instantiate both gene types since this must be done before the SMR is persisted.
+                                                                  Gene gene = sr.getFacilityGene()
+                                                                      .withEntrezgeneId(1) // values used by GeneTest
+                                                                      .withGeneName("genename")
+                                                                      .withSpeciesName("species")
+                                                                      .withEntrezgeneSymbol("symbol1")
+                                                                      .withEntrezgeneSymbol("symbol2")
+                                                                      .withGenbankAccessionNumber("gbn1")
+                                                                      .withGenbankAccessionNumber("gbn2");
+                                                                  sr.getVendorGene();
+                                                                }
+                                                                  })
+    );
+    addBuilder(new ParentedEntityBuilder<SmallMoleculeReagent,Well>(SmallMoleculeReagent.class,
+                                                                    Well.class.getMethod("createSmallMoleculeReagent", new Class[] {
+                                                                      ReagentVendorIdentifier.class,
+                                                                      String.class,
+                                                                      String.class,
+                                                                      String.class,
+                                                                      BigDecimal.class,
+                                                                      BigDecimal.class,
+                                                                      MolecularFormula.class }), "", genericEntityDao, this));
+    addBuilder(new ParentedEntityBuilder<NaturalProductReagent,Well>(NaturalProductReagent.class,
+                                                                     Well.class.getMethod("createNaturalProductReagent", new Class[] {
+                                                                                          ReagentVendorIdentifier.class }), "", genericEntityDao, this));
+    Builder<ResultValue> numericResultValueBuilder =
+      new ParentedEntityBuilder<ResultValue,DataColumn>(ResultValue.class,
+                                                        DataColumn.class.getMethod("createResultValue",
+                                                                                   new Class[] { AssayWell.class, Double.class }),
+                                                        "",
+                                                        genericEntityDao, this) {
+        protected DataColumn newParent(String callStack)
+      {
+        // unfortunately, we can't just call super.newParent(), as this causes the new DataColumn to be persisted before its data type is set, which in turn causes Hibernate to set the (immutable) data type to an arbitrary value
+        return dataFactory.newInstance(ScreenResult.class, callStack).createDataColumn(dataFactory.newInstance(String.class, callStack)).makeNumeric(3);
+      }
+      };
+    addBuilder(numericResultValueBuilder);
+
+    addDefaultEntityBuilders();
+
+    addPostCreateHook(Well.class, new PostCreateHook<Well>() {
+      /** ensure that a well has a reagent if we're ultimately instantiating a LabCherryPick */
+      public void postCreate(String callStack, Well well) 
+      {
+        if (callStack.contains(LabCherryPick.class.getName())) {
+          Library library = well.getLibrary();
+          assert !library.getContentsVersions().isEmpty();
+          Class<? extends Reagent> reagentType = library.getReagentType();
+          ReagentVendorIdentifier rvi = newInstance(ReagentVendorIdentifier.class);
+          if (reagentType.equals(SilencingReagent.class)) {
+            well.createSilencingReagent(newInstance(ReagentVendorIdentifier.class),
+                                        SilencingReagentType.SIRNA, "ACTG");
+          }
+          else if (reagentType.equals(SmallMoleculeReagent.class)) {
+            well.createSmallMoleculeReagent(rvi,
+                                            "molfile",
+                                            "smiles",
+                                            "inchi",
+                                            BigDecimal.ONE,
+                                            BigDecimal.ONE,
+                                            new MolecularFormula());
+          }
+          else if (reagentType.equals(NaturalProductReagent.class)) {
+            well.createNaturalProductReagent(rvi);
+          }
+          else {
+            throw new DevelopmentException("unhandled reagent type " + reagentType);
+          }
+          AdministrativeActivity releaseActivity = 
+            new AdministrativeActivity(newInstance(AdministratorUser.class),
+                                       new LocalDate(),
+                                       AdministrativeActivityType.LIBRARY_CONTENTS_VERSION_RELEASE);
+          library.getLatestContentsVersion().release(releaseActivity);
+        }
+      }
+    }).addPreCreateHook(new ParentedPreCreateHook<Well,Library>() {
+      /** ensures well plate numbers agree with library start/end plate */
+      public void preCreate(String callStack, Object[] args) {
+        args[0] = new WellKey(parent.getStartPlate(), 0, 0);
+        args[1] = LibraryWellType.EXPERIMENTAL;
+      }
+    });
+    addPostCreateHook(Library.class, new PostCreateHook<Library>() {
+      /** ensure that a LibraryContentsVersion is created for Reagents that are to be instantiated */
+      public void postCreate(String callStack, Library o)
+      {
+        if (callStack.contains("Reagent") || callStack.contains("LabCherryPick")) {
+          o.createContentsVersion(newInstance(AdministratorUser.class));
+        }
+      }
+    }).addPreCreateHook(new PreCreateHook<Library>() {
+      @Override
+      public void preCreate(String callStack, Object[] args)
+    {
+      if (callStack.contains("SmallMoleculeReagent")) {
+        args[3] = ScreenType.SMALL_MOLECULE;
+        args[4] = LibraryType.COMMERCIAL;
+      }
+      else if (callStack.contains("SilencingReagent")) {
+        args[3] = ScreenType.RNAI;
+        args[4] = LibraryType.COMMERCIAL;
+      }
+      else if (callStack.contains("NaturalProductReagent")) {
+        args[3] = ScreenType.SMALL_MOLECULE;
+        args[4] = LibraryType.NATURAL_PRODUCTS;
+      }
     }
-    if (row >= ScreensaverConstants.DEFAULT_PLATE_SIZE.getRows()) {
-      row = 0;
-      ++plateNumber;
-    }
-    _wellKeyTestValue = new WellKey(plateNumber, row, col);
-    return _wellKeyTestValue;
-  }
-
-  private Object getTestValueForWellName()
-  {
-    String wellName = String.format("%c%02d",
-                                    'A' + (_wellNameTestValueIndex / 24),
-                                    (_wellNameTestValueIndex % 24) + 1);
-    ++_wellNameTestValueIndex;
-    return wellName;
-  }
-
-  private interface EntityFactory
-  {
-    AbstractEntity createEntity(AbstractEntity relatedEntity) throws DomainModelDefinitionException;
-  }
-
-  private Map<Class<? extends AbstractEntity>,EntityFactory> _entityFactoryMap =
-    new HashMap<Class<? extends AbstractEntity>,EntityFactory>();
-  {
-    _entityFactoryMap.put(ScreensaverUser.class, new EntityFactory()
-    {
-      public AbstractEntity createEntity(AbstractEntity relatedEntity) throws DomainModelDefinitionException
-      {
-        return newInstanceViaConstructor(ScreeningRoomUser.class, null);
-      }
     });
 
-    _entityFactoryMap.put(Activity.class, new EntityFactory()
-    {
-      public AbstractEntity createEntity(AbstractEntity relatedEntity) throws DomainModelDefinitionException
+    addPreCreateHook(RNAiCherryPickRequest.class,
+                     new ParentedPreCreateHook<RNAiCherryPickRequest,Screen>() 
+                     {
+      @Override
+      public void setParent(Screen parent)
       {
-        return newInstance(LibraryScreening.class);
+        super.setParent(parent);
+        parent.setScreenType(ScreenType.RNAI);
       }
-    });
+                     });
+    addPreCreateHook(SmallMoleculeCherryPickRequest.class,
+                     new ParentedPreCreateHook<SmallMoleculeCherryPickRequest,Screen>() 
+                     {
+                       @Override
+                       public void setParent(Screen parent)
+      {
+        super.setParent(parent);
+        parent.setScreenType(ScreenType.SMALL_MOLECULE);
+      }
+                     });
     
-    _entityFactoryMap.put(LabActivity.class, new EntityFactory()
-    {
-      public AbstractEntity createEntity(AbstractEntity relatedEntity) throws DomainModelDefinitionException
+    addPreCreateHook(AnnotationValue.class,
+                     new ParentedPreCreateHook<AnnotationValue,AnnotationType>()
+                     {
+                       @Override
+                       public void preCreate(String callStack, Object[] args)
       {
-        return newInstance(LibraryScreening.class);
-      }
-    });
-
-    _entityFactoryMap.put(Screening.class, new EntityFactory()
-    {
-      public AbstractEntity createEntity(AbstractEntity relatedEntity) throws DomainModelDefinitionException
-      {
-        return newInstance(LibraryScreening.class);
-      }
-    });
-    
-    _entityFactoryMap.put(CherryPickRequest.class, new EntityFactory()
-    {
-      public AbstractEntity createEntity(AbstractEntity relatedEntity) throws DomainModelDefinitionException
-      {
-        return newInstance(SmallMoleculeCherryPickRequest.class);
-      }
-    });
-    
-    _entityFactoryMap.put(SmallMoleculeCherryPickRequest.class, new EntityFactory()
-    {
-      public AbstractEntity createEntity(AbstractEntity relatedEntity) throws DomainModelDefinitionException
-      {
-        Screen screen = newInstance(Screen.class);
-        screen.setScreenType(ScreenType.SMALL_MOLECULE);
-        CherryPickRequest cpr = screen.createCherryPickRequest((AdministratorUser) screen.getCreatedBy());
-        cpr.setTransferVolumePerWellApproved(new Volume("2.0", VolumeUnit.MICROLITERS));
-        return cpr;
-      }
-    });
-    
-    _entityFactoryMap.put(RNAiCherryPickRequest.class, new EntityFactory()
-    {
-      public AbstractEntity createEntity(AbstractEntity relatedEntity) throws DomainModelDefinitionException
-      {
-        Screen screen = newInstance(Screen.class);
-        screen.setScreenType(ScreenType.RNAI);
-        CherryPickRequest cpr = screen.createCherryPickRequest((AdministratorUser) screen.getCreatedBy());
-        cpr.setTransferVolumePerWellApproved(new Volume("2.0", VolumeUnit.MICROLITERS));
-        return cpr;
-      }
-    });
-    
-    _entityFactoryMap.put(Gene.class, new EntityFactory()
-    {
-      public AbstractEntity createEntity(AbstractEntity relatedEntity) throws DomainModelDefinitionException
-      {
-        SilencingReagent silencingReagent = newInstance(SilencingReagent.class);
-        return silencingReagent.getFacilityGene();
-      }
-    });
- 
-    _entityFactoryMap.put(Reagent.class, new EntityFactory()
-    {
-      public AbstractEntity createEntity(AbstractEntity relatedEntity) throws DomainModelDefinitionException
-      {
-        return newInstance(SmallMoleculeReagent.class);
-      }
-    });
-
-    _entityFactoryMap.put(SilencingReagent.class, new EntityFactory()
-    {
-      public AbstractEntity createEntity(AbstractEntity relatedEntity) throws DomainModelDefinitionException
-      {
-        LibraryContentsVersion contentsVersion = newInstance(LibraryContentsVersion.class);
-        Library library = contentsVersion.getLibrary();
-        Well well = library.createWell(new WellKey(1, 0, 0), LibraryWellType.EXPERIMENTAL);
-        well.getLibrary().setScreenType(ScreenType.RNAI);
-        SilencingReagent silencingReagent = well.createSilencingReagent(new ReagentVendorIdentifier("vendor1", "reagent1"), SilencingReagentType.SIRNA, "AGCT");
-        return silencingReagent;
-      }
-    });
-  
-    _entityFactoryMap.put(SmallMoleculeReagent.class, new EntityFactory()
-    {
-      public AbstractEntity createEntity(AbstractEntity relatedEntity) throws DomainModelDefinitionException
-      {
-        LibraryContentsVersion contentsVersion = newInstance(LibraryContentsVersion.class);
-        Library library = contentsVersion.getLibrary();
-        library.setScreenType(ScreenType.SMALL_MOLECULE);
-        Well well = library.createWell(new WellKey(1, 0, 0), LibraryWellType.EXPERIMENTAL);
-        SmallMoleculeReagent smallMoleculeReagent = well.createSmallMoleculeReagent(new ReagentVendorIdentifier("vendor1", "reagent1"), "", "smiles", "inchi", new BigDecimal("1.001"), new BigDecimal("1.001"), new MolecularFormula("CH1"));
-        return smallMoleculeReagent;
-      }
-    });
-  
-    _entityFactoryMap.put(NaturalProductReagent.class, new EntityFactory()
-    {
-      public AbstractEntity createEntity(AbstractEntity relatedEntity) throws DomainModelDefinitionException
-      {
-        LibraryContentsVersion contentsVersion = newInstance(LibraryContentsVersion.class);
-        Library library = contentsVersion.getLibrary();
-        library.setScreenType(ScreenType.SMALL_MOLECULE);
-        library.setLibraryType(LibraryType.NATURAL_PRODUCTS);
-        Well well = library.createWell(new WellKey(1, 0, 0), LibraryWellType.EXPERIMENTAL);
-        NaturalProductReagent naturalProductReagent = well.createNaturalProductReagent(new ReagentVendorIdentifier("vendor1", "reagent1"));
-        return naturalProductReagent;
-      }
-    });
- 
-    _entityFactoryMap.put(LabCherryPick.class, new EntityFactory()
-    {
-      private int testEntrezGeneId = 0;
-      public AbstractEntity createEntity(AbstractEntity relatedEntity) throws DomainModelDefinitionException
-      {
-        CherryPickRequest cherryPickRequest = (CherryPickRequest) getTestValueForType(RNAiCherryPickRequest.class);
-        Well well = (Well) getTestValueForType(Well.class);
-        LibraryContentsVersion contentsVersion = newInstance(LibraryContentsVersion.class, well.getLibrary());
-        well.getLibrary().setScreenType(ScreenType.RNAI);
-        well.setLibraryWellType(LibraryWellType.EXPERIMENTAL);
-        ReagentVendorIdentifier rvi = new ReagentVendorIdentifier("vendor", "atcg");
-        SilencingReagent reagent = well.createSilencingReagent(rvi, SilencingReagentType.SIRNA, "ATCG");
-        reagent.getVendorGene().withEntrezgeneId(testEntrezGeneId).withEntrezgeneSymbol("entrezSymbol" + testEntrezGeneId).withSpeciesName("Human");
-        contentsVersion.release(new AdministrativeActivity(newInstance(AdministratorUser.class),
-                                                           new LocalDate(),
-                                                           AdministrativeActivityType.LIBRARY_CONTENTS_VERSION_RELEASE));
-        ScreenerCherryPick screenerCherryPick;
-        if (cherryPickRequest.getScreenerCherryPicks().isEmpty()) {
-          screenerCherryPick = (ScreenerCherryPick)
-          cherryPickRequest.createScreenerCherryPick(well);
+        if (parent.isNumeric()) {
+          args[1] = newInstance(Double.class, callStack).toString();
         }
         else {
-          screenerCherryPick = cherryPickRequest.getScreenerCherryPicks().iterator().next();
-        }
-        LabCherryPick labCherryPick = screenerCherryPick.createLabCherryPick(well);
-        return labCherryPick;
-      }
-    });
-
-    _entityFactoryMap.put(ResultValue.class, new EntityFactory() {
-      public AbstractEntity createEntity(AbstractEntity relatedEntity)
-        throws DomainModelDefinitionException
-      {
-        DataColumn col = newInstance(DataColumn.class).makeNumeric(3);
-        AssayWell assayWell = col.getScreenResult().createAssayWell(newInstance(Well.class));
-        return col.createResultValue(assayWell, getTestValueForType(Double.class));
-      }
-    });
-    
-    _entityFactoryMap.put(DataColumn.class, new EntityFactory() {
-      public AbstractEntity createEntity(AbstractEntity relatedEntity)
-        throws DomainModelDefinitionException
-      {
-        // force usage of numeric DataColumn, so that numeric properties can be tested (which also covers non-numeric DataColumn behaviors)
-        DataColumn dataColumn = newInstance(DataColumn.class, newInstance(ScreenResult.class)).makeNumeric(3);
-        return dataColumn;
-      }
-    });
-    
-    _entityFactoryMap.put(AnnotationValue.class, new EntityFactory() 
-    {
-      public AbstractEntity createEntity(AbstractEntity relatedEntity) throws DomainModelDefinitionException
-      {
-        // force usage of numeric AnnotationType, so that numeric properties can be tested
-        Screen study = newInstanceViaConstructor(Screen.class, null);
-        AnnotationType at = study.createAnnotationType("at", "", true);
-        Reagent reagent = newInstance(Reagent.class);
-        return at.createAnnotationValue(reagent, "1.01");
-      }
-    });
-    
-    _entityFactoryMap.put(AttachedFileType.class, new EntityFactory() 
-    {
-      public AbstractEntity createEntity(AbstractEntity relatedEntity) throws DomainModelDefinitionException
-      {
-        return newInstance(ScreenAttachedFileType.class);
-      }
-    });
-
-    _entityFactoryMap.put(AttachedFile.class, new EntityFactory() 
-    {
-      public AbstractEntity createEntity(AbstractEntity relatedEntity) throws DomainModelDefinitionException
-      {
-        Screen screen = newInstance(Screen.class);
-        try {
-          return screen.createAttachedFile("filename_" + getTestValueForType(String.class),
-                                           new ScreenAttachedFileType(getStringTestValue()),
-                                           "filecontents_" + getTestValueForType(String.class));
-        }
-        catch (IOException e) {
-          throw new DomainModelDefinitionException(e);
+          args[1] = newInstance(String.class, callStack);
         }
       }
-    });
+                     });
+    addPreCreateHook(SmallMoleculeReagent.class,
+                     new PreCreateHook<SmallMoleculeReagent>()
+                     {
 
-    _entityFactoryMap.put(Plate.class, new EntityFactory() 
-    {
-      public AbstractEntity createEntity(AbstractEntity relatedEntity) throws DomainModelDefinitionException
-      {
-        Copy copy = newInstance(Copy.class);
-        Plate plate = copy.findPlate(copy.getLibrary().getStartPlate());
-        plate.setWellVolume(new Volume(10));
-        return plate;
-      }
-    });
+                      @Override
+                      public void preCreate(String callStack, Object[] args)
+                      {
+                        args[4] = new BigDecimal("1000.001");
+                         args[5] = new BigDecimal("1.001");
+                      }
+                     });
   }
 
   /**
-   * Instantiate a new AbstractEntity of the specified type, instantiating all
+   * Adds an entity builder for every entity type that does not already have a builder (in other words, a builder that
+   * is added for a entity type before this method is called will be the entity type's default builder).
+   */
+  private void addDefaultEntityBuilders()
+  {
+    for (ManagedType<?> managedType : entityManagerFactory.getMetamodel().getManagedTypes()) {
+      Class<?> managedClass = managedType.getJavaType();
+      if (AbstractEntity.class.isAssignableFrom(managedClass)) {
+        if (Modifier.isAbstract(managedClass.getModifiers())) {
+          continue;
+        }
+        Class<? extends AbstractEntity> entityClass = (Class<? extends AbstractEntity>) managedClass;
+        Class<? extends AbstractEntity> parentClass = ModelIntrospectionUtil.getParent(entityClass);
+        if (!!!builders.containsKey(entityClass)) {
+          if (parentClass != null) {
+            addBuilder(new ParentedEntityBuilder(entityClass, genericEntityDao, this));
+          }
+          else {
+            addBuilder(new EntityBuilder(entityClass, genericEntityDao, this));
+          }
+        }
+      }
+    }
+  }
+
+  public void addBuilder(Builder<?> builder)
+  {
+    builders.put(builder.getTargetClass(), builder);
+    log.debug("added builder " + builder);
+  }
+
+  public <T> Builder<T> addPreCreateHook(Class<T> type, PreCreateHook<T> preCreateHook)
+  {
+    return ((Builder<T>) Iterables.getLast(builders.get(type))).addPreCreateHook(preCreateHook);
+  }
+
+  public <T> Builder<T> addPostCreateHook(Class<T> type, PostCreateHook<T> postCreateHook)
+  {
+    return ((Builder<T>) Iterables.getLast(builders.get(type))).addPostCreateHook(postCreateHook);
+  }
+
+  /**
+   * Instantiate a new, persisted AbstractEntity of the specified type, instantiating all
    * required, related entities, as necessary.
    * 
    * @param <T> the type of the new AbstractEntity to be instantiated
-   * @param entityClass the class of the new AbstractEntity to be instantiated
-   * @return a new AbstractEntity of the specified type
+   * @param type the class of the new AbstractEntity to be instantiated
+   * @return a new, persisted AbstractEntity of the specified type
    * @throws DomainModelDefinitionException
    */
-  public <T extends AbstractEntity> T newInstance(Class<T> entityClass) throws DomainModelDefinitionException
+  @Transactional
+  public <T> T newInstance(Class<T> type) throws DomainModelDefinitionException
   {
-    return newInstance(entityClass, null);
+    return newInstance(type, "");
   }
 
   /**
-   * Instantiate a new AbstractEntity of the specified type, instantiating all
-   * required, related entities, as necessary, and associating the new entity
-   * with the <code>relatedEntity</code>, which is assumed to be required in the
-   * constructor or factory method used to instantiate the new entity. If the
-   * new entity is instantiated via a parent factory method, and if
-   * <code>relatedEntity</code> is the same type as the parent type, then the
-   * factory method is called from <code>relatedEntity</code> instance.
+   * Instantiate a new, persisted AbstractEntity of the specified type, instantiating all
+   * required, related entities, as necessary. The <code>callStack</code> argument allows a custom frame to be specified
+   * by TestDataFactory client code, so that custom {@link Builder}s (that are added by the client code) can be detect
+   * whether they should be applied to this newInstance request.
    * 
    * @param <T> the type of the new AbstractEntity to be instantiated
-   * @param entityClass the class of the new AbstractEntity to be instantiated
-   * @param relatedEntity an entity with which the newly instantiated entity
-   *          should be associated, either by passing it in the constructor or
-   *          factory method, or by calling this entity's factory method, if
-   *          applicable; may be null
-   * @return a new AbstractEntity of the specified type
+   * @param type the class of the new AbstractEntity to be instantiated
+   * @param callStack the initial (bottom) frame (or frames) of the callStack
+   * @return a new, persisted AbstractEntity of the specified type
    * @throws DomainModelDefinitionException
    */
-  public <NE extends AbstractEntity> NE newInstance(Class<NE> entityClass, AbstractEntity relatedEntity) throws DomainModelDefinitionException
+  @Transactional
+  public <T> T newInstance(Class<T> type, String callStack) throws DevelopmentException
   {
-    if (relatedEntity == null) {
-      // use special-case EntityFactory, if defined for this entity class
-      EntityFactory entityFactory = _entityFactoryMap.get(entityClass);
-      if (entityFactory != null) {
-        log.debug("using custom entity factory for " + entityClass.getName());
-        return (NE) entityFactory.createEntity(null);
+    log.debug("newInstance(" + type.getName() + ", " + callStack + ")");
+    callStack = newCallStack(type, callStack);
+    if (!!!builders.containsKey(type)) {
+      throw new DevelopmentException("no builder for type " + type);
+    }
+    for (Builder<T> builder : Iterables.reverse(Lists.newArrayList(builders.get(type)))) {
+      if (builder.isApplicable(callStack)) {
+        return builder.newInstance(callStack);
       }
     }
-    
-    if (entityClass.getAnnotation(ContainedEntity.class) != null) {
-      return newInstanceUsingParentFactory(entityClass, relatedEntity);
-    }
-    else {
-      return newInstanceViaConstructor(entityClass, relatedEntity);
-    }
+    throw new DevelopmentException("none of the builders for type " + type + " were applicable");
   }
 
-  /**
-   * Instantiates an AbstractEntity, using a factory method from a related,
-   * parent bean. The optional relatedEntity arg will get passed into the
-   * factory method, and does not have to be the parent entity; it just needs to
-   * be a related entity that is set via the factory method. If it is the same
-   * type as the parent entity, then it is used as the parent entity from which
-   * the factory method is called.
-   * 
-   * @param <NE>
-   * @param entityClass
-   * @param relatedEntity
-   * @return
-   * @throws DomainModelDefinitionException
-   */
-  private <NE extends AbstractEntity> NE newInstanceUsingParentFactory(Class<NE> entityClass, AbstractEntity relatedEntity) 
-    throws DomainModelDefinitionException
+  public static String newCallStack(Class<?> type)
   {
-    Method instantiationMethod = getFactoryMethod(entityClass);
-    Class<? extends AbstractEntity> instantiatingClass = (Class<? extends AbstractEntity>) instantiationMethod.getDeclaringClass();
-    AbstractEntity instantiatingBean = null;
-    if (instantiatingClass.isInstance(relatedEntity)) {
-      instantiatingBean = relatedEntity;
-      // if related is the instantiating class, then it is *not* used as arg to
-      // the factory method
-      relatedEntity = null; 
-    }
-    else {
-      instantiatingBean = newInstance(instantiatingClass);
-      log.debug("using newly instantiated parent " + instantiatingBean + " for new contained entity " + entityClass);
-    }
-    try {
-      Object[] arguments = getArgumentsForFactoryMethod(instantiationMethod, relatedEntity);
-      NE newEntity = (NE) instantiationMethod.invoke(instantiatingBean, arguments);
-      log.debug("constructed new entity (via parent entity's factory method) " + newEntity + " with args " + Arrays.asList(arguments));
-      return newEntity;
-    }
-    catch (Exception e) {
-      throw new DomainModelDefinitionException("could not invoke parent bean factory method " + 
-                                               instantiatingClass.getName() + "." + instantiationMethod.getName(), e);
-    }
+    return newCallStack(type, "");
   }
 
-  /**
-   * Instantiates an AbstractEntity, using a public constructor. The optional
-   * relatedEntity arg will get passed into the constructor.
-   * 
-   * @param <NE>
-   * @param entityClass
-   * @param relatedEntity
-   * @return
-   * @throws DomainModelDefinitionException
-   */
-  private <NE extends AbstractEntity> NE newInstanceViaConstructor(Class<NE> entityClass, AbstractEntity relatedEntity) throws DomainModelDefinitionException
+  public static String newCallStack(Class<?> type, String callStack)
   {
-    Constructor constructor = getMaxArgConstructor(entityClass);
-    Object[] arguments = getArgumentsForConstructor(constructor, relatedEntity);
-    try {
-      NE newEntity = (NE) constructor.newInstance(arguments);
-      log.debug("constructed new entity " + newEntity + " with args " + Arrays.asList(arguments));
-      return newEntity;
-    }
-    catch (Exception e) {
-      throw new DomainModelDefinitionException("could not invoke constructor " + entityClass.getName() + "." + constructor.getName(), e);
-    }
+    return newCallStack(type.getName(), callStack);
   }
 
-  private Object[] getArgumentsForConstructor(Constructor constructor, AbstractEntity parentBean) throws DomainModelDefinitionException
+  public static String newCallStack(String methodName, int argIndex, String callStack)
   {
-    Class[] parameterTypes = constructor.getParameterTypes();
-    Object[] arguments = getArgumentsForParameterTypes(parameterTypes, parentBean);
-    return arguments;
+    return newCallStack(methodName + ":" + argIndex, callStack);
   }
 
-  private Object[] getArgumentsForFactoryMethod(Method method, AbstractEntity relatedEntity) throws DomainModelDefinitionException
+  public static String newCallStack(String newFrame, String callStack)
   {
-    Class[] parameterTypes = method.getParameterTypes();
-    // TODO: move these special cases to a client-code-configurable map
-    if (method.getName().equals("createPlatesUsed")) {
-      Copy copy = newInstance(Copy.class);
-      return new Object [] {
-        copy.getLibrary().getStartPlate(),
-        copy.getLibrary().getEndPlate(),
-        copy
-      };
+    if (callStack.isEmpty()) {
+      return newFrame;
     }
-    if (method.getName().equals("createAnnotationValue") &&
-      parameterTypes.length == 2 &&
-      parameterTypes[0].equals(Reagent.class) &&
-      parameterTypes[1].equals(String.class)) {
-      parameterTypes[1] = BigDecimal.class;
-      Object[] arguments = getArgumentsForParameterTypes(parameterTypes, relatedEntity);
-      arguments[1] = arguments[1].toString();
-      return arguments;
-    }
-    if (method.getName().equals("createLabCherryPick")) {
-      LabCherryPick lcp = newInstance(LabCherryPick.class);
-      return new Object[] {lcp.getSourceWell()};
-    }
-    Object[] arguments = getArgumentsForParameterTypes(parameterTypes, relatedEntity);
-    return arguments;
+    return newFrame + "|" + callStack;
   }
 
-  protected Object[] getArgumentsForParameterTypes(Class[] parameterTypes, AbstractEntity relatedEntity) throws DomainModelDefinitionException
-  {
-    Object [] arguments = new Object[parameterTypes.length];
-    boolean usedRelatedEntity = false;
-    for (int i = 0; i < arguments.length; i++) {
-      Class<?> parameterType = parameterTypes[i];
-      if (relatedEntity != null && parameterType.isAssignableFrom(relatedEntity.getClass())) {
-        if (usedRelatedEntity) {
-          throw new DomainModelDefinitionException("multiple argument types for " + relatedEntity);
-        }
-        log.debug("related entity " + relatedEntity + 
-                  " being used as argument for instantiating method parameter " + 
-                  (i + 1) + " of type " + parameterType.getName());
-        arguments[i] = relatedEntity;
-        usedRelatedEntity = true;
-      }
-      else {
-        arguments[i] = getTestValueForType(parameterType);
-      }
-    }
-    if (relatedEntity != null && !usedRelatedEntity) {
-      throw new DomainModelDefinitionException("expected an argument type for " + relatedEntity);
-    }
-    return arguments;
-  }
-
-  protected Constructor getMaxArgConstructor(Class<? extends AbstractEntity> entityClass)
+  protected static Constructor findMaxArgConstructor(Class<? extends AbstractEntity> entityClass)
   {
     int maxArgs = 0;
     Constructor maxArgConstructor = null;
@@ -643,7 +1115,7 @@ public class TestDataFactory
     return maxArgConstructor;
   }
 
-  protected Method getFactoryMethod(Class<? extends AbstractEntity> entityClass)
+  protected static Method findParentFactoryMethod(Class<? extends AbstractEntity> entityClass)
   {
     ContainedEntity containedEntity = entityClass.getAnnotation(ContainedEntity.class);
     if (containedEntity == null) {
@@ -686,5 +1158,21 @@ public class TestDataFactory
     log.debug("chose candidate factory method " + candidateFactoryMethods.first());
     return candidateFactoryMethods.first(); 
   }
-  
+
+  /**
+   * Reset the TestDataFactory, clearing all custom {@link Builder}s, {@link PreCreateHook}s
+   * and {@link PostCreateHook}s.
+   * 
+   * @throws DevelopmentException
+   */
+  public void resetToDefaults() throws DevelopmentException
+  {
+    builders.clear();
+    try {
+      initializeBuilders();
+    }
+    catch (NoSuchMethodException e) {
+      throw new DevelopmentException(e.getMessage());
+    }
+  }
 }

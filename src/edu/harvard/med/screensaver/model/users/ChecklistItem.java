@@ -18,12 +18,11 @@ import javax.persistence.Table;
 import javax.persistence.UniqueConstraint;
 import javax.persistence.Version;
 
+import org.apache.log4j.Logger;
+import org.hibernate.annotations.Parameter;
+
 import edu.harvard.med.screensaver.model.AbstractEntity;
 import edu.harvard.med.screensaver.model.AbstractEntityVisitor;
-
-import org.apache.log4j.Logger;
-import org.hibernate.annotations.Immutable;
-import org.hibernate.annotations.Parameter;
 
 
 /**
@@ -113,8 +112,7 @@ public class ChecklistItem extends AbstractEntity<Integer> implements Comparable
    *
    * @return the order statistic
    */
-  @Column(nullable = false)
-  @org.hibernate.annotations.Immutable
+  @Column(nullable = false, updatable = false)
   public Integer getOrderStatistic()
   {
     return _orderStatistic;
@@ -125,8 +123,7 @@ public class ChecklistItem extends AbstractEntity<Integer> implements Comparable
    *
    * @return the item name
    */
-  @Column(nullable = false, unique = true)
-  @org.hibernate.annotations.Immutable
+  @Column(nullable = false, updatable = false, unique = true)
   @org.hibernate.annotations.Type(type = "text")
   public String getItemName()
   {
@@ -137,15 +134,13 @@ public class ChecklistItem extends AbstractEntity<Integer> implements Comparable
    * Get whether this checklist item can be activated and then
    * expired (repeatedly)
    */
-  @Column(nullable = false, name = "isExpirable")
-  @org.hibernate.annotations.Immutable
+  @Column(nullable = false, updatable = false, name = "isExpirable")
   public boolean isExpirable()
   {
     return _isExpirable;
   }
 
   @Column(nullable=false, updatable=false)
-  @Immutable
   @org.hibernate.annotations.Type(type="edu.harvard.med.screensaver.model.users.ChecklistItemGroup$UserType")
   public ChecklistItemGroup getChecklistItemGroup()
   {

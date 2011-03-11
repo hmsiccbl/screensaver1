@@ -10,31 +10,35 @@
 package edu.harvard.med.screensaver.db.datafetcher;
 
 
-import java.util.Iterator;
 import java.util.Set;
 
 import edu.harvard.med.screensaver.db.hqlbuilder.HqlBuilder;
+import edu.harvard.med.screensaver.db.hqlbuilder.JoinType;
 import edu.harvard.med.screensaver.model.Entity;
 import edu.harvard.med.screensaver.model.meta.RelationshipPath;
+import edu.harvard.med.screensaver.util.ParallelIterator;
 
 public class DataFetcherUtil
 {
   static public <P extends Entity,R extends Entity> void addDomainRestrictions(HqlBuilder hql,
-                                                                               RelationshipPath<R> _parentEntityPath,
+                                                                               RelationshipPath<R> parentEntityPath,
                                                                                P parentEntity,
                                                                                String rootAlias)
   {
-    if (_parentEntityPath.hasRestrictions()) {
-      throw new IllegalArgumentException("path to parent entity cannot have restrictions " +
-                                         "(if there are to-many relationships between root entity and parent entity, " +
-                                         "the parent entity is not really a parent!)");
-    }
+    //    if (parentEntityPath.getCardinality() == Cardinality.TO_MANY) {
+    //      throw new IllegalArgumentException("path to parent entity must have cardinality of one " +
+    //                                         "(if there are to-many relationships between root entity and parent entity, " +
+    //                                         "the parent entity is not really a parent)");
+    //    }
+    ParallelIterator<String,Class<? extends Entity>> iterator =
+      new ParallelIterator<String,Class<? extends Entity>>(parentEntityPath.pathIterator(),
+                                                           parentEntityPath.entityClassIterator());
     int n = 1;
     String alias = rootAlias;
-    Iterator<String> iter = _parentEntityPath.pathIterator();
-    while (iter.hasNext()) {
+    while (iterator.hasNext()) {
       String nextAlias = "p" + n++;
-      hql.from(alias, iter.next(), nextAlias);
+      iterator.next();
+      hql.from(alias, RelationshipPath.from(iterator.getSecond()).to(iterator.getFirst()), nextAlias, JoinType.INNER);
       alias = nextAlias;
     }
     hql.where(alias, parentEntity);

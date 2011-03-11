@@ -12,6 +12,11 @@ package edu.harvard.med.screensaver.service.libraries;
 import java.util.List;
 import java.util.Map;
 
+import com.google.common.collect.Maps;
+import org.apache.log4j.Logger;
+import org.joda.time.LocalDate;
+import org.springframework.transaction.annotation.Transactional;
+
 import edu.harvard.med.screensaver.db.GenericEntityDAO;
 import edu.harvard.med.screensaver.model.AdministrativeActivity;
 import edu.harvard.med.screensaver.model.AdministrativeActivityType;
@@ -23,15 +28,8 @@ import edu.harvard.med.screensaver.model.users.AdministratorUser;
 import edu.harvard.med.screensaver.model.users.ScreensaverUserRole;
 import edu.harvard.med.screensaver.service.OperationRestrictedException;
 
-import org.apache.log4j.Logger;
-import org.joda.time.LocalDate;
-import org.springframework.transaction.annotation.Transactional;
-
-import com.google.common.collect.Maps;
-
 public class LibraryContentsVersionManager
 {
-  private static final int BATCH_SIZE = 384;
   private static final Logger log = Logger.getLogger(LibraryContentsVersionManager.class);
   
   private GenericEntityDAO _dao;
@@ -53,12 +51,8 @@ public class LibraryContentsVersionManager
   {
     library = _dao.reloadEntity(library);
     performedBy = _dao.reloadEntity(performedBy);
-    AdministrativeActivity loadingActivity = 
-      new AdministrativeActivity(performedBy,
-                                 new LocalDate(),
-                                 AdministrativeActivityType.LIBRARY_CONTENTS_LOADING);
-    loadingActivity.setComments(loadingComments);
-    LibraryContentsVersion contentsVersion = library.createContentsVersion(loadingActivity);
+    LibraryContentsVersion contentsVersion = library.createContentsVersion(performedBy);
+    library.getLastUpdateActivityOfType(AdministrativeActivityType.LIBRARY_CONTENTS_LOADING).setComments(loadingComments);
     return contentsVersion;
   }
 
@@ -79,7 +73,7 @@ public class LibraryContentsVersionManager
     int n = 0;
     Map<String,Object> criteria = Maps.newHashMap();
     for (int p = library.getStartPlate(); p <= library.getEndPlate(); ++p) {
-      List<Well> wells = _dao.findEntitiesByProperty(Well.class, "plateNumber", new Integer(p), false, Well.latestReleasedReagent.getPath());
+      List<Well> wells = _dao.findEntitiesByProperty(Well.class, "plateNumber", new Integer(p), false, Well.latestReleasedReagent);
       for (Well well : wells) {
         criteria.put(Reagent.libraryContentsVersion.getLeaf(), lcv);
         criteria.put(Reagent.well.getLeaf(), well);

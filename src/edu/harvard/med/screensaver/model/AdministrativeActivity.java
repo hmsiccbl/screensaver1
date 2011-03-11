@@ -15,7 +15,6 @@ import javax.persistence.PrimaryKeyJoinColumn;
 import javax.persistence.Transient;
 
 import com.google.common.base.Predicate;
-import org.hibernate.annotations.Immutable;
 import org.joda.time.LocalDate;
 
 import edu.harvard.med.screensaver.model.users.AdministratorUser;
@@ -47,9 +46,8 @@ public class AdministrativeActivity extends Activity
       }
     };
   }
-  
-  private AdministrativeActivityType _type;
 
+  private AdministrativeActivityType _type;
 
   @Override
   @Transient
@@ -65,7 +63,6 @@ public class AdministrativeActivity extends Activity
   }
 
   @Column(name="administrativeActivityType", nullable=false, updatable=false)
-  @Immutable
   @org.hibernate.annotations.Type(type="edu.harvard.med.screensaver.model.AdministrativeActivityType$UserType")
   public AdministrativeActivityType getType()
   {

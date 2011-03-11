@@ -27,6 +27,7 @@ import org.joda.time.LocalDate;
 import org.springframework.transaction.annotation.Transactional;
 
 import edu.harvard.med.screensaver.db.DAOTransaction;
+import edu.harvard.med.screensaver.db.EntityInflator;
 import edu.harvard.med.screensaver.db.GenericEntityDAO;
 import edu.harvard.med.screensaver.db.datafetcher.AggregateDataFetcher;
 import edu.harvard.med.screensaver.db.datafetcher.DataFetcherUtil;
@@ -119,7 +120,7 @@ public class WellCopyVolumeSearchResults extends EntityBasedEntitySearchResults<
       {
         SortedSet<WellCopy> result = new TreeSet<WellCopy>();
         for (WellKey wellKey : wellKeys) {
-          Well well = _dao.findEntityById(Well.class, wellKey.toString(), true, Well.library.to(Library.copies).to(Copy.plates).getPath());
+          Well well = _dao.findEntityById(Well.class, wellKey.toString(), true, Well.library.to(Library.copies).to(Copy.plates));
           makeWellCopyVolumes(well, result);
         }
         return aggregateWellVolumeAdjustments(result, nonAggregatedData);
@@ -151,8 +152,8 @@ public class WellCopyVolumeSearchResults extends EntityBasedEntitySearchResults<
         final Library[] library2 = new Library[1];
         _dao.doInTransaction(new DAOTransaction() {
           public void runTransaction() {
-            library2[0] = _dao.reloadEntity(library, true, "wells");
-            _dao.needReadOnly(library2[0], Library.copies.to(Copy.plates).getPath());
+            library2[0] = _dao.reloadEntity(library, true, Library.wells);
+            _dao.needReadOnly(library2[0], Library.copies.to(Copy.plates));
           }
         });
         return aggregateWellVolumeAdjustments(makeWellCopyVolumes(library2[0], new TreeSet<WellCopy>()),
@@ -184,7 +185,12 @@ public class WellCopyVolumeSearchResults extends EntityBasedEntitySearchResults<
     // our model; instead we just find all the wells for CPR and delegate to the
     // searchWells() method
     Set<WellKey> wellKeys = new HashSet<WellKey>();
-    cherryPickRequest = _dao.reloadEntity(cherryPickRequest, true, CherryPickRequest.labCherryPicks.to(LabCherryPick.sourceWell).getPath());
+    EntityInflator<CherryPickRequest> inflator =
+      new EntityInflator<CherryPickRequest>(_dao, cherryPickRequest, true).need(CherryPickRequest.labCherryPicks.to(LabCherryPick.sourceWell));
+    if (forUnfulfilledOnly) {
+      inflator.need(CherryPickRequest.labCherryPicks.to(LabCherryPick.wellVolumeAdjustments));
+    }
+    cherryPickRequest = inflator.inflate();
     for (LabCherryPick labCherryPick : cherryPickRequest.getLabCherryPicks()) {
       if (!forUnfulfilledOnly || labCherryPick.isUnfulfilled()) {
         wellKeys.add(labCherryPick.getSourceWell().getWellKey());
@@ -196,7 +202,6 @@ public class WellCopyVolumeSearchResults extends EntityBasedEntitySearchResults<
       " lab cherry picks");
   }
 
-  @SuppressWarnings("unchecked")
   @Override
   protected List<? extends TableColumn<WellCopy,?>> buildColumns()
   {

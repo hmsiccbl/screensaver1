@@ -35,5 +35,20 @@ public @interface ContainedEntity {
    * @return the class of the containing entity
    */
   Class<? extends AbstractEntity> containingEntityClass();
+
+  /**
+   * Whether the contained entity is automatically created by the parent when the parent is constructed
+   * 
+   * @return
+   */
+  boolean autoCreated() default false;
+
+  /**
+   * For entities that may be parented by one of multiple entity types. In this case, one of the parent entity types
+   * should be specified for the (singular) containingEntityClass attribute, for testing purposes.
+   * 
+   * @return
+   */
+  Class<? extends AbstractEntity>[] containingEntityClasses() default {};
 }
 

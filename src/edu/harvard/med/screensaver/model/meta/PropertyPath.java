@@ -108,4 +108,16 @@ public class PropertyPath<E extends Entity> extends RelationshipPath<E>
     }
     return super.getCardinality();
   }
+
+  @Override
+  public <T extends E> PropertyPath<T> castToSubtype(Class<T> castTo)
+  {
+    return new PropertyPath<T>(super.castToSubtype(castTo), _propertyName, _isCollectionOfValues);
+  }
+
+  @Override
+  public <T extends Entity> PropertyPath<T> castToSupertype(Class<T> castTo)
+  {
+    return new PropertyPath<T>(super.castToSupertype(castTo), _propertyName, _isCollectionOfValues);
+  }
 }

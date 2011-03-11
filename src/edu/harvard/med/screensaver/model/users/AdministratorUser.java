@@ -31,36 +31,11 @@ public class AdministratorUser extends ScreensaverUser
 {
   private static final long serialVersionUID = 0L;
 
-  /**
-   * Constructs an initialized <code>ScreensaverUser</code> object.
-   *
-   * @param firstName the first name
-   * @param lastName the last name
-   * @param email the email
-   * @param phone the phone number
-   * @param mailingAddress the mailing address
-   * @param comments the comments
-   * @param loginId the Screensaver-managed login ID of the user
-   * @param password the password associated with the screensaverId login ID of the user (plaintext)
-   */
-  public AdministratorUser(
-    String firstName,
-    String lastName,
-    String email,
-    String phone,
-    String mailingAddress,
-    String comments,
-    String loginId,
-    String password)
+  /** @motivation for test code only */
+  public AdministratorUser(String firstName,
+                           String lastName)
   {
-    super(firstName,
-          lastName,
-          email,
-          phone,
-          mailingAddress,
-          comments);
-    setLoginId(loginId);
-    updateScreensaverPassword(password);
+    super(firstName, lastName);
   }
 
   @Override

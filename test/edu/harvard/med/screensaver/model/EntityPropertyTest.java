@@ -9,67 +9,55 @@
 
 package edu.harvard.med.screensaver.model;
 
-import java.beans.IntrospectionException;
 import java.beans.PropertyDescriptor;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.math.BigDecimal;
-import java.sql.Blob;
 import java.util.Collection;
+
+import org.apache.log4j.Logger;
 
 import edu.harvard.med.screensaver.AbstractSpringPersistenceTest;
 import edu.harvard.med.screensaver.db.DAOTransaction;
-import edu.harvard.med.screensaver.model.annotations.CollectionOfElements;
+import edu.harvard.med.screensaver.model.annotations.ElementCollection;
 import edu.harvard.med.screensaver.model.annotations.ToMany;
 import edu.harvard.med.screensaver.model.entitytesters.ModelIntrospectionUtil;
 import edu.harvard.med.screensaver.model.meta.RelatedProperty;
 import edu.harvard.med.screensaver.util.StringUtils;
 
-import org.apache.commons.io.IOUtils;
-import org.apache.log4j.Logger;
-import org.springframework.orm.hibernate3.HibernateTemplate;
-
 public class EntityPropertyTest<E extends AbstractEntity> extends AbstractSpringPersistenceTest
 {
   private static Logger log = Logger.getLogger(EntityPropertyTest.class);
   
-  protected HibernateTemplate hibernateTemplate;
-
   private Class<E> _entityClass;
   private PropertyDescriptor propertyDescriptor;
   private E entity;
-  private TestDataFactory dataFactory = new TestDataFactory();
-  
+  private String testName;
 
-  public EntityPropertyTest(Class<E> entityClass, PropertyDescriptor propertyDescriptor) throws IntrospectionException
+  public EntityPropertyTest(String name)
   {
-    super("testPersistentBeanProperty:" + propertyDescriptor.getDisplayName());
+    super(name);
+  }
+
+  public EntityPropertyTest(Class<E> entityClass, PropertyDescriptor propertyDescriptor)
+  {
+    super("testEntityProperty"); // unfortunately, the test name has to match the method name that implements the test, in order to work with Spring's unit test runner
+    testName = getName() + ":" + propertyDescriptor.getDisplayName();
     _entityClass = entityClass;
     this.propertyDescriptor = propertyDescriptor;
   }
   
   @Override
-  protected void onSetUp() throws Exception
+  protected void setUp() throws Exception
   {
-    //super.onSetUp();
+    //super.setup();
   }
 
-  /**
-   * @motivation lazy init database and test entity, to save time by not
-   *             invoking unless test is actually going to do something with the
-   *             database (many tests are skipped for various reasons)
-   */
   private E initTestEntity()
   {
-    schemaUtil.truncateTablesOrCreateSchema();
-    entity = dataFactory.newInstance(_entityClass);
-    persistEntityNetwork(entity);
+    schemaUtil.truncateTables();
+    entity = dataFactory.newInstance(_entityClass, testName);
     return entity;
-  }
-
-  private void persistEntityNetwork(AbstractEntity entity)
-  {
-    new EntityNetworkPersister(genericEntityDao, entity).persistEntityNetwork();
   }
 
   protected void doTestBeanInTransaction(final AbstractEntity bean,
@@ -110,8 +98,8 @@ public class EntityPropertyTest<E extends AbstractEntity> extends AbstractSpring
     });
   }
 
-  @Override
-  protected void runTest() throws Throwable
+  //@IfProfileValue(name = "never.to.be.run.explicitly", value = "never.to.be.run.explicitly")
+  public void testEntityProperty() throws Throwable
   {
     log.info("testing entity property " + fullPropName(propertyDescriptor));
 
@@ -199,8 +187,6 @@ public class EntityPropertyTest<E extends AbstractEntity> extends AbstractSpring
     final Method getter = propertyDescriptor.getReadMethod();
     final Method setter = propertyDescriptor.getWriteMethod();
     
-    assertNotNull("setter exists for property " + propertyDescriptor.getName());
-
     if (ModelIntrospectionUtil.isPropertyWithNonconventionalSetterMethod(propertyDescriptor)) {
       log.warn("skipping testing setter of mutable property " + fullPropName(propertyDescriptor) + ": has non-conventional setter method");
       return;
@@ -210,11 +196,13 @@ public class EntityPropertyTest<E extends AbstractEntity> extends AbstractSpring
       return;
     }
 
+    assertNotNull("setter exists for property " + propertyDescriptor.getName(), setter);
+
     initTestEntity();
     Object testValue;
     int attemptsToFindDifferingTestValue = 2;
     do {
-      testValue = dataFactory.getTestValueForType(getter.getReturnType());
+      testValue = dataFactory.newInstance(getter.getReturnType(), testName);
       try {
         Object existingValue = getter.invoke(entity);
         // test would be inconsequential if existing property value is same as new value...find another value!
@@ -283,18 +271,18 @@ public class EntityPropertyTest<E extends AbstractEntity> extends AbstractSpring
       // if set via-constructor we could easily test this case, but we never actually do this;
       // otherwise, we would have to populate the collection before bean is persisted
       fail("sorry, testing of immutable collection of elements is not yet supported " +
-      		"(hint: annotate property getter with @CollectionOfElements(hasNonconventionalMutation=true) to avoid test failure)");
+      		"(hint: annotate property getter with @ElementCollection(hasNonconventionalMutation=true) to avoid test failure)");
     }
     if (ModelIntrospectionUtil.isMapBasedProperty(propertyDescriptor)) {
       fail("sorry, testing of map-based collection of elements is not yet supported " +
-           "(hint: annotate property getter with @CollectionOfElements(hasNonconventionalMutation=true) to avoid test failure)");
+           "(hint: annotate property getter with @ElementCollection(hasNonconventionalMutation=true) to avoid test failure)");
     }
     
 
-    CollectionOfElements collectionOfElements = propertyDescriptor.getReadMethod().getAnnotation(CollectionOfElements.class);
+    ElementCollection elementCollection = propertyDescriptor.getReadMethod().getAnnotation(ElementCollection.class);
     String singularPropertyName = null;
-    if (collectionOfElements != null && collectionOfElements.singularPropertyName().length() > 0) {
-      singularPropertyName = collectionOfElements.singularPropertyName(); 
+    if (elementCollection != null && elementCollection.singularPropertyName().length() > 0) {
+      singularPropertyName = elementCollection.singularPropertyName(); 
     }
     else if (propertyName.endsWith("s")) {
       singularPropertyName = propertyName.substring(0, propertyName.length() - 1);
@@ -312,7 +300,7 @@ public class EntityPropertyTest<E extends AbstractEntity> extends AbstractSpring
 
     log.info("running add/remove test for collection of elements: " + fullPropName(propertyDescriptor));
     initTestEntity();
-    Object testElement = dataFactory.getTestValueForType(ModelIntrospectionUtil.getCollectionOfElementsType(propertyDescriptor));
+    Object testElement = dataFactory.newInstance(ModelIntrospectionUtil.getCollectionOfElementsType(propertyDescriptor), testName);
     
     
     class CollectionElementAdder implements BeanTester
@@ -424,7 +412,8 @@ public class EntityPropertyTest<E extends AbstractEntity> extends AbstractSpring
     log.info("testing to-one entity relationship " + fullPropName(propertyDescriptor));
 
     if (ModelIntrospectionUtil.isToOneRelationshipWithNonConventionalSetter(propertyDescriptor)) {
-      log.warn("skipping add/remove test for to-one entity relationship " + fullPropName(propertyDescriptor) + ": non-conventional mutation");
+      log.warn("skipping test for to-one entity relationship " + fullPropName(propertyDescriptor) +
+        ": non-conventional mutation");
       return;
     }
 
@@ -436,8 +425,8 @@ public class EntityPropertyTest<E extends AbstractEntity> extends AbstractSpring
     }
     // TODO: what if non-nullable? setter okay, but must be set in constructor too?
     
-    AbstractEntity entity = initTestEntity();
-    Class<? extends AbstractEntity> relatedEntityType = ModelIntrospectionUtil.getRelationshipEntityType(propertyDescriptor);
+    final AbstractEntity entity = initTestEntity();
+    final Class<? extends AbstractEntity> relatedEntityType = ModelIntrospectionUtil.getRelationshipEntityType(propertyDescriptor);
     AbstractEntity relatedEntity = null;
     RelatedProperty relatedProperty = new RelatedProperty(beanClass, propertyDescriptor);
     if (ModelIntrospectionUtil.isToOneRelationshipRequired(propertyDescriptor)) {
@@ -447,21 +436,20 @@ public class EntityPropertyTest<E extends AbstractEntity> extends AbstractSpring
     }
     else if (relatedProperty.getPropertyDescriptor() != null && 
       ModelIntrospectionUtil.isToOneRelationshipRequired(relatedProperty.getPropertyDescriptor())) {
-      // instantiate related one-to-one entity, with association to this test entity
-      relatedEntity = dataFactory.newInstance(relatedEntityType, entity);
-      persistEntityNetwork(relatedEntity);
+      log.info("skipping set/get test for one-to-one entity relationship since relationship is required on the related side, and it will be tested using the related entity type");
+      return;
     }
     else if (!!!ModelIntrospectionUtil.isImmutableProperty(beanClass, propertyDescriptor)) {
-      relatedEntity = dataFactory.newInstance(relatedEntityType);
+      relatedEntity = dataFactory.newInstance(relatedEntityType, testName);
       setterMethod.invoke(entity, relatedEntity);
-      persistEntityNetwork(entity);
+      genericEntityDao.mergeEntity(entity);
     }
     else {
       fail("sorry, testing of nullable, immutable, {one,many}-to-one relationships not implemented " +
            "(hint: annotate property getter with @ToOne(hasNonconventionalSetterMethod=true) to avoid test failure)");
     }
 
-  class ToOneAsserter implements RelatedBeansTester
+    class ToOneAsserter implements RelatedBeansTester
     {
       public void testRelatedEntities(AbstractEntity entity,
                                       AbstractEntity expectedRelatedEntity)
@@ -523,31 +511,30 @@ public class EntityPropertyTest<E extends AbstractEntity> extends AbstractSpring
     final String addMethodName = "add" + StringUtils.capitalize(singularPropertyName); 
     final String removeMethodName = "remove" + StringUtils.capitalize(singularPropertyName);
     
-    AbstractEntity entity = initTestEntity();
-    Class<? extends AbstractEntity> relatedEntityType = ModelIntrospectionUtil.getRelationshipEntityType(propertyDescriptor);
+    final AbstractEntity entity = initTestEntity();
+    final Class<? extends AbstractEntity> relatedEntityType = ModelIntrospectionUtil.getRelationshipEntityType(propertyDescriptor);
     AbstractEntity relatedEntity;
     if (ModelIntrospectionUtil.isOneToManyRelationshipRequired(beanClass, propertyDescriptor)) {
-      relatedEntity = dataFactory.newInstance(relatedEntityType, entity);
-      persistEntityNetwork(relatedEntity);
       ModelIntrospectionUtil.findAndCheckMethod(beanClass, addMethodName, ExistenceRequirement.NOT_ALLOWED);
       ModelIntrospectionUtil.findAndCheckMethod(beanClass, removeMethodName, ExistenceRequirement.NOT_ALLOWED);
+      log.info("skipping add/remove test for one-to-many entity relationship since relationship is required on the related side, and it will be tested using the related entity type");
+      return;
     }
     else {
-      relatedEntity = dataFactory.newInstance(relatedEntityType);
-      persistEntityNetwork(relatedEntity);
+      relatedEntity = dataFactory.newInstance(relatedEntityType, testName);
       final Method addMethod = ModelIntrospectionUtil.findAndCheckMethod(beanClass, addMethodName, ExistenceRequirement.REQUIRED);
       /*final Method removeMethod = */ModelIntrospectionUtil.findAndCheckMethod(beanClass, removeMethodName, 
                                                                             addMethod == null ? ExistenceRequirement.NOT_ALLOWED : ExistenceRequirement.OPTIONAL);
       class ToManyAdder implements RelatedBeansTester
       {
         public void testRelatedEntities(AbstractEntity entity,
-                                            AbstractEntity relatedEntity)
+                                        AbstractEntity relatedEntity)
         {
           try {
             boolean addResult;
             log.debug("calling " + entity + ".add(" + relatedEntity + ")");
             addResult = (Boolean) addMethod.invoke(entity, relatedEntity);
-            assertTrue("adding to to-many entity relationship return true: " + fullPropName(propertyDescriptor), addResult);
+            assertTrue("adding to to-many entity relationship returns true: " + fullPropName(propertyDescriptor), addResult);
           }
           catch (Exception e) {
             e.printStackTrace();
@@ -608,7 +595,7 @@ public class EntityPropertyTest<E extends AbstractEntity> extends AbstractSpring
     if (entity == null) {
       return entity;
     }
-    return (AbstractEntity) hibernateTemplate.get(entity.getEntityClass(), entity.getEntityId());
+    return genericEntityDao.findEntityById(entity.getEntityClass(), entity.getEntityId());
   }
   
 
@@ -637,15 +624,10 @@ public class EntityPropertyTest<E extends AbstractEntity> extends AbstractSpring
       // reliably instantiate test values with the correct scale
       assertTrue(assertMessage, ((BigDecimal) expectedValue).compareTo((BigDecimal) actualValue) == 0);
     }
-    else if (expectedValue instanceof Blob) {
-      try {
-        assertEquals(assertMessage,
-                     IOUtils.toString(((Blob) expectedValue).getBinaryStream()),
-                     IOUtils.toString(((Blob) actualValue).getBinaryStream()));
-      }
-      catch (Exception e) {
-        fail("exception on Blob property value comparison: " + e.getMessage());
-      }
+    else if (expectedValue instanceof byte[]) {
+      assertEquals(assertMessage,
+                   new String((byte[]) expectedValue),
+                   new String((byte[]) actualValue));
     }
     else {
       assertEquals(assertMessage,

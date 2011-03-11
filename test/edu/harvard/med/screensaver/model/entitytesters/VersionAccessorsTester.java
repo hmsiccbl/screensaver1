@@ -13,10 +13,10 @@ import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
 
 import javax.persistence.Column;
+import javax.persistence.EntityManagerFactory;
 import javax.persistence.Version;
 
 import org.apache.log4j.Logger;
-import org.hibernate.SessionFactory;
 import org.hibernate.annotations.Immutable;
 
 import edu.harvard.med.screensaver.model.AbstractEntity;
@@ -37,7 +37,7 @@ extends AbstractEntityTester<E>
 {
   private static Logger log = Logger.getLogger(VersionAccessorsTester.class);
 
-  public VersionAccessorsTester(Class<E> entityClass, SessionFactory sessionFactory)
+  public VersionAccessorsTester(Class<E> entityClass, EntityManagerFactory sessionFactory)
   {
     super(entityClass, sessionFactory);
   }

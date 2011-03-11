@@ -63,7 +63,7 @@ public class NaturalProductsLibraryContentsParser extends WorkbookLibraryContent
     Integer plate = PLATE.getValue(row);
     WellName wellName = WELL.getValue(row);
     WellKey wellKey = new WellKey(plate, wellName);
-    Well well = getDao().findEntityById(Well.class, wellKey.getKey(), false, Well.library.getPath());
+    Well well = getDao().findEntityById(Well.class, wellKey.getKey(), false, Well.library);
 
     if (well == null) {
       throw new ParseException(new ParseError("specified well does not exist: " + wellKey + " (this is probably due to an erroneous plate number)"));

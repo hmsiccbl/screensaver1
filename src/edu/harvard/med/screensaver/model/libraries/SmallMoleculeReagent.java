@@ -15,8 +15,8 @@ import java.util.List;
 import java.util.Set;
 
 import javax.persistence.Column;
+import javax.persistence.ElementCollection;
 import javax.persistence.Entity;
-import javax.persistence.FetchType;
 import javax.persistence.JoinColumn;
 import javax.persistence.JoinTable;
 import javax.persistence.Transient;
@@ -28,7 +28,6 @@ import org.hibernate.annotations.Type;
 
 import edu.harvard.med.screensaver.ScreensaverConstants;
 import edu.harvard.med.screensaver.model.AbstractEntityVisitor;
-import edu.harvard.med.screensaver.model.annotations.CollectionOfElements;
 import edu.harvard.med.screensaver.model.annotations.ContainedEntity;
 import edu.harvard.med.screensaver.model.meta.PropertyPath;
 import edu.harvard.med.screensaver.model.meta.RelationshipPath;
@@ -53,7 +52,7 @@ public class SmallMoleculeReagent extends Reagent
   public static final PropertyPath<SmallMoleculeReagent> molfileList = RelationshipPath.from(SmallMoleculeReagent.class).toCollectionOfValues("molfileList");
   
   public static final SmallMoleculeReagent NullSmallMoleculeReagent = 
-    new SmallMoleculeReagent(new ReagentVendorIdentifier("", ""),
+    new SmallMoleculeReagent(ReagentVendorIdentifier.NULL_VENDOR_ID,
                              null,
                              null,
                              "",
@@ -117,8 +116,9 @@ public class SmallMoleculeReagent extends Reagent
     return _inchi;
   }
 
-  @org.hibernate.annotations.CollectionOfElements
-  @CollectionOfElements(hasNonconventionalMutation=true) /* immutable, unless transient */ 
+  @ElementCollection
+  @edu.harvard.med.screensaver.model.annotations.ElementCollection(hasNonconventionalMutation = true)
+  /* immutable, unless transient */
   @Column(name="compoundName", nullable=false)
   @JoinTable(
     name="smallMoleculeCompoundName",
@@ -137,8 +137,9 @@ public class SmallMoleculeReagent extends Reagent
     return _compoundNames.size();
   }
 
-  @org.hibernate.annotations.CollectionOfElements
-  @CollectionOfElements(hasNonconventionalMutation=true) /* immutable, unless transient */ 
+  @ElementCollection
+  @edu.harvard.med.screensaver.model.annotations.ElementCollection(hasNonconventionalMutation = true)
+  /* immutable, unless transient */
   @Column(name="pubchemCid", nullable=false)
   @JoinTable(
     name="smallMoleculePubchemCid",
@@ -156,8 +157,9 @@ public class SmallMoleculeReagent extends Reagent
     return _pubchemCids.size();
   }
 
-  @org.hibernate.annotations.CollectionOfElements
-  @CollectionOfElements(hasNonconventionalMutation=true) /* immutable, unless transient */ 
+  @ElementCollection
+  @edu.harvard.med.screensaver.model.annotations.ElementCollection(hasNonconventionalMutation = true)
+  /* immutable, unless transient */
   @Column(name="chembankId", nullable=false)
   @JoinTable(
     name="smallMoleculeChembankId",
@@ -181,7 +183,7 @@ public class SmallMoleculeReagent extends Reagent
    *             value collection
    * @see #getMolfile()
    */
-  @org.hibernate.annotations.CollectionOfElements(fetch=FetchType.LAZY)
+  @ElementCollection
   @JoinTable(name="molfile", joinColumns=@JoinColumn(name="reagent_id", unique=true)) // note "unique=true" ensures 1-to-1 mapping
   @Column(name="molfile", nullable=false)
   @IndexColumn(name="ordinal")

@@ -28,6 +28,8 @@ public interface ScreenResultsDAO
 
   public List<DataColumn> findMutualPositiveColumns(ScreenResult sr);
 
+  public List<DataColumn> findMutualPositiveColumns(HqlBuilderCallback hqlBuilderCallback);
+
   public ScreenResult getLatestScreenResult();
 }
 

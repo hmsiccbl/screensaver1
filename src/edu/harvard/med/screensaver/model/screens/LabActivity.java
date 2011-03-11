@@ -73,7 +73,6 @@ public abstract class LabActivity extends Activity
    */
   @ManyToOne(fetch=FetchType.LAZY)
   @JoinColumn(name="screenId", nullable=false, updatable=false)
-  @org.hibernate.annotations.Immutable
   @org.hibernate.annotations.ForeignKey(name="fk_lab_activity_to_screen")
   @org.hibernate.annotations.LazyToOne(value=org.hibernate.annotations.LazyToOneOption.PROXY)
   @edu.harvard.med.screensaver.model.annotations.ToOne(inverseProperty="labActivities")

@@ -12,20 +12,26 @@ package edu.harvard.med.screensaver.service.cherrypicks;
 import java.util.Iterator;
 import java.util.Set;
 
+import com.google.common.base.Function;
+import com.google.common.collect.Iterables;
+import com.google.common.collect.Sets;
+import org.apache.log4j.Logger;
+import org.joda.time.LocalDate;
+import org.springframework.beans.factory.annotation.Autowired;
+
 import edu.harvard.med.screensaver.AbstractSpringPersistenceTest;
+import edu.harvard.med.screensaver.db.DAOTransaction;
 import edu.harvard.med.screensaver.model.AdministrativeActivity;
 import edu.harvard.med.screensaver.model.AdministrativeActivityType;
 import edu.harvard.med.screensaver.model.DuplicateEntityException;
-import edu.harvard.med.screensaver.model.EntityNetworkPersister;
-import edu.harvard.med.screensaver.model.TestDataFactory;
 import edu.harvard.med.screensaver.model.cherrypicks.CherryPickRequest;
 import edu.harvard.med.screensaver.model.cherrypicks.InvalidCherryPickWellException;
 import edu.harvard.med.screensaver.model.cherrypicks.LabCherryPick;
-import edu.harvard.med.screensaver.model.cherrypicks.RNAiCherryPickRequest;
 import edu.harvard.med.screensaver.model.cherrypicks.ScreenerCherryPick;
 import edu.harvard.med.screensaver.model.libraries.Library;
-import edu.harvard.med.screensaver.model.libraries.LibraryContentsVersion;
+import edu.harvard.med.screensaver.model.libraries.LibraryType;
 import edu.harvard.med.screensaver.model.libraries.LibraryWellType;
+import edu.harvard.med.screensaver.model.libraries.PlateSize;
 import edu.harvard.med.screensaver.model.libraries.ReagentVendorIdentifier;
 import edu.harvard.med.screensaver.model.libraries.SilencingReagent;
 import edu.harvard.med.screensaver.model.libraries.SilencingReagentType;
@@ -33,13 +39,6 @@ import edu.harvard.med.screensaver.model.libraries.Well;
 import edu.harvard.med.screensaver.model.libraries.WellKey;
 import edu.harvard.med.screensaver.model.screens.ScreenType;
 import edu.harvard.med.screensaver.model.users.AdministratorUser;
-
-import org.apache.log4j.Logger;
-import org.joda.time.LocalDate;
-
-import com.google.common.base.Function;
-import com.google.common.collect.Iterables;
-import com.google.common.collect.Sets;
 
 public class CherryPickRequestCherryPicksAdderTest extends AbstractSpringPersistenceTest
 {
@@ -55,56 +54,67 @@ public class CherryPickRequestCherryPicksAdderTest extends AbstractSpringPersist
     public WellKey apply(LabCherryPick lcp) { return lcp.getSourceWell().getWellKey(); }
   };
 
-  protected CherryPickRequestCherryPicksAdder cherryPickRequestCherryPicksAdder;
+  @Autowired protected CherryPickRequestCherryPicksAdder cherryPickRequestCherryPicksAdder;
 
-  private RNAiCherryPickRequest cpr;
+  private CherryPickRequest cpr;
   private Library poolLibrary;
   private Library duplexLibrary;
   
   @Override
-  protected void onSetUp() throws Exception
+  protected void setUp() throws Exception
   {
-    super.onSetUp();
-    
-    TestDataFactory dataFactory = new TestDataFactory();
+    super.setUp();
 
-    duplexLibrary = dataFactory.newInstance(Library.class);
-    duplexLibrary.setScreenType(ScreenType.RNAI);
-    dataFactory.newInstance(LibraryContentsVersion.class, duplexLibrary);
-    for (int i = 0; i < 8; ++i ) {
-      Well well = duplexLibrary.createWell(new WellKey(duplexLibrary.getStartPlate(), 0, i), LibraryWellType.EXPERIMENTAL);
-      well.createSilencingReagent(new ReagentVendorIdentifier("v", "d" + i), 
-                                  SilencingReagentType.SIRNA,
-                                  "ATCGGCTA");
-    }
-    duplexLibrary.getLatestContentsVersion().release(new AdministrativeActivity((AdministratorUser) duplexLibrary.getLatestContentsVersion().getLoadingActivity().getPerformedBy(), new LocalDate(), AdministrativeActivityType.LIBRARY_CONTENTS_VERSION_RELEASE));
-    genericEntityDao.persistEntity(duplexLibrary);
-    duplexLibrary = genericEntityDao.reloadEntity(duplexLibrary, true, 
-                                                  Library.wells.to(Well.reagents).getPath(), 
-                                                  Library.wells.to(Well.latestReleasedReagent).getPath());
+    genericEntityDao.doInTransaction(new DAOTransaction() {
+      @Override
+      public void runTransaction()
+      {
+        AdministratorUser admin = dataFactory.newInstance(AdministratorUser.class);
+        duplexLibrary = new Library(admin, "x", "x", ScreenType.RNAI, LibraryType.COMMERCIAL, 1, 1, PlateSize.WELLS_96);
+        duplexLibrary.createContentsVersion(admin);
 
-    poolLibrary = dataFactory.newInstance(Library.class);
-    poolLibrary.setScreenType(ScreenType.RNAI);
-    dataFactory.newInstance(LibraryContentsVersion.class, poolLibrary);
-    Well emptyWell = poolLibrary.createWell(new WellKey(poolLibrary.getStartPlate(), "A01"), LibraryWellType.EMPTY);
-    Well poolWell1 = poolLibrary.createWell(new WellKey(poolLibrary.getStartPlate(), "A02"), LibraryWellType.EXPERIMENTAL);
-    Well poolWell2 = poolLibrary.createWell(new WellKey(poolLibrary.getStartPlate(), "A03"), LibraryWellType.EXPERIMENTAL);
-    Well redundantDuplexesPoolWell = poolLibrary.createWell(new WellKey(poolLibrary.getStartPlate(), "A04"), LibraryWellType.EXPERIMENTAL);
-    Iterator<Well> duplexWellIter = duplexLibrary.getWells().iterator();
-    emptyWell.createSilencingReagent(new ReagentVendorIdentifier("v", "1"), SilencingReagentType.SIRNA, null);
-    poolWell1.createSilencingReagent(new ReagentVendorIdentifier("v", "2"), SilencingReagentType.SIRNA, null)
-    .withDuplexWell(duplexWellIter.next()).withDuplexWell(duplexWellIter.next()).withDuplexWell(duplexWellIter.next()).withDuplexWell(duplexWellIter.next());
-    SilencingReagent poolWell2Reagent = poolWell2.createSilencingReagent(new ReagentVendorIdentifier("v", "3"), SilencingReagentType.SIRNA, null)
-    .withDuplexWell(duplexWellIter.next()).withDuplexWell(duplexWellIter.next()).withDuplexWell(duplexWellIter.next()).withDuplexWell(duplexWellIter.next());
-    duplexWellIter = poolWell2Reagent.getDuplexWells().iterator();
-    redundantDuplexesPoolWell.createSilencingReagent(new ReagentVendorIdentifier("v", "4"), SilencingReagentType.SIRNA, null)
-    .withDuplexWell(duplexWellIter.next()).withDuplexWell(duplexWellIter.next()).withDuplexWell(duplexWellIter.next()).withDuplexWell(duplexWellIter.next());
-    poolLibrary.getLatestContentsVersion().release(new AdministrativeActivity((AdministratorUser) poolLibrary.getLatestContentsVersion().getLoadingActivity().getPerformedBy(), new LocalDate(), AdministrativeActivityType.LIBRARY_CONTENTS_VERSION_RELEASE));
-    genericEntityDao.persistEntity(poolLibrary);
-    poolLibrary = genericEntityDao.reloadEntity(poolLibrary, true, Library.wells.to(Well.reagents).to(SilencingReagent.duplexWells).getPath());
+        for (int i = 0; i < 8; ++i) {
+          Well well = duplexLibrary.createWell(new WellKey(duplexLibrary.getStartPlate(), 0, i), LibraryWellType.EXPERIMENTAL);
+          well.createSilencingReagent(new ReagentVendorIdentifier("v", "d" + i),
+                                      SilencingReagentType.SIRNA,
+                                      "ATCGGCTA");
+        }
+        duplexLibrary.getLatestContentsVersion().release(new AdministrativeActivity((AdministratorUser) duplexLibrary.getLatestContentsVersion().getLoadingActivity().getPerformedBy(), new LocalDate(), AdministrativeActivityType.LIBRARY_CONTENTS_VERSION_RELEASE));
+        genericEntityDao.persistEntity(duplexLibrary);
+      }
+    });
 
-    cpr = dataFactory.newInstance(RNAiCherryPickRequest.class);
-    new EntityNetworkPersister(genericEntityDao, cpr).persistEntityNetwork();
+    genericEntityDao.doInTransaction(new DAOTransaction() {
+      @Override
+      public void runTransaction()
+      {
+        AdministratorUser admin = dataFactory.newInstance(AdministratorUser.class);
+        poolLibrary = new Library(admin, "y", "y", ScreenType.RNAI, LibraryType.COMMERCIAL, 2, 2, PlateSize.WELLS_96);
+        poolLibrary.setPool(true);
+        poolLibrary.createContentsVersion(admin);
+
+        Well emptyWell = poolLibrary.createWell(new WellKey(poolLibrary.getStartPlate(), "A01"), LibraryWellType.EMPTY);
+        Well poolWell1 = poolLibrary.createWell(new WellKey(poolLibrary.getStartPlate(), "A02"), LibraryWellType.EXPERIMENTAL);
+        Well poolWell2 = poolLibrary.createWell(new WellKey(poolLibrary.getStartPlate(), "A03"), LibraryWellType.EXPERIMENTAL);
+        Well redundantDuplexesPoolWell = poolLibrary.createWell(new WellKey(poolLibrary.getStartPlate(), "A04"), LibraryWellType.EXPERIMENTAL);
+        Iterator<Well> duplexWellIter = duplexLibrary.getWells().iterator();
+        emptyWell.createSilencingReagent(new ReagentVendorIdentifier("v", "1"), SilencingReagentType.SIRNA, null);
+        poolWell1.createSilencingReagent(new ReagentVendorIdentifier("v", "2"), SilencingReagentType.SIRNA, null)
+        .withDuplexWell(duplexWellIter.next()).withDuplexWell(duplexWellIter.next()).withDuplexWell(duplexWellIter.next()).withDuplexWell(duplexWellIter.next());
+        SilencingReagent poolWell2Reagent = poolWell2.createSilencingReagent(new ReagentVendorIdentifier("v", "3"), SilencingReagentType.SIRNA, null)
+        .withDuplexWell(duplexWellIter.next()).withDuplexWell(duplexWellIter.next()).withDuplexWell(duplexWellIter.next()).withDuplexWell(duplexWellIter.next());
+        duplexWellIter = poolWell2Reagent.getDuplexWells().iterator();
+        redundantDuplexesPoolWell.createSilencingReagent(new ReagentVendorIdentifier("v", "4"), SilencingReagentType.SIRNA, null)
+        .withDuplexWell(duplexWellIter.next()).withDuplexWell(duplexWellIter.next()).withDuplexWell(duplexWellIter.next()).withDuplexWell(duplexWellIter.next());
+        poolLibrary.getLatestContentsVersion().release(new AdministrativeActivity((AdministratorUser) poolLibrary.getLatestContentsVersion().getLoadingActivity().getPerformedBy(), new LocalDate(), AdministrativeActivityType.LIBRARY_CONTENTS_VERSION_RELEASE));
+        genericEntityDao.persistEntity(poolLibrary);
+      }
+    });
+
+    duplexLibrary = genericEntityDao.reloadEntity(duplexLibrary, true, Library.wells.to(Well.reagents));
+    poolLibrary = genericEntityDao.reloadEntity(poolLibrary, true, Library.wells.to(Well.reagents).to(SilencingReagent.duplexWells));
+
+    cpr = dataFactory.newInstance(CherryPickRequest.class);
   }
 
   public void testAddCherryPicks()

@@ -22,7 +22,6 @@ import com.google.common.collect.Sets;
 
 import edu.harvard.med.screensaver.AbstractSpringPersistenceTest;
 import edu.harvard.med.screensaver.model.MakeDummyEntities;
-import edu.harvard.med.screensaver.model.TestDataFactory;
 import edu.harvard.med.screensaver.model.libraries.Gene;
 import edu.harvard.med.screensaver.model.libraries.Library;
 import edu.harvard.med.screensaver.model.libraries.Reagent;
@@ -42,7 +41,6 @@ public class TupleDataFetcherTest extends AbstractSpringPersistenceTest
 {
   public void testSimpleEntity()
   {
-    TestDataFactory dataFactory = new TestDataFactory();
     LabHead labHead = dataFactory.newInstance(LabHead.class);
     ScreeningRoomUser user1 = dataFactory.newInstance(ScreeningRoomUser.class);
     user1.setLab(labHead.getLab());

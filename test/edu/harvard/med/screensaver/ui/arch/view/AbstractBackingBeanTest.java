@@ -10,24 +10,29 @@
 package edu.harvard.med.screensaver.ui.arch.view;
 
 import org.apache.log4j.Logger;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.test.context.ContextConfiguration;
 
 import edu.harvard.med.screensaver.AbstractSpringPersistenceTest;
 import edu.harvard.med.screensaver.model.users.AdministratorUser;
 import edu.harvard.med.screensaver.ui.CurrentScreensaverUser;
 
-public class AbstractBackingBeanTest extends AbstractSpringPersistenceTest
+@ContextConfiguration(locations = { "/spring-context-test-ui.xml" }, inheritLocations = false)
+public abstract class AbstractBackingBeanTest extends AbstractSpringPersistenceTest
 {
   private static Logger log = Logger.getLogger(AbstractBackingBeanTest.class);
 
-  protected AdministratorUser _admin;
+  @Autowired
   protected CurrentScreensaverUser currentScreensaverUser;
 
+  protected AdministratorUser _admin;
+
   @Override
-  protected void onSetUp() throws Exception
+  protected void setUp() throws Exception
   {
-    super.onSetUp();
-    _admin = new AdministratorUser("Admin", "User", "admin_user@hms.harvard.edu", "", "", "", "", "");
-    genericEntityDao.persistEntity(_admin);
+    super.setUp();
+    _admin = new AdministratorUser("Admin", "User");
+    _admin = genericEntityDao.mergeEntity(_admin);
     currentScreensaverUser.setScreensaverUser(_admin);
   }
 }

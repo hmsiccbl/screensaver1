@@ -17,6 +17,7 @@ import java.util.Set;
 
 import org.apache.log4j.Logger;
 import org.joda.time.LocalDate;
+import org.springframework.beans.factory.annotation.Autowired;
 
 import edu.harvard.med.screensaver.AbstractSpringPersistenceTest;
 import edu.harvard.med.screensaver.model.AdministrativeActivity;
@@ -50,13 +51,15 @@ public class CherryPickRequestDAOTest extends AbstractSpringPersistenceTest
 
   private static final Logger log = Logger.getLogger(CherryPickRequestDAOTest.class);
   
+  @Autowired
   protected CherryPickRequestDAO cherryPickRequestDao;
+  @Autowired
   protected LibrariesDAO librariesDao;
 
 
   public void testFindCherryPickRequestByNumber()
   {
-    schemaUtil.truncateTablesOrCreateSchema();
+    schemaUtil.truncateTables();
     final Screen screen = MakeDummyEntities.makeDummyScreen(1, ScreenType.RNAI);
     CherryPickRequest cherryPickRequest1 = screen.createCherryPickRequest((AdministratorUser) screen.getCreatedBy(),
                                                                           screen.getLeadScreener(), 
@@ -229,7 +232,7 @@ public class CherryPickRequestDAOTest extends AbstractSpringPersistenceTest
   
   private CherryPickRequest makeCherryPickRequest(final String screenFacilityId)
   {
-    AdministratorUser adminUser1 = new AdministratorUser("Admin" + screenFacilityId, "User1", "", "", "", "", "admin1" + screenFacilityId, "");
+    AdministratorUser adminUser1 = new AdministratorUser("Admin" + screenFacilityId, "User1");
     Library duplexLibrary = new Library(adminUser1,
                                         "Duplexes library 1",
                                         "duplib1",
@@ -238,7 +241,7 @@ public class CherryPickRequestDAOTest extends AbstractSpringPersistenceTest
                                         3,
                                         4,
                                         PlateSize.WELLS_384);
-    duplexLibrary.createContentsVersion(new AdministrativeActivity(adminUser1, new LocalDate(), AdministrativeActivityType.LIBRARY_CONTENTS_LOADING));
+    duplexLibrary.createContentsVersion(adminUser1);
     for (int i = 0; i < 2; ++i ) {
       Well well = duplexLibrary.createWell(new WellKey(duplexLibrary.getStartPlate(), 0, i), LibraryWellType.EXPERIMENTAL);
       well.createSilencingReagent(new ReagentVendorIdentifier("vendor", "d" + i), 
@@ -246,9 +249,9 @@ public class CherryPickRequestDAOTest extends AbstractSpringPersistenceTest
     }
     duplexLibrary.getLatestContentsVersion().release(new AdministrativeActivity(adminUser1, new LocalDate(), AdministrativeActivityType.LIBRARY_CONTENTS_VERSION_RELEASE));
     genericEntityDao.saveOrUpdateEntity(duplexLibrary);
-    duplexLibrary = genericEntityDao.reloadEntity(duplexLibrary, true, Library.wells.to(Well.reagents).getPath(), Library.wells.to(Well.latestReleasedReagent).getPath());
+    duplexLibrary = new EntityInflator<Library>(genericEntityDao, duplexLibrary, true).need(Library.wells.to(Well.reagents)).need(Library.wells.to(Well.latestReleasedReagent)).inflate();
 
-    AdministratorUser adminUser2 = new AdministratorUser("Admin" + screenFacilityId, "User2", "", "", "", "", "admin2" + screenFacilityId, "");
+    AdministratorUser adminUser2 = new AdministratorUser("Admin" + screenFacilityId, "User2");
     Library poolLibrary = new Library(adminUser2,
                                       "Pools library 1",
                                       "poollib1",
@@ -257,7 +260,7 @@ public class CherryPickRequestDAOTest extends AbstractSpringPersistenceTest
                                       1,
                                       2,
                                       PlateSize.WELLS_384);
-    poolLibrary.createContentsVersion(new AdministrativeActivity(adminUser2, new LocalDate(), AdministrativeActivityType.LIBRARY_CONTENTS_LOADING));
+    poolLibrary.createContentsVersion(adminUser2);
     Well poolWell1 = CherryPickRequestAllocatorTest.makeRNAiWell(poolLibrary, 1, new WellName("A01"));
     Iterator<Well> duplexWellsIter = duplexLibrary.getWells().iterator();
     poolWell1.<SilencingReagent>getPendingReagent().withDuplexWell(duplexWellsIter.next());

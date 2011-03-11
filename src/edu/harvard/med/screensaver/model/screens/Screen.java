@@ -25,6 +25,7 @@ import java.util.TreeSet;
 
 import javax.persistence.CascadeType;
 import javax.persistence.Column;
+import javax.persistence.ElementCollection;
 import javax.persistence.Entity;
 import javax.persistence.FetchType;
 import javax.persistence.GeneratedValue;
@@ -36,7 +37,6 @@ import javax.persistence.ManyToMany;
 import javax.persistence.ManyToOne;
 import javax.persistence.OneToMany;
 import javax.persistence.OneToOne;
-import javax.persistence.OrderBy;
 import javax.persistence.Transient;
 import javax.persistence.Version;
 
@@ -64,7 +64,6 @@ import edu.harvard.med.screensaver.model.BusinessRuleViolationException;
 import edu.harvard.med.screensaver.model.DataModelViolationException;
 import edu.harvard.med.screensaver.model.DuplicateEntityException;
 import edu.harvard.med.screensaver.model.RequiredPropertyException;
-import edu.harvard.med.screensaver.model.annotations.CollectionOfElements;
 import edu.harvard.med.screensaver.model.annotations.Derived;
 import edu.harvard.med.screensaver.model.annotations.ToMany;
 import edu.harvard.med.screensaver.model.cherrypicks.CherryPickLiquidTransfer;
@@ -188,7 +187,7 @@ public class Screen extends Study implements AttachedFilesEntity<Integer>
   private LocalDate _publishableProtocolDateEntered;
   private String _publishableProtocolEnteredBy;
   private AdministrativeActivity _pinTransferApprovalActivity;
-  private Set<CherryPickRequest> _cherryPickRequests = new HashSet<CherryPickRequest>();
+  private Set<CherryPickRequest> _cherryPickRequests = Sets.newHashSet();
   private ScreenDataSharingLevel _dataSharingLevel;
   private LocalDate _minAllowedDataPrivacyExpirationDate;
   private LocalDate _maxAllowedDataPrivacyExpirationDate;
@@ -500,8 +499,7 @@ public class Screen extends Study implements AttachedFilesEntity<Integer>
    * 
    * @return Collection of {@link AssayPlate}s
    */
-  @OneToMany(mappedBy="screen", fetch=FetchType.LAZY, cascade={ CascadeType.ALL } )
-  @org.hibernate.annotations.Cascade({ org.hibernate.annotations.CascadeType.ALL, org.hibernate.annotations.CascadeType.DELETE_ORPHAN })
+  @OneToMany(mappedBy = "screen", cascade = { CascadeType.ALL }, orphanRemoval = true)
   @Sort(type=SortType.NATURAL)
   public SortedSet<AssayPlate> getAssayPlates()
   {
@@ -706,7 +704,6 @@ public class Screen extends Study implements AttachedFilesEntity<Integer>
     for (AssayPlate assayPlate : getAssayPlates()) {
       assayPlate.setScreenResultDataLoading(null);
     }
-    invalidate();
   }
 
   /**
@@ -717,17 +714,8 @@ public class Screen extends Study implements AttachedFilesEntity<Integer>
    *
    * @return the status items
    */
-  @OneToMany(
-    mappedBy="screen",
-    cascade={ CascadeType.PERSIST, CascadeType.MERGE, CascadeType.REMOVE },
-    fetch=FetchType.LAZY
-  )
+  @OneToMany(mappedBy = "screen", cascade = { CascadeType.ALL }, orphanRemoval = true)
   @Sort(type=SortType.NATURAL)
-  @org.hibernate.annotations.Cascade(value={
-    org.hibernate.annotations.CascadeType.SAVE_UPDATE,
-    org.hibernate.annotations.CascadeType.DELETE,
-    org.hibernate.annotations.CascadeType.DELETE_ORPHAN
-  })
   public SortedSet<StatusItem> getStatusItems()
   {
     return _statusItems;
@@ -773,16 +761,7 @@ public class Screen extends Study implements AttachedFilesEntity<Integer>
    * Get the lab activities.
    * @return the lab activities
    */
-  @OneToMany(
-    mappedBy="screen",
-    cascade={ CascadeType.PERSIST, CascadeType.MERGE, CascadeType.REMOVE },
-    fetch=FetchType.LAZY
-  )
-  @org.hibernate.annotations.Cascade(value={
-    org.hibernate.annotations.CascadeType.SAVE_UPDATE,
-    org.hibernate.annotations.CascadeType.DELETE,
-    org.hibernate.annotations.CascadeType.DELETE_ORPHAN
-  })
+  @OneToMany(mappedBy = "screen", cascade = { CascadeType.ALL })
   @Sort(type=SortType.NATURAL)
   @edu.harvard.med.screensaver.model.annotations.ToMany(singularPropertyName="labActivity", 
                                                         hasNonconventionalMutation=true /* uses createLibraryScreening() and createRNAiCherryPickScreening */)
@@ -873,17 +852,7 @@ public class Screen extends Study implements AttachedFilesEntity<Integer>
    * Get the cherry pick requests.
    * @return the cherry pick requests
    */
-  @OneToMany(
-    mappedBy="screen",
-    cascade={ CascadeType.PERSIST, CascadeType.MERGE, CascadeType.REMOVE },
-    fetch=FetchType.LAZY
-  )
-  @OrderBy("dateRequested")
-  @org.hibernate.annotations.Cascade(value={
-    org.hibernate.annotations.CascadeType.SAVE_UPDATE,
-    org.hibernate.annotations.CascadeType.DELETE,
-    org.hibernate.annotations.CascadeType.DELETE_ORPHAN
-  })
+  @OneToMany(mappedBy = "screen", cascade = { CascadeType.ALL })
   public Set<CherryPickRequest> getCherryPickRequests()
   {
     return _cherryPickRequests;
@@ -934,16 +903,7 @@ public class Screen extends Study implements AttachedFilesEntity<Integer>
    * Get the set of abase testsets.
    * @return the abase testsets
    */
-  @OneToMany(
-    mappedBy="screen",
-    cascade={ CascadeType.PERSIST, CascadeType.MERGE, CascadeType.REMOVE },
-    fetch=FetchType.LAZY
-  )
-  @org.hibernate.annotations.Cascade(value={
-    org.hibernate.annotations.CascadeType.SAVE_UPDATE,
-    org.hibernate.annotations.CascadeType.DELETE,
-    org.hibernate.annotations.CascadeType.DELETE_ORPHAN
-  })
+  @OneToMany(mappedBy = "screen", cascade = { CascadeType.ALL }, orphanRemoval = true)
   public Set<AbaseTestset> getAbaseTestsets()
   {
     return _abaseTestsets;
@@ -967,16 +927,7 @@ public class Screen extends Study implements AttachedFilesEntity<Integer>
    * Get the publications.
    * @return the publications
    */
-  @OneToMany(
-    mappedBy="screen",
-    cascade={ CascadeType.PERSIST, CascadeType.MERGE, CascadeType.REMOVE },
-    fetch=FetchType.LAZY
-  )
-  @org.hibernate.annotations.Cascade(value={
-    org.hibernate.annotations.CascadeType.SAVE_UPDATE,
-    org.hibernate.annotations.CascadeType.DELETE,
-    org.hibernate.annotations.CascadeType.DELETE_ORPHAN
-  })
+  @OneToMany(mappedBy = "screen", cascade = { CascadeType.ALL }, orphanRemoval = true)
   public Set<Publication> getPublications()
   {
     return _publications;
@@ -1013,16 +964,7 @@ public class Screen extends Study implements AttachedFilesEntity<Integer>
    * Get the attached files.
    * @return the attached files
    */
-  @OneToMany(
-    mappedBy="screen",
-    cascade={ CascadeType.PERSIST, CascadeType.MERGE, CascadeType.REMOVE },
-    fetch=FetchType.LAZY
-  )
-  @org.hibernate.annotations.Cascade(value={
-    org.hibernate.annotations.CascadeType.SAVE_UPDATE,
-    org.hibernate.annotations.CascadeType.DELETE,
-    org.hibernate.annotations.CascadeType.DELETE_ORPHAN
-  })
+  @OneToMany(mappedBy = "screen", cascade = { CascadeType.ALL }, orphanRemoval=true)
   @ToMany(hasNonconventionalMutation=true)
   public Set<AttachedFile> getAttachedFiles()
   {
@@ -1077,8 +1019,8 @@ public class Screen extends Study implements AttachedFilesEntity<Integer>
    * Get the set of billing items.
    * @return the billing items
    */
-  @org.hibernate.annotations.CollectionOfElements
-  @CollectionOfElements(hasNonconventionalMutation=true)
+  @ElementCollection
+  @edu.harvard.med.screensaver.model.annotations.ElementCollection(hasNonconventionalMutation = true)
   @JoinTable(name = "screen_billing_item",
              joinColumns = @JoinColumn(name = "screen_id"))
   @org.hibernate.annotations.IndexColumn(name="ordinal")
@@ -1304,7 +1246,7 @@ public class Screen extends Study implements AttachedFilesEntity<Integer>
    * Get the keywords.
    * @return the keywords
    */
-  @org.hibernate.annotations.CollectionOfElements
+  @ElementCollection
   @Column(name="keyword", nullable=false)
   @JoinTable(
     name="screenKeyword",
@@ -1615,18 +1557,8 @@ public class Screen extends Study implements AttachedFilesEntity<Integer>
    * Get the annotation types provided by this study.
    * @return the annotation types
    */
-  @OneToMany(
-    mappedBy="study",
-    cascade={ CascadeType.PERSIST, CascadeType.MERGE, CascadeType.REMOVE },
-    fetch=FetchType.LAZY
-  )
-  @OrderBy("ordinal")
-  @org.hibernate.annotations.Sort(type=org.hibernate.annotations.SortType.NATURAL)
-  @org.hibernate.annotations.Cascade(value={
-    org.hibernate.annotations.CascadeType.SAVE_UPDATE,
-    org.hibernate.annotations.CascadeType.DELETE,
-    org.hibernate.annotations.CascadeType.DELETE_ORPHAN
-  })
+  @OneToMany(mappedBy = "study", cascade = { CascadeType.ALL }, orphanRemoval = true)
+  @Sort(type = SortType.NATURAL)
   public SortedSet<AnnotationType> getAnnotationTypes()
   {
     return _annotationTypes;

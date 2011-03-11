@@ -9,24 +9,20 @@
 
 package edu.harvard.med.screensaver.db;
 
-import java.sql.SQLException;
 import java.util.List;
 
-import org.apache.log4j.Logger;
-import org.hibernate.HibernateException;
+import javax.persistence.EntityManager;
+import javax.persistence.PersistenceContext;
+
 import org.hibernate.ScrollableResults;
 import org.hibernate.Session;
-import org.springframework.orm.hibernate3.HibernateCallback;
-import org.springframework.orm.hibernate3.support.HibernateDaoSupport;
+import org.springframework.stereotype.Repository;
 import org.springframework.transaction.annotation.Transactional;
 
+@Repository
 @Transactional
-public class AbstractDAO extends HibernateDaoSupport
+public class AbstractDAO
 {
-  // static members
-
-  private static Logger log = Logger.getLogger(AbstractDAO.class);
-
   /**
    * This controls the number of to be read before flushing the hibernate
    * cache and persisting all of the entities. This value should be matched to
@@ -34,10 +30,31 @@ public class AbstractDAO extends HibernateDaoSupport
    */
   public static final int ROWS_TO_CACHE = 50;
 
+  @PersistenceContext
+  private EntityManager _entityManager;
 
-  // instance data members
+  protected AbstractDAO()
+  {}
 
-  // public constructors and methods
+  protected EntityManager getEntityManager()
+  {
+    return _entityManager;
+  }
+
+  protected void setEntityManager(EntityManager entityManager)
+  {
+    _entityManager = entityManager;
+  }
+
+  /**
+   * @motivation provides a means of obtaining the underlying Hibernate session, until we can make all code (and HQL)
+   *             JPA-compliant
+   */
+  @Deprecated
+  public Session getHibernateSession()
+  {
+    return (Session) _entityManager.getDelegate();
+  }
 
   /**
    * This method can be called before invoking other GenericEntityDAO methods that issue HQL
@@ -49,12 +66,12 @@ public class AbstractDAO extends HibernateDaoSupport
    */
   public void flush()
   {
-    getHibernateTemplate().flush();
+    getEntityManager().flush();
   }
 
   public void clear()
   {
-    getHibernateTemplate().clear();
+    getEntityManager().clear();
   }
 
   /**
@@ -73,34 +90,14 @@ public class AbstractDAO extends HibernateDaoSupport
     daoTransaction.runTransaction();
   }
 
-
-  @SuppressWarnings("unchecked")
-  public <E> List<E> runQuery(final edu.harvard.med.screensaver.db.Query<E> query)
+  public <E> List<E> runQuery(edu.harvard.med.screensaver.db.Query<E> query)
   {
-    return (List<E>)
-    getHibernateTemplate().execute(new HibernateCallback()
-    {
-      public Object doInHibernate(Session session) throws HibernateException, SQLException
-      {
-        return query.execute(session);
-      }
-    });
+    return query.execute(getHibernateSession());
   }
   
-  public ScrollableResults runScrollQuery(final edu.harvard.med.screensaver.db.ScrollQuery query)
+  public ScrollableResults runScrollQuery(edu.harvard.med.screensaver.db.ScrollQuery query)
   {
-    return (ScrollableResults) getHibernateTemplate().execute(new HibernateCallback()
-    {
-      public ScrollableResults doInHibernate(Session session) throws HibernateException, SQLException
-      {
-        return query.execute(session);
-      }
-    });
+    return query.execute(getHibernateSession());
   }
-
-  // private methods
-
-  protected AbstractDAO() {}
-
 }
 

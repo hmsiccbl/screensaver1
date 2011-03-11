@@ -1,0 +1,77 @@
+Screensaver Domain Model Structure
+
+
+  - Indented entities denote containment relationship
+
+  - Caret ('^') denotes inheritance relationship (not all inheritance relationships are shown)
+
+  - Parameter lists denote non-containment relationships (parent and child
+  relns are already shown via the indented structure)
+
+    - square-bracketed parameters are nullable (optional) to-on relationships
+
+    - curly-bracketed parameters are non-cascading
+
+
+Activity: AdministratorUser createdBy, ScreensaverUser performedBy
+^AdministrativeActivity
+
+libraries.PlateLocation
+libraries.Library: AdministratorUser createdBy, [ScreeningRoomUser owner]
+  libraries.Copy
+    libraries.Plate: [PlateLocation]
+  libraries.LibraryContentsVersion: [AdministrativeActivity loadingActivity], [AdministrativeActivity releaseActivity]
+  libraries.Well: MapKey<LibraryContentsVersion> reagents:key, Map<DataColumn,ResultValue>, [AdministrativeActivity deprecationActivity]
+    libraries.Reagent: {LibraryContentsVersion}, {Map<AnnotationType,AnnotationValue>}, {Set<Screen> studies}
+    ^libraries.SmallMoleculeReagent
+    ^libraries.NaturalProductReagent
+    ^libraries.SilencingReagent
+      libraries.Gene
+libraries.WellVolumeCorrectionActivity
+  libraries.WellVolumeAdjustment [dual parenting: LabCherryPick, WellVolumeCorrectionActivity]
+
+screens.Screen: [ScreeningRoomUser leadScreener], [LabHead labHead], {Set<ScreeningRoomUser>}, [AdministrativeActivity pinTransferApprovalActivity], {Set<Reagents>}
+  cherrypicks.CherryPickRequest: ScreeningRoomUser requestedBy, [AdministratorUser volumeApprovedBy], {Set<LabCherryPick>}, {Set<CherryPickScreening> cherryPickScreenings}
+    cherrypicks.CherryPickAssayPlate: {Set<LabCherryPick>}, [{CherryPickScreening}], [{CherryPickLiquidTransfer}]
+    ^cherrypicks.LegacyCherryPickAssayPlate
+  ^cherrypicks.SmallMoleculeCherryPickRequest
+  ^cherrypicks.RNAiCherryPickRequest
+    cherrypicks.ScreenerCherryPick: {Well}
+      cherrypicks.LabCherryPick
+        libraries.WellVolumeAdjustment [dual parenting: LabCherryPick, WellVolumeCorrectionActivity]
+      cherrypicks.RNAiKnockdownConfirmation
+  screenresults.AnnotationType
+    screenresults.AnnotationValue
+  screenresults.AssayPlate: [{Plate}], [{LibraryScreening}], [{AdministrativeActivity screenResultDataLoading}]
+  screenresults.ScreenResult
+    screenresults.AssayWell: {Well}
+    screenresults.DataColumn
+      screenresults.ResultValue: {Well}
+  screens.AbaseTestset
+  screens.LabActivity
+    screens.EquipmentUsed
+  ^screens.Screening
+   ^screens.CherryPickScreening: {CherryPickRequest}, Set<CherryPickAssayPlate>
+   ^screens.LibraryScreening: Set<AssayPlate>
+  ^cherrypicks.CherryPickLiquidTransfer: {Set<CherryPickAssayPlate>}
+  screens.Publication: [{AttachedFile}]
+  screens.StatusItem
+  AttachedFile [dual parenting: Screen, ScreeingRoomUser]
+    AttachedFileType
+    ^screens.ScreenAttachedFileType
+
+users.ScreensaverUser: {Set<Activity> activitiesPerformed}
+^users.AdministratorUser
+^users.ScreeningRoomUser: {Set<Screen>}, [LabHead]
+  AttachedFile [dual parenting: Screen, ScreeingRoomUser]
+    AttachedFileType
+    ^users.UserAttachedFileType
+  users.ChecklistItemEvent
+ ^users.LabHead: {Set<Screen>}, {Set<ScreeningRoomUser>}
+
+screens.FundingSupport
+
+users.ChecklistItem
+
+users.LabAffiliation
+

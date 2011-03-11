@@ -100,12 +100,12 @@ public class StudyAnnotationParser
         List<Reagent> reagents = _dao.findEntitiesByProperties(Reagent.class, 
                                                                queryProps, 
                                                                true, 
-                                                               Reagent.studies.getPath());
+                                                               Reagent.studies);
         if (reagents.isEmpty()) {
           throw new UnrecoverableParseException("no such reagent with identifier " + rvi);
         }
         for (Reagent reagent : reagents) {
-          _dao.needReadOnly(reagent, Reagent.annotationValues.getPath());
+          _dao.needReadOnly(reagent, Reagent.annotationValues);
           study.addReagent(reagent);
           for (int iAnnot = 0; iAnnot < study.getAnnotationTypes().size(); ++iAnnot) {
             int iCol = iAnnot + 1;

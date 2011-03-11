@@ -9,11 +9,14 @@
 
 package edu.harvard.med.screensaver;
 
+import org.apache.log4j.Logger;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.test.context.TestExecutionListeners;
+import org.springframework.test.context.transaction.TransactionalTestExecutionListener;
+
 import edu.harvard.med.screensaver.db.GenericEntityDAO;
 import edu.harvard.med.screensaver.db.SchemaUtil;
-import edu.harvard.med.screensaver.ui.arch.util.Messages;
-
-import org.apache.log4j.Logger;
+import edu.harvard.med.screensaver.model.TestDataFactory;
 
 /**
  * Extends AbstractSpringTest by automatically providing a GenericEntityDAO object and
@@ -22,27 +25,31 @@ import org.apache.log4j.Logger;
  * @author <a mailto="andrew_tolopko@hms.harvard.edu">Andrew Tolopko</a>
  * @author <a mailto="john_sullivan@hms.harvard.edu">John Sullivan</a>
  */
-public class AbstractSpringPersistenceTest extends AbstractSpringTest
+@TestExecutionListeners({ TransactionalTestExecutionListener.class })
+public abstract class AbstractSpringPersistenceTest extends AbstractSpringTest
 {
-  // static members
-
   private static Logger log = Logger.getLogger(AbstractSpringPersistenceTest.class);
 
-
-  // instance data members
-
+  @Autowired
   protected GenericEntityDAO genericEntityDao;
+  @Autowired
   protected SchemaUtil schemaUtil;
-  protected Messages messages;
+  @Autowired
+  protected TestDataFactory dataFactory;
 
   @Override
-  protected void onSetUp() throws Exception
+  protected void setUp() throws Exception
   {
-    super.onSetUp();
-    schemaUtil.truncateTablesOrCreateSchema();
+    super.setUp();
+    dataFactory.resetToDefaults();
+    schemaUtil.truncateTables();
   }
 
-  // public constructors and methods
+  protected void flushAndClear()
+  {
+    genericEntityDao.flush();
+    genericEntityDao.clear();
+  }
 
   public AbstractSpringPersistenceTest()
   {
@@ -52,8 +59,5 @@ public class AbstractSpringPersistenceTest extends AbstractSpringTest
   {
     super(testName);
   }
-
-  // private methods
-
 }
 

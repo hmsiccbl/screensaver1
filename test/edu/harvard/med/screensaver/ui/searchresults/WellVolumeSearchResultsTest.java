@@ -23,8 +23,8 @@ import com.google.common.collect.ImmutableSortedSet;
 import com.google.common.collect.Maps;
 import com.google.common.collect.Sets;
 import org.apache.log4j.Logger;
+import org.springframework.beans.factory.annotation.Autowired;
 
-import edu.harvard.med.screensaver.AbstractSpringPersistenceTest;
 import edu.harvard.med.screensaver.db.DAOTransaction;
 import edu.harvard.med.screensaver.db.LibrariesDAO;
 import edu.harvard.med.screensaver.model.Volume;
@@ -43,16 +43,21 @@ import edu.harvard.med.screensaver.model.libraries.WellVolumeAdjustment;
 import edu.harvard.med.screensaver.model.users.AdministratorUser;
 import edu.harvard.med.screensaver.service.cherrypicks.CherryPickRequestAllocatorTest;
 import edu.harvard.med.screensaver.ui.arch.datatable.column.TableColumn;
+import edu.harvard.med.screensaver.ui.arch.view.AbstractBackingBeanTest;
 import edu.harvard.med.screensaver.ui.libraries.WellCopyVolumeSearchResults;
 import edu.harvard.med.screensaver.ui.libraries.WellVolumeSearchResults;
 
-public class WellVolumeSearchResultsTest extends AbstractSpringPersistenceTest
+public class WellVolumeSearchResultsTest extends AbstractBackingBeanTest
 {
   private static Logger log = Logger.getLogger(WellVolumeSearchResultsTest.class);
 
+  @Autowired
   protected LibrariesDAO librariesDao;
+  @Autowired
   protected WellCopyVolumeSearchResults wellCopyVolumesBrowser;
+  @Autowired
   protected WellVolumeSearchResults wellVolumesBrowser;
+
   private Library _library;
   private CherryPickRequest _cherryPickRequest;
   private Map<WellCopy,Volume> _expectedRemainingWellCopyVolume = Maps.newHashMap();
@@ -60,9 +65,9 @@ public class WellVolumeSearchResultsTest extends AbstractSpringPersistenceTest
 
 
   @Override
-  protected void onSetUp() throws Exception
+  protected void setUp() throws Exception
   {
-    super.onSetUp();
+    super.setUp();
 
     initializeWellCopyVolumes();
   }

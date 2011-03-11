@@ -77,9 +77,9 @@ public class DataExportersTest extends AbstractSpringPersistenceTest
   private List<Tuple<String>> _expectedData;
 
   @Override
-  protected void onSetUp() throws Exception
+  protected void setUp() throws Exception
   {
-    super.onSetUp();
+    super.setUp();
 
     Library library = MakeDummyEntities.makeDummyLibrary(1, ScreenType.SMALL_MOLECULE, 1);
     genericEntityDao.persistEntity(library);
@@ -256,7 +256,7 @@ public class DataExportersTest extends AbstractSpringPersistenceTest
                                                             new DefaultEntityViewPolicy(),
                                                             null, null, null, null,
                                                             Lists.<DataExporter<Tuple<String>>>newArrayList(new ExcelWorkbookDataExporter<Tuple<String>>("wells")));
-    ScreenResult screenResult = dao.findEntityByProperty(Screen.class, Screen.facilityId.getPropertyName(), 974, true, Screen.screenResult.to(ScreenResult.dataColumns).getPath()).getScreenResult();
+    ScreenResult screenResult = dao.findEntityByProperty(Screen.class, Screen.facilityId.getPropertyName(), 974, true, Screen.screenResult.to(ScreenResult.dataColumns)).getScreenResult();
     searchResults.searchWellsForScreenResult(screenResult);
     searchResults.getRowCount(); // force initial data fetch
 

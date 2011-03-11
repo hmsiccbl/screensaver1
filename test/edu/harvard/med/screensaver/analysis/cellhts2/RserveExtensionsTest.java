@@ -14,11 +14,13 @@ import org.rosuda.REngine.REXP;
 import org.rosuda.REngine.REXPMismatchException;
 import org.rosuda.REngine.Rserve.RConnection;
 import org.rosuda.REngine.Rserve.RserveException;
+import org.springframework.test.annotation.IfProfileValue;
 
 import edu.harvard.med.screensaver.AbstractSpringTest;
 
-public class RserveExtensionsTest extends AbstractSpringTest {
-	// static members
+@IfProfileValue(name = "screensaver.ui.feature.cellHTS2", value = "true")
+public class RserveExtensionsTest extends AbstractSpringTest
+{
 
 	private static Logger log = Logger.getLogger(RserveExtensionsTest.class);
 

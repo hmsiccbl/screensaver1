@@ -113,30 +113,25 @@ public class ScreenViewer extends StudyViewer<Screen>
   protected void initializeEntity(Screen screen)
   {
     super.initializeEntity(screen);
-    getDao().needReadOnly(screen,
-                          Screen.labHead.to(LabHead.labAffiliation).getPath(),
-                          Screen.labHead.to(LabHead.labMembers).getPath(),
-                          Screen.leadScreener.getPath());
-    getDao().needReadOnly(screen, Screen.collaborators.to(ScreeningRoomUser.LabHead).getPath());
-    getDao().needReadOnly(screen, Screen.billingItems.getPath());
-    getDao().needReadOnly(screen, Screen.labActivities.to(Activity.performedBy).getPath());
-    getDao().needReadOnly(screen, Screen.attachedFiles.to(AttachedFile.fileType).getPath());
-    getDao().needReadOnly(screen, Screen.fundingSupports.getPath());
-    getDao().needReadOnly(screen, Screen.publications.getPath());
-    getDao().needReadOnly(screen, Screen.keywords.getPath());
-    getDao().needReadOnly(screen, Screen.statusItems.getPath());
-    getDao().needReadOnly(screen, Screen.cherryPickRequests.to(CherryPickRequest.requestedBy).getPath());
-    getDao().needReadOnly(screen, "annotationTypes.annotationValues");
-    getDao().needReadOnly(screen.getScreenResult(),
-                          ScreenResult.dataColumns.to(DataColumn.derivedTypes).getPath());
-    getDao().needReadOnly(screen.getScreenResult(),
-                          ScreenResult.dataColumns.to(DataColumn.typesDerivedFrom).getPath());
+    getDao().needReadOnly(screen, Screen.labHead.to(LabHead.labAffiliation));
+    getDao().needReadOnly(screen, Screen.labHead.to(LabHead.labMembers));
+    getDao().needReadOnly(screen, Screen.leadScreener);
+    getDao().needReadOnly(screen, Screen.collaborators.to(ScreeningRoomUser.LabHead));
+    getDao().needReadOnly(screen, Screen.billingItems);
+    getDao().needReadOnly(screen, Screen.labActivities.to(Activity.performedBy));
+    getDao().needReadOnly(screen, Screen.attachedFiles.to(AttachedFile.fileType));
+    getDao().needReadOnly(screen, Screen.fundingSupports);
+    getDao().needReadOnly(screen, Screen.publications);
+    getDao().needReadOnly(screen, Screen.keywords);
+    getDao().needReadOnly(screen, Screen.statusItems);
+    getDao().needReadOnly(screen, Screen.cherryPickRequests.to(CherryPickRequest.requestedBy));
+    //getDao().needReadOnly(screen, Screen.annotationTypes.to(AnnotationType.annotationValues));
+    getDao().needReadOnly(screen.getScreenResult(), ScreenResult.dataColumns.to(DataColumn.derivedTypes));
+    getDao().needReadOnly(screen.getScreenResult(), ScreenResult.dataColumns.to(DataColumn.typesDerivedFrom));
     // for screen result last data import date
-    getDao().needReadOnly(screen,
-                          AuditedAbstractEntity.updateActivities.getPath());
-    getDao().needReadOnly(screen, 
-                      Screen.pinTransferApprovalActivity.to(Activity.createdBy).getPath(),
-                      Screen.pinTransferApprovalActivity.to(Activity.performedBy).getPath());
+    getDao().needReadOnly(screen, AuditedAbstractEntity.updateActivities);
+    getDao().needReadOnly(screen, Screen.pinTransferApprovalActivity.to(Activity.createdBy));
+    getDao().needReadOnly(screen, Screen.pinTransferApprovalActivity.to(Activity.performedBy));
   }
 
 

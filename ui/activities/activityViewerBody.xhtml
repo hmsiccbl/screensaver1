@@ -88,7 +88,7 @@
     <ss:property id="numberOfReplicates" label="# Replicates Screened"
       value="#{activityViewer.entity.numberOfReplicates}"
       description="The number of replicates screened"
-      editable="#{activityViewer.editMode &amp;&amp; activityViewer.platesScreenedDataModel.rowCount == 0}" editWidth="2"
+      editable="#{activityViewer.editMode &amp;&amp; (activityViewer.entity.class.simpleName != 'LibraryScreening' || activityViewer.platesScreenedDataModel.rowCount == 0)}" editWidth="2"
       rendered="#{activityViewer.entity.class.simpleName == 'LibraryScreening' || activityViewer.entity.class.simpleName == 'CherryPickScreening'}" />
 
     <ss:property id="volumeTransferredPerWell"

@@ -11,16 +11,9 @@ package edu.harvard.med.screensaver.model;
 
 import java.beans.IntrospectionException;
 
-import junit.framework.TestSuite;
-
-public class AttachedFileTypeTest<T extends AttachedFileType> extends AbstractEntityInstanceTest<T>
+public abstract class AttachedFileTypeTest<T extends AttachedFileType> extends AbstractEntityInstanceTest<T>
 {
-  public static TestSuite suite()
-  {
-    return buildTestSuite(AttachedFileTypeTest.class, AttachedFileType.class);
-  }
-
-  public AttachedFileTypeTest(Class<T> clazz) throws IntrospectionException
+  public AttachedFileTypeTest(Class<T> clazz)
   {
     super(clazz);
   }

@@ -12,6 +12,7 @@ package edu.harvard.med.screensaver.service.libraries;
 import java.io.IOException;
 
 import org.apache.log4j.Logger;
+import org.springframework.beans.factory.annotation.Autowired;
 
 import edu.harvard.med.screensaver.AbstractSpringPersistenceTest;
 import edu.harvard.med.screensaver.db.LibrariesDAO;
@@ -33,12 +34,14 @@ public class LibraryCreatorTest extends AbstractSpringPersistenceTest
   private static final String RNAI_LIBRARY_CONTENTS_TEST_FILE = "rnaiLibraryContentsFile.xls";
   private static Logger log = Logger.getLogger(LibraryCreatorTest.class);
 
+  @Autowired
   protected LibraryCreator libraryCreator;
+  @Autowired
   protected LibrariesDAO librariesDao;
   
   public void testCreateLibrary() throws ParseErrorsException, IOException
   {
-    AdministratorUser adminUser = new AdministratorUser("Admin", "User", "", "", "", "", "", "");
+    AdministratorUser adminUser = new AdministratorUser("Admin", "User");
     final Library library = new Library(adminUser,
                                         "Human1",
                                         "Human1",
@@ -55,7 +58,7 @@ public class LibraryCreatorTest extends AbstractSpringPersistenceTest
 
       assertNotNull("library was assigned ID", library.getLibraryId());
 
-      Library library2 = genericEntityDao.findEntityById(Library.class, library.getEntityId(), true, Library.wells.getPath());
+      Library library2 = genericEntityDao.findEntityById(Library.class, library.getEntityId(), true, Library.wells);
       assertNotNull("library was persisted", library2);
       Well firstWell = librariesDao.findWell(new WellKey(50439, "A1"));
       Well lastWell = librariesDao.findWell(new WellKey(50439, "P24"));

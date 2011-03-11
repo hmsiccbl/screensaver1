@@ -16,7 +16,6 @@ import edu.harvard.med.screensaver.model.cherrypicks.CherryPickAssayPlate;
 import edu.harvard.med.screensaver.model.cherrypicks.CherryPickLiquidTransfer;
 import edu.harvard.med.screensaver.model.cherrypicks.LabCherryPick;
 import edu.harvard.med.screensaver.model.cherrypicks.RNAiCherryPickRequest;
-import edu.harvard.med.screensaver.model.cherrypicks.RNAiKnockdownConfirmation;
 import edu.harvard.med.screensaver.model.cherrypicks.ScreenerCherryPick;
 import edu.harvard.med.screensaver.model.cherrypicks.SmallMoleculeCherryPickRequest;
 import edu.harvard.med.screensaver.model.libraries.Copy;
@@ -212,12 +211,6 @@ public class DefaultEntityViewPolicy implements EntityViewPolicy
 
   @Override
   public boolean visit(DataColumn entity)
-  {
-    return true;
-  }
-
-  @Override
-  public boolean visit(RNAiKnockdownConfirmation entity)
   {
     return true;
   }

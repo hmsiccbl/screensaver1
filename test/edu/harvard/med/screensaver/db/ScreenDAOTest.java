@@ -15,6 +15,7 @@ import java.util.List;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.Iterables;
 import org.apache.log4j.Logger;
+import org.springframework.beans.factory.annotation.Autowired;
 
 import edu.harvard.med.screensaver.AbstractSpringPersistenceTest;
 import edu.harvard.med.screensaver.model.MakeDummyEntities;
@@ -33,12 +34,10 @@ import edu.harvard.med.screensaver.model.users.LabHead;
  */
 public class ScreenDAOTest extends AbstractSpringPersistenceTest
 {
-
   private static final Logger log = Logger.getLogger(ScreenDAOTest.class);
 
-
+  @Autowired
   protected ScreenDAO screenDao;
-
 
   public void testDelete()
   {

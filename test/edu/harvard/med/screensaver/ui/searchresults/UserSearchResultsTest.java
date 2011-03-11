@@ -13,8 +13,8 @@ import java.util.ArrayList;
 import java.util.List;
 
 import org.apache.log4j.Logger;
+import org.springframework.beans.factory.annotation.Autowired;
 
-import edu.harvard.med.screensaver.AbstractSpringPersistenceTest;
 import edu.harvard.med.screensaver.db.SortDirection;
 import edu.harvard.med.screensaver.model.MakeDummyEntities;
 import edu.harvard.med.screensaver.model.users.ScreeningRoomUser;
@@ -23,12 +23,14 @@ import edu.harvard.med.screensaver.ui.arch.datatable.Criterion.Operator;
 import edu.harvard.med.screensaver.ui.arch.datatable.column.TableColumnManager;
 import edu.harvard.med.screensaver.ui.arch.datatable.column.entity.UserNameColumn;
 import edu.harvard.med.screensaver.ui.arch.datatable.model.DataTableModel;
+import edu.harvard.med.screensaver.ui.arch.view.AbstractBackingBeanTest;
 import edu.harvard.med.screensaver.ui.users.ScreenerSearchResults;
 
-public class UserSearchResultsTest extends AbstractSpringPersistenceTest
+public class UserSearchResultsTest extends AbstractBackingBeanTest
 {
   private static Logger log = Logger.getLogger(UserSearchResultsTest.class);
 
+  @Autowired
   protected ScreenerSearchResults screenersBrowser;
 
   private ScreeningRoomUser _admin1;
@@ -36,9 +38,9 @@ public class UserSearchResultsTest extends AbstractSpringPersistenceTest
   private ScreeningRoomUser _admin3;
 
   @Override
-  protected void onSetUp() throws Exception
+  protected void setUp() throws Exception
   {
-    super.onSetUp();
+    super.setUp();
 
     screenersBrowser.searchAll();
     TableColumnManager<ScreeningRoomUser> columnManager = screenersBrowser.getColumnManager();
@@ -47,9 +49,9 @@ public class UserSearchResultsTest extends AbstractSpringPersistenceTest
     screenersBrowser.getColumnManager().setSortColumnName("Name");
     screenersBrowser.getColumnManager().setSortDirection(SortDirection.DESCENDING);
 
-    _admin1 = MakeDummyEntities.makeDummyUser(1, "Al", "Capone");
-    _admin2 = MakeDummyEntities.makeDummyUser(1, "Bugsy", "Malone");
-    _admin3 = MakeDummyEntities.makeDummyUser(1, "Jesse", "James");
+    _admin1 = MakeDummyEntities.makeDummyUser("1", "Al", "Capone");
+    _admin2 = MakeDummyEntities.makeDummyUser("1", "Bugsy", "Malone");
+    _admin3 = MakeDummyEntities.makeDummyUser("1", "Jesse", "James");
     genericEntityDao.persistEntity(_admin1);
     genericEntityDao.persistEntity(_admin2);
     genericEntityDao.persistEntity(_admin3);

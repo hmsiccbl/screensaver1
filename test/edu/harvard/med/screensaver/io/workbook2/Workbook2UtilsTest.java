@@ -9,6 +9,7 @@
 
 package edu.harvard.med.screensaver.io.workbook2;
 
+import java.io.File;
 import java.io.FileOutputStream;
 import java.io.InputStream;
 import java.io.OutputStream;
@@ -17,15 +18,18 @@ import junit.framework.TestCase;
 import jxl.Workbook;
 import jxl.write.WritableSheet;
 import jxl.write.WritableWorkbook;
-
 import org.apache.commons.io.IOUtils;
+import org.apache.log4j.Logger;
 
 public class Workbook2UtilsTest extends TestCase
 {
+  private static final Logger log = Logger.getLogger(Workbook2UtilsTest.class);
+
   /** Requires manual inspection to verify success */
   public void testImageExport() throws Exception
   {
-    OutputStream out = new FileOutputStream("image-export-text.xls") ;
+    File file = File.createTempFile("testImageExport", ".xls");
+    OutputStream out = new FileOutputStream(file);
     WritableWorkbook workbook = Workbook.createWorkbook(out);
     WritableSheet sheet = workbook.createSheet("sheet1", 0);
     InputStream imageIn = getClass().getResourceAsStream("/images/arrow-first.png");
@@ -34,5 +38,7 @@ public class Workbook2UtilsTest extends TestCase
     Workbook2Utils.writeImage(sheet, 1, 1, imageData);
     workbook.write();
     workbook.close();
+    log.warn("must manually verify that image was exported to workbook " + file);
   }
 }
+

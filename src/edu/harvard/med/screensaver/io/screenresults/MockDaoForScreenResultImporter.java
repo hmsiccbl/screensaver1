@@ -17,13 +17,14 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
-import org.apache.log4j.Logger;
-import org.hibernate.ScrollableResults;
 import com.google.common.collect.Maps;
 import com.google.common.collect.Sets;
+import org.apache.log4j.Logger;
+import org.hibernate.ScrollableResults;
 
 import edu.harvard.med.screensaver.db.DAOTransaction;
 import edu.harvard.med.screensaver.db.GenericEntityDAO;
+import edu.harvard.med.screensaver.db.HqlBuilderCallback;
 import edu.harvard.med.screensaver.db.LibrariesDAO;
 import edu.harvard.med.screensaver.db.Query;
 import edu.harvard.med.screensaver.db.ScreenResultsDAO;
@@ -46,6 +47,7 @@ import edu.harvard.med.screensaver.model.libraries.ReagentVendorIdentifier;
 import edu.harvard.med.screensaver.model.libraries.Well;
 import edu.harvard.med.screensaver.model.libraries.WellCopy;
 import edu.harvard.med.screensaver.model.libraries.WellKey;
+import edu.harvard.med.screensaver.model.meta.RelationshipPath;
 import edu.harvard.med.screensaver.model.screenresults.AssayWell;
 import edu.harvard.med.screensaver.model.screenresults.DataColumn;
 import edu.harvard.med.screensaver.model.screenresults.ResultValue;
@@ -132,11 +134,6 @@ public class MockDaoForScreenResultImporter implements GenericEntityDAO, ScreenR
   {
   }
 
-  public <E extends Entity> E defineEntity(Class<E> entityClass, Object... constructorArguments)
-  {
-    return null;
-  }
-
   public void deleteEntity(Entity entity)
   {
   }
@@ -151,7 +148,15 @@ public class MockDaoForScreenResultImporter implements GenericEntityDAO, ScreenR
     return null;
   }
 
-  public <E extends Entity> List<E> findAllEntitiesOfType(Class<E> entityClass, boolean readOnly, String... relationships)
+  public <E extends Entity> List<E> findAllEntitiesOfType(Class<E> entityClass,
+                                                          boolean readOnly,
+                                                          RelationshipPath<E> relationship)
+  {
+    return null;
+  }
+
+  public <E extends Entity> List<E> findAllEntitiesOfType(Class<E> entityClass,
+                                                          boolean readOnly)
   {
     return null;
   }
@@ -166,17 +171,39 @@ public class MockDaoForScreenResultImporter implements GenericEntityDAO, ScreenR
     return null;
   }
 
-  public <E extends Entity> List<E> findEntitiesByProperty(Class<E> entityClass, String propertyName, Object propertyValue, boolean readOnly, String... relationships)
+  public <E extends Entity> List<E> findEntitiesByProperty(Class<E> entityClass,
+                                                           String propertyName,
+                                                           Object propertyValue,
+                                                           boolean readOnly,
+                                                           RelationshipPath<E> relationship)
   {
     return null;
   }
 
-  public <E extends Entity, K extends Serializable> E findEntityById(Class<E> entityClass, K id)
+  public <E extends Entity> List<E> findEntitiesByProperty(Class<E> entityClass,
+                                                           String propertyName,
+                                                           Object propertyValue,
+                                                           boolean readOnly)
   {
     return null;
   }
 
-  public <E extends Entity, K extends Serializable> E findEntityById(Class<E> entityClass, K id, boolean readOnly, String... relationships)
+  public <E extends Entity<K>,K extends Serializable> E findEntityById(Class<E> entityClass, K id)
+  {
+    return null;
+  }
+
+  public <E extends Entity<K>,K extends Serializable> E findEntityById(Class<E> entityClass,
+                                                                       K id,
+                                                                       boolean readOnly,
+                                                                       RelationshipPath<E> relationship)
+  {
+    return null;
+  }
+
+  public <E extends Entity<K>,K extends Serializable> E findEntityById(Class<E> entityClass,
+                                                                       K id,
+                                                                       boolean readOnly)
   {
     return null;
   }
@@ -199,7 +226,19 @@ public class MockDaoForScreenResultImporter implements GenericEntityDAO, ScreenR
     return null;
   }
 
-  public <E extends Entity> E findEntityByProperty(Class<E> entityClass, String propertyName, Object propertyValue, boolean readOnly, String... relationships)
+  public <E extends Entity> E findEntityByProperty(Class<E> entityClass,
+                                                   String propertyName,
+                                                   Object propertyValue,
+                                                   boolean readOnly,
+                                                   RelationshipPath<E> relationship)
+  {
+    return null;
+  }
+
+  public <E extends Entity> E findEntityByProperty(Class<E> entityClass,
+                                                   String propertyName,
+                                                   Object propertyValue,
+                                                   boolean readOnly)
   {
     return null;
   }
@@ -208,11 +247,11 @@ public class MockDaoForScreenResultImporter implements GenericEntityDAO, ScreenR
   {
   }
 
-  public void need(Entity entity, String... relationships)
+  public <E extends Entity> void need(E entity, RelationshipPath<E> relationship)
   {
   }
 
-  public void needReadOnly(Entity entity, String... relationships)
+  public <E extends Entity> void needReadOnly(E entity, RelationshipPath<E> relationship)
   {
   }
 
@@ -229,27 +268,17 @@ public class MockDaoForScreenResultImporter implements GenericEntityDAO, ScreenR
     return null;
   }
 
-  public int relationshipSize(Object persistentCollection)
-  {
-    return 0;
-  }
-
-  public int relationshipSize(Entity entity, String relationship)
-  {
-    return 0;
-  }
-
-  public int relationshipSize(Entity entity, String relationship, String relationshipProperty, String relationshipPropertyValue)
-  {
-    return 0;
-  }
-
   public <E extends Entity> E reloadEntity(E entity)
   {
     return null;
   }
 
-  public <E extends Entity> E reloadEntity(E entity, boolean readOnly, String... relationships)
+  public <E extends Entity> E reloadEntity(E entity, boolean readOnly, RelationshipPath<E> relationship)
+  {
+    return null;
+  }
+
+  public <E extends Entity> E reloadEntity(E entity, boolean readOnly)
   {
     return null;
   }
@@ -289,7 +318,17 @@ public class MockDaoForScreenResultImporter implements GenericEntityDAO, ScreenR
     return null;
   }
 
-  public <E extends Entity> List<E> findEntitiesByProperties(Class<E> entityClass, Map<String,Object> name2Value, boolean readOnly, String... relationshipsIn)
+  public <E extends Entity> List<E> findEntitiesByProperties(Class<E> entityClass,
+                                                             Map<String,Object> name2Value,
+                                                             boolean readOnly,
+                                                             RelationshipPath<E> relationshipIn)
+  {
+    return null;
+  }
+
+  public <E extends Entity> List<E> findEntitiesByProperties(Class<E> entityClass,
+                                                             Map<String,Object> name2Value,
+                                                             boolean readOnly)
   {
     return null;
   }
@@ -299,7 +338,17 @@ public class MockDaoForScreenResultImporter implements GenericEntityDAO, ScreenR
     return null;
   }
 
-  public <E extends Entity> E findEntityByProperties(Class<E> entityClass, Map<String,Object> name2Value, boolean readOnly, String... relationships)
+  public <E extends Entity> E findEntityByProperties(Class<E> entityClass,
+                                                     Map<String,Object> name2Value,
+                                                     boolean readOnly,
+                                                     RelationshipPath<E> relationship)
+  {
+    return null;
+  }
+
+  public <E extends Entity> E findEntityByProperties(Class<E> entityClass,
+                                                     Map<String,Object> name2Value,
+                                                     boolean readOnly)
   {
     return null;
   }
@@ -348,7 +397,7 @@ public class MockDaoForScreenResultImporter implements GenericEntityDAO, ScreenR
 
   public void clear() {}
 
-  public <E> List<E> runQuery(Query<E> query)
+  public <T> List<T> runQuery(Query<T> query)
   {
     return null;
   }
@@ -406,11 +455,17 @@ public class MockDaoForScreenResultImporter implements GenericEntityDAO, ScreenR
   }
 
   @Override
+  public List<DataColumn> findMutualPositiveColumns(HqlBuilderCallback hqlBuilderCallback)
+  {
+    return null;
+  }
+
+  @Override
   public <E extends Entity,T> Set<T> findDistinctPropertyValues(Class<E> entityClass, String propertyName)
   {
     return Sets.newHashSet();
   }
-  
+
   public Set<Integer> queryForPlateIds(LibraryCopyPlateListParserResult parserResult)
   {
     return Sets.newHashSet();

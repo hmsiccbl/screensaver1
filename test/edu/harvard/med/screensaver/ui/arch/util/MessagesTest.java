@@ -10,34 +10,22 @@
 package edu.harvard.med.screensaver.ui.arch.util;
 
 import java.io.InputStream;
-import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.HashSet;
-import java.util.List;
 import java.util.Map;
 import java.util.Properties;
 import java.util.Set;
 
 import javax.faces.application.FacesMessage;
 
-import edu.harvard.med.screensaver.AbstractSpringTest;
-import edu.harvard.med.screensaver.ui.arch.util.Messages;
+import org.springframework.beans.factory.annotation.Autowired;
 
-public class MessagesTest extends AbstractSpringTest
+import edu.harvard.med.screensaver.ui.arch.view.AbstractBackingBeanTest;
+
+public class MessagesTest extends AbstractBackingBeanTest
 {
-
+  @Autowired
   protected Messages messages;
-  
-  @Override
-  protected String[] getConfigLocations()
-  {
-    List<String> configLocations = new ArrayList<String>(Arrays.asList(super.getConfigLocations()));
-    configLocations.add("spring-context-ui.xml");
-    return configLocations.toArray(new String[] {});
-  }
-  
-  
-  @SuppressWarnings("unchecked")
+
   public void testMessagesArgSubstitution() throws Exception {
     InputStream messagesStream = getClass().getClassLoader().getResourceAsStream("messages.properties");
     Properties messagesProperties = new Properties();

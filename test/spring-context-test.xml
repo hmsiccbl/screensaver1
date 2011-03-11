@@ -19,8 +19,6 @@
 
 <beans>
 
-  <import resource="spring-context-config.xml"/>
-
   <bean id="entityViewPolicy"
    class="edu.harvard.med.screensaver.policy.DefaultEntityViewPolicy">
   </bean>
@@ -42,46 +40,31 @@
   <bean id="cherryPickPlateSourceWellMinimumVolumePolicy"
    class="edu.harvard.med.iccbl.screensaver.policy.cherrypicks.IccblCherryPickPlateSourceWellMinimumVolumePolicy">
   </bean>
- 
-  <bean
-    id="currentScreensaverUser"
-    class="edu.harvard.med.screensaver.ui.CurrentScreensaverUser"
-    scope="session">
-    <property name="screensaverUser">
-      <bean class="edu.harvard.med.screensaver.model.users.ScreeningRoomUser">
-        <constructor-arg index="0" value="First"/>
-        <constructor-arg index="1" value="Last"/>
-      </bean>
-    </property>
-  </bean>
 
-  <bean id="structureImageProvider"
-        class="edu.harvard.med.iccbl.screensaver.io.libraries.smallmolecule.PlateWellFileNameStructureImageProvider">
-    <constructor-arg value="http://localhost:8080/" />
-  </bean>
-
-  <bean
+   <bean
     id="screenGenerator"
-    class="edu.harvard.med.screensaver.service.screens.DefaultScreenGenerator"/>
+    class="edu.harvard.med.screensaver.service.screens.DefaultScreenGenerator">
+    <constructor-arg>
+      <bean
+        id="screenFacilityIdInitializer"
+        class="edu.harvard.med.screensaver.service.screens.DefaultScreenFacilityIdInitializer" />
+    </constructor-arg>
+    <constructor-arg ref="genericEntityDao" />
+  </bean>
 
   <bean
     id="plateFacilityIdInitializer"
     class="edu.harvard.med.screensaver.service.libraries.DefaultPlateFacilityIdInitializer">
   </bean>
 
+  <import resource="spring-context-config.xml"/>
   <import resource="spring-context-persistence.xml"/>
   <import resource="spring-context-services.xml"/>
   <import resource="spring-context-logging.xml"/>
-  <import resource="spring-context-ui.xml"/>
   
-  <bean class="org.springframework.beans.factory.config.CustomScopeConfigurer">
-    <property name="scopes">
-        <map>
-            <entry key="session">
-                <bean class="edu.harvard.med.screensaver.ui.MockSessionScope"/>
-            </entry>
-        </map>
-    </property>
+  <bean id="dataFactory" class="edu.harvard.med.screensaver.model.TestDataFactory">
+    <constructor-arg ref="genericEntityDao" />
+    <constructor-arg ref="entityManagerFactory" />
   </bean>
 
 </beans>

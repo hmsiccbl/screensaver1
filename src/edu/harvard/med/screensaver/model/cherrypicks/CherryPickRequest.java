@@ -20,6 +20,7 @@ import java.util.TreeSet;
 
 import javax.persistence.CascadeType;
 import javax.persistence.Column;
+import javax.persistence.ElementCollection;
 import javax.persistence.Entity;
 import javax.persistence.FetchType;
 import javax.persistence.GeneratedValue;
@@ -161,7 +162,6 @@ public abstract class CherryPickRequest extends AuditedAbstractEntity<Integer>
    * @return the legacy cherry pick request number
    */
   @Column(updatable=false)
-  @org.hibernate.annotations.Immutable
   @edu.harvard.med.screensaver.model.annotations.Column(hasNonconventionalSetterMethod=true) /* no new CPRs should use this property */
   public Integer getLegacyCherryPickRequestNumber()
   {
@@ -206,7 +206,6 @@ public abstract class CherryPickRequest extends AuditedAbstractEntity<Integer>
    */
   @ManyToOne
   @JoinColumn(name="screenId", nullable=false, updatable=false)
-  @org.hibernate.annotations.Immutable
   @org.hibernate.annotations.ForeignKey(name="fk_cherry_pick_request_to_screen")
   @org.hibernate.annotations.LazyToOne(value=org.hibernate.annotations.LazyToOneOption.PROXY)
   public Screen getScreen()
@@ -218,16 +217,7 @@ public abstract class CherryPickRequest extends AuditedAbstractEntity<Integer>
    * Get the screener cherry picks.
    * @return the screener cherry picks
    */
-  @OneToMany(
-    mappedBy="cherryPickRequest",
-    cascade={ CascadeType.PERSIST, CascadeType.MERGE, CascadeType.REMOVE },
-    fetch=FetchType.LAZY
-  )
-  @org.hibernate.annotations.Cascade(value={
-    org.hibernate.annotations.CascadeType.SAVE_UPDATE,
-    org.hibernate.annotations.CascadeType.DELETE,
-    org.hibernate.annotations.CascadeType.DELETE_ORPHAN
-  })
+  @OneToMany(mappedBy = "cherryPickRequest", cascade = { CascadeType.ALL })
   public Set<ScreenerCherryPick> getScreenerCherryPicks()
   {
     return _screenerCherryPicks;
@@ -251,10 +241,7 @@ public abstract class CherryPickRequest extends AuditedAbstractEntity<Integer>
    * Get the set lab cherry picks.
    * @return the lab cherry picks
    */
-  @OneToMany(
-    mappedBy="cherryPickRequest",
-    fetch=FetchType.LAZY
-  )
+  @OneToMany(mappedBy = "cherryPickRequest")
   public Set<LabCherryPick> getLabCherryPicks()
   {
     return _labCherryPicks;
@@ -293,7 +280,7 @@ public abstract class CherryPickRequest extends AuditedAbstractEntity<Integer>
    */
   @OneToMany(
     mappedBy="cherryPickRequest",
-    cascade={ CascadeType.PERSIST, CascadeType.MERGE, CascadeType.REMOVE },
+    cascade = { CascadeType.ALL },
     fetch=FetchType.LAZY
   )
   @org.hibernate.annotations.Sort(type=org.hibernate.annotations.SortType.NATURAL)
@@ -586,13 +573,13 @@ public abstract class CherryPickRequest extends AuditedAbstractEntity<Integer>
    * @return the set of well names that should be left empty when generating the
    *         cherry pick plate mapping.
    */
-  @org.hibernate.annotations.CollectionOfElements
+  @ElementCollection
   @JoinTable(
     name="cherryPickRequestEmptyWell",
     joinColumns=@JoinColumn(name="cherryPickRequestId")
   )
   @org.hibernate.annotations.ForeignKey(name="fk_cherry_pick_request_empty_wells_to_cherry_pick_request")
-  @edu.harvard.med.screensaver.model.annotations.CollectionOfElements(singularPropertyName="emptyWellOnAssayPlate") 
+  @edu.harvard.med.screensaver.model.annotations.ElementCollection(singularPropertyName="emptyWellOnAssayPlate") 
   public Set<WellName> getEmptyWellsOnAssayPlate()
   {
     return _emptyWellsOnAssayPlate;

@@ -147,7 +147,10 @@ public abstract class AbstractStudyDetailViewer<E extends Study> extends Editabl
   }
 
   @Override
-  protected void initializeEntity(E entity) {};
+  protected void initializeEntity(E entity) 
+  {
+    getDao().needReadOnly((Screen) entity, Screen.collaborators);
+  }
   
   @Override
   protected void initializeViewer(E entity)

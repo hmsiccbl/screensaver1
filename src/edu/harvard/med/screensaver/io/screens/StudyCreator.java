@@ -232,7 +232,7 @@ public class StudyCreator
     props.put("firstName", firstName);
     props.put("lastName", lastName);
     props.put("email", email);
-    List<ScreeningRoomUser> users = dao.findEntitiesByProperties(ScreeningRoomUser.class, props, true);
+    List<ScreeningRoomUser> users = dao.findEntitiesByProperties(ScreeningRoomUser.class, props, false);
     if (users.size() > 1) {
       throw new DuplicateEntityException(users.get(0));
     }
@@ -249,6 +249,7 @@ public class StudyCreator
       newUser = new ScreeningRoomUser(firstName, lastName);
     }
     log.info("created new user " + newUser + " for " + firstName + " " + lastName + " (" + email + ")");
+    dao.persistEntity(newUser);
     return newUser;
   }
 }

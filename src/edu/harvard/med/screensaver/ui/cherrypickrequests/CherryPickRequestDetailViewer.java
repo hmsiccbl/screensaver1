@@ -116,11 +116,11 @@ public class CherryPickRequestDetailViewer extends EditableEntityViewerBackingBe
   public void initializeEntity(CherryPickRequest cherryPickRequest)
   {
     getDao().needReadOnly(cherryPickRequest,
-                          CherryPickRequest.requestedBy.getPath());
+                          CherryPickRequest.requestedBy);
     getDao().needReadOnly(cherryPickRequest,
-                          CherryPickRequest.emptyWellsOnAssayPlate.getPath());
+                          CherryPickRequest.emptyWellsOnAssayPlate);
     getDao().needReadOnly(cherryPickRequest,
-                          CherryPickRequest.cherryPickScreenings.getPath());
+                          CherryPickRequest.cherryPickScreenings);
   }
 
   @Override
@@ -391,11 +391,11 @@ public class CherryPickRequestDetailViewer extends EditableEntityViewerBackingBe
   {
     // eager fetch all data needed to calculate warnings
     CherryPickRequest cherryPickRequest = getDao().reloadEntity(getEntity(),
-                                                            true,
-                                                            CherryPickRequest.screen.getPath(),
-                                                            CherryPickRequest.labCherryPicks.to(LabCherryPick.screenerCherryPick).to(ScreenerCherryPick.screenedWell).to(Well.deprecationActivity).getPath(),
-                                                            CherryPickRequest.labCherryPicks.to(LabCherryPick.sourceWell).to(Well.deprecationActivity).getPath());
-    getDao().needReadOnly(cherryPickRequest, CherryPickRequest.screenerCherryPicks.to(ScreenerCherryPick.screenedWell).to(Well.library).getPath());
+                                                                true,
+                                                                CherryPickRequest.screen);
+    getDao().needReadOnly(cherryPickRequest, CherryPickRequest.labCherryPicks.to(LabCherryPick.screenerCherryPick).to(ScreenerCherryPick.screenedWell).to(Well.deprecationActivity));
+    getDao().needReadOnly(cherryPickRequest, CherryPickRequest.labCherryPicks.to(LabCherryPick.sourceWell).to(Well.deprecationActivity));
+    getDao().needReadOnly(cherryPickRequest, CherryPickRequest.screenerCherryPicks.to(ScreenerCherryPick.screenedWell).to(Well.library));
 
     boolean warningIssued = false;
     warningIssued |= doWarnOnCherryPickAllowanceExceeded(cherryPickRequest);

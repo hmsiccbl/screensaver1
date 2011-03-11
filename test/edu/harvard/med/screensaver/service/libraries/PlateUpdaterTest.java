@@ -18,6 +18,7 @@ import com.google.common.collect.Maps;
 import com.google.common.collect.Sets;
 import org.hibernate.Session;
 import org.joda.time.LocalDate;
+import org.springframework.beans.factory.annotation.Autowired;
 
 import edu.harvard.med.screensaver.AbstractSpringPersistenceTest;
 import edu.harvard.med.screensaver.db.DAOTransaction;
@@ -41,6 +42,7 @@ import edu.harvard.med.screensaver.ui.arch.datatable.Criterion.Operator;
 
 public class PlateUpdaterTest extends AbstractSpringPersistenceTest
 {
+  @Autowired
   protected PlateUpdater plateUpdater;
 
   private AdministratorUser _admin;
@@ -48,10 +50,10 @@ public class PlateUpdaterTest extends AbstractSpringPersistenceTest
   private Copy _copyD;
 
   @Override
-  public void onSetUp() throws Exception
+  public void setUp() throws Exception
   {
-    super.onSetUp();
-    _admin = new AdministratorUser("Admin", "User", "", "", "", "", "", "");
+    super.setUp();
+    _admin = new AdministratorUser("Admin", "User");
     genericEntityDao.persistEntity(_admin);
     Library library = new Library(null, "lib", "lib", ScreenType.SMALL_MOLECULE, LibraryType.COMMERCIAL, 1, 6, PlateSize.WELLS_96);
     _copyC = library.createCopy(null, CopyUsageType.LIBRARY_SCREENING_PLATES, "C");
@@ -61,7 +63,7 @@ public class PlateUpdaterTest extends AbstractSpringPersistenceTest
 
   public void testPlateStatusUpdate()
   {
-    final AdministratorUser admin2 = new AdministratorUser("Admin2", "User", "", "", "", "", null, "");
+    final AdministratorUser admin2 = new AdministratorUser("Admin2", "User");
     Plate plate = _copyC.findPlate(1);
     genericEntityDao.persistEntity(admin2);
 
@@ -172,7 +174,7 @@ public class PlateUpdaterTest extends AbstractSpringPersistenceTest
 
   public void testPlateStatusUpdateFromLost()
   {
-    final AdministratorUser admin2 = new AdministratorUser("Admin2", "User", "", "", "", "", null, "");
+    final AdministratorUser admin2 = new AdministratorUser("Admin2", "User");
     Plate plate = _copyC.findPlate(1);
     genericEntityDao.persistEntity(admin2);
 
@@ -258,7 +260,7 @@ public class PlateUpdaterTest extends AbstractSpringPersistenceTest
 
   private void doTestInvalidStatusUpdate(final PlateStatus initialStatus, final PlateStatus invalidStatus)
   {
-    final AdministratorUser admin2 = new AdministratorUser("Admin2", "User", "", "", "", "", null, "");
+    final AdministratorUser admin2 = new AdministratorUser("Admin2", "User");
     Plate plate = _copyC.findPlate(1);
     genericEntityDao.persistEntity(admin2);
     plateUpdater.updatePlateStatus(plate, initialStatus, _admin, admin2, new LocalDate(2010, 1, 1));
@@ -274,7 +276,7 @@ public class PlateUpdaterTest extends AbstractSpringPersistenceTest
 
   public void testPrimaryPlateStatus()
   {
-    final AdministratorUser admin2 = new AdministratorUser("Admin2", "User", "", "", "", "", null, "");
+    final AdministratorUser admin2 = new AdministratorUser("Admin2", "User");
     genericEntityDao.persistEntity(admin2);
 
     plateUpdater.updatePlateStatus(_copyC.findPlate(1), PlateStatus.NOT_AVAILABLE, _admin, admin2, new LocalDate(2010, 1, 1));
@@ -295,7 +297,7 @@ public class PlateUpdaterTest extends AbstractSpringPersistenceTest
 
   public void testPrimaryPlateLocation()
   {
-    final AdministratorUser admin2 = new AdministratorUser("Admin2", "User", "", "", "", "", null, "");
+    final AdministratorUser admin2 = new AdministratorUser("Admin2", "User");
     genericEntityDao.persistEntity(admin2);
 
     plateUpdater.updatePlateLocation(_copyC.findPlate(1), new PlateLocation("R1", "F1", "S1", "B1"), _admin, admin2, new LocalDate(2010, 1, 1));
@@ -319,26 +321,26 @@ public class PlateUpdaterTest extends AbstractSpringPersistenceTest
 
   public void testPlatedDate()
   {
-    final AdministratorUser admin2 = new AdministratorUser("Admin2", "User", "", "", "", "", null, "");
+    final AdministratorUser admin2 = new AdministratorUser("Admin2", "User");
     genericEntityDao.persistEntity(admin2);
 
     Plate plate1 = _copyC.findPlate(1);
     plateUpdater.updatePlateStatus(plate1, PlateStatus.AVAILABLE, _admin, admin2, new LocalDate(2010, 2, 2));
-    plate1 = genericEntityDao.reloadEntity(plate1, false, Plate.copy.to(Copy.library).getPath());
+    plate1 = genericEntityDao.reloadEntity(plate1, false, Plate.copy.to(Copy.library));
     assertEquals(PlateStatus.AVAILABLE, plate1.getStatus());
     assertEquals(new LocalDate(2010, 2, 2), plate1.getCopy().getDatePlated());
     assertEquals(new LocalDate(2010, 2, 2), plate1.getCopy().getLibrary().getDateScreenable());
 
     Plate plate2 = _copyC.findPlate(2);
     plateUpdater.updatePlateStatus(plate2, PlateStatus.AVAILABLE, _admin, admin2, new LocalDate(2010, 3, 3));
-    plate2 = genericEntityDao.reloadEntity(plate2, false, Plate.copy.to(Copy.library).getPath());
+    plate2 = genericEntityDao.reloadEntity(plate2, false, Plate.copy.to(Copy.library));
     assertEquals(PlateStatus.AVAILABLE, plate2.getStatus());
     assertEquals(new LocalDate(2010, 3, 3), plate2.getCopy().getDatePlated());
     assertEquals(new LocalDate(2010, 2, 2), plate2.getCopy().getLibrary().getDateScreenable());
 
     Plate plate3 = _copyC.findPlate(3);
     plateUpdater.updatePlateStatus(plate3, PlateStatus.AVAILABLE, _admin, admin2, new LocalDate(2010, 1, 1));
-    plate3 = genericEntityDao.reloadEntity(plate3, false, Plate.copy.to(Copy.library).getPath());
+    plate3 = genericEntityDao.reloadEntity(plate3, false, Plate.copy.to(Copy.library));
     assertEquals(PlateStatus.AVAILABLE, plate3.getStatus());
     assertEquals(new LocalDate(2010, 1, 1), plate3.getCopy().getDatePlated());
     assertEquals(new LocalDate(2010, 1, 1), plate3.getCopy().getLibrary().getDateScreenable());
@@ -380,7 +382,7 @@ public class PlateUpdaterTest extends AbstractSpringPersistenceTest
 
   public void testPlateLocationTransferActivityCreation()
   {
-    AdministratorUser performedBy = new AdministratorUser("Admin2", "User", "", "", "", "", null, "");
+    AdministratorUser performedBy = new AdministratorUser("Admin2", "User");
     genericEntityDao.persistEntity(performedBy);
     Map<Plate,PlateLocation> plateLocations = Maps.newHashMap();
     plateLocations.put(_copyC.findPlate(1), new PlateLocation("R1", "F1", "S1", "B1"));
@@ -563,7 +565,7 @@ public class PlateUpdaterTest extends AbstractSpringPersistenceTest
   {
     final HqlBuilder hql = new HqlBuilder();
     hql.select("p");
-    hql.from(Plate.class, "p").from("p", Plate.location.getPath(), "l", JoinType.INNER);
+    hql.from(Plate.class, "p").from("p", Plate.location, "l", JoinType.INNER);
     hql.whereIn("p", plates);
     if (room != null) {
       hql.where("l", "room", Operator.EQUAL, room);

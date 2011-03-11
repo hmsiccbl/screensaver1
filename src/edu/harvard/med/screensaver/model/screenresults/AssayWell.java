@@ -135,7 +135,6 @@ public class AssayWell extends AbstractEntity<Integer> implements Comparable<Ass
 
   @ManyToOne(fetch=FetchType.LAZY, cascade={})
   @JoinColumn(name="screenResultId", nullable=false, updatable=false)
-  @org.hibernate.annotations.Immutable
   @org.hibernate.annotations.ForeignKey(name="fk_assay_well_to_screen_result")
   @org.hibernate.annotations.LazyToOne(value=org.hibernate.annotations.LazyToOneOption.PROXY)
   public ScreenResult getScreenResult()
@@ -154,7 +153,6 @@ public class AssayWell extends AbstractEntity<Integer> implements Comparable<Ass
    */
   @ManyToOne(fetch=FetchType.LAZY, cascade={} /*Well is owned by Library.wells*/)
   @JoinColumn(name="well_id", nullable=false, updatable=false)
-  @org.hibernate.annotations.Immutable
   @org.hibernate.annotations.ForeignKey(name="fk_assay_well_to_well")
   @org.hibernate.annotations.LazyToOne(value=org.hibernate.annotations.LazyToOneOption.PROXY)
   @ToOne(unidirectional=true)

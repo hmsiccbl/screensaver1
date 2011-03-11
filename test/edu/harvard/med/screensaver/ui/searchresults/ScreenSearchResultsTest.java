@@ -13,23 +13,25 @@ import java.util.Set;
 
 import com.google.common.collect.Sets;
 import org.apache.log4j.Logger;
+import org.springframework.beans.factory.annotation.Autowired;
 
-import edu.harvard.med.screensaver.AbstractSpringPersistenceTest;
 import edu.harvard.med.screensaver.model.MakeDummyEntities;
 import edu.harvard.med.screensaver.model.screens.ProjectPhase;
 import edu.harvard.med.screensaver.model.screens.Screen;
 import edu.harvard.med.screensaver.model.screens.ScreenType;
 import edu.harvard.med.screensaver.model.screens.StudyType;
+import edu.harvard.med.screensaver.ui.arch.view.AbstractBackingBeanTest;
 import edu.harvard.med.screensaver.ui.screens.ScreenSearchResults;
 
-public class ScreenSearchResultsTest extends AbstractSpringPersistenceTest
+public class ScreenSearchResultsTest extends AbstractBackingBeanTest
 {
   private static Logger log = Logger.getLogger(ScreenSearchResultsTest.class);
 
+  @Autowired
   protected ScreenSearchResults screensBrowser;
 
-  public void testSearchMyScreens()
-  {}
+//  public void testSearchMyScreens()
+//  {}
   
   public void testSearchScreensForProject()
   {

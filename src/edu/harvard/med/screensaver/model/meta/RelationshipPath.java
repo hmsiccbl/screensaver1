@@ -315,4 +315,40 @@ public class RelationshipPath<E extends Entity/* ,L */>
        .append(']');
     }
   }
+
+  /**
+   * Returns a new RelationshpPath where the root entity class is a subtype of this RelationshipPath's root entity
+   * class.
+   * 
+   * @motivation RelationshipPaths that are defined on supertype in an entity class inheritance hierarchy cannot
+   *             be passed into GenericEntityDAO methods that take RelationshipPaths of a subtype. Rather than
+   *             redundantly defining the same static RelationshipPath on both the supertype and subtype, we define it
+   *             only on the supertype, and rely upon this method to create the subtype-specific version when needed.
+   */
+  public <T extends E> RelationshipPath<T> castToSubtype(Class<T> subType)
+  {
+    if (subType.equals(_rootEntityClass)) {
+      return (RelationshipPath<T>) this;
+    }
+    return new RelationshipPath<T>(subType, _entityClasses, _path, _inversePath, _restrictions, _cardinality);
+  }
+
+  /**
+   * Returns a new RelationshpPath where the root entity class is a supertype of this RelationshipPath's root entity
+   * class.
+   * 
+   * @motivation needed for EntitySearchResults for an entity type that has subtypes, and some of the search result's
+   *             columns are specific to entity subtypes.
+   */
+  public <T extends Entity> RelationshipPath<T> castToSupertype(Class<T> superType)
+  {
+    if (!superType.isAssignableFrom(_rootEntityClass)) {
+      throw new IllegalArgumentException(superType + " is not a supertype of " + _rootEntityClass);
+    }
+    if (superType.equals(_rootEntityClass)) {
+      return (RelationshipPath<T>) this;
+    }
+    return new RelationshipPath<T>(superType, _entityClasses, _path, _inversePath, _restrictions, _cardinality);
+  }
+
 }

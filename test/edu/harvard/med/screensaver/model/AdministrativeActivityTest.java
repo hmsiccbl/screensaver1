@@ -13,11 +13,6 @@ import java.beans.IntrospectionException;
 
 import junit.framework.TestSuite;
 
-import edu.harvard.med.screensaver.model.users.AdministratorUser;
-
-import org.joda.time.DateTime;
-import org.joda.time.LocalDate;
-
 public class AdministrativeActivityTest extends AbstractEntityInstanceTest<AdministrativeActivity>
 {
   public static TestSuite suite()
@@ -25,7 +20,7 @@ public class AdministrativeActivityTest extends AbstractEntityInstanceTest<Admin
     return buildTestSuite(AdministrativeActivityTest.class, AdministrativeActivity.class);
   }
 
-  public AdministrativeActivityTest() throws IntrospectionException
+  public AdministrativeActivityTest()
   {
     super(AdministrativeActivity.class);
   }

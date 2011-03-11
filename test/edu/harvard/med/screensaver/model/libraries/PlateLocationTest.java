@@ -22,7 +22,7 @@ public class PlateLocationTest extends AbstractEntityInstanceTest<PlateLocation>
     return buildTestSuite(PlateLocationTest.class, PlateLocation.class);
   }
 
-  public PlateLocationTest() throws IntrospectionException
+  public PlateLocationTest()
   {
     super(PlateLocation.class);
   }

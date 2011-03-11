@@ -33,7 +33,7 @@ import javax.persistence.UniqueConstraint;
 import javax.persistence.Version;
 
 import com.google.common.base.Function;
-import com.google.common.collect.ImmutableSet;
+import com.google.common.collect.Sets;
 import org.hibernate.annotations.Parameter;
 import org.hibernate.annotations.Sort;
 import org.hibernate.annotations.SortType;
@@ -60,7 +60,7 @@ import edu.harvard.med.screensaver.model.users.AdministratorUser;
 @Entity
 @Table(uniqueConstraints={ @UniqueConstraint(columnNames={ "copyId", "plateNumber" }) })
 @org.hibernate.annotations.Proxy
-@ContainedEntity(containingEntityClass=Copy.class)
+@ContainedEntity(containingEntityClass = Copy.class, autoCreated = true)
 public class Plate extends AuditedAbstractEntity<Integer> implements Comparable<Plate>
 {
   private static final long serialVersionUID = 0L;
@@ -89,7 +89,7 @@ public class Plate extends AuditedAbstractEntity<Integer> implements Comparable<
 
   private Integer _version;
   private Copy _copy;
-  private Integer _plateNumber;
+  private Integer _plateNumber = 0;
   private PlateLocation _location;
   private String _facilityId;
   private PlateType _plateType;
@@ -101,7 +101,7 @@ public class Plate extends AuditedAbstractEntity<Integer> implements Comparable<
   private AdministrativeActivity _platedActivity;
   private AdministrativeActivity _retiredActivity;
   private String _comments;
-  private Set<AssayPlate> _assayPlates = ImmutableSet.of();
+  private Set<AssayPlate> _assayPlates = Sets.newHashSet();//ImmutableSet.of(); (breaks JPA merge)
   private ScreeningStatistics _screeningStatistics;
 
   /**
@@ -150,7 +150,7 @@ public class Plate extends AuditedAbstractEntity<Integer> implements Comparable<
    */
   @ManyToOne(fetch=FetchType.LAZY)
   @JoinColumn(name="copyId", nullable=false, updatable=false)
-  @org.hibernate.annotations.Immutable
+  //@org.hibernate.annotations.Immutable
   @org.hibernate.annotations.ForeignKey(name="fk_plate_to_copy")
   @org.hibernate.annotations.LazyToOne(value=org.hibernate.annotations.LazyToOneOption.PROXY)
   public Copy getCopy()
@@ -180,8 +180,7 @@ public class Plate extends AuditedAbstractEntity<Integer> implements Comparable<
    * Get the plate number.
    * @return the plate number
    */
-  @org.hibernate.annotations.Immutable
-  @Column(nullable=false)
+  @Column(nullable = false, updatable = false)
   public int getPlateNumber()
   {
     return _plateNumber;
@@ -370,25 +369,21 @@ public class Plate extends AuditedAbstractEntity<Integer> implements Comparable<
     _screeningStatistics = screeningStatistics;
   }
 
-  @ManyToMany(fetch = FetchType.LAZY, cascade = { CascadeType.PERSIST, CascadeType.MERGE })
+  @ManyToMany(fetch = FetchType.LAZY, cascade = { CascadeType.ALL })
   @JoinTable(name = "plateUpdateActivity",
              joinColumns = @JoinColumn(name = "plateId", nullable = false, updatable = false),
              inverseJoinColumns = @JoinColumn(name = "updateActivityId", nullable = false, updatable = false, unique = true))
   @org.hibernate.annotations.Cascade(value = { org.hibernate.annotations.CascadeType.SAVE_UPDATE })
   @Sort(type = SortType.NATURAL)
-  @ToMany(singularPropertyName = "updateActivity", hasNonconventionalMutation = true /*
-                                                                                      * model testing framework doesn't
-                                                                                      * understand this is a containment
-                                                                                      * relationship, and so requires
-                                                                                      * addUpdateActivity() method
-                                                                                      */)
+  // hasNonconventionalMutation: model testing framework doesn't understand this is a containment relationship, and so requires addUpdateActivity() method
+  @ToMany(singularPropertyName = "updateActivity", hasNonconventionalMutation = true)
   @Override
   public SortedSet<AdministrativeActivity> getUpdateActivities()
   {
     return _updateActivities;
   }
 
-  @OneToOne(cascade = {}, fetch = FetchType.LAZY)
+  @OneToOne(cascade = { CascadeType.ALL }, fetch = FetchType.LAZY)
   @JoinColumn(name = "plated_activity_id", nullable = true, updatable = true, unique = true)
   @edu.harvard.med.screensaver.model.annotations.ToOne(unidirectional = true,
                                                        hasNonconventionalSetterMethod = true)
@@ -401,7 +396,7 @@ public class Plate extends AuditedAbstractEntity<Integer> implements Comparable<
    * Get the activity associated with changing the plate status from {@link PlateStatus#AVAILABLE Available} to any
    * non-available status ({@link PlateStatus#RETIRED Retired} or greater.
    */
-  @OneToOne(cascade = {}, fetch = FetchType.LAZY)
+  @OneToOne(cascade = { CascadeType.ALL }, fetch = FetchType.LAZY)
   @JoinColumn(name = "retired_activity_id", nullable = true, updatable = true, unique = true)
   @edu.harvard.med.screensaver.model.annotations.ToOne(unidirectional = true,
                                                        hasNonconventionalSetterMethod = true)

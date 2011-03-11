@@ -11,6 +11,7 @@ package edu.harvard.med.screensaver.model.screens;
 
 import java.util.SortedSet;
 
+import javax.persistence.CascadeType;
 import javax.persistence.Entity;
 import javax.persistence.FetchType;
 import javax.persistence.JoinColumn;
@@ -98,11 +99,9 @@ public class CherryPickScreening extends Screening
    * Get the cherry pick request.
    * @return the cherry pick request
    */
-  @ManyToOne(fetch=FetchType.LAZY)
+  @ManyToOne
   @JoinColumn(name="cherryPickRequestId", nullable=false, updatable=false)
-  @org.hibernate.annotations.Immutable
   @org.hibernate.annotations.ForeignKey(name="fk_cherry_pick_screening_to_cherry_pick_request")
-  @org.hibernate.annotations.LazyToOne(value=org.hibernate.annotations.LazyToOneOption.PROXY)
   @edu.harvard.med.screensaver.model.annotations.ToOne(inverseProperty="CherryPickScreenings")
   public CherryPickRequest getCherryPickRequest()
   {
@@ -123,10 +122,10 @@ public class CherryPickScreening extends Screening
    * Get the plates used.
    * @return the plates used
    */
-  @ManyToMany(mappedBy = "cherryPickScreenings", cascade = {}, fetch = FetchType.LAZY)
-  /* note: no cascades, since CherryPickAssayPlate is managed by CherryPickRequest, not CherryPickScreeing */
+  @ManyToMany(mappedBy = "cherryPickScreenings", cascade = { CascadeType.MERGE, CascadeType.PERSIST }, fetch = FetchType.LAZY)
   @org.hibernate.annotations.Sort(type=org.hibernate.annotations.SortType.NATURAL)
   @ToMany(singularPropertyName="assayPlateScreened", hasNonconventionalMutation=true /* has constraint that CPAP.isPlated()==true */ )
+  @org.hibernate.annotations.Cascade(value = { org.hibernate.annotations.CascadeType.SAVE_UPDATE })
   public SortedSet<CherryPickAssayPlate> getCherryPickAssayPlatesScreened()
   {
     return _cherryPickAssayPlatesScreened;

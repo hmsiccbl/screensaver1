@@ -52,6 +52,7 @@ public class AnnotationValue extends AbstractEntity<Integer>
   private static Logger log = Logger.getLogger(AnnotationValue.class);
 
   public static final RelationshipPath<AnnotationValue> annotationType = RelationshipPath.from(AnnotationValue.class).to("annotationType", Cardinality.TO_ONE);
+  public static final RelationshipPath<AnnotationValue> reagent = RelationshipPath.from(AnnotationValue.class).to("reagent");
 
   private AnnotationType _annotationType;
   private Reagent _reagent;
@@ -86,7 +87,6 @@ public class AnnotationValue extends AbstractEntity<Integer>
   */
   @ManyToOne(fetch=FetchType.LAZY)
   @JoinColumn(name="annotationTypeId", nullable=false, updatable=false)
-  @org.hibernate.annotations.Immutable
   @org.hibernate.annotations.ForeignKey(name="fk_annotation_value_to_annotation_type")
   @org.hibernate.annotations.LazyToOne(value=org.hibernate.annotations.LazyToOneOption.PROXY)
   public AnnotationType getAnnotationType()
@@ -100,8 +100,7 @@ public class AnnotationValue extends AbstractEntity<Integer>
    * @return the annotated reagent
    */
   @ManyToOne(fetch=FetchType.LAZY)
-  @JoinColumn(name="reagentId", nullable=false)
-  @org.hibernate.annotations.Immutable
+  @JoinColumn(name = "reagentId", nullable = false, updatable = false)
   @org.hibernate.annotations.ForeignKey(name="fk_annotation_value_to_reagent")
   @org.hibernate.annotations.LazyToOne(value=org.hibernate.annotations.LazyToOneOption.PROXY)
   public Reagent getReagent()
@@ -116,7 +115,6 @@ public class AnnotationValue extends AbstractEntity<Integer>
    */
   @Column(updatable=false)
   @org.hibernate.annotations.Type(type="text")
-  @org.hibernate.annotations.Immutable
   public String getValue()
   {
     return _value;
@@ -128,7 +126,6 @@ public class AnnotationValue extends AbstractEntity<Integer>
    * @motivation for sorting via SQL
    */
   @Column(updatable=false)
-  @org.hibernate.annotations.Immutable
   public Double getNumericValue()
   {
     return _numericValue;

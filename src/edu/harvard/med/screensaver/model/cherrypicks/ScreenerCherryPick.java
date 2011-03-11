@@ -23,7 +23,6 @@ import javax.persistence.Id;
 import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
 import javax.persistence.OneToMany;
-import javax.persistence.OneToOne;
 import javax.persistence.Table;
 import javax.persistence.UniqueConstraint;
 import javax.persistence.Version;
@@ -37,7 +36,6 @@ import edu.harvard.med.screensaver.model.DataModelViolationException;
 import edu.harvard.med.screensaver.model.libraries.Well;
 import edu.harvard.med.screensaver.model.meta.Cardinality;
 import edu.harvard.med.screensaver.model.meta.RelationshipPath;
-import edu.harvard.med.screensaver.model.screens.IsHitConfirmedViaExperimentation;
 import edu.harvard.med.screensaver.model.screens.Screen;
 
 
@@ -73,10 +71,6 @@ public class ScreenerCherryPick extends AbstractEntity<Integer>
   private CherryPickRequest _cherryPickRequest;
   private Well _screenedWell;
   private Set<LabCherryPick> _labCherryPicks = new HashSet<LabCherryPick>();
-  /* follow-up data from screener, after cherry pick screening is completed */
-  private RNAiKnockdownConfirmation _rnaiKnockdownConfirmation;
-  private IsHitConfirmedViaExperimentation _isHitConfirmedViaExperimentation;
-  private String _notesOnHitConfirmation;
 
 
   // public instance methods
@@ -125,11 +119,9 @@ public class ScreenerCherryPick extends AbstractEntity<Integer>
    * Get the cherry pick request.
    * @return the cherry pick request
    */
-  @ManyToOne
+  @ManyToOne(fetch = FetchType.EAGER)
   @JoinColumn(name="cherryPickRequestId", nullable=false, updatable=false)
-  @org.hibernate.annotations.Immutable
   @org.hibernate.annotations.ForeignKey(name="fk_screener_cherry_pick_to_cherry_pick_request")
-  @org.hibernate.annotations.LazyToOne(value=org.hibernate.annotations.LazyToOneOption.PROXY)
   public CherryPickRequest getCherryPickRequest()
   {
     return _cherryPickRequest;
@@ -142,12 +134,10 @@ public class ScreenerCherryPick extends AbstractEntity<Integer>
    * @return the screened well
    * @see LabCherryPick#getSourceWell()
    */
-  @ManyToOne
+  @ManyToOne(fetch = FetchType.EAGER)
   @JoinColumn(name="screenedWellId", nullable=false, updatable=false)
-  @org.hibernate.annotations.Immutable
   @org.hibernate.annotations.ForeignKey(name="fk_screener_cherry_pick_to_screened_well")
-  @org.hibernate.annotations.LazyToOne(value=org.hibernate.annotations.LazyToOneOption.PROXY)
-  @edu.harvard.med.screensaver.model.annotations.ToOne(unidirectional=true)
+  @edu.harvard.med.screensaver.model.annotations.ToOne(unidirectional = true)
   public Well getScreenedWell()
   {
     return _screenedWell;
@@ -157,99 +147,10 @@ public class ScreenerCherryPick extends AbstractEntity<Integer>
    * Get the set of lab cherry picks associated with this screener cherry pick.
    * @return the set of lab cherry picks associated with this screener cherry pick
    */
-  @OneToMany(
-    mappedBy="screenerCherryPick",
-    cascade={ CascadeType.PERSIST, CascadeType.MERGE, CascadeType.REMOVE },
-    fetch=FetchType.LAZY
-  )
-  @org.hibernate.annotations.Cascade(value={
-    org.hibernate.annotations.CascadeType.SAVE_UPDATE,
-    org.hibernate.annotations.CascadeType.DELETE
-  })
+  @OneToMany(mappedBy = "screenerCherryPick", cascade = { CascadeType.ALL })
   public Set<LabCherryPick> getLabCherryPicks()
   {
     return _labCherryPicks;
-  }
-
-  /**
-   * Get the RNAi knockdown confirmation.
-   * @return the RNAi knockdown confirmation
-   */
-  @OneToOne(
-    mappedBy="screenerCherryPick",
-    cascade={ CascadeType.PERSIST, CascadeType.MERGE, CascadeType.REMOVE },
-    fetch=FetchType.LAZY
-  )
-  @org.hibernate.annotations.LazyToOne(value=org.hibernate.annotations.LazyToOneOption.PROXY)
-  @org.hibernate.annotations.Cascade(value={
-    org.hibernate.annotations.CascadeType.SAVE_UPDATE,
-    org.hibernate.annotations.CascadeType.DELETE
-  })
-  public RNAiKnockdownConfirmation getRnaiKnockdownConfirmation()
-  {
-    return _rnaiKnockdownConfirmation;
-  }
-
-  /**
-   * Create and return a new RNAi knockdown confirmation for the screener cherry pick.
-   * @param percentKnockdown the percent knockdown
-   * @param methodOfQuantification the method of quantification
-   * @param timing the timing
-   * @param cellLine the cell line
-   * @return the new RNAi knockdown confirmation
-   */
-  public RNAiKnockdownConfirmation createRNAiKnockdownConfirmation(
-    Double percentKnockdown,
-    MethodOfQuantification methodOfQuantification,
-    String timing,
-    String cellLine)
-  {
-    RNAiKnockdownConfirmation rnaiKnockdownConfirmation = new RNAiKnockdownConfirmation(
-      this,
-      percentKnockdown,
-      methodOfQuantification,
-      timing,
-      cellLine);
-    _rnaiKnockdownConfirmation = rnaiKnockdownConfirmation;
-    return rnaiKnockdownConfirmation;
-  }
-
-  /**
-   * Get the is hit confirmed via experimentation.
-   * @return the is hit confirmed via experimentation
-   */
-  @org.hibernate.annotations.Type(type="edu.harvard.med.screensaver.model.screens.IsHitConfirmedViaExperimentation$UserType")
-  public IsHitConfirmedViaExperimentation getIsHitConfirmedViaExperimentation()
-  {
-    return _isHitConfirmedViaExperimentation;
-  }
-
-  /**
-   * Set the is hit confirmed via experimentation.
-   * @param isHitConfirmedViaExperimentation the new is hit confirmed via experimentation
-   */
-  public void setIsHitConfirmedViaExperimentation(IsHitConfirmedViaExperimentation isHitConfirmedViaExperimentation)
-  {
-    _isHitConfirmedViaExperimentation = isHitConfirmedViaExperimentation;
-  }
-
-  /**
-   * Get the notes on hit confirmation.
-   * @return the notes on hit confirmation
-   */
-  @org.hibernate.annotations.Type(type="text")
-  public String getNotesOnHitConfirmation()
-  {
-    return _notesOnHitConfirmation;
-  }
-
-  /**
-   * Set the notes on hit confirmation.
-   * @param notesOnHitConfirmation the new notes on hit confirmation
-   */
-  public void setNotesOnHitConfirmation(String notesOnHitConfirmation)
-  {
-    _notesOnHitConfirmation = notesOnHitConfirmation;
   }
 
 
@@ -342,16 +243,6 @@ public class ScreenerCherryPick extends AbstractEntity<Integer>
   private void setLabCherryPicks(Set<LabCherryPick> labCherryPicks)
   {
     _labCherryPicks = labCherryPicks;
-  }
-
-  /**
-   * Set the RNAi knockdown confirmation.
-   * @param rnaiKnockdownConfirmation the new RNAi knockdown confirmation
-   * @motivation for hibernate
-   */
-  private void setRnaiKnockdownConfirmation(RNAiKnockdownConfirmation rnaiKnockdownConfirmation)
-  {
-    _rnaiKnockdownConfirmation = rnaiKnockdownConfirmation;
   }
 
   /**

@@ -16,76 +16,53 @@ import java.sql.SQLException;
 import java.util.List;
 import java.util.Set;
 
+import com.google.common.collect.Sets;
 import org.apache.commons.io.IOUtils;
 import org.apache.log4j.Logger;
 import org.joda.time.LocalDate;
-import org.springframework.test.AbstractTransactionalSpringContextTests;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.transaction.annotation.Transactional;
 
-import com.google.common.collect.Sets;
-
-import edu.harvard.med.screensaver.db.GenericEntityDAO;
-import edu.harvard.med.screensaver.db.SchemaUtil;
+import edu.harvard.med.screensaver.AbstractSpringPersistenceTest;
 import edu.harvard.med.screensaver.model.AttachedFileType;
 import edu.harvard.med.screensaver.model.BusinessRuleViolationException;
 import edu.harvard.med.screensaver.model.users.AdministratorUser;
 import edu.harvard.med.screensaver.model.users.ChecklistItem;
 import edu.harvard.med.screensaver.model.users.ChecklistItemEvent;
 import edu.harvard.med.screensaver.model.users.ChecklistItemGroup;
-import edu.harvard.med.screensaver.model.users.LabHead;
 import edu.harvard.med.screensaver.model.users.ScreeningRoomUser;
-import edu.harvard.med.screensaver.model.users.ScreeningRoomUserClassification;
 import edu.harvard.med.screensaver.model.users.ScreensaverUser;
 import edu.harvard.med.screensaver.model.users.ScreensaverUserRole;
 import edu.harvard.med.screensaver.model.users.UserAttachedFileType;
 import edu.harvard.med.screensaver.util.Pair;
 
-public class UserAgreementUpdaterTest extends AbstractTransactionalSpringContextTests
+@Transactional
+public class UserAgreementUpdaterTest extends AbstractSpringPersistenceTest
 {
   private static Logger log = Logger.getLogger(UserAgreementUpdaterTest.class);
   
-  protected GenericEntityDAO genericEntityDao;
-  protected SchemaUtil schemaUtil;
+  @Autowired
   protected UserAgreementUpdater userAgreementUpdater;
 
-
-  @Override
-  protected String[] getConfigLocations()
-  {
-    return new String[] { "spring-context-test.xml" };
-  }
-
-  public UserAgreementUpdaterTest() 
-  {
-    setPopulateProtectedVariables(true);
-  }
-  
   AdministratorUser admin = null;
   AdministratorUser otherUserAgreementAdmin = null;
   AdministratorUser nonAdminUser = null;
   
-  protected void onSetUpInTransaction() throws Exception 
+  private void initializeData()
   {
-    log.info("onSetupInTransaction called");
-    String server = "ss.harvard.com"; // note mailinator reduced size of supported addresses
-    admin = new AdministratorUser("admin", "testaccount", "admin@" + server, "", "", "", "dev", "");
+    admin = new AdministratorUser("admin", "testaccount");
     admin.addScreensaverUserRole(ScreensaverUserRole.USERS_ADMIN);
     admin.addScreensaverUserRole(ScreensaverUserRole.USER_ROLES_ADMIN);
     admin.addScreensaverUserRole(ScreensaverUserRole.LAB_HEADS_ADMIN);
     genericEntityDao.persistEntity(admin);
 
-    otherUserAgreementAdmin = new AdministratorUser("userAgreementAdmin", "testaccount", "userAdmin@" + server, "", "", "", "dsl1", "");
+    otherUserAgreementAdmin = new AdministratorUser("userAgreementAdmin", "testaccount");
     otherUserAgreementAdmin.addScreensaverUserRole(ScreensaverUserRole.USERS_ADMIN);
     genericEntityDao.persistEntity(otherUserAgreementAdmin);
 
-    nonAdminUser = new AdministratorUser("nonAdminUser", "testaccount", "userAdmin1@" + server, "", "", "", "dsl2", "");
+    nonAdminUser = new AdministratorUser("nonAdminUser", "testaccount");
     nonAdminUser.addScreensaverUserRole(ScreensaverUserRole.USERS_ADMIN);
     genericEntityDao.persistEntity(nonAdminUser);
-
-  }
-  @Override
-  protected void onSetUpBeforeTransaction() throws Exception
-  {
-    schemaUtil.truncateTablesOrCreateSchema();
   }
   
   /**
@@ -95,6 +72,8 @@ public class UserAgreementUpdaterTest extends AbstractTransactionalSpringContext
    */
   public void testFindUsersWithOldSMUAgreements() throws IOException
   {
+    initializeData();
+
 //    // create the entities
 //    AdministratorUser admin = new AdministratorUser("Test", "Admin", "testadmin@screensaver.med.harvard.edu", "", "", "", "dev", "");
 //    admin.addScreensaverUserRole(ScreensaverUserRole.USERS_ADMIN);
@@ -131,16 +110,17 @@ public class UserAgreementUpdaterTest extends AbstractTransactionalSpringContext
     user2.setLoginId("user2");
     user2.addScreensaverUserRole(ScreensaverUserRole.SM_DSL_LEVEL1_MUTUAL_SCREENS);
     genericEntityDao.persistEntity(user2);
-    setComplete();
-    endTransaction();
+
+    flushAndClear();
 
     // check that not yet "old" - there are no events yet!
     List<Pair<ScreeningRoomUser, ChecklistItemEvent>> expiredSet 
         = userAgreementUpdater.findUsersWithOldSMAgreements(new LocalDate(), false);
     assertTrue(expiredSet.isEmpty());
 
+    flushAndClear();
+
     // add a checklist item and event to the user
-    startNewTransaction();
     user1 = genericEntityDao.reloadEntity(user1);
     userExpired2YearsAgo = genericEntityDao.reloadEntity(userExpired2YearsAgo);
     user2 = genericEntityDao.reloadEntity(user2);
@@ -164,10 +144,8 @@ public class UserAgreementUpdaterTest extends AbstractTransactionalSpringContext
     date2 = date2.plusYears(1);
     ChecklistItemEvent cieToBeNotified = user2.createChecklistItemActivationEvent(checklistItem, date2, admin);
 
-    setComplete();
-    endTransaction();
+    flushAndClear();
 
-    startNewTransaction();
     user1 = genericEntityDao.reloadEntity(user1);
     user2 = genericEntityDao.reloadEntity(user2);
     userExpired2YearsAgo = genericEntityDao.reloadEntity(userExpired2YearsAgo);
@@ -196,8 +174,7 @@ public class UserAgreementUpdaterTest extends AbstractTransactionalSpringContext
     user2.setLastNotifiedSMUAChecklistItemEvent(cieToBeNotified);
     genericEntityDao.saveOrUpdateEntity(user2);
     
-    setComplete();
-    endTransaction();
+    flushAndClear();
 
     // Now find again, not that only user 1 is found
     
@@ -206,7 +183,6 @@ public class UserAgreementUpdaterTest extends AbstractTransactionalSpringContext
     assertFalse(expiredSet.isEmpty());
     assertTrue(contains(user1, expiredSet));
     assertFalse(contains(user2, expiredSet));
-    
   }
   
   private boolean contains(ScreeningRoomUser user, List<Pair<ScreeningRoomUser, ChecklistItemEvent>> list)
@@ -217,6 +193,8 @@ public class UserAgreementUpdaterTest extends AbstractTransactionalSpringContext
   
   public void testFindUsersWithOldSMUAgreementsAndExpire() throws IOException
   {
+    initializeData();
+
     //    // create the entities
     //    AdministratorUser admin = new AdministratorUser("Test", "Admin", "testadmin@screensaver.med.harvard.edu", "", "", "", "dev", "");
     //    admin.addScreensaverUserRole(ScreensaverUserRole.USERS_ADMIN);
@@ -241,16 +219,17 @@ public class UserAgreementUpdaterTest extends AbstractTransactionalSpringContext
     ScreeningRoomUser user2 = new ScreeningRoomUser("Test", "User2");
     user2.setEmail("testuser2@screensaver.med.harvard.edu");
     genericEntityDao.persistEntity(user2);
-    setComplete();
-    endTransaction();
+
+    flushAndClear();
 
     // check that not yet "old" - there are no events yet!
     List<Pair<ScreeningRoomUser,ChecklistItemEvent>> expiredSet 
         = userAgreementUpdater.findUsersWithOldSMAgreements(new LocalDate(), true);
     assertTrue(expiredSet.isEmpty());
 
+    flushAndClear();
+
     // add a checklist item and event to the user
-    startNewTransaction();
     user = genericEntityDao.reloadEntity(user);
     user2 = genericEntityDao.reloadEntity(user2);
     admin = genericEntityDao.reloadEntity(admin);
@@ -262,8 +241,7 @@ public class UserAgreementUpdaterTest extends AbstractTransactionalSpringContext
     date2 = date2.plusYears(1);
     user2.createChecklistItemActivationEvent(checklistItem, date2, admin);
 
-    setComplete();
-    endTransaction();
+    flushAndClear();
 
     // first find the user with the old event first
     LocalDate findDate = new LocalDate();
@@ -294,11 +272,12 @@ public class UserAgreementUpdaterTest extends AbstractTransactionalSpringContext
     assertFalse(contains(user, expiredSet));
     assertTrue(contains(user2, expiredSet));
     assertEquals(1,expiredSet.size());
-    
   }
   
   public void testUserAgreementUpdater() throws IOException, SQLException
   {
+    initializeData();
+
     ChecklistItem checklistItem = new ChecklistItem(UserAgreementUpdater.USER_AGREEMENT_CHECKLIST_ITEM_NAME, true, ChecklistItemGroup.FORMS, 0);
     AttachedFileType attachedFileType = new UserAttachedFileType(UserAgreementUpdater.USER_AGREEMENT_ATTACHED_FILE_TYPE);
     ScreeningRoomUser user = new ScreeningRoomUser("Test", "User");
@@ -309,18 +288,16 @@ public class UserAgreementUpdaterTest extends AbstractTransactionalSpringContext
     genericEntityDao.persistEntity(attachedFileType);
     genericEntityDao.persistEntity(user);
     genericEntityDao.persistEntity(admin);
-    setComplete();
-    endTransaction();
     
-    startNewTransaction();
+    flushAndClear();
+
     user = genericEntityDao.reloadEntity(user);
     admin = genericEntityDao.reloadEntity(admin);
     InputStream inputStream = new ByteArrayInputStream("contents".getBytes());
     userAgreementUpdater.updateUser(user, ScreensaverUserRole.SM_DSL_LEVEL1_MUTUAL_SCREENS, "user_agreement.pdf", inputStream, admin);
-    setComplete();
-    endTransaction();
+
+    flushAndClear();
     
-    startNewTransaction();
     user = genericEntityDao.reloadEntity(user);
     checklistItem = genericEntityDao.reloadEntity(checklistItem);
     assertEquals(Sets.newHashSet(ScreensaverUserRole.SM_DSL_LEVEL1_MUTUAL_SCREENS,
@@ -330,11 +307,10 @@ public class UserAgreementUpdaterTest extends AbstractTransactionalSpringContext
                  user.getScreensaverUserRoles());
     assertEquals(checklistItem, user.getChecklistItemEvents().first().getChecklistItem());
     assertEquals("user_agreement.pdf", user.getAttachedFiles().iterator().next().getFilename());
-    assertEquals("contents", new String(IOUtils.toByteArray(user.getAttachedFiles().iterator().next().getFileContents().getBinaryStream())));
-    setComplete();
-    endTransaction();
+    assertEquals("contents", IOUtils.toString(user.getAttachedFiles().iterator().next().getFileContents()));
 
-    startNewTransaction();
+    flushAndClear();
+
     user = genericEntityDao.reloadEntity(user);
     admin = genericEntityDao.reloadEntity(admin);
     inputStream = new ByteArrayInputStream("contents".getBytes());
@@ -345,25 +321,22 @@ public class UserAgreementUpdaterTest extends AbstractTransactionalSpringContext
     catch (BusinessRuleViolationException e) { 
       assertTrue(e.getMessage().contains("already has an active user agreement")); 
     }
-    endTransaction();
+    genericEntityDao.clear();
     
-    startNewTransaction();
     user = genericEntityDao.reloadEntity(user);
     admin = genericEntityDao.reloadEntity(admin);
     checklistItem = genericEntityDao.reloadEntity(checklistItem);
     user.getChecklistItemEvents(checklistItem).last().createChecklistItemExpirationEvent(new LocalDate(), admin);
-    setComplete();
-    endTransaction();
 
-    startNewTransaction();
+    flushAndClear();
+
     user = genericEntityDao.reloadEntity(user);
     admin = genericEntityDao.reloadEntity(admin);
     inputStream = new ByteArrayInputStream("contents".getBytes());
     userAgreementUpdater.updateUser(user, ScreensaverUserRole.SM_DSL_LEVEL3_SHARED_SCREENS, "user_agreement.pdf", inputStream, admin);
-    setComplete();
-    endTransaction();
     
-    startNewTransaction();
+    flushAndClear();
+
     user = genericEntityDao.reloadEntity(user);
     checklistItem = genericEntityDao.reloadEntity(checklistItem);
     assertEquals(Sets.newHashSet(ScreensaverUserRole.SM_DSL_LEVEL3_SHARED_SCREENS,
@@ -371,15 +344,15 @@ public class UserAgreementUpdaterTest extends AbstractTransactionalSpringContext
                  user.getScreensaverUserRoles());
     assertEquals(checklistItem, user.getChecklistItemEvents().first().getChecklistItem());
     assertEquals("user_agreement.pdf", user.getAttachedFiles().iterator().next().getFilename());
-    assertEquals("contents", new String(IOUtils.toByteArray(user.getAttachedFiles().iterator().next().getFileContents().getBinaryStream())));
-
+    assertEquals("contents", IOUtils.toString(user.getAttachedFiles().iterator().next().getFileContents()));
   }
   
   public void testFindUserAgreementAdmins()
   {
-    setComplete();
-    endTransaction();
-    startNewTransaction();
+    initializeData();
+
+    flushAndClear();
+
     admin = genericEntityDao.reloadEntity(admin);
     otherUserAgreementAdmin = genericEntityDao.reloadEntity(otherUserAgreementAdmin);
     log.info("admin: " + admin);

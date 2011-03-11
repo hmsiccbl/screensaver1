@@ -26,9 +26,9 @@ import org.hibernate.Hibernate;
 import org.springframework.transaction.annotation.Transactional;
 
 import edu.harvard.med.screensaver.ScreensaverConstants;
+import edu.harvard.med.screensaver.db.EntityInflator;
 import edu.harvard.med.screensaver.db.GenericEntityDAO;
 import edu.harvard.med.screensaver.db.LibrariesDAO;
-import edu.harvard.med.screensaver.model.Activity;
 import edu.harvard.med.screensaver.model.MolarConcentration;
 import edu.harvard.med.screensaver.model.MolarUnit;
 import edu.harvard.med.screensaver.model.Volume;
@@ -36,7 +36,6 @@ import edu.harvard.med.screensaver.model.VolumeUnit;
 import edu.harvard.med.screensaver.model.cherrypicks.CherryPickAssayPlate;
 import edu.harvard.med.screensaver.model.cherrypicks.CherryPickLiquidTransfer;
 import edu.harvard.med.screensaver.model.cherrypicks.CherryPickRequest;
-import edu.harvard.med.screensaver.model.cherrypicks.LabCherryPick;
 import edu.harvard.med.screensaver.model.libraries.Copy;
 import edu.harvard.med.screensaver.model.libraries.CopyUsageType;
 import edu.harvard.med.screensaver.model.libraries.Library;
@@ -49,6 +48,8 @@ import edu.harvard.med.screensaver.model.screens.LibraryScreening;
 import edu.harvard.med.screensaver.model.screens.Screen;
 import edu.harvard.med.screensaver.model.screens.Screening;
 import edu.harvard.med.screensaver.model.users.ScreensaverUser;
+import edu.harvard.med.screensaver.service.libraries.LibraryScreeningDerivedPropertiesUpdater;
+import edu.harvard.med.screensaver.service.screens.ScreenDerivedPropertiesUpdater;
 import edu.harvard.med.screensaver.ui.arch.util.UISelectOneBean;
 import edu.harvard.med.screensaver.ui.arch.util.UISelectOneEntityBean;
 import edu.harvard.med.screensaver.ui.arch.view.AbstractBackingBean;
@@ -68,7 +69,8 @@ public class LabActivityViewer extends SearchResultContextEditableEntityViewerBa
   private ScreenViewer _screenViewer;
   private CherryPickRequestViewer _cherryPickRequestViewer;
   private LibrarySearchResults _librarySearchResults;
-  private DataModel _platesScreenedDataModel;
+  private ScreenDerivedPropertiesUpdater _screenDerivedPropertiesUpdater;
+  private LibraryScreeningDerivedPropertiesUpdater _libraryScreeningDerivedPropertiesUpdater;
 
   private Screen _screen;
   private UISelectOneEntityBean<ScreensaverUser> _performedBy;
@@ -78,17 +80,16 @@ public class LabActivityViewer extends SearchResultContextEditableEntityViewerBa
   private String _concentrationValue;
   private String _volumeValue;
   private DataModel _cherryPickPlatesDataModel;
-  private AbstractBackingBean _returnToViewAfterEdit;
 
-  private boolean _editingNewEntity;
-
+  private DataModel _platesScreenedDataModel;
   private Integer _newPlateRangeScreenedStartPlate;
   private Integer _newPlateRangeScreenedEndPlate;
   private UISelectOneBean<String> _newPlateRangeScreenedCopy;
-
   private List<Copy> _copies;
 
-  
+  private AbstractBackingBean _returnToViewAfterEdit;
+  private boolean _editingNewEntity;
+
 
   /**
    * @motivation for CGLIB2
@@ -103,35 +104,36 @@ public class LabActivityViewer extends SearchResultContextEditableEntityViewerBa
                            ActivitySearchResults activitiesBrowser,
                            ScreenViewer screenViewer,
                            CherryPickRequestViewer cherryPickRequestViewer,
-                           LibrarySearchResults librarySearchResults)
+                           LibrarySearchResults librarySearchResults,
+                           ScreenDerivedPropertiesUpdater screenDerivedPropertiesUpdater,
+                           LibraryScreeningDerivedPropertiesUpdater libraryScreeningDerivedPropertiesUpdater)
   {
     super(thisProxy, LabActivity.class, BROWSE_ACTIVITIES, VIEW_ACTIVITY, dao, activitiesBrowser);
     _screenViewer = screenViewer;
     _cherryPickRequestViewer = cherryPickRequestViewer;
     _librariesDao = librariesDao;
     _librarySearchResults = librarySearchResults;
+    _screenDerivedPropertiesUpdater = screenDerivedPropertiesUpdater;
+    _libraryScreeningDerivedPropertiesUpdater = libraryScreeningDerivedPropertiesUpdater;
   }
 
   @Override
   protected void initializeEntity(LabActivity activity)
   {
     Hibernate.initialize(activity.getPerformedBy());
-    //getDao().needReadOnly(activity, Activity.performedBy.getPath());
-    getDao().needReadOnly(activity, LabActivity.Screen.getPath());
+    //getDao().needReadOnly(activity, Activity.performedBy);
+    getDao().needReadOnly(activity, LabActivity.Screen);
     
     if (activity instanceof LibraryScreening) {
-      getDao().needReadOnly(activity, LibraryScreening.Screen.to(Screen.assayPlates).getPath());
-      getDao().needReadOnly(activity, LibraryScreening.assayPlatesScreened.to(AssayPlate.plateScreened).to(Plate.copy).to(Copy.library).getPath());
+      getDao().needReadOnly(activity, LibraryScreening.Screen.to(Screen.assayPlates));
+      getDao().needReadOnly((LibraryScreening) activity, LibraryScreening.assayPlatesScreened.to(AssayPlate.plateScreened).to(Plate.copy).to(Copy.library));
     }
     if (activity instanceof CherryPickScreening) {
-      getDao().needReadOnly(activity, CherryPickScreening.cherryPickRequest.to(CherryPickRequest.requestedBy).getPath());
-      getDao().needReadOnly(activity, CherryPickScreening.cherryPickRequest.to(CherryPickRequest.cherryPickAssayPlates).to(CherryPickAssayPlate.cherryPickLiquidTransfer).getPath());
-      getDao().needReadOnly(activity, CherryPickScreening.cherryPickRequest.to(CherryPickRequest.cherryPickAssayPlates).to(CherryPickAssayPlate.cherryPickScreenings).getPath());
-      getDao().needReadOnly(activity, CherryPickScreening.cherryPickAssayPlatesScreened.getPath());
+      getDao().needReadOnly((CherryPickScreening) activity, CherryPickScreening.cherryPickRequest.to(CherryPickRequest.requestedBy));
+      getDao().needReadOnly((CherryPickScreening) activity, CherryPickScreening.cherryPickAssayPlatesScreened);
     }
     if (activity instanceof CherryPickLiquidTransfer) {
-      getDao().needReadOnly(activity, CherryPickLiquidTransfer.cherryPickAssayPlates.to(CherryPickAssayPlate.cherryPickRequest).to(CherryPickRequest.requestedBy).getPath());
-      getDao().needReadOnly(activity, CherryPickLiquidTransfer.cherryPickAssayPlates.to(CherryPickAssayPlate.cherryPickRequest).to(CherryPickRequest.cherryPickAssayPlates).to(CherryPickAssayPlate.cherryPickLiquidTransfer).getPath());
+      getDao().needReadOnly((CherryPickLiquidTransfer) activity, CherryPickLiquidTransfer.cherryPickAssayPlates.to(CherryPickAssayPlate.cherryPickRequest).to(CherryPickRequest.requestedBy));
     }
     _editingNewEntity = false;
   }
@@ -139,18 +141,10 @@ public class LabActivityViewer extends SearchResultContextEditableEntityViewerBa
   @Override
   protected void initializeNewEntity(LabActivity activity)
   {
-    if (activity instanceof CherryPickScreening) {
-      getDao().needReadOnly(((CherryPickScreening) activity).getCherryPickRequest(), CherryPickRequest.cherryPickAssayPlates.to(CherryPickAssayPlate.cherryPickLiquidTransfer).to(Activity.performedBy).getPath());
-    }
-
-    if (activity instanceof CherryPickLiquidTransfer) {
-      getDao().needReadOnly(((CherryPickLiquidTransfer) activity).getCherryPickRequest(), CherryPickRequest.cherryPickAssayPlates.to(CherryPickAssayPlate.cherryPickLiquidTransfer).to(Activity.performedBy).getPath());
-    }
     // set null dateOfActivity, to force user to enter a valid date
     // TODO: this model shouldn't allow this null value, and we should really set to null at the UI component level only
     if (activity instanceof LibraryScreening) {
       activity.setDateOfActivity(null);
-      getDao().needReadOnly(((LibraryScreening) activity).getScreen(), Screen.assayPlates.getPath());
     }
     _editingNewEntity = true;
   }
@@ -181,8 +175,8 @@ public class LabActivityViewer extends SearchResultContextEditableEntityViewerBa
   {
     if (_screen == null) {
       _screen = getDao().reloadEntity(getEntity().getScreen());
-      getDao().needReadOnly(_screen, Screen.labHead.getPath());
-      getDao().needReadOnly(_screen, Screen.leadScreener.getPath());
+      getDao().needReadOnly(_screen, Screen.labHead);
+      getDao().needReadOnly(_screen, Screen.leadScreener);
     }
     return _screen;
   }
@@ -367,34 +361,22 @@ public class LabActivityViewer extends SearchResultContextEditableEntityViewerBa
       CherryPickScreening screening = (CherryPickScreening) entity;
       for (SelectableRow<CherryPickAssayPlate> row : (List<SelectableRow<CherryPickAssayPlate>>) getCherryPickPlatesDataModel().getWrappedData()) {
         if (row.isSelected() && !screening.getCherryPickAssayPlatesScreened().contains(row.getData())) {
-          screening.addCherryPickAssayPlateScreened(row.getData());
+          screening.addCherryPickAssayPlateScreened(getDao().mergeEntity(row.getData()));
         }
         else if (!row.isSelected() && screening.getCherryPickAssayPlatesScreened().contains(row.getData())) {
-          screening.removeCherryPickAssayPlateScreened(row.getData());
+          screening.removeCherryPickAssayPlateScreened(getDao().mergeEntity(row.getData()));
         }
-        // save/update every assay plate, to ensure that all assay plates for newly created CPS are updated 
-        getDao().saveOrUpdateEntity(row.getData());
       }
     }
     if (entity instanceof CherryPickLiquidTransfer) {
       if (_editingNewEntity) {
-        CherryPickLiquidTransfer cplt = (CherryPickLiquidTransfer) entity;
-        for (CherryPickAssayPlate cpap : cplt.getCherryPickAssayPlates()) {
-          getDao().saveOrUpdateEntity(cpap);
-          for (LabCherryPick lcp : cpap.getLabCherryPicks()) {
-            getDao().saveOrUpdateEntity(lcp);
-          }
-        }
         // do calculations necessitated by invalidate calls on the screen 
         // (i.e. for screen.getFulfilledLabCherryPicksCount invalidated in CPAP.setCherryPickLiquidTransfer )...
-        cplt.getScreen().update();
+        _screenDerivedPropertiesUpdater.updateFulfilledCherryPicksCount(((CherryPickLiquidTransfer) entity).getScreen());
       }
     }
     if (entity instanceof LibraryScreening) {
-      // explicitly save/update the parent screen to update assay plates that have been added or deleted  
-      getDao().saveOrUpdateEntity(((LibraryScreening) entity).getScreen());
-      ((LibraryScreening) entity).getScreen().update();
-      entity.update();
+      _libraryScreeningDerivedPropertiesUpdater.updateScreeningStatistics((LibraryScreening) entity);
     }
     // note: execute this after parent entity (Screen/CPR) is reattached, to avoid NonUniqueObjectExceptions
     entity.setPerformedBy(getPerformedBy().getSelection());
@@ -454,14 +436,25 @@ public class LabActivityViewer extends SearchResultContextEditableEntityViewerBa
       List<CherryPickAssayPlate> plates = Lists.newArrayList();
       Set<CherryPickAssayPlate> selectedPlates = Sets.newHashSet();
       if (getEntity() instanceof CherryPickScreening) {
-        CherryPickScreening cherryPickScreening = (CherryPickScreening) getEntity();
-        plates = cherryPickScreening.getCherryPickRequest().getActiveCherryPickAssayPlates();
-        selectedPlates = cherryPickScreening.getCherryPickAssayPlatesScreened();
+        CherryPickRequest cpr =
+          new EntityInflator<CherryPickRequest>(getDao(), ((CherryPickScreening) getEntity()).getCherryPickRequest(), true).
+            need(CherryPickRequest.requestedBy).
+            need(CherryPickRequest.screen).
+            need(CherryPickRequest.cherryPickAssayPlates.to(CherryPickAssayPlate.cherryPickScreenings)).
+            need(CherryPickRequest.cherryPickAssayPlates.to(CherryPickAssayPlate.cherryPickLiquidTransfer)).inflate();
+        plates = cpr.getActiveCherryPickAssayPlates();
+        selectedPlates = ((CherryPickScreening) getEntity()).getCherryPickAssayPlatesScreened();
       }
       else if (getEntity() instanceof CherryPickLiquidTransfer) {
         CherryPickLiquidTransfer cplt = (CherryPickLiquidTransfer) getEntity();
         if (cplt.getCherryPickRequest() != null) {
-          plates = cplt.getCherryPickRequest().getActiveCherryPickAssayPlates();
+          CherryPickRequest cpr =
+            new EntityInflator<CherryPickRequest>(getDao(), cplt.getCherryPickRequest(), true).
+              need(CherryPickRequest.requestedBy).
+              need(CherryPickRequest.screen).
+              need(CherryPickRequest.cherryPickAssayPlates.to(CherryPickAssayPlate.cherryPickScreenings)).
+              need(CherryPickRequest.cherryPickAssayPlates.to(CherryPickAssayPlate.cherryPickLiquidTransfer).to(CherryPickLiquidTransfer.cherryPickAssayPlates)).inflate();
+          plates = cpr.getActiveCherryPickAssayPlates();
           selectedPlates = cplt.getCherryPickAssayPlates();
         }
       }
@@ -531,7 +524,7 @@ public class LabActivityViewer extends SearchResultContextEditableEntityViewerBa
                                            "usageType", 
                                            CopyUsageType.LIBRARY_SCREENING_PLATES, 
                                            true, 
-                                           Copy.library.getPath());
+                                           Copy.library);
   }
   
   

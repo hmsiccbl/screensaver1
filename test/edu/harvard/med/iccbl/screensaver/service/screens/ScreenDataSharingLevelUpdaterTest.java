@@ -16,11 +16,12 @@ import java.util.Set;
 import com.google.common.collect.Sets;
 import org.apache.log4j.Logger;
 import org.joda.time.LocalDate;
-import org.springframework.test.AbstractTransactionalSpringContextTests;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.test.annotation.Rollback;
+import org.springframework.transaction.annotation.Transactional;
 
 import edu.harvard.med.iccbl.screensaver.io.screens.ScreenPrivacyExpirationUpdater;
-import edu.harvard.med.screensaver.db.GenericEntityDAO;
-import edu.harvard.med.screensaver.db.SchemaUtil;
+import edu.harvard.med.screensaver.AbstractSpringPersistenceTest;
 import edu.harvard.med.screensaver.model.AdministrativeActivity;
 import edu.harvard.med.screensaver.model.screens.LibraryScreening;
 import edu.harvard.med.screensaver.model.screens.ProjectPhase;
@@ -38,31 +39,33 @@ import edu.harvard.med.screensaver.model.users.ScreensaverUser;
 import edu.harvard.med.screensaver.model.users.ScreensaverUserRole;
 import edu.harvard.med.screensaver.util.Pair;
 
-public class ScreenDataSharingLevelUpdaterTest extends AbstractTransactionalSpringContextTests
+@Transactional
+public class ScreenDataSharingLevelUpdaterTest extends AbstractSpringPersistenceTest
 {
   private static Logger log = Logger.getLogger(ScreenDataSharingLevelUpdaterTest.class);
-  protected GenericEntityDAO genericEntityDao;
-  protected SchemaUtil schemaUtil;
-  protected  ScreenDataSharingLevelUpdater screenDataSharingLevelUpdater;
-
 
   private static int screen_number_counter = 1;
+
+  @Autowired
+  protected  ScreenDataSharingLevelUpdater screenDataSharingLevelUpdater;
+
   AdministratorUser admin = null;
   AdministratorUser otherDSLAdmin = null;
   LabHead labHead = null;
   ScreeningRoomUser leadScreener = null;
   ScreeningRoomUser collaborator = null;
   
-  protected void onSetUpInTransaction() throws Exception 
+  @Transactional
+  public void initializeData() throws Exception
   {
-    log.info("onSetupInTransaction called");
+    log.info("setupInTransaction called");
     String server = "ss.harvard.com"; // note mailinator reduced size of supported addresses
-    admin = new AdministratorUser("admin", "testaccount", "admin@" + server, "", "", "", "dev", "");
+    admin = new AdministratorUser("admin", "testaccount");
     admin.addScreensaverUserRole(ScreensaverUserRole.SCREENS_ADMIN);
     admin.addScreensaverUserRole(ScreensaverUserRole.SCREEN_DATA_SHARING_LEVELS_ADMIN);
     genericEntityDao.persistEntity(admin);
 
-    otherDSLAdmin = new AdministratorUser("dslAdmin", "testaccount", "dslAdmin@" + server, "", "", "", "dsl1", "");
+    otherDSLAdmin = new AdministratorUser("dslAdmin", "testaccount");
     otherDSLAdmin.addScreensaverUserRole(ScreensaverUserRole.SCREENS_ADMIN);
     otherDSLAdmin.addScreensaverUserRole(ScreensaverUserRole.SCREEN_DATA_SHARING_LEVELS_ADMIN);
     genericEntityDao.persistEntity(otherDSLAdmin);
@@ -101,25 +104,10 @@ public class ScreenDataSharingLevelUpdaterTest extends AbstractTransactionalSpri
     return screen;
   }
 
-  @Override
-  protected String[] getConfigLocations()
+  public void testAdjustDataPrivacyExpirationByActivities() throws Exception
   {
-    return new String[] { "spring-context-test.xml" };
-  }
+    initializeData();
 
-  public ScreenDataSharingLevelUpdaterTest() 
-  {
-    setPopulateProtectedVariables(true);
-  }
-  
-  @Override
-  protected void onSetUpBeforeTransaction() throws Exception
-  {
-    schemaUtil.truncateTablesOrCreateSchema();
-  }
-  
-  public void testAdjustDataPrivacyExpirationByActivities()
-  {
     // as of [#2175] expiration services to become notification services only
     // the DPED will be set separately from the ScreenResultImport (the old way).
     // It will now be set by batch process, SCREEN_ACTIVITY_DATA_PRIVACY_EXPIRATION_AGE_DAYS from the last ScreeningActivity date for a screen:
@@ -129,16 +117,9 @@ public class ScreenDataSharingLevelUpdaterTest extends AbstractTransactionalSpri
     
     // 1. create some screens
     Screen screen1NoActivities = createScreen("SDSL TEST1");
-    genericEntityDao.persistEntity(screen1NoActivities);
-    
     Screen screen2HasActivity = createScreen("SDSL TEST2");
-    genericEntityDao.persistEntity(screen2HasActivity);
-
     Screen screen3RnaiHasActivity = createScreen("SDSL TEST RNAI", ScreenType.RNAI);
-    genericEntityDao.persistEntity(screen3RnaiHasActivity);
-
     Screen screen4HasNoLibraryScreeningActivity = createScreen("screen4HasNoLibraryScreeningActivity");
-    genericEntityDao.persistEntity(screen4HasNoLibraryScreeningActivity);
 
     // 2. add some activities
     LocalDate newActivityDate = new LocalDate();
@@ -146,7 +127,7 @@ public class ScreenDataSharingLevelUpdaterTest extends AbstractTransactionalSpri
     screen2HasActivity.createLibraryScreening(admin, leadScreener, newActivityDate);
     screen2HasActivity.createLibraryScreening(admin, leadScreener, newActivityDate);
     screen2HasActivity.createLibraryScreening(admin, leadScreener, newActivityDate);
-    // create a screeining for user provided plates
+    // create a screening for user provided plates
     LibraryScreening ls = screen2HasActivity.createLibraryScreening(admin, leadScreener, newActivityDate.plusDays(100));
     ls.setForExternalLibraryPlates(true);
     // create a non-library-screening activity too
@@ -159,21 +140,20 @@ public class ScreenDataSharingLevelUpdaterTest extends AbstractTransactionalSpri
     // 3. add some results
     screen2HasActivity.createScreenResult();
     screen4HasNoLibraryScreeningActivity.createScreenResult();
-    
-    setComplete();
-    endTransaction();
 
-    // 3. find the ones with "old" activities (activity age > SCREEN_ACTIVITY_DATA_PRIVACY_EXPIRATION_AGE_DAYS
-    int ageToExpireFromActivityDateInDays =ScreenPrivacyExpirationUpdater.SCREEN_ACTIVITY_DATA_PRIVACY_EXPIRATION_AGE_DAYS;
-    startNewTransaction();
-    
+    genericEntityDao.persistEntity(screen1NoActivities);
+    genericEntityDao.persistEntity(screen2HasActivity);
+    genericEntityDao.persistEntity(screen3RnaiHasActivity);
+    genericEntityDao.persistEntity(screen4HasNoLibraryScreeningActivity);
+    flushAndClear();
+
+    // 4. find the ones with "old" activities (activity age > SCREEN_ACTIVITY_DATA_PRIVACY_EXPIRATION_AGE_DAYS
+    int ageToExpireFromActivityDateInDays = ScreenPrivacyExpirationUpdater.SCREEN_ACTIVITY_DATA_PRIVACY_EXPIRATION_AGE_DAYS;
+
     ScreenDataSharingLevelUpdater.DataPrivacyAdjustment adjustment = screenDataSharingLevelUpdater
         .adjustDataPrivacyExpirationByActivities(ageToExpireFromActivityDateInDays, admin);
 
-    setComplete();
-    endTransaction();
-    
-    startNewTransaction();
+    flushAndClear();
     
     screen1NoActivities = genericEntityDao.reloadEntity(screen1NoActivities);
     screen2HasActivity = genericEntityDao.reloadEntity(screen2HasActivity);
@@ -203,12 +183,13 @@ public class ScreenDataSharingLevelUpdaterTest extends AbstractTransactionalSpri
                  screen2HasActivity.getDataPrivacyExpirationDate());
     
   }
-  
-  public void testGetDataSharingLevelAdmins()
+
+  public void testGetDataSharingLevelAdmins() throws Exception
   {
-    setComplete();
-    endTransaction();
-    startNewTransaction();
+    initializeData();
+
+    flushAndClear();
+
     admin = genericEntityDao.reloadEntity(admin);
     otherDSLAdmin = genericEntityDao.reloadEntity(otherDSLAdmin);
     log.info("admin: " + admin);
@@ -220,9 +201,11 @@ public class ScreenDataSharingLevelUpdaterTest extends AbstractTransactionalSpri
     assertTrue("admins doesn't contain the admin", admins.contains(admin));
     assertTrue("admins should contain the ", admins.contains(otherDSLAdmin) );
   }
-  
-  public void testFindNewPublishedPrivate()
+
+  public void testFindNewPublishedPrivate() throws Exception
   {
+    initializeData();
+
     Screen screen1NotPublished = createScreen("SDSL TEST1 Not Published");
     genericEntityDao.persistEntity(screen1NotPublished);
 
@@ -271,10 +254,8 @@ public class ScreenDataSharingLevelUpdaterTest extends AbstractTransactionalSpri
     publication.setTitle("Test Publication Title xx");
     genericEntityDao.persistEntity(screen4Public);
 
-    setComplete();
-    endTransaction();
+    flushAndClear();
 
-    startNewTransaction();
     screen2Published = genericEntityDao.reloadEntity(screen2Published);
     screen3Mutual = genericEntityDao.reloadEntity(screen3Mutual);
     screen4Private = genericEntityDao.reloadEntity(screen4Private);
@@ -284,12 +265,15 @@ public class ScreenDataSharingLevelUpdaterTest extends AbstractTransactionalSpri
     assertEquals(Sets.newHashSet(screen2Published, screen3Mutual, screen4Private), publishedScreens);
   }
 
-  
   /**
-   * If this test is run by itself, it leaves the database in a state that is convenient for testing from the command line.
+   * If this test is run by itself, it leaves the database in a state that is convenient for testing from the command
+   * line.
    */
-  public void testThatSetsUpForCommandLineTest()
+  @Rollback(value = false)
+  public void testThatSetsUpForCommandLineTest() throws Exception
   {
+    initializeData();
+
     int daysToNofify = 60; 
     int daysToExpire = 790; // 2 years, 2months  (technically, a month is variable, using 30 days for all calculations)
     LocalDate today = new LocalDate();
@@ -326,10 +310,7 @@ public class ScreenDataSharingLevelUpdaterTest extends AbstractTransactionalSpri
     genericEntityDao.persistEntity(screen3AjustementOverridden);
     genericEntityDao.persistEntity(screen3aAjustementOverridden);
     genericEntityDao.persistEntity(screen4Published);
-    
-    setComplete();
-    endTransaction();
-
+    genericEntityDao.flush();
   }
     
   Screen screen1NotExpired = null;
@@ -341,8 +322,10 @@ public class ScreenDataSharingLevelUpdaterTest extends AbstractTransactionalSpri
   Screen screen7ExpiredDropped = null;
   Screen screen8ExpiredTransferred = null;
   
-  public void testFindExpired()
+  public void testFindExpired() throws Exception
   {
+    initializeData();
+
     LocalDate date = new LocalDate(new Date());
 
     screen1NotExpired = createScreen("SDSL TEST1");
@@ -382,9 +365,8 @@ public class ScreenDataSharingLevelUpdaterTest extends AbstractTransactionalSpri
     screen8ExpiredTransferred.createScreenResult();
     screen8ExpiredTransferred.createStatusItem(new LocalDate(), StatusValue.TRANSFERRED_TO_BROAD_INSTITUTE);
     genericEntityDao.persistEntity(screen8ExpiredTransferred);
-    
-    setComplete();
-    endTransaction();
+
+    flushAndClear();
 
 //    startNewTransaction();
     
@@ -430,15 +412,16 @@ public class ScreenDataSharingLevelUpdaterTest extends AbstractTransactionalSpri
   /**
    * Test the bulk expire method
    */
-  public void testExpire()
+  public void testExpire() throws Exception
   {
+    initializeData();
+
     LocalDate date = new LocalDate(new Date());
 
     testFindExpired();
-    setComplete();
-    endTransaction();   
-    startNewTransaction();
     
+    flushAndClear();
+
     screen1NotExpired = genericEntityDao.reloadEntity(screen1NotExpired);
     screen2Expired = genericEntityDao.reloadEntity(screen2Expired);
     screen3Expired = genericEntityDao.reloadEntity(screen3Expired);
@@ -477,46 +460,44 @@ public class ScreenDataSharingLevelUpdaterTest extends AbstractTransactionalSpri
     assertFalse("screen5RnaiExpired should not be expired: ", screens.contains(screen5RnaiExpired));
     assertTrue("screen5RnaiExpired should not be public: ", screen5RnaiExpired.getDataSharingLevel() != ScreenDataSharingLevel.MUTUAL_SCREENS );
   }
-  
+
   /**
    * Test the updates of single screens to various levels
    * TODO: should check the audit log too
+   * 
+   * @throws Exception
    */
-  public void testScreenDataSharingLevelUpdater()
+  public void testScreenDataSharingLevelUpdater() throws Exception
   {
+    initializeData();
     Screen screen = createScreen("SDSL TEST");
-    setComplete();
-    endTransaction();
     
-    startNewTransaction();
+    flushAndClear();
+
     screen = genericEntityDao.reloadEntity(screen);
     assertEquals(ScreenDataSharingLevel.PRIVATE, screen.getDataSharingLevel());
     screenDataSharingLevelUpdater.updateScreen(screen, ScreenDataSharingLevel.MUTUAL_SCREENS, admin);
-    setComplete();
-    endTransaction();
 
-    startNewTransaction();
+    flushAndClear();
+
     screen = genericEntityDao.reloadEntity(screen);
     assertEquals(ScreenDataSharingLevel.MUTUAL_SCREENS, screen.getDataSharingLevel());
     screenDataSharingLevelUpdater.updateScreen(screen, ScreenDataSharingLevel.MUTUAL_POSITIVES, admin);
-    setComplete();
-    endTransaction();
-    
-    startNewTransaction();
+
+    flushAndClear();
+
     screen = genericEntityDao.reloadEntity(screen);
     assertEquals(ScreenDataSharingLevel.MUTUAL_POSITIVES, screen.getDataSharingLevel());
     screenDataSharingLevelUpdater.updateScreen(screen, ScreenDataSharingLevel.SHARED, admin);
-    setComplete();
-    endTransaction();
 
-    startNewTransaction();
+    flushAndClear();
+
     screen = genericEntityDao.reloadEntity(screen);
     assertEquals(ScreenDataSharingLevel.SHARED, screen.getDataSharingLevel());
     screenDataSharingLevelUpdater.updateScreen(screen, ScreenDataSharingLevel.PRIVATE, admin);
-    setComplete();
-    endTransaction();
 
-    startNewTransaction();
+    flushAndClear();
+
     screen = genericEntityDao.reloadEntity(screen);
     assertEquals(ScreenDataSharingLevel.PRIVATE, screen.getDataSharingLevel());
   }

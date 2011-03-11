@@ -59,7 +59,7 @@
             value="${appserver.dir}/bin/shutdown.sh"
   />
 	<condition property="appserver.jprofiler.opts"
-             value="-agentlib:jprofilerti -Xbootclasspath/a:/usr/local/jprofiler/bin/agent.jar"
+             value="-agentlib:jprofilerti -Xbootclasspath/a:/usr/local/dev/jprofiler/bin/agent.jar"
              else=""
   >
 		<istrue value="${profile}" />
@@ -320,28 +320,31 @@
       Generate the schema create and drop DDL files from the Hibernate-annotated entity model bean classes.
     </description>
 
-		<antcall target="compile">
-			<param name="classes.dir" location="${ddl.build.dir}/classes" />
-		</antcall>
-
+    <antcall target="build">
+      <param name="build.dir" location="${ddl.build.dir}" />
+    </antcall>
+	  
 		<taskdef name="hibernatetool"
              classname="org.hibernate.tool.ant.HibernateToolTask"
-             classpathref="hibernatetools.classpath"
-    />
+             classpathref="hibernatetools.classpath" />
 		<hibernatetool destdir="${ddl.build.dir}">
-			<annotationconfiguration configurationfile="${hibernate.cfg.xml}"
-                               namingstrategy="org.hibernate.cfg.ImprovedNamingStrategy"
-      />
-			<hbm2ddl export="false"
-               format="true"
-               outputfilename="create_schema.sql"
-      />
-			<hbm2ddl create="false"
-               drop="true"
-               export="false"
-               format="true"
-               outputfilename="drop_schema.sql"
-      />
+		  <classpath>
+        <pathelement location="${ddl.build.dir}" />
+        <pathelement location="${ddl.build.dir}/classes" />
+		    <fileset dir="${ddl.build.dir}/lib">
+		      <include name="*.jar" />
+		    </fileset>
+      </classpath>
+  	  <jpaconfiguration persistenceunit="screensaverPersistenceUnit" 
+                        namingstrategy="org.hibernate.cfg.ImprovedNamingStrategy" />
+  			<hbm2ddl export="false"
+                 format="true"
+                 outputfilename="create_schema.sql" />
+  			<hbm2ddl create="false"
+                 drop="true"
+                 export="false"
+                 format="true"
+                 outputfilename="drop_schema.sql" />
 		</hibernatetool>
 	</target>
 
@@ -625,6 +628,7 @@
 			<param name="classes.dir" location="${classes.dir}" />
 		</antcall>
 
+        <copy todir="${build.dir}/META-INF/" verbose="${verbose}" file="web/META-INF/persistence.xml"/>
 
 		<copy todir="${build.dir}/lib" flatten="true" verbose="${verbose}">
 			<fileset refid="deploy.lib.fileset" />

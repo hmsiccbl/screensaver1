@@ -44,7 +44,7 @@ public class ScreenerSearchResults extends UserSearchResults<ScreeningRoomUser>
   @Transactional
   public void searchAssociatedUsers(ScreeningRoomUser screener)
   {
-    screener = _dao.reloadEntity(screener, true, "labHead", "labMembers");
+    screener = _dao.reloadEntity(screener, true, ScreeningRoomUser.LabHead.to(LabHead.labMembers));
     searchUsers(screener.getAssociatedUsers(), "Associates of screener " + screener.getFullNameFirstLast());
   }
 

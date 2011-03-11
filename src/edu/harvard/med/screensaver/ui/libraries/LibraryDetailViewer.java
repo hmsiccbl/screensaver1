@@ -118,7 +118,7 @@ public class LibraryDetailViewer extends EditableEntityViewerBackingBean<Library
   @Override
   protected void initializeEntity(Library entity)
   {
-    getDao().needReadOnly(entity, Library.updateActivities.to(Activity.performedBy).getPath());
+    getDao().needReadOnly(entity, Library.updateActivities.to(Activity.performedBy));
   }
   
   @Override

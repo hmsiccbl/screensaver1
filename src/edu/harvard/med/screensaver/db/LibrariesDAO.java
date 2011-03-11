@@ -9,7 +9,6 @@
 
 package edu.harvard.med.screensaver.db;
 
-import java.util.Collection;
 import java.util.Map;
 import java.util.Set;
 
@@ -68,11 +67,7 @@ public interface LibrariesDAO
 
   public boolean isPlateRangeAvailable(Integer startPlate, Integer endPlate);
 
-  public void loadOrCreateWellsForLibrary(Library library);
-
   public Map<Copy,Volume> findRemainingVolumesInWellCopies(Well well, CopyUsageType copyUsageType);
-
-  public Collection<String> findAllVendorNames();
 
   public int countExperimentalWells(int startPlate, int endPlate);
 

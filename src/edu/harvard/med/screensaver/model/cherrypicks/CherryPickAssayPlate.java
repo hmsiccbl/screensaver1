@@ -13,12 +13,12 @@ import java.util.HashSet;
 import java.util.Set;
 import java.util.SortedSet;
 
+import javax.persistence.CascadeType;
 import javax.persistence.Column;
 import javax.persistence.DiscriminatorColumn;
 import javax.persistence.DiscriminatorType;
 import javax.persistence.DiscriminatorValue;
 import javax.persistence.Entity;
-import javax.persistence.FetchType;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
@@ -198,7 +198,7 @@ public class CherryPickAssayPlate extends AbstractEntity<Integer> implements Com
    */
   @ManyToOne
   @JoinColumn(name="cherryPickRequestId", nullable=false, updatable=false)
-  @org.hibernate.annotations.Immutable
+  //@org.hibernate.annotations.Immutable
   @org.hibernate.annotations.ForeignKey(name="fk_cherry_pick_assay_plate_to_cherry_pick_request")
   @org.hibernate.annotations.LazyToOne(value=org.hibernate.annotations.LazyToOneOption.PROXY)
   public CherryPickRequest getCherryPickRequest()
@@ -216,7 +216,6 @@ public class CherryPickAssayPlate extends AbstractEntity<Integer> implements Com
    * @return the plate ordinal
    */
   @Column(nullable=false, updatable=false)
-  @org.hibernate.annotations.Immutable
   @org.hibernate.annotations.Type(type="integer")
   public Integer getPlateOrdinal()
   {
@@ -230,7 +229,6 @@ public class CherryPickAssayPlate extends AbstractEntity<Integer> implements Com
    * @return the attempt ordinal
    */
   @Column(nullable=false, updatable=false)
-  @org.hibernate.annotations.Immutable
   @org.hibernate.annotations.Type(type="integer")
   public Integer getAttemptOrdinal()
   {
@@ -267,7 +265,7 @@ public class CherryPickAssayPlate extends AbstractEntity<Integer> implements Com
    * LabCherryPick#setMapped(CherryPickAssayPlate, int, int)}.
    * @return the set of lab cherry picks mapped onto this cherry pick assay plate
    */
-  @OneToMany(mappedBy="assayPlate", fetch=FetchType.LAZY)
+  @OneToMany(mappedBy = "assayPlate", cascade = { CascadeType.MERGE })
   @edu.harvard.med.screensaver.model.annotations.ToMany(hasNonconventionalMutation=true)
   public Set<LabCherryPick> getLabCherryPicks()
   {
@@ -360,9 +358,6 @@ public class CherryPickAssayPlate extends AbstractEntity<Integer> implements Com
     if (_cherryPickLiquidTransfer != null) {
       _cherryPickLiquidTransfer.getCherryPickAssayPlates().add(this);
     }
-    if (cherryPickLiquidTransfer.getStatus() == CherryPickLiquidTransferStatus.SUCCESSFUL) {
-      cherryPickLiquidTransfer.getScreen().invalidate();
-    }
   }
 
   /**
@@ -370,7 +365,6 @@ public class CherryPickAssayPlate extends AbstractEntity<Integer> implements Com
    * @return the assay plate type
    */
   @Column(nullable=false, updatable=false)
-  @org.hibernate.annotations.Immutable
   @org.hibernate.annotations.Type(type="edu.harvard.med.screensaver.model.libraries.PlateType$UserType")
   public PlateType getAssayPlateType()
   {

@@ -9,10 +9,9 @@
 
 package edu.harvard.med.screensaver.model.libraries;
 
-import java.beans.IntrospectionException;
-
 import junit.framework.TestSuite;
 import org.joda.time.LocalDate;
+import org.springframework.beans.factory.annotation.Autowired;
 
 import edu.harvard.med.screensaver.db.DAOTransaction;
 import edu.harvard.med.screensaver.db.LibrariesDAO;
@@ -20,7 +19,6 @@ import edu.harvard.med.screensaver.model.AbstractEntityInstanceTest;
 import edu.harvard.med.screensaver.model.AdministrativeActivity;
 import edu.harvard.med.screensaver.model.AdministrativeActivityType;
 import edu.harvard.med.screensaver.model.DataModelViolationException;
-import edu.harvard.med.screensaver.model.EntityNetworkPersister;
 import edu.harvard.med.screensaver.model.MakeDummyEntities;
 import edu.harvard.med.screensaver.model.screenresults.DataColumn;
 import edu.harvard.med.screensaver.model.screenresults.ResultValue;
@@ -28,6 +26,7 @@ import edu.harvard.med.screensaver.model.screenresults.ScreenResult;
 import edu.harvard.med.screensaver.model.screens.Screen;
 import edu.harvard.med.screensaver.model.screens.ScreenType;
 import edu.harvard.med.screensaver.model.users.AdministratorUser;
+import edu.harvard.med.screensaver.service.libraries.LibraryCreator;
 
 public class WellTest extends AbstractEntityInstanceTest<Well>
 {
@@ -36,9 +35,13 @@ public class WellTest extends AbstractEntityInstanceTest<Well>
     return buildTestSuite(WellTest.class, Well.class);
   }
 
+  @Autowired
   protected LibrariesDAO librariesDao;
+  @Autowired
+  protected LibraryCreator libraryCreator;
 
-  public WellTest() throws IntrospectionException
+
+  public WellTest()
   {
     super(Well.class);
   }
@@ -46,7 +49,7 @@ public class WellTest extends AbstractEntityInstanceTest<Well>
 
   public void testResultValueMap()
   {
-    schemaUtil.truncateTablesOrCreateSchema();
+    schemaUtil.truncateTables();
     genericEntityDao.doInTransaction(new DAOTransaction() {
       public void runTransaction() {
         Library library = MakeDummyEntities.makeDummyLibrary(1, ScreenType.SMALL_MOLECULE, 1);
@@ -78,13 +81,13 @@ public class WellTest extends AbstractEntityInstanceTest<Well>
 
   public void testDeprecation()
   {
-    schemaUtil.truncateTablesOrCreateSchema();
+    schemaUtil.truncateTables();
     initDeprecatedWells();
 
     Well well = genericEntityDao.findEntityById(Well.class,
                                                 new WellKey(1000, "A01").toString(),
                                                 true,
-                                                "deprecationActivity");
+                                                Well.deprecationActivity);
     assertTrue(well.isDeprecated());
     assertEquals("discontinued gene", well.getDeprecationActivity().getComments());
   }
@@ -117,7 +120,7 @@ public class WellTest extends AbstractEntityInstanceTest<Well>
         Library library = MakeDummyEntities.makeDummyLibrary(1, ScreenType.SMALL_MOLECULE, 1);
         genericEntityDao.persistEntity(library);
         Well well = genericEntityDao.findEntityById(Well.class, new WellKey(1000, "A01").toString());
-        AdministratorUser admin = new AdministratorUser("Admin2", "User", "admin_user@hms.harvard.edu", "", "", "", "admin2", "");
+        AdministratorUser admin = new AdministratorUser("Admin2", "User");
         AdministrativeActivity deprecationActivity =
           new AdministrativeActivity(admin,
                                      new LocalDate(),
@@ -130,12 +133,12 @@ public class WellTest extends AbstractEntityInstanceTest<Well>
   
   public void testWellEdge()
   {
-    schemaUtil.truncateTablesOrCreateSchema();
+    schemaUtil.truncateTables();
     Library library = dataFactory.newInstance(Library.class);
     library.setStartPlate(1);
     library.setEndPlate(1);
     library.setPlateSize(PlateSize.WELLS_96);
-    librariesDao.loadOrCreateWellsForLibrary(library);
+    libraryCreator.createWells(library);
     for (Well well : library.getWells()) {
         assertEquals("is edge @ " + well.getWellName(),
                      well.isEdgeWell(),
@@ -148,14 +151,12 @@ public class WellTest extends AbstractEntityInstanceTest<Well>
   
   public void testLibraryWellTypeMutability()
   {
-    schemaUtil.truncateTablesOrCreateSchema();
+    schemaUtil.truncateTables();
     Well well = dataFactory.newInstance(Well.class);
     well.setLibraryWellType(LibraryWellType.UNDEFINED);
     well.setLibraryWellType(LibraryWellType.EXPERIMENTAL);
     well.setLibraryWellType(LibraryWellType.UNDEFINED);
-    new EntityNetworkPersister(genericEntityDao, well).persistEntityNetwork();
     well.setLibraryWellType(LibraryWellType.EXPERIMENTAL);
-    new EntityNetworkPersister(genericEntityDao, well).persistEntityNetwork();
     try {
       well.setLibraryWellType(LibraryWellType.DMSO);
       fail("expecting DataModelViolationException");

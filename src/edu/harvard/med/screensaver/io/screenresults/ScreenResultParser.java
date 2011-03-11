@@ -654,9 +654,9 @@ public class ScreenResultParser implements ScreenResultWorkbookSpecification
         _genericEntityDao.saveOrUpdateEntity(assayWell);
       }
       screenResult.getAssayWells().clear();
+      _genericEntityDao.flush();
+      _genericEntityDao.clear();
     }
-    _genericEntityDao.flush();
-    _genericEntityDao.clear();
   }
 
   private void readResultValues(ScreenResult screenResult, Row row, Well well, boolean incrementalFlush)

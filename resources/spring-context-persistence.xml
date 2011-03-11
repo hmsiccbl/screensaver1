@@ -20,7 +20,7 @@
                       http://www.springframework.org/schema/tx http://www.springframework.org/schema/tx/spring-tx-2.0.xsd
                       http://www.springframework.org/schema/aop http://www.springframework.org/schema/aop/spring-aop-2.0.xsd">
 
-  <!-- Data sources -->
+  <!-- Data source -->
 
   <bean
     id="screensaverDataSource"
@@ -44,183 +44,112 @@
       name="minIdle"
       value="0" />
   </bean>
-
-  <!--  Register EntityUpdater domain logic classes here.  See edu.harvard.med.screensaver.domainlogic package-info.html -->
-  <!-- TODO: implement a mechanism to auto-detect and register all EntityUpdater classes, rather than having to explicitly register them here -->
-  <bean id="entityUpdatersList" class="java.util.ArrayList">
-    <constructor-arg>
-      <list>
-        <bean class="edu.harvard.med.screensaver.domainlogic.ScreenEntityUpdater">
-          <constructor-arg ref="genericEntityDao"/>
-          <constructor-arg ref="screenDao"/>
-        </bean>
-        <bean class="edu.harvard.med.screensaver.domainlogic.LibraryScreeningEntityUpdater">
-          <constructor-arg ref="librariesDao"/>
-        </bean>
-      </list>
-    </constructor-arg>
-  </bean>
+  
+  <bean name="entityViewPolicyInjector" class="edu.harvard.med.screensaver.db.accesspolicy.EntityViewPolicyInjectorPostLoadEventListener" />
 
 
-  <!-- Hibernate configuration -->
-
-
-  <bean
-    id="hibernateSessionFactory"
-    class="org.springframework.orm.hibernate3.annotation.AnnotationSessionFactoryBean">
-    <!-- Have Spring gather settings from the hibernate.cfg.xml file -->
-    <property
-      name="configLocation"
-      value="classpath:hibernate.cfg.xml" />
-    <!-- Specify the DataSource.  Overrides the datasource found in hibernate.cfg.xml.  -->
-    <property
-      name="dataSource"
-      ref="screensaverDataSource" />
-    <!-- Use a naming strategy that uses underscores in schema's field names -->
-    <property name="namingStrategy">
-      <bean
-        id="org.hibernate.cfg.ImprovedNamingStrategy.INSTANCE"
-        class="org.springframework.beans.factory.config.FieldRetrievingFactoryBean" />
+  <bean id="entityManagerFactory" class="org.springframework.orm.jpa.LocalContainerEntityManagerFactoryBean">
+    <property name="dataSource" ref="screensaverDataSource"/>
+    <property name="persistenceXmlLocation" value="META-INF/persistence.xml" />
+    <property name="persistenceProvider">
+      <bean class="org.hibernate.ejb.ConfigurableListenerBeansHibernatePersistence">
+        <property name="postLoadEventListeners">
+          <list>
+            <ref bean="entityViewPolicyInjector" />
+          </list>
+        </property>
+        <property name="persistEventListeners">
+          <list>
+            <ref bean="entityViewPolicyInjector" />
+          </list>
+        </property>
+        <property name="mergeEventListeners">
+          <list>
+            <ref bean="entityViewPolicyInjector" />
+          </list>
+        </property>
+        <property name="saveOrUpdateEventListeners">
+          <list>
+            <ref bean="entityViewPolicyInjector" />
+          </list>
+        </property>
+      </bean>
     </property>
-    <!-- Release database connections after a transaction completes.  -->
-    <property name="hibernateProperties">
-      <props>
-        <prop key="hibernate.connection.release_mode">
-          after_transaction
-        </prop>
-        <prop key="hibernate.jdbc.batch_size">
-          50
-        </prop>
-	   	<prop key="hibernate.jdbc.batch_versioned_data">true</prop>
-    	<prop key="hibernate.order_inserts">true</prop>
-    	<prop key="hibernate.order_updates">true</prop>
-      </props>
-    </property>
-    <property name="eventListeners">
+    <property name="jpaPropertyMap">
       <map>
-        <entry key="post-load">
-          <list>
-            <bean class="edu.harvard.med.screensaver.db.accesspolicy.EntityViewPolicyInjectorPostLoadEventListener" />
-            <bean class="edu.harvard.med.screensaver.domainlogic.EntityUpdatersInjector" />
-          </list>
-        </entry>
-        <entry key="save-update">
-          <list>
-            <bean class="org.hibernate.event.def.DefaultSaveOrUpdateEventListener" />
-            <bean class="edu.harvard.med.screensaver.domainlogic.EntityUpdatersInjector" />
-          </list>
-        </entry>
-        <entry key="merge">
-          <list>
-            <bean class="org.hibernate.event.def.DefaultMergeEventListener" />
-            <bean class="edu.harvard.med.screensaver.domainlogic.EntityUpdatersInjector" />
-          </list>
-        </entry>
       </map>
     </property>
   </bean>
-
-  <!-- The bean through which our application will access Hibernate, and thus our persistent data.
-    Inject this bean into our application's persistence-aware classes.  -->
-  <bean
-    id="hibernateTemplate"
-    class="org.springframework.orm.hibernate3.HibernateTemplate">
-    <property
-      name="sessionFactory"
-      ref="hibernateSessionFactory" />
-    <property
-      name="flushModeName"
-      value="FLUSH_COMMIT" />
-  </bean>
-
 
   <!-- Transactional support -->
 
   <!-- enable the configuration of transactional behavior based on annotations -->
   <!-- we (arbitrarily) use order="16" to allow other advice to be execute "outside" (before & after) transactional scope -->
+
   <tx:annotation-driven transaction-manager="transactionManager" proxy-target-class="true" order="16"/>
 
-  <bean
-    id="transactionManager"
-    class="org.springframework.orm.hibernate3.HibernateTransactionManager">
-    <property
-      name="sessionFactory"
-      ref="hibernateSessionFactory" />
-    <property
-      name="nestedTransactionAllowed"
-      value="true" />
+  <bean id="transactionManager" class="org.springframework.orm.jpa.JpaTransactionManager">
+    <property name="entityManagerFactory" ref="entityManagerFactory"/>
+    <property name="nestedTransactionAllowed" value="true" />
+    <property name="jpaPropertyMap">
+      <map>
+        <entry key="org.hibernate.flushMode" value="COMMIT" />
+      </map>
+    </property>
   </bean>
+  
+  <!--  TODO: autoflush setting? (was turned off, previoulsy) -->
 
   <!-- end of transactional support configuration -->
 
+  <!-- have Spring inject EntityManager into (DAO) beans having @PersistenceContext -->
+  <bean class="org.springframework.orm.jpa.support.PersistenceAnnotationBeanPostProcessor"/>
 
-  <bean
-    id="schemaUtil"
-    class="edu.harvard.med.screensaver.db.SchemaUtil">
-    <property name="sessionFactoryBeanId">
-      <idref bean="hibernateSessionFactory" />
-    </property>
-    <property
-      name="hibernateTemplate"
-      ref="hibernateTemplate" />
-    <property
-      name="usersDao"
-      ref="usersDao" />
-  </bean>
-
-
+  
   <!-- Data Access Object (DAO) beans -->
 
   <bean
     id="genericEntityDao"
     class="edu.harvard.med.screensaver.db.GenericEntityDAOImpl">
-    <property
-      name="hibernateTemplate"
-      ref="hibernateTemplate" />
   </bean>
   
   <bean
     id="usersDao"
     class="edu.harvard.med.screensaver.db.UsersDAO">
-    <property
-      name="hibernateTemplate"
-      ref="hibernateTemplate" />
   </bean>
 
   <bean
     id="librariesDao"
     class="edu.harvard.med.screensaver.db.LibrariesDAOImpl">
     <constructor-arg ref="genericEntityDao" />
-    <property
-      name="hibernateTemplate"
-      ref="hibernateTemplate" />
   </bean>
 
   <bean
     id="screenDao"
     class="edu.harvard.med.screensaver.db.ScreenDAOImpl">
     <constructor-arg ref="genericEntityDao" />
-    <property
-      name="hibernateTemplate"
-      ref="hibernateTemplate" />
   </bean>
 
   <bean
     id="screenResultsDao"
     class="edu.harvard.med.screensaver.db.ScreenResultsDAOImpl">
     <constructor-arg ref="genericEntityDao" />
-    <property
-      name="hibernateTemplate"
-      ref="hibernateTemplate" />
   </bean>
 
   <bean
     id="cherryPickRequestDao"
     class="edu.harvard.med.screensaver.db.CherryPickRequestDAO">
     <constructor-arg ref="genericEntityDao" />
-    <property
-      name="hibernateTemplate"
-      ref="hibernateTemplate" />
   </bean>
+  
+  
+  <bean
+    id="schemaUtil"
+    class="edu.harvard.med.screensaver.db.SchemaUtil">
+    <property
+      name="usersDao"
+      ref="usersDao" />
+  </bean>
+    
 
 </beans>

@@ -29,8 +29,6 @@ import edu.harvard.med.screensaver.model.AbstractEntityInstanceTest;
 import edu.harvard.med.screensaver.model.AttachedFile;
 import edu.harvard.med.screensaver.model.BusinessRuleViolationException;
 import edu.harvard.med.screensaver.model.DataModelViolationException;
-import edu.harvard.med.screensaver.model.DomainModelDefinitionException;
-import edu.harvard.med.screensaver.model.TestDataFactory;
 import edu.harvard.med.screensaver.model.screens.ProjectPhase;
 import edu.harvard.med.screensaver.model.screens.Screen;
 import edu.harvard.med.screensaver.model.screens.ScreenAttachedFileType;
@@ -45,20 +43,9 @@ public class ScreeningRoomUserTest extends AbstractEntityInstanceTest<ScreeningR
     return buildTestSuite(ScreeningRoomUserTest.class, ScreeningRoomUser.class);
   }
 
-  public ScreeningRoomUserTest() throws IntrospectionException
+  public ScreeningRoomUserTest()
   {
     super(ScreeningRoomUser.class);
-    dataFactory = new TestDataFactory() {
-      @Override
-      public <T> T getTestValueForType(Class<T> type) throws DomainModelDefinitionException
-      {
-        if (getName().endsWith("screensaverUserRoles") &&
-          ScreensaverUserRole.class.isAssignableFrom(type)) {
-           return (T) ScreensaverUserRole.SCREENSAVER_USER;
-        }
-        return super.getTestValueForType(type);
-      }
-    };
   }
 
   public void testUserDigestedPassword()
@@ -92,7 +79,7 @@ public class ScreeningRoomUserTest extends AbstractEntityInstanceTest<ScreeningR
                                                                         "lastName",
                                                                         "Member",
                                                                         true,
-                                                                        "labHead.labAffiliation");
+                                                                        ScreeningRoomUser.LabHead.to(LabHead.labAffiliation));
     assertEquals("lab member with lab head", "Head, Lab - labAffiliation", labMember.getLab().getLabName());
     ScreeningRoomUser labHead = labMember.getLab().getLabHead();
     assertEquals("lab head", "Head, Lab - labAffiliation", labHead.getLab().getLabName());
@@ -105,12 +92,12 @@ public class ScreeningRoomUserTest extends AbstractEntityInstanceTest<ScreeningR
     user.addScreensaverUserRole(ScreensaverUserRole.RNAI_SCREENS);
     genericEntityDao.saveOrUpdateEntity(user);
 
-    ScreeningRoomUser user2 = genericEntityDao.findEntityById(ScreeningRoomUser.class, user.getEntityId(), false, "screensaverUserRoles");
+    ScreeningRoomUser user2 = genericEntityDao.findEntityById(ScreeningRoomUser.class, user.getEntityId(), false, ScreensaverUser.roles.castToSubtype(ScreeningRoomUser.class));
     assertEquals(Sets.newHashSet(ScreensaverUserRole.RNAI_SCREENS),
                  user2.getScreensaverUserRoles());
 
     try {
-      ScreeningRoomUser user3 = genericEntityDao.findEntityById(ScreeningRoomUser.class, user.getEntityId(), false, "screensaverUserRoles");
+      ScreeningRoomUser user3 = genericEntityDao.findEntityById(ScreeningRoomUser.class, user.getEntityId(), false, ScreensaverUser.roles.castToSubtype(ScreeningRoomUser.class));
       user3.addScreensaverUserRole(ScreensaverUserRole.READ_EVERYTHING_ADMIN);
       fail("expected DataModelViolationException after adding administrative role to screening room user");
     }
@@ -176,7 +163,7 @@ public class ScreeningRoomUserTest extends AbstractEntityInstanceTest<ScreeningR
 
   public void testUserWithoutLab()
   {
-    schemaUtil.truncateTablesOrCreateSchema();
+    schemaUtil.truncateTables();
     genericEntityDao.doInTransaction(new DAOTransaction()
     {
       public void runTransaction()
@@ -216,7 +203,7 @@ public class ScreeningRoomUserTest extends AbstractEntityInstanceTest<ScreeningR
                                             "lastName",
                                             "Member",
                                             true,
-                                            "labHead.labAffiliation");
+                                            ScreeningRoomUser.LabHead.to(LabHead.labAffiliation));
     assertEquals("Head2, Lab - LabAffiliation2", labMember.getLab().getLabName());
 
   }
@@ -233,7 +220,7 @@ public class ScreeningRoomUserTest extends AbstractEntityInstanceTest<ScreeningR
                                                 "lastName",
                                                 "Member",
                                                 false,
-                                                "labHead.labAffiliation");
+                                                ScreeningRoomUser.LabHead.to(LabHead.labAffiliation));
         assertEquals("Head, Lab - labAffiliation", labMember.getLab().getLabName());
         labMember.setLab(null);
       }
@@ -244,7 +231,7 @@ public class ScreeningRoomUserTest extends AbstractEntityInstanceTest<ScreeningR
                                             "lastName",
                                             "Member",
                                             true,
-                                            "labHead.labAffiliation");
+                                            ScreeningRoomUser.LabHead.to(LabHead.labAffiliation));
     assertEquals("", labMember.getLab().getLabName());
     assertEquals("", labMember.getLab().getLabAffiliationName());
     assertNull(labMember.getLab().getLabAffiliation());
@@ -259,7 +246,7 @@ public class ScreeningRoomUserTest extends AbstractEntityInstanceTest<ScreeningR
                                             "lastName",
                                             "Member",
                                             false,
-                                            "labHead.labAffiliation");
+                                            ScreeningRoomUser.LabHead.to(LabHead.labAffiliation));
     try {
       assertFalse(labMember.isHeadOfLab());
       labMember.setUserClassification(ScreeningRoomUserClassification.GRADUATE_STUDENT); // allowed
@@ -291,20 +278,20 @@ public class ScreeningRoomUserTest extends AbstractEntityInstanceTest<ScreeningR
   
   public void testChecklistItemEvents()
   {
-    schemaUtil.truncateTablesOrCreateSchema();
+    schemaUtil.truncateTables();
     genericEntityDao.doInTransaction(new DAOTransaction() {
       public void runTransaction()
       {
         genericEntityDao.persistEntity(new ChecklistItem("trained", false, ChecklistItemGroup.NON_HARVARD_SCREENERS, 1));
         genericEntityDao.persistEntity(new ChecklistItem("lab access", true, ChecklistItemGroup.NON_HARVARD_SCREENERS, 2));
-        AdministratorUser admin = new AdministratorUser("Admin", "User", "admin_user@hms.harvard.edu", "", "", "", "", "");
+        AdministratorUser admin = new AdministratorUser("Admin", "User");
         ScreeningRoomUser user = new ScreeningRoomUser("Lab", "User");
         genericEntityDao.persistEntity(admin);
         genericEntityDao.persistEntity(user);
       }
     });
-    ScreeningRoomUser user = genericEntityDao.findEntityByProperty(ScreeningRoomUser.class, "firstName", "Lab", false, "checklistItemEvents");
-    AdministratorUser admin = genericEntityDao.findEntityByProperty(AdministratorUser.class, "firstName", "Admin", false, "activitiesPerformed");
+    ScreeningRoomUser user = genericEntityDao.findEntityByProperty(ScreeningRoomUser.class, "firstName", "Lab", false, ScreeningRoomUser.checklistItemEvents);
+    AdministratorUser admin = genericEntityDao.findEntityByProperty(AdministratorUser.class, "firstName", "Admin", false, ScreensaverUser.activitiesPerformed.castToSubtype(AdministratorUser.class));
     ChecklistItem checklistItem = genericEntityDao.findEntityByProperty(ChecklistItem.class, "itemName", "lab access");
     LocalDate today = new LocalDate();
     ChecklistItemEvent activationEvent = 
@@ -342,7 +329,7 @@ public class ScreeningRoomUserTest extends AbstractEntityInstanceTest<ScreeningR
   static void initLab(final GenericEntityDAO dao,
                       SchemaUtil schemaUtil)
   {
-    schemaUtil.truncateTablesOrCreateSchema();
+    schemaUtil.truncateTables();
     dao.doInTransaction(new DAOTransaction()
     {
       public void runTransaction()
@@ -377,12 +364,12 @@ public class ScreeningRoomUserTest extends AbstractEntityInstanceTest<ScreeningR
     
     genericEntityDao.doInTransaction(new DAOTransaction() {
       public void runTransaction() {
-        ScreeningRoomUser user = (ScreeningRoomUser) genericEntityDao.findEntityByProperty(ScreeningRoomUser.class, "lastName", "Head", true, "attachedFiles");
+        ScreeningRoomUser user = (ScreeningRoomUser) genericEntityDao.findEntityByProperty(ScreeningRoomUser.class, "lastName", "Head", true, ScreeningRoomUser.attachedFiles);
         assertEquals("add attached file to user", 1, user.getAttachedFiles().size());
         try {
           assertEquals("attached file contents accessible",
                        "file1 contents",
-                       IOUtils.toString(user.getAttachedFiles().iterator().next().getFileContents().getBinaryStream()));
+                       IOUtils.toString(user.getAttachedFiles().iterator().next().getFileContents()));
         }
         catch (Exception e) {
           throw new DAOTransactionRollbackException(e);
@@ -390,13 +377,14 @@ public class ScreeningRoomUserTest extends AbstractEntityInstanceTest<ScreeningR
       }
     });
 
-    ScreeningRoomUser user = genericEntityDao.findEntityByProperty(ScreeningRoomUser.class, "lastName", "Head", false, "attachedFiles");
+    ScreeningRoomUser user = genericEntityDao.findEntityByProperty(ScreeningRoomUser.class, "lastName", "Head", false, ScreeningRoomUser.attachedFiles);
     Iterator<AttachedFile> iter = user.getAttachedFiles().iterator();
     AttachedFile attachedFile = iter.next();
     user.getAttachedFiles().remove(attachedFile);
-    genericEntityDao.saveOrUpdateEntity(user);
-    user = genericEntityDao.findEntityByProperty(ScreeningRoomUser.class, "lastName", "Head", true, "attachedFiles");
+    genericEntityDao.mergeEntity(user);
+    user = genericEntityDao.findEntityByProperty(ScreeningRoomUser.class, "lastName", "Head", true, ScreeningRoomUser.attachedFiles);
     assertEquals("delete attached file from detached user", 0, user.getAttachedFiles().size());
+    assertNull(genericEntityDao.reloadEntity(attachedFile));
   }
   
   public void testUpdateFacilityUsageRolesForAssociatedScreens()

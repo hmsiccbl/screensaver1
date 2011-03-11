@@ -13,9 +13,12 @@ import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
 import java.lang.reflect.Type;
 
+import javax.persistence.EntityManagerFactory;
+import javax.persistence.metamodel.IdentifiableType;
+import javax.persistence.metamodel.ManagedType;
+import javax.persistence.metamodel.SingularAttribute;
+
 import org.apache.log4j.Logger;
-import org.hibernate.SessionFactory;
-import org.hibernate.metadata.ClassMetadata;
 
 import edu.harvard.med.screensaver.model.AbstractEntity;
 
@@ -28,7 +31,7 @@ extends AbstractEntityTester<E>
 {
   private static Logger log = Logger.getLogger(IdentifierAccessorModifiersTester.class);
   
-  public IdentifierAccessorModifiersTester(Class<E> entityClass, SessionFactory sessionFactory)
+  public IdentifierAccessorModifiersTester(Class<E> entityClass, EntityManagerFactory sessionFactory)
   {
     super(entityClass, sessionFactory);
   }
@@ -51,8 +54,11 @@ extends AbstractEntityTester<E>
       return;
     }
     
-    ClassMetadata classMetadata = _sessionFactory.getClassMetadata(_entityClass);
-    String identifierPropertyName = classMetadata.getIdentifierPropertyName();
+    String identifierPropertyName;
+    ManagedType<? extends AbstractEntity> type = _entityManagerFactory.getMetamodel().managedType(_entityClass);
+    Class idType = ((IdentifiableType) type).getIdType().getJavaType();
+    SingularAttribute id = ((IdentifiableType) type).getId(idType);
+    identifierPropertyName = id.getName();
     
     Method identifierGetter = ModelIntrospectionUtil.getGetterMethodForPropertyName(_entityClass, identifierPropertyName);
     assertTrue("public entity ID getter for " + _entityClass,

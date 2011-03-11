@@ -22,7 +22,7 @@ public class AbaseTestsetTest extends AbstractEntityInstanceTest<AbaseTestset>
     return buildTestSuite(AbaseTestsetTest.class, AbaseTestset.class);
   }
 
-  public AbaseTestsetTest() throws IntrospectionException
+  public AbaseTestsetTest()
   {
     super(AbaseTestset.class);
   }

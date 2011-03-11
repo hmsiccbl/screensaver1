@@ -9,10 +9,10 @@
 
 package edu.harvard.med.screensaver.model.cherrypicks;
 
-import java.beans.IntrospectionException;
 import java.util.List;
 
 import junit.framework.TestSuite;
+import org.springframework.beans.factory.annotation.Autowired;
 
 import edu.harvard.med.screensaver.db.CherryPickRequestDAO;
 import edu.harvard.med.screensaver.db.LibrariesDAO;
@@ -30,17 +30,19 @@ public abstract class CherryPickRequestTest<CPR extends CherryPickRequest> exten
     return buildTestSuite(CherryPickRequestTest.class, CherryPickRequest.class);
   }
 
+  @Autowired
   protected CherryPickRequestDAO cherryPickRequestDao;
+  @Autowired
   protected LibrariesDAO librariesDao;
   
-  public CherryPickRequestTest(Class<CPR> clazz) throws IntrospectionException
+  public CherryPickRequestTest(Class<CPR> clazz)
   {
     super(clazz);
   }
 
   public void testGetActiveCherryPickAssayPlates()
   {
-    schemaUtil.truncateTablesOrCreateSchema();
+    schemaUtil.truncateTables();
     Screen screen = MakeDummyEntities.makeDummyScreen(1, ScreenType.RNAI);
     CherryPickRequest cherryPickRequest = screen.createCherryPickRequest((AdministratorUser) screen.getCreatedBy());
     for (int plateOrdinal = 0; plateOrdinal < 3; ++plateOrdinal) {

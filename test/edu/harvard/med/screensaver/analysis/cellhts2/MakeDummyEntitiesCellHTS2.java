@@ -28,9 +28,7 @@ import org.joda.time.LocalDate;
 import edu.harvard.med.screensaver.model.AdministrativeActivity;
 import edu.harvard.med.screensaver.model.AdministrativeActivityType;
 import edu.harvard.med.screensaver.model.MakeDummyEntities;
-import edu.harvard.med.screensaver.model.TestDataFactory;
 import edu.harvard.med.screensaver.model.libraries.Library;
-import edu.harvard.med.screensaver.model.libraries.LibraryContentsVersion;
 import edu.harvard.med.screensaver.model.libraries.LibraryType;
 import edu.harvard.med.screensaver.model.libraries.LibraryWellType;
 import edu.harvard.med.screensaver.model.libraries.PlateSize;
@@ -54,8 +52,6 @@ public class MakeDummyEntitiesCellHTS2
                                                                                                        "C01", AssayWellControlType.ASSAY_CONTROL_SHARED);
 
   // static members
-  private static TestDataFactory dataFactory = new TestDataFactory();
-
   private static Logger log = Logger.getLogger(MakeDummyEntitiesCellHTS2.class);
 
   public static Library makeSimpleDummyLibrary(int id,
@@ -100,9 +96,8 @@ public class MakeDummyEntitiesCellHTS2
                                   endPlate,
                                   PlateSize.WELLS_384);
 
-    dataFactory.newInstance(LibraryContentsVersion.class, library);
+    library.createContentsVersion(null);
     library.getLatestContentsVersion().release(new AdministrativeActivity((AdministratorUser) library.getLatestContentsVersion().getLoadingActivity().getPerformedBy(), new LocalDate(), AdministrativeActivityType.LIBRARY_CONTENTS_VERSION_RELEASE));
-    
     
     List<Well> wells = new ArrayList<Well>(nWells);
     for (int i = 0; i < nWells; ++i) {

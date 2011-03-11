@@ -13,7 +13,6 @@ import edu.harvard.med.screensaver.model.cherrypicks.CherryPickAssayPlate;
 import edu.harvard.med.screensaver.model.cherrypicks.CherryPickLiquidTransfer;
 import edu.harvard.med.screensaver.model.cherrypicks.LabCherryPick;
 import edu.harvard.med.screensaver.model.cherrypicks.RNAiCherryPickRequest;
-import edu.harvard.med.screensaver.model.cherrypicks.RNAiKnockdownConfirmation;
 import edu.harvard.med.screensaver.model.cherrypicks.ScreenerCherryPick;
 import edu.harvard.med.screensaver.model.cherrypicks.SmallMoleculeCherryPickRequest;
 import edu.harvard.med.screensaver.model.libraries.Copy;
@@ -102,7 +101,6 @@ public interface AbstractEntityVisitor
   public boolean visit(DataColumn entity);
   public boolean visit(RNAiCherryPickRequest entity);
   public boolean visit(CherryPickScreening entity);
-  public boolean visit(RNAiKnockdownConfirmation entity);
   public boolean visit(Screen screen);
   public boolean visit(ScreenResult screenResult);
   public boolean visit(ScreenerCherryPick entity);

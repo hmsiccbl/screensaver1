@@ -12,9 +12,9 @@ package edu.harvard.med.screensaver.model;
 
 import java.io.IOException;
 import java.io.InputStream;
-import java.sql.Blob;
 import java.util.SortedSet;
 
+import javax.persistence.Basic;
 import javax.persistence.CascadeType;
 import javax.persistence.Column;
 import javax.persistence.Entity;
@@ -31,12 +31,13 @@ import javax.persistence.Table;
 import javax.persistence.UniqueConstraint;
 import javax.persistence.Version;
 
+import org.apache.commons.io.IOUtils;
 import org.apache.log4j.Logger;
-import org.hibernate.Hibernate;
-import org.hibernate.annotations.Immutable;
 import org.hibernate.annotations.Sort;
 import org.hibernate.annotations.SortType;
+import org.hibernate.annotations.Type;
 
+import edu.harvard.med.screensaver.model.annotations.ContainedEntity;
 import edu.harvard.med.screensaver.model.annotations.ToMany;
 import edu.harvard.med.screensaver.model.annotations.ToOne;
 import edu.harvard.med.screensaver.model.meta.Cardinality;
@@ -53,6 +54,7 @@ import edu.harvard.med.screensaver.model.users.ScreeningRoomUser;
 @Entity
 @Table(uniqueConstraints={ @UniqueConstraint(columnNames={ "screenId", "screensaverUserId", "filename" }) })
 @org.hibernate.annotations.Proxy
+@ContainedEntity(containingEntityClass = Screen.class, containingEntityClasses = { Screen.class, ScreeningRoomUser.class })
 public class AttachedFile extends AuditedAbstractEntity<Integer> implements Comparable<AttachedFile>
 {
 
@@ -73,7 +75,7 @@ public class AttachedFile extends AuditedAbstractEntity<Integer> implements Comp
   private ScreeningRoomUser _screeningRoomUser;
   private String _filename;
   private AttachedFileType _fileType;
-  private Blob _fileContents;
+  private byte[] _fileContents;
 
 
   // public constructor
@@ -118,7 +120,6 @@ public class AttachedFile extends AuditedAbstractEntity<Integer> implements Comp
   @ManyToOne(fetch=FetchType.LAZY,
              cascade={ CascadeType.PERSIST, CascadeType.MERGE })
   @JoinColumn(name="screenId", nullable=true, updatable=false)
-  @org.hibernate.annotations.Immutable
   @org.hibernate.annotations.ForeignKey(name="fk_attached_file_to_screen")
   @org.hibernate.annotations.LazyToOne(value=org.hibernate.annotations.LazyToOneOption.PROXY)
   @ToOne(hasNonconventionalSetterMethod=true /* mutually-exclusive parenting relationships */) 
@@ -135,7 +136,6 @@ public class AttachedFile extends AuditedAbstractEntity<Integer> implements Comp
   @ManyToOne(fetch=FetchType.LAZY,
              cascade={ CascadeType.PERSIST, CascadeType.MERGE })
   @JoinColumn(name="screensaverUserId", nullable=true, updatable=false)
-  @org.hibernate.annotations.Immutable
   @org.hibernate.annotations.ForeignKey(name="fk_attached_file_to_screening_room_user")
   @org.hibernate.annotations.LazyToOne(value=org.hibernate.annotations.LazyToOneOption.PROXY)
   @ToOne(hasNonconventionalSetterMethod=true /* mutually-exclusive parenting relationships */) 
@@ -189,10 +189,11 @@ public class AttachedFile extends AuditedAbstractEntity<Integer> implements Comp
    * Get the file contents.
    * @return the file contents
    */
-  @Column(nullable=false, updatable=false)
-  @Immutable
   @Lob
-  public Blob getFileContents()
+  @Basic(fetch = FetchType.LAZY)
+  @Column(nullable = false, updatable = false)
+  @Type(type = "org.hibernate.type.PrimitiveByteArrayBlobType")
+  public byte[] getFileContents()
   {
     return _fileContents;
   }
@@ -201,7 +202,7 @@ public class AttachedFile extends AuditedAbstractEntity<Integer> implements Comp
    * Set the file contents.
    * @param fileContents the new file contents
    */
-  private void setFileContents(Blob fileContents)
+  private void setFileContents(byte[] fileContents)
   {
     _fileContents = fileContents;
   }
@@ -229,7 +230,7 @@ public class AttachedFile extends AuditedAbstractEntity<Integer> implements Comp
     _screen = screen;
     _filename = filename;
     _fileType = fileType;
-    _fileContents = Hibernate.createBlob(fileContents);
+    _fileContents = IOUtils.toByteArray(fileContents);
   }
 
   /**
@@ -252,7 +253,8 @@ public class AttachedFile extends AuditedAbstractEntity<Integer> implements Comp
     _screeningRoomUser = screeningRoomUser;
     _filename = filename;
     _fileType = fileType;
-    _fileContents = Hibernate.createBlob(fileContents);
+    _fileContents = IOUtils.toByteArray(fileContents);
+
   }
 
   // protected constructor

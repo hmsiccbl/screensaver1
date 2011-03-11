@@ -13,10 +13,10 @@ import java.math.BigDecimal;
 import java.util.List;
 
 import com.google.common.collect.Lists;
+import org.joda.time.LocalDate;
+import org.springframework.beans.factory.annotation.Autowired;
 
-import edu.harvard.med.screensaver.AbstractSpringPersistenceTest;
 import edu.harvard.med.screensaver.db.LibrariesDAO;
-import edu.harvard.med.screensaver.model.TestDataFactory;
 import edu.harvard.med.screensaver.model.Volume;
 import edu.harvard.med.screensaver.model.libraries.Copy;
 import edu.harvard.med.screensaver.model.libraries.CopyUsageType;
@@ -25,22 +25,25 @@ import edu.harvard.med.screensaver.model.libraries.Plate;
 import edu.harvard.med.screensaver.model.screens.LibraryScreening;
 import edu.harvard.med.screensaver.model.screens.Screen;
 import edu.harvard.med.screensaver.model.users.AdministratorUser;
+import edu.harvard.med.screensaver.model.users.ScreeningRoomUser;
 import edu.harvard.med.screensaver.ui.arch.datatable.column.TableColumn;
 import edu.harvard.med.screensaver.ui.arch.datatable.model.DataTableModel;
 import edu.harvard.med.screensaver.ui.arch.searchresults.SearchResults;
+import edu.harvard.med.screensaver.ui.arch.view.AbstractBackingBeanTest;
 import edu.harvard.med.screensaver.ui.libraries.LibraryCopySearchResults;
 
-public class LibraryCopySearchResultsTest extends AbstractSpringPersistenceTest
+public class LibraryCopySearchResultsTest extends AbstractBackingBeanTest
 {
+  @Autowired
   protected LibrariesDAO librariesDao;
+  @Autowired
   protected LibraryCopySearchResults libraryCopiesBrowser;
   
   @Override
-  protected void onSetUp() throws Exception
+  protected void setUp() throws Exception
   {
-    super.onSetUp();
+    super.setUp();
     
-    TestDataFactory dataFactory = new TestDataFactory();
     Library library = dataFactory.newInstance(Library.class);
     library.setStartPlate(100);
     library.setEndPlate(103);
@@ -58,14 +61,18 @@ public class LibraryCopySearchResultsTest extends AbstractSpringPersistenceTest
     
     Screen screen1 = dataFactory.newInstance(Screen.class);
     
-    LibraryScreening ls1 = dataFactory.newInstance(LibraryScreening.class, screen1);
+    LibraryScreening ls1 = screen1.createLibraryScreening(dataFactory.newInstance(AdministratorUser.class),
+                                                          dataFactory.newInstance(ScreeningRoomUser.class),
+                                                          new LocalDate());
     ls1.setNumberOfReplicates(2);
     ls1.setComments("first");
     ls1.addAssayPlatesScreened(plate100A);
     ls1.addAssayPlatesScreened(plate101A);
     genericEntityDao.saveOrUpdateEntity(ls1.getScreen());
 
-    LibraryScreening ls2 = dataFactory.newInstance(LibraryScreening.class, screen1);
+    LibraryScreening ls2 = screen1.createLibraryScreening(dataFactory.newInstance(AdministratorUser.class),
+                                                          dataFactory.newInstance(ScreeningRoomUser.class),
+                                                          new LocalDate());
     ls2.setNumberOfReplicates(1);
     ls2.addAssayPlatesScreened(plate101B);
     ls2.addAssayPlatesScreened(plate102B);
@@ -75,7 +82,9 @@ public class LibraryCopySearchResultsTest extends AbstractSpringPersistenceTest
 
     Screen screen2 = dataFactory.newInstance(Screen.class);
 
-    LibraryScreening ls3 = dataFactory.newInstance(LibraryScreening.class, screen2);
+    LibraryScreening ls3 = screen2.createLibraryScreening(dataFactory.newInstance(AdministratorUser.class),
+                                                          dataFactory.newInstance(ScreeningRoomUser.class),
+                                                          new LocalDate());
     ls3.setNumberOfReplicates(2);
     ls3.setComments("first");
     ls3.addAssayPlatesScreened(plate100B);

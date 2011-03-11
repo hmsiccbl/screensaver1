@@ -47,16 +47,6 @@ public abstract class NonPersistentEntity<K extends Serializable> implements Ent
   }
 
   @Override
-  public void invalidate()
-  {
-  }
-
-  @Override
-  public void update()
-  {
-  }
-
-  @Override
   public boolean isTransient()
   {
     return true;

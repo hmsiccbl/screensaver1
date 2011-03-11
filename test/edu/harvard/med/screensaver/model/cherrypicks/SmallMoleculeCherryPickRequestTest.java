@@ -17,6 +17,7 @@ import java.util.List;
 import junit.framework.TestSuite;
 import org.apache.log4j.Logger;
 import org.joda.time.LocalDate;
+import org.springframework.beans.factory.annotation.Autowired;
 
 import edu.harvard.med.iccbl.screensaver.policy.cherrypicks.SmallMoleculeCherryPickRequestAllowancePolicy;
 import edu.harvard.med.screensaver.db.DAOTransaction;
@@ -37,6 +38,7 @@ import edu.harvard.med.screensaver.model.screenresults.ScreenResult;
 import edu.harvard.med.screensaver.model.screens.Screen;
 import edu.harvard.med.screensaver.model.screens.ScreenType;
 import edu.harvard.med.screensaver.model.users.AdministratorUser;
+import edu.harvard.med.screensaver.service.libraries.LibraryCreator;
 
 public class SmallMoleculeCherryPickRequestTest extends CherryPickRequestTest<SmallMoleculeCherryPickRequest>
 {
@@ -47,27 +49,31 @@ public class SmallMoleculeCherryPickRequestTest extends CherryPickRequestTest<Sm
 
   private static Logger log = Logger.getLogger(SmallMoleculeCherryPickRequestTest.class);
 
+  @Autowired
   protected LibrariesDAO librariesDao;
+  @Autowired
+  protected LibraryCreator libraryCreator;
+  @Autowired
   protected SmallMoleculeCherryPickRequestAllowancePolicy smallMoleculeCherryPickRequestAllowancePolicy;
 
   
-  public SmallMoleculeCherryPickRequestTest() throws IntrospectionException
+  public SmallMoleculeCherryPickRequestTest()
   {
     super(SmallMoleculeCherryPickRequest.class);
   }
   
   public void testCherryPickAllowance()
   {
-    schemaUtil.truncateTablesOrCreateSchema();
+    schemaUtil.truncateTables();
     genericEntityDao.doInTransaction(new DAOTransaction()
     {
       public void runTransaction()
       {
-        AdministratorUser admin = new AdministratorUser("Admin", "User", "", "", "", "", "", "");
+        AdministratorUser admin = new AdministratorUser("Admin", "User");
         Library library = new Library(admin, "Small Molecule Library", "smlib", ScreenType.SMALL_MOLECULE, LibraryType.COMMERCIAL, 1, 10, PlateSize.WELLS_384);
         /*LibraryContentsVersion libraryContentsVersion =*/ 
-        library.createContentsVersion(new AdministrativeActivity(admin, new LocalDate(), AdministrativeActivityType.LIBRARY_CONTENTS_LOADING));
-        librariesDao.loadOrCreateWellsForLibrary(library);
+        library.createContentsVersion(admin);
+        libraryCreator.createWells(library);
         int iSmiles = 0;
         List<Well> wells = new ArrayList<Well>(library.getWells());
         for (Well well : wells) {
@@ -85,7 +91,7 @@ public class SmallMoleculeCherryPickRequestTest extends CherryPickRequestTest<Sm
           }
         }
         library.getLatestContentsVersion().release(new AdministrativeActivity((AdministratorUser) library.getLatestContentsVersion().getLoadingActivity().getPerformedBy(), new LocalDate(), AdministrativeActivityType.LIBRARY_CONTENTS_VERSION_RELEASE));
-        genericEntityDao.saveOrUpdateEntity(library);
+        genericEntityDao.persistEntity(library);
         
         Screen screen = MakeDummyEntities.makeDummyScreen(1);
         

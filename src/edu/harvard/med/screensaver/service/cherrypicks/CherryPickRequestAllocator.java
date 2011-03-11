@@ -34,6 +34,7 @@ import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
 
 import edu.harvard.med.screensaver.db.CherryPickRequestDAO;
+import edu.harvard.med.screensaver.db.EntityInflator;
 import edu.harvard.med.screensaver.db.GenericEntityDAO;
 import edu.harvard.med.screensaver.db.LibrariesDAO;
 import edu.harvard.med.screensaver.model.BusinessRuleViolationException;
@@ -89,7 +90,7 @@ public class CherryPickRequestAllocator
   public Set<LabCherryPick> allocate(CherryPickRequest cherryPickRequestIn) throws DataAccessException
   {
     // TODO: handle concurrency; perform appropriate locking to prevent race conditions (overdrawing well) among multiple allocate() calls
-    CherryPickRequest cherryPickRequest = _dao.reloadEntity(cherryPickRequestIn, false, "labCherryPicks.sourceWell");
+    CherryPickRequest cherryPickRequest = _dao.reloadEntity(cherryPickRequestIn, false, CherryPickRequest.labCherryPicks.to(LabCherryPick.sourceWell));
     validateAllocationBusinessRules(cherryPickRequest);
 
     Set<LabCherryPick> unfulfillableLabCherryPicks = new HashSet<LabCherryPick>();
@@ -284,9 +285,13 @@ public class CherryPickRequestAllocator
   }
 
   @Transactional
-  public void deallocate(final CherryPickRequest cherryPickRequestIn)
+  public CherryPickRequest deallocate(CherryPickRequest cherryPickRequestIn)
   {
-    CherryPickRequest cherryPickRequest = (CherryPickRequest) _dao.reattachEntity(cherryPickRequestIn);
+    CherryPickRequest cherryPickRequest = (CherryPickRequest) _dao.reloadEntity(cherryPickRequestIn);
+    // eager fetch relationships, for performance
+    new EntityInflator<CherryPickRequest>(_dao, cherryPickRequest, false).
+      need(CherryPickRequest.labCherryPicks.to(LabCherryPick.assayPlate)).
+      need(CherryPickRequest.labCherryPicks.to(LabCherryPick.wellVolumeAdjustments)).inflate();
     for (LabCherryPick labCherryPick : cherryPickRequest.getLabCherryPicks()) {
       if (labCherryPick.isMapped()) {
         // note: for safety, we do not allow wholesale deallocation of cherry picks once they have been mapped to plates;
@@ -295,9 +300,9 @@ public class CherryPickRequestAllocator
       }
       if (labCherryPick.isAllocated()) {
         labCherryPick.setAllocated(null);
-        _dao.saveOrUpdateEntity(labCherryPick);
       }
     }
+    return cherryPickRequest;
   }
 
   @Transactional(propagation = Propagation.MANDATORY)

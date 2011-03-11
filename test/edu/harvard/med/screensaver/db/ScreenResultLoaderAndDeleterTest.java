@@ -20,6 +20,7 @@ import com.google.common.collect.Lists;
 import org.apache.log4j.Logger;
 import org.hibernate.Session;
 import org.joda.time.LocalDate;
+import org.springframework.beans.factory.annotation.Autowired;
 
 import edu.harvard.med.screensaver.AbstractSpringPersistenceTest;
 import edu.harvard.med.screensaver.io.ParseError;
@@ -27,7 +28,6 @@ import edu.harvard.med.screensaver.io.ParseErrorsException;
 import edu.harvard.med.screensaver.io.workbook2.Workbook;
 import edu.harvard.med.screensaver.model.AdministrativeActivityType;
 import edu.harvard.med.screensaver.model.MakeDummyEntities;
-import edu.harvard.med.screensaver.model.TestDataFactory;
 import edu.harvard.med.screensaver.model.libraries.CopyUsageType;
 import edu.harvard.med.screensaver.model.libraries.Library;
 import edu.harvard.med.screensaver.model.libraries.LibraryType;
@@ -44,33 +44,38 @@ import edu.harvard.med.screensaver.model.screens.Screen;
 import edu.harvard.med.screensaver.model.screens.ScreenType;
 import edu.harvard.med.screensaver.model.screens.StudyType;
 import edu.harvard.med.screensaver.model.users.AdministratorUser;
+import edu.harvard.med.screensaver.model.users.ScreeningRoomUser;
 import edu.harvard.med.screensaver.service.libraries.LibraryCreator;
 import edu.harvard.med.screensaver.service.screenresult.ScreenResultDeleter;
 import edu.harvard.med.screensaver.service.screenresult.ScreenResultLoader;
+import edu.harvard.med.screensaver.service.screens.ScreenDerivedPropertiesUpdater;
 
 
 public class ScreenResultLoaderAndDeleterTest extends AbstractSpringPersistenceTest
 {
   private static final Logger log = Logger.getLogger(ScreenResultLoaderAndDeleterTest.class);
 
+  @Autowired
   protected ScreenResultLoader screenResultLoader;
+  @Autowired
   protected ScreenResultDeleter screenResultDeleter;
+  @Autowired
   protected LibraryCreator libraryCreator;
+  @Autowired
+  protected ScreenDerivedPropertiesUpdater screenDerivedPropertiesUpdater;
 
   public static final File TEST_INPUT_FILE_DIR = new File("test/edu/harvard/med/screensaver/io/screenresults");
   public static final String SCREEN_RESULT_115_TEST_WORKBOOK_FILE = "ScreenResultTest115.xls";
   public static final String TEST_SCREEN_FACILITY_ID = "115";
   
   @Override
-  protected void onSetUp() throws Exception
+  protected void setUp() throws Exception
   {
-    super.onSetUp();
-    
-    final Screen screen = MakeDummyEntities.makeDummyScreen(TEST_SCREEN_FACILITY_ID, ScreenType.SMALL_MOLECULE, StudyType.IN_VITRO);
+    super.setUp();
     genericEntityDao.doInTransaction(new DAOTransaction() {
-
       public void runTransaction()
       {
+        Screen screen = MakeDummyEntities.makeDummyScreen(TEST_SCREEN_FACILITY_ID, ScreenType.SMALL_MOLECULE, StudyType.IN_VITRO);
         genericEntityDao.persistEntity(screen);
         Library library = new Library((AdministratorUser) screen.getCreatedBy(),
                                       "library for screen 115 test",
@@ -103,8 +108,6 @@ public class ScreenResultLoaderAndDeleterTest extends AbstractSpringPersistenceT
             }
           }
         }
-        libraryCreator.createLibrary(library);
-        
         library.createCopy((AdministratorUser) library.getCreatedBy(),
                            CopyUsageType.CHERRY_PICK_SOURCE_PLATES, "C");
         genericEntityDao.persistEntity(library);
@@ -127,7 +130,7 @@ public class ScreenResultLoaderAndDeleterTest extends AbstractSpringPersistenceT
     try {
       File workbookFile = new File(TEST_INPUT_FILE_DIR,
                                    SCREEN_RESULT_115_TEST_WORKBOOK_FILE);
-      final AdministratorUser admin = new AdministratorUser("Admin", "User", "", "", "", "", "", "");
+      final AdministratorUser admin = new AdministratorUser("Admin", "User");
       genericEntityDao.saveOrUpdateEntity(admin);
 
       Screen screen = genericEntityDao.findEntityByProperty(Screen.class, Screen.facilityId.getPropertyName(), TEST_SCREEN_FACILITY_ID);
@@ -157,9 +160,10 @@ public class ScreenResultLoaderAndDeleterTest extends AbstractSpringPersistenceT
       public void runTransaction()
       {
         Screen screen = genericEntityDao.findEntityByProperty(Screen.class, Screen.facilityId.getPropertyName(), TEST_SCREEN_FACILITY_ID);
-        LibraryScreening libraryScreening = screen.createLibraryScreening((AdministratorUser) screen.getCreatedBy(), screen.getLabHead(), new LocalDate());
+        LibraryScreening libraryScreening = screen.createLibraryScreening(null, screen.getLabHead(), new LocalDate());
         libraryScreening.setNumberOfReplicates(1);
         libraryScreening.addAssayPlatesScreened(genericEntityDao.findEntityByProperty(Plate.class, "plateNumber", 1));
+        genericEntityDao.persistEntity(libraryScreening);
       }
     });
 
@@ -174,10 +178,10 @@ public class ScreenResultLoaderAndDeleterTest extends AbstractSpringPersistenceT
     assertEquals("Loaded data for 3 plates [1..3].  test comments", screenResult.getLastDataLoadingActivity().getComments());
 
     List<DataColumn> loadedDataColumns = genericEntityDao.findEntitiesByProperty(DataColumn.class,
-                                                                               "screenResult",
-                                                                               screenResult,
-                                                                               true,
-                                                                               "resultValues");
+                                                                                 "screenResult",
+                                                                                 screenResult,
+                                                                                 true,
+                                                                                 DataColumn.resultValues);
     assertNotNull(loadedDataColumns);
     assertEquals("DataColumns count", 8, loadedDataColumns.size());
     for (DataColumn actualCol : loadedDataColumns) {
@@ -208,8 +212,10 @@ public class ScreenResultLoaderAndDeleterTest extends AbstractSpringPersistenceT
     assertEquals(3, screen.getLibraryPlatesDataAnalyzedCount());
     assertTrue(screen.getAssayPlatesDataLoaded().size() > 0);
     assertTrue(screen.getAssayPlatesDataLoaded().size() > screen.getAssayPlatesScreened().size()); // ensure that we're testing with sets of assay plates that have and do not have a library screening
+    AdministratorUser admin = new AdministratorUser("joe", "deleter");
+    genericEntityDao.saveOrUpdateEntity(admin);
     screenResultDeleter.deleteScreenResult(screenResult, 
-                                           genericEntityDao.findEntityByProperty(AdministratorUser.class, "firstName", "Admin"));
+                                           admin);
     screen = findScreen();
     assertNull(screen.getScreenResult());
     assertEquals(AdministrativeActivityType.SCREEN_RESULT_DATA_DELETION, 
@@ -222,50 +228,59 @@ public class ScreenResultLoaderAndDeleterTest extends AbstractSpringPersistenceT
   
   public void testAssayPlateLoadingStatus() throws Exception
   {
-     // 1. no extant assay plates
+    Screen screen;
+    LibraryScreening libraryScreening;
+
+    // 1. no extant assay plates
     doLoad(false);
-    Screen screen = findScreen();
+    screen = findScreen();
     assertEquals(6, screen.getAssayPlates().size());
     assertEquals("library plates screened", 0, screen.getLibraryPlatesScreenedCount());
     assertEquals("library plates data loaded", 3, screen.getLibraryPlatesDataLoadedCount());
     assertEquals(6, screen.getAssayPlatesDataLoaded().size());
 
     // 2. insufficient assay plate replicates: a new set of attempt assay plates replicates created
-    onSetUp();
+    setUp();
     screen = findScreen();
-    LibraryScreening libraryScreening = new TestDataFactory().newInstance(LibraryScreening.class, screen);
+    libraryScreening = screen.createLibraryScreening(dataFactory.newInstance(AdministratorUser.class),
+                                                     dataFactory.newInstance(ScreeningRoomUser.class),
+                                                     new LocalDate());
     libraryScreening.setNumberOfReplicates(1);
     libraryScreening.addAssayPlatesScreened(genericEntityDao.findEntityByProperty(Plate.class, "plateNumber", 1));
     libraryScreening.addAssayPlatesScreened(genericEntityDao.findEntityByProperty(Plate.class, "plateNumber", 2));
     libraryScreening.addAssayPlatesScreened(genericEntityDao.findEntityByProperty(Plate.class, "plateNumber", 3));
     genericEntityDao.saveOrUpdateEntity(screen);
-    screen.update();
+    screenDerivedPropertiesUpdater.updateScreeningStatistics(screen);
     screen = findScreen();
     assertEquals(3, screen.getAssayPlates().size());
     assertEquals("library plates screened, pre-load", 3, screen.getLibraryPlatesScreenedCount());
     assertEquals("library plates data loaded, pre-load", 0, screen.getLibraryPlatesDataLoadedCount());
     doLoad(false);
     screen = findScreen();
-    assertEquals(3+6, screen.getAssayPlates().size());
+    assertEquals(3 + 6, screen.getAssayPlates().size());
     assertEquals("library plates screened", 3, screen.getLibraryPlatesScreenedCount());
     assertEquals("library plates data loaded", 3, screen.getLibraryPlatesDataLoadedCount());
     assertEquals(6, screen.getAssayPlatesDataLoaded().size());
-    
+
      // 3. sufficient assay plate replicates, with multiple attempts: only last attempt assay plates are updated
-    onSetUp();
+    setUp();
     screen = findScreen();
-    libraryScreening = new TestDataFactory().newInstance(LibraryScreening.class, screen);
+    libraryScreening = screen.createLibraryScreening(dataFactory.newInstance(AdministratorUser.class),
+                                                     dataFactory.newInstance(ScreeningRoomUser.class),
+                                                     new LocalDate());
     libraryScreening.setNumberOfReplicates(2);
     libraryScreening.addAssayPlatesScreened(genericEntityDao.findEntityByProperty(Plate.class, "plateNumber", 1));
     libraryScreening.addAssayPlatesScreened(genericEntityDao.findEntityByProperty(Plate.class, "plateNumber", 2));
     libraryScreening.addAssayPlatesScreened(genericEntityDao.findEntityByProperty(Plate.class, "plateNumber", 3));
-    libraryScreening = new TestDataFactory().newInstance(LibraryScreening.class, screen);
+    libraryScreening = screen.createLibraryScreening(dataFactory.newInstance(AdministratorUser.class),
+                                                     dataFactory.newInstance(ScreeningRoomUser.class),
+                                                     new LocalDate());
     libraryScreening.setNumberOfReplicates(2);
     libraryScreening.addAssayPlatesScreened(genericEntityDao.findEntityByProperty(Plate.class, "plateNumber", 1));
     libraryScreening.addAssayPlatesScreened(genericEntityDao.findEntityByProperty(Plate.class, "plateNumber", 2));
     libraryScreening.addAssayPlatesScreened(genericEntityDao.findEntityByProperty(Plate.class, "plateNumber", 3));
     genericEntityDao.saveOrUpdateEntity(screen);
-    screen.update();
+    screenDerivedPropertiesUpdater.updateScreeningStatistics(screen);
     screen = findScreen();
     assertEquals(12, screen.getAssayPlates().size());
     assertEquals("library plates screened, pre-load", 3, screen.getLibraryPlatesScreenedCount());
@@ -279,15 +294,17 @@ public class ScreenResultLoaderAndDeleterTest extends AbstractSpringPersistenceT
 
     // 4. extra assay plate replicates: only the first N assay plates replicates
     // should be updated, where N is the screen result's replicate count
-    onSetUp();
+    setUp();
     screen = findScreen();
-    libraryScreening = new TestDataFactory().newInstance(LibraryScreening.class, screen);
+    libraryScreening = screen.createLibraryScreening(dataFactory.newInstance(AdministratorUser.class),
+                                                     dataFactory.newInstance(ScreeningRoomUser.class),
+                                                     new LocalDate());
     libraryScreening.setNumberOfReplicates(3);
     libraryScreening.addAssayPlatesScreened(genericEntityDao.findEntityByProperty(Plate.class, "plateNumber", 1));
     libraryScreening.addAssayPlatesScreened(genericEntityDao.findEntityByProperty(Plate.class, "plateNumber", 2));
     libraryScreening.addAssayPlatesScreened(genericEntityDao.findEntityByProperty(Plate.class, "plateNumber", 3));
     genericEntityDao.saveOrUpdateEntity(screen);
-    screen.update();
+    screenDerivedPropertiesUpdater.updateScreeningStatistics(screen);
     screen = findScreen();
     assertEquals(9, screen.getAssayPlates().size());
     assertEquals("library plates screened, pre-load", 3, screen.getLibraryPlatesScreenedCount());
@@ -309,9 +326,9 @@ public class ScreenResultLoaderAndDeleterTest extends AbstractSpringPersistenceT
                                                               Screen.facilityId.getPropertyName(),
                                                               TEST_SCREEN_FACILITY_ID,
                                                               true, 
-                                                              Screen.assayPlates.getPath());
-        genericEntityDao.needReadOnly(screen, Screen.updateActivities.getPath());
-        genericEntityDao.needReadOnly(screen, Screen.labActivities.getPath());
+                                                              Screen.assayPlates);
+        genericEntityDao.needReadOnly(screen, Screen.updateActivities);
+        genericEntityDao.needReadOnly(screen, Screen.labActivities);
         return Lists.newArrayList(screen);
       }
     }).get(0);

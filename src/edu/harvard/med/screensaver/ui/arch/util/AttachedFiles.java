@@ -199,7 +199,7 @@ public class AttachedFiles extends AbstractBackingBean
       }
       if (attachedFile != null) {
         JSFUtils.handleUserDownloadRequest(getFacesContext(),
-                                           attachedFile.getFileContents().getBinaryStream(),
+                                           new ByteArrayInputStream(attachedFile.getFileContents()),
                                            attachedFile.getFilename(),
                                            null);
       }

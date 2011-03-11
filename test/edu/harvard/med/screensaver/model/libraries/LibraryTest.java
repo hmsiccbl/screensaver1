@@ -9,7 +9,6 @@
 
 package edu.harvard.med.screensaver.model.libraries;
 
-import java.beans.IntrospectionException;
 import java.math.BigDecimal;
 
 import junit.framework.TestSuite;
@@ -29,21 +28,21 @@ public class LibraryTest extends AbstractEntityInstanceTest<Library>
     return buildTestSuite(LibraryTest.class, Library.class);
   }
 
-  public LibraryTest() throws IntrospectionException
+  public LibraryTest()
   {
     super(Library.class);
   }
   
   public void testSmallMoleculeLibraryAndReagents()
   {
-    schemaUtil.truncateTablesOrCreateSchema();
+    schemaUtil.truncateTables();
     
     genericEntityDao.doInTransaction(new DAOTransaction() {
       public void runTransaction()
       {
-        AdministratorUser adminUser = new AdministratorUser("Admin", "User", "", "", "", "", "", "");
+        AdministratorUser adminUser = new AdministratorUser("Admin", "User");
         Library library = new Library(adminUser, "Small Molecule Library", "smLib", ScreenType.SMALL_MOLECULE, LibraryType.COMMERCIAL, 1, 2, PlateSize.WELLS_384);
-        library.createContentsVersion(new AdministrativeActivity(adminUser, new LocalDate(), AdministrativeActivityType.LIBRARY_CONTENTS_LOADING));
+        library.createContentsVersion(adminUser);
         PlateSize plateSize = library.getPlateSize();
         for (int plate = library.getStartPlate(); plate <= library.getEndPlate(); ++plate) {
           for (int row = 0; row < plateSize.getRows(); ++row) {
@@ -128,9 +127,7 @@ public class LibraryTest extends AbstractEntityInstanceTest<Library>
       {
         Library library = genericEntityDao.findEntityByProperty(Library.class, "shortName", "smLib");
         AdministratorUser admin = genericEntityDao.findAllEntitiesOfType(AdministratorUser.class).get(0);
-        library.createContentsVersion(new AdministrativeActivity(admin, 
-                                                                 new LocalDate(), 
-                                                                 AdministrativeActivityType.LIBRARY_CONTENTS_LOADING));
+        library.createContentsVersion(admin);
         for (Well well : library.getWells()) {
           /*SmallMoleculeReagent reagent =*/ 
           well.createSmallMoleculeReagent(new ReagentVendorIdentifier("vendor", well.getWellKey().toString()),
@@ -142,6 +139,7 @@ public class LibraryTest extends AbstractEntityInstanceTest<Library>
                                           new MolecularFormula("M2F2"));
         }
         LibraryContentsVersion lcv = library.getLatestContentsVersion();
+        genericEntityDao.flush();
         lcv.release(new AdministrativeActivity((AdministratorUser) lcv.getLoadingActivity().getPerformedBy(), new LocalDate(), AdministrativeActivityType.LIBRARY_CONTENTS_VERSION_RELEASE));
       }
     });
@@ -176,7 +174,7 @@ public class LibraryTest extends AbstractEntityInstanceTest<Library>
   
   public void testExperimentalWellCount()
   {
-    schemaUtil.truncateTablesOrCreateSchema();
+    schemaUtil.truncateTables();
     Library library = dataFactory.newInstance(Library.class);
     assertEquals(new Integer(0), library.getExperimentalWellCount());
     library.createWell(new WellKey(library.getStartPlate(), "A01"), LibraryWellType.DMSO);
@@ -185,11 +183,12 @@ public class LibraryTest extends AbstractEntityInstanceTest<Library>
     assertEquals(new Integer(1), library.getExperimentalWellCount());
     Well well = library.createWell(new WellKey(library.getStartPlate(), "A03"), LibraryWellType.EXPERIMENTAL);
     assertEquals(new Integer(2), library.getExperimentalWellCount());
+    well.setLibraryWellType(LibraryWellType.UNDEFINED);
+    assertEquals(new Integer(1), library.getExperimentalWellCount());
     well.setLibraryWellType(LibraryWellType.RNAI_BUFFER);
     assertEquals(new Integer(1), library.getExperimentalWellCount());
     library.createWell(new WellKey(library.getStartPlate(), "A04"), LibraryWellType.EXPERIMENTAL);
-    
-    genericEntityDao.persistEntity(library);
+    genericEntityDao.mergeEntity(library);
     library = genericEntityDao.reloadEntity(library);
     assertEquals(new Integer(2), library.getExperimentalWellCount());
   }

@@ -16,6 +16,18 @@
 <beans>
 
   <bean
+  id="screenDerivedPropertiesUpdater"
+  class="edu.harvard.med.screensaver.service.screens.ScreenDerivedPropertiesUpdater"
+  autowire="constructor">
+  </bean>
+
+  <bean
+  id="libraryScreeningDerivedPropertiesUpdater"
+  class="edu.harvard.med.screensaver.service.libraries.LibraryScreeningDerivedPropertiesUpdater"
+  autowire="constructor">
+  </bean>
+
+  <bean
     id="screenResultParser"
     class="edu.harvard.med.screensaver.io.screenresults.ScreenResultParser"
     scope="prototype">
@@ -25,11 +37,10 @@
   </bean>
 
   <bean
-    id="screenResultLoader"
+    id="screenResultLoader" 
     class="edu.harvard.med.screensaver.service.screenresult.ScreenResultLoader"
-    scope="singleton">
-    <constructor-arg ref="genericEntityDao"/>
-    <constructor-arg ref="screenResultsDao"/>
+    scope="singleton" 
+    autowire="constructor">
     <lookup-method name="createScreenResultParser" bean="screenResultParser"/>
   </bean>
 
@@ -37,8 +48,6 @@
     id="screenResultDeleter"
     class="edu.harvard.med.screensaver.service.screenresult.ScreenResultDeleter"
     scope="singleton">
-    <constructor-arg ref="genericEntityDao"/>
-    <constructor-arg ref="screenResultsDao"/>
   </bean>
 
   <!-- TODO: place this in a spring-context-testing.xml file, or something similar -->

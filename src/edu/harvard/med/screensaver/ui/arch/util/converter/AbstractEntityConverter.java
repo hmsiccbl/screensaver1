@@ -44,7 +44,7 @@ public abstract class AbstractEntityConverter<E extends AbstractEntity> implemen
       return null;
     }
     try {
-      E entity = _dao.findEntityById(_entityType, parseEntityId(entityId));
+      E entity = (E) _dao.findEntityById(_entityType, parseEntityId(entityId));
       if (entity == null) {
         throw new ConverterException("no such " + _entityType.getSimpleName() + 
                                      " with id=" + entityId + 

@@ -22,7 +22,7 @@ public class ChecklistItemTest extends AbstractEntityInstanceTest<ChecklistItem>
     return buildTestSuite(ChecklistItemTest.class, ChecklistItem.class);
   }
 
-  public ChecklistItemTest() throws IntrospectionException
+  public ChecklistItemTest()
   {
     super(ChecklistItem.class);
   }

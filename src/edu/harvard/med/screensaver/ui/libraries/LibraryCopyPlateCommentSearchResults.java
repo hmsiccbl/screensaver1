@@ -9,6 +9,7 @@
 
 package edu.harvard.med.screensaver.ui.libraries;
 
+import java.util.Collection;
 import java.util.List;
 import java.util.Set;
 import java.util.SortedSet;
@@ -26,6 +27,7 @@ import edu.harvard.med.screensaver.db.Query;
 import edu.harvard.med.screensaver.db.datafetcher.SetBasedDataFetcher;
 import edu.harvard.med.screensaver.db.hqlbuilder.HqlBuilder;
 import edu.harvard.med.screensaver.db.hqlbuilder.JoinType;
+import edu.harvard.med.screensaver.model.Activity;
 import edu.harvard.med.screensaver.model.AdministrativeActivity;
 import edu.harvard.med.screensaver.model.AdministrativeActivityType;
 import edu.harvard.med.screensaver.model.libraries.Copy;
@@ -38,7 +40,6 @@ import edu.harvard.med.screensaver.ui.arch.datatable.column.IntegerColumn;
 import edu.harvard.med.screensaver.ui.arch.datatable.column.TableColumn;
 import edu.harvard.med.screensaver.ui.arch.datatable.column.TextColumn;
 import edu.harvard.med.screensaver.ui.arch.datatable.column.entity.UserNameColumn;
-import edu.harvard.med.screensaver.ui.arch.datatable.model.DataTableModel;
 import edu.harvard.med.screensaver.ui.arch.datatable.model.InMemoryDataModel;
 import edu.harvard.med.screensaver.ui.arch.searchresults.EntityBasedEntitySearchResults;
 
@@ -83,47 +84,35 @@ public class LibraryCopyPlateCommentSearchResults extends EntityBasedEntitySearc
   public void searchForCopy(Copy copy)
   {
     _mode = Mode.COPY;
-    copy = _dao.reloadEntity(copy, true, Copy.plates.getPath());
+    copy = _dao.reloadEntity(copy, true, Copy.plates.to(Plate.updateActivities).to(Activity.performedBy));
     setTitle("Plate Comments for Copy: " + copy.getName());
-    SortedSet<PlateActivity> comments = Sets.newTreeSet();
-    for (Plate plate : copy.getPlates().values()) {
-      plate = _dao.reloadEntity(plate);
-      for (AdministrativeActivity ae : plate.getUpdateActivitiesOfType(AdministrativeActivityType.COMMENT)) {
-        comments.add(new PlateActivity(plate, ae));
-      }
-    }
-    initialize(new InMemoryDataModel<PlateActivity>(new SetBasedDataFetcher<PlateActivity,Integer>(comments)));
+    initialize(copy.getPlates().values());
   }
 
   @Transactional
   public void searchForLibrary(Library library)
   {
     _mode = Mode.LIBRARY;
-    library = _dao.reloadEntity(library, true, Library.copies.to(Copy.plates).getPath());
+    library = _dao.reloadEntity(library, true, Library.copies.to(Copy.plates).to(Plate.updateActivities).to(Activity.performedBy));
     setTitle("Plate Comments for Library " + library.getLibraryName());
-    SortedSet<PlateActivity> comments = Sets.newTreeSet();
+    List<Plate> plates = Lists.newArrayList();
     for (Copy copy : library.getCopies()) {
-      for (Plate plate : copy.getPlates().values()) {
-        plate = _dao.reloadEntity(plate);
-        for (AdministrativeActivity ae : plate.getUpdateActivitiesOfType(AdministrativeActivityType.COMMENT)) {
-          comments.add(new PlateActivity(plate, ae));
-        }
-      }
+      plates.addAll(copy.getPlates().values());
     }
-    initialize(new InMemoryDataModel<PlateActivity>(new SetBasedDataFetcher<PlateActivity,Integer>(comments)));
+    initialize(plates);
   }
 
   @Transactional
-  public void searchForPlates(String string, Set<Integer> plateIds)
+  public void searchForPlates(String title, Set<Integer> plateIds)
   {
     _mode = Mode.ALL;
-    setTitle("Plate Comments for: " + string);
-    SortedSet<PlateActivity> comments = Sets.newTreeSet();
+    setTitle("Plate Comments for: " + title);
 
     final HqlBuilder builder = new HqlBuilder();
     builder.select("p").distinctProjectionValues();
     builder.from(Plate.class, "p");
-    builder.from("p", Plate.updateActivities.getLeaf(), "a", JoinType.LEFT_FETCH);
+    builder.from("p", Plate.updateActivities, "a", JoinType.LEFT_FETCH);
+    builder.from("a", Activity.performedBy, "pb", JoinType.LEFT_FETCH);
     builder.whereIn("p", "id", plateIds);
     log.info("builder.toHql(): " + builder.toHql() + ", " + plateIds);
     Query<Plate> query = new Query<Plate>() {
@@ -134,23 +123,19 @@ public class LibraryCopyPlateCommentSearchResults extends EntityBasedEntitySearc
       }
     };
 
-    List<Plate> result = _dao.runQuery(query);
-    for (Plate p : result) {
-      _dao.needReadOnly(p, Plate.copy.getPath(), Plate.copy.to(Copy.library).getPath());
-      for (AdministrativeActivity a : p.getUpdateActivitiesOfType(AdministrativeActivityType.COMMENT)) {
-        _dao.needReadOnly(a,
-                          AdministrativeActivity.performedBy.getPath());
-        comments.add(new PlateActivity(p, a));
-      }
-    }
-
-    initialize(new InMemoryDataModel<PlateActivity>(new SetBasedDataFetcher<PlateActivity,Integer>(comments)));
+    initialize(_dao.runQuery(query));
   }
 
-  @Override
-  public void initialize(DataTableModel<PlateActivity> dataTableModel)
+  private void initialize(Collection<Plate> plates)
   {
-    super.initialize(dataTableModel);
+    SortedSet<PlateActivity> comments = Sets.newTreeSet();
+    for (Plate plate : plates) {
+      //plate = _dao.reloadEntity(plate);
+      for (AdministrativeActivity ae : plate.getUpdateActivitiesOfType(AdministrativeActivityType.COMMENT)) {
+        comments.add(new PlateActivity(plate, ae));
+      }
+    }
+    initialize(new InMemoryDataModel<PlateActivity>(new SetBasedDataFetcher<PlateActivity,Integer>(comments)));
   }
 
   @Override
@@ -158,8 +143,8 @@ public class LibraryCopyPlateCommentSearchResults extends EntityBasedEntitySearc
   {
     List<TableColumn<PlateActivity,?>> columns = Lists.newArrayList();
     columns.add(new IntegerColumn<PlateActivity>("Plate",
-                                               "Plate number",
-                                               TableColumn.UNGROUPED) {
+                                                 "Plate number",
+                                                 TableColumn.UNGROUPED) {
       @Override
       public Integer getCellValue(PlateActivity ae)
       {
@@ -226,8 +211,8 @@ public class LibraryCopyPlateCommentSearchResults extends EntityBasedEntitySearc
     });
 
     columns.add(new DateColumn<PlateActivity>("Comment Date",
-                                                  "The date that a corresponding real-world activity was performed",
-                                                  TableColumn.UNGROUPED) {
+                                              "The date that a corresponding real-world activity was performed",
+                                              TableColumn.UNGROUPED) {
       @Override
       protected LocalDate getDate(PlateActivity pa)
           {
@@ -236,17 +221,17 @@ public class LibraryCopyPlateCommentSearchResults extends EntityBasedEntitySearc
     });
 
     columns.add(new UserNameColumn<PlateActivity,ScreensaverUser>(null,
-                                                                  "Comment by", "The administrator who made the comment",
+                                                                  "Comment by",
+                                                                  "The administrator who made the comment",
                                                                   TableColumn.UNGROUPED,
                                                                   null) {
       @Override
       public ScreensaverUser getUser(PlateActivity ae)
-          {
-            return (ScreensaverUser) ae.getAdministrativeActivity().getPerformedBy();
-          }
+      {
+        return (ScreensaverUser) ae.getAdministrativeActivity().getPerformedBy();
+      }
     });
 
     return columns;
   }
-
 }

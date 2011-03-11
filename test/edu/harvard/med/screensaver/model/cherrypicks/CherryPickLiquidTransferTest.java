@@ -9,8 +9,6 @@
 
 package edu.harvard.med.screensaver.model.cherrypicks;
 
-import java.beans.IntrospectionException;
-
 import junit.framework.TestSuite;
 
 import edu.harvard.med.screensaver.model.AbstractEntityInstanceTest;
@@ -22,7 +20,7 @@ public class CherryPickLiquidTransferTest extends AbstractEntityInstanceTest<Che
     return buildTestSuite(CherryPickLiquidTransferTest.class, CherryPickLiquidTransfer.class);
   }
 
-  public CherryPickLiquidTransferTest() throws IntrospectionException
+  public CherryPickLiquidTransferTest()
   {
     super(CherryPickLiquidTransfer.class);
   }

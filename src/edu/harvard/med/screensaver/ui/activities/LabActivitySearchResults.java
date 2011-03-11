@@ -96,10 +96,11 @@ public class LabActivitySearchResults extends ActivitySearchResults<LabActivity>
     List<TableColumn<LabActivity,?>> columns =
       (List<TableColumn<LabActivity,?>>) super.buildColumns();
     
-    IntegerEntityColumn<LabActivity> column = new IntegerEntityColumn<LabActivity>(RelationshipPath.from(LabActivity.class).toProperty("screenedExperimentalWellCount"),
-                                                                                   "Experimental Wells Screened (Library Screening)",
-                                                                                   "The number of experimental library wells that were screened during this activity (ignoring replicates)",
-                                                                                   TableColumn.UNGROUPED) {
+    IntegerEntityColumn<LabActivity> column =
+      new IntegerEntityColumn<LabActivity>(RelationshipPath.from(LabActivity.class).toProperty("screenedExperimentalWellCount"),
+                                           "Experimental Wells Screened (Library Screening)",
+                                           "The number of experimental library wells that were screened during this activity (ignoring replicates)",
+                                           TableColumn.UNGROUPED) {
       @Override
       public Integer getCellValue(LabActivity activity) 
       { 
@@ -112,8 +113,7 @@ public class LabActivitySearchResults extends ActivitySearchResults<LabActivity>
     column.setVisible(false);
     columns.add(2, column);
 
-    column = new IntegerEntityColumn<LabActivity>(
-      (RelationshipPath) CherryPickScreening.cherryPickRequest,
+    column = new IntegerEntityColumn<LabActivity>(CherryPickScreening.cherryPickRequest.castToSupertype(LabActivity.class),
       "Cherry Pick Request #", "The cherry pick request number, if applicable", TableColumn.UNGROUPED) {
       @Override
       public Integer getCellValue(LabActivity activity) 
@@ -139,7 +139,7 @@ public class LabActivitySearchResults extends ActivitySearchResults<LabActivity>
       @Override
       public boolean isCommandLink() { return true; }
     };
-    column.addRelationshipPath((RelationshipPath) CherryPickLiquidTransfer.cherryPickAssayPlates.to(CherryPickAssayPlate.cherryPickRequest));
+    column.addRelationshipPath(CherryPickLiquidTransfer.cherryPickAssayPlates.to(CherryPickAssayPlate.cherryPickRequest).castToSupertype(LabActivity.class));
     column.setVisible(false);
     columns.add(2, column);
     

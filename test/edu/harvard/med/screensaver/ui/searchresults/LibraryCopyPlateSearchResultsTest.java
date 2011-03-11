@@ -16,13 +16,11 @@ import com.google.common.base.Predicate;
 import com.google.common.collect.Iterables;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Sets;
+import org.springframework.beans.factory.annotation.Autowired;
 
-import edu.harvard.med.screensaver.AbstractSpringPersistenceTest;
-import edu.harvard.med.screensaver.db.GenericEntityDAO;
 import edu.harvard.med.screensaver.db.LibrariesDAO;
 import edu.harvard.med.screensaver.io.libraries.LibraryCopyPlateListParser;
 import edu.harvard.med.screensaver.io.libraries.LibraryCopyPlateListParserResult;
-import edu.harvard.med.screensaver.model.TestDataFactory;
 import edu.harvard.med.screensaver.model.Volume;
 import edu.harvard.med.screensaver.model.libraries.Copy;
 import edu.harvard.med.screensaver.model.libraries.CopyUsageType;
@@ -33,23 +31,23 @@ import edu.harvard.med.screensaver.model.users.AdministratorUser;
 import edu.harvard.med.screensaver.ui.arch.datatable.Criterion.Operator;
 import edu.harvard.med.screensaver.ui.arch.datatable.column.TableColumn;
 import edu.harvard.med.screensaver.ui.arch.datatable.model.DataTableModel;
+import edu.harvard.med.screensaver.ui.arch.view.AbstractBackingBeanTest;
 import edu.harvard.med.screensaver.ui.libraries.LibraryCopyPlateSearchResults;
 
-public class LibraryCopyPlateSearchResultsTest extends AbstractSpringPersistenceTest
+public class LibraryCopyPlateSearchResultsTest extends AbstractBackingBeanTest
 {
-
-  protected GenericEntityDAO genericEntityDao;
+  @Autowired
   protected LibrariesDAO librariesDao;
+  @Autowired
   protected LibraryCopyPlateSearchResults libraryCopyPlatesBrowser;
   
   private static String copyNameWithSpaces = "Copy name with spaces";
 
   @Override
-  protected void onSetUp() throws Exception
+  protected void setUp() throws Exception
   {
-    super.onSetUp();
+    super.setUp();
     
-    TestDataFactory dataFactory = new TestDataFactory();
     Library library = dataFactory.newInstance(Library.class);
     library.setStartPlate(100);
     library.setEndPlate(105);
@@ -71,7 +69,7 @@ public class LibraryCopyPlateSearchResultsTest extends AbstractSpringPersistence
   {
     LibraryCopyPlateSearchResults searchResults = libraryCopyPlatesBrowser;
     searchResults.setNested(true);
-    searchResults.searchPlatesForCopy(genericEntityDao.findEntityByProperty(Copy.class, "name", "B", true, Copy.library.getPath()));
+    searchResults.searchPlatesForCopy(genericEntityDao.findEntityByProperty(Copy.class, "name", "B", true, Copy.library));
     searchResults.getColumnManager().getColumn("Copy").setVisible(true);
     assertEquals(Lists.newArrayList(100, 101, 102, 103, 104, 105), getColumnsValues(searchResults, "Plate"));
     assertEquals(Lists.newArrayList("B", "B", "B", "B", "B", "B"), getColumnsValues(searchResults, "Copy"));

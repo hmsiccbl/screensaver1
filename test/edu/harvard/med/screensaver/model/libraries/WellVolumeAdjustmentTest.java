@@ -14,7 +14,6 @@ import java.beans.IntrospectionException;
 import junit.framework.TestSuite;
 
 import edu.harvard.med.screensaver.model.AbstractEntityInstanceTest;
-import edu.harvard.med.screensaver.model.EntityNetworkPersister;
 import edu.harvard.med.screensaver.model.Volume;
 import edu.harvard.med.screensaver.model.cherrypicks.LabCherryPick;
 
@@ -25,39 +24,39 @@ public class WellVolumeAdjustmentTest extends AbstractEntityInstanceTest<WellVol
     return buildTestSuite(WellVolumeAdjustmentTest.class, WellVolumeAdjustment.class);
   }
 
-  public WellVolumeAdjustmentTest() throws IntrospectionException
+  public WellVolumeAdjustmentTest()
   {
     super(WellVolumeAdjustment.class);
   }
   
   public void testLabCherryPickRelationship()
   {
-    schemaUtil.truncateTablesOrCreateSchema();
+    schemaUtil.truncateTables();
     Copy copy = dataFactory.newInstance(Copy.class);
     Well well = dataFactory.newInstance(Well.class);
-    Volume volume = dataFactory.getTestValueForType(Volume.class);
+    Volume volume = dataFactory.newInstance(Volume.class);
     LabCherryPick labCherryPick = dataFactory.newInstance(LabCherryPick.class);
     WellVolumeAdjustment wellVolumeAdjustment = new WellVolumeAdjustment(copy, well, volume, labCherryPick);
-    new EntityNetworkPersister(genericEntityDao, wellVolumeAdjustment).persistEntityNetwork();
+    wellVolumeAdjustment = genericEntityDao.mergeEntity(wellVolumeAdjustment);
 
     labCherryPick = genericEntityDao.reloadEntity(labCherryPick);
-    WellVolumeAdjustment wellVolumeAdjustment2 = genericEntityDao.findEntityById(WellVolumeAdjustment.class, wellVolumeAdjustment.getEntityId(), true, "labCherryPick");
-    assertEquals(labCherryPick, wellVolumeAdjustment2.getLabCherryPick());
+    wellVolumeAdjustment = genericEntityDao.reloadEntity(wellVolumeAdjustment, true, WellVolumeAdjustment.labCherryPick);
+    assertEquals(labCherryPick, wellVolumeAdjustment.getLabCherryPick());
   }
   
   public void testWellVolumeCorrectActivityRelationship()
   {
-    schemaUtil.truncateTablesOrCreateSchema();
+    schemaUtil.truncateTables();
     Copy copy = dataFactory.newInstance(Copy.class);
     Well well = dataFactory.newInstance(Well.class);
-    Volume volume = dataFactory.getTestValueForType(Volume.class);
+    Volume volume = dataFactory.newInstance(Volume.class);
     WellVolumeCorrectionActivity wellVolumeCorrectionActivity = dataFactory.newInstance(WellVolumeCorrectionActivity.class);
     WellVolumeAdjustment wellVolumeAdjustment = new WellVolumeAdjustment(copy, well, volume, wellVolumeCorrectionActivity);
-    new EntityNetworkPersister(genericEntityDao, wellVolumeAdjustment).persistEntityNetwork();
+    wellVolumeAdjustment = genericEntityDao.mergeEntity(wellVolumeAdjustment);
     
     wellVolumeCorrectionActivity = genericEntityDao.reloadEntity(wellVolumeCorrectionActivity);
-    WellVolumeAdjustment wellVolumeAdjustment2 = genericEntityDao.findEntityById(WellVolumeAdjustment.class, wellVolumeAdjustment.getEntityId(), true, "wellVolumeCorrectionActivity");
-    assertEquals(wellVolumeCorrectionActivity, wellVolumeAdjustment2.getWellVolumeCorrectionActivity());
+    wellVolumeAdjustment = genericEntityDao.reloadEntity(wellVolumeAdjustment, true, WellVolumeAdjustment.wellVolumeCorrectionActivity);
+    assertEquals(wellVolumeCorrectionActivity, wellVolumeAdjustment.getWellVolumeCorrectionActivity());
   }
 }
 

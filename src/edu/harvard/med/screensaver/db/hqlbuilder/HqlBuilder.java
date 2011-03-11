@@ -25,6 +25,8 @@ import org.hibernate.transform.DistinctRootEntityResultTransformer;
 
 import edu.harvard.med.screensaver.db.SortDirection;
 import edu.harvard.med.screensaver.model.Entity;
+import edu.harvard.med.screensaver.model.meta.PropertyPath;
+import edu.harvard.med.screensaver.model.meta.RelationshipPath;
 import edu.harvard.med.screensaver.ui.arch.datatable.Criterion.Operator;
 import edu.harvard.med.screensaver.util.StringUtils;
 
@@ -111,17 +113,31 @@ public class HqlBuilder
     return this;
   }
 
-  public HqlBuilder fromFetch(String joinAlias, String joinRelationship, String alias)
+  public HqlBuilder fromFetch(String joinAlias, RelationshipPath joinRelationship, String alias)
   {
     return from(joinAlias, joinRelationship, alias, JoinType.LEFT_FETCH);
   }
 
-  public HqlBuilder from(String joinAlias, String joinRelationship, String alias)
+  public HqlBuilder from(String joinAlias, RelationshipPath joinRelationship, String alias)
   {
     return from(joinAlias, joinRelationship, alias, JoinType.LEFT);
   }
 
-  public HqlBuilder from(String joinAlias, String joinRelationship, String alias, JoinType joinType)
+  public HqlBuilder from(String joinAlias, RelationshipPath joinRelationship, String alias, JoinType joinType)
+  {
+//    if (joinRelationship.getPathLength() > 1) {
+//      throw new IllegalArgumentException("joinRelationship length must be 1");
+//    }
+    if (joinRelationship instanceof PropertyPath) {
+      if (!((PropertyPath) joinRelationship).isCollectionOfValues()) {
+        throw new IllegalArgumentException("joinRelationships that are PropertyPaths must be a 'collection of values'");
+      }
+      return from(joinAlias, ((PropertyPath) joinRelationship).getPropertyName(), alias, joinType);
+    }
+    return from(joinAlias, joinRelationship.getLeaf(), alias, joinType);
+  }
+
+  private HqlBuilder from(String joinAlias, String joinRelationship, String alias, JoinType joinType)
   {
     checkAliasExists(joinAlias);
     checkAliasIsUnique(alias);
@@ -333,9 +349,8 @@ public class HqlBuilder
         query.setParameter(arg.getKey(), arg.getValue());
       }
     }
-    query.setReadOnly(true);
     if (_isDistinctRootEntities) {
-      query.setResultTransformer(new DistinctRootEntityResultTransformer());
+      query.setResultTransformer(DistinctRootEntityResultTransformer.INSTANCE);
     }
     query.setReadOnly(isReadOnly);
     return query;

@@ -9,21 +9,19 @@
 
 package edu.harvard.med.screensaver.model.entitytesters;
 
+import javax.persistence.EntityManagerFactory;
+
 import junit.framework.Assert;
+import org.apache.log4j.Logger;
 
 import edu.harvard.med.screensaver.model.AbstractEntity;
-import edu.harvard.med.screensaver.model.SemanticIDAbstractEntity;
-
-import org.apache.log4j.Logger;
-import org.hibernate.SessionFactory;
 
 /**
  * An abstract class for testing various aspects of a model entity. Implementing classes
  * provide an implementation of abstract method {@link #testEntity} to perform the test.
- * They are provided access to the {@link #_entityClass entity class} and the {@link
- * #_sessionFactory session factory}. They are also provided with some helper methods:
- * {@link #isEntitySubclass()}, {@link #getGetterMethodForPropertyName(String)}, and
- * {@link #getSetterMethodForPropertyName(String, Class)}.
+ * They are provided access to the {@link #_entityClass entity class} and the {@link #_entityManagerFactory session
+ * factory}. They are also provided with some helper methods: {@link #isEntitySubclass()},
+ * {@link #getGetterMethodForPropertyName(String)}, and {@link #getSetterMethodForPropertyName(String, Class)}.
  * 
  * @param <E> the type of abstract entity to be tested
  */
@@ -38,7 +36,7 @@ abstract public class AbstractEntityTester<E extends AbstractEntity> extends Ass
   // protected instance data
 
   protected Class<? extends AbstractEntity> _entityClass;
-  protected SessionFactory _sessionFactory;
+  protected EntityManagerFactory _entityManagerFactory;
 
   
   // public constructor and instance method
@@ -48,10 +46,10 @@ abstract public class AbstractEntityTester<E extends AbstractEntity> extends Ass
    * @param entityClass the entity class
    * @param sessionFactory the session factory
    */
-  public AbstractEntityTester(Class<E> entityClass, SessionFactory sessionFactory)
+  public AbstractEntityTester(Class<E> entityClass, EntityManagerFactory sessionFactory)
   {
     _entityClass = entityClass;
-    _sessionFactory = sessionFactory;
+    _entityManagerFactory = sessionFactory;
   }
   
   /**

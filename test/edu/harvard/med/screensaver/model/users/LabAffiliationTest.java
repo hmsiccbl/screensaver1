@@ -22,7 +22,7 @@ public class LabAffiliationTest extends AbstractEntityInstanceTest<LabAffiliatio
     return buildTestSuite(LabAffiliationTest.class, LabAffiliation.class);
   }
   
-  public LabAffiliationTest() throws IntrospectionException
+  public LabAffiliationTest()
   {
     super(LabAffiliation.class);
   }

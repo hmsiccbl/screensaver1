@@ -13,6 +13,7 @@ import java.util.Map;
 import java.util.TreeSet;
 
 import org.apache.log4j.Logger;
+import org.springframework.beans.factory.annotation.Autowired;
 
 import edu.harvard.med.screensaver.AbstractSpringPersistenceTest;
 import edu.harvard.med.screensaver.io.UnrecoverableParseException;
@@ -30,6 +31,7 @@ public class StudyAnnotationParserTest extends AbstractSpringPersistenceTest
 
   private static Logger log = Logger.getLogger(StudyAnnotationParserTest.class);
 
+  @Autowired
   protected StudyAnnotationParser studyAnnotationParser;
 
   public void testStudyAnnotationParser() throws UnrecoverableParseException

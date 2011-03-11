@@ -13,8 +13,8 @@ import edu.harvard.med.screensaver.model.VocabularyTerm;
 import edu.harvard.med.screensaver.model.VocabularyUserType;
 
 /**
- * The is screenable vocabulary.
- *
+ * The vocabulary for library screening statuses.
+ * 
  * @author <a mailto="john_sullivan@hms.harvard.edu">John Sullivan</a>
  * @author <a mailto="andrew_tolopko@hms.harvard.edu">Andrew Tolopko</a>
  */

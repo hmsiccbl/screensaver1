@@ -67,7 +67,7 @@ public class EntityUpdateSearchResults<AE extends AuditedAbstractEntity<K>, K ex
   public void searchForParentEntity(AE auditedEntity)
   {
     setTitle("Update History for " + auditedEntity); // TODO: need user-friendly toString(), see [#2560]
-    _auditedEntity = _dao.reloadEntity(auditedEntity, true, AuditedAbstractEntity.updateActivities.getPath());
+    _auditedEntity = (AE) _dao.reloadEntity(auditedEntity, true, AuditedAbstractEntity.updateActivities.castToSubtype((Class<AE>) auditedEntity.getClass()));
 
     EntityDataFetcher<AdministrativeActivity,Integer> dataFetcher =
       new EntityDataFetcher<AdministrativeActivity,Integer>(AdministrativeActivity.class, _dao) {

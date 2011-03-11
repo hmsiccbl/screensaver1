@@ -22,7 +22,7 @@ public class CherryPickScreeningTest extends AbstractEntityInstanceTest<CherryPi
     return buildTestSuite(CherryPickScreeningTest.class, CherryPickScreening.class);
   }
 
-  public CherryPickScreeningTest() throws IntrospectionException
+  public CherryPickScreeningTest()
   {
     super(CherryPickScreening.class);
   }

@@ -213,7 +213,6 @@ public class PlateUpdater
                                  comments.toString());
     updateActivity.setPerformedBy(performedByAdmin);
     updateActivity.setDateOfActivity(datePerformed);
-    
     // TODO: we want to be able to call validateLocations() here, but the resultant flush() call is causing problems with Plate.updateActivities, where newly added elements are not being added to the collection, although the activity itself is being persisted
     //validateLocations();
     

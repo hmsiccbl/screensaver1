@@ -32,6 +32,7 @@ import edu.harvard.med.screensaver.ui.arch.datatable.column.TableColumn;
 import edu.harvard.med.screensaver.ui.arch.datatable.model.DataTableModel;
 import edu.harvard.med.screensaver.ui.arch.util.UISelectOneBean;
 import edu.harvard.med.screensaver.ui.arch.view.EntityViewer;
+import edu.harvard.med.screensaver.ui.arch.view.EntityViewerBackingBean;
 import edu.harvard.med.screensaver.ui.arch.view.aspects.UICommand;
 
 /**
@@ -90,6 +91,21 @@ public abstract class EntitySearchResults<E extends Entity<K>,R,K extends Serial
   public void setNested(boolean isNested)
   {
     _isNested = isNested;
+  }
+
+  private EntityViewerBackingBean _nestedIn;
+
+  /**
+   * @return the parent viewer in which this search result is nested
+   */
+  public EntityViewerBackingBean getNestedIn()
+  {
+    return _nestedIn;
+  }
+
+  public void setNestedIn(EntityViewerBackingBean nestedIn)
+  {
+    _nestedIn = nestedIn;
   }
 
   /**

@@ -64,7 +64,7 @@ public class ScreeningDuplicator
   @Transactional
   public LibraryScreening addLibraryScreening(Screen screen, AdministratorUser recordedBy)
   {
-    screen = _dao.reloadEntity(screen, false, Screen.leadScreener.getPath());
+    screen = _dao.reloadEntity(screen, false, Screen.leadScreener);
     SortedSet<LibraryScreening> activities = screen.getLabActivitiesOfType(LibraryScreening.class);
     Screening lastScreening = null;
     if (!activities.isEmpty()) {

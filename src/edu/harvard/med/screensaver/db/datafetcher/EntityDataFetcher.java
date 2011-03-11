@@ -36,9 +36,16 @@ public class EntityDataFetcher<E extends Entity,K> extends PropertyPathDataFetch
 {
   private static final Logger log = Logger.getLogger(EntityDataFetcher.class);
 
+  protected boolean _isDataReadOnly = true;
+
   public EntityDataFetcher(Class<E> rootEntityClass, GenericEntityDAO dao)
   {
     super(rootEntityClass, dao);
+  }
+
+  public void setReadOnly(boolean isDataReadOnly)
+  {
+    _isDataReadOnly = isDataReadOnly;
   }
 
   public List<E> fetchAllData()
@@ -72,7 +79,7 @@ public class EntityDataFetcher<E extends Entity,K> extends PropertyPathDataFetch
       public List<E> execute(Session session)
       {
         HqlBuilder hql = buildHqlQueryForPaths();
-        List<E> result = hql.toQuery(session, true).list();
+        List<E> result = hql.toQuery(session, _isDataReadOnly).list();
         log.debug("found " + result.size() + " root entities");
         return result;
       }
@@ -82,11 +89,14 @@ public class EntityDataFetcher<E extends Entity,K> extends PropertyPathDataFetch
         HqlBuilder hql = new HqlBuilder();
         Map<RelationshipPath<E>,String> path2Alias = Maps.newHashMap();
 
-        // ensure that the root entity is fetched, at a minimum
-        getOrCreateJoin(hql, RelationshipPath.from(_rootEntityClass), path2Alias, null);
-
-        for (PropertyPath<E> path : getProperties()) {
-          getOrCreateJoin(hql, path.getUnrestrictedPath(), path2Alias, JoinType.LEFT_FETCH);
+        if (getProperties().isEmpty()) {
+          // ensure that at least the root entity is fetched
+          getOrCreateJoin(hql, RelationshipPath.from(_rootEntityClass), path2Alias, null);
+        }
+        else {
+          for (PropertyPath<E> path : getProperties()) {
+            getOrCreateJoin(hql, path.getUnrestrictedPath(), path2Alias, JoinType.LEFT_FETCH);
+          }
         }
 
         if (keys != null) {

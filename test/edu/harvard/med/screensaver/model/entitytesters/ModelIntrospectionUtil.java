@@ -22,7 +22,6 @@ import javax.persistence.JoinColumn;
 import javax.persistence.OneToMany;
 import javax.persistence.Transient;
 
-import junit.framework.TestCase;
 import org.apache.log4j.Logger;
 import org.hibernate.annotations.Immutable;
 
@@ -30,15 +29,17 @@ import edu.harvard.med.screensaver.model.AbstractEntity;
 import edu.harvard.med.screensaver.model.DomainModelDefinitionException;
 import edu.harvard.med.screensaver.model.ExistenceRequirement;
 import edu.harvard.med.screensaver.model.SemanticIDAbstractEntity;
-import edu.harvard.med.screensaver.model.annotations.CollectionOfElements;
 import edu.harvard.med.screensaver.model.annotations.Column;
+import edu.harvard.med.screensaver.model.annotations.ContainedEntity;
 import edu.harvard.med.screensaver.model.annotations.Derived;
+import edu.harvard.med.screensaver.model.annotations.ElementCollection;
 import edu.harvard.med.screensaver.model.annotations.ToMany;
 import edu.harvard.med.screensaver.model.annotations.ToOne;
 import edu.harvard.med.screensaver.model.meta.RelatedProperty;
+import edu.harvard.med.screensaver.util.DevelopmentException;
 import edu.harvard.med.screensaver.util.StringUtils;
 
-public class ModelIntrospectionUtil extends TestCase
+public class ModelIntrospectionUtil
 {
 
   private static Logger log = Logger.getLogger(ModelIntrospectionUtil.class);
@@ -186,7 +187,7 @@ public class ModelIntrospectionUtil extends TestCase
     }
     
 
-    if (isImmutableProperty(beanClass, propertyDescriptor) || beanClass.getAnnotation(Immutable.class) != null) {
+    if (isImmutableProperty(beanClass, propertyDescriptor)) {
       log.info("setter method not expected for immutable property: " + propFullName);
       return true;
     }
@@ -263,7 +264,9 @@ public class ModelIntrospectionUtil extends TestCase
     if (beanClass.getAnnotation(Immutable.class) != null) {
       return true;
     }
-    return hasAnnotation(Immutable.class, propertyDescriptor);
+    Method getter = propertyDescriptor.getReadMethod();
+    javax.persistence.Column columnAnnot = getter.getAnnotation(javax.persistence.Column.class);
+    return columnAnnot != null && !columnAnnot.updatable();
   }
 
   public static boolean isEmbeddableProperty(Class<? extends AbstractEntity> beanClass, PropertyDescriptor propertyDescriptor)
@@ -393,8 +396,8 @@ public class ModelIntrospectionUtil extends TestCase
   public static boolean isCollectionWithNonConventionalMutation(PropertyDescriptor propertyDescriptor)
   {
     Method getter = propertyDescriptor.getReadMethod();
-    CollectionOfElements collectionOfElements = getter.getAnnotation(CollectionOfElements.class);
-    return collectionOfElements != null && collectionOfElements.hasNonconventionalMutation();
+    ElementCollection elementCollection = getter.getAnnotation(ElementCollection.class);
+    return elementCollection != null && elementCollection.hasNonconventionalMutation();
   }
   
   public static boolean isToOneRelationshipWithNonConventionalSetter(PropertyDescriptor propertyDescriptor)
@@ -443,10 +446,12 @@ public class ModelIntrospectionUtil extends TestCase
       log.debug("findAndCheckMethod(): non-required method was not found: " + fullMethodName);
       return null;
     }
-    assertTrue("method not allowed: " + fullMethodName,
-               requirement != ExistenceRequirement.NOT_ALLOWED || foundMethod == null);
-    assertTrue("method must exist: " + fullMethodName,
-               requirement != ExistenceRequirement.REQUIRED || foundMethod != null);
+    if (!(requirement != ExistenceRequirement.NOT_ALLOWED || foundMethod == null)) {
+      throw new DevelopmentException("method not allowed: " + fullMethodName);
+    }
+    if (!(requirement != ExistenceRequirement.REQUIRED || foundMethod != null)) {
+      throw new DevelopmentException("method must exist: " + fullMethodName);
+    }
     return foundMethod;
   }
 
@@ -455,6 +460,23 @@ public class ModelIntrospectionUtil extends TestCase
     return hasAnnotation(Derived.class, propertyDescriptor);
   }
 
+  public static Class<? extends AbstractEntity> getParent(Class<? extends AbstractEntity> beanClass)
+  {
+    ContainedEntity containedEntity = beanClass.getAnnotation(ContainedEntity.class);
+    if (containedEntity != null) {
+      return containedEntity.containingEntityClass();
+    }
+    return null;
+  }
+
+  public static boolean isAutoCreatedByParent(Class<? extends AbstractEntity> beanClass)
+  {
+    ContainedEntity containedEntity = beanClass.getAnnotation(ContainedEntity.class);
+    if (containedEntity != null) {
+      return containedEntity.autoCreated();
+    }
+    return false;
+  }
 //  public static boolean isContainmentRelationship(Class<? extends AbstractEntity> beanClass,
 //                                                  Class<? extends AbstractEntity> relatedEntityType)
 //  {

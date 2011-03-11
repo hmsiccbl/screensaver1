@@ -16,11 +16,12 @@ import java.util.Set;
 import java.util.SortedSet;
 import java.util.TreeSet;
 
-import org.apache.log4j.Logger;
-import org.springframework.test.AbstractTransactionalSpringContextTests;
-
 import com.google.common.collect.Sets;
+import org.apache.log4j.Logger;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.transaction.annotation.Transactional;
 
+import edu.harvard.med.screensaver.AbstractSpringPersistenceTest;
 import edu.harvard.med.screensaver.io.screenresults.ScreenResultParserTest;
 import edu.harvard.med.screensaver.model.MakeDummyEntities;
 import edu.harvard.med.screensaver.model.libraries.Library;
@@ -38,39 +39,25 @@ import edu.harvard.med.screensaver.model.screens.Screen;
 import edu.harvard.med.screensaver.model.screens.ScreenDataSharingLevel;
 import edu.harvard.med.screensaver.model.screens.ScreenType;
 import edu.harvard.med.screensaver.model.users.AdministratorUser;
+import edu.harvard.med.screensaver.service.screens.ScreenDerivedPropertiesUpdater;
 import edu.harvard.med.screensaver.ui.libraries.WellSearchResults;
 
 /**
  * @author <a mailto="andrew_tolopko@hms.harvard.edu">Andrew Tolopko</a>
  */
-public class ScreenResultDAOTest extends AbstractTransactionalSpringContextTests
+@Transactional
+public class ScreenResultDAOTest extends AbstractSpringPersistenceTest
 {
-
   private static final Logger log = Logger.getLogger(ScreenResultDAOTest.class);
 
-  protected GenericEntityDAO genericEntityDao;
+  @Autowired
   protected ScreenResultsDAO screenResultsDao;
+  @Autowired
   protected LibrariesDAO librariesDao;
-  protected SchemaUtil schemaUtil;
+  @Autowired
+  protected ScreenDerivedPropertiesUpdater screenDerivedPropertiesUpdater;
 
-  @Override
-  protected String[] getConfigLocations()
-  {
-    return new String[] { "spring-context-test.xml" };
-  }
-
-  public ScreenResultDAOTest() 
-  {
-    setPopulateProtectedVariables(true);
-  }
-  
-  @Override
-  protected void onSetUpBeforeTransaction() throws Exception
-  {
-    schemaUtil.truncateTablesOrCreateSchema();
-  }
-  
-  
+  @Transactional
   public void testFindMutualPositiveColumns()
   {
     //    To test, create 4 screens:
@@ -183,7 +170,6 @@ public class ScreenResultDAOTest extends AbstractTransactionalSpringContextTests
     resultValue = col.createBooleanPositiveResultValue(assayWell, true, false);
     assert resultValue.isPositive();
 
-
     genericEntityDao.persistEntity(library);
     genericEntityDao.persistEntity(myScreen);
     genericEntityDao.persistEntity(screenWithNoOverlaps);
@@ -191,11 +177,6 @@ public class ScreenResultDAOTest extends AbstractTransactionalSpringContextTests
     genericEntityDao.persistEntity(screenWithOverlapNegative1);
     genericEntityDao.persistEntity(screenWithOverlapPositive);
     genericEntityDao.flush();
-
-    setComplete();
-    endTransaction();
-
-    startNewTransaction();
 
     List<DataColumn> columns = screenResultsDao.findMutualPositiveColumns(myScreen.getScreenResult());
     for (DataColumn dc : columns) {
@@ -210,8 +191,6 @@ public class ScreenResultDAOTest extends AbstractTransactionalSpringContextTests
     assertFalse("should not contain the positiveNonOverlapColumn column: " +
                   positiveNonOverlapColumn,
                 columns.contains(positiveNonOverlapColumn));
-          
-    
   }
 
   public void testDerivedScreenResults()
@@ -243,9 +222,7 @@ public class ScreenResultDAOTest extends AbstractTransactionalSpringContextTests
     genericEntityDao.saveOrUpdateEntity(screenResult.getScreen().getLabHead());
     genericEntityDao.saveOrUpdateEntity(screenResult.getScreen());
 
-    setComplete();
-    endTransaction();
-    startNewTransaction();
+    flushAndClear();
           
     List<ScreenResult> screenResults = genericEntityDao.findAllEntitiesOfType(ScreenResult.class);
     screenResult = screenResults.get(0);
@@ -273,24 +250,21 @@ public class ScreenResultDAOTest extends AbstractTransactionalSpringContextTests
     screen1.setMaxDataLoadedReplicateCount(2);
     screen1.setMinDataLoadedReplicateCount(2);
     genericEntityDao.saveOrUpdateEntity(screen1);
-    setComplete();
-    endTransaction();
 
-    startNewTransaction();
+    flushAndClear();
+
     screen1 = genericEntityDao.findEntityByProperty(Screen.class, Screen.facilityId.getPropertyName(), "1");
-    screen1.invalidate();
-    screen1.update();
-    setComplete();
-    endTransaction();
+    screenDerivedPropertiesUpdater.updateScreeningStatistics(screen1);
 
-    startNewTransaction();
+    flushAndClear();
+
     screen1 = genericEntityDao.findEntityByProperty(Screen.class, Screen.facilityId.getPropertyName(), "1");
     assertNotNull(screen1.getScreenResult());
-    endTransaction();
 
     screenResultsDao.deleteScreenResult(screen1.getScreenResult());
 
-    startNewTransaction();
+    flushAndClear();
+
     screen1 = genericEntityDao.findEntityByProperty(Screen.class, Screen.facilityId.getPropertyName(), "1", true);
     assertNull(screen1.getScreenResult());
     assertEquals(0, screen1.getLibraryPlatesDataLoadedCount());
@@ -321,7 +295,7 @@ public class ScreenResultDAOTest extends AbstractTransactionalSpringContextTests
                                   ScreenType.SMALL_MOLECULE,
                                   LibraryType.COMMERCIAL,
                                   1,
-                                  1,
+                                  10,
                                   PlateSize.WELLS_384);
     for (int i = 1; i <= 10; ++i) {
       int plateNumber = i;
@@ -345,9 +319,7 @@ public class ScreenResultDAOTest extends AbstractTransactionalSpringContextTests
     genericEntityDao.saveOrUpdateEntity(screen.getLabHead());
     genericEntityDao.saveOrUpdateEntity(screen);
 
-    setComplete();
-    endTransaction();
-    startNewTransaction();
+    flushAndClear();
 
     screen = genericEntityDao.findEntityByProperty(Screen.class, Screen.facilityId.getPropertyName(), "1");
     assertEquals("wells", expectedAssayWells, screen.getScreenResult().getAssayWells());
@@ -369,7 +341,7 @@ public class ScreenResultDAOTest extends AbstractTransactionalSpringContextTests
                                   ScreenType.SMALL_MOLECULE,
                                   LibraryType.COMMERCIAL,
                                   1,
-                                  1,
+                                  10,
                                   PlateSize.WELLS_384);
     for (int iPlate = 1; iPlate <= 3; ++iPlate) {
       int plateNumber = iPlate;
@@ -384,10 +356,9 @@ public class ScreenResultDAOTest extends AbstractTransactionalSpringContextTests
     genericEntityDao.saveOrUpdateEntity(screen.getLeadScreener());
     genericEntityDao.saveOrUpdateEntity(screen.getLabHead());
     genericEntityDao.saveOrUpdateEntity(screen);
-    setComplete();
-    endTransaction();
 
-    startNewTransaction();
+    flushAndClear();
+
     // test findResultValuesByPlate(Integer, DataColumn)
     Map<WellKey,ResultValue> resultValues1 = screenResultsDao.findResultValuesByPlate(2, col1);
     assertEquals("result values size", 10, resultValues1.size());
@@ -396,6 +367,4 @@ public class ScreenResultDAOTest extends AbstractTransactionalSpringContextTests
       assertEquals("rv.value", new Double(iWell), rv.getNumericValue());
     }
   }
-
-
 }

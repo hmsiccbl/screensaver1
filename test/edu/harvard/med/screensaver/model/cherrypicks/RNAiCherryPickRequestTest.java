@@ -9,12 +9,12 @@
 
 package edu.harvard.med.screensaver.model.cherrypicks;
 
-import java.beans.IntrospectionException;
 import java.util.Arrays;
 import java.util.HashSet;
 import java.util.Set;
 
 import junit.framework.TestSuite;
+import org.springframework.beans.factory.annotation.Autowired;
 
 import edu.harvard.med.iccbl.screensaver.policy.cherrypicks.RNAiCherryPickRequestAllowancePolicy;
 import edu.harvard.med.screensaver.db.DAOTransaction;
@@ -38,17 +38,19 @@ public class RNAiCherryPickRequestTest extends CherryPickRequestTest<RNAiCherryP
     return buildTestSuite(RNAiCherryPickRequestTest.class, RNAiCherryPickRequest.class);
   }
 
+  @Autowired
   protected LibrariesDAO librariesDao;
+  @Autowired
   protected RNAiCherryPickRequestAllowancePolicy rnaiCherryPickRequestAllowancePolicy;
 
-  public RNAiCherryPickRequestTest() throws IntrospectionException
+  public RNAiCherryPickRequestTest()
   {
     super(RNAiCherryPickRequest.class);
   }
 
   public void testRequestedEmptyWellsOnAssayPlate()
   {
-    schemaUtil.truncateTablesOrCreateSchema();
+    schemaUtil.truncateTables();
 
     final Set<WellName> requestedEmptyWells= new HashSet<WellName>(Arrays.asList(new WellName("A03"),
                                                                                  new WellName("G07"),
@@ -83,7 +85,7 @@ public class RNAiCherryPickRequestTest extends CherryPickRequestTest<RNAiCherryP
    */
   public void testCherryPickAllowance()
   {
-    schemaUtil.truncateTablesOrCreateSchema();
+    schemaUtil.truncateTables();
     genericEntityDao.doInTransaction(new DAOTransaction()
     {
       public void runTransaction()
@@ -114,7 +116,7 @@ public class RNAiCherryPickRequestTest extends CherryPickRequestTest<RNAiCherryP
 
   public void testUniqueScreenerCherryPicksOnly()
   {
-    schemaUtil.truncateTablesOrCreateSchema();
+    schemaUtil.truncateTables();
     try {
       Screen screen = MakeDummyEntities.makeDummyScreen(1, ScreenType.RNAI);
       RNAiCherryPickRequest cherryPickRequest = (RNAiCherryPickRequest) screen.createCherryPickRequest((AdministratorUser) screen.getCreatedBy());

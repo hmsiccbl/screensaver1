@@ -9,7 +9,6 @@
 
 package edu.harvard.med.screensaver.db;
 
-import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -18,10 +17,7 @@ import java.util.Map;
 import java.util.Set;
 
 import org.apache.log4j.Logger;
-import org.hibernate.HibernateException;
 import org.hibernate.Query;
-import org.hibernate.Session;
-import org.springframework.orm.hibernate3.HibernateCallback;
 
 import edu.harvard.med.screensaver.model.BusinessRuleViolationException;
 import edu.harvard.med.screensaver.model.cherrypicks.CherryPickRequest;
@@ -70,7 +66,7 @@ public class CherryPickRequestDAO extends AbstractDAO
       deleteLabCherryPick(cherryPick);
     }
 
-    getHibernateTemplate().delete(screenerCherryPick);
+    getEntityManager().remove(screenerCherryPick);
   }
 
   public void deleteLabCherryPick(LabCherryPick labCherryPick)
@@ -87,20 +83,17 @@ public class CherryPickRequestDAO extends AbstractDAO
     
     labCherryPick.getCherryPickRequest().decUnfulfilledLabCherryPicks();
 
-    getHibernateTemplate().delete(labCherryPick);
+    getEntityManager().remove(labCherryPick);
   }
   
   public void deleteAllCherryPicks(CherryPickRequest cherryPickRequest)
   {
    cherryPickRequest = _dao.reattachEntity(cherryPickRequest);
-   _dao.need(cherryPickRequest, 
-             "labCherryPicks.sourceWell");
+    _dao.need(cherryPickRequest, CherryPickRequest.labCherryPicks.to(LabCherryPick.sourceWell));
     if (cherryPickRequest.isAllocated()) {
       throw new BusinessRuleViolationException("cherry picks cannot be deleted once a cherry pick request has been allocated");
     }
-    _dao.need(cherryPickRequest,
-              "screenerCherryPicks.screenedWell",
-              "screenerCherryPicks.rnaiKnockdownConfirmation");
+    _dao.need(cherryPickRequest, CherryPickRequest.screenerCherryPicks.to(ScreenerCherryPick.screenedWell));
     Set<ScreenerCherryPick> cherryPicksToDelete = new HashSet<ScreenerCherryPick>(cherryPickRequest.getScreenerCherryPicks());
     for (ScreenerCherryPick cherryPick : cherryPicksToDelete) {
       deleteScreenerCherryPick(cherryPick);
@@ -126,7 +119,7 @@ public class CherryPickRequestDAO extends AbstractDAO
 
     // dissociate from related entities
     cherryPickRequest.getScreen().getCherryPickRequests().remove(cherryPickRequest);
-    getHibernateTemplate().delete(cherryPickRequest);
+    getEntityManager().remove(cherryPickRequest);
   }
 
   public CherryPickRequest findCherryPickRequestByNumber(int cherryPickRequestNumber)
@@ -148,35 +141,27 @@ public class CherryPickRequestDAO extends AbstractDAO
                                                                   well));
   }
 
-  @SuppressWarnings("unchecked")
   public Set<ScreenerCherryPick> findScreenerCherryPicksForWell(Well well)
   {
-    return new HashSet<ScreenerCherryPick>(
-      getHibernateTemplate().find("from ScreenerCherryPick where screenedWell = ?", well));
+    return new HashSet<ScreenerCherryPick>(_dao.findEntitiesByProperty(ScreenerCherryPick.class,
+                                                                       "screenedWell",
+                                                                       well));
   }
 
-  @SuppressWarnings("unchecked")
   public Map<WellKey,Number> findDuplicateCherryPicksForScreen(final Screen screen)
   {
-    return (Map<WellKey,Number>) getHibernateTemplate().execute(new HibernateCallback() {
-      public Object doInHibernate(Session session) throws HibernateException, SQLException
-      {
-        Query query = session.createQuery(
-          "select sw.wellId, count(*) " +
-          "from Screen s left join s.cherryPickRequests cpr left join cpr.screenerCherryPicks scp join scp.screenedWell sw " +
-            "where s." + Screen.facilityId.getPropertyName() + " = :screenId " +
-          "group by sw.wellId " +
-          "having count(*) > 1");
-        query.setReadOnly(true);
-        query.setParameter("screenId", screen.getFacilityId());
-        Map<WellKey,Number> result = new HashMap<WellKey,Number>();
-        for (Iterator iter = query.list().iterator(); iter.hasNext();) {
-          Object[] row = (Object[]) iter.next();
-          result.put(new WellKey(row[0].toString()), (Number) row[1]);
-        }
-        return result;
-      }
-    });
+    Query query = getHibernateSession().createQuery("select sw.wellId, count(*) " +
+                                                    "from Screen s left join s.cherryPickRequests cpr left join cpr.screenerCherryPicks scp join scp.screenedWell sw " +
+                                                    "where s." + Screen.facilityId.getPropertyName() + " = :screenId " +
+                                                    "group by sw.wellId having count(*) > 1");
+    query.setReadOnly(true);
+    query.setParameter("screenId", screen.getFacilityId());
+    Map<WellKey,Number> result = new HashMap<WellKey,Number>();
+    for (Iterator iter = query.list().iterator(); iter.hasNext();) {
+      Object[] row = (Object[]) iter.next();
+      result.put(new WellKey(row[0].toString()), (Number) row[1]);
+    }
+    return result;
   }
 }
 

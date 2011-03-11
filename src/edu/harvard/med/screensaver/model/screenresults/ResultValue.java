@@ -55,9 +55,9 @@ import edu.harvard.med.screensaver.util.DevelopmentException;
 @edu.harvard.med.screensaver.model.annotations.ContainedEntity(containingEntityClass=DataColumn.class)
 @Table(uniqueConstraints = { @UniqueConstraint(columnNames = { "dataColumnId", "well_id" }) })
 @org.hibernate.annotations.Table(appliesTo = "result_value",
- indexes = {
-  @Index(name = "result_value_data_column_and_value_index", columnNames = { "dataColumnId", "value" }),
-  @Index(name = "result_value_data_column_and_numeric_value_index", columnNames = { "dataColumnId", "numericValue" }) })
+  indexes = {
+    @Index(name = "result_value_data_column_and_value_index", columnNames = { "dataColumnId", "value" }),
+    @Index(name = "result_value_data_column_and_numeric_value_index", columnNames = { "dataColumnId", "numericValue" }) })
 public class ResultValue extends AbstractEntity<Integer>
 {
   private static final long serialVersionUID = -4066041317098744417L;
@@ -276,7 +276,6 @@ public class ResultValue extends AbstractEntity<Integer>
    */
   @ManyToOne(cascade={}, fetch=FetchType.LAZY)
   @JoinColumn(name="dataColumnId", nullable=false, updatable=false)
-  @org.hibernate.annotations.Immutable
   @org.hibernate.annotations.ForeignKey(name="fk_result_value_to_data_column")
   @org.hibernate.annotations.LazyToOne(value=org.hibernate.annotations.LazyToOneOption.PROXY)
   public DataColumn getDataColumn()
@@ -290,7 +289,6 @@ public class ResultValue extends AbstractEntity<Integer>
    */
   @ManyToOne(fetch=FetchType.LAZY)
   @JoinColumn(name="well_id", nullable=false, updatable=false)
-  @org.hibernate.annotations.Immutable
   @org.hibernate.annotations.ForeignKey(name="fk_result_value_to_well")
   @org.hibernate.annotations.LazyToOne(value=org.hibernate.annotations.LazyToOneOption.PROXY)
   public Well getWell()

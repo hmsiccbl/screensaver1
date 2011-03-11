@@ -15,6 +15,8 @@ import java.util.Map;
 import junit.framework.TestCase;
 
 import edu.harvard.med.screensaver.model.libraries.Well;
+import edu.harvard.med.screensaver.model.screenresults.ResultValue;
+import edu.harvard.med.screensaver.model.screenresults.ScreenResult;
 import edu.harvard.med.screensaver.model.screens.Screen;
 import edu.harvard.med.screensaver.ui.arch.datatable.Criterion.Operator;
 
@@ -25,8 +27,8 @@ public class HqlBuilderTest extends TestCase
     HqlBuilder hb = new HqlBuilder();
     hb.select("s", Screen.facilityId.getPropertyName()).
     from(Screen.class, "s").
-    from("s", "screenResult", "sr", JoinType.INNER).
-    from("sr", "dataColumns", "col", JoinType.INNER).
+      from("s", Screen.screenResult, "sr", JoinType.INNER).
+      from("sr", ScreenResult.dataColumns, "col", JoinType.INNER).
     where("col", "numeric", Operator.EQUAL, true).
       where("col", "name", Operator.TEXT_LIKE, "Positive").
     orderBy("s", Screen.facilityId.getPropertyName());
@@ -46,8 +48,8 @@ public class HqlBuilderTest extends TestCase
     HqlBuilder hb = new HqlBuilder();
     hb.select("w", "id").select("col", "id").select("rv", "value");
     hb.from(Well.class, "w");
-    hb.from("w", "resultValues", "rv", JoinType.LEFT_FETCH);
-    hb.from("rv", "dataColumn", "col");
+    hb.from("w", Well.resultValues, "rv", JoinType.LEFT_FETCH);
+    hb.from("rv", ResultValue.DataColumn, "col");
     Disjunction orClause = hb.disjunction();
     Conjunction and1 = hb.conjunction();
     Conjunction and2 = hb.conjunction();
@@ -66,7 +68,7 @@ public class HqlBuilderTest extends TestCase
   public void testAliasReuse()
   {
     try {
-      new HqlBuilder().from(Screen.class, "s").from("s", "screenResult", "s");
+      new HqlBuilder().from(Screen.class, "s").from("s", Screen.screenResult, "s");
       fail("expected exception for alias reuse");
     }
     catch (Exception e) {}
@@ -86,7 +88,7 @@ public class HqlBuilderTest extends TestCase
   {
     HqlBuilder hb = new HqlBuilder();
     hb.from(Well.class, "w");
-    hb.from("w", "resultValues", "rv", JoinType.LEFT);
+    hb.from("w", Well.resultValues, "rv", JoinType.LEFT);
     hb.restrictFrom("rv", "dataColumn.id", Operator.EQUAL, 1);
     hb.where(hb.simplePredicate("rv.value", Operator.GREATER_THAN, 5.0));
     assertEquals("from Well w left join w.resultValues rv with rv.dataColumn.id=:arg0 where rv.value>:arg1",

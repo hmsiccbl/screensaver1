@@ -21,7 +21,6 @@ import java.util.SortedSet;
 import javax.persistence.CascadeType;
 import javax.persistence.Column;
 import javax.persistence.Entity;
-import javax.persistence.FetchType;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
@@ -30,7 +29,6 @@ import javax.persistence.JoinTable;
 import javax.persistence.ManyToMany;
 import javax.persistence.OneToMany;
 import javax.persistence.OneToOne;
-import javax.persistence.OrderBy;
 import javax.persistence.Transient;
 import javax.persistence.Version;
 
@@ -151,11 +149,10 @@ public class ScreenResult extends AuditedAbstractEntity<Integer>
     return getEntityId();
   }
 
-  @ManyToMany(fetch = FetchType.LAZY, cascade={ CascadeType.PERSIST, CascadeType.MERGE })
+  @ManyToMany(cascade = { CascadeType.ALL })
   @JoinTable(name="screenResultUpdateActivity", 
              joinColumns=@JoinColumn(name="screenResultId", nullable=false, updatable=false),
              inverseJoinColumns=@JoinColumn(name="updateActivityId", nullable=false, updatable=false))
-  @org.hibernate.annotations.Cascade(value={org.hibernate.annotations.CascadeType.SAVE_UPDATE})
   @Sort(type=SortType.NATURAL)            
   @ToMany(singularPropertyName="updateActivity", hasNonconventionalMutation=true /* model testing framework doesn't understand this is a containment relationship, and so requires addUpdateActivity() method*/)
   @Override
@@ -168,11 +165,9 @@ public class ScreenResult extends AuditedAbstractEntity<Integer>
    * Get the screen.
    * @return the screen
    */
-  @OneToOne(cascade={ CascadeType.PERSIST, CascadeType.MERGE })
+  @OneToOne
   @JoinColumn(name="screenId", nullable=false, updatable=false, unique=true)
-  @org.hibernate.annotations.Immutable
   @org.hibernate.annotations.ForeignKey(name="fk_screen_result_to_screen")
-  @org.hibernate.annotations.LazyToOne(value=org.hibernate.annotations.LazyToOneOption.PROXY)
   public Screen getScreen()
   {
     return _screen;
@@ -199,8 +194,6 @@ public class ScreenResult extends AuditedAbstractEntity<Integer>
     for (AssayPlate assayPlate : assayPlatesDataLoaded) {
       assayPlate.setScreenResultDataLoading(screenResultDataLoading);
     }
-    
-    getScreen().invalidate(); // to recalculate screening status counts
     
     return screenResultDataLoading;
   }
@@ -288,17 +281,8 @@ public class ScreenResult extends AuditedAbstractEntity<Integer>
    * @return the ordered set of all {@link DataColumn}s for this screen
    * result.
    */
-  @OneToMany(
-    mappedBy="screenResult",
-    cascade={ CascadeType.PERSIST, CascadeType.MERGE, CascadeType.REMOVE },
-    fetch=FetchType.LAZY
-  )
-  @OrderBy("ordinal")
+  @OneToMany(mappedBy = "screenResult", cascade = { CascadeType.ALL }, orphanRemoval = true)
   @org.hibernate.annotations.Sort(type=org.hibernate.annotations.SortType.NATURAL)
-  @org.hibernate.annotations.Cascade(value={
-    org.hibernate.annotations.CascadeType.SAVE_UPDATE,
-    org.hibernate.annotations.CascadeType.DELETE_ORPHAN
-  })
   public SortedSet<DataColumn> getDataColumns()
   {
     return _dataColumns;
@@ -443,10 +427,7 @@ public class ScreenResult extends AuditedAbstractEntity<Integer>
     _channelCount = channelCount;
   }
 
-  @OneToMany(mappedBy="screenResult",
-             fetch=FetchType.LAZY)
-  @org.hibernate.annotations.LazyCollection(value=org.hibernate.annotations.LazyCollectionOption.TRUE)
-  @org.hibernate.annotations.Cascade({ org.hibernate.annotations.CascadeType.DELETE, org.hibernate.annotations.CascadeType.SAVE_UPDATE, org.hibernate.annotations.CascadeType.PERSIST })
+  @OneToMany(mappedBy = "screenResult", cascade = { CascadeType.ALL })
   @org.hibernate.annotations.Sort(type=org.hibernate.annotations.SortType.NATURAL)
   public SortedSet<AssayWell> getAssayWells()
   {

@@ -17,11 +17,12 @@ import javax.persistence.Id;
 import javax.persistence.Table;
 import javax.persistence.UniqueConstraint;
 
+import org.hibernate.annotations.Immutable;
+import org.hibernate.annotations.Parameter;
+import org.hibernate.annotations.Type;
 import com.google.common.base.Function;
 import com.google.common.base.Joiner;
 import com.google.common.collect.ImmutableList;
-import org.hibernate.annotations.Parameter;
-import org.hibernate.annotations.Type;
 
 import edu.harvard.med.screensaver.model.AbstractEntity;
 import edu.harvard.med.screensaver.model.AbstractEntityVisitor;
@@ -35,6 +36,7 @@ import edu.harvard.med.screensaver.util.Triple;
  * @author <a mailto="andrew_tolopko@hms.harvard.edu">Andrew Tolopko</a>
  */
 @Entity
+@Immutable
 @org.hibernate.annotations.Proxy
 @Table(uniqueConstraints = { @UniqueConstraint(columnNames = { "room", "freezer", "shelf", "bin" }) })
 public class PlateLocation extends AbstractEntity<Integer>
@@ -147,7 +149,7 @@ public class PlateLocation extends AbstractEntity<Integer>
     return _room;
   }
 
-  public void setRoom(String room)
+  private void setRoom(String room)
   {
     _room = room;
   }
@@ -159,7 +161,7 @@ public class PlateLocation extends AbstractEntity<Integer>
     return _freezer;
   }
 
-  public void setFreezer(String freezer)
+  private void setFreezer(String freezer)
   {
     _freezer = freezer;
   }
@@ -171,7 +173,7 @@ public class PlateLocation extends AbstractEntity<Integer>
     return _shelf;
   }
 
-  public void setShelf(String shelf)
+  private void setShelf(String shelf)
   {
     _shelf = shelf;
   }
@@ -183,7 +185,7 @@ public class PlateLocation extends AbstractEntity<Integer>
     return _bin;
   }
 
-  public void setBin(String bin)
+  private void setBin(String bin)
   {
     _bin = bin;
   }

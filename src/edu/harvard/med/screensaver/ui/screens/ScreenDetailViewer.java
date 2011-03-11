@@ -15,6 +15,7 @@ import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Observable;
 import java.util.Observer;
@@ -25,15 +26,15 @@ import javax.faces.model.DataModel;
 import javax.faces.model.ListDataModel;
 import javax.faces.model.SelectItem;
 
+import org.apache.log4j.Logger;
+import org.apache.myfaces.custom.fileupload.UploadedFile;
+import org.joda.time.LocalDate;
+import org.springframework.transaction.annotation.Transactional;
 import com.google.common.base.Predicate;
 import com.google.common.collect.ImmutableSortedSet;
 import com.google.common.collect.Iterables;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Sets;
-import org.apache.log4j.Logger;
-import org.apache.myfaces.custom.fileupload.UploadedFile;
-import org.joda.time.LocalDate;
-import org.springframework.transaction.annotation.Transactional;
 
 import edu.harvard.med.screensaver.ScreensaverConstants;
 import edu.harvard.med.screensaver.db.GenericEntityDAO;
@@ -302,18 +303,18 @@ public class ScreenDetailViewer extends AbstractStudyDetailViewer<Screen>
       return null;
     }
     return getEntity().getLabActivities().last();
-  }
+  }	
 
   public DataModel getCherryPickRequestsDataModel()
   {
     ArrayList<CherryPickRequest> cherryPickRequests = new ArrayList<CherryPickRequest>(getEntity().getCherryPickRequests());
     Collections.sort(cherryPickRequests,
                      new Comparator<CherryPickRequest>() {
-      public int compare(CherryPickRequest cpr1, CherryPickRequest cpr2)
+                       public int compare(CherryPickRequest cpr1, CherryPickRequest cpr2)
       {
         return -1 * cpr1.getCherryPickRequestNumber().compareTo(cpr2.getCherryPickRequestNumber());
       }
-    });
+                     });
     return new ListDataModel(new ArrayList<CherryPickRequest>(cherryPickRequests.subList(0, Math.min(CHILD_ENTITY_TABLE_MAX_ROWS, cherryPickRequests.size()))));
   }
 
@@ -401,7 +402,7 @@ public class ScreenDetailViewer extends AbstractStudyDetailViewer<Screen>
   {
     if (_pinTransferApprovedBy == null) {
       Set<AdministratorUser> candidateApprovers = 
-        Sets.filter(ImmutableSortedSet.orderedBy(ScreensaverUserComparator.<AdministratorUser>getInstance()).addAll(getDao().findAllEntitiesOfType(AdministratorUser.class, true, "screensaverUserRoles")).build(),
+        Sets.filter(ImmutableSortedSet.orderedBy(ScreensaverUserComparator.<AdministratorUser>getInstance()).addAll(getDao().findAllEntitiesOfType(AdministratorUser.class, true, ScreensaverUser.roles.castToSubtype(AdministratorUser.class))).build(),
                     new Predicate<AdministratorUser>() { public boolean apply(AdministratorUser u) { return u.getScreensaverUserRoles().contains(ScreensaverUserRole.SCREENS_ADMIN); } } );
       // note: we must reload 'performedBy', since it can otherwise be a proxy, which will not allow us to cast it to AdministratorUser
       AdministratorUser defaultSelection = getEntity().getPinTransferApprovalActivity() == null ? null : (AdministratorUser) getDao().reloadEntity(getEntity().getPinTransferApprovalActivity().getPerformedBy());
@@ -465,7 +466,11 @@ public class ScreenDetailViewer extends AbstractStudyDetailViewer<Screen>
   public List<SelectItem> getProjectPhaseSelectItems()
   {
     List<SelectItem> selectItems = super.getProjectPhaseSelectItems();
-    selectItems.remove(ProjectPhase.ANNOTATION.ordinal());
+    for (Iterator<SelectItem> iter = selectItems.iterator(); iter.hasNext();) {
+      if (iter.next().getValue() == ProjectPhase.ANNOTATION) {
+        iter.remove();
+      }
+    }
     return selectItems;
   }
 
@@ -475,11 +480,6 @@ public class ScreenDetailViewer extends AbstractStudyDetailViewer<Screen>
     setEditMode(false);
     _isAdminViewMode ^= true;
     return REDISPLAY_PAGE_ACTION_RESULT;
-  }
-
-  @Override
-  protected void initializeNewEntity(Screen screen)
-  {
   }
 
   @Override
@@ -529,19 +529,19 @@ public class ScreenDetailViewer extends AbstractStudyDetailViewer<Screen>
       screen.removeCollaborator(getDao().reloadEntity(collaborator));
     }
     
-    if (_pinTransferApprovedBy.getSelection() != null && screen.getPinTransferApprovalActivity() == null) {
-      screen.setPinTransferApproved((AdministratorUser) getDao().reloadEntity(getScreensaverUser(), false, "activitiesPerformed"),
-                                    _pinTransferApprovedBy.getSelection(),
-                                    _pinTransferApprovalDate,
-                                    _pinTransferApprovalComments);
+    if (getPinTransferApprovedBy().getSelection() != null && screen.getPinTransferApprovalActivity() == null) {
+      screen.setPinTransferApproved((AdministratorUser) getDao().reloadEntity(getScreensaverUser(), false, ScreensaverUser.activitiesPerformed),
+                                    getPinTransferApprovedBy().getSelection(),
+                                    getPinTransferApprovalDate(),
+                                    getPinTransferApprovalComments());
     }
-    else if (!StringUtils.isEmpty(_pinTransferApprovalComments) && screen.getPinTransferApprovalActivity() != null) {
-      screen.getPinTransferApprovalActivity().setComments(_pinTransferApprovalComments);
+    else if (!StringUtils.isEmpty(getPinTransferApprovalComments()) && screen.getPinTransferApprovalActivity() != null) {
+      screen.getPinTransferApprovalActivity().setComments(getPinTransferApprovalComments());
     }
   }
   
   @Override
-  protected boolean validateEntity(final Screen screen)
+  protected boolean validateEntity(Screen screen)
   {
     if (!_screenDao.isScreenFacilityIdUnique(screen)) {
       showMessage("duplicateEntity", "Screen ID");
@@ -550,9 +550,10 @@ public class ScreenDetailViewer extends AbstractStudyDetailViewer<Screen>
 
     LocalDate max = screen.getMaxAllowedDataPrivacyExpirationDate();
     LocalDate min = screen.getMinAllowedDataPrivacyExpirationDate();
+    
     //TODO: consider using a Comparator Utility class! - sde4
     if (max != null && min != null) {
-      if (max.compareTo(min) < 0) {
+      if(max.compareTo(min) < 0) {
         showMessage("screens.dataPrivacyExpirationDateOrderError", min, max);
         return false;
       }
@@ -609,7 +610,6 @@ public class ScreenDetailViewer extends AbstractStudyDetailViewer<Screen>
   @UICommand
   public String addPublication()
   {
-
     try {
       Publication publication = getEntity().addCopyOfPublication(_newPublication);
 
@@ -633,7 +633,7 @@ public class ScreenDetailViewer extends AbstractStudyDetailViewer<Screen>
     }
 
     _newPublication = null;
-    _attachedFiles.reset();
+    _attachedFiles.reset(); // TODO: I think this should be deleted; expect it to cause newly attached files to be ignored after adding a publication!
     return REDISPLAY_PAGE_ACTION_RESULT;
   }
 
@@ -689,14 +689,16 @@ public class ScreenDetailViewer extends AbstractStudyDetailViewer<Screen>
   }
 
   @UICommand
-  @Transactional(readOnly=true) // readOnly to prevent saving the new screening before the user clicks Save
+  @Transactional
   public String addLibraryScreening()
   {
     if (!!!getScreensaverUser().isUserInRole(ScreensaverUserRole.SCREENS_ADMIN)) {
       throw new OperationRestrictedException("add Library Screening");
     }
+    getDao().need(getEntity(), Screen.assayPlates);
     Screening screening = _screeningDuplicator.addLibraryScreening(getEntity(),
                                                                    (AdministratorUser) getScreensaverUser());
+    getDao().clear(); // detach new Activity, as it should only be persisted if user invokes "save" command 
     return _labActivityViewer.editNewEntity(screening);
   }
 
@@ -713,20 +715,19 @@ public class ScreenDetailViewer extends AbstractStudyDetailViewer<Screen>
   }
 
   @UICommand
-  @Transactional(readOnly=true) // readOnly to prevent saving the new screening before the user clicks Save
+  @Transactional
   public String addCherryPickRequest()
   {
     if (!!!getScreensaverUser().isUserInRole(ScreensaverUserRole.CHERRY_PICK_REQUESTS_ADMIN)) {
       throw new OperationRestrictedException("add Cherry Pick Request");
     }
-    Screen screen = getDao().reloadEntity(getEntity(), 
-                                          true, 
-                                          Screen.cherryPickRequests.getPath(),
-                                          Screen.labActivities.getPath());
-    getDao().needReadOnly(screen, Screen.labHead.getPath());
-    getDao().needReadOnly(screen, Screen.leadScreener.getPath());
-    getDao().needReadOnly(screen, Screen.collaborators.getPath());
+    Screen screen = getDao().reloadEntity(getEntity(), true, Screen.cherryPickRequests);
+    getDao().needReadOnly(screen, Screen.labActivities);
+    getDao().needReadOnly(screen, Screen.labHead);
+    getDao().needReadOnly(screen, Screen.leadScreener);
+    getDao().needReadOnly(screen, Screen.collaborators);
     CherryPickRequest cpr = screen.createCherryPickRequest((AdministratorUser) getScreensaverUser());
+    getDao().clear(); // detach new entity, as it should only be persisted if user invokes "save" command 
     return _cherryPickRequestDetailViewer.editNewEntity(cpr);
   }
 

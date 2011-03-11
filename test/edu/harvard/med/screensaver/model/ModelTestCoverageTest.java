@@ -10,48 +10,40 @@
 package edu.harvard.med.screensaver.model;
 
 import java.lang.reflect.Modifier;
-import java.util.Iterator;
 
-import org.apache.log4j.Logger;
-import org.hibernate.SessionFactory;
-import org.hibernate.metadata.ClassMetadata;
+import javax.persistence.Embeddable;
+import javax.persistence.EntityManagerFactory;
+import javax.persistence.metamodel.ManagedType;
+
+import org.springframework.beans.factory.annotation.Autowired;
 
 import edu.harvard.med.screensaver.AbstractSpringTest;
 
 /**
- * Tests that all non-abstract subclasses of {@link AbstractEntity} have corresponding
- * unit tests.
+ * Tests that all entity classes have corresponding unit test classes.
  */
 public class ModelTestCoverageTest extends AbstractSpringTest
 {
-  private static Logger log = Logger.getLogger(ModelTestCoverageTest.class);
-  
-  protected SessionFactory hibernateSessionFactory;
+  @Autowired
+  protected EntityManagerFactory entityManagerFactory;
   
   public void testModelTestCoverage()
   {
-    assertNotNull(hibernateSessionFactory);
-    Iterator classMetadatas = hibernateSessionFactory.getAllClassMetadata().values().iterator();
-    while (classMetadatas.hasNext()) {
-      ClassMetadata classMetadata = (ClassMetadata) classMetadatas.next();
-      log.info("meta = " + classMetadata.getEntityName());
-      String entityClassName = classMetadata.getEntityName();
-      Class entityClass = null;
-      try {
-        entityClass = Class.forName(entityClassName);
-      }
-      catch (ClassNotFoundException e) {
-        fail("couldnt find entity class " + entityClassName);
-      }
+    assertNotNull(entityManagerFactory);
+    for (ManagedType<?> managedType : entityManagerFactory.getMetamodel().getManagedTypes()) {
+      Class<?> entityClass = managedType.getJavaType();
+      String entityClassName = entityClass.getSimpleName();
       if (Modifier.isAbstract(entityClass.getModifiers())) {
-        log.info("skipping abstract class " + entityClass.getSimpleName());
+        continue;
+      }
+      if (entityClass.getAnnotation(Embeddable.class) != null) {
         continue;
       }
       try {
-        Class.forName(entityClassName + "Test");
+        Class.forName(entityClass.getName() + "Test");
       }
       catch (ClassNotFoundException e) {
-        fail("couldnt find test class for " + entityClass.getSimpleName());
+        fail("missing test class for " + entityClassName);
       }
     }
   }

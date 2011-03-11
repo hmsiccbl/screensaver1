@@ -20,6 +20,7 @@ import java.util.Set;
 import com.google.common.collect.Sets;
 import org.apache.log4j.Logger;
 import org.joda.time.LocalDate;
+import org.springframework.beans.factory.annotation.Autowired;
 
 import edu.harvard.med.screensaver.AbstractSpringPersistenceTest;
 import edu.harvard.med.screensaver.db.DAOTransaction;
@@ -46,6 +47,7 @@ import edu.harvard.med.screensaver.model.libraries.Well;
 import edu.harvard.med.screensaver.model.libraries.WellKey;
 import edu.harvard.med.screensaver.model.screens.ScreenType;
 import edu.harvard.med.screensaver.model.users.AdministratorUser;
+import edu.harvard.med.screensaver.model.users.ScreensaverUser;
 import edu.harvard.med.screensaver.model.users.ScreensaverUserRole;
 import edu.harvard.med.screensaver.service.libraries.LibraryContentsLoader;
 import edu.harvard.med.screensaver.service.libraries.LibraryContentsVersionManager;
@@ -62,22 +64,26 @@ public class LibraryContentsLoaderTest extends AbstractSpringPersistenceTest
   private static final File TEST_INPUT_FILE_DIR =
     new File("test/edu/harvard/med/screensaver/io/libraries/");
 
+  @Autowired
   protected edu.harvard.med.screensaver.service.libraries.LibraryCreator libraryCreator;
+  @Autowired
   protected LibraryContentsLoader libraryContentsLoader;
+  @Autowired
   protected GenericEntityDAO genericEntityDao;
+  @Autowired
   protected LibrariesDAO librariesDao;
+  @Autowired
   protected LibraryContentsVersionManager libraryContentsVersionManager;
   private AdministratorUser _admin;
 
-  protected void onSetUp() throws Exception
+  protected void setUp() throws Exception
   {
-    super.onSetUp();
-    _admin = new AdministratorUser("firstname", 
-                                   "lastname", "testemail@email.null","555-555-1212", "One Test Ave, Testerville, Tx",
-                                   "comment", "testid", "password");
+    super.setUp();
+    _admin = new AdministratorUser("firstname",
+                                   "lastname");
     _admin.addScreensaverUserRole(ScreensaverUserRole.LIBRARIES_ADMIN);
     genericEntityDao.saveOrUpdateEntity(_admin);
-    _admin = genericEntityDao.reloadEntity(_admin, false, AdministratorUser.activitiesPerformed.getPath());
+    _admin = genericEntityDao.reloadEntity(_admin, false, ScreensaverUser.activitiesPerformed.castToSubtype(AdministratorUser.class));
   }
 
   /**
@@ -87,7 +93,12 @@ public class LibraryContentsLoaderTest extends AbstractSpringPersistenceTest
    */
   public void testCleanDataRNAi() throws IOException
   {
-    Library library = new Library(_admin,
+    genericEntityDao.doInTransaction(new DAOTransaction()
+    {
+      public void runTransaction()
+      {
+        _admin = genericEntityDao.reloadEntity(_admin, false, ScreensaverUser.activitiesPerformed.castToSubtype(AdministratorUser.class));
+        Library library = new Library(_admin,
                                   "Human1",
                                   "Human1",
                                   ScreenType.RNAI,
@@ -95,42 +106,46 @@ public class LibraryContentsLoaderTest extends AbstractSpringPersistenceTest
                                   50001,
                                   50001,
                                   PlateSize.WELLS_384);
-    libraryCreator.createLibrary(library);
+        libraryCreator.createLibrary(library);
+        library = genericEntityDao.reloadEntity(library, false);
 
+        // make sure that there is at least one other library in the system 
+        Library otherLibrary = new Library(_admin,
+                                           "Human2",
+                                           "Human2",
+                                           ScreenType.RNAI,
+                                           LibraryType.SIRNA,
+                                           50002,
+                                           50002,
+                                           PlateSize.WELLS_384);
+        libraryCreator.createWells(otherLibrary);
+        otherLibrary.createContentsVersion(_admin);
+        otherLibrary.getLatestContentsVersion().release(new AdministrativeActivity(_admin, new LocalDate(), AdministrativeActivityType.LIBRARY_CONTENTS_VERSION_RELEASE));
+        genericEntityDao.saveOrUpdateEntity(otherLibrary);
 
-    // make sure that there is at least one other library in the system 
-    Library otherLibrary = new Library(_admin,
-                                       "Human2",
-                                       "Human2",
-                                       ScreenType.RNAI,
-                                       LibraryType.SIRNA,
-                                       50002,
-                                       50002,
-                                       PlateSize.WELLS_384);
-    librariesDao.loadOrCreateWellsForLibrary(otherLibrary);
-    otherLibrary.createContentsVersion(new AdministrativeActivity(_admin, new LocalDate(),
-                                                                  AdministrativeActivityType.LIBRARY_CONTENTS_LOADING));
-    otherLibrary.getLatestContentsVersion().release(new AdministrativeActivity(_admin, new LocalDate(), AdministrativeActivityType.LIBRARY_CONTENTS_VERSION_RELEASE));
-    genericEntityDao.saveOrUpdateEntity(otherLibrary);
-
-    String filename = "clean_data_rnai.xls";
-    File file = new File(TEST_INPUT_FILE_DIR, filename);
-    InputStream stream = null;
-    try {
-      stream = new FileInputStream(file);
-    }
-    catch (FileNotFoundException e) {
-      fail("file not found: " + filename);
-    }
-    try {
-      LibraryContentsVersion lcv = libraryContentsLoader.loadLibraryContents(library, _admin, "clean data rnai", stream);
-      libraryContentsVersionManager.releaseLibraryContentsVersion(lcv, _admin);
-    }
-    catch (ParseErrorsException e) {
-      log.warn(e.getErrors());
-      fail("workbook has errors");
-    }
-    
+        String filename = "clean_data_rnai.xls";
+        File file = new File(TEST_INPUT_FILE_DIR, filename);
+        InputStream stream = null;
+        try {
+          stream = new FileInputStream(file);
+        }
+        catch (FileNotFoundException e) {
+          fail("file not found: " + filename);
+        }
+        try {
+          LibraryContentsVersion lcv = libraryContentsLoader.loadLibraryContents(library, _admin, "clean data rnai", stream);
+          libraryContentsVersionManager.releaseLibraryContentsVersion(lcv, _admin);
+        }
+        catch (ParseErrorsException e) {
+          log.warn(e.getErrors());
+          fail("workbook has errors");
+        }
+        catch (IOException e) {
+          log.warn(e);
+          fail("workbook has errors");
+        }
+      }
+    });
     genericEntityDao.doInTransaction(new DAOTransaction() {
       public void runTransaction()
       {
@@ -210,201 +225,248 @@ public class LibraryContentsLoaderTest extends AbstractSpringPersistenceTest
     });
   }
 
-  public void testDirtyDataRNAi() throws FileNotFoundException, IOException
+  public void testDirtyDataRNAi()
   {
-    Library library = new Library(_admin,
-                                  "Human1",
-                                  "Human1",
-                                  ScreenType.RNAI,
-                                  LibraryType.SIRNA,
-                                  50001,
-                                  50003,
-                                  PlateSize.WELLS_384);
-    libraryCreator.createLibrary(library);
+    try {
+      genericEntityDao.doInTransaction(new DAOTransaction()
+      {
+        public void runTransaction()
+        {
+          _admin = genericEntityDao.reloadEntity(_admin, false, ScreensaverUser.activitiesPerformed.castToSubtype(AdministratorUser.class));
+          Library library = new Library(_admin,
+                                        "Human1",
+                                        "Human1",
+                                        ScreenType.RNAI,
+                                        LibraryType.SIRNA,
+                                        50001,
+                                        50003,
+                                        PlateSize.WELLS_384);
+          libraryCreator.createLibrary(library);
+          library = genericEntityDao.reloadEntity(library, false);
 
-    String filename = "dirty_data_rnai.xls";
-    File file = new File(TEST_INPUT_FILE_DIR, filename);
-    try  {
-      libraryContentsLoader.loadLibraryContents(library, _admin, "dirty data RNAi", new FileInputStream(file));
-      fail("no error exception found");
+          String filename = "dirty_data_rnai.xls";
+          File file = new File(TEST_INPUT_FILE_DIR, filename);
+          try {
+            libraryContentsLoader.loadLibraryContents(library, _admin, "dirty data RNAi", new FileInputStream(file));
+            fail("no error exception found");
+          }
+          catch (ParseErrorsException e) {
+            assertFalse("no lcv added to database", genericEntityDao.findAllEntitiesOfType(LibraryContentsVersion.class).isEmpty());
+            assertTrue("reagents were added to database", genericEntityDao.findAllEntitiesOfType(Reagent.class).isEmpty());
+
+            // expected error cells, [row,col]
+            Set<ParseError> expectedErrors = Sets.newHashSet();
+            expectedErrors.add(new ParseError("Vendor and Vendor Reagent ID must be null for well type: empty", "Human Kinases:(E,4)"));
+            expectedErrors.add(new ParseError("'buffer1' must be one of: [DMSO, empty, experimental, <undefined>, RNAi buffer, library control]", "Human Kinases:(C,5)"));
+            expectedErrors.add(new ParseError("Vendor and Vendor Reagent ID must both be specified, or neither should be specified", "Human Kinases:(E,6)"));
+            expectedErrors.add(new ParseError("if sequence is specified, Vendor Reagent ID and Silencing Reagent Type must be specified", "Human Kinases:(H,7)"));
+            expectedErrors.add(new ParseError("Well is required", "Human Kinases:(B,8)"));
+            expectedErrors.add(new ParseError("Well Type is required", "Human Kinases:(C,9)"));
+            expectedErrors.add(new ParseError("Vendor is required", "Human Kinases:(D,10)"));
+            expectedErrors.add(new ParseError("Silencing Reagent Type is required", "Human Kinases:(G,11)"));
+            expectedErrors.add(new ParseError("NumberFormatException", "Human Kinases 2:(I,12)"));
+
+            log.debug("expected errors that were not reported: " +
+              Sets.difference(expectedErrors, Sets.newHashSet(e.getErrors())));
+            log.debug("unexpected errors that were reported: " +
+              Sets.difference(Sets.newHashSet(e.getErrors()), expectedErrors));
+            assertEquals("expected errors same as reported errors",
+                         expectedErrors, Sets.newHashSet(e.getErrors()));
+          }
+          catch (Exception e) {
+            fail("expected ParseErrorsException, not " + e);
+          }
+        }
+      });
+      fail("A transaction exception was expected!");
     }
-    catch (ParseErrorsException e)
-    {
-      assertTrue("no lcv added to database", genericEntityDao.findAllEntitiesOfType(LibraryContentsVersion.class).isEmpty());
-      assertTrue("no reagents added to database", genericEntityDao.findAllEntitiesOfType(Reagent.class).isEmpty());
-
-      // expected error cells, [row,col]
-      Set<ParseError> expectedErrors = Sets.newHashSet();
-      expectedErrors.add(new ParseError("Vendor and Vendor Reagent ID must be null for well type: empty", "Human Kinases:(E,4)"));
-      expectedErrors.add(new ParseError("'buffer1' must be one of: [buffer, DMSO, empty, experimental, <undefined>, library control]", "Human Kinases:(C,5)"));
-      expectedErrors.add(new ParseError("Vendor and Vendor Reagent ID must both be specified, or neither should be specified", "Human Kinases:(E,6)"));
-      expectedErrors.add(new ParseError("if sequence is specified, Vendor Reagent ID and Silencing Reagent Type must be specified", "Human Kinases:(H,7)"));
-      expectedErrors.add(new ParseError("Well is required", "Human Kinases:(B,8)"));
-      expectedErrors.add(new ParseError("Well Type is required", "Human Kinases:(C,9)"));
-      expectedErrors.add(new ParseError("Vendor is required", "Human Kinases:(D,10)"));
-      expectedErrors.add(new ParseError("Silencing Reagent Type is required", "Human Kinases:(G,11)"));
-      expectedErrors.add(new ParseError("NumberFormatException", "Human Kinases 2:(I,12)"));
-
-      log.debug("expected errors that were not reported: " + Sets.difference(expectedErrors, Sets.newHashSet(e.getErrors())));
-      log.debug("unexpected errors that were reported: " + Sets.difference(Sets.newHashSet(e.getErrors()), expectedErrors));
-      assertEquals("expected errors same as reported errors", 
-                   expectedErrors, Sets.newHashSet(e.getErrors()));
-    }
+    catch (Exception e) {}
+    assertTrue("database unchanged when errors exist in input file",
+               genericEntityDao.findAllEntitiesOfType(LibraryContentsVersion.class).isEmpty());
   }
 
   public void testCleanDataRNAi_withDuplex() throws IOException
   {
-    // Load all of the duplex libraries needed for the pool library
-    Library library = new Library(_admin,
-                                  "Human1_duplex",
-                                  "Human1_duplex",
-                                  ScreenType.RNAI,
-                                  LibraryType.SIRNA,
-                                  50440,
-                                  50443,
-                                  PlateSize.WELLS_384);
-    libraryCreator.createLibrary(library);
-
-    String filename = "clean_rnai_duplex_50440_50443.xls";
-    File file = new File(TEST_INPUT_FILE_DIR, filename);
-    InputStream stream = null;
-    try {
-      stream = new FileInputStream(file);
-    }
-    catch (FileNotFoundException e) {
-      fail("file not found: " + filename);
-    }
-    try {
-      LibraryContentsVersion lcv =  libraryContentsLoader.loadLibraryContents(library, _admin, "clean data rnai with duplex", stream);
-      libraryContentsVersionManager.releaseLibraryContentsVersion(lcv, _admin);
-    }
-    catch (ParseErrorsException e) {
-      log.warn(e.getErrors());
-      fail("workbook has errors");
-    }
-    
-    // now load the pool library that references the duplex library
-    
-    library = new Library(_admin,
-                          "Human1_pool",
-                          "Human1_pool",
-                          ScreenType.RNAI,
-                          LibraryType.SIRNA,
-                          50439,
-                          50439,
-                          PlateSize.WELLS_384);
-    library.setPool(true);
-    libraryCreator.createLibrary(library);
-
-    filename = "clean_rnai_pool.xls";
-    file = new File(TEST_INPUT_FILE_DIR, filename);
-    stream = null;
-    try {
-      stream = new FileInputStream(file);
-    }
-    catch (FileNotFoundException e) {
-      fail("file not found: " + filename);
-    }
-    try {
-      LibraryContentsVersion lcv = libraryContentsLoader.loadLibraryContents(library, _admin, "clean data rnai with duplex", stream);
-      libraryContentsVersionManager.releaseLibraryContentsVersion(lcv, _admin);
-    }
-    catch (ParseErrorsException e) {
-      log.warn(e.getErrors());
-      fail("workbook has errors");
-    }
-
-    // find out if this vendorReagentId is on a silencing reagent for the following well
-    String vendorReagentId = "M-024927-00";
-    WellKey wellKey = new WellKey(50439, "A05");
-    Well well = genericEntityDao.findEntityById(
-        Well.class,
-        wellKey.getKey(),
-        false,
-        Well.latestReleasedReagent.to(SilencingReagent.duplexWells).getPath());
-
-    assertNotNull(well);
-    
-    Set<SilencingReagent> srs = ((SilencingReagent)well.getLatestReleasedReagent()).getDuplexSilencingReagents();
-    assertNotNull(srs);
-    assertEquals(4, srs.size());
-    
-    boolean found = false;
-    for (SilencingReagent sr:srs)
+    genericEntityDao.doInTransaction(new DAOTransaction()
     {
-      log.info("Sr for well: " + sr.getWell() + ": " + sr.getVendorId());
-      if(sr.getWell().getColumn() == 4 && sr.getWell().getRow() == 0)  // "A05"
+      public void runTransaction()
       {
-        assertEquals(vendorReagentId, sr.getVendorId().getVendorIdentifier());
-        found = true;
-      }
-    }
-    assertTrue("Could not find the duplex well, expected for " + well 
-        + ", namely the one having the ReagentVendorIdentifer: \"" + vendorReagentId + "\"", found);
+        _admin = genericEntityDao.reloadEntity(_admin, false, ScreensaverUser.activitiesPerformed.castToSubtype(AdministratorUser.class));
+        // Load all of the duplex libraries needed for the pool library
+        Library library = new Library(_admin,
+                                      "Human1_duplex",
+                                      "Human1_duplex",
+                                      ScreenType.RNAI,
+                                      LibraryType.SIRNA,
+                                      50440,
+                                      50443,
+                                      PlateSize.WELLS_384);
+        libraryCreator.createLibrary(library);
+        library = genericEntityDao.reloadEntity(library, false);
+
+        String filename = "clean_rnai_duplex_50440_50443.xls";
+        File file = new File(TEST_INPUT_FILE_DIR, filename);
+        InputStream stream = null;
+        try {
+          stream = new FileInputStream(file);
+        }
+        catch (FileNotFoundException e) {
+          fail("file not found: " + filename);
+        }
+        try {
+          LibraryContentsVersion lcv = libraryContentsLoader.loadLibraryContents(library, _admin, "clean data rnai with duplex", stream);
+          libraryContentsVersionManager.releaseLibraryContentsVersion(lcv, _admin);
+        }
+        catch (ParseErrorsException e) {
+          log.warn(e.getErrors());
+          fail("workbook has errors");
+        }
+        catch (IOException e) {
+          log.error(e);
+          fail("could not load the file: " + filename);
+        }
+
+        // now load the pool library that references the duplex library
+        _admin = genericEntityDao.reloadEntity(_admin, false, ScreensaverUser.activitiesPerformed.castToSubtype(AdministratorUser.class));
+        library = new Library(_admin,
+                              "Human1_pool",
+                              "Human1_pool",
+                              ScreenType.RNAI,
+                              LibraryType.SIRNA,
+                              50439,
+                              50439,
+                              PlateSize.WELLS_384);
+        library.setPool(true);
+        libraryCreator.createLibrary(library);
+        library = genericEntityDao.reloadEntity(library, false);
+
+        filename = "clean_rnai_pool.xls";
+        file = new File(TEST_INPUT_FILE_DIR, filename);
+        stream = null;
+        try {
+          stream = new FileInputStream(file);
+        }
+        catch (FileNotFoundException e) {
+          fail("file not found: " + filename);
+        }
+        try {
+          LibraryContentsVersion lcv = libraryContentsLoader.loadLibraryContents(library, _admin, "clean data rnai with duplex", stream);
+          libraryContentsVersionManager.releaseLibraryContentsVersion(lcv, _admin);
+        }
+        catch (ParseErrorsException e) {
+          log.warn(e.getErrors());
+          fail("workbook has errors");
+        }
+        catch (IOException e) {
+          log.error(e);
+          fail("could not load the file: " + filename);
+        }
+
+        // find out if this vendorReagentId is on a silencing reagent for the following well
+        String vendorReagentId = "M-024927-00";
+        WellKey wellKey = new WellKey(50439, "A05");
+        Well well = genericEntityDao.findEntityById(
+                                                    Well.class,
+                                                    wellKey.getKey(),
+                                                    false,
+                                                    Well.latestReleasedReagent.to(SilencingReagent.duplexWells));
+    
+        assertNotNull(well);
+
+        Set<SilencingReagent> srs = ((SilencingReagent) well.getLatestReleasedReagent()).getDuplexSilencingReagents();
+        assertNotNull(srs);
+        assertEquals(4, srs.size());
+
+        boolean found = false;
+        for (SilencingReagent sr : srs)
+        {
+          log.info("Sr for well: " + sr.getWell() + ": " + sr.getVendorId());
+          if (sr.getWell().getColumn() == 4 && sr.getWell().getRow() == 0) // "A05"
+          {
+            assertEquals(vendorReagentId, sr.getVendorId().getVendorIdentifier());
+            found = true;
+          }
+        }
+        assertTrue("Could not find the duplex well, expected for " + well
+            + ", namely the one having the ReagentVendorIdentifer: \"" + vendorReagentId + "\"", found);
+
+        // find out if this vendorReagentId is on a silencing reagent for the following well
+        vendorReagentId = "M-016115-00";
+        wellKey = new WellKey(50439, "E07");
+        well = genericEntityDao.findEntityById(
+                                               Well.class,
+                                               wellKey.getKey(),
+                                               false,
+                                               Well.latestReleasedReagent.to(SilencingReagent.duplexWells));
+    
+        assertNotNull(well);
+
+        srs = ((SilencingReagent) well.getLatestReleasedReagent()).getDuplexSilencingReagents();
+
+        assertNotNull(srs);
+        assertEquals(4, srs.size());
         
-    // find out if this vendorReagentId is on a silencing reagent for the following well
-    vendorReagentId = "M-016115-00";
-    wellKey = new WellKey(50439, "E07");
-    well = genericEntityDao.findEntityById(
-        Well.class,
-        wellKey.getKey(),
-        false,
-        Well.latestReleasedReagent.to(SilencingReagent.duplexWells).getPath());
-
-    assertNotNull(well);
-    
-    srs = ((SilencingReagent)well.getLatestReleasedReagent()).getDuplexSilencingReagents();
-  
-    assertNotNull(srs);
-    assertEquals(4, srs.size());
-    
-    found = false;
-    for (SilencingReagent sr:srs)
-    {
-      log.info("Sr for well: " + sr.getWell() + ": " + sr.getVendorId());
-      if(sr.getWell().getColumn() == 6 && sr.getWell().getRow() == 4 ) // "E07" 
-      {
-        assertEquals(vendorReagentId, sr.getVendorId().getVendorIdentifier());
-        found = true;
+        found = false;
+        for (SilencingReagent sr : srs)
+        {
+          log.info("Sr for well: " + sr.getWell() + ": " + sr.getVendorId());
+          if (sr.getWell().getColumn() == 6 && sr.getWell().getRow() == 4) // "E07" 
+          {
+            assertEquals(vendorReagentId, sr.getVendorId().getVendorIdentifier());
+            found = true;
+          }
+        }
+        assertTrue("Could not find the duplex well, expected for " + well
+            + ", namely the one having the ReagentVendorIdentifer: \"" + vendorReagentId + "\"", found);
       }
-    }
-    assertTrue("Could not find the duplex well, expected for " + well 
-        + ", namely the one having the ReagentVendorIdentifer: \"" + vendorReagentId + "\"", found);
+    });
   }  
   
   public void testCleanDataNaturalProduct() throws IOException
   {
-    int TEST_PLATE = 2037;
-    Library library = new Library(_admin,
-                                  "NaturalProdTest",
-                                  "Natprod",
-                                  ScreenType.SMALL_MOLECULE,
-                                  LibraryType.NATURAL_PRODUCTS,
-                                  TEST_PLATE,
-                                  TEST_PLATE,
-                                  PlateSize.WELLS_384);
-    library.setProvider("test vendor");
-    libraryCreator.createLibrary(library);
-
-    String filename = "clean_data_natural_product.xls";
-    File file = new File(TEST_INPUT_FILE_DIR, filename);
-    InputStream stream = null;
-    try {
-      stream = new FileInputStream(file);
-    }
-    catch (FileNotFoundException e) {
-      log.warn("file not found: " + file);
-      fail("file not found: " + file);
-    }
-    
-    try {
-      libraryContentsLoader.loadLibraryContents(library, _admin, "clean data natural product", stream);
-    }
-    catch (ParseErrorsException e) 
+    final int TEST_PLATE = 2037;
+    genericEntityDao.doInTransaction(new DAOTransaction()
     {
-      log.warn(e.getErrors());
-      fail("workbook has errors");
-    }
+      public void runTransaction()
+      {
+        _admin = genericEntityDao.reloadEntity(_admin, false, ScreensaverUser.activitiesPerformed.castToSubtype(AdministratorUser.class));
+        Library library = new Library(_admin,
+                                      "NaturalProdTest",
+                                      "Natprod",
+                                      ScreenType.SMALL_MOLECULE,
+                                      LibraryType.NATURAL_PRODUCTS,
+                                      TEST_PLATE,
+                                      TEST_PLATE,
+                                      PlateSize.WELLS_384);
+        library.setProvider("test vendor");
+        libraryCreator.createLibrary(library);
+        library = genericEntityDao.reloadEntity(library, false);
+
+        String filename = "clean_data_natural_product.xls";
+        File file = new File(TEST_INPUT_FILE_DIR, filename);
+        InputStream stream = null;
+        try {
+          stream = new FileInputStream(file);
+        }
+        catch (FileNotFoundException e) {
+          log.warn("file not found: " + file);
+          fail("file not found: " + file);
+        }
+
+        try {
+          libraryContentsLoader.loadLibraryContents(library, _admin, "clean data natural product", stream);
+        }
+        catch (ParseErrorsException e)
+        {
+          log.warn(e.getErrors());
+          fail("workbook has errors");
+        }
+        catch (IOException e) {
+          log.error(e);
+          fail("could not load the file: " + filename);
+        }
+      }
+    });
     
     assertEquals("natural product reagent count", 351, genericEntityDao.findAllEntitiesOfType(NaturalProductReagent.class).size());
 
@@ -421,36 +483,50 @@ public class LibraryContentsLoaderTest extends AbstractSpringPersistenceTest
 
   public void testCleanDataSmallMolecule() throws IOException
   {
-    Library library = new Library(_admin,
-                                  "COMP",
-                                  "COMP",
-                                  ScreenType.SMALL_MOLECULE,
-                                  LibraryType.OTHER,
-                                  1534,
-                                  1534,
-                                  PlateSize.WELLS_384);
-    String filename = "clean_data_small_molecule.sdf";
-    File file = new File(TEST_INPUT_FILE_DIR, filename);
-    InputStream stream = null;
-    try {
-      stream = new FileInputStream(file);
-    }
-    catch (FileNotFoundException e) {
-      log.warn("file not found: " + file);
-      fail("file not found: " + file);
-    }
-    libraryCreator.createLibrary(library);
-    
-    try {
-      LibraryContentsVersion lcv = libraryContentsLoader.loadLibraryContents(library, _admin, "clean data small molecule", stream);
-      libraryContentsVersionManager.releaseLibraryContentsVersion(lcv, _admin);
-      log.info("added library definition for " + library);
-    }
-    catch (ParseErrorsException e) 
+    genericEntityDao.doInTransaction(new DAOTransaction()
     {
-      log.warn(e.getErrors());
-      fail("input file has errors");
-    }
+      public void runTransaction()
+      {
+        _admin = genericEntityDao.reloadEntity(_admin, false, ScreensaverUser.activitiesPerformed.castToSubtype(AdministratorUser.class));
+        Library library = new Library(_admin,
+                                      "COMP",
+                                      "COMP",
+                                      ScreenType.SMALL_MOLECULE,
+                                      LibraryType.OTHER,
+                                      1534,
+                                      1534,
+                                      PlateSize.WELLS_384);
+        libraryCreator.createLibrary(library);
+        library = genericEntityDao.reloadEntity(library, false);
+
+        String filename = "clean_data_small_molecule.sdf";
+        File file = new File(TEST_INPUT_FILE_DIR, filename);
+        InputStream stream = null;
+        try {
+          stream = new FileInputStream(file);
+        }
+        catch (FileNotFoundException e) {
+          log.warn("file not found: " + file);
+          fail("file not found: " + file);
+        }
+        //libraryCreator.createLibrary(library);
+
+        try {
+          LibraryContentsVersion lcv = libraryContentsLoader.loadLibraryContents(library, _admin, "clean data small molecule", stream);
+          libraryContentsVersionManager.releaseLibraryContentsVersion(lcv, _admin);
+          log.info("added library definition for " + library);
+        }
+        catch (ParseErrorsException e)
+        {
+          log.warn(e.getErrors());
+          fail("input file has errors");
+        }
+        catch (IOException e) {
+          log.error(e);
+          fail("could not load the file: " + filename);
+        }
+      }
+    });
     
     genericEntityDao.doInTransaction(new DAOTransaction() {
       public void runTransaction()

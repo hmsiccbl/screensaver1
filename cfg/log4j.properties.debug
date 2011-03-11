@@ -32,16 +32,20 @@ log4j.logger.edu.harvard.med.screensaver=info
 #log4j.logger.edu.harvard.med.screensaver.db=debug
 #log4j.logger.edu.harvard.med.screensaver.db.datafetcher=debug
 #log4j.logger.edu.harvard.med.screensaver.ui=debug
+#log4j.logger.edu.harvard.med.screensaver.ui.activities.ActivityViewer=debug
 #log4j.logger.edu.harvard.med.screensaver.io=debug
 #log4j.logger.edu.harvard.med.screensaver.io.libraries=debug
 #log4j.logger.edu.harvard.med.screensaver.ui.table=debug
 #log4j.logger.edu.harvard.med.screensaver.ui.searchresults=debug
 #log4j.logger.edu.harvard.med.screensaver.service.cherrypicks=debug
+#log4j.logger.edu.harvard.med.screensaver.service.libraries.PlateUpdater=debug
 #log4j.logger.edu.harvard.med.screensaver.model=debug
 #log4j.logger.edu.harvard.med.screensaver.model.AbstractEntityInstanceTester=info
-#log4j.logger.edu.harvard.med.screensaver.model.EntityNetworkPersister=debug
 #log4j.logger.edu.harvard.med.screensaver.util.eutils=debug
 #log4j.logger.edu.harvard.med.iccbl.screensaver.policy=debug
+#log4j.logger.edu.harvard.med.screensaver.model.AbstractEntity=debug
+#log4j.logger.edu.harvard.med.screensaver.model.TestDataFactory=debug
+
 
 # for resolution of database connection properties
 #log4j.logger.edu.harvard.med.iccbl.screensaver.db.PropertyPlaceholderConfigurerWithDatabaseConfiguration=debug
@@ -130,13 +134,15 @@ log4j.logger.org.apache.myfaces.renderkit.html.HtmlResponseWriterImpl=warn
 
 ### Hibernate
 
-log4j.logger.org.hibernate=warn
+log4j.logger.org.hibernate=info
 log4j.logger.org.hibernate.impl.SessionImpl=warn
 # view load, save, etc. events on a per-entity basis
 #log4j.logger.org.hibernate.event=debug
 # low-level loading of entities, collections
-#log4j.logger.org.hibernate.loader=warn
-
+#log4j.logger.org.hibernate.loader=debug
+#log4j.logger.org.hibernate.transaction=debug
+# Log the state of all entities (max 20 entities) associated with the session at flush time
+#log4j.logger.org.hibernate.pretty=debug
 
 # log just the SQL - set this to "debug" to get all the SQL stmts
 #log4j.logger.org.hibernate.SQL=debug

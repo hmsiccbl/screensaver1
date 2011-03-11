@@ -15,9 +15,12 @@ import java.util.Arrays;
 import java.util.Iterator;
 import java.util.List;
 
+import javax.persistence.EntityManager;
+import javax.persistence.EntityManagerFactory;
+
 import org.apache.commons.io.IOUtils;
 import org.apache.log4j.Logger;
-import org.springframework.orm.hibernate3.HibernateTemplate;
+import org.hibernate.Session;
 
 import edu.harvard.med.screensaver.io.CommandLineApplication;
 import edu.harvard.med.screensaver.util.StringUtils;
@@ -47,7 +50,10 @@ public class HibernateConsole
         System.exit(1);
       }
       br = new BufferedReader(new InputStreamReader(System.in));
-      HibernateTemplate hib = (HibernateTemplate) app.getSpringBean("hibernateTemplate");
+
+      EntityManagerFactory emf = (EntityManagerFactory) app.getSpringBean("entityManagerFactory");
+      EntityManager em = emf.createEntityManager();
+
       do {
         System.out.println("Enter HQL query (blank to quit): ");
         String input = br.readLine();
@@ -56,7 +62,9 @@ public class HibernateConsole
           System.exit(0);
         }
         try {
-          List list = hib.find(input);
+          List list = ((Session) em.getDelegate()).createQuery(input).list(); // note: this uses the Hibernate Session object, to allow HQL (and JPQL)
+          // List list = em.createQuery(input).getResultList();  // note: this JPA method supports JPQL
+
           System.out.println("Result:");
           for (Iterator iter = list.iterator(); iter.hasNext();) {
             Object item = iter.next();

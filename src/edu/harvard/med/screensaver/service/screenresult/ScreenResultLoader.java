@@ -14,6 +14,7 @@ import javax.persistence.EntityExistsException;
 import com.google.common.collect.Sets;
 import org.apache.commons.lang.math.IntRange;
 import org.apache.log4j.Logger;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -22,10 +23,12 @@ import edu.harvard.med.screensaver.db.ScreenResultsDAO;
 import edu.harvard.med.screensaver.io.ParseErrorsException;
 import edu.harvard.med.screensaver.io.screenresults.ScreenResultParser;
 import edu.harvard.med.screensaver.io.workbook2.Workbook;
+import edu.harvard.med.screensaver.model.AdministrativeActivity;
 import edu.harvard.med.screensaver.model.screenresults.ScreenResult;
 import edu.harvard.med.screensaver.model.screens.Screen;
 import edu.harvard.med.screensaver.model.users.AdministratorUser;
 import edu.harvard.med.screensaver.service.EntityNotFoundException;
+import edu.harvard.med.screensaver.service.screens.ScreenDerivedPropertiesUpdater;
 
 
 /**
@@ -39,6 +42,7 @@ public abstract class ScreenResultLoader
 
   private GenericEntityDAO _dao;
   private ScreenResultsDAO _screenResultsDao;
+  private ScreenDerivedPropertiesUpdater _screenDerivedPropertiesUpdater;
 
   
   private boolean _ignoreDuplicateErrors;
@@ -48,11 +52,14 @@ public abstract class ScreenResultLoader
    */
   protected ScreenResultLoader() {}
 
+  @Autowired
   public ScreenResultLoader(GenericEntityDAO dao,
-                            ScreenResultsDAO screenResultsDao)
+                            ScreenResultsDAO screenResultsDao,
+                            ScreenDerivedPropertiesUpdater screenDerivedPropertiesUpdater)
   {
     _dao = dao;
     _screenResultsDao = screenResultsDao;
+    _screenDerivedPropertiesUpdater = screenDerivedPropertiesUpdater;
   }
   
   public void setIgnoreDuplicateErrors(boolean value)
@@ -90,7 +97,6 @@ public abstract class ScreenResultLoader
     throws ParseErrorsException
   {
     screen = _dao.reloadEntity(screen);
-    admin = _dao.reloadEntity(admin);
     ScreenResultParser screenResultParser = createScreenResultParser();
     screenResultParser.setIgnoreDuplicateErrors(_ignoreDuplicateErrors);
     ScreenResult screenResult = screenResultParser.parse(screen,
@@ -104,15 +110,20 @@ public abstract class ScreenResultLoader
       throw new ParseErrorsException(screenResultParser.getErrors());
     }
 
-    _dao.saveOrUpdateEntity(screen);
-
-    screen.getScreenResult().createScreenResultDataLoading(admin, screenResultParser.getPlateNumbersLoadedWithMaxReplicates(), comments);
+    if (incrementalFlush) {
+      _dao.flush();
+      _dao.clear();
+      screen = _dao.reloadEntity(screen);
+    }
+    admin = _dao.reloadEntity(admin);
+    AdministrativeActivity screenResultDataLoading = screen.getScreenResult().createScreenResultDataLoading(admin, screenResultParser.getPlateNumbersLoadedWithMaxReplicates(), comments);
     int assayPlatesCreated = Sets.difference(screen.getAssayPlatesDataLoaded(), screen.getAssayPlatesScreened()).size();
     if (assayPlatesCreated > 0) {
       log.info("created " + assayPlatesCreated + " assay plate(s) that were not previously recorded as having been screened");
     }
+    _dao.persistEntity(screenResultDataLoading);
 
-    screen.update();
+    _screenDerivedPropertiesUpdater.updateScreeningStatistics(screen);
 
     log.info("Screen result data loading completed successfully!");
     return screenResult;

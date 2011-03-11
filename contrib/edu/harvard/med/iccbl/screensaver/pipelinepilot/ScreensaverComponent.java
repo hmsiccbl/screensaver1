@@ -1,4 +1,4 @@
-// $HeadURL:$
+// $HeadURL$
 // $Id$
 //
 // Copyright © 2006, 2010 by the President and Fellows of Harvard College.

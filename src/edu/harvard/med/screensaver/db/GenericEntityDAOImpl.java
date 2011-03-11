@@ -10,121 +10,57 @@
 package edu.harvard.med.screensaver.db;
 
 import java.io.Serializable;
-import java.lang.reflect.Constructor;
-import java.lang.reflect.InvocationTargetException;
-import java.sql.SQLException;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
+import com.google.common.collect.ImmutableList;
+import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.Sets;
 import org.apache.log4j.Logger;
-import org.hibernate.Criteria;
-import org.hibernate.HibernateException;
 import org.hibernate.Query;
-import org.hibernate.ScrollableResults;
-import org.hibernate.Session;
-import org.hibernate.criterion.Restrictions;
-import org.hibernate.engine.SessionFactoryImplementor;
-import org.hibernate.metadata.ClassMetadata;
-import org.hibernate.type.CollectionType;
-import org.springframework.orm.hibernate3.HibernateCallback;
 
-import edu.harvard.med.screensaver.db.hqlbuilder.HqlUtils;
+import edu.harvard.med.screensaver.db.datafetcher.EntityDataFetcher;
+import edu.harvard.med.screensaver.db.hqlbuilder.HqlBuilder;
 import edu.harvard.med.screensaver.model.Entity;
-import edu.harvard.med.screensaver.util.CollectionUtils;
-import edu.harvard.med.screensaver.util.StringUtils;
+import edu.harvard.med.screensaver.model.meta.PropertyPath;
+import edu.harvard.med.screensaver.model.meta.RelationshipPath;
+import edu.harvard.med.screensaver.ui.arch.datatable.Criterion.Operator;
 
 /**
  * GenericEntityDAO that provides basic data access methods that are applicable
  * to all Entity types.
  * <p>
- * Each of the find* methods has two overloaded versions: a simple version that
- * takes only the basic arguments needed to find the entity (or entities), and
- * an "advanced" version that takes an additional <code>readOnly</code> flag
- * parameter and a <code>relationships</code> (var arg) array of Strings.
+ * Each of the find* methods has three overloaded versions: one that takes only the basic arguments needed to find the
+ * entity (or entities), a version that takes an additional <code>readOnly</code> flag parameter, and a version that
+ * takes a <code>readOnly</code> flag and a <code>RelationshipPath</code> where the related entity (or entities) should
+ * be eagerly fetched (i.e., within a single SQL call). This last version is useful in cases where the returned entity
+ * (or entities) will later be used outside of a Hibernate session (i.e., "detached") and the specified relationship
+ * will be traversed via the entities' getter methods. This is also useful for minimizing (optimizing) the number of SQL
+ * calls that are used to fetch data for each of the relationship that will be traversed when using the entity within an
+ * active Hibernate session. This can be used to avoid the "N+1 selects" performance problem, as discussed in Hibernate
+ * documentation. If you need to retrieve more than one RelationshipPath, make calls to {@link #need} or
+ * {@link #needReadOnly}, but do so within the same Hibernate session as the initial find*() call.
  * <p>
- * The relationships specify what related data should be loaded from the
- * database at the same time the entity itself is being loaded (i.e., within a
- * single SQL call). This is useful in cases where the returned entity (or
- * entities) will be used outside of a Hibernate session (i.e., "detached") and
- * therefore must have all needed relationships eagerly fetched. This is also
- * useful for minimizing (optimizing) the number of SQL calls that are used to
- * fetch data for each of the relationships that will be traversed while using
- * the entity within an active Hibernate session. This also reduces or
- * eliminates the "N+1 selects" performance problem, as discussed in Hibernate
- * documentation. Each relationship is specified as a dot-separated path of
- * relationship property names, relative to the root entity. For example, if
- * loading a Parent entity, one might specify the following (hypothetical)
- * relationships: <code>"children.toys"</code>,
- * <code>"children.friends.toys"</code>. Intermediate relationships do not
- * need to be specified independently, so that, for example,
- * <code>"children.friends.toys"</code> is sufficient and <code>{"children",
- * "children.friends", "children.friends.toys"}</code>
- * is unnecessary. <i>Warning</i>: specifying more than a single to-many
- * relationship will generate an SQL query whose result will be the
- * cross-product of all the relationships' entities. This can grow quite large,
- * quickly! Unless you are sure that the multiple to-many relationships only
- * contain a small number of entities, you should retrieve each of the root
- * entity's additional to-many relationships via subsequent calls to
- * {@link #need} or {@link #needReadOnly}.
- * <p>
- * If <code>readOnly</code> is true, the entities that are loaded by Hibernate
- * will not be "managed". This means that they will not be dirty-checked at
- * flush time, and modifications made to the objects will not be persisted. This
- * is beneficial for performance, but of course only makes sense if the client
- * code does not intend to make modifications that need to be persisted. Note
- * that this does not in any way make the loaded entity instances immutable, so
- * if any of these entity instances happen to have already been loaded into the
- * Hibernate session as managed (read-write) entities, changes to them <i>will</i>
- * be persisted! So the best practice is for the client code to never modify
- * entities loaded as read-only.
- *
+ * If <code>readOnly</code> is true, the entities that are loaded by Hibernate will not be "managed". This means that
+ * they will not be dirty-checked at flush time, and modifications made to the objects will not be persisted. This is
+ * beneficial for performance when fetched data will be read-only. Note that this does not in any way make the loaded
+ * entity instances immutable, so if any of these entity instances happen to have already been loaded into the Hibernate
+ * session as managed (read-write) entities, changes to them <i>will</i> be persisted! So the best practice is for the
+ * client code to never modify entities loaded as read-only.
+ * 
  * @author <a mailto="andrew_tolopko@hms.harvard.edu">Andrew Tolopko</a>
  * @author <a mailto="john_sullivan@hms.harvard.edu">John Sullivan</a>
  */
 public class GenericEntityDAOImpl extends AbstractDAO implements GenericEntityDAO
 {
-  // static members
-
   private static Logger log = Logger.getLogger(GenericEntityDAOImpl.class);
-  private static final Logger entityInflatorLog = Logger.getLogger(GenericEntityDAOImpl.class.getName() + ".EntityInflator");
-
-  public static String makeQueryIdList(List<? extends Entity> entities)
-  {
-    return StringUtils.makeListString(CollectionUtils.entityIds(entities), ", ");
-  }
-
-
-  // instance data members
-
-  // public methods
 
   /**
    * @motivation for CGLIB dynamic proxy creation
    */
   public GenericEntityDAOImpl()
   {
-  }
-
-  /**
-   * @deprecated Use this method prevents compile-time checking of constructor
-   *             signature. Instantiate the entity via its constructor and use
-   *             {@link #saveOrUpdateEntity(Entity)} instead.
-   */
-  public <E extends Entity> E defineEntity(
-    Class<E> entityClass,
-    Object... constructorArguments)
-  {
-    Constructor<E> constructor = getConstructor(entityClass, constructorArguments);
-    E entity = newInstance(constructor, constructorArguments);
-    getHibernateTemplate().save(entity);
-    return entity;
   }
 
   /**
@@ -139,7 +75,7 @@ public class GenericEntityDAOImpl extends AbstractDAO implements GenericEntityDA
    */
   public void saveOrUpdateEntity(Entity entity)
   {
-    getHibernateTemplate().saveOrUpdate(entity);
+    getHibernateSession().saveOrUpdate(entity);
   }
 
   /**
@@ -149,16 +85,9 @@ public class GenericEntityDAOImpl extends AbstractDAO implements GenericEntityDA
    *
    * @param entity
    */
-  public void persistEntity(final Entity entity)
+  public void persistEntity(Entity entity)
   {
-    getHibernateTemplate().execute(new HibernateCallback()
-    {
-      public Object doInHibernate(Session session) throws HibernateException, SQLException
-      {
-        session.persist(entity);
-        return null;
-      }
-    });
+    getEntityManager().persist(entity);
   }
 
   /**
@@ -181,15 +110,14 @@ public class GenericEntityDAOImpl extends AbstractDAO implements GenericEntityDA
    */
   public <E extends Entity> E reattachEntity(E entity)
   {
-    getHibernateTemplate().update(entity);
+    getHibernateSession().update(entity);
     return entity;
   }
   
   public <E extends Entity> E mergeEntity(E entity)
   {
-    return (E) getHibernateTemplate().merge(entity);
+    return getEntityManager().merge(entity);
   }
-  
 
   /**
    * For a given detached entity, return a <i>new, Hibernate-managed instance</i>.
@@ -201,16 +129,12 @@ public class GenericEntityDAOImpl extends AbstractDAO implements GenericEntityDA
    * the session. The passed-in entity instance will be unchanged, and its
    * uninitialized relationships cannot be navigated.
    * <p>
-   * Any relationships that may have been initialized in the passed-in entity
-   * (network) <i>cannot</i> be expected to be pre-initialized (eagerly
-   * fetched) in the new, returned entity instance, so consider carefully the
-   * potential performance impact of accessing relationships on this entity
-   * instance. If you need to eagerly fetch relationships on this entity
-   * instance, use {@link #reloadEntity(Entity, boolean, String...)}
-   * and/or {@link #need(Entity, String...)} and/or
-   * {@link #needReadOnly(Entity, String...)}.
+   * Any relationships that may have been initialized in the passed-in entity (network) <i>cannot</i> be expected to be
+   * pre-initialized (eagerly fetched) in the new, returned entity instance. However, you may specify relationships that
+   * need to be eagerly fetched by making subsequent calls to {@link #need(Entity, RelationshipPath<E>)} or {@link
+   * #needReadOnly(Entity, RelationshipPath<E>)}.
    * </p>
-   *
+   * 
    * @param entity the entity to be reloaded
    * @return a new Hibernate-managed instance of the specified entity
    */
@@ -231,175 +155,80 @@ public class GenericEntityDAOImpl extends AbstractDAO implements GenericEntityDA
    * the session. The passed-in entity instance will be unchanged, and its
    * uninitialized relationships cannot be navigated.
    * <p>
-   * Any relationships that may have been initialized in the passed-in entity
-   * (network) <i>cannot</i> be expected to be pre-initialized (eagerly
-   * fetched) in the new, returned entity instance. However, you may specify the
-   * relationships that need to be eagerly fetched via the
-   * <code>relationships</code> varargs. To avoid the eager fetching
-   * cross-product problem (see Hibernate docs), you should only eager fetch a
-   * single <i>collection</i> (to-many) relationship in this method call; eager fetch additional
-   * collection relationships by making subsequent calls to
-   * {@link #need(Entity, String...)} or
-   * {@link #needReadOnly(Entity, String...)}. You may, however, eager
-   * fetch as many to-one relationships as needed in a single call to this
-   * method, without creating a performance problem.
+   * Any relationships that may have been initialized in the passed-in entity (network) <i>cannot</i> be expected to be
+   * pre-initialized (eagerly fetched) in the new, returned entity instance. However, you may specify a relationship
+   * that needs to be eagerly fetched via the <code>relationship</code> arg and you may eager fetch additional
+   * collection relationships by making subsequent calls to {@link #need(Entity, RelationshipPath<E>)} or {@link
+   * #needReadOnly(Entity, RelationshipPath<E>)}.
    * </p>
-   *
+   * 
    * @param <E>
    * @param entity the entity to be reloaded
    * @param readOnly see class-level documentation of {@link GenericEntityDAO}
-   * @param relationships the relationships to loaded, relative to the root
-   *          entity, specified as a dot-separated path of relationship property
-   *          names; see class-level documentation of {@link GenericEntityDAO}
+   * @param relationship the related entity or entities to be eagerly fetched
    * @return a new Hibernate-managed instance of the specified entity
    */
-  @SuppressWarnings("unchecked")
-  public <E extends Entity> E reloadEntity(E entity, boolean readOnly, String... relationships)
+  public <E extends Entity> E reloadEntity(E entity,
+                                           boolean readOnly,
+                                           RelationshipPath<E> relationship)
   {
     // TODO: throw exception if entity already exists in the session
     if (entity != null) {
       log.debug("reloading entity " + entity);
-      return (E) findEntityById(entity.getEntityClass(), entity.getEntityId(), readOnly, relationships);
+      return (E) findEntityById(entity.getEntityClass(), entity.getEntityId(), readOnly, relationship);
     }
     return null;
   }
 
+  public <E extends Entity> E reloadEntity(E entity, boolean readOnly)
+  {
+    return reloadEntity(entity, readOnly, null);
+  }
+
   /**
-   * Loads the specified relationships of a given entity, allowing these
-   * relationships to be navigated after the entity is detached from the
-   * Hibernate session. You may specify the relationships that need to be
-   * eagerly fetched via the <code>relationships</code> varargs. To avoid the
-   * eager fetching cross-product problem (see Hibernate docs), you should only
-   * eager fetch a single <i>collection</i> (to-many) relationship in this
-   * method call; eager fetch additional collection relationships by making
-   * subsequent calls to {@link #need(Entity, String...)} or
-   * {@link #needReadOnly(Entity, String...)}. You may, however, eager
-   * fetch as many to-one relationships as needed in a single call to this
-   * method, without creating a performance problem.
-   *
+   * Loads the specified relationship of a given entity, allowing the
+   * relationship to be navigated after the entity is detached from the
+   * Hibernate session.
+   * 
    * @param entity the root entity
-   * @param relationships the relationships to loaded, relative to the root
-   *          entity, specified as a dot-separated path of relationship property
-   *          names; see class-level documentation of {@link GenericEntityDAO}
+   * @param relationship the related entity or entities to be eagerly fetched
    */
-  public void need(Entity entity,
-                   String... relationships)
+  public <E extends Entity> void need(E entity,
+                                      RelationshipPath<E> relationship)
   {
     if (entity == null) {
       return;
     }
-    inflate(entity, false, relationships);
+    findEntityById(entity.getEntityClass(), entity.getEntityId(), false, relationship.castToSubtype(entity.getEntityClass()));
   }
 
   /**
-   * Loads the specified relationships of a given entity, allowing these
-   * relationships to be navigated after the entity is detached from the
-   * Hibernate session. See class-level documentation of
-   * {@link GenericEntityDAO} for issues related to loading read-only entities.
-   * You may specify the relationships that need to be eagerly fetched via the
-   * <code>relationships</code> varargs. To avoid the eager fetching
-   * cross-product problem (see Hibernate docs), you should only eager fetch a
-   * single <i>collection</i> (to-many) relationship in this method call; eager
-   * fetch additional collection relationships by making subsequent calls to
-   * {@link #need(Entity, String...)} or
-   * {@link #needReadOnly(Entity, String...)}. You may, however, eager
-   * fetch as many to-one relationships as needed in a single call to this
-   * method, without creating a performance problem.
-   *
+   * Loads the specified relationship of a given entity, allowing the
+   * relationship to be navigated after the entity is detached from the
+   * Hibernate session. See class-level documentation of {@link GenericEntityDAO} for issues related to loading
+   * read-only entities.
+   * 
    * @param entity the root entity
-   * @param relationships the relationships to loaded, relative to the root
-   *          entity, specified as a dot-separated path of relationship property
-   *          names; see class-level documentation of {@link GenericEntityDAO}
+   * @param relationship the related entity or entities to be eagerly fetched
    */
-  public void needReadOnly(Entity entity,
-                           String... relationships)
+  public <E extends Entity> void needReadOnly(E entity,
+                                              RelationshipPath<E> relationship)
   {
     if (entity == null) {
       return;
     }
-    inflate(entity, true, relationships);
+    findEntityById(entity.getEntityClass(), entity.getEntityId(), true, relationship.castToSubtype(entity.getEntityClass()));
   }
 
   /**
-   * Returns the size of a to-many relationship collection, and does so
-   * efficiently, without loading the entities in the relationship.
-   *
-   * @param persistentCollection
+   * Deletes the entity. The entity is first reloaded ({@link #reloadEntity(Entity)) to ensure that is attached to the
+   * current session; this is necessary when this method is called outside of an active session. If the method is called
+   * within an active session, and the entity is already managed, the reloadEntity call has no effect.
    */
-  public int relationshipSize(final Object persistentCollection)
-  {
-    Number size = (Number) getHibernateTemplate().execute(new HibernateCallback()
-    {
-      public Object doInHibernate(Session session) throws HibernateException, SQLException
-      {
-        return ((Number) session.createFilter(persistentCollection, "select count(*)" ).list().get(0)).intValue();
-      }
-    });
-    return size.intValue();
-  }
-
-  /**
-   * Returns the size of a to-many relationship collection, and does so
-   * efficiently, without loading the entities in the relationship.
-   *
-   * @param entity
-   * @param relationship
-   */
-  public int relationshipSize(final Entity entity, final String relationship)
-  {
-    return (Integer) runQuery(new edu.harvard.med.screensaver.db.Query<Integer>() {
-      public List<Integer> execute(Session session)
-      {
-        Criteria criteria = session.createCriteria(entity.getEntityClass()).add(Restrictions.idEq(entity.getEntityId())).createCriteria(relationship);
-        ScrollableResults scroll = criteria.scroll();
-        int size = scroll.last() ? scroll.getRowNumber() + 1: 0;
-        return Arrays.asList(size);
-      }
-    }).get(0);
-  }
-
-  public int relationshipSize(
-    final Entity entity,
-    final String relationship,
-    final String relationshipProperty,
-    final String relationshipPropertyValue)
-  {
-    Number size = (Number) getHibernateTemplate().execute(new HibernateCallback()
-    {
-      public Object doInHibernate(Session session) throws HibernateException, SQLException
-      {
-        String entityName = session.getEntityName(entity);
-        String idProperty = session.getSessionFactory().getClassMetadata(entityName).getIdentifierPropertyName();
-        Query query = session.createQuery(
-          "select count(*) from " + entityName + " e join e." + relationship + " r " +
-          "where e." + idProperty + " = :id " +
-          "and r." + relationshipProperty + " = :propValue");
-
-        // the following block used to be just <code>query.setString("id", entity.getEntityId().toString());</code>.
-        // this starting failing in Postgres somewhere between versions 8.1.11 and 8.3.0 with a
-        // "ERROR: operator does not exist: integer = character varying", for entities with Integer primary keys.
-        // the fix below is kind of a hack, since it only special-cases for Integer, instead of applying a more
-        // generic solution. But should be okay since all our primary keys are either Integer or String. -s
-        {
-          Object entityId = entity.getEntityId();
-          if (entityId instanceof Integer) {
-            query.setInteger("id", (Integer) entityId);
-          }
-          else {
-            query.setString("id", entityId.toString());
-          }
-        }
-
-        query.setString("propValue", relationshipPropertyValue);
-        return query.list().get(0);
-      }
-    });
-    return size.intValue();
-  }
-
   public void deleteEntity(Entity entity)
   {
-    getHibernateTemplate().delete(entity);
+    entity = reloadEntity(entity);
+    getEntityManager().remove(entity);
   }
 
   /**
@@ -409,37 +238,28 @@ public class GenericEntityDAOImpl extends AbstractDAO implements GenericEntityDA
    * @param entityClass the class of the entity to retrieve
    * @return a list of the entities of the specified type
    */
-  @SuppressWarnings("unchecked")
   public <E extends Entity> List<E> findAllEntitiesOfType(Class<E> entityClass)
   {
-    return (List<E>) getHibernateTemplate().loadAll(entityClass);
+    return findAllEntitiesOfType(entityClass, false, null);
   }
 
   /**
-   * You may specify any relationships that need to be eagerly fetched via the
-   * <code>relationships</code> varargs. To avoid the eager fetching
-   * cross-product problem (see Hibernate docs), you should only eager fetch a
-   * single <i>collection</i> (to-many) relationship in this method call; eager
-   * fetch additional collection relationships by making subsequent calls to
-   * {@link #need(Entity, String...)} or
-   * {@link #needReadOnly(Entity, String...)}. You may, however, eager
-   * fetch as many to-one relationships as needed in a single call to this
-   * method, without creating a performance problem. *
-   *
    * @param <E>
    * @param readOnly see class-level documentation of {@link GenericEntityDAO}
-   * @param relationships the relationships to loaded, relative to the root
-   *          entity, specified as a dot-separated path of relationship property
-   *          names; see class-level documentation of {@link GenericEntityDAO}
+   * @param relationship the related entity or entities to be eagerly fetched
    */
-  @SuppressWarnings("unchecked")
   public <E extends Entity> List<E> findAllEntitiesOfType(Class<E> entityClass,
-                                                                  boolean readOnly,
-                                                                  String... relationships)
+                                                          boolean readOnly,
+                                                          RelationshipPath<E> relationship)
   {
-    return (List<E>) findEntitiesByProperties(entityClass, null, readOnly, relationships);
+    return (List<E>) findEntitiesByProperties(entityClass, null, readOnly, relationship);
   }
 
+  public <E extends Entity> List<E> findAllEntitiesOfType(Class<E> entityClass, boolean readOnly)
+  {
+    return (List<E>) findEntitiesByProperties(entityClass, null, readOnly, null);
+  }
+  
   /**
    * Retrieve and return an entity by its identifier (primary key). If the
    * requested entity is in the Hibernate session, no database I/O will occur.
@@ -453,36 +273,31 @@ public class GenericEntityDAOImpl extends AbstractDAO implements GenericEntityDA
    *         Return null if there is no such entity.
    */
   @SuppressWarnings("unchecked")
-  public <E extends Entity, K extends Serializable> E findEntityById(Class<E> entityClass,
-                                                                     K id)
+  public <E extends Entity<K>,K extends Serializable> E findEntityById(Class<E> entityClass,
+                                                                       K id)
   {
-    return (E) getHibernateTemplate().get(entityClass, id);
+    return (E) getEntityManager().find(entityClass, id);
   }
 
   /**
-   * You may specify any relationships that need to be eagerly fetched via the
-   * <code>relationships</code> varargs. To avoid the eager fetching
-   * cross-product problem (see Hibernate docs), you should only eager fetch a
-   * single <i>collection</i> (to-many) relationship in this method call; eager
-   * fetch additional collection relationships by making subsequent calls to
-   * {@link #need(Entity, String...)} or
-   * {@link #needReadOnly(Entity, String...)}. You may, however, eager
-   * fetch as many to-one relationships as needed in a single call to this
-   * method, without creating a performance problem. * See @{@link #findEntityById(Class, Serializable)}.
    * @param readOnly see class-level documentation of {@link GenericEntityDAO}
-   * @param relationships the relationships to loaded, relative to the root
-   *          entity, specified as a dot-separated path of relationship property
-   *          names; see class-level documentation of {@link GenericEntityDAO}
+   * @param relationship the related entity or entities to be eagerly fetched
    */
-  @SuppressWarnings("unchecked")
-  public <E extends Entity, K extends Serializable> E findEntityById(Class<E> entityClass,
-                                                                     K id,
-                                                                     boolean readOnly,
-                                                                     String... relationships)
+  public <E extends Entity<K>,K extends Serializable> E findEntityById(Class<E> entityClass,
+                                                                       K id,
+                                                                       boolean readOnly,
+                                                                       RelationshipPath<E> relationship)
   {
-    return findEntityByProperty(entityClass, "id", id, readOnly, relationships);
+    return findEntityByProperty(entityClass, "id", id, readOnly, relationship);
   }
 
+  public <E extends Entity<K>,K extends Serializable> E findEntityById(Class<E> entityClass, 
+                                                                       K id,
+                                                                       boolean readOnly)
+  {
+    return findEntityById(entityClass, id, readOnly, null);
+  }
+  
   /**
    * Retrieve and return the entity that has specific values for the specified
    * properties. Return <code>null</code> if no entity has that value for that
@@ -496,101 +311,53 @@ public class GenericEntityDAOImpl extends AbstractDAO implements GenericEntityDA
    *         set of properties
    */
   public <E extends Entity> List<E> findEntitiesByProperties(Class<E> entityClass,
-                                                                     Map<String,Object> name2Value)
+                                                             Map<String,Object> name2Value)
   {
     return findEntitiesByProperties(entityClass, name2Value, false);
   }
 
   /**
-   * You may specify any relationships that need to be eagerly fetched via the
-   * <code>relationships</code> varargs. To avoid the eager fetching
-   * cross-product problem (see Hibernate docs), you should only eager fetch a
-   * single <i>collection</i> (to-many) relationship in this method call; eager
-   * fetch additional collection relationships by making subsequent calls to
-   * {@link #need(Entity, String...)} or
-   * {@link #needReadOnly(Entity, String...)}. You may, however, eager
-   * fetch as many to-one relationships as needed in a single call to this
-   * method, without creating a performance problem. * See @{@link #findEntitiesByProperties(Class, Map)}.
    * @param name2Value a <code>Map</code> containing entries for each
    *          property/value pair to query against
    * @param readOnly see class-level documentation of {@link GenericEntityDAO}
-   * @param relationshipsIn the relationships to loaded, relative to the root
-   *          entity, specified as a dot-separated path of relationship property
-   *          names; see class-level documentation of {@link GenericEntityDAO}
+   * @param relationship the related entity or entities to be eagerly fetched
    */
-  @SuppressWarnings("unchecked")
   public <E extends Entity> List<E> findEntitiesByProperties(Class<E> entityClass,
-                                                                     Map<String,Object> name2Value,
-                                                                     final boolean readOnly,
-                                                                     String... relationshipsIn)
+                                                             final Map<String,Object> name2Value,
+                                                             final boolean readOnly,
+                                                             RelationshipPath<E> relationship)
   {
-    String entityName = entityClass.getSimpleName();
-    final StringBuffer hql = new StringBuffer();
-
-    List<String> relationships = HqlUtils.expandRelationships(relationshipsIn);
-    Map<String,String> path2Alias = HqlUtils.makeAliases(relationships);
-    String entityAlias = "x";
-    hql.append("select distinct x from ").append(entityName).append(' ').append(entityAlias);
-    for (String relationship : relationships) {
-      int finalPathSeparatorPos = relationship.lastIndexOf('.');
-      String fromAlias = null;
-      String association = null;
-      if (finalPathSeparatorPos < 0) {
-        fromAlias = "x";
-        association = relationship;
-      }
-      else {
-        String pathToRel = relationship.substring(0, finalPathSeparatorPos);
-        if (!path2Alias.containsKey(pathToRel)) {
-          throw new IllegalArgumentException("relationship " + relationship + " requires previous intermediate relationship " + pathToRel);
-        }
-        fromAlias = path2Alias.get(pathToRel);
-        association = relationship.substring(finalPathSeparatorPos + 1);
-      }
-      String asAlias = path2Alias.get(relationship);
-      hql.append(" left join fetch ").append(fromAlias).append(".").append(association).append(' ').append(asAlias);
-    }
-
-    boolean first = true;
-    if (name2Value == null) {
-      name2Value = Collections.EMPTY_MAP;
-    }
-    final Object[] values = new Object[name2Value.size()];
-    int i = 0;
-    for (String propertyName : name2Value.keySet()) {
-      if (first) {
-        hql.append(" where ");
-        first = false;
-      }
-      else {
-        hql.append(" and ");
-      }
-      hql.append("x.").append(propertyName).append(" = ?");
-      values[i++]= name2Value.get(propertyName);
-    }
-
-    if (log.isDebugEnabled()) {
-      log.debug(hql.toString());
-    }
-
-    List<E> result = (List<E>) getHibernateTemplate().execute(new HibernateCallback()
-    {
-      public Object doInHibernate(Session session) throws HibernateException, SQLException
+    EntityDataFetcher<E,?> entityDataFetcher = new EntityDataFetcher<E,Serializable>(entityClass, this) {
+      @Override
+      public void addDomainRestrictions(HqlBuilder hql)
       {
-        Query query = session.createQuery(hql.toString());
-        query.setReadOnly(readOnly);
-        int pos = 0;
-        for (Object arg : values) {
-          query.setParameter(pos++, arg);
+        if (name2Value != null) {
+          for (Map.Entry<String,Object> criterion : name2Value.entrySet()) {
+            hql.where(getRootAlias(), criterion.getKey(), Operator.EQUAL, criterion.getValue());
+          }
         }
-        return query.list();
       }
-    });
-    LinkedHashSet<E> distinctResult = new LinkedHashSet<E>(result);
-    if (result.size() > distinctResult.size()) {
-      return new ArrayList<E>(distinctResult);
+    };
+    PropertyPath<E> propertyPath;
+    if (relationship == null) {
+      propertyPath = RelationshipPath.from(entityClass).toFullEntity();
     }
-    return result;
+    else if (relationship instanceof PropertyPath) {
+      propertyPath = (PropertyPath<E>) relationship;
+    }
+    else {
+      propertyPath = relationship.toFullEntity();
+    }
+    entityDataFetcher.setPropertiesToFetch(ImmutableList.of(propertyPath));
+    entityDataFetcher.setReadOnly(readOnly);
+    return entityDataFetcher.fetchAllData();
+  }
+  
+  public <E extends Entity> List<E> findEntitiesByProperties(Class<E> entityClass,
+                                                             Map<String,Object> name2Value,
+                                                             boolean readOnly)
+  {
+    return findEntitiesByProperties(entityClass, name2Value, readOnly, null);
   }
 
   /**
@@ -607,7 +374,7 @@ public class GenericEntityDAOImpl extends AbstractDAO implements GenericEntityDA
    *    than one entity with the specified value for the property
    */
   public <E extends Entity> E findEntityByProperties(Class<E> entityClass,
-                                                             Map<String,Object> name2Value)
+                                                     Map<String,Object> name2Value)
   {
     return findEntityByProperties(entityClass,
                                   name2Value,
@@ -615,32 +382,20 @@ public class GenericEntityDAOImpl extends AbstractDAO implements GenericEntityDA
   }
 
   /**
-   * You may specify any relationships that need to be eagerly fetched via the
-   * <code>relationships</code> varargs. To avoid the eager fetching
-   * cross-product problem (see Hibernate docs), you should only eager fetch a
-   * single <i>collection</i> (to-many) relationship in this method call; eager
-   * fetch additional collection relationships by making subsequent calls to
-   * {@link #need(Entity, String...)} or
-   * {@link #needReadOnly(Entity, String...)}. You may, however, eager
-   * fetch as many to-one relationships as needed in a single call to this
-   * method, without creating a performance problem. * See @{@link #findEntityByProperties(Class, Map)}.
    * @param name2Value a <code>Map</code> containing entries for each
    *          property/value pair to query against
    * @param readOnly see class-level documentation of {@link GenericEntityDAO}
-   * @param relationships the relationships to loaded, relative to the root
-   *          entity, specified as a dot-separated path of relationship property
-   *          names; see class-level documentation of {@link GenericEntityDAO}
+   * @param relationship the related entity or entities to be eagerly fetched
    */
   public <E extends Entity> E findEntityByProperties(Class<E> entityClass,
-                                                             Map<String,Object> name2Value,
-                                                             boolean readOnly,
-                                                             String... relationships)
+                                                     Map<String,Object> name2Value,
+                                                     boolean readOnly,
+                                                     RelationshipPath<E> relationship)
   {
-    List<E> entities = findEntitiesByProperties(
-      entityClass,
-      name2Value,
-      readOnly,
-      relationships);
+    List<E> entities = findEntitiesByProperties(entityClass,
+                                                name2Value,
+                                                readOnly,
+                                                relationship);
     if (entities.size() == 0) {
       return null;
     }
@@ -649,6 +404,13 @@ public class GenericEntityDAOImpl extends AbstractDAO implements GenericEntityDA
         "more than one result for GenericEntityDAO.findEntityByProperties");
     }
     return entities.get(0);
+  }
+
+  public <E extends Entity> E findEntityByProperties(Class<E> entityClass,
+                                                     Map<String,Object> name2Value,
+                                                     boolean readOnly)
+  {
+    return findEntityByProperties(entityClass, name2Value, readOnly, null);
   }
 
   /**
@@ -663,38 +425,33 @@ public class GenericEntityDAOImpl extends AbstractDAO implements GenericEntityDA
    * @return the entity that has the specified value for the specified property
    */
   public <E extends Entity> List<E> findEntitiesByProperty(Class<E> entityClass,
-                                                                   String propertyName,
-                                                                   Object propertyValue)
+                                                           String propertyName,
+                                                           Object propertyValue)
   {
     return findEntitiesByProperty(entityClass, propertyName, propertyValue, false);
   }
 
   /**
-   * You may specify any relationships that need to be eagerly fetched via the
-   * <code>relationships</code> varargs. To avoid the eager fetching
-   * cross-product problem (see Hibernate docs), you should only eager fetch a
-   * single <i>collection</i> (to-many) relationship in this method call; eager
-   * fetch additional collection relationships by making subsequent calls to
-   * {@link #need(Entity, String...)} or
-   * {@link #needReadOnly(Entity, String...)}. You may, however, eager
-   * fetch as many to-one relationships as needed in a single call to this
-   * method, without creating a performance problem. * See @{@link #findEntitiesByProperty(Class, String, Object)}.
    * @param readOnly see class-level documentation of {@link GenericEntityDAO}
-   * @param relationships the relationships to loaded, relative to the root
-   *          entity, specified as a dot-separated path of relationship property
-   *          names; see class-level documentation of {@link GenericEntityDAO}
+   * @param relationship the related entity or entities to be eagerly fetched
    */
-  @SuppressWarnings("unchecked")
   public <E extends Entity> List<E> findEntitiesByProperty(Class<E> entityClass,
-                                                                   String propertyName,
-                                                                   Object propertyValue,
-                                                                   boolean readOnly,
-                                                                   String... relationships)
+                                                           String propertyName,
+                                                           Object propertyValue,
+                                                           boolean readOnly,
+                                                           RelationshipPath<E> relationship)
   {
-    Map<String,Object> props = new HashMap<String,Object>();
-    props.put(propertyName, propertyValue);
-    return findEntitiesByProperties(entityClass, props, readOnly, relationships);
+    return findEntitiesByProperties(entityClass, ImmutableMap.of(propertyName, propertyValue), readOnly, relationship);
   }
+
+  public <E extends Entity> List<E> findEntitiesByProperty(Class<E> entityClass,
+                                                           String propertyName,
+                                                           Object propertyValue,
+                                                           boolean readOnly)
+  {
+    return findEntitiesByProperty(entityClass, propertyName, propertyValue, readOnly, null);
+  }
+
 
   /**
    * Retrieve and return the entity that has a specific value for the specified
@@ -711,8 +468,8 @@ public class GenericEntityDAOImpl extends AbstractDAO implements GenericEntityDA
    *    than one entity with the specified value for the property
    */
   public <E extends Entity> E findEntityByProperty(Class<E> entityClass,
-                                                           String propertyName,
-                                                           Object propertyValue)
+                                                   String propertyName,
+                                                   Object propertyValue)
   {
     return findEntityByProperty(entityClass,
                                 propertyName,
@@ -721,32 +478,21 @@ public class GenericEntityDAOImpl extends AbstractDAO implements GenericEntityDA
   }
 
   /**
-   * You may specify any relationships that need to be eagerly fetched via the
-   * <code>relationships</code> varargs. To avoid the eager fetching
-   * cross-product problem (see Hibernate docs), you should only eager fetch a
-   * single <i>collection</i> (to-many) relationship in this method call; eager
-   * fetch additional collection relationships by making subsequent calls to
-   * {@link #need(Entity, String...)} or
-   * {@link #needReadOnly(Entity, String...)}. You may, however, eager
-   * fetch as many to-one relationships as needed in a single call to this
-   * method, without creating a performance problem. * See @{@link #findEntityByProperty(Class, String, Object)}.
    * @param readOnly see class-level documentation of {@link GenericEntityDAO}
-   * @param relationships the relationships to loaded, relative to the root
-   *          entity, specified as a dot-separated path of relationship property
-   *          names; see class-level documentation of {@link GenericEntityDAO}
+   * @param relationship the related entity or entities to be eagerly fetched
    */
   public <E extends Entity> E findEntityByProperty(Class<E> entityClass,
-                                                           String propertyName,
-                                                           Object propertyValue,
-                                                           boolean readOnly,
-                                                           String... relationships)
+                                                   String propertyName,
+                                                   Object propertyValue,
+                                                   boolean readOnly,
+                                                   RelationshipPath<E> relationship)
   {
     List<E> entities = findEntitiesByProperty(
       entityClass,
       propertyName,
       propertyValue,
       readOnly,
-      relationships);
+      relationship);
     if (entities.size() == 0) {
       return null;
     }
@@ -757,154 +503,23 @@ public class GenericEntityDAOImpl extends AbstractDAO implements GenericEntityDA
     return entities.get(0);
   }
 
-//  @SuppressWarnings("unchecked")
-//  public <E extends Entity> List<E> findEntitiesByPropertyPattern(
-//    Class<E> entityClass,
-//    String propertyName,
-//    String propertyPattern)
-//  {
-//    String entityName = entityClass.getSimpleName();
-//    String hql = "from " + entityName + " x where x." + propertyName + " like ?";
-//    propertyPattern = propertyPattern.replaceAll( "\\*", "%" );
-//    return (List<E>) getHibernateTemplate().find(hql, propertyPattern);
-//  }
-
-  @SuppressWarnings("unchecked")
-  public <E extends Entity> List<E> findEntitiesByHql(
-    Class<E> entityClass,
-    String hql,
-    Object... hqlParameters)
+  public <E extends Entity> E findEntityByProperty(Class<E> entityClass,
+                                                   String propertyName,
+                                                   Object propertyValue,
+                                                   boolean readOnly)
   {
-    return (List<E>) getHibernateTemplate().find(hql, hqlParameters);
+    return findEntityByProperty(entityClass, propertyName, propertyValue, readOnly, null);
   }
 
-
-  // private instance methods
-
-  /**
-   * Get the constructor for the given Entity class and arguments.
-   * @param <E> the entity type
-   * @param entityClass the entity class
-   * @param arguments the (possibly empty) constructor arguments
-   * @return the constructor for the given Entity class and arguments
-   * @exception IllegalArgumentException whenever the implied constructor
-   * does not exist or is not public
-   */
-  private <E extends Entity> Constructor<E> getConstructor(
-    Class<E> entityClass,
-    Object... arguments)
+  public <E extends Entity> List<E> findEntitiesByHql(Class<E> entityClass,
+                                                      String hql,
+                                                      Object... hqlParameters)
   {
-    Class[] argumentTypes = getArgumentTypes(arguments);
-    try {
-      return entityClass.getConstructor(argumentTypes);
+    Query query = getHibernateSession().createQuery(hql);
+    for (int i = 0; i < hqlParameters.length; i++) {
+      query.setParameter(i, hqlParameters[i]);
     }
-    catch (SecurityException e) {
-      throw new IllegalArgumentException(e);
-    }
-    catch (NoSuchMethodException e) {
-      throw new IllegalArgumentException(e);
-    }
-  }
-
-  /**
-   * Return an array of types that correspond to the array of arguments.
-   *
-   * @param arguments the arguments to get the types for
-   * @return an array of types that correspond to the array of arguments
-   */
-  private Class[] getArgumentTypes(Object [] arguments)
-  {
-    Class [] argumentTypes = new Class [arguments.length];
-    for (int i = 0; i < arguments.length; i++) {
-      Class argumentType;
-      if (arguments[i] instanceof Entity) {
-        argumentType = ((Entity) arguments[i]).getEntityClass();
-      }
-      else {
-        argumentType = arguments[i].getClass();
-      }
-      if (argumentType.equals(Boolean.class)) {
-        argumentType = Boolean.TYPE;
-      }
-      argumentTypes[i] = argumentType;
-    }
-    return argumentTypes;
-  }
-
-  /**
-   * Construct and return a new entity object.
-   *
-   * @param <E> the entity type
-   * @param constructor the constructor to invoke
-   * @param constructorArguments the (possibly empty) list of arguments to
-   * pass to the constructor
-   * @return the newly constructed entity object
-   */
-  private <E extends Entity> E newInstance(
-    Constructor<E> constructor,
-    Object... constructorArguments)
-  {
-    try {
-      return constructor.newInstance(constructorArguments);
-    }
-    catch (IllegalArgumentException e) {
-      throw new IllegalArgumentException(e);
-    }
-    catch (InstantiationException e) {
-      throw new IllegalArgumentException(e);
-    }
-    catch (IllegalAccessException e) {
-      throw new IllegalArgumentException(e);
-    }
-    catch (InvocationTargetException e) {
-      throw new IllegalArgumentException(e);
-    }
-  }
-
-  private boolean verifyEntityRelationshipExists(Session session, Class entityClass, String relationship)
-  {
-    ClassMetadata metadata = session.getSessionFactory().getClassMetadata(entityClass);
-    if (relationship.contains(".")) {
-      int next = relationship.indexOf(".");
-      String nextRelationship = relationship.substring(next + 1);
-      relationship = relationship.substring(0, next);
-      if (!verifyEntityRelationshipExists(session, entityClass, relationship)) {
-        return false;
-      }
-
-      org.hibernate.type.Type nextType = metadata.getPropertyType(relationship);
-      if (nextType.isCollectionType()) {
-        nextType = ((CollectionType) nextType).getElementType((SessionFactoryImplementor) session.getSessionFactory());
-      }
-      Class nextEntityClass = nextType.getReturnedClass();
-      return verifyEntityRelationshipExists(session,
-                                            nextEntityClass,
-                                            nextRelationship);
-    }
-    else {
-      if (!Arrays.asList(metadata.getPropertyNames()).contains(relationship)) {
-        // TODO: this should probably be a Java assert instead of just a log error msg
-        log.error("relationship does not exist: " + entityClass.getSimpleName() + "." + relationship);
-        return false;
-      }
-      return true;
-    }
-  }
-
-  @SuppressWarnings("unchecked")
-  private <T> void inflate(final Entity entity,
-                           boolean readOnly,
-                           final String... relationships)
-  {
-    long start = 0;
-    if (entityInflatorLog.isDebugEnabled()) {
-      entityInflatorLog.debug("inflating " + entity + " for relationships: " + Arrays.asList(relationships));
-      start = System.currentTimeMillis();
-    }
-    findEntityById(entity.getEntityClass(), entity.getEntityId(), readOnly, relationships);
-    if (entityInflatorLog.isDebugEnabled()) {
-      entityInflatorLog.debug("inflating " + entity + " took " + (System.currentTimeMillis() - start) / 1000.0 + " seconds");
-    }
+    return query.list();
   }
 
   @Override
@@ -912,7 +527,7 @@ public class GenericEntityDAOImpl extends AbstractDAO implements GenericEntityDA
   {
     String hql = "select distinct e. " + propertyName + " from " + entityClass.getSimpleName() + " e where e." + propertyName +
       " is not null";
-    List<?> result = getHibernateTemplate().find(hql);
+    List<?> result = getEntityManager().createQuery(hql).getResultList();
     return Sets.<T>newHashSet((List<T>) result);
   }
 }

@@ -36,6 +36,8 @@ import edu.harvard.med.screensaver.model.AuditedAbstractEntity;
 import edu.harvard.med.screensaver.model.DataModelViolationException;
 import edu.harvard.med.screensaver.model.annotations.ToMany;
 import edu.harvard.med.screensaver.model.annotations.ToOne;
+import edu.harvard.med.screensaver.model.meta.Cardinality;
+import edu.harvard.med.screensaver.model.meta.RelationshipPath;
 
 
 /**
@@ -55,6 +57,9 @@ import edu.harvard.med.screensaver.model.annotations.ToOne;
 public class ChecklistItemEvent extends AuditedAbstractEntity<Integer> implements Comparable<ChecklistItemEvent>
 {
   private static final long serialVersionUID = 0L;
+
+  public static final RelationshipPath<ChecklistItemEvent> screeningRoomUser = RelationshipPath.from(ChecklistItemEvent.class).to("screeningRoomUser", Cardinality.TO_ONE);
+  public static final RelationshipPath<ChecklistItemEvent> checklistItem = RelationshipPath.from(ChecklistItemEvent.class).to("checklistItem", Cardinality.TO_ONE);
 
   private ChecklistItem _checklistItem;
   private ScreeningRoomUser _screeningRoomUser;
@@ -89,7 +94,7 @@ public class ChecklistItemEvent extends AuditedAbstractEntity<Integer> implement
    */
   @ManyToOne(fetch = FetchType.LAZY, cascade = {})
   @JoinColumn(name = "checklistItemId", nullable = false, updatable = false)
-  @org.hibernate.annotations.Immutable
+  //@org.hibernate.annotations.Immutable
   @org.hibernate.annotations.ForeignKey(name = "fk_checklist_item_event_to_checklist_item")
   @org.hibernate.annotations.LazyToOne(org.hibernate.annotations.LazyToOneOption.PROXY)
   @org.hibernate.annotations.Cascade({})
@@ -119,7 +124,6 @@ public class ChecklistItemEvent extends AuditedAbstractEntity<Integer> implement
    * expiration event.
    */
   @Column(nullable = false, updatable = false, name = "isExpiration")
-  @Immutable
   public boolean isExpiration()
   {
     return _isExpiration;
@@ -128,8 +132,7 @@ public class ChecklistItemEvent extends AuditedAbstractEntity<Integer> implement
   /**
    * If set, indicates that this checklist item is "not applicable"
    */
-  @Column(nullable = false, name = "isNotApplicable")
-  @org.hibernate.annotations.Immutable
+  @Column(nullable = false, updatable = false, name = "isNotApplicable")
   public boolean isNotApplicable()
   {
     return _isNotApplicable;
@@ -142,7 +145,6 @@ public class ChecklistItemEvent extends AuditedAbstractEntity<Integer> implement
    */
   @ManyToOne(fetch = FetchType.LAZY, cascade = { /*CascadeType.PERSIST, CascadeType.MERGE*/ })
   @JoinColumn(name = "screeningRoomUserId", nullable = false, updatable = false)
-  @org.hibernate.annotations.Immutable
   @org.hibernate.annotations.ForeignKey(name = "fk_checklist_item_event_to_screening_room_user")
   @org.hibernate.annotations.Cascade({ /*org.hibernate.annotations.CascadeType.SAVE_UPDATE*/ })
   @org.hibernate.annotations.LazyToOne(org.hibernate.annotations.LazyToOneOption.PROXY)
@@ -158,7 +160,7 @@ public class ChecklistItemEvent extends AuditedAbstractEntity<Integer> implement
    */
   @Column(updatable=false)
   @Type(type = "edu.harvard.med.screensaver.db.usertypes.LocalDateType")
-  @Immutable
+  //@Immutable
   public LocalDate getDatePerformed()
   {
     return _datePerformed;

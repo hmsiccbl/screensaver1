@@ -19,6 +19,7 @@ import java.util.TreeSet;
 
 import javax.persistence.CascadeType;
 import javax.persistence.Column;
+import javax.persistence.ElementCollection;
 import javax.persistence.Entity;
 import javax.persistence.FetchType;
 import javax.persistence.JoinColumn;
@@ -74,6 +75,7 @@ public class ScreeningRoomUser extends ScreensaverUser implements AttachedFilesE
   public static final RelationshipPath<ScreeningRoomUser> screensLed = RelationshipPath.from(ScreeningRoomUser.class).to("screensLed");
   public static final RelationshipPath<ScreeningRoomUser> screensCollaborated = RelationshipPath.from(ScreeningRoomUser.class).to("screensCollaborated");
   public static final PropertyPath<ScreeningRoomUser> facilityUsageRoles = PropertyPath.from(ScreeningRoomUser.class).toCollectionOfValues("facilityUsageRoles");
+  public static final RelationshipPath<ScreeningRoomUser> checklistItemEvents = RelationshipPath.from(ScreeningRoomUser.class).to("checklistItemEvents");
 
   // private instance data
 
@@ -109,23 +111,18 @@ public class ScreeningRoomUser extends ScreensaverUser implements AttachedFilesE
      super(createdBy);
    }
 
-  /**
-   * Construct an initialized <code>ScreeningRoomUser</code>.
-   */
+  /** @motivation for test code only */
   public ScreeningRoomUser(
     String firstName,
     String lastName,
     ScreeningRoomUserClassification userClassification)
   {
     super(firstName,
-          lastName,
-          "",
-          "",
-          "",
-          "");
+          lastName);
     setUserClassification(userClassification);
   }
 
+  /** @motivation for test code only */
   public ScreeningRoomUser(String firstName,
                            String lastName)
   {
@@ -144,16 +141,7 @@ public class ScreeningRoomUser extends ScreensaverUser implements AttachedFilesE
    * Get the set of checklist item events.
    * @return the checklist item events
    */
-  @OneToMany(
-    mappedBy="screeningRoomUser",
-    cascade={ CascadeType.PERSIST, CascadeType.MERGE, CascadeType.REMOVE },
-    fetch=FetchType.LAZY
-  )
-  @org.hibernate.annotations.Cascade(value={
-    org.hibernate.annotations.CascadeType.SAVE_UPDATE,
-    org.hibernate.annotations.CascadeType.DELETE,
-    org.hibernate.annotations.CascadeType.DELETE_ORPHAN
-  })
+  @OneToMany(mappedBy = "screeningRoomUser", cascade = { CascadeType.ALL }, orphanRemoval = true)
   @Sort(type=SortType.NATURAL)
   public SortedSet<ChecklistItemEvent> getChecklistItemEvents()
   {
@@ -351,7 +339,7 @@ public class ScreeningRoomUser extends ScreensaverUser implements AttachedFilesE
     _userClassification = userClassification;
   }
 
-  @org.hibernate.annotations.CollectionOfElements
+  @ElementCollection
   @Column(name="facilityUsageRole", nullable=false)
   @JoinTable(name="screening_room_user_facility_usage_role", joinColumns=@JoinColumn(name="screening_room_user_id"))
   @org.hibernate.annotations.Type(type = "edu.harvard.med.screensaver.model.users.FacilityUsageRole$UserType")
@@ -407,16 +395,7 @@ public class ScreeningRoomUser extends ScreensaverUser implements AttachedFilesE
    * Get the attached files.
    * @return the attached files
    */
-  @OneToMany(
-    mappedBy="screeningRoomUser",
-    cascade={ CascadeType.PERSIST, CascadeType.MERGE, CascadeType.REMOVE },
-    fetch=FetchType.LAZY
-  )
-  @org.hibernate.annotations.Cascade(value={
-    org.hibernate.annotations.CascadeType.SAVE_UPDATE,
-    org.hibernate.annotations.CascadeType.DELETE,
-    org.hibernate.annotations.CascadeType.DELETE_ORPHAN
-  })
+  @OneToMany(mappedBy = "screeningRoomUser", cascade = { CascadeType.ALL }, orphanRemoval = true)
   @ToMany(hasNonconventionalMutation=true)
   public Set<AttachedFile> getAttachedFiles()
   {
@@ -515,14 +494,13 @@ public class ScreeningRoomUser extends ScreensaverUser implements AttachedFilesE
    * labHead relationship, as the labHead "is" the lab, but that concept is
    * confusing from the perspective of client code, so we provide an explicit
    * Lab object instead.
-   *
-   * @return the ScreeningRoomUser that represents the lab of this user; since a
-   *         non-lab head is allowed to not have a lab at all, in this case a
-   *         Lab will be returned that has a null labHead and empty labName and
-   *         labAffiliation; modifying its labMembers collection will have not
-   *         effect on persisted data.
+   * 
+   * @return the Lab to which this user belongs; a ScreeningRoomUser that is not a LabHead may not have a lab at all, in
+   *         which case a Lab will be returned that has a null labHead and empty labName and labAffiliation (Null Object
+   *         pattern); modifying its labMembers collection will have not effect on persisted
+   *         data.
    * @motivation prevents client code from being able to set properties that
-   *             should only be set on the labHead (e.g. labAffiliation).
+   *             should only be set on the associated LabHead (e.g. labAffiliation).
    */
   @Transient
   public Lab getLab()

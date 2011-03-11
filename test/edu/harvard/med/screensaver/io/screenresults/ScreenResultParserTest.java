@@ -25,17 +25,16 @@ import java.util.Set;
 import java.util.SortedSet;
 import java.util.TreeSet;
 
+import com.google.common.collect.Sets;
 import jxl.BooleanFormulaCell;
 import jxl.CellType;
 import jxl.NumberFormulaCell;
 import jxl.Sheet;
 import jxl.read.biff.BiffException;
 import jxl.write.WriteException;
-
 import org.apache.commons.lang.math.IntRange;
 import org.apache.log4j.Logger;
-
-import com.google.common.collect.Sets;
+import org.springframework.beans.factory.annotation.Autowired;
 
 import edu.harvard.med.screensaver.AbstractSpringTest;
 import edu.harvard.med.screensaver.io.ParseError;
@@ -71,17 +70,8 @@ public class ScreenResultParserTest extends AbstractSpringTest
   public static final String HIT_COUNT_TEST_WORKBOOK_FILE = "ScreenResultHitCountTest.xls";
 
 
+  @Autowired
   protected ScreenResultParser mockScreenResultParser;
-
-  protected void onSetUp() throws Exception
-  {
-    super.onSetUp();
-  }
-
-  protected void onTearDown() throws Exception
-  {
-    // TODO: delete *.error.xls files
-  }
 
   /**
    * This is the primary test of the ScreenResultParser.

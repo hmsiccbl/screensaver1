@@ -103,7 +103,7 @@ public abstract class PropertyPathDataFetcher<R,E extends Entity,K> implements D
         Map<RelationshipPath<E>,String> path2Alias = Maps.newHashMap();
 
         // ensure that the root entity is fetched, at a minimum
-        getOrCreateJoin(hql, RelationshipPath.from(_rootEntityClass), path2Alias, null);
+        PropertyPathDataFetcher.getOrCreateJoin(hql, RelationshipPath.from(_rootEntityClass), path2Alias, null);
 
         // order by
         // note: we add 'order by' clauses before restrictions, to ensure that
@@ -118,24 +118,7 @@ public abstract class PropertyPathDataFetcher<R,E extends Entity,K> implements D
           }
         }
 
-        // filtering restrictions
-        for (Map.Entry<PropertyPath<E>,List<? extends Criterion<?>>> entry : _criteria.entrySet()) {
-          PropertyPath<E> propertyPath = entry.getKey();
-          for (Criterion<?> criterion : entry.getValue()) {
-            if (!criterion.isUndefined()) {
-              String alias = getOrCreateJoin(hql,
-                                             propertyPath,
-                                             path2Alias,
-                                             criterion.getOperator() == Operator.EMPTY ? JoinType.LEFT : JoinType.INNER);
-              if (propertyPath.isCollectionOfValues()) {
-                hql.where(alias, criterion.getOperator(), criterion.getValue());
-              }
-              else {
-                hql.where(alias, propertyPath.getPropertyName(), criterion.getOperator(), criterion.getValue());
-              }
-            }
-          }
-        }
+        addFilteringRestrictions(hql, path2Alias, _criteria);
 
         // restrict to a domain
         addDomainRestrictions(hql);
@@ -153,25 +136,49 @@ public abstract class PropertyPathDataFetcher<R,E extends Entity,K> implements D
         }
         return hql.toQuery(session, true).list();
       }
+
     };
   }
 
-  protected String getRootAlias()
+  static public String getRootAlias()
   {
     return "x";
   }
 
-  protected String getOrCreateJoin(HqlBuilder hql,
-                                   PropertyPath<E> path,
-                                   Map<RelationshipPath<E>,String> path2Alias,
-                                   JoinType joinType)
+  static public <E extends Entity> void addFilteringRestrictions(HqlBuilder hql,
+                                                                 Map<RelationshipPath<E>,String> path2Alias,
+                                                                 Map<PropertyPath<E>,List<? extends Criterion<?>>> criteria)
   {
-    String alias = getOrCreateJoin(hql, path.getAncestryPath(), path2Alias, joinType);
-    if (path.isCollectionOfValues()) {
+    for (Map.Entry<PropertyPath<E>,List<? extends Criterion<?>>> entry : criteria.entrySet()) {
+      PropertyPath<E> propertyPath = entry.getKey();
+      for (Criterion<?> criterion : entry.getValue()) {
+        if (!criterion.isUndefined()) {
+          String alias = getOrCreateJoin(hql,
+                                         propertyPath,
+                                         path2Alias,
+                                         criterion.getOperator() == Operator.EMPTY ? JoinType.LEFT : JoinType.INNER);
+          if (propertyPath.isCollectionOfValues()) {
+            hql.where(alias, criterion.getOperator(), criterion.getValue());
+          }
+          else {
+            hql.where(alias, propertyPath.getPropertyName(), criterion.getOperator(), criterion.getValue());
+          }
+        }
+      }
+    }
+  }
+
+  static public <E extends Entity> String getOrCreateJoin(HqlBuilder hql,
+                                                          PropertyPath<E> relationshipPath,
+                                                          Map<RelationshipPath<E>,String> path2Alias,
+                                                          JoinType joinType)
+  {
+    String alias = getOrCreateJoin(hql, relationshipPath.getAncestryPath(), path2Alias, joinType);
+    if (relationshipPath.isCollectionOfValues()) {
       String parentAlias = alias;
       alias = makeCollectionOfValuesAlias(alias, path2Alias);
-      path2Alias.put(path, alias);
-      hql.from(parentAlias, ((PropertyPath) path).getPropertyName(), alias, joinType);
+      path2Alias.put(relationshipPath, alias);
+      hql.from(parentAlias, relationshipPath, alias, joinType);
     }
     return alias;
   }
@@ -179,7 +186,7 @@ public abstract class PropertyPathDataFetcher<R,E extends Entity,K> implements D
   /**
    * @motivation support joining of multiple collections of values belonging to the same entity
    */
-  private String makeCollectionOfValuesAlias(String alias, Map<RelationshipPath<E>,String> path2Alias)
+  static public <E extends Entity> String makeCollectionOfValuesAlias(String alias, Map<RelationshipPath<E>,String> path2Alias)
   {
     int n = 0;
     String aliasCandidate;
@@ -190,10 +197,10 @@ public abstract class PropertyPathDataFetcher<R,E extends Entity,K> implements D
     return aliasCandidate;
   }
 
-  protected String getOrCreateJoin(HqlBuilder hql,
-                                   RelationshipPath<E> path,
-                                   Map<RelationshipPath<E>,String> path2Alias,
-                                   JoinType joinType)
+  static public <E extends Entity> String getOrCreateJoin(HqlBuilder hql,
+                                                          RelationshipPath<E> path,
+                                                          Map<RelationshipPath<E>,String> path2Alias,
+                                                          JoinType joinType)
   {
     if (!path2Alias.containsKey(path)) {
       createJoin(hql, path, path2Alias, joinType);
@@ -201,10 +208,10 @@ public abstract class PropertyPathDataFetcher<R,E extends Entity,K> implements D
     return path2Alias.get(path);
   }
 
-  private String createJoin(HqlBuilder hql,
-                            RelationshipPath<E> path,
-                            Map<RelationshipPath<E>,String> path2Alias,
-                            JoinType joinType)
+  static public <E extends Entity> String createJoin(HqlBuilder hql,
+                                                     RelationshipPath<E> path,
+                                                     Map<RelationshipPath<E>,String> path2Alias,
+                                                     JoinType joinType)
   {
     String parentAlias;
     if (path.getAncestryPath() == null) {
@@ -216,7 +223,7 @@ public abstract class PropertyPathDataFetcher<R,E extends Entity,K> implements D
     parentAlias = getOrCreateJoin(hql, path.getAncestryPath(), path2Alias, joinType);
     String alias = "x" + path2Alias.size();
     path2Alias.put(path, alias);
-    hql.from(parentAlias, path.getLeaf(), alias, joinType);
+    hql.from(parentAlias, path, alias, joinType);
 
     if (joinType != JoinType.LEFT_FETCH) {
       addRestriction(hql, alias, path.getLeafRestriction());
@@ -224,7 +231,7 @@ public abstract class PropertyPathDataFetcher<R,E extends Entity,K> implements D
     return alias;
   }
 
-  private void addRestriction(HqlBuilder hql, String alias, PropertyNameAndValue restriction)
+  static public void addRestriction(HqlBuilder hql, String alias, PropertyNameAndValue restriction)
   {
     if (restriction != null) {
       String propName = restriction.getName();

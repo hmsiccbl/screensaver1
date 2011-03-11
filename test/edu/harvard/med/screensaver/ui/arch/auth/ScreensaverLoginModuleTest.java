@@ -21,6 +21,10 @@ import javax.security.auth.callback.UnsupportedCallbackException;
 import javax.security.auth.login.FailedLoginException;
 import javax.security.auth.login.LoginException;
 
+import org.apache.log4j.Logger;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.test.context.ContextConfiguration;
+
 import edu.harvard.med.authentication.AuthenticationClient;
 import edu.harvard.med.authentication.AuthenticationRequestException;
 import edu.harvard.med.authentication.AuthenticationResponseException;
@@ -33,11 +37,8 @@ import edu.harvard.med.screensaver.db.SchemaUtil;
 import edu.harvard.med.screensaver.model.users.ScreeningRoomUser;
 import edu.harvard.med.screensaver.model.users.ScreensaverUser;
 import edu.harvard.med.screensaver.model.users.ScreensaverUserRole;
-import edu.harvard.med.screensaver.ui.arch.auth.ScreensaverLoginModule;
-import edu.harvard.med.screensaver.ui.arch.auth.ScreensaverUserPrincipal;
 
-import org.apache.log4j.Logger;
-
+@ContextConfiguration(locations = { "/spring-context-test-security.xml", "/spring-context-authentication.xml" }, inheritLocations = false)
 public class ScreensaverLoginModuleTest extends AbstractSpringTest
 {
   
@@ -47,16 +48,20 @@ public class ScreensaverLoginModuleTest extends AbstractSpringTest
   
   private static final String TEST_VALID_ECOMMONS_USER_LOGIN = "ecom";
   private static final String TEST_VALID_SCREENSAVER_USER_LOGIN = "screensaverId";
+  private static final String TEST_VALID_SCREENSAVER_USER_EMAIL = "test.user@screensaver.com";
   private static final String TEST_VALID_ECOMMONS_PASSWORD = "eCommonsPassword";
   private static final String TEST_VALID_SCREENSAVER_PASSWORD = "screensaverPassword";
   private static final String TEST_INVALID_USER_LOGIN = "!testUser";
   private static final String TEST_INVALID_PASSWORD = "!testPassword";
+  
+  // Spring-injected data members (must have @Autowired protected access)
+  
 
-  
-  // Spring-injected data members (must have protected access)
-  
+  @Autowired
   protected ScreensaverLoginModule screensaverLoginModule;
+  @Autowired
   protected SchemaUtil schemaUtil;
+  @Autowired
   protected GenericEntityDAO genericEntityDao;
 
   
@@ -75,14 +80,9 @@ public class ScreensaverLoginModuleTest extends AbstractSpringTest
   // test setup methods
   
   @Override
-  protected String[] getConfigLocations() {
-    return new String[] { "spring-context-test-security.xml" } ;
-  }
-
-  @Override
-  protected void onSetUp() throws Exception
+  protected void setUp() throws Exception
   {
-    super.onSetUp();
+    super.setUp();
     
     _subject = new Subject();
     
@@ -142,10 +142,11 @@ public class ScreensaverLoginModuleTest extends AbstractSpringTest
     };
     screensaverLoginModule.setAuthenticationClient(_mockECommonsAuthenticationClient);
     
-    schemaUtil.truncateTablesOrCreateSchema();
+    schemaUtil.truncateTables();
 
     // create a user
     _validUser = new ScreeningRoomUser("Iam", "Authorized");
+    _validUser.setEmail(TEST_VALID_SCREENSAVER_USER_EMAIL);
     _validUser.setECommonsId(TEST_VALID_ECOMMONS_USER_LOGIN);
     _validUser.setLoginId(TEST_VALID_SCREENSAVER_USER_LOGIN);
     _validUser.updateScreensaverPassword(TEST_VALID_SCREENSAVER_PASSWORD);

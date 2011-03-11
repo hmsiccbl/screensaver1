@@ -11,9 +11,11 @@ package edu.harvard.med.screensaver.service.cherrypicks;
 
 import java.util.Set;
 
+import org.apache.log4j.Logger;
+import org.springframework.transaction.annotation.Transactional;
+
 import edu.harvard.med.screensaver.db.GenericEntityDAO;
 import edu.harvard.med.screensaver.model.BusinessRuleViolationException;
-import edu.harvard.med.screensaver.model.DuplicateEntityException;
 import edu.harvard.med.screensaver.model.cherrypicks.CherryPickRequest;
 import edu.harvard.med.screensaver.model.cherrypicks.InvalidCherryPickWellException;
 import edu.harvard.med.screensaver.model.cherrypicks.LabCherryPick;
@@ -22,10 +24,6 @@ import edu.harvard.med.screensaver.model.libraries.Reagent;
 import edu.harvard.med.screensaver.model.libraries.SilencingReagent;
 import edu.harvard.med.screensaver.model.libraries.Well;
 import edu.harvard.med.screensaver.model.libraries.WellKey;
-import edu.harvard.med.screensaver.model.screens.ScreenType;
-
-import org.apache.log4j.Logger;
-import org.springframework.transaction.annotation.Transactional;
 
 /**
  * For a cherry pick request, adds the specified cherry pick wells as
@@ -64,17 +62,10 @@ public class CherryPickRequestCherryPicksAdder
     }
 
     for (WellKey wellKey : cherryPickWellKeys) {
-      String[] eagerFetchRelationships = {};
-      if (cherryPickRequest.getScreen().getScreenType() == ScreenType.RNAI) {
-        eagerFetchRelationships = new String[] { Well.latestReleasedReagent.to(SilencingReagent.duplexWells).getPath() };
-      }
-      else if (cherryPickRequest.getScreen().getScreenType() == ScreenType.SMALL_MOLECULE) {
-        eagerFetchRelationships = new String[] { Well.latestReleasedReagent.getPath() }; // TODO: necessary anymore?
-      }
       Well well = _dao.findEntityById(Well.class,
                                       wellKey.toString(),
                                       true,
-                                      eagerFetchRelationships);
+                                      Well.latestReleasedReagent.to(SilencingReagent.duplexWells));
       if (well == null) {
         throw new InvalidCherryPickWellException(wellKey, "no such well");
       }

@@ -9,6 +9,8 @@
 
 package edu.harvard.med.iccbl.screensaver.service.screens;
 
+import org.springframework.beans.factory.annotation.Autowired;
+
 import edu.harvard.med.screensaver.AbstractSpringPersistenceTest;
 import edu.harvard.med.screensaver.db.ScreenDAO;
 import edu.harvard.med.screensaver.model.screens.ProjectPhase;
@@ -20,12 +22,13 @@ import edu.harvard.med.screensaver.model.users.LabHead;
 public class IccblScreenFacilityIdInitializerTest extends AbstractSpringPersistenceTest
 {
   private IccblScreenFacilityIdInitializer screenFacilityIdInitializer;
+  @Autowired
   protected ScreenDAO screenDao;
 
   @Override
-  protected void onSetUp() throws Exception
+  protected void setUp() throws Exception
   {
-    super.onSetUp();
+    super.setUp();
     screenFacilityIdInitializer = new IccblScreenFacilityIdInitializer(genericEntityDao, screenDao);
     LabHead user = new LabHead("Test", "User", null);
     Screen primaryScreen = new Screen(null, "1", user, user, ScreenType.RNAI, StudyType.IN_VITRO, ProjectPhase.PRIMARY_SCREEN, "test");

@@ -118,7 +118,7 @@ public class LibraryCopyPlateSearchResults extends EntityBasedEntitySearchResult
 
   private void addLibraryTypeRestriction(HqlBuilder hql, String rootAlias)
   {
-    hql.from(rootAlias, "copy", "c").from("c", "library", "l").
+    hql.from(rootAlias, Plate.copy, "c").from("c", Copy.library, "l").
       whereIn("l", "libraryType", LibrarySearchResults.LIBRARY_TYPES_TO_DISPLAY);
   }
 
@@ -278,8 +278,8 @@ public class LibraryCopyPlateSearchResults extends EntityBasedEntitySearchResult
 
         builder.from(Plate.class, "p")
                .from(AssayPlate.class, "ap")
-               .from("ap", AssayPlate.libraryScreening.getPath(), "ls")
-               .from("ap", AssayPlate.screenResultDataLoading.getPath(), "dl")
+               .from("ap", AssayPlate.libraryScreening, "ls")
+               .from("ap", AssayPlate.screenResultDataLoading, "dl")
                .whereIn("p", "id", result.keySet())
                .where("ap", AssayPlate.plateScreened.getLeaf(), Operator.EQUAL, "p", "id")
                .groupBy("p", "id")
@@ -317,9 +317,9 @@ public class LibraryCopyPlateSearchResults extends EntityBasedEntitySearchResult
         // calculate plate_screening_count - the total number of times individual plates from this copy have been screened, ignoring replicates)
         final HqlBuilder builder1 = new HqlBuilder();
         builder1.from(LibraryScreening.class, "ls")
-               .from("ls", LibraryScreening.assayPlatesScreened.getPath(), "ap")
-               .from("ap", AssayPlate.plateScreened.getPath(), "p")
-               .from("p", Plate.copy.getPath(), "c")
+               .from("ls", LibraryScreening.assayPlatesScreened, "ap")
+               .from("ap", AssayPlate.plateScreened, "p")
+               .from("p", Plate.copy, "c")
                .whereIn("p", "id", result.keySet())
                .where("ap", "replicateOrdinal", Operator.EQUAL, 0)
                .groupBy("p", "id");
@@ -789,16 +789,6 @@ public class LibraryCopyPlateSearchResults extends EntityBasedEntitySearchResult
     return screeningStatistics;
   }
 
-  //  @Override
-  //  @Transactional
-  //  public void doSave()
-  //  {
-  //    Iterator<Plate> rowIter = getDataTableModel().iterator();
-  //    while (rowIter.hasNext()) {
-  //     _dao.saveOrUpdateEntity(rowIter.next());
-  //    }
-  //  }
-
   public boolean isBatchEditable()
   {
     return getScreensaverUser().isUserInRole(getEditingRole());
@@ -854,10 +844,12 @@ public class LibraryCopyPlateSearchResults extends EntityBasedEntitySearchResult
       catch (Exception e) {
         showMessage("applicationError", e.getMessage());
       }
-      // note: we reload()after success *or* failure, since we want the Plate entities to be reloaded in either case
+      // note: we reload() after success *or* failure, since we want the Plate entities to be reloaded in either case
       reload();
 
-      _libraryCopyViewer.reload();
+      if (isNested() && getNestedIn() != null) {
+        getNestedIn().reload();
+      }
     }
 
     return REDISPLAY_PAGE_ACTION_RESULT;

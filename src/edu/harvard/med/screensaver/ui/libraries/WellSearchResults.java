@@ -216,7 +216,7 @@ public class WellSearchResults extends TupleBasedEntitySearchResults<Well,String
       @Override
       public void addDomainRestrictions(HqlBuilder hql)
       {
-        hql.from(getRootAlias(), "library", "l");
+        hql.from(getRootAlias(), Well.library, "l");
         hql.whereIn("l", "libraryType", LibrarySearchResults.LIBRARY_TYPES_TO_DISPLAY);
       }
     };
@@ -363,7 +363,7 @@ public class WellSearchResults extends TupleBasedEntitySearchResults<Well,String
         @Override
         public void addDomainRestrictions(HqlBuilder hql)
         {
-          hql.from(getRootAlias(), "reagents", "r").whereIn("r", Reagent.vendorIdentifier.getPropertyName(), reagentIds);
+          hql.from(getRootAlias(), Well.reagents, "r").whereIn("r", Reagent.vendorIdentifier.getPropertyName(), reagentIds);
         }
       };
     initialize(dataFetcher);
@@ -515,7 +515,7 @@ public class WellSearchResults extends TupleBasedEntitySearchResults<Well,String
         if (_structureImageProvider != null) {
           Integer reagentId = (Integer) tuple.getProperty(TupleDataFetcher.makePropertyKey(reagentIdPropertyPath));
           if (reagentId != null) {
-            SmallMoleculeReagent smallMoleculeReagent = _dao.findEntityById(SmallMoleculeReagent.class, reagentId, true, Reagent.well.getPath());
+            SmallMoleculeReagent smallMoleculeReagent = _dao.findEntityById(SmallMoleculeReagent.class, reagentId, true, Reagent.well.castToSubtype(SmallMoleculeReagent.class));
             URL url = _structureImageProvider.getImageUrl(smallMoleculeReagent);
             if (url != null) {
               return url.toString();
@@ -614,7 +614,7 @@ public class WellSearchResults extends TupleBasedEntitySearchResults<Well,String
       @Override
       public Object cellAction(Tuple<String> tuple)
       {
-        Well well = _dao.findEntityById(Well.class, tuple.getKey(), true, Well.library.getPath());
+        Well well = _dao.findEntityById(Well.class, tuple.getKey(), true, Well.library);
         return _libraryViewer.viewEntity(well.getLibrary());
       }
     });
@@ -795,11 +795,11 @@ public class WellSearchResults extends TupleBasedEntitySearchResults<Well,String
         HqlBuilder hql = new HqlBuilder();
         hql.distinctProjectionValues().
         select("dc").
-        from(DataColumn.class, "dc").
-        from("dc", "screenResult", "sr", JoinType.LEFT_FETCH).
-        from("sr", "screen", "s", JoinType.LEFT_FETCH).
-        whereIn("s", "screenType", _screenTypes).
-        orderBy("s", Screen.facilityId.getPropertyName()).orderBy("dc", "ordinal");
+          from(DataColumn.class, "dc").
+          from("dc", DataColumn.ScreenResult, "sr", JoinType.LEFT_FETCH).
+          from("sr", ScreenResult.screen, "s", JoinType.LEFT_FETCH).
+          whereIn("s", "screenType", _screenTypes).
+          orderBy("s", Screen.facilityId.getPropertyName()).orderBy("dc", "ordinal");
         if (log.isDebugEnabled()) {
           log.debug("findValidDataColumns query: " + hql.toHql());
         }
@@ -816,7 +816,7 @@ public class WellSearchResults extends TupleBasedEntitySearchResults<Well,String
       {
         HqlBuilder hql = new HqlBuilder();
         hql.select("at").distinctProjectionValues().
-        from(AnnotationType.class, "at").from("at", "study", "s", JoinType.LEFT_FETCH).
+          from(AnnotationType.class, "at").from("at", AnnotationType.study, "s", JoinType.LEFT_FETCH).
         whereIn("s", "screenType", _screenTypes).
           orderBy("s", Screen.facilityId.getPropertyName()).orderBy("at", "ordinal");
         if (log.isDebugEnabled()) {

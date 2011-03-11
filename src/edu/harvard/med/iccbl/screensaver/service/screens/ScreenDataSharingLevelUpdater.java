@@ -69,6 +69,7 @@ public class ScreenDataSharingLevelUpdater
                                              ScreenDataSharingLevel screenDataSharingLevel, 
                                              AdministratorUser recordedBy)
   {
+    recordedBy = _dao.reloadEntity(recordedBy);
     verifyOperationPermitted(recordedBy);
     ScreenDataSharingLevel oldLevel = screen.getDataSharingLevel();
     screen.setDataSharingLevel(screenDataSharingLevel);
@@ -187,6 +188,7 @@ public class ScreenDataSharingLevelUpdater
   public DataPrivacyAdjustment
     adjustDataPrivacyExpirationByActivities(int ageToExpireFromActivityDateInDays, AdministratorUser admin)
   {
+    admin = _dao.reloadEntity(admin);
     String hql = "select distinct(s) from Screen as s " +
         " join s.screenResult sr " +
     		" inner join s.labActivities la " +

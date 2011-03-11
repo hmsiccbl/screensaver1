@@ -12,6 +12,7 @@ package edu.harvard.med.screensaver.model.screenresults;
 import java.beans.IntrospectionException;
 
 import junit.framework.TestSuite;
+import org.springframework.beans.factory.annotation.Autowired;
 
 import edu.harvard.med.screensaver.db.DAOTransaction;
 import edu.harvard.med.screensaver.db.LibrariesDAO;
@@ -29,17 +30,19 @@ public class DataColumnTest extends AbstractEntityInstanceTest<DataColumn>
     return buildTestSuite(DataColumnTest.class, DataColumn.class);
   }
 
+  @Autowired
   protected ScreenResultParser screenResultParser;
+  @Autowired
   protected LibrariesDAO librariesDao;
 
-  public DataColumnTest() throws IntrospectionException
+  public DataColumnTest()
   {
     super(DataColumn.class);
   }
 
-  public void testDeleteResultValueTest()
+  public void testDeleteDataColumnTest()
   {
-    schemaUtil.truncateTablesOrCreateSchema();
+    schemaUtil.truncateTables();
 
     genericEntityDao.doInTransaction(new DAOTransaction()
     {
@@ -53,37 +56,50 @@ public class DataColumnTest extends AbstractEntityInstanceTest<DataColumn>
       }
     });
 
+    genericEntityDao.doInTransaction(new DAOTransaction()
+    {
+      public void runTransaction()
+      {
+        ScreenResult screenResult =
+          genericEntityDao.findEntityByProperty(Screen.class,
+                                                Screen.facilityId.getPropertyName(),
+                                                "1",
+                                                true,
+                                                Screen.screenResult).getScreenResult();
+        assertEquals("pre-delete col count", 8, screenResult.getDataColumns().size());
+
+        try {
+          screenResult.deleteDataColumn(screenResult.getDataColumnsList().get(1));
+          fail("expected DataModelViolationException when deleting DataColumn that is derived from");
+        }
+        catch (DataModelViolationException e) {}
+      }
+    });
+
+    genericEntityDao.doInTransaction(new DAOTransaction()
+    {
+      public void runTransaction()
+      {
+        ScreenResult screenResult =
+          genericEntityDao.findEntityByProperty(Screen.class,
+                                                Screen.facilityId.getPropertyName(),
+                                                "1",
+                                                true,
+                                                Screen.screenResult).getScreenResult();
+        screenResult.deleteDataColumn(screenResult.getDataColumnsList().get(6));
+        screenResult.deleteDataColumn(screenResult.getDataColumnsList().get(5));
+        screenResult.deleteDataColumn(screenResult.getDataColumnsList().get(3));
+        screenResult.deleteDataColumn(screenResult.getDataColumnsList().get(1));
+        assertEquals("post-delete col count", 4, screenResult.getDataColumns().size());
+      }
+    });
+
     ScreenResult screenResult =
       genericEntityDao.findEntityByProperty(Screen.class,
                                             Screen.facilityId.getPropertyName(),
                                             "1",
                                             true,
-                                            "screenResult.dataColumns.derivedTypes",
-                                            "screenResult.dataColumns.typesDerivedFrom")
-                                            .getScreenResult();
-    assertEquals("pre-delete col count", 8, screenResult.getDataColumns().size());
-
-    try {
-      screenResult.deleteDataColumn(screenResult.getDataColumnsList().get(1));
-      fail("expected DataModelViolationException when deleting DataColumn that is derived from");
-    }
-    catch (DataModelViolationException e) {}
-
-    screenResult.deleteDataColumn(screenResult.getDataColumnsList().get(6));
-    screenResult.deleteDataColumn(screenResult.getDataColumnsList().get(5));
-    screenResult.deleteDataColumn(screenResult.getDataColumnsList().get(3));
-    screenResult.deleteDataColumn(screenResult.getDataColumnsList().get(1));
-    assertEquals("post-delete col count", 4, screenResult.getDataColumns().size());
-
-    genericEntityDao.saveOrUpdateEntity(screenResult);
-
-    screenResult =
-      genericEntityDao.findEntityByProperty(Screen.class,
-                                            Screen.facilityId.getPropertyName(),
-                                            "1",
-                                            true,
-                                            "screenResult.dataColumns.derivedTypes",
-                                            "screenResult.dataColumns.typesDerivedFrom")
+                                            Screen.screenResult.to(ScreenResult.dataColumns))
                                             .getScreenResult();
     assertEquals("post-delete, post-persist col count", 4, screenResult.getDataColumns().size());
 

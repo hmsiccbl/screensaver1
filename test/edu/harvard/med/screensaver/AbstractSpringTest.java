@@ -9,51 +9,22 @@
 
 package edu.harvard.med.screensaver;
 
-import org.springframework.test.AbstractDependencyInjectionSpringContextTests;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.test.context.ContextConfiguration;
+import org.springframework.test.context.junit38.AbstractJUnit38SpringContextTests;
 
-/**
- * A simple wrapper for the
- * <code>AbstractDependencyInjectionSpringContextTests</code> that implements
- * the abstract method
- * {@link org.springframework.test.AbstractDependencyInjectionSpringContextTests#getConfigLocations}
- * by loading our <code>spring-context-test.xml</code> resource file.
- *
- * @author <a mailto="john_sullivan@hms.harvard.edu">John Sullivan</a>
- * @author <a mailto="andrew_tolopko@hms.harvard.edu">Andrew Tolopko</a>
- */
+@ContextConfiguration({ "/spring-context-test.xml" })
 public abstract class AbstractSpringTest
-extends AbstractDependencyInjectionSpringContextTests
+  extends AbstractJUnit38SpringContextTests
 {
-  protected LogConfigurer logConfigurer;
-
-  /**
-   * Spring configuration will be loaded from the configuration file(s)
-   * specified in this constant.
-   */
-  private static final String[] SPRING_CONFIG_FILES = new String [] {
-    "spring-context-test.xml",
-  };
-
+  @Autowired protected LogConfigurer logConfigurer;
 
   public AbstractSpringTest(String testName)
   {
     super(testName);
-    // have AbstractDependencyInjectionSpringContextTests inject the properties
-    // we need into protected data members that share the same name as beans in
-    // our Spring configuration files.
-    setPopulateProtectedVariables(true);
   }
 
   public AbstractSpringTest()
   {
-    // have AbstractDependencyInjectionSpringContextTests inject the properties
-    // we need into protected data members that share the same name as beans in
-    // our Spring configuration files.
-    setPopulateProtectedVariables(true);
-  }
-
-  @Override
-  protected String[] getConfigLocations() {
-    return SPRING_CONFIG_FILES;
   }
 }

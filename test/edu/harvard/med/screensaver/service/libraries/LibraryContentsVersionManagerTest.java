@@ -9,10 +9,11 @@
 
 package edu.harvard.med.screensaver.service.libraries;
 
+import org.springframework.beans.factory.annotation.Autowired;
+
 import edu.harvard.med.screensaver.AbstractSpringPersistenceTest;
 import edu.harvard.med.screensaver.db.DAOTransaction;
 import edu.harvard.med.screensaver.db.LibrariesDAO;
-import edu.harvard.med.screensaver.model.TestDataFactory;
 import edu.harvard.med.screensaver.model.libraries.Library;
 import edu.harvard.med.screensaver.model.libraries.LibraryContentsVersion;
 import edu.harvard.med.screensaver.model.libraries.ReagentVendorIdentifier;
@@ -25,19 +26,22 @@ import edu.harvard.med.screensaver.service.OperationRestrictedException;
 
 public class LibraryContentsVersionManagerTest extends AbstractSpringPersistenceTest
 {
+  @Autowired
   protected LibraryContentsVersionManager libraryContentsVersionManager;
+  @Autowired
   protected LibrariesDAO librariesDao;
+  @Autowired
+  protected LibraryCreator libraryCreator;
   
   public void testReleaseLibraryContentsVersion()
   {
-    final TestDataFactory dataFactory = new TestDataFactory();
     genericEntityDao.doInTransaction(new DAOTransaction() {
       public void runTransaction()
       {
         Library library = dataFactory.newInstance(Library.class);
         library.setScreenType(ScreenType.RNAI);
-        librariesDao.loadOrCreateWellsForLibrary(library);
-        dataFactory.newInstance(LibraryContentsVersion.class, library);
+        libraryCreator.createWells(library);
+        library.createContentsVersion(dataFactory.newInstance(AdministratorUser.class));
         for (Well well : library.getWells()) {
           int x = well.getWellKey().hashCode();
           well.createSilencingReagent(new ReagentVendorIdentifier("vendor", "rvi" + x),
@@ -47,7 +51,7 @@ public class LibraryContentsVersionManagerTest extends AbstractSpringPersistence
       }
     });
     
-    Library library = genericEntityDao.findAllEntitiesOfType(Library.class, true, Library.contentsVersions.getPath()).get(0);
+    Library library = genericEntityDao.findAllEntitiesOfType(Library.class, true, Library.contentsVersions).get(0);
     LibraryContentsVersion lcv = library.getLatestContentsVersion();
     assertFalse(lcv.isReleased());
     
@@ -72,17 +76,20 @@ public class LibraryContentsVersionManagerTest extends AbstractSpringPersistence
     assertEquals(lcv.getLibraryContentsVersionId(), library.getLatestReleasedContentsVersion().getLibraryContentsVersionId());
 
     // test database representation updated
-    library = genericEntityDao.findAllEntitiesOfType(Library.class, true, 
-                                                     Library.contentsVersions.getPath(),
-                                                     Library.wells.to(Well.latestReleasedReagent).getPath(),
-                                                     Library.wells.to(Well.reagents).getPath()).get(0);
-    lcv = library.getContentsVersions().first();
-    assertTrue(lcv.isReleased());
-    
-    // test the well.latestReleasedReagent is updated
-    assertEquals(lcv, library.getLatestReleasedContentsVersion());
-    for (Well well : library.getWells()) {
-      assertEquals(lcv, well.getLatestReleasedReagent().getLibraryContentsVersion());
-    }
+    genericEntityDao.doInTransaction(new DAOTransaction() {
+      @Override
+      public void runTransaction()
+      {
+        Library library = genericEntityDao.findAllEntitiesOfType(Library.class, true).get(0);
+        LibraryContentsVersion lcv = library.getContentsVersions().first();
+        assertTrue(lcv.isReleased());
+
+        // test the well.latestReleasedReagent is updated
+        assertEquals(lcv, library.getLatestReleasedContentsVersion());
+        for (Well well : library.getWells()) {
+          assertEquals(lcv, well.getLatestReleasedReagent().getLibraryContentsVersion());
+        }
+      }
+    });
   }
 }

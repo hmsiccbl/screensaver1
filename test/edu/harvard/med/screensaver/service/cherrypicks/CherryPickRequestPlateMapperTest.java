@@ -22,6 +22,7 @@ import java.util.TreeSet;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Sets;
 import org.apache.log4j.Logger;
+import org.springframework.beans.factory.annotation.Autowired;
 
 import edu.harvard.med.screensaver.AbstractSpringPersistenceTest;
 import edu.harvard.med.screensaver.db.DAOTransaction;
@@ -53,8 +54,11 @@ public class CherryPickRequestPlateMapperTest extends AbstractSpringPersistenceT
 
   // instance data members
 
+  @Autowired
   protected LibrariesDAO librariesDao;
+  @Autowired
   protected CherryPickRequestPlateMapper cherryPickRequestPlateMapper;
+  @Autowired
   protected CherryPickRequestAllocator cherryPickRequestAllocator;
 
   private Volume _minimumSourceWellVolume = new Volume(5, VolumeUnit.MICROLITERS);

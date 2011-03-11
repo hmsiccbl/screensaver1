@@ -16,13 +16,13 @@ import junit.framework.TestSuite;
 
 import edu.harvard.med.screensaver.db.DAOTransaction;
 import edu.harvard.med.screensaver.model.AbstractEntityInstanceTest;
-import edu.harvard.med.screensaver.model.EntityNetworkPersister;
 import edu.harvard.med.screensaver.model.MakeDummyEntities;
 import edu.harvard.med.screensaver.model.screenresults.AnnotationType;
 import edu.harvard.med.screensaver.model.screenresults.AnnotationValue;
 import edu.harvard.med.screensaver.model.screens.Screen;
 import edu.harvard.med.screensaver.model.screens.ScreenType;
 import edu.harvard.med.screensaver.model.screens.StudyType;
+import edu.harvard.med.screensaver.model.users.AdministratorUser;
 
 public class ReagentTest extends AbstractEntityInstanceTest<Reagent>
 {
@@ -31,18 +31,18 @@ public class ReagentTest extends AbstractEntityInstanceTest<Reagent>
     return buildTestSuite(ReagentTest.class, Reagent.class);
   }
 
-  public ReagentTest() throws IntrospectionException
+  public ReagentTest()
   {
     super(Reagent.class);
   }
 
   public void testAnnotationValueMap()
   {
-    schemaUtil.truncateTablesOrCreateSchema();
+    schemaUtil.truncateTables();
     genericEntityDao.doInTransaction(new DAOTransaction() {
       public void runTransaction() {
-        Library library = dataFactory.getTestValueForType(Library.class);
-        dataFactory.newInstance(LibraryContentsVersion.class, library);
+        Library library = dataFactory.newInstance(Library.class);
+        library.createContentsVersion(dataFactory.newInstance(AdministratorUser.class));
         Well well1 = library.createWell(new WellKey(library.getStartPlate(), 0, 0), LibraryWellType.EXPERIMENTAL);
         Well well2 = library.createWell(new WellKey(library.getStartPlate(), 0, 1), LibraryWellType.EXPERIMENTAL);
         library.setScreenType(ScreenType.SMALL_MOLECULE);
@@ -58,7 +58,7 @@ public class ReagentTest extends AbstractEntityInstanceTest<Reagent>
         annotType1.createAnnotationValue(reagent2, "annotType1_annotValue2");
         annotType2.createAnnotationValue(reagent1, "annotType2_annotValue1");
         annotType2.createAnnotationValue(reagent2, "annotType2_annotValue2");
-        new EntityNetworkPersister(genericEntityDao, study).persistEntityNetwork();
+        genericEntityDao.persistEntity(study);
       }
     });
 

@@ -10,6 +10,7 @@
 package edu.harvard.med.screensaver.ui.libraries;
 
 import org.apache.log4j.Logger;
+import org.springframework.beans.factory.annotation.Autowired;
 
 import edu.harvard.med.screensaver.ScreensaverConstants;
 import edu.harvard.med.screensaver.model.AdministrativeActivityType;
@@ -24,14 +25,15 @@ public class LibraryDetailViewerTest extends AbstractBackingBeanTest
 {
   private static Logger log = Logger.getLogger(LibraryDetailViewerTest.class);
 
+  @Autowired
   protected LibraryDetailViewer libraryDetailViewer;
 
   private Library _library;
 
   @Override
-  public void onSetUp() throws Exception
+  public void setUp() throws Exception
   {
-    super.onSetUp();
+    super.setUp();
     _library = new Library(_admin);
     _library.setScreenType(ScreenType.RNAI);
     libraryDetailViewer.editNewEntity(_library);
@@ -43,12 +45,13 @@ public class LibraryDetailViewerTest extends AbstractBackingBeanTest
     _library.setSolvent(Solvent.RNAI_BUFFER);
     _library.setScreeningStatus(LibraryScreeningStatus.ALLOWED);
     libraryDetailViewer.save();
-    _library = genericEntityDao.reloadEntity(_library);
+    _library = libraryDetailViewer.getEntity();
   }
 
   public void testSolventType()
   {
     assertEquals(Solvent.RNAI_BUFFER, _library.getSolvent());
+
     libraryDetailViewer.viewEntity(_library);
     libraryDetailViewer.edit();
     libraryDetailViewer.getEntity().setSolvent(Solvent.DMSO);
@@ -58,9 +61,17 @@ public class LibraryDetailViewerTest extends AbstractBackingBeanTest
     assertEquals(Solvent.RNAI_BUFFER, _library.getSolvent());
   }
 
+  public void testEntityUpdateHistory()
+  {
+    libraryDetailViewer.viewEntity(_library);
+    assertEquals(ScreensaverConstants.BROWSE_ENTITY_UPDATE_HISTORY, libraryDetailViewer.viewUpdateHistory());
+    assertEquals(1, libraryDetailViewer.getEntityUpdateSearchResults().getRowCount());
+    assertEquals(Solvent.RNAI_BUFFER, _library.getSolvent());
+  }
+
   public void testComments()
   {
-    _library = genericEntityDao.reloadEntity(_library, true, Library.updateActivities.getPath());
+    _library = genericEntityDao.reloadEntity(_library, true, Library.updateActivities.castToSubtype(Library.class));
     assertEquals(0, _library.getUpdateActivitiesOfType(AdministrativeActivityType.COMMENT).size());
 
     libraryDetailViewer.viewEntity(_library);

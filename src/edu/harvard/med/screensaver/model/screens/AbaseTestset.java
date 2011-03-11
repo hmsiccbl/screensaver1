@@ -81,7 +81,6 @@ public class AbaseTestset extends AbstractEntity<Integer>
   @ManyToOne(fetch=FetchType.LAZY,
              cascade={ CascadeType.PERSIST, CascadeType.MERGE })
   @JoinColumn(name="screenId", nullable=false, updatable=false)
-  @org.hibernate.annotations.Immutable
   @org.hibernate.annotations.ForeignKey(name="fk_abase_testset_to_screen")
   @org.hibernate.annotations.LazyToOne(value=org.hibernate.annotations.LazyToOneOption.PROXY)
   public Screen getScreen()

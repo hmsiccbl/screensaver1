@@ -20,7 +20,7 @@ import edu.harvard.med.screensaver.model.Entity;
 import edu.harvard.med.screensaver.policy.EntityRestrictedException;
 import edu.harvard.med.screensaver.ui.arch.view.aspects.UICommand;
 
-public abstract class EntityViewerBackingBean<E extends Entity<? extends Serializable>> extends AbstractBackingBean implements EntityViewer<E>
+public abstract class EntityViewerBackingBean<E extends Entity<?>> extends AbstractBackingBean implements EntityViewer<E>
 {
   protected static Logger log = Logger.getLogger(EntityViewerBackingBean.class);
   
@@ -66,10 +66,10 @@ public abstract class EntityViewerBackingBean<E extends Entity<? extends Seriali
    * @param entity
    */
   protected abstract void initializeViewer(E entity);
-  
+
   /**
    * Subclasses should override this method to eager fetch relationships that
-   * will be need when viewing the entity. It will called within a transaction.
+   * will be need when viewing the entity. It will be called within a transaction.
    */
   protected abstract void initializeEntity(E entity); 
 
@@ -138,7 +138,7 @@ public abstract class EntityViewerBackingBean<E extends Entity<? extends Seriali
   {
     String entityIdAsString = (String) getRequestParameter("entityId");
     Serializable entityId = convertEntityId(entityIdAsString);
-    E entity = _dao.findEntityById(_entityClass, entityId);
+    E entity = (E) _dao.findEntityById((Class<Entity>) (Class<?>) _entityClass, entityId);
     return _thisProxy.viewEntity(entity);
   }
 
@@ -150,7 +150,7 @@ public abstract class EntityViewerBackingBean<E extends Entity<? extends Seriali
     return Integer.valueOf(entityIdAsString);
   }
 
-  /* final */public String reload()
+  /*final*/ public String reload()
   {
     return viewEntity(_entity);
   }

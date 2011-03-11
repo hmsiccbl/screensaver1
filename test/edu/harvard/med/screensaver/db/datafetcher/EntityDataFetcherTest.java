@@ -78,11 +78,11 @@ public class EntityDataFetcherTest extends AbstractSpringPersistenceTest
   // public constructors and methods
 
   @Override
-  protected void onSetUp() throws Exception
+  protected void setUp() throws Exception
   {
     if (!oneTimeDataSetup) {
       oneTimeDataSetup = true;
-      super.onSetUp();
+      super.setUp();
       genericEntityDao.doInTransaction(new DAOTransaction() {
 
         public void runTransaction()
@@ -125,10 +125,10 @@ public class EntityDataFetcherTest extends AbstractSpringPersistenceTest
       {
         _rnaiScreen = genericEntityDao.reloadEntity(_rnaiScreen, true);
         _screenResult = _rnaiScreen.getScreenResult();
-        genericEntityDao.needReadOnly(_screenResult, "dataColumns.resultValues");
-        genericEntityDao.needReadOnly(_screenResult, "assayWells");
-        _study = genericEntityDao.reloadEntity(_study, true, "annotationTypes.annotationValues");
-        _rnaiLibrary = genericEntityDao.reloadEntity(_rnaiLibrary, true, "wells");
+        genericEntityDao.needReadOnly(_screenResult, ScreenResult.dataColumns.to(DataColumn.resultValues));
+        genericEntityDao.needReadOnly(_screenResult, ScreenResult.assayWells);
+        _study = genericEntityDao.reloadEntity(_study, true, Screen.annotationTypes.to(AnnotationType.annotationValues));
+        _rnaiLibrary = genericEntityDao.reloadEntity(_rnaiLibrary, true, Library.wells);
       }
     });
 
@@ -277,28 +277,6 @@ public class EntityDataFetcherTest extends AbstractSpringPersistenceTest
       assertTrue("fetchData", data.containsKey(expectedWellKey));
       assertEquals("fetchData", expectedWellKey, data.get(expectedWellKey).getWellKey().toString());
     }
-  }
-
-  /**
-   * Explicitly test that a relationship path that is longer than 2 elements (in
-   * this case 4), is handled correctly. This is a regression test for a bug
-   * caused by earlier misuse of Criteria.setFetchMode(), which requires *full*
-   * paths to be specified from the root criteria, rather than relative paths
-   * being set from each subcriteria (internal nodes in the Criteria tree). We
-   * no longer use the Criteria API, but the more tests, the better.
-   */
-  public void testFetchLongRelationshipPath()
-  {
-    EntityDataFetcher<Library,Integer> librariesDataFetcher =
-      new EntityDataFetcher<Library,Integer>(Library.class, genericEntityDao);
-    List<PropertyPath<Library>> properties = Lists.newArrayList();
-    properties.add(Library.wells.to(Well.latestReleasedReagent).to(SilencingReagent.facilityGene).to(Gene.genbankAccessionNumbers));
-    properties.add(Library.contentsVersions.toFullEntity());
-    librariesDataFetcher.setPropertiesToFetch(properties);
-    List<Library> libraries = librariesDataFetcher.fetchAllData();
-    assertEquals("library.wells.gene.genbankAccessionNumbers size",
-                 1,
-                 libraries.iterator().next().getWells().iterator().next().<SilencingReagent>getLatestReleasedReagent().getFacilityGene().getGenbankAccessionNumbers().size());
   }
 
   public void testEagerFetchCollections()

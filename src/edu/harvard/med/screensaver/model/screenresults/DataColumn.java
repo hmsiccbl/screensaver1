@@ -17,6 +17,7 @@ import java.util.Set;
 import java.util.SortedSet;
 import java.util.TreeSet;
 
+import javax.persistence.CascadeType;
 import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.FetchType;
@@ -31,12 +32,10 @@ import javax.persistence.OneToMany;
 import javax.persistence.Transient;
 import javax.persistence.Version;
 
-import org.apache.log4j.Logger;
-import org.hibernate.annotations.Immutable;
-import org.hibernate.annotations.OptimisticLock;
-
 import com.google.common.base.Predicate;
 import com.google.common.collect.Maps;
+import org.apache.log4j.Logger;
+import org.hibernate.annotations.OptimisticLock;
 
 import edu.harvard.med.screensaver.model.AbstractEntity;
 import edu.harvard.med.screensaver.model.AbstractEntityVisitor;
@@ -76,6 +75,7 @@ public class DataColumn extends AbstractEntity<Integer> implements MetaDataType,
   public static final RelationshipPath<DataColumn> ScreenResult = RelationshipPath.from(DataColumn.class).to("screenResult", Cardinality.TO_ONE);
   public static final RelationshipPath<DataColumn> typesDerivedFrom = RelationshipPath.from(DataColumn.class).to("typesDerivedFrom");
   public static final RelationshipPath<DataColumn> derivedTypes = RelationshipPath.from(DataColumn.class).to("derivedTypes");
+  public static final RelationshipPath<DataColumn> resultValues = RelationshipPath.from(DataColumn.class).to("resultValues");
   
   private static final DataType DEFAULT_DATA_TYPE = DataType.NUMERIC; 
   private static final int DEFAULT_DECIMAL_PLACES = 3;
@@ -174,12 +174,9 @@ public class DataColumn extends AbstractEntity<Integer> implements MetaDataType,
    * Get the parent {@link ScreenResult}.
    * @return the parent {@link ScreenResult}
    */
-  @ManyToOne(fetch=FetchType.LAZY,
-             cascade={})
+  @ManyToOne
   @JoinColumn(name="screenResultId", nullable=false, updatable=false)
-  @org.hibernate.annotations.Immutable
   @org.hibernate.annotations.ForeignKey(name="fk_data_column_to_screen_result")
-  @org.hibernate.annotations.LazyToOne(value=org.hibernate.annotations.LazyToOneOption.PROXY)
   public ScreenResult getScreenResult()
   {
     return _screenResult;
@@ -261,7 +258,7 @@ public class DataColumn extends AbstractEntity<Integer> implements MetaDataType,
   }
 
   @Column(nullable=false, updatable=false)
-  @Immutable
+  //@Immutable
   @edu.harvard.med.screensaver.model.annotations.Column(hasNonconventionalSetterMethod=true /*uses make*() builder methods*/)
   @org.hibernate.annotations.Type(type="edu.harvard.med.screensaver.model.screenresults.DataType$UserType")
   public DataType getDataType()
@@ -376,7 +373,8 @@ public class DataColumn extends AbstractEntity<Integer> implements MetaDataType,
     return this;
   }
 
-  @Immutable
+  @Column(updatable = false)
+  //@Immutable
   @edu.harvard.med.screensaver.model.annotations.Column(hasNonconventionalSetterMethod=true /*uses makeNumeric() builder method*/)
   public Integer getDecimalPlaces()
   {
@@ -409,7 +407,6 @@ public class DataColumn extends AbstractEntity<Integer> implements MetaDataType,
    *         its parent {@link ScreenResult}
    */
   @Column(nullable=false, updatable=false)
-  @org.hibernate.annotations.Immutable
   public Integer getOrdinal()
   {
     return _ordinal;
@@ -423,7 +420,7 @@ public class DataColumn extends AbstractEntity<Integer> implements MetaDataType,
    *         produced.
    */
   // TODO: remove 'Ordinal' suffix, or replace with 'Number' (mathematically, ordinal includes the value 0)
-  @Immutable
+  @Column(updatable = false)
   @edu.harvard.med.screensaver.model.annotations.Column(hasNonconventionalSetterMethod=true /*uses forReplicate() builder method*/)
   public Integer getReplicateOrdinal()
   {
@@ -448,7 +445,8 @@ public class DataColumn extends AbstractEntity<Integer> implements MetaDataType,
    * @return a <code>String</code> representing the Assay Phenotype
    */
   @org.hibernate.annotations.Type(type="text")
-  @Immutable
+  @Column(updatable = false)
+  //@Immutable
   @edu.harvard.med.screensaver.model.annotations.Column(hasNonconventionalSetterMethod=true /*uses forPhenotype() builder method*/)
   public String getAssayPhenotype()
   {
@@ -759,7 +757,6 @@ public class DataColumn extends AbstractEntity<Integer> implements MetaDataType,
    * @return the name of this data column
    */
   @Column(nullable=false, updatable=false)
-  @Immutable
   @org.hibernate.annotations.Type(type="text")
   public String getName()
   {
@@ -781,8 +778,8 @@ public class DataColumn extends AbstractEntity<Integer> implements MetaDataType,
    * <code>DataColumn</code> were read. The format and units for the time point is arbitrary.
    * @return the time point
    */
+  @Column(updatable = false)
   @org.hibernate.annotations.Type(type="text")
-  @Immutable
   @edu.harvard.med.screensaver.model.annotations.Column(hasNonconventionalSetterMethod=true /*uses forTimePoint() instead*/)
   public String getTimePoint()
   {
@@ -938,8 +935,7 @@ public class DataColumn extends AbstractEntity<Integer> implements MetaDataType,
    * @return a Collection of the result values for this data column
    * @motivation for hibernate
    */
-  @OneToMany(fetch=FetchType.LAZY, mappedBy="dataColumn")
-  @org.hibernate.annotations.Cascade({ org.hibernate.annotations.CascadeType.DELETE, org.hibernate.annotations.CascadeType.SAVE_UPDATE, org.hibernate.annotations.CascadeType.PERSIST })
+  @OneToMany(mappedBy = "dataColumn", cascade = { CascadeType.ALL })
   @OptimisticLock(excluded=true)
   public Collection<ResultValue> getResultValues()
   {
@@ -1123,7 +1119,7 @@ public class DataColumn extends AbstractEntity<Integer> implements MetaDataType,
     }
   }
 
-  @Immutable
+  @Column(updatable = false)
   @edu.harvard.med.screensaver.model.annotations.Column(hasNonconventionalSetterMethod=true /*uses forChannel() builder method*/)
   public Integer getChannel()
   {
@@ -1135,7 +1131,7 @@ public class DataColumn extends AbstractEntity<Integer> implements MetaDataType,
     this.channel = channel;
   }
 
-  @Immutable
+  @Column(updatable = false)
   @edu.harvard.med.screensaver.model.annotations.Column(hasNonconventionalSetterMethod=true /*uses forTimePointOrdinal() builder method*/)
   public Integer getTimePointOrdinal()
   {
@@ -1147,7 +1143,7 @@ public class DataColumn extends AbstractEntity<Integer> implements MetaDataType,
     this.timePointOrdinal = timePointOrdinal;
   }
 
-  @Immutable
+  @Column(updatable = false)
   @edu.harvard.med.screensaver.model.annotations.Column(hasNonconventionalSetterMethod=true /*uses forZdepthOrdinal() builder method*/)
   public Integer getZdepthOrdinal()
   {

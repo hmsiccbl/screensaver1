@@ -13,10 +13,11 @@ import java.io.Serializable;
 
 import javax.persistence.Embeddable;
 
-import com.google.common.base.Function;
 import org.hibernate.annotations.Type;
+import com.google.common.base.Function;
 
 import edu.harvard.med.screensaver.model.RequiredPropertyException;
+import edu.harvard.med.screensaver.util.StringUtils;
 
 
 /**
@@ -52,10 +53,10 @@ public class ReagentVendorIdentifier implements Serializable, Comparable<Reagent
 
   public ReagentVendorIdentifier(String vendorName, String reagentIdentifier)
   {
-    if (vendorName == null) {
+    if (StringUtils.isEmpty(vendorName)) {
       throw new RequiredPropertyException(Reagent.class, "reagent vendor name");
     }
-    if (reagentIdentifier == null) {
+    if (StringUtils.isEmpty(reagentIdentifier)) {
       throw new RequiredPropertyException(Reagent.class, "reagent identifier");
     }
     setVendorName(vendorName);

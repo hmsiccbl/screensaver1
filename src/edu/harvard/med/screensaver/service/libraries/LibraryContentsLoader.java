@@ -13,8 +13,10 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.util.List;
 
-import edu.harvard.med.screensaver.db.DAOTransaction;
-import edu.harvard.med.screensaver.db.DAOTransactionRollbackException;
+import com.google.common.collect.Lists;
+import org.apache.log4j.Logger;
+import org.springframework.transaction.annotation.Transactional;
+
 import edu.harvard.med.screensaver.db.GenericEntityDAO;
 import edu.harvard.med.screensaver.db.LibrariesDAO;
 import edu.harvard.med.screensaver.io.ParseError;
@@ -33,12 +35,6 @@ import edu.harvard.med.screensaver.model.screens.ScreenType;
 import edu.harvard.med.screensaver.model.users.AdministratorUser;
 import edu.harvard.med.screensaver.util.DevelopmentException;
 import edu.harvard.med.screensaver.util.Pair;
-
-import org.apache.log4j.Logger;
-import org.springframework.transaction.annotation.Propagation;
-import org.springframework.transaction.annotation.Transactional;
-
-import com.google.common.collect.Lists;
 
 /**
  * Service that creates a new library and its wells and imports its well
@@ -73,8 +69,7 @@ public class LibraryContentsLoader
     _libraryContentsVersionManager = libraryContentsVersionManager;
   }
 
-  @Transactional(propagation=Propagation.REQUIRES_NEW /* to ensure that errors cause rollback */, 
-                 rollbackFor={ParseErrorsException.class, IOException.class})
+  @Transactional(rollbackFor = { ParseErrorsException.class, IOException.class })
   public LibraryContentsVersion loadLibraryContents(Library library, 
                                                     AdministratorUser performedBy,
                                                     String loadingComments,

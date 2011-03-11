@@ -15,7 +15,7 @@ import edu.harvard.med.screensaver.model.AttachedFileTypeTest;
 
 public class ScreenAttachedFileTypeTest extends AttachedFileTypeTest<ScreenAttachedFileType>
 {
-  public ScreenAttachedFileTypeTest() throws IntrospectionException
+  public ScreenAttachedFileTypeTest()
   {
     super(ScreenAttachedFileType.class);
   }

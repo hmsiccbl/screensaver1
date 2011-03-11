@@ -30,18 +30,15 @@ import com.google.common.collect.Lists;
 import com.google.common.collect.Sets;
 import org.apache.log4j.Logger;
 import org.hibernate.Session;
-import org.joda.time.LocalDate;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.util.comparator.NullSafeComparator;
 
-import edu.harvard.med.screensaver.AbstractSpringPersistenceTest;
 import edu.harvard.med.screensaver.db.DAOTransaction;
 import edu.harvard.med.screensaver.db.LibrariesDAO;
 import edu.harvard.med.screensaver.db.Query;
 import edu.harvard.med.screensaver.db.SortDirection;
 import edu.harvard.med.screensaver.db.datafetcher.Tuple;
 import edu.harvard.med.screensaver.db.datafetcher.TupleDataFetcher;
-import edu.harvard.med.screensaver.model.AdministrativeActivity;
-import edu.harvard.med.screensaver.model.AdministrativeActivityType;
 import edu.harvard.med.screensaver.model.MakeDummyEntities;
 import edu.harvard.med.screensaver.model.libraries.Library;
 import edu.harvard.med.screensaver.model.libraries.MolecularFormula;
@@ -63,13 +60,14 @@ import edu.harvard.med.screensaver.ui.arch.datatable.column.TableColumnManager;
 import edu.harvard.med.screensaver.ui.arch.datatable.column.entity.HasFetchPaths;
 import edu.harvard.med.screensaver.ui.arch.datatable.model.DataTableModel;
 import edu.harvard.med.screensaver.ui.arch.searchresults.SearchResults;
+import edu.harvard.med.screensaver.ui.arch.view.AbstractBackingBeanTest;
 import edu.harvard.med.screensaver.ui.libraries.WellSearchResults;
 
 /**
  * High-level test covering DataTable, TableColumnManager, SearchResults, and
  * WellSearchResults.
  */
-public class WellSearchResultsTest extends AbstractSpringPersistenceTest
+public class WellSearchResultsTest extends AbstractBackingBeanTest
 {
   // static members
 
@@ -77,7 +75,9 @@ public class WellSearchResultsTest extends AbstractSpringPersistenceTest
 
   // instance data members
 
+  @Autowired
   protected LibrariesDAO librariesDao;
+  @Autowired
   protected WellSearchResults wellsBrowser;
 
   private static boolean oneTimeDataSetup = false;
@@ -93,11 +93,11 @@ public class WellSearchResultsTest extends AbstractSpringPersistenceTest
   // public constructors and methods
 
   @Override
-  protected void onSetUp() throws Exception
+  protected void setUp() throws Exception
   {
     if (!oneTimeDataSetup) {
       oneTimeDataSetup = true;
-      super.onSetUp();
+      super.setUp();
 
       _bigSmallMoleculeLibrary = MakeDummyEntities.makeDummyLibrary(1,
                                                                     ScreenType.SMALL_MOLECULE,
@@ -149,9 +149,7 @@ public class WellSearchResultsTest extends AbstractSpringPersistenceTest
   /** for testing that multiple contents versions are handled in a disjoint manner */
   private void addUnreleasedContentsVersion(Library library)
   {
-    library.createContentsVersion(new AdministrativeActivity((AdministratorUser) library.getLatestReleasedContentsVersion().getLoadingActivity().getPerformedBy(), 
-                                                             new LocalDate(), 
-                                                             AdministrativeActivityType.LIBRARY_CONTENTS_LOADING));
+    library.createContentsVersion((AdministratorUser) library.getLatestReleasedContentsVersion().getLoadingActivity().getPerformedBy());
     for (Well well : library.getWells()) {
       SmallMoleculeReagent latestReleasedReagent = well.getLatestReleasedReagent();
       well.createSmallMoleculeReagent(latestReleasedReagent.getVendorId(),
@@ -214,7 +212,7 @@ public class WellSearchResultsTest extends AbstractSpringPersistenceTest
     WellSearchResults wsr = wellsBrowser;
     // reload library to ensure LCV.equals() works in Well.getReagent() 
     Library library =
-      genericEntityDao.reloadEntity(_bigSmallMoleculeLibrary, true, Library.wells.to(Well.latestReleasedReagent).getPath());
+      genericEntityDao.reloadEntity(_bigSmallMoleculeLibrary, true, Library.wells.to(Well.latestReleasedReagent));
     wsr.searchWellsForLibrary(library);
     setOrderBy(wsr);
     DataTableModel model = wsr.getDataTableModel();
@@ -507,8 +505,10 @@ public class WellSearchResultsTest extends AbstractSpringPersistenceTest
 
   private ScreenResult setupScreenResult()
   {
-    genericEntityDao.runQuery(new Query() {
-      public List execute(Session session) {
+    genericEntityDao.doInTransaction(new DAOTransaction() {
+      @Override
+      public void runTransaction()
+      {
         Library library = genericEntityDao.reloadEntity(_bigSmallMoleculeLibrary,
                                                         true);
         Screen screen = MakeDummyEntities.makeDummyScreen(1, ScreenType.SMALL_MOLECULE);
@@ -516,14 +516,14 @@ public class WellSearchResultsTest extends AbstractSpringPersistenceTest
         genericEntityDao.persistEntity(screen.getLeadScreener());
         genericEntityDao.persistEntity(screen.getLabHead());
         genericEntityDao.persistEntity(screen);
-        return Arrays.asList(screen.getScreenResult());
-      } });
+      }
+    });
     // reload from database to ensure objects have entity-ID-based hashCodes, not Object hashCodes
-    return (ScreenResult)
-    genericEntityDao.runQuery(new Query() {
-      public List execute(Session session) {
+    return genericEntityDao.runQuery(new Query<ScreenResult>() {
+      public List<ScreenResult> execute(Session session)
+      {
         Screen screen = genericEntityDao.findEntityByProperty(Screen.class, Screen.facilityId.getPropertyName(), "1", true);
-        genericEntityDao.needReadOnly(screen.getScreenResult(), "dataColumns.resultValues");
+        genericEntityDao.needReadOnly(screen.getScreenResult(), ScreenResult.dataColumns.to(DataColumn.resultValues));
         return Arrays.asList(screen.getScreenResult());
       }
     }).get(0);
@@ -535,7 +535,7 @@ public class WellSearchResultsTest extends AbstractSpringPersistenceTest
       public List execute(Session session) {
         Library library = genericEntityDao.reloadEntity(_bigSmallMoleculeLibrary,
                                                         true,
-                                                        Library.wells.getPath());
+                                                        Library.wells);
         Study study = MakeDummyEntities.makeDummyStudy(library);
 
         
@@ -549,8 +549,8 @@ public class WellSearchResultsTest extends AbstractSpringPersistenceTest
     genericEntityDao.runQuery(new Query() {
       public List execute(Session session) {
         Screen screen = genericEntityDao.findAllEntitiesOfType(Screen.class).get(0);
-        genericEntityDao.needReadOnly(screen, "reagents");
-        genericEntityDao.needReadOnly(screen, "annotationTypes.annotationValues");
+        genericEntityDao.needReadOnly(screen, Screen.reagents);
+        genericEntityDao.needReadOnly(screen, Screen.annotationTypes.to(AnnotationType.annotationValues));
         return Arrays.asList(screen);
       }
     }).get(0);

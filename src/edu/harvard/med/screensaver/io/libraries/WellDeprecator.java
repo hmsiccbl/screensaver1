@@ -33,6 +33,7 @@ import edu.harvard.med.screensaver.model.AdministrativeActivityType;
 import edu.harvard.med.screensaver.model.libraries.Well;
 import edu.harvard.med.screensaver.model.libraries.WellKey;
 import edu.harvard.med.screensaver.model.users.AdministratorUser;
+import edu.harvard.med.screensaver.model.users.ScreensaverUser;
 
 /**
  * Command-line application that deprecates a set of wells
@@ -59,7 +60,7 @@ public class WellDeprecator
       }
 
       String comments = app.getCommandLineOptionValue("c");
-      String approvedByAdminId = app.getCommandLineOptionValue("aab");
+      Integer approvedByAdminId = app.getCommandLineOptionValue("aa", Integer.class);
       LocalDate dateApproved = app.getCommandLineOptionValue("d", DateTimeFormat.forPattern(CommandLineApplication.DEFAULT_DATE_PATTERN)).toLocalDate();
 
       GenericEntityDAO dao = (GenericEntityDAO) app.getSpringBean("genericEntityDao");
@@ -108,17 +109,17 @@ public class WellDeprecator
                                                             GenericEntityDAO dao)
     throws Exception
   {
-    AdministratorUser performedBy =
+    AdministratorUser admin =
       dao.findEntityByProperty(AdministratorUser.class,
                                "ECommonsId",
                                performedByEcommonsId,
                                false,
-                               "activitiesPerformed",
-                               "activitiesApproved");
-    if (performedBy == null) {
+                               ScreensaverUser.activitiesPerformed.castToSubtype(AdministratorUser.class));
+
+    if (admin == null) {
       throw new Exception("no such user with eCommons ID " + performedByEcommonsId);
     }
-    return performedBy;
+    return admin;
   }
 
   private static Set<WellKey> readWellsFromFile(CommandLineApplication app) throws IOException, ParseException

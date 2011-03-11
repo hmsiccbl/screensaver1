@@ -24,7 +24,6 @@ import javax.persistence.Transient;
 import javax.persistence.UniqueConstraint;
 import javax.persistence.Version;
 
-import org.hibernate.annotations.Immutable;
 import org.hibernate.annotations.Parameter;
 
 import edu.harvard.med.screensaver.model.AbstractEntity;
@@ -126,7 +125,6 @@ public class LibraryContentsVersion extends AbstractEntity<Integer> implements C
 
 
   @Column(nullable = false, updatable=false)
-  @Immutable
   public Integer getVersionNumber()
   {
     return _versionNumber;
@@ -137,13 +135,11 @@ public class LibraryContentsVersion extends AbstractEntity<Integer> implements C
     _versionNumber = versionNumber;
   }
   
-  @Transient
   public void release(AdministrativeActivity releaseAdminActivity)
   {
     release(releaseAdminActivity, true);
   }
 
-  @Transient
   public void release(AdministrativeActivity releaseAdminActivity, boolean updateInMemory)
   {
     if (_library.getLatestReleasedContentsVersion() != null && 
@@ -152,9 +148,6 @@ public class LibraryContentsVersion extends AbstractEntity<Integer> implements C
     }
     if (isReleased()) {
       throw new DataModelViolationException("cannot release a library contents version more than once");
-    }
-    if (!_library.getContentsVersions().contains(this)) {
-      throw new DataModelViolationException("the released contents versions must be one of the library's contents versions");
     }
     _library.setLatestReleasedContentsVersion(this);
     _releaseActivity = releaseAdminActivity;
@@ -180,7 +173,6 @@ public class LibraryContentsVersion extends AbstractEntity<Integer> implements C
 
   @ManyToOne
   @JoinColumn(name = "libraryId", nullable = false, updatable = false)
-  @org.hibernate.annotations.Immutable
   @org.hibernate.annotations.ForeignKey(name = "fk_library_contents_version_to_library")
   @org.hibernate.annotations.LazyToOne(value = org.hibernate.annotations.LazyToOneOption.PROXY)
   @edu.harvard.med.screensaver.model.annotations.ToOne(inverseProperty = "contentsVersions")
@@ -197,7 +189,6 @@ public class LibraryContentsVersion extends AbstractEntity<Integer> implements C
   @OneToOne(cascade = { CascadeType.PERSIST, CascadeType.MERGE, CascadeType.REMOVE }, fetch = FetchType.LAZY)
   @ToOne(unidirectional=true)
   @JoinColumn(name = "libraryContentsLoadingActivityId", nullable = false, updatable = false)
-  @org.hibernate.annotations.Immutable
   @org.hibernate.annotations.LazyToOne(value = org.hibernate.annotations.LazyToOneOption.PROXY)
   @org.hibernate.annotations.Cascade( { org.hibernate.annotations.CascadeType.SAVE_UPDATE, org.hibernate.annotations.CascadeType.DELETE })
   public AdministrativeActivity getLoadingActivity()

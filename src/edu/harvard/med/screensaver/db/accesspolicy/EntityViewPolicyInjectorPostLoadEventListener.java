@@ -9,14 +9,13 @@
 
 package edu.harvard.med.screensaver.db.accesspolicy;
 
-import edu.harvard.med.screensaver.model.AbstractEntity;
-import edu.harvard.med.screensaver.policy.EntityViewPolicy;
-
-import org.hibernate.event.PostLoadEvent;
-import org.hibernate.event.def.DefaultPostLoadEventListener;
 import org.springframework.beans.BeansException;
 import org.springframework.beans.factory.BeanFactory;
 import org.springframework.beans.factory.BeanFactoryAware;
+
+import edu.harvard.med.screensaver.db.AbstractManagedEventsListener;
+import edu.harvard.med.screensaver.model.AbstractEntity;
+import edu.harvard.med.screensaver.policy.EntityViewPolicy;
 
 /**
  * A Hibernate event listener that injects the specified EntityViewPolicy into
@@ -30,7 +29,8 @@ import org.springframework.beans.factory.BeanFactoryAware;
 // EntityViewPolicy without creating a circular dependency in Spring
 // configuration files (and using the Spring-recommended setter-based injection
 // strategy for handling circular dependencies could not be made to work).
-public class EntityViewPolicyInjectorPostLoadEventListener extends DefaultPostLoadEventListener implements BeanFactoryAware
+// TODO: remove "PostLoadEventListener" suffix from this class name
+public class EntityViewPolicyInjectorPostLoadEventListener extends AbstractManagedEventsListener implements BeanFactoryAware
 {
   private static final long serialVersionUID = 1L;
 
@@ -50,15 +50,10 @@ public class EntityViewPolicyInjectorPostLoadEventListener extends DefaultPostLo
     return _entityViewPolicy;
   }
 
-  @Override
-  public void onPostLoad(PostLoadEvent event)
+  public void apply(Object entity)
   {
-    // let the Hibernate core do its thing
-    super.onPostLoad(event);
-    
-    if (event.getEntity() instanceof AbstractEntity) {
-      AbstractEntity entity = (AbstractEntity) event.getEntity();
-      entity.setEntityViewPolicy(getEntityViewPolicy());
+    if (entity instanceof AbstractEntity) {
+      ((AbstractEntity) entity).setEntityViewPolicy(getEntityViewPolicy());
     }
   }
 }

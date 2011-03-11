@@ -90,7 +90,7 @@ public class SmallMoleculeLibraryContentsParser extends LibraryContentsParser<Sm
     
     WellKey key = new WellKey(sdRecordData.getPlateNumber(),
                               sdRecordData.getWellName());
-    Well well = dao.findEntityById(Well.class, key.getKey(), false, Well.library.getPath());
+    Well well = dao.findEntityById(Well.class, key.getKey(), false, Well.library);
     if (well == null) {
       throw new InvalidWellException("no such well " + key);
     }

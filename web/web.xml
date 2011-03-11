@@ -86,7 +86,13 @@
       org.springframework.web.context.request.RequestContextListener
     </listener-class>
   </listener>
-
+  
+  <!-- MyFaces Orchestra servlet listener -->
+  <!-- 
+  <listener>
+    <listener-class>org.apache.myfaces.orchestra.conversation.servlet.ConversationManagerSessionListener</listener-class>
+  </listener>
+ -->
 
   <!-- Screensaver filter -->
 

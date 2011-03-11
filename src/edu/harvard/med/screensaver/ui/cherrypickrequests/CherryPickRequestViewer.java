@@ -637,8 +637,8 @@ public class CherryPickRequestViewer extends SearchResultContextEntityViewerBack
   @Override
   public void initializeEntity(CherryPickRequest cherryPickRequest)
   {
-    getDao().needReadOnly(cherryPickRequest, CherryPickRequest.screenerCherryPicks.getPath());
-    getDao().needReadOnly(cherryPickRequest, CherryPickRequest.labCherryPicks.to(LabCherryPick.wellVolumeAdjustments).getPath());
+    getDao().needReadOnly(cherryPickRequest, CherryPickRequest.screenerCherryPicks);
+    getDao().needReadOnly(cherryPickRequest, CherryPickRequest.labCherryPicks.to(LabCherryPick.wellVolumeAdjustments));
   }
   
   @Override
@@ -715,12 +715,12 @@ public class CherryPickRequestViewer extends SearchResultContextEntityViewerBack
         public void runTransaction()
         {
           CherryPickRequest cpr = getDao().reloadEntity(getEntity(), true);
-          getDao().needReadOnly(cpr, CherryPickRequest.cherryPickAssayPlates.to(CherryPickAssayPlate.cherryPickLiquidTransfer).to(CherryPickLiquidTransfer.performedBy).getPath());
-          getDao().needReadOnly(cpr, CherryPickRequest.cherryPickAssayPlates.to(CherryPickAssayPlate.cherryPickScreenings).to(Activity.performedBy).getPath());
-          getDao().needReadOnly(cpr, CherryPickRequest.cherryPickAssayPlates.to(CherryPickAssayPlate.cherryPickRequest).to(CherryPickRequest.requestedBy).getPath());
-          getDao().needReadOnly(cpr, CherryPickRequest.screen.getPath());
+          getDao().needReadOnly(cpr, CherryPickRequest.cherryPickAssayPlates.to(CherryPickAssayPlate.cherryPickLiquidTransfer).to(CherryPickLiquidTransfer.performedBy));
+          getDao().needReadOnly(cpr, CherryPickRequest.cherryPickAssayPlates.to(CherryPickAssayPlate.cherryPickScreenings).to(Activity.performedBy));
+          getDao().needReadOnly(cpr, CherryPickRequest.cherryPickAssayPlates.to(CherryPickAssayPlate.cherryPickRequest).to(CherryPickRequest.requestedBy));
+          getDao().needReadOnly(cpr, CherryPickRequest.screen);
           // HACK: following reln is (only) needed by validateSelectedAssayPlates() in LIQUID_TRANSFER case 
-          getDao().needReadOnly(cpr, CherryPickRequest.cherryPickAssayPlates.to(CherryPickAssayPlate.labCherryPicks).getPath());
+          getDao().needReadOnly(cpr, CherryPickRequest.cherryPickAssayPlates.to(CherryPickAssayPlate.labCherryPicks));
           List<AssayPlateRow> rows = new ArrayList<AssayPlateRow>();
           for (CherryPickAssayPlate assayPlate : cpr.getCherryPickAssayPlates()) {
             AssayPlateRow row = new AssayPlateRow(assayPlate);
@@ -812,7 +812,7 @@ public class CherryPickRequestViewer extends SearchResultContextEntityViewerBack
   }
 
   @UICommand
-  @Transactional(readOnly=true) // readOnly to prevent saving the new screening before the user clicks Save
+  @Transactional
   public String deallocateCherryPicksByPlate()
   {
     if (!validateSelectedAssayPlates(AssayPlateValidationType.DEALLOCATION)) {
@@ -826,7 +826,7 @@ public class CherryPickRequestViewer extends SearchResultContextEntityViewerBack
       cplt.addCherryPickAssayPlate(getDao().reloadEntity(plate));
     }
     _cherryPickRequestAllocator.deallocateAssayPlates(cplt.getCherryPickAssayPlates());
-    
+    getDao().clear(); // detach new Activity, as it should only be persisted if user invokes "save" command 
     return _labActivityViewer.editNewEntity(cplt);
   }
 
@@ -879,7 +879,7 @@ public class CherryPickRequestViewer extends SearchResultContextEntityViewerBack
   }
 
   @UICommand
-  @Transactional(readOnly=true) // readOnly to prevent saving the new screening before the user clicks Save
+  @Transactional
   public String recordSuccessfulCreationOfAssayPlates()
   {
     if (!validateSelectedAssayPlates(AssayPlateValidationType.LIQUID_TRANSFER)) {
@@ -892,12 +892,12 @@ public class CherryPickRequestViewer extends SearchResultContextEntityViewerBack
     for (CherryPickAssayPlate plate : getSelectedAssayPlates()) {
       cplt.addCherryPickAssayPlate(plate);
     }
-    
+    getDao().clear(); // detach new Activity, as it should only be persisted if user invokes "save" command 
     return _labActivityViewer.editNewEntity(cplt);
   }
 
   @UICommand
-  @Transactional(readOnly=true) // readOnly to prevent saving the new screening before the user clicks Save
+  @Transactional
   public String recordScreeningOfAssayPlates()
   {
     if (!validateSelectedAssayPlates(AssayPlateValidationType.SCREENING)) {
@@ -910,12 +910,12 @@ public class CherryPickRequestViewer extends SearchResultContextEntityViewerBack
     for (CherryPickAssayPlate plate : getSelectedAssayPlates()) {
       screening.addCherryPickAssayPlateScreened(getDao().reloadEntity(plate));
     }
-    
+    getDao().clear(); // detach new Activity, as it should only be persisted if user invokes "save" command 
     return _labActivityViewer.editNewEntity(screening);
   }
 
   @UICommand
-  @Transactional(readOnly=true) // readOnly to prevent saving the new screening before the user clicks Save
+  @Transactional
   public String recordFailedCreationOfAssayPlates()
   {
     if (!validateSelectedAssayPlates(AssayPlateValidationType.LIQUID_TRANSFER)) {
@@ -928,6 +928,7 @@ public class CherryPickRequestViewer extends SearchResultContextEntityViewerBack
     for (CherryPickAssayPlate plate : getSelectedAssayPlates()) {
       cplt.addCherryPickAssayPlate(plate);
     }
+    getDao().clear(); // detach new Activity, as it should only be persisted if user invokes "save" command 
     return _labActivityViewer.editNewEntity(cplt);
   }
 

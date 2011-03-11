@@ -13,6 +13,7 @@ import java.awt.Color;
 import java.text.NumberFormat;
 
 import org.apache.log4j.Logger;
+import org.springframework.beans.factory.annotation.Autowired;
 
 import edu.harvard.med.screensaver.AbstractSpringTest;
 import edu.harvard.med.screensaver.io.screenresults.ScreenResultParser;
@@ -35,6 +36,7 @@ public class HeatMapCellTest extends AbstractSpringTest
 {
   private static Logger log = Logger.getLogger(HeatMapCellTest.class);
 
+  @Autowired
   protected ScreenResultParser screenResultParser;
 
   public void testHeatMapCell()

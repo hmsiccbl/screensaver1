@@ -12,9 +12,12 @@ package edu.harvard.med.screensaver.model.users;
 import javax.persistence.DiscriminatorValue;
 import javax.persistence.Entity;
 
+import org.hibernate.annotations.Immutable;
+
 import edu.harvard.med.screensaver.model.AttachedFileType;
 
 @Entity
+@Immutable
 @DiscriminatorValue("user")
 @org.hibernate.annotations.Proxy
 public class UserAttachedFileType extends AttachedFileType

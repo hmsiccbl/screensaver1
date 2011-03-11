@@ -11,15 +11,12 @@
 
 package edu.harvard.med.screensaver.db;
 
-import java.sql.SQLException;
 import java.util.Collections;
 import java.util.List;
 
 import org.apache.log4j.Logger;
-import org.hibernate.HibernateException;
 import org.hibernate.Query;
 import org.hibernate.Session;
-import org.springframework.orm.hibernate3.HibernateCallback;
 
 import edu.harvard.med.screensaver.db.hqlbuilder.HqlBuilder;
 import edu.harvard.med.screensaver.model.DataModelViolationException;
@@ -58,52 +55,35 @@ public class ScreenDAOImpl extends AbstractDAO implements ScreenDAO
     final Screen finalStudy = _dao.reloadEntity(study);
 
     // TODO: see if we can delete these using the entity delete
-    getHibernateTemplate().execute(new HibernateCallback() {
-      public Object doInHibernate(Session session) throws HibernateException, SQLException
-  {
-        String hqlStatement = "delete from AnnotationValue av " +
-          "where av.annotationType in (select at from AnnotationType at where at.study = ?)";
-        Query query = session.createQuery(hqlStatement);
-        query.setEntity(0, finalStudy);
-        int count = query.executeUpdate();
-        log.info("Executed: " + hqlStatement + ", count: " + count);
+    String hql = "delete from AnnotationValue av " +
+      "where av.annotationType in (select at from AnnotationType at where at.study = ?)";
+    Query query = getHibernateSession().createQuery(hql);
+    query.setEntity(0, finalStudy);
+    int count = query.executeUpdate();
+    log.info("Executed: " + hql + ", count: " + count);
 
-        hqlStatement = "delete from AnnotationType at " +
-          "where at.study = ?)";
-        query = session.createQuery(hqlStatement);
-        query.setEntity(0, finalStudy);
-        count = query.executeUpdate();
-        log.info("Executed: " + hqlStatement + ", count: " + count);
-
-
-        return count;
-            }
-    });
+    hql = "delete from AnnotationType at " +
+      "where at.study = ?)";
+    query = getHibernateSession().createQuery(hql);
+    query.setEntity(0, finalStudy);
+    count = query.executeUpdate();
+    log.info("Executed: " + hql + ", count: " + count);
 
     // TODO: reimplement this in the proper (performant) HQL!
     log.info("delete the study: " + finalStudy.getFacilityId());
-    runQuery(new edu.harvard.med.screensaver.db.Query() {
-      public List<?> execute(Session session)
-      {
-        String sql = "delete from study_reagent_link where study_id = :studyId";
-        log.info("sql: " + sql);
-        Query query = session.createSQLQuery(sql);
-        query.setParameter("studyId", finalStudy.getScreenId());
-        int rows = query.executeUpdate();
-        if (rows == 0) {
-          log.info("No rows were updated: " +
-            query.getQueryString());
-          }
-        log.info("study_reagent_link updated: " + rows);
-        return null;
-            }
-    });
+    String sql = "delete from study_reagent_link where study_id = :studyId";
+    log.info("sql: " + sql);
+    javax.persistence.Query sqlQuery = getEntityManager().createNativeQuery(sql);
+    sqlQuery.setParameter("studyId", finalStudy.getScreenId());
+    count = sqlQuery.executeUpdate();
+    log.info("study_reagent_link updated: " + count);
+
     //study.getReagents().clear();
     //_dao.flush();
     _dao.deleteEntity(finalStudy);
-      _dao.flush();
+    _dao.flush();
     log.info("study deleted");
-    }
+  }
 
   @Override
   public int countScreenedExperimentalWells(Screen screen, boolean distinct)
@@ -112,7 +92,7 @@ public class ScreenDAOImpl extends AbstractDAO implements ScreenDAO
     		"from Well w, Screen s join s.assayPlates ap join ap.plateScreened p join ap.libraryScreening ls " +
     		"where s = ? and ap.replicateOrdinal = 0 " +
     		"and w.plateNumber = p.plateNumber and w.libraryWellType = 'experimental'";
-    Long count = (Long) getHibernateTemplate().find(hql, screen).get(0);
+    Long count = (Long) getHibernateSession().createQuery(hql).setEntity(0, screen).list().get(0);
     return count.intValue();
   }
 
@@ -126,10 +106,7 @@ public class ScreenDAOImpl extends AbstractDAO implements ScreenDAO
       "join lcp.assayPlate cpap " +
       "join cpap.cherryPickLiquidTransfer cplt " +
       "where s = ? and cplt.status = 'Successful'";
-    Long count = (Long) getHibernateTemplate().find(hql,screen).get(0);
-    if (log.isDebugEnabled()) {
-      log.debug("hql: " + hql + ", screen: " + screen + ", returns: " + count);
-    }
+    Long count = (Long) getHibernateSession().createQuery(hql).setEntity(0, screen).list().get(0);
     return count.intValue();
   }
 

@@ -13,9 +13,9 @@ import java.util.Iterator;
 import java.util.Set;
 import java.util.SortedSet;
 
+import javax.persistence.CascadeType;
 import javax.persistence.Column;
 import javax.persistence.Entity;
-import javax.persistence.FetchType;
 import javax.persistence.OneToMany;
 import javax.persistence.PrimaryKeyJoinColumn;
 import javax.persistence.Transient;
@@ -111,13 +111,13 @@ public class LibraryScreening extends Screening
   }
 
   /**
-   * Get the plates screened during this library screening. Note that it is
+   * Get the plates screened during this library screening. Note that it is not
    * possible for the same plate (plate number and copy) to be screened multiple times within the same
    * visit.
    * 
    * @return the plates screened
    */
-  @OneToMany(mappedBy="libraryScreening", cascade={}, fetch=FetchType.LAZY)
+  @OneToMany(mappedBy = "libraryScreening", cascade = { CascadeType.MERGE })
   @edu.harvard.med.screensaver.model.annotations.ToMany(singularPropertyName="assayPlateScreened", hasNonconventionalMutation=true /*add/remove methods operator on replicate groups, not individual assay plates*/)
   @Sort(type=SortType.NATURAL)
   public SortedSet<AssayPlate> getAssayPlatesScreened()
@@ -220,8 +220,6 @@ public class LibraryScreening extends Screening
       AssayPlate assayPlate = getScreen().createAssayPlate(plate, r, this);
       _assayPlatesScreened.add(assayPlate);
     }
-    invalidate();
-    getScreen().invalidate();
 
     return true;
   }
@@ -243,8 +241,6 @@ public class LibraryScreening extends Screening
         ap.setLibraryScreening(null);
         changed = true;
         iter.remove();
-        invalidate();
-        getScreen().invalidate();
       }
     }
     return changed;

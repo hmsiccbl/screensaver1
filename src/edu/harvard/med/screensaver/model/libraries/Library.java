@@ -10,7 +10,6 @@
 package edu.harvard.med.screensaver.model.libraries;
 
 import java.util.Collections;
-import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
 import java.util.SortedSet;
@@ -28,7 +27,6 @@ import javax.persistence.ManyToMany;
 import javax.persistence.ManyToOne;
 import javax.persistence.OneToMany;
 import javax.persistence.OneToOne;
-import javax.persistence.OrderBy;
 import javax.persistence.Transient;
 import javax.persistence.Version;
 
@@ -47,6 +45,7 @@ import org.joda.time.LocalDate;
 import edu.harvard.med.screensaver.db.LibrariesDAO;
 import edu.harvard.med.screensaver.model.AbstractEntityVisitor;
 import edu.harvard.med.screensaver.model.AdministrativeActivity;
+import edu.harvard.med.screensaver.model.AdministrativeActivityType;
 import edu.harvard.med.screensaver.model.AuditedAbstractEntity;
 import edu.harvard.med.screensaver.model.DuplicateEntityException;
 import edu.harvard.med.screensaver.model.annotations.ToMany;
@@ -114,8 +113,8 @@ public class Library extends AuditedAbstractEntity<Integer>
   // private instance data
 
   private Integer _version;
-  private Set<Well> _wells = new HashSet<Well>();
-  private Set<Copy> _copies = new HashSet<Copy>();
+  private SortedSet<Well> _wells = Sets.newTreeSet();
+  private SortedSet<Copy> _copies = Sets.newTreeSet();
   private String _libraryName;
   private String _shortName;
   private String _description;
@@ -206,11 +205,10 @@ public class Library extends AuditedAbstractEntity<Integer>
     return getEntityId();
   }
 
-  @ManyToMany(fetch = FetchType.LAZY, cascade={ CascadeType.PERSIST, CascadeType.MERGE })
+  @ManyToMany(fetch = FetchType.LAZY, cascade = { CascadeType.ALL })
   @JoinTable(name="libraryUpdateActivity", 
              joinColumns=@JoinColumn(name="libraryId", nullable=false, updatable=false),
              inverseJoinColumns=@JoinColumn(name="updateActivityId", nullable=false, updatable=false))
-  @org.hibernate.annotations.Cascade(value={org.hibernate.annotations.CascadeType.SAVE_UPDATE})
   @Sort(type=SortType.NATURAL)
   @ToMany(singularPropertyName="updateActivity", hasNonconventionalMutation=true /* model testing framework doesn't understand this is a containment relationship, and so requires addUpdateActivity() method*/)
   @Override
@@ -224,10 +222,9 @@ public class Library extends AuditedAbstractEntity<Integer>
    *
    * @return the wells
    */
-  @OneToMany(targetEntity = Well.class, mappedBy = "library", cascade = { CascadeType.PERSIST, CascadeType.MERGE, CascadeType.REMOVE }, fetch = FetchType.LAZY)
-  @OrderBy("wellId")
-  @org.hibernate.annotations.Cascade(value = { org.hibernate.annotations.CascadeType.SAVE_UPDATE, org.hibernate.annotations.CascadeType.DELETE, org.hibernate.annotations.CascadeType.DELETE_ORPHAN })
-  public Set<Well> getWells()
+  @OneToMany(mappedBy = "library", cascade = { CascadeType.ALL })
+  @Sort(type = SortType.NATURAL)
+  public SortedSet<Well> getWells()
   {
     return _wells;
   }
@@ -268,27 +265,11 @@ public class Library extends AuditedAbstractEntity<Integer>
    *
    * @return the copies
    */
-  @OneToMany(mappedBy = "library", cascade = { CascadeType.PERSIST, CascadeType.MERGE, CascadeType.REMOVE }, fetch = FetchType.LAZY)
-  @OrderBy("copyId")
-  @org.hibernate.annotations.Cascade(value = { org.hibernate.annotations.CascadeType.SAVE_UPDATE, org.hibernate.annotations.CascadeType.DELETE })
-  public Set<Copy> getCopies()
+  @OneToMany(mappedBy = "library", cascade = { CascadeType.ALL })
+  @Sort(type = SortType.NATURAL)
+  public SortedSet<Copy> getCopies()
   {
     return _copies;
-  }
-
-  /**
-   * Get the number of copies.
-   *
-   * @return the number of copies
-   * @motivation {@link #getCopies()} forces loading of all copies, just to get
-   *             the size; Hibernate can optimize a collection size request, if
-   *             we get directly from an underyling extra-lazy persistent
-   *             collection.
-   */
-  @Transient
-  public int getNumCopies()
-  {
-    return _copies.size();
   }
 
   /**
@@ -661,7 +642,7 @@ public class Library extends AuditedAbstractEntity<Integer>
    * @param wells the new set of wells
    * @motivation for hibernate
    */
-  private void setWells(Set<Well> wells)
+  private void setWells(SortedSet<Well> wells)
   {
     _wells = wells;
   }
@@ -672,7 +653,7 @@ public class Library extends AuditedAbstractEntity<Integer>
    * @param copies the new set of copies
    * @motivation for hibernate
    */
-  private void setCopies(Set<Copy> copies)
+  private void setCopies(SortedSet<Copy> copies)
   {
     _copies = copies;
   }
@@ -721,11 +702,7 @@ public class Library extends AuditedAbstractEntity<Integer>
     _experimentalWellCount = Math.max(0, _experimentalWellCount - 1);
   }
 
-  @OneToMany(targetEntity = LibraryContentsVersion.class, 
-             mappedBy = "library", 
-             cascade = { CascadeType.PERSIST, CascadeType.MERGE, CascadeType.REMOVE }, 
-             fetch = FetchType.LAZY)
-  @org.hibernate.annotations.Cascade(value = { org.hibernate.annotations.CascadeType.SAVE_UPDATE, org.hibernate.annotations.CascadeType.DELETE, org.hibernate.annotations.CascadeType.DELETE_ORPHAN })
+  @OneToMany(mappedBy = "library", cascade = { CascadeType.ALL }, orphanRemoval = true)
   @org.hibernate.annotations.Sort(type=org.hibernate.annotations.SortType.NATURAL)
   public SortedSet<LibraryContentsVersion> getContentsVersions()
   {
@@ -744,7 +721,7 @@ public class Library extends AuditedAbstractEntity<Integer>
    * contents versions that has not yet been released for viewing, and so is
    * only available to {@link AdministratorUser}s.
    */
-  @OneToOne(cascade={}, fetch=FetchType.LAZY)
+  @OneToOne
   @JoinColumn(name="latest_released_contents_version_id")
   @ToOne(hasNonconventionalSetterMethod=true) /* the released contents versions must be one of the library's contents versions */
   public LibraryContentsVersion getLatestReleasedContentsVersion()
@@ -780,8 +757,9 @@ public class Library extends AuditedAbstractEntity<Integer>
    * @param loadingAdminActivity
    * @return the new {@link LibraryContentsVersion}
    */
-  public LibraryContentsVersion createContentsVersion(AdministrativeActivity loadingAdminActivity)
+  public LibraryContentsVersion createContentsVersion(AdministratorUser recordedBy)
   {
+    AdministrativeActivity loadingAdminActivity = new AdministrativeActivity(recordedBy, new LocalDate(), AdministrativeActivityType.LIBRARY_CONTENTS_LOADING);
     LibraryContentsVersion libraryContentsVersion = 
       new LibraryContentsVersion(this, 
                                  _contentsVersions.isEmpty() ? LibraryContentsVersion.FIRST_VERSION_NUMBER : _contentsVersions.last().getVersionNumber() + 1,

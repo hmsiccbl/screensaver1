@@ -10,6 +10,8 @@
 package edu.harvard.med.screensaver.service.cellhts2;
 
 import org.apache.log4j.Logger;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.test.annotation.IfProfileValue;
 
 import edu.harvard.med.screensaver.AbstractSpringPersistenceTest;
 import edu.harvard.med.screensaver.analysis.cellhts2.CellHTS2;
@@ -24,12 +26,14 @@ import edu.harvard.med.screensaver.model.screenresults.ScreenResult;
 import edu.harvard.med.screensaver.model.screens.Screen;
 import edu.harvard.med.screensaver.model.screens.ScreenType;
 
+@IfProfileValue(name = "screensaver.ui.feature.cellHTS2", value = "true")
 public class CellHts2AnnotatorTest extends AbstractSpringPersistenceTest
 {
   // static members
 
   private static Logger log = Logger.getLogger(CellHts2AnnotatorTest.class);
 
+  @Autowired
   protected CellHts2Annotator cellHts2Annotator;
 
   /**
@@ -55,7 +59,7 @@ public class CellHts2AnnotatorTest extends AbstractSpringPersistenceTest
                                             Screen.facilityId.getPropertyName(),
                                             "1",
                                             true,
-                                            Screen.screenResult.to(ScreenResult.dataColumns).getPath())
+                                            Screen.screenResult.to(ScreenResult.dataColumns))
                                             .getScreenResult();
 
     assertEquals("pre-cellHTS raw DataColumn count", 8, screenResult.getDataColumns().size());
@@ -70,14 +74,14 @@ public class CellHts2AnnotatorTest extends AbstractSpringPersistenceTest
        true,
        ".",
        null);
-    
+
     // load again, to ensure we're testing the persisted version of the data
     screenResult =
       genericEntityDao.findEntityByProperty(Screen.class,
                                             Screen.facilityId.getPropertyName(),
                                             "1",
                                             true,
-                                            Screen.screenResult.to(ScreenResult.dataColumns).getPath())
+                                            Screen.screenResult.to(ScreenResult.dataColumns))
                                             .getScreenResult();
     assertEquals("post-cellHTS raw DataColumn count", 10, screenResult.getDataColumns().size());
     for (int i = 8; i < 10; ++i ) {

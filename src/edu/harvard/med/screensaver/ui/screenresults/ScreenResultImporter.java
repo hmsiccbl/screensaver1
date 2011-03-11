@@ -15,6 +15,7 @@ import java.util.List;
 import javax.faces.model.DataModel;
 import javax.faces.model.ListDataModel;
 
+import com.google.common.collect.Sets;
 import org.apache.log4j.Logger;
 import org.apache.myfaces.custom.fileupload.UploadedFile;
 
@@ -22,6 +23,7 @@ import edu.harvard.med.screensaver.db.GenericEntityDAO;
 import edu.harvard.med.screensaver.io.ParseError;
 import edu.harvard.med.screensaver.io.ParseErrorsException;
 import edu.harvard.med.screensaver.io.workbook2.Workbook;
+import edu.harvard.med.screensaver.model.AuditedAbstractEntity;
 import edu.harvard.med.screensaver.model.screenresults.ScreenResult;
 import edu.harvard.med.screensaver.model.screens.Screen;
 import edu.harvard.med.screensaver.model.users.AdministratorUser;
@@ -130,14 +132,14 @@ public class ScreenResultImporter extends AbstractBackingBean
                                          _comments,
                                          null,
                                          true);
+      screenResult = _dao.reloadEntity(screenResult, true, ScreenResult.screen.to(AuditedAbstractEntity.updateActivities.castToSubtype(Screen.class)));
       showMessage("screens.screenResultDataLoaded", 
                   screenResult.getLastDataLoadingActivity().getComments());
-      // TODO: reinstate (throwing exceptions)
-      //      screen = _dao.reloadEntity(screen);
-      //      int assayPlatesCreated = Sets.difference(screen.getAssayPlatesDataLoaded(), screen.getAssayPlatesScreened()).size();
-      //      if (assayPlatesCreated > 0) {
-      //        showMessage("screens.assayPlatesCreatedForLoadedData", assayPlatesCreated);
-      //      }
+      screen = _dao.reloadEntity(screen, true, Screen.assayPlates);
+      int assayPlatesCreated = Sets.difference(screen.getAssayPlatesDataLoaded(), screen.getAssayPlatesScreened()).size();
+      if (assayPlatesCreated > 0) {
+        showMessage("screens.assayPlatesCreatedForLoadedData", assayPlatesCreated);
+      }
     }
     catch (ParseErrorsException e) {
       log.info("parse errors encountered during import of ScreenResult for Screen " + screen);

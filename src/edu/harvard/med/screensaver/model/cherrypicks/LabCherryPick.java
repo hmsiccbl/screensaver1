@@ -215,9 +215,7 @@ public class LabCherryPick extends AbstractEntity<Integer>
    */
   @ManyToOne
   @JoinColumn(name="cherryPickRequestId", nullable=false, updatable=false)
-  @org.hibernate.annotations.Immutable
   @org.hibernate.annotations.ForeignKey(name="fk_lab_cherry_pick_to_cherry_pick_request")
-  @org.hibernate.annotations.LazyToOne(value=org.hibernate.annotations.LazyToOneOption.PROXY)
   public CherryPickRequest getCherryPickRequest()
   {
     return _cherryPickRequest;
@@ -229,9 +227,7 @@ public class LabCherryPick extends AbstractEntity<Integer>
    */
   @ManyToOne
   @JoinColumn(name="screenerCherryPickId", nullable=false, updatable=false)
-  @org.hibernate.annotations.Immutable
   @org.hibernate.annotations.ForeignKey(name="fk_lab_cherry_pick_to_screener_cherry_pick")
-  @org.hibernate.annotations.LazyToOne(value=org.hibernate.annotations.LazyToOneOption.PROXY)
   public ScreenerCherryPick getScreenerCherryPick()
   {
     return _screenerCherryPick;
@@ -257,7 +253,6 @@ public class LabCherryPick extends AbstractEntity<Integer>
    */
   @ManyToOne
   @JoinColumn(name="sourceWellId", nullable=false, updatable=false)
-  @org.hibernate.annotations.Immutable
   @org.hibernate.annotations.ForeignKey(name="fk_lab_cherry_pick_to_source_well")
   @org.hibernate.annotations.LazyToOne(value=org.hibernate.annotations.LazyToOneOption.PROXY)
   @edu.harvard.med.screensaver.model.annotations.ToOne(unidirectional=true)
@@ -288,17 +283,13 @@ public class LabCherryPick extends AbstractEntity<Integer>
    * </ul>
    */
   @OneToMany(
-    cascade={ CascadeType.PERSIST, CascadeType.MERGE, CascadeType.REMOVE },
+    cascade = { CascadeType.PERSIST, CascadeType.MERGE, CascadeType.REMOVE },
+    orphanRemoval = true,
     fetch=FetchType.LAZY
   )
   @ToMany(hasNonconventionalMutation=true)
   @JoinColumn(name="labCherryPickId")
   @org.hibernate.annotations.ForeignKey(name="fk_well_volume_adjustment_to_lab_cherry_pick")
-  @org.hibernate.annotations.Cascade(value={
-    org.hibernate.annotations.CascadeType.SAVE_UPDATE,
-    org.hibernate.annotations.CascadeType.DELETE,
-    org.hibernate.annotations.CascadeType.DELETE_ORPHAN
-  })
   public Set<WellVolumeAdjustment> getWellVolumeAdjustments()
   {
     return _wellVolumeAdjustments;

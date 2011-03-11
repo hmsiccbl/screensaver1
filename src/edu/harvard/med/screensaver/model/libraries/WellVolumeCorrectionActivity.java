@@ -93,18 +93,11 @@ public class WellVolumeCorrectionActivity extends AdministrativeActivity
    * Get the set of well volume adjustments.
    * @return the set of well volume adjustments
    */
-  @OneToMany(
-    cascade={ CascadeType.PERSIST, CascadeType.MERGE, CascadeType.REMOVE },
-    fetch=FetchType.LAZY
-  )
+  @OneToMany(cascade = { CascadeType.ALL },
+             fetch = FetchType.LAZY)
   @JoinColumn(name="wellVolumeCorrectionActivityId")
   @ToMany(hasNonconventionalMutation=true)
   @org.hibernate.annotations.ForeignKey(name="fk_well_volume_adjustment_to_well_volume_correction_activity")
-  @org.hibernate.annotations.Cascade(value={
-    org.hibernate.annotations.CascadeType.SAVE_UPDATE,
-    org.hibernate.annotations.CascadeType.DELETE,
-    org.hibernate.annotations.CascadeType.DELETE_ORPHAN
-  })
   public Set<WellVolumeAdjustment> getWellVolumeAdjustments()
   {
     return _wellVolumeAdjustments;

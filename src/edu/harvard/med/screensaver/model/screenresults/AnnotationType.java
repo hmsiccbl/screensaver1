@@ -151,7 +151,6 @@ public class AnnotationType extends AbstractEntity<Integer> implements MetaDataT
    */
   @ManyToOne(fetch=FetchType.LAZY)
   @JoinColumn(name="studyId", nullable=false, updatable=false)
-  @org.hibernate.annotations.Immutable
   @org.hibernate.annotations.ForeignKey(name="fk_annotation_type_to_screen")
   @org.hibernate.annotations.LazyToOne(value=org.hibernate.annotations.LazyToOneOption.PROXY)
   public Screen getStudy()
@@ -257,7 +256,6 @@ public class AnnotationType extends AbstractEntity<Integer> implements MetaDataT
    * @return the 0-based ordinal position
    */
   @Column(nullable=false, updatable=false)
-  @org.hibernate.annotations.Immutable
   public Integer getOrdinal()
   {
     return _ordinal;
@@ -268,7 +266,6 @@ public class AnnotationType extends AbstractEntity<Integer> implements MetaDataT
    * @return true iff this annotation type contains numeric result values
    */
   @Column(nullable=false, updatable=false, name="isNumeric")
-  @org.hibernate.annotations.Immutable
   public boolean isNumeric()
   {
     return _isNumeric;

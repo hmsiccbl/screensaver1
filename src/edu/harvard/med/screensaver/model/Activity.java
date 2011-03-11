@@ -52,7 +52,7 @@ import edu.harvard.med.screensaver.model.users.ScreensaverUser;
 @Entity
 @Inheritance(strategy=InheritanceType.JOINED)
 @org.hibernate.annotations.Proxy
-public abstract class Activity extends AuditedAbstractEntity<Integer> implements Comparable
+public abstract class Activity extends AuditedAbstractEntity<Integer> implements Comparable<Activity>
 {
   private static final Logger log = Logger.getLogger(Activity.class);
   private static final long serialVersionUID = 0L;
@@ -71,7 +71,7 @@ public abstract class Activity extends AuditedAbstractEntity<Integer> implements
   // public instance methods
 
   @Transient
-  public int compareTo(Object o)
+  public int compareTo(Activity o)
   {
     if (this.equals(o)) {
       return 0;

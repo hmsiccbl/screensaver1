@@ -22,7 +22,7 @@ public class StatusItemTest extends AbstractEntityInstanceTest<StatusItem>
     return buildTestSuite(StatusItemTest.class, StatusItem.class);
   }
 
-  public StatusItemTest() throws IntrospectionException
+  public StatusItemTest()
   {
     super(StatusItem.class);
   }

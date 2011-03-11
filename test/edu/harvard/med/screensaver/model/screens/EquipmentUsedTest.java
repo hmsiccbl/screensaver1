@@ -22,7 +22,7 @@ public class EquipmentUsedTest extends AbstractEntityInstanceTest<EquipmentUsed>
     return buildTestSuite(EquipmentUsedTest.class, EquipmentUsed.class);
   }
   
-  public EquipmentUsedTest() throws IntrospectionException
+  public EquipmentUsedTest()
   {
     super(EquipmentUsed.class);
   }

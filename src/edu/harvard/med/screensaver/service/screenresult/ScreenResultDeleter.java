@@ -9,15 +9,17 @@
 
 package edu.harvard.med.screensaver.service.screenresult;
 
+import org.apache.log4j.Logger;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.transaction.annotation.Transactional;
+
 import edu.harvard.med.screensaver.db.GenericEntityDAO;
 import edu.harvard.med.screensaver.db.ScreenResultsDAO;
 import edu.harvard.med.screensaver.model.AdministrativeActivityType;
 import edu.harvard.med.screensaver.model.screenresults.ScreenResult;
 import edu.harvard.med.screensaver.model.screens.Screen;
 import edu.harvard.med.screensaver.model.users.AdministratorUser;
-
-import org.apache.log4j.Logger;
-import org.springframework.transaction.annotation.Transactional;
+import edu.harvard.med.screensaver.service.screens.ScreenDerivedPropertiesUpdater;
 
 
 /**
@@ -32,6 +34,7 @@ public class ScreenResultDeleter
 
   private GenericEntityDAO _dao;
   private ScreenResultsDAO _screenResultsDao;
+  private ScreenDerivedPropertiesUpdater _screenDerivedPropertiesUpdater;
 
   
   /**
@@ -39,11 +42,14 @@ public class ScreenResultDeleter
    */
   protected ScreenResultDeleter() {}
 
+  @Autowired
   public ScreenResultDeleter(GenericEntityDAO dao,
-                             ScreenResultsDAO screenResultsDao)
+                             ScreenResultsDAO screenResultsDao,
+                             ScreenDerivedPropertiesUpdater screenDerivedPropertiesUpdater)
   {
     _dao = dao;
     _screenResultsDao = screenResultsDao;
+    _screenDerivedPropertiesUpdater = screenDerivedPropertiesUpdater;
   }
 
   @Transactional
@@ -53,7 +59,7 @@ public class ScreenResultDeleter
     admin = _dao.reloadEntity(admin);
     _screenResultsDao.deleteScreenResult(screenResult);
     screen.createUpdateActivity(AdministrativeActivityType.SCREEN_RESULT_DATA_DELETION, admin, COMMENTS);
-    screen.update();
+    _screenDerivedPropertiesUpdater.updateScreeningStatistics(screen);
     
     return screen;
   }

@@ -9,8 +9,6 @@
 
 package edu.harvard.med.screensaver.model.libraries;
 
-import java.beans.IntrospectionException;
-
 import junit.framework.TestSuite;
 
 import edu.harvard.med.screensaver.model.AbstractEntityInstanceTest;
@@ -22,7 +20,7 @@ public class LibraryContentsVersionTest extends AbstractEntityInstanceTest<Libra
     return buildTestSuite(LibraryContentsVersionTest.class, LibraryContentsVersion.class);
   }
 
-  public LibraryContentsVersionTest() throws IntrospectionException
+  public LibraryContentsVersionTest()
   {
     super(LibraryContentsVersion.class);
   }

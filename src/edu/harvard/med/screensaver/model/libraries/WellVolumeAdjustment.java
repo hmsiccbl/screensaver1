@@ -30,6 +30,7 @@ import edu.harvard.med.screensaver.model.AbstractEntity;
 import edu.harvard.med.screensaver.model.AbstractEntityVisitor;
 import edu.harvard.med.screensaver.model.Activity;
 import edu.harvard.med.screensaver.model.Volume;
+import edu.harvard.med.screensaver.model.annotations.ContainedEntity;
 import edu.harvard.med.screensaver.model.annotations.ToOne;
 import edu.harvard.med.screensaver.model.cherrypicks.CherryPickLiquidTransfer;
 import edu.harvard.med.screensaver.model.cherrypicks.LabCherryPick;
@@ -58,21 +59,19 @@ import edu.harvard.med.screensaver.model.meta.RelationshipPath;
   "wellVolumeCorrectionActivityId"
 }) })
 @org.hibernate.annotations.Proxy
+@ContainedEntity(containingEntityClass = LabCherryPick.class,
+                 containingEntityClasses = { LabCherryPick.class, WellVolumeCorrectionActivity.class })
 public class WellVolumeAdjustment extends AbstractEntity<Integer>
 {
-
-  // private static data
-
   private static final long serialVersionUID = 1L;
   private static Logger log = Logger.getLogger(WellVolumeAdjustment.class);
     
   public static final RelationshipPath<WellVolumeAdjustment> copy = RelationshipPath.from(WellVolumeAdjustment.class).to("copy", Cardinality.TO_ONE);
   public static final RelationshipPath<WellVolumeAdjustment> well = RelationshipPath.from(WellVolumeAdjustment.class).to("well", Cardinality.TO_ONE);
   public static final RelationshipPath<WellVolumeAdjustment> labCherryPick = RelationshipPath.from(WellVolumeAdjustment.class).to("labCherryPick", Cardinality.TO_ONE);
-  public static final RelationshipPath<WellVolumeAdjustment> wellVolumeorrectionActivity = RelationshipPath.from(WellVolumeAdjustment.class).to("wellVolumeorrectionActivity", Cardinality.TO_ONE);
+  public static final RelationshipPath<WellVolumeAdjustment> wellVolumeCorrectionActivity = RelationshipPath.from(WellVolumeAdjustment.class).to("wellVolumeCorrectionActivity", Cardinality.TO_ONE);
   public static final PropertyPath<WellVolumeAdjustment> volume = RelationshipPath.from(WellVolumeAdjustment.class).toProperty("volume");
 
-  // private instance data
 
   private Integer _version;
   private Copy _copy;
@@ -82,7 +81,13 @@ public class WellVolumeAdjustment extends AbstractEntity<Integer>
   private WellVolumeCorrectionActivity _wellVolumeCorrectionActivity;
 
 
-  // public constructor
+  /**
+   * Construct an uninitialized <code>WellVolumeAdjustment</code>.
+   * 
+   * @motivation for hibernate and proxy/concrete subclass constructors
+   */
+  protected WellVolumeAdjustment()
+  {}
 
   /**
    * Construct an initialized <code>WellVolumeAdjustment</code>. Intended only for use by
@@ -98,8 +103,34 @@ public class WellVolumeAdjustment extends AbstractEntity<Integer>
     _labCherryPick = labCherryPick;
   }
 
+  /**
+   * Construct an initialized <code>WellVolumeAdjustment</code>. Intended only for use by
+   * {@link WellVolumeCorrectionActivity}.
+   * 
+   * @param copy the copy
+   * @param well the well
+   * @param volume the volume
+   * @param wellVolumeCorrectionActivity
+   */
+  WellVolumeAdjustment(Copy copy, Well well, Volume volume, WellVolumeCorrectionActivity wellVolumeCorrectionActivity)
+  {
+    this(copy, well, volume);
+    _wellVolumeCorrectionActivity = wellVolumeCorrectionActivity;
+  }
 
-  // public instance methods
+  /**
+   * Construct a partially initialized <code>WellVolumeAdjustment</code>.
+   * 
+   * @param copy the copy
+   * @param well the well
+   * @param volume the volume
+   */
+  private WellVolumeAdjustment(Copy copy, Well well, Volume volume)
+  {
+    _copy = copy;
+    _well = well;
+    _volume = volume;
+  }
 
   @Override
   public Object acceptVisitor(AbstractEntityVisitor visitor)
@@ -133,7 +164,7 @@ public class WellVolumeAdjustment extends AbstractEntity<Integer>
   @ManyToOne(fetch=FetchType.LAZY,
              cascade={ CascadeType.PERSIST, CascadeType.MERGE })
   @JoinColumn(name="copyId", nullable=false, updatable=false)
-  @org.hibernate.annotations.Immutable
+  //@org.hibernate.annotations.Immutable
   @org.hibernate.annotations.ForeignKey(name="fk_well_volume_adjustment_to_copy")
   @org.hibernate.annotations.LazyToOne(value=org.hibernate.annotations.LazyToOneOption.PROXY)
   @org.hibernate.annotations.Cascade(value={ org.hibernate.annotations.CascadeType.SAVE_UPDATE })
@@ -153,7 +184,7 @@ public class WellVolumeAdjustment extends AbstractEntity<Integer>
   @ManyToOne(fetch=FetchType.LAZY,
              cascade={})
   @JoinColumn(name="wellId", nullable=false, updatable=false)
-  @org.hibernate.annotations.Immutable
+  //@org.hibernate.annotations.Immutable
   @org.hibernate.annotations.ForeignKey(name="fk_well_volume_adjustment_to_well")
   @org.hibernate.annotations.LazyToOne(value=org.hibernate.annotations.LazyToOneOption.PROXY)
   @edu.harvard.med.screensaver.model.annotations.ToOne(unidirectional=true)
@@ -167,7 +198,6 @@ public class WellVolumeAdjustment extends AbstractEntity<Integer>
    * @return the volume
    */
   @Column(precision=ScreensaverConstants.VOLUME_PRECISION, scale=ScreensaverConstants.VOLUME_SCALE, nullable=false, updatable=false)
-  @org.hibernate.annotations.Immutable
   @org.hibernate.annotations.Type(type="edu.harvard.med.screensaver.db.usertypes.VolumeType")
   public Volume getVolume()
   {
@@ -182,7 +212,6 @@ public class WellVolumeAdjustment extends AbstractEntity<Integer>
              cascade={})
   @JoinColumn(name="labCherryPickId", nullable=true, updatable=false)
   @ToOne(hasNonconventionalSetterMethod=true /* model unit tests do not yet handle nullable, immutable to-one relationships */)
-  @org.hibernate.annotations.Immutable
   @org.hibernate.annotations.ForeignKey(name="fk_well_volume_adjustment_to_lab_cherry_pick")
   @org.hibernate.annotations.LazyToOne(value=org.hibernate.annotations.LazyToOneOption.PROXY)
   public LabCherryPick getLabCherryPick()
@@ -198,7 +227,6 @@ public class WellVolumeAdjustment extends AbstractEntity<Integer>
              cascade={})
   @JoinColumn(name="wellVolumeCorrectionActivityId", nullable=true, updatable=false)
   @ToOne(hasNonconventionalSetterMethod=true /* model unit tests do not yet handle nullable, immutable to-one relationships */)
-  @org.hibernate.annotations.Immutable
   @org.hibernate.annotations.ForeignKey(name="fk_well_volume_adjustment_to_well_volume_correction_activity")
   @org.hibernate.annotations.LazyToOne(value=org.hibernate.annotations.LazyToOneOption.PROXY)
   public WellVolumeCorrectionActivity getWellVolumeCorrectionActivity()
@@ -232,51 +260,6 @@ public class WellVolumeAdjustment extends AbstractEntity<Integer>
     assert(false) : "either _labCherryPick or _wellVolumeCorrectionActivity is non-null";
     return null;
   }
-
-
-  // package constructor
-
-  /**
-   * Construct an initialized <code>WellVolumeAdjustment</code>. Intended only for use by
-   * {@link WellVolumeCorrectionActivity}.
-   * @param copy the copy
-   * @param well the well
-   * @param volume the volume
-   * @param wellVolumeCorrectionActivity
-   */
-  WellVolumeAdjustment(Copy copy, Well well, Volume volume, WellVolumeCorrectionActivity wellVolumeCorrectionActivity)
-  {
-    this(copy, well, volume);
-    _wellVolumeCorrectionActivity = wellVolumeCorrectionActivity;
-  }
-
-
-  // protected constructor
-
-  /**
-   * Construct an uninitialized <code>WellVolumeAdjustment</code>.
-   * @motivation for hibernate and proxy/concrete subclass constructors
-   */
-  protected WellVolumeAdjustment() {}
-
-
-  // private constructor
-
-  /**
-   * Construct a partially initialized <code>WellVolumeAdjustment</code>. 
-   * @param copy the copy
-   * @param well the well
-   * @param volume the volume
-   */
-  private WellVolumeAdjustment(Copy copy, Well well, Volume volume)
-  {
-    _copy = copy;
-    _well = well;
-    _volume = volume;
-  }
-
-
-  // private instance methods
 
   /**
    * Set the well volume adjustment id.

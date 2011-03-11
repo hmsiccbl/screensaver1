@@ -23,14 +23,14 @@ public class LabHeadTest extends AbstractEntityInstanceTest<LabHead>
     return buildTestSuite(LabHeadTest.class, LabHead.class);
   }
 
-  public LabHeadTest() throws IntrospectionException
+  public LabHeadTest()
   {
     super(LabHead.class);
   }
 
   public void testLabHeadClassificationImmutable()
   {
-    schemaUtil.truncateTablesOrCreateSchema();
+    schemaUtil.truncateTables();
     ScreeningRoomUserTest.initLab(genericEntityDao, schemaUtil);
     ScreeningRoomUser labHead =
       genericEntityDao.findEntityByProperty(ScreeningRoomUser.class,

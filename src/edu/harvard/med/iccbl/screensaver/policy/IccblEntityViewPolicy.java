@@ -31,7 +31,6 @@ import edu.harvard.med.screensaver.model.cherrypicks.CherryPickLiquidTransfer;
 import edu.harvard.med.screensaver.model.cherrypicks.CherryPickRequest;
 import edu.harvard.med.screensaver.model.cherrypicks.LabCherryPick;
 import edu.harvard.med.screensaver.model.cherrypicks.RNAiCherryPickRequest;
-import edu.harvard.med.screensaver.model.cherrypicks.RNAiKnockdownConfirmation;
 import edu.harvard.med.screensaver.model.cherrypicks.ScreenerCherryPick;
 import edu.harvard.med.screensaver.model.cherrypicks.SmallMoleculeCherryPickRequest;
 import edu.harvard.med.screensaver.model.libraries.Copy;
@@ -335,11 +334,6 @@ public class IccblEntityViewPolicy implements EntityViewPolicy
     return false;
   }
 
-  public boolean visit(RNAiKnockdownConfirmation entity)
-  {
-    return true;
-  }
-
   public boolean visit(Study study)
   {
     return visit((Screen) study);
@@ -424,8 +418,8 @@ public class IccblEntityViewPolicy implements EntityViewPolicy
             return
             new HqlBuilder().
               select("lw2", "id").distinctProjectionValues().
-              from(AssayWell.class, "aw1").from("aw1", AssayWell.screenResult.getPath(), "sr1", JoinType.INNER).from("sr1", ScreenResult.screen.getPath(), "s1", JoinType.INNER).
-              from(AssayWell.class, "aw2").from("aw2", AssayWell.screenResult.getPath(), "sr2", JoinType.INNER).from("sr2", ScreenResult.screen.getPath(), "s2", JoinType.INNER).from("aw2", AssayWell.libraryWell.getPath(), "lw2", JoinType.INNER).
+              from(AssayWell.class, "aw1").from("aw1", AssayWell.screenResult, "sr1", JoinType.INNER).from("sr1", ScreenResult.screen, "s1", JoinType.INNER).
+              from(AssayWell.class, "aw2").from("aw2", AssayWell.screenResult, "sr2", JoinType.INNER).from("sr2", ScreenResult.screen, "s2", JoinType.INNER).from("aw2", AssayWell.libraryWell, "lw2", JoinType.INNER).
               where("aw1", "libraryWell", Operator.EQUAL, "aw2", "libraryWell").
               where("aw1", "positive", Operator.EQUAL, Boolean.TRUE).
               where("aw2", "positive", Operator.EQUAL, Boolean.TRUE).
@@ -531,15 +525,13 @@ public class IccblEntityViewPolicy implements EntityViewPolicy
     if (!!!_screensForFundingSupport.containsKey(fundingSupportName)) {
       _screensForFundingSupport.putAll(fundingSupportName,
                                        _dao.<Screen>runQuery(new Query() { 
-        public List execute(Session session)
-        {
-          return new HqlBuilder().
-          select("s").
-          from(Screen.class, "s").from("s", Screen.fundingSupports.getLeaf(), "fs").
-          where("fs", "value", Operator.EQUAL, fundingSupportName).
-          toQuery(session, true).list();
-        }
-      }));
+                                         public List execute(Session session)
+                                         {
+                                           return new HqlBuilder().select("s").from(Screen.class, "s").from("s", Screen.fundingSupports, "fs").
+                                           where("fs", "value", Operator.EQUAL, fundingSupportName).
+                                             toQuery(session, true).list();
+                                         }
+                                       }));
     }
     return _screensForFundingSupport.get(fundingSupportName);
   }

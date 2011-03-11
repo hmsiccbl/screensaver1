@@ -22,7 +22,7 @@ public class AssayWellTest extends AbstractEntityInstanceTest<AssayWell>
     return buildTestSuite(AssayWellTest.class, AssayWell.class);
   }
 
-  public AssayWellTest() throws IntrospectionException
+  public AssayWellTest()
   {
     super(AssayWell.class);
   }

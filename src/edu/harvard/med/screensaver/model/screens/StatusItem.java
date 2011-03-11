@@ -24,7 +24,6 @@ import javax.persistence.UniqueConstraint;
 import javax.persistence.Version;
 
 import org.apache.log4j.Logger;
-import org.hibernate.annotations.Immutable;
 import org.hibernate.annotations.Type;
 import org.joda.time.LocalDate;
 
@@ -90,7 +89,6 @@ public class StatusItem extends AbstractEntity<Integer> implements Comparable<St
   @ManyToOne(fetch=FetchType.LAZY,
              cascade={ CascadeType.PERSIST, CascadeType.MERGE })
   @JoinColumn(name="screenId", nullable=false, updatable=false)
-  @org.hibernate.annotations.Immutable
   @org.hibernate.annotations.ForeignKey(name="fk_status_item_to_screen")
   @org.hibernate.annotations.LazyToOne(value=org.hibernate.annotations.LazyToOneOption.PROXY)
   public Screen getScreen()
@@ -103,7 +101,6 @@ public class StatusItem extends AbstractEntity<Integer> implements Comparable<St
    * @return the status date
    */
   @Column(nullable=false, updatable=false)
-  @Immutable
   @Type(type="edu.harvard.med.screensaver.db.usertypes.LocalDateType")
   public LocalDate getStatusDate()
   {
@@ -115,7 +112,6 @@ public class StatusItem extends AbstractEntity<Integer> implements Comparable<St
    * @return the status value
    */
   @Column(nullable=false, updatable=false)
-  @Immutable
   @org.hibernate.annotations.Type(type="edu.harvard.med.screensaver.model.screens.StatusValue$UserType")
   public StatusValue getStatusValue()
   {

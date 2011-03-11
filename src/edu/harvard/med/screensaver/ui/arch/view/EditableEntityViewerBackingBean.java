@@ -12,6 +12,7 @@ package edu.harvard.med.screensaver.ui.arch.view;
 import java.io.Serializable;
 
 import org.apache.log4j.Logger;
+import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
 
 import edu.harvard.med.screensaver.db.GenericEntityDAO;
@@ -94,7 +95,7 @@ public abstract class EditableEntityViewerBackingBean<E extends Entity<? extends
     E entity = getEntity();
     if (entity instanceof AuditedAbstractEntity) {
       AdministratorUser admin = (AdministratorUser) getCurrentScreensaverUser().getScreensaverUser();
-      admin = getDao().reloadEntity(admin, false, ScreensaverUser.activitiesPerformed.getPath());
+      admin = getDao().reloadEntity(admin, false, ScreensaverUser.activitiesPerformed.castToSubtype(AdministratorUser.class));
       ((AuditedAbstractEntity) entity).createUpdateActivity(adminActivityType,
                                                             admin,
                                                             comments);
@@ -158,14 +159,23 @@ public abstract class EditableEntityViewerBackingBean<E extends Entity<? extends
     setEditMode(true);
     return view();
   }
-  
+
+  /**
+   * @param newEntity a transient or detached entity, with all relationships initialized that will be needed by the
+   *          viewer; the entity will be directly modified and later persisted, so the object network must contain
+   *          distinct instances of any entity that is reachable from multiple relationships
+   * @return
+   */
   @UICommand
-  
-  @Transactional(/*TODO: this appears to be causing problems on entity reattachment in initializeNewEntity() method implementations: propagation=Propagation.REQUIRES_NEW,*/ readOnly=true) // be defensive: prevent saving entity before user invokes "save" command
+  // TODO: determine if this propagation setting is necessary for safety
+  @Transactional(propagation = Propagation.NOT_SUPPORTED)
   /*final*/ public String editNewEntity(E newEntity)
   {
     if (newEntity == null) {
       throw new DevelopmentException("attempted to edit a null entity");
+    }
+    if (!!!newEntity.isTransient()) {
+      throw new DevelopmentException("attempted to edit a non-transient entity");
     }
     if (_entityEditPolicy == null || 
       !!!((Boolean) newEntity.acceptVisitor(_entityEditPolicy)).booleanValue()) {
@@ -182,8 +192,9 @@ public abstract class EditableEntityViewerBackingBean<E extends Entity<? extends
   }
 
   /**
-   * Subclasses should override this method if property values need to be set to
-   * defaults.
+   * Subclasses should override this method if property values need to be set to defaults. It will <i>not</i> be called
+   * within a transaction/session, and the method should <i>not</i> fetch any
+   * additional entities (to avoid session reattachment problems)
    */
   protected void initializeNewEntity(E entity) 
   {
@@ -198,7 +209,7 @@ public abstract class EditableEntityViewerBackingBean<E extends Entity<? extends
       return REDISPLAY_PAGE_ACTION_RESULT;
     }
     setEditMode(false); // leave edit mode only after validation occurs, in order to remain in edit mode if validation failed
-    getDao().saveOrUpdateEntity(getEntity());
+    _setEntity(getDao().mergeEntity(getEntity()));
     updateEntityProperties(getEntity());
     recordUpdateActivity();
     getDao().flush();
@@ -209,7 +220,8 @@ public abstract class EditableEntityViewerBackingBean<E extends Entity<? extends
   /**
    * Subclasses should override this method to perform validation of the entity
    * prior to saving it. The entity may be transient (when creating new
-   * entities) or detached (when updating existing entities).
+   * entities) or detached (when updating existing entities). The method <i>should not</i> load new entities into the
+   * session (as this may cause NonUniqueObjectExceptions when the entity is later flushed).
    * 
    * @param entity
    * @return true if entity state is valid, otherwise false

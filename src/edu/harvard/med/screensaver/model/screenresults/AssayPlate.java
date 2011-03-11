@@ -25,7 +25,6 @@ import javax.persistence.Version;
 import com.google.common.base.Function;
 import com.google.common.base.Predicate;
 import org.apache.log4j.Logger;
-import org.hibernate.annotations.Immutable;
 import org.hibernate.annotations.Parameter;
 
 import edu.harvard.med.screensaver.model.AbstractEntity;
@@ -83,7 +82,7 @@ public class AssayPlate extends AbstractEntity<Integer> implements Comparable<As
   
   private Integer _version;
   private Screen _screen;
-  private Integer _plateNumber;
+  private int _plateNumber;
   private Plate _plateScreened;
   private int _replicateOrdinal;
   private LibraryScreening _libraryScreening;
@@ -146,7 +145,6 @@ public class AssayPlate extends AbstractEntity<Integer> implements Comparable<As
 
   @ManyToOne(fetch=FetchType.LAZY, cascade={})
   @JoinColumn(name="plateId", nullable=true, updatable=false)
-  @Immutable
   @org.hibernate.annotations.ForeignKey(name="fk_assay_plate_to_plate")
   @ToOne(hasNonconventionalSetterMethod = true)
   public Plate getPlateScreened()
@@ -160,7 +158,6 @@ public class AssayPlate extends AbstractEntity<Integer> implements Comparable<As
   }
 
   @Column(nullable=false, updatable=false)
-  @Immutable
   public int getPlateNumber()
   {
     return _plateNumber;
@@ -171,7 +168,7 @@ public class AssayPlate extends AbstractEntity<Integer> implements Comparable<As
     _plateNumber = plateNumber;
   }
 
-  @ManyToOne(fetch=FetchType.LAZY, cascade={})
+  @ManyToOne
   @JoinColumn(name="libraryScreeningId")
   @org.hibernate.annotations.ForeignKey(name="fk_assay_plate_to_library_screening")
   public LibraryScreening getLibraryScreening()
@@ -184,7 +181,7 @@ public class AssayPlate extends AbstractEntity<Integer> implements Comparable<As
     _libraryScreening = libraryScreening;
   }
 
-  @ManyToOne(fetch=FetchType.LAZY, cascade={})
+  @ManyToOne
   @JoinColumn(name="screenResultDataLoadingId")
   @org.hibernate.annotations.ForeignKey(name="fk_assay_plate_to_screen_result_data_loading")
   public AdministrativeActivity getScreenResultDataLoading()
@@ -198,7 +195,6 @@ public class AssayPlate extends AbstractEntity<Integer> implements Comparable<As
   }
 
   @Column(nullable=false, updatable=false)
-  @Immutable
   public int getReplicateOrdinal()
   {
     return _replicateOrdinal;
@@ -251,9 +247,8 @@ public class AssayPlate extends AbstractEntity<Integer> implements Comparable<As
     return result;
   }
 
-  @ManyToOne(fetch=FetchType.LAZY, cascade={})
+  @ManyToOne
   @JoinColumn(name="screenId", nullable=false, updatable=false)
-  @org.hibernate.annotations.Immutable
   @org.hibernate.annotations.ForeignKey(name="fk_assay_plate_to_screen")
   public Screen getScreen()
   {

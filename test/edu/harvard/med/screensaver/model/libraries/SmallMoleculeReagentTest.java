@@ -11,9 +11,13 @@ package edu.harvard.med.screensaver.model.libraries;
 
 import java.beans.IntrospectionException;
 
+import com.google.common.collect.Sets;
 import junit.framework.TestSuite;
+import org.joda.time.LocalDate;
+import org.springframework.beans.factory.annotation.Autowired;
 
 import edu.harvard.med.screensaver.db.DAOTransaction;
+import edu.harvard.med.screensaver.db.LibrariesDAO;
 import edu.harvard.med.screensaver.model.AbstractEntityInstanceTest;
 import edu.harvard.med.screensaver.model.AdministrativeActivity;
 import edu.harvard.med.screensaver.model.AdministrativeActivityType;
@@ -22,27 +26,26 @@ import edu.harvard.med.screensaver.model.users.AdministratorUser;
 import edu.harvard.med.screensaver.model.users.ScreensaverUserRole;
 import edu.harvard.med.screensaver.service.libraries.LibraryContentsVersionManager;
 
-import org.joda.time.LocalDate;
-
-import com.google.common.collect.Sets;
-
 public class SmallMoleculeReagentTest extends AbstractEntityInstanceTest<SmallMoleculeReagent>
 {
+  @Autowired
   protected LibraryContentsVersionManager libraryContentsVersionManager;
+  @Autowired
+  protected LibrariesDAO librariesDao;
 
   public static TestSuite suite()
   {
     return buildTestSuite(SmallMoleculeReagentTest.class, SmallMoleculeReagent.class);
   }
 
-  public SmallMoleculeReagentTest() throws IntrospectionException
+  public SmallMoleculeReagentTest()
   {
     super(SmallMoleculeReagent.class);
   }
   
   public void testCollections()
   {
-    schemaUtil.truncateTablesOrCreateSchema();
+    schemaUtil.truncateTables();
     SmallMoleculeReagent reagent = dataFactory.newInstance(SmallMoleculeReagent.class);
     reagent.getCompoundNames().add("compound1");
     reagent.getCompoundNames().add("compound2");
@@ -50,7 +53,7 @@ public class SmallMoleculeReagentTest extends AbstractEntityInstanceTest<SmallMo
     reagent.getPubchemCids().add(2);
     reagent.getChembankIds().add(10);
     reagent.getChembankIds().add(11);
-    persistEntityNetwork(reagent);
+    reagent = genericEntityDao.mergeEntity(reagent);
     
     Reagent reagent2 = genericEntityDao.findEntityById(SmallMoleculeReagent.class, reagent.getReagentId());
     assertNotNull(reagent2);
@@ -65,18 +68,18 @@ public class SmallMoleculeReagentTest extends AbstractEntityInstanceTest<SmallMo
    */
   public void testMolfile()
   {
-    schemaUtil.truncateTablesOrCreateSchema();
+    schemaUtil.truncateTables();
     
     final AdministratorUser releaseAdmin = dataFactory.newInstance(AdministratorUser.class);
     releaseAdmin.addScreensaverUserRole(ScreensaverUserRole.LIBRARIES_ADMIN);
     genericEntityDao.saveOrUpdateEntity(releaseAdmin);
     
-    Library library = dataFactory.newInstance(Library.class);
+    final Library library = dataFactory.newInstance(Library.class);
     library.setLibraryName("library");
     library.setScreenType(ScreenType.SMALL_MOLECULE);
-    LibraryContentsVersion contentsVersion = library.createContentsVersion(new AdministrativeActivity(releaseAdmin, new LocalDate(), AdministrativeActivityType.LIBRARY_CONTENTS_LOADING));
+    LibraryContentsVersion contentsVersion = library.createContentsVersion(releaseAdmin);
     for (int i = 0; i < 3; ++i) {
-      Well well = library.createWell(new WellKey(1, 0, i), LibraryWellType.EXPERIMENTAL);
+      Well well = library.createWell(new WellKey(library.getStartPlate(), 0, i), LibraryWellType.EXPERIMENTAL);
       well.createSmallMoleculeReagent(new ReagentVendorIdentifier("vendor", Integer.toString(i + 1)),
                                       "molfile" + (i + 1), 
                                       "", "", null, null, null);
@@ -91,13 +94,13 @@ public class SmallMoleculeReagentTest extends AbstractEntityInstanceTest<SmallMo
       public void runTransaction()
       {
         // test that we can load the molfile on demand, within session
-        Well well = genericEntityDao.findEntityById(Well.class, "00001:A01");
+        Well well = librariesDao.findWell(new WellKey(library.getStartPlate(), 0, 0));
         assertEquals("molfile1", ((SmallMoleculeReagent) well.getLatestReleasedReagent()).getMolfile());
 
         // set up to test that we can eager load the molfile via our dao methods, and access after session is closed
-        wellWithMolfileLoadedEagerly = genericEntityDao.findEntityById(Well.class, "00001:A02");
+        wellWithMolfileLoadedEagerly = librariesDao.findWell(new WellKey(library.getStartPlate(), 0, 1));
         genericEntityDao.need(wellWithMolfileLoadedEagerly, 
-                              Well.latestReleasedReagent.to(SmallMoleculeReagent.molfileList).getPath());
+                              Well.latestReleasedReagent.to(SmallMoleculeReagent.molfileList));
 
         // set up to test that a molfile not loaded is not accessible after session is closed
         wellWithMolfileNotLoaded = genericEntityDao.findEntityById(Well.class, "00001:A03");

@@ -13,34 +13,33 @@ import java.io.IOException;
 
 import com.google.common.collect.Iterators;
 import com.google.common.collect.Sets;
+import org.springframework.beans.factory.annotation.Autowired;
 
-import edu.harvard.med.screensaver.AbstractSpringPersistenceTest;
 import edu.harvard.med.screensaver.db.DAOTransaction;
 import edu.harvard.med.screensaver.db.datafetcher.TupleToKeyFunction;
 import edu.harvard.med.screensaver.model.MakeDummyEntities;
 import edu.harvard.med.screensaver.model.libraries.Library;
 import edu.harvard.med.screensaver.model.screens.ScreenType;
-import edu.harvard.med.screensaver.model.users.AdministratorUser;
-import edu.harvard.med.screensaver.ui.CurrentScreensaverUser;
+import edu.harvard.med.screensaver.ui.arch.view.AbstractBackingBeanTest;
 
-public class ReagentFinderTest extends AbstractSpringPersistenceTest
+public class ReagentFinderTest extends AbstractBackingBeanTest
 {
+  @Autowired
   protected ReagentFinder reagentFinder;
+  @Autowired
   protected WellSearchResults wellsBrowser;
-  protected CurrentScreensaverUser currentScreensaverUser;
 
-  private AdministratorUser _admin;
   private Library _library1;
   private Library _library2;
 
-  protected void onSetUp() throws Exception
+  protected void setUp() throws Exception
   {
-    super.onSetUp();
+    super.setUp();
     genericEntityDao.doInTransaction(new DAOTransaction() {
       @Override
       public void runTransaction()
       {
-        _admin = new AdministratorUser("Admin", "User", "admin_user@hms.harvard.edu", "", "", "", "", "");
+        _admin = genericEntityDao.reattachEntity(_admin);
         currentScreensaverUser.setScreensaverUser(_admin);
         genericEntityDao.persistEntity(_admin);
         _library1 = MakeDummyEntities.makeDummyLibrary(1, ScreenType.SMALL_MOLECULE, 1);

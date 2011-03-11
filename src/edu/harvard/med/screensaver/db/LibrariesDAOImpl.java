@@ -16,7 +16,6 @@ import java.util.TreeSet;
 
 import com.google.common.base.Functions;
 import com.google.common.collect.Iterables;
-import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
 import com.google.common.collect.Sets;
 import org.apache.log4j.Logger;
@@ -78,25 +77,17 @@ public class LibrariesDAOImpl extends AbstractDAO implements LibrariesDAO
     return _dao.findEntityById(Well.class, wellKey.getKey());
   }
 
-  public List<String> findAllVendorNames()
-  {
-    String hql = "select distinct l.vendor from Library l where l.vendor is not null";
-    @SuppressWarnings("unchecked")
-    List<String> vendorNames = getHibernateTemplate().find(hql);
-    return vendorNames;
-  }
-
   public Set<Reagent> findReagents(ReagentVendorIdentifier rvi, 
                                    boolean latestReleasedOnly)
   {
     final HqlBuilder hql = new HqlBuilder();
     hql.from(Reagent.class, "r").
-    from("r", Reagent.well.getLeaf(), "w", JoinType.LEFT_FETCH).
-    from("w", Well.library.getLeaf(), "l", JoinType.LEFT_FETCH).
+      from("r", Reagent.well, "w", JoinType.LEFT_FETCH).
+      from("w", Well.library, "l", JoinType.LEFT_FETCH).
     where("r", Reagent.vendorIdentifier.getPath(), Operator.EQUAL, rvi.getVendorIdentifier()).
     where("r", Reagent.vendorName.getPath(), Operator.EQUAL, rvi.getVendorName());
     if (latestReleasedOnly) {
-      hql.from("w", "latestReleasedReagent", "lrr").
+      hql.from("w", Well.latestReleasedReagent, "lrr").
       where("lrr", Operator.EQUAL, "r");
     }
     hql.select("r");
@@ -114,16 +105,14 @@ public class LibrariesDAOImpl extends AbstractDAO implements LibrariesDAO
   public Library findLibraryWithPlate(Integer plateNumber)
   {
     String hql =
-      "select library from Library library where " +
-      plateNumber + " between library.startPlate and library.endPlate";
-    List<Library> libraries = (List<Library>) getHibernateTemplate().find(hql);
-    if (libraries.size() == 0) {
+      "select library from Library library where ? between library.startPlate and library.endPlate";
+    List<Library> libraries = (List<Library>) getHibernateSession().createQuery(hql).setInteger(0, plateNumber).list();
+    if (libraries.isEmpty()) {
       return null;
     }
     return libraries.get(0);
   }
 
-  @SuppressWarnings("unchecked")
   public boolean isPlateRangeAvailable(Integer startPlate, Integer endPlate)
   {
     if (startPlate <= 0 || endPlate <= 0) {
@@ -138,11 +127,7 @@ public class LibrariesDAOImpl extends AbstractDAO implements LibrariesDAO
     String hql =
       "from Library library where not" +
       "(library.startPlate > :endPlate or library.endPlate < :startPlate)";
-    List<Library> libraries = (List<Library>)
-    getHibernateTemplate().findByNamedParam(hql,
-                                            new String[] {"startPlate", "endPlate"},
-                                            new Integer[] {startPlate, endPlate});
-    return libraries.size() == 0;
+    return getHibernateSession().createQuery(hql).setInteger("startPlate", startPlate).setInteger("endPlate", endPlate).list().isEmpty();
   }
 
   /**
@@ -159,22 +144,24 @@ public class LibrariesDAOImpl extends AbstractDAO implements LibrariesDAO
       throw new BusinessRuleViolationException("cannot delete a library contents version that has been released");
     }
     LibraryContentsVersion libraryContentsVersion = 
-      _dao.reloadEntity(libraryContentsVersionIn, false, LibraryContentsVersion.library.getPath()); 
+      _dao.reloadEntity(libraryContentsVersionIn, false, LibraryContentsVersion.library); 
     Library library = libraryContentsVersion.getLibrary();
     if (library.getReagentType().equals(SilencingReagent.class)) {
       _dao.need(library, 
-                Library.wells.to(Well.reagents).to(SilencingReagent.facilityGene).to(Gene.entrezgeneSymbols).getPath(),
-                Library.wells.to(Well.reagents).to(SilencingReagent.facilityGene).to(Gene.genbankAccessionNumbers).getPath());
+                Library.wells.to(Well.reagents).to(SilencingReagent.facilityGene).to(Gene.entrezgeneSymbols));
+      _dao.need(library,
+                Library.wells.to(Well.reagents).to(SilencingReagent.facilityGene).to(Gene.genbankAccessionNumbers));
       _dao.need(library, 
-                Library.wells.to(Well.reagents).to(SilencingReagent.vendorGene).to(Gene.entrezgeneSymbols).getPath(),
-                Library.wells.to(Well.reagents).to(SilencingReagent.vendorGene).to(Gene.genbankAccessionNumbers).getPath());
+                Library.wells.to(Well.reagents).to(SilencingReagent.vendorGene).to(Gene.entrezgeneSymbols));
+      _dao.need(library,
+                Library.wells.to(Well.reagents).to(SilencingReagent.vendorGene).to(Gene.genbankAccessionNumbers));
     }
     else if (library.getReagentType().equals(SmallMoleculeReagent.class)) { 
-      _dao.need(library, Library.wells.to(Well.reagents).to(SmallMoleculeReagent.compoundNames).getPath());
-      _dao.need(library, Library.wells.to(Well.reagents).to(SmallMoleculeReagent.molfileList).getPath());
+      _dao.need(library, Library.wells.to(Well.reagents).to(SmallMoleculeReagent.compoundNames));
+      _dao.need(library, Library.wells.to(Well.reagents).to(SmallMoleculeReagent.molfileList));
     }
     else {
-      _dao.need(library, Library.wells.to(Well.reagents).getPath());
+      _dao.need(library, Library.wells.to(Well.reagents));
     }
     
     library.getContentsVersions().remove(libraryContentsVersion); // will be deleted by Hibernate, thanks to delete-orphan cascade
@@ -191,89 +178,12 @@ public class LibrariesDAOImpl extends AbstractDAO implements LibrariesDAO
     log.info("deleted library contents version " + libraryContentsVersion.getVersionNumber() + " for library " + library.getLibraryName());
   }
 
-  @SuppressWarnings("unchecked")
   public Set<Well> findWellsForPlate(int plate)
   {
-    return new TreeSet<Well>(getHibernateTemplate().find("from Well where plateNumber = ?", plate));
-  }
-
-  /**
-   * Efficiently loads all wells for the specified library into the current
-   * Hibernate session, thus avoiding subsequent database accesses when any of the library's
-   * wells are subsequently accessed. If the library has not had its wells
-   * created yet, they will be created. Created wells will be in the Hibernate
-   * session after invoking this method, but will not yet be flushed to the
-   * database (HQL queries will fail to find them). If the library is transient
-   * (i.e., never persisted, and thus not in the Hibernate session), it will be
-   * persisted (entity ID will be assigned, it will be managed by the Hibernate
-   * session, but not flushed to the database). If the library is detached, it
-   * will be reattached to the session.
-   *
-   * @throws IllegalArgumentException if the provided library instance is not
-   *           the same as the one in the current Hibernate session.
-   */
-  public void loadOrCreateWellsForLibrary(Library library)
-  {
-    // Cases that must be handled:
-    // 1. Library instance is transient (not in Hibernate session), and not in database
-    // 2. Library instance is detached (not in Hibernate session), but is in database
-    // 3. Library instance is managed (in Hibernate session), but not in database (awaiting flush)
-    // 4. Library instance is managed (in Hibernate session), and in database
-
-    if (library.getLibraryId() == null) { // case 1
-      log.debug("library is transient");
-    }
-    else { // case 2, 3, or 4
-      // reload library, fetching all wells;
-      // if library instance is detached (case 2), we load it from the database
-      // if library instance is already in session (case 3 or 4), we obtain that instance
-      Library reloadedLibrary = _dao.reloadEntity(library, false, "wells");
-      if (reloadedLibrary == null) { // case 2
-        log.debug("library is Hibernate-managed, but not yet persisted in database");
-        _dao.saveOrUpdateEntity(library);
-      }
-      else { // case 4
-        log.debug("library is Hibernate-managed and persisted in database");
-        // if library instance is not same instance as the one in the session, this method cannot be called
-        if (reloadedLibrary != library) {
-          throw new IllegalArgumentException("provided Library instance is not the same as the one in the current Hibernate session; cannot load/create wells for that library");
-        }
-      }
-    }
-
-    // create wells for library, if needed;
-    // it is expected that either all wells will have been created, or none were created, but if 
-    int nominalWellCount = ((library.getEndPlate() - library.getStartPlate()) + 1) * library.getPlateSize().getWellCount();
-    int nWellsCreated = 0;
-    if (library.getWells().size() <= nominalWellCount) {
-      for (int iPlate = library.getStartPlate(); iPlate <= library.getEndPlate(); ++iPlate) {
-        for (int iRow = 0; iRow < library.getPlateSize().getRows(); ++iRow) {
-          for (int iCol = 0; iCol < library.getPlateSize().getColumns(); ++iCol) {
-            WellKey wellKey = new WellKey(iPlate, iRow, iCol);
-            try {
-              library.createWell(wellKey, LibraryWellType.UNDEFINED);
-              ++nWellsCreated;
-            }
-            catch (DuplicateEntityException e) {
-              log.debug("ignore failed creation attempt for any well that has been created in the past: " + e.getMessage());
-              // ignore failed creation attempt for any well that has been created in the past
-            }
-          }
-        }
-      }
-      // persistEntity() call will place all wells in session *now*
-      // (as opposed t saveOrUpdate(), which does upon session flush), so that
-      // subsequent code can find them in the Hibernate session
-      _dao.persistEntity(library);
-      log.info("created " + nWellsCreated + " wells for library " + library.getLibraryName());
-      if (nWellsCreated < nominalWellCount) {
-        log.warn("needed to create only " + nWellsCreated + " of " + nominalWellCount + " wells for library " + library.getLibraryName());
-      }
-    }
+    return new TreeSet<Well>(getHibernateSession().createQuery("from Well where plateNumber = ?").setInteger(0, plate).list());
   }
 
   @Override
-  @SuppressWarnings("unchecked")
   public Map<Copy,Volume> findRemainingVolumesInWellCopies(Well well, CopyUsageType copyUsageType)
   {
     String hql = "select c, p.wellVolume, " +
@@ -283,11 +193,13 @@ public class LibrariesDAOImpl extends AbstractDAO implements LibrariesDAO
     
     
     List<Object[]> copyVolumes = 
-      getHibernateTemplate().find(hql, 
-                                  new Object[] { well.getWellKey().toString(), well.getPlateNumber(),
-                                    PlateStatus.NOT_SPECIFIED, // TODO: temporarily allowing NOT_SPECIFIED status plates to be considered; see [#2750]
-                                    PlateStatus.AVAILABLE,
-                                    CopyUsageType.CHERRY_PICK_SOURCE_PLATES });
+      getHibernateSession().createQuery(hql).
+        setString(0, well.getWellKey().toString()).
+        setInteger(1, well.getPlateNumber()).
+        setParameter(2, PlateStatus.NOT_SPECIFIED). // TODO: temporarily allowing NOT_SPECIFIED status plates to be considered; see [#2750]
+		    setParameter(3, PlateStatus.AVAILABLE).
+        setParameter(4, CopyUsageType.CHERRY_PICK_SOURCE_PLATES).
+        list();
     Map<Copy,Volume> remainingVolumes = Maps.newHashMap();
     for (Object[] row : copyVolumes) {
       Volume remainingVolume = 
@@ -303,7 +215,10 @@ public class LibrariesDAOImpl extends AbstractDAO implements LibrariesDAO
   public int countExperimentalWells(int startPlate, int endPlate)
   {
     String hql = "select count(*) from Well w where w.plateNumber between ? and ? and w.libraryWellType = 'experimental'";
-    return ((Long) getHibernateTemplate().find(hql, Lists.newArrayList(startPlate, endPlate).toArray()).get(0)).intValue(); 
+    return ((Long) getHibernateSession().createQuery(hql).
+      setInteger(0, startPlate).
+      setInteger(1, endPlate).
+      list().get(0)).intValue();
   }
   
   @Override
@@ -312,8 +227,8 @@ public class LibrariesDAOImpl extends AbstractDAO implements LibrariesDAO
     final HqlBuilder hql = new HqlBuilder().
       select("l", "screenType").distinctProjectionValues().
       from(Reagent.class, "r").
-      from("r", Reagent.well.getLeaf(), "w").
-      from("w", Well.library.getLeaf(), "l").
+      from("r", Reagent.well, "w").
+      from("w", Well.library, "l").
       whereIn("r", Reagent.vendorIdentifier.getPath(), reagentIds);
     List<ScreenType> screenTypes = runQuery(new Query<ScreenType>() {
       public List<ScreenType> execute(Session session)
@@ -331,7 +246,7 @@ public class LibrariesDAOImpl extends AbstractDAO implements LibrariesDAO
     final HqlBuilder hql = new HqlBuilder().
     select("l", "screenType").distinctProjectionValues().
     from(Well.class, "w").
-    from("w", Well.library.getLeaf(), "l").
+      from("w", Well.library, "l").
     whereIn("w", "id", wellIds);
     List<ScreenType> screenTypes = runQuery(new Query<ScreenType>() {
       public List<ScreenType> execute(Session session)
@@ -346,7 +261,10 @@ public class LibrariesDAOImpl extends AbstractDAO implements LibrariesDAO
   public Plate findPlate(int plateNumber, String copyName)
   {
     String hql = "select p from Plate p left join fetch p.copy c left join fetch c.library where p.plateNumber = ? and c.name = ?";
-    List<Plate> plates = (List<Plate>) getHibernateTemplate().find(hql, new Object[] { Integer.valueOf(plateNumber), copyName });
+    List<Plate> plates = (List<Plate>) getHibernateSession().createQuery(hql).
+      setInteger(0, plateNumber).
+      setString(1, copyName).
+      list();
     if (plates.size() == 0) {
       return null;
     }
@@ -421,7 +339,7 @@ public class LibrariesDAOImpl extends AbstractDAO implements LibrariesDAO
         {
           HqlBuilder builder = new HqlBuilder();
           builder.from(Plate.class, "p");
-          if (copyName != null) builder.from("p", "copy", "c", JoinType.INNER);
+          if (copyName != null) builder.from("p", Plate.copy, "c", JoinType.INNER);
           builder.select("p").distinctProjectionValues();
           if (first != second) {
             builder.where("p", "plateNumber", Operator.GREATER_THAN_EQUAL, first);
@@ -445,7 +363,7 @@ public class LibrariesDAOImpl extends AbstractDAO implements LibrariesDAO
         {
           HqlBuilder builder = new HqlBuilder();
           builder.from(Plate.class, "p");
-          builder.from("p", Plate.copy.getPath(), "c", JoinType.LEFT_FETCH);
+          builder.from("p", Plate.copy, "c", JoinType.LEFT_FETCH);
           builder.select("p").distinctProjectionValues();
           for (String copyName : copies) {
             builder.where("c", "name", Operator.TEXT_LIKE, copyName);

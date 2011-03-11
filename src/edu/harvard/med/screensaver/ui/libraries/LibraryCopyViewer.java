@@ -59,6 +59,7 @@ public class LibraryCopyViewer extends SearchResultContextEntityViewerBackingBea
           libraryCopySearchResults);
     _libraryCopyDetail = libraryCopyDetail;
     _libraryCopyPlateSearchResults = libraryCopyPlateSearchResults;
+    _libraryCopyPlateSearchResults.setNestedIn(this);
     _libraryCopyPlateCommentSearchResults = libraryCopyPlateCommentSearchResults;
     getIsPanelCollapsedMap().put("plateComments", true);
     getIsPanelCollapsedMap().put("plates", true);
@@ -89,7 +90,7 @@ public class LibraryCopyViewer extends SearchResultContextEntityViewerBackingBea
   @Override
   protected void initializeEntity(Copy copy)
   {
-    getDao().needReadOnly(copy, Copy.library.getPath());
+    getDao().needReadOnly(copy, Copy.library);
   }
   
   /**

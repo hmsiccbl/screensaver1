@@ -86,6 +86,7 @@ public class LibraryViewer extends SearchResultContextEntityViewerBackingBean<Li
     _libraryCopiesBrowser = libraryCopiesBrowser;
     _libraryCopyDetail = libraryCopyDetail;
     _libraryCopyPlateSearchResults = libraryCopyPlateSearchResults;
+    _libraryCopyPlateSearchResults.setNestedIn(this);
     _libraryCopyPlateCommentSearchResults = libraryCopyPlateCommentSearchResults;
     getIsPanelCollapsedMap().put("copies", true);
     getIsPanelCollapsedMap().put("plateComments", true);
@@ -98,9 +99,11 @@ public class LibraryViewer extends SearchResultContextEntityViewerBackingBean<Li
   protected void initializeEntity(Library library)
   {
     getDao().needReadOnly(library, 
-                          Library.contentsVersions.to(LibraryContentsVersion.loadingActivity).to(Activity.performedBy).getPath(),
-                          Library.contentsVersions.to(LibraryContentsVersion.releaseActivity).to(Activity.performedBy).getPath(),
-                          Library.copies.getPath());
+                          Library.contentsVersions.to(LibraryContentsVersion.loadingActivity).to(Activity.performedBy));
+    getDao().needReadOnly(library,
+                          Library.contentsVersions.to(LibraryContentsVersion.releaseActivity).to(Activity.performedBy));
+    getDao().needReadOnly(library,
+                          Library.copies);
   }
   
   @Override

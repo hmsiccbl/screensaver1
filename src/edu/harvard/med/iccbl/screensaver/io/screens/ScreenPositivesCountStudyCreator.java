@@ -25,20 +25,15 @@ import edu.harvard.med.screensaver.db.DAOTransactionRollbackException;
 import edu.harvard.med.screensaver.db.GenericEntityDAO;
 import edu.harvard.med.screensaver.db.ScreenDAO;
 import edu.harvard.med.screensaver.db.ScreenResultsDAO;
-import edu.harvard.med.screensaver.io.screens.StudyCreator;
-import edu.harvard.med.screensaver.model.screenresults.AnnotationType;
 import edu.harvard.med.screensaver.model.screenresults.ScreenResult;
-import edu.harvard.med.screensaver.model.screens.ProjectPhase;
 import edu.harvard.med.screensaver.model.screens.Screen;
-import edu.harvard.med.screensaver.model.screens.ScreenDataSharingLevel;
 import edu.harvard.med.screensaver.model.screens.ScreenType;
-import edu.harvard.med.screensaver.model.screens.StudyType;
 import edu.harvard.med.screensaver.model.users.AdministratorUser;
-import edu.harvard.med.screensaver.model.users.LabHead;
 import edu.harvard.med.screensaver.service.EmailService;
 import edu.harvard.med.screensaver.service.screenresult.ScreenResultReporter;
 
 /**
+ * TODO: Move the transactional code out of this class and into service methods
  * Create a studies to count overlapping positives and to count confirmed positive statistics.<br>
  * 1. Overlapping positives:<br>
  * see [#2268] new column to display # overlapping screens <br>
@@ -161,6 +156,7 @@ public class ScreenPositivesCountStudyCreator extends AdminEmailApplication
       final ScreenResultsDAO screenResultsDao = (ScreenResultsDAO) app.getSpringBean("screenResultsDao");
       final ScreenDAO screenDao = (ScreenDAO) app.getSpringBean("screenDao");
 
+      //TODO: Move the transactional code out of this class and into service methods
       dao.doInTransaction(new DAOTransaction() {
         public void runTransaction()
         {
@@ -245,7 +241,7 @@ public class ScreenPositivesCountStudyCreator extends AdminEmailApplication
                 }
             }
 
-            int count = app.createReagentCountStudy(admin,
+            int count = report.createReagentCountStudy(admin,
                                                     studyFacilityId,
                                                 title,
                                                 summary,
@@ -253,9 +249,7 @@ public class ScreenPositivesCountStudyCreator extends AdminEmailApplication
                                                 annotationDesc,
                                                 DEFAULT_OVERALL_ANNOTATION_NAME,
                                                 overallAnnotationDesc,
-                                                screenType,
-                                                dao,
-                                                    report);
+                                                screenType);
             
             InternetAddress adminEmail = app.getEmail(admin);
             String subject = "Study created: " + study.getTitle(); //app.getMessages().getMessage("Study generated");
@@ -285,58 +279,4 @@ public class ScreenPositivesCountStudyCreator extends AdminEmailApplication
     System.exit(1); // error
   }
 
-  /**
-   * @return the count of reagents
-   */
-  public int createReagentCountStudy(AdministratorUser admin,
-                                     String studyName,
-                                     String title,
-                                     String summary,
-                                     String positiveCountAnnotationName,
-                                     String positiveCountAnnotationDescription,
-                                     String overallCountAnnotationName,
-                                     String overallCountAnnotationDesc,
-                                     ScreenType screenType,
-                                     GenericEntityDAO dao,
-                                     ScreenResultReporter report)
-  {
-    Screen study = dao.findEntityByProperty(Screen.class,
-                                            Screen.facilityId.getPropertyName(),
-                                            studyName);
-    if (study != null) {
-      String errMsg = "study " + studyName +
-        " already exists (use --replace flag to delete existing study first)";
-      throw new IllegalArgumentException(errMsg);
-    }
-
-    LabHead labHead = (LabHead) StudyCreator.findOrCreateScreeningRoomUser(dao,
-                                                                           admin.getFirstName(),
-                                                                           admin.getLastName(),
-                                                                           admin.getEmail(),
-                                                                           true,
-                                                                           null);
-
-    study = new Screen(admin,
-                       studyName,
-                       labHead,
-                       labHead,
-                       screenType,
-                       StudyType.IN_SILICO,
-                       ProjectPhase.ANNOTATION,
-                       title);
-    study.setDataSharingLevel(ScreenDataSharingLevel.SHARED);
-    study.setSummary(summary);
-
-    AnnotationType positivesCountAnnotType = study.createAnnotationType(positiveCountAnnotationName,
-                                                                        positiveCountAnnotationDescription,
-                                                                        true);
-    AnnotationType overallCountAnnotType = study.createAnnotationType(overallCountAnnotationName,
-                                                                      overallCountAnnotationDesc,
-                                                                      true);
-    dao.persistEntity(study);
-    dao.persistEntity(positivesCountAnnotType);
-    dao.persistEntity(overallCountAnnotType);
-
-    return report.createScreenedReagentCounts(screenType, study, positivesCountAnnotType, overallCountAnnotType);
-  }
 }

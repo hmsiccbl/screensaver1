@@ -12,6 +12,8 @@ package edu.harvard.med.screensaver.db;
 import java.util.List;
 import java.util.Map;
 
+import com.google.common.collect.Maps;
+import com.google.common.collect.Sets;
 import org.apache.commons.collections.Transformer;
 import org.apache.log4j.Logger;
 import org.hibernate.CacheMode;
@@ -19,9 +21,6 @@ import org.hibernate.Query;
 import org.hibernate.ScrollMode;
 import org.hibernate.ScrollableResults;
 import org.hibernate.Session;
-
-import com.google.common.collect.Lists;
-import com.google.common.collect.Maps;
 
 import edu.harvard.med.screensaver.db.hqlbuilder.HqlBuilder;
 import edu.harvard.med.screensaver.db.hqlbuilder.JoinType;
@@ -34,6 +33,7 @@ import edu.harvard.med.screensaver.model.screenresults.AnnotationType;
 import edu.harvard.med.screensaver.model.screenresults.AnnotationValue;
 import edu.harvard.med.screensaver.model.screenresults.AssayWell;
 import edu.harvard.med.screensaver.model.screenresults.DataColumn;
+import edu.harvard.med.screensaver.model.screenresults.DataType;
 import edu.harvard.med.screensaver.model.screenresults.ResultValue;
 import edu.harvard.med.screensaver.model.screenresults.ScreenResult;
 import edu.harvard.med.screensaver.model.screens.Screen;
@@ -89,83 +89,77 @@ public class ScreenResultsDAOImpl extends AbstractDAO implements ScreenResultsDA
     return result2;
   }
 
-  // TODO: return a list of column names? since we only need the DC.name and the screen_number
   public List<DataColumn> findMutualPositiveColumns(final ScreenResult screenResult)
   {
-    List<DataColumn> columns = runQuery(new edu.harvard.med.screensaver.db.Query() {
+    return findMutualPositiveColumns(new HqlBuilderCallback() {
+      @Override
+      public void apply(HqlBuilder hql)
+      {
+        hql.where("aw1", "screenResult", Operator.EQUAL, screenResult).
+          where("aw2", "screenResult", Operator.NOT_EQUAL, screenResult); // ignore data columns from the screen result passed in
+      }
+    });
+  }
+
+  public List<DataColumn> findMutualPositiveColumns(final HqlBuilderCallback hqlBuilderCallback)
+  {
+
+    edu.harvard.med.screensaver.db.Query query = new edu.harvard.med.screensaver.db.Query() {
       public List<?> execute(Session session)
-            {
-        return new HqlBuilder().select("dc").distinctProjectionValues().
+      {
+        HqlBuilder hql = new HqlBuilder().
+          select("dc").distinctProjectionValues().
           from(AssayWell.class, "aw1").
-          from("aw1", AssayWell.screenResult.getPath(), "sr1", JoinType.INNER).
-          from("sr1", ScreenResult.screen.getPath(), "s1", JoinType.INNER).
           from(AssayWell.class, "aw2").
-          from("aw2", AssayWell.screenResult.getPath(), "sr2", JoinType.INNER).
-          from("sr2", ScreenResult.screen.getPath(), "s2", JoinType.INNER).
-          from("sr2", ScreenResult.dataColumns.getPath(), "dc", JoinType.INNER).
+          from("aw2", AssayWell.screenResult, "sr2", JoinType.INNER).
+          from("sr2", ScreenResult.dataColumns, "dc", JoinType.INNER).
           where("aw1", "libraryWell", Operator.EQUAL, "aw2", "libraryWell").
           where("aw1", "positive", Operator.EQUAL, Boolean.TRUE).
           where("aw2", "positive", Operator.EQUAL, Boolean.TRUE).
-          where("s1", Operator.NOT_EQUAL, "s2"). /* don't consider my screens as "others" screens */
-        where("s1", Operator.EQUAL, screenResult.getScreen()).
-          toQuery(session, true).list();
+          whereIn("dc", "dataType", Sets.newHashSet(DataType.POSITIVE_INDICATOR_BOOLEAN, DataType.POSITIVE_INDICATOR_PARTITION));
+        hqlBuilderCallback.apply(hql);
+        return hql.toQuery(session, true).list();
       }
-    });
-    // TODO: integrate the following into the HQL... sde4
-    List<DataColumn> finalColumns = Lists.newLinkedList();
-    for (DataColumn dc : columns) {
-      if (dc.isPositiveIndicator()) {
-        // eager fetch the screen for the screen number, as a favor to the calling code
-        _dao.reloadEntity(dc, true, DataColumn.ScreenResult.to(ScreenResult.screen).getPath());
-        finalColumns.add(dc);
-      }
-    }
-    return finalColumns;
+    };
+
+    return runQuery(query);
   }
 
-  public void deleteScreenResult(final ScreenResult screenResultIn)
+  public void deleteScreenResult(ScreenResult screenResultIn)
   {
-    runQuery(new edu.harvard.med.screensaver.db.Query() 
-    {
-      public List execute(Session session)
-      {
-        ScreenResult screenResult = (ScreenResult) getHibernateTemplate().get(ScreenResult.class, screenResultIn.getEntityId());
-        Query query;
-        int rows;
-        
-        log.info("delete Assay Wells");
-        query = session.createQuery("delete AssayWell a where a.screenResult.id = :screenResultId");
-        query.setParameter("screenResultId", screenResult.getScreenResultId());
-        rows = query.executeUpdate();
-        log.info("deleted " + rows + " AssayWells for " + screenResult);
-        screenResult.getAssayWells().clear();
-        
-        log.info("delete Assay Plates to be orphaned (i.e., without library screenings)");
-        query = session.createQuery("delete AssayPlate ap where ap.screen.id = :screenId and ap.libraryScreening is null");
-        query.setParameter("screenId", screenResult.getScreen().getScreenId());
-        rows = query.executeUpdate();
-        log.info("deleted " + rows + " AssayPlates for " + screenResult);
+    Session session = getHibernateSession();
+    ScreenResult screenResult = (ScreenResult) session.get(ScreenResult.class, screenResultIn.getEntityId());
 
-        log.info("delete ResultValues");
-        int cumRows = 0;
-        query = session.createQuery("delete ResultValue v where v.dataColumn.id = :col");
-        for (DataColumn col : screenResult.getDataColumns()) {
-          query.setParameter("col", col.getDataColumnId());
-          rows = query.executeUpdate();
-          cumRows += rows;
-          log.debug("deleted " + rows + " result values for " + col);
-          col.getResultValues().clear();
-        }
-        log.info("deleted a total of " + cumRows + " result values");
-        //screenResult.getPlateNumbers().clear();
-        // dissociate ScreenResult from Screen
-        screenResult.getScreen().clearScreenResult();
-        getHibernateTemplate().delete(screenResult);
-        flush();
-        log.info("deleted " + screenResult);
-        return null;
-      }
-    });
+    log.info("delete Assay Wells");
+    Query query = session.createQuery("delete AssayWell a where a.screenResult.id = :screenResultId");
+    query.setParameter("screenResultId", screenResult.getScreenResultId());
+    int rows = query.executeUpdate();
+    log.info("deleted " + rows + " AssayWells for " + screenResult);
+    screenResult.getAssayWells().clear();
+
+    log.info("delete Assay Plates to be orphaned (i.e., without library screenings)");
+    query = session.createQuery("delete AssayPlate ap where ap.screen.id = :screenId and ap.libraryScreening is null");
+    query.setParameter("screenId", screenResult.getScreen().getScreenId());
+    rows = query.executeUpdate();
+    log.info("deleted " + rows + " AssayPlates for " + screenResult);
+
+    log.info("delete ResultValues");
+    int cumRows = 0;
+    query = session.createQuery("delete ResultValue v where v.dataColumn.id = :col");
+    for (DataColumn col : screenResult.getDataColumns()) {
+      query.setParameter("col", col.getDataColumnId());
+      rows = query.executeUpdate();
+      cumRows += rows;
+      log.debug("deleted " + rows + " result values for " + col);
+      col.getResultValues().clear();
+    }
+    log.info("deleted a total of " + cumRows + " result values");
+    //screenResult.getPlateNumbers().clear();
+    // dissociate ScreenResult from Screen
+    screenResult.getScreen().clearScreenResult();
+    session.delete(screenResult);
+    flush();
+    log.info("deleted " + screenResult);
   }
 
   //TODO: move to report class
@@ -174,7 +168,7 @@ public class ScreenResultsDAOImpl extends AbstractDAO implements ScreenResultsDA
                                           AnnotationType positiveAnnotationType,
                                           AnnotationType overallAnnotationType)
   {
-    // Break this into two separate queries because of an apparent Hibernate bug:
+    // Break this into two separate queries because of Hibernate bug (http://opensource.atlassian.com/projects/hibernate/browse/HHH-1615):
     // when using the "group by" clause with a full object (as opposed to an attribute of the object/table),
     // Hibernate is requiring that every attribute of the object be specified in a "group by" and not 
     // just the object itself.  so the workaround is to query once to get the id's then once again to 
@@ -188,9 +182,9 @@ public class ScreenResultsDAOImpl extends AbstractDAO implements ScreenResultsDA
         builder.select("r", "id").
           selectExpression("count(*)").
           from(AssayWell.class, "aw").
-          from("aw", AssayWell.libraryWell.getPath(), "w", JoinType.INNER).
-          from("w", Well.latestReleasedReagent.getPath(), "r", JoinType.INNER).
-          from("w", Well.library.getPath(), "l", JoinType.INNER).
+                from("aw", AssayWell.libraryWell, "w", JoinType.INNER).
+                from("w", Well.latestReleasedReagent, "r", JoinType.INNER).
+                from("w", Well.library, "l", JoinType.INNER).
           where("l", "screenType", Operator.EQUAL, screenType).
           where("w", "libraryWellType", Operator.EQUAL, LibraryWellType.EXPERIMENTAL);
         builder.where("aw", "positive", Operator.EQUAL, Boolean.TRUE);
@@ -215,9 +209,9 @@ public class ScreenResultsDAOImpl extends AbstractDAO implements ScreenResultsDA
         builder.select("r", "id").
                 selectExpression("count(*)").
                 from(AssayWell.class, "aw").
-                from("aw", AssayWell.libraryWell.getPath(), "w", JoinType.INNER).
-                from("w", Well.library.getPath(), "l", JoinType.INNER).
-                from("w", Well.latestReleasedReagent.getPath(), "r", JoinType.INNER).
+                from("aw", AssayWell.libraryWell, "w", JoinType.INNER).
+                from("w", Well.library, "l", JoinType.INNER).
+                from("w", Well.latestReleasedReagent, "r", JoinType.INNER).
                 where("l", "screenType", Operator.EQUAL, screenType).
                 where("w", "libraryWellType", Operator.EQUAL, LibraryWellType.EXPERIMENTAL).
                 groupBy("r", "id");
@@ -240,9 +234,9 @@ public class ScreenResultsDAOImpl extends AbstractDAO implements ScreenResultsDA
         HqlBuilder builder = new HqlBuilder();
         builder.select("r").distinctProjectionValues().
                 from(AssayWell.class, "aw").
-                from("aw", AssayWell.libraryWell.getPath(), "w", JoinType.INNER).
-                from("w", Well.library.getPath(), "l", JoinType.INNER).
-                from("w", Well.latestReleasedReagent.getPath(), "r", JoinType.INNER).
+                from("aw", AssayWell.libraryWell, "w", JoinType.INNER).
+                from("w", Well.library, "l", JoinType.INNER).
+                from("w", Well.latestReleasedReagent, "r", JoinType.INNER).
                 where("l", "screenType", Operator.EQUAL, screenType).
                 where("w", "libraryWellType", Operator.EQUAL, LibraryWellType.EXPERIMENTAL);
         log.debug("hql: " + builder.toHql());
@@ -291,8 +285,10 @@ public class ScreenResultsDAOImpl extends AbstractDAO implements ScreenResultsDA
   public AssayWell findAssayWell(ScreenResult screenResult, WellKey wellKey)
   {
     
-    List result = getHibernateTemplate().find("select a from AssayWell a where a.screenResult.id = ? and a.libraryWell.id = ?",
-                                              new Object[] { screenResult.getEntityId(), wellKey.toString() });
+    List result = getHibernateSession().createQuery("select a from AssayWell a where a.screenResult.id = ? and a.libraryWell.id = ?").
+      setParameter(0, screenResult.getEntityId()).
+      setParameter(1, wellKey.toString()).
+      list();
     if (result.size() == 0) {
       return null;
     }
@@ -308,82 +304,37 @@ public class ScreenResultsDAOImpl extends AbstractDAO implements ScreenResultsDA
    * poses memory performance issues.
    */
   //TODO: move this to the report class
-  private int populateStudyReagentLinkTable(final int screenId)
+  private int populateStudyReagentLinkTable(int screenId)
   {
-    final int[] result = new int[1];
-    runQuery(new edu.harvard.med.screensaver.db.Query() {
-      public List<?> execute(Session session)
-      {
-        String sql =
-          "insert into study_reagent_link " +
-          "(study_id,reagent_id) " +
-          "select :studyId as study_id, " +
-          "reagent_id from " +
-          "(select distinct(reagent_id) " +
-          "from reagent " +
-          "join annotation_value using(reagent_id) " +
-          "join annotation_type using(annotation_type_id) " +
-          "where study_id = :studyId ) a";
+    String sql =
+      "insert into study_reagent_link " +
+        "(study_id,reagent_id) " +
+        "select :studyId as study_id, " +
+        "reagent_id from " +
+        "(select distinct(reagent_id) " +
+        "from reagent " +
+        "join annotation_value using(reagent_id) " +
+        "join annotation_type using(annotation_type_id) " +
+        "where study_id = :studyId ) a";
 
-        log.debug("sql: " + sql);
+    log.debug("sql: " + sql);
 
-        Query query = session.createSQLQuery(sql);
-        query.setParameter("studyId", screenId);
-        int rows = query.executeUpdate();
-        if (rows == 0) {
-          log.warn("No rows were updated: " +
-            query.getQueryString());
-        }
-        log.info("study_reagent_link updated: " + rows);
-        result[0] = rows;
-        return null;
-      }
-    });
-    return result[0];
+    javax.persistence.Query query = getEntityManager().createNativeQuery(sql);
+    query.setParameter("studyId", screenId);
+    int rows = query.executeUpdate();
+    log.info("study_reagent_link updated: " + rows);
+    return rows;
   }
-
-  //
-  //  public void populateScreenResultWellLinkTable(final int screenResultId)
-  //    throws DataModelViolationException
-  //  {
-  //    runQuery(new edu.harvard.med.screensaver.db.Query() {
-  //      public List<?> execute(Session session)
-  //      {
-  //        String sql = "insert into screen_result_well_link (screen_result_id, well_id) "
-  //          + "select :screenResultId  as screen_result_id,"
-  //          + "well_id from (select distinct(well_id) from result_value "
-  //          + "join data_column using(data_column_id) "
-  //          + "where screen_result_id = :screenResultId and well_id is not null) as well_id";
-  //
-  //        log.debug("sql: " + sql);
-  //
-  //        Query query = session.createSQLQuery(sql);
-  //        query.setParameter("screenResultId", screenResultId);
-  //        int rows = query.executeUpdate();
-  //        if (rows == 0) {
-  //          throw new DataModelViolationException("No rows were updated: " +
-  //            query.getQueryString());
-  //    }
-  //        log.info("screen_result_well_link updated: " + rows);
-  //        return null;
-  //      }
-  //    });
-  //  }
 
   public ScreenResult getLatestScreenResult()
   {
-    List<ScreenResult> results = runQuery(new edu.harvard.med.screensaver.db.Query() {
-      public List<?> execute(Session session)
-            {
-        return new HqlBuilder().select("sr").distinctProjectionValues().
-          from(ScreenResult.class, "sr").
-          orderBy("sr", SortDirection.DESCENDING).
-          toQuery(session, true).list();
-      }
-    });
+    List<ScreenResult> result = new HqlBuilder().select("sr").distinctProjectionValues().
+      from(ScreenResult.class, "sr").
+      orderBy("sr", SortDirection.DESCENDING).
+      toQuery(getHibernateSession(), true).list();
 
-    if (results == null || results.isEmpty()) return null;
-    return results.get(0);
+    if (result == null || result.isEmpty()) return null;
+    return result.get(0);
   }
 
 

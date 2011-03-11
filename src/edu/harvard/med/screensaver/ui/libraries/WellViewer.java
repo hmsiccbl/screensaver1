@@ -23,10 +23,9 @@ import java.util.Set;
 import javax.faces.model.DataModel;
 import javax.faces.model.ListDataModel;
 
-import org.apache.log4j.Logger;
-
 import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.Lists;
+import org.apache.log4j.Logger;
 
 import edu.harvard.med.screensaver.ScreensaverConstants;
 import edu.harvard.med.screensaver.db.GenericEntityDAO;
@@ -177,7 +176,10 @@ public class WellViewer extends SearchResultContextEntityViewerBackingBean<Well,
   {
     if (_otherWellsDataModel == null) {
       if (_versionedReagent != null) {
-        Set<Reagent> reagents = _librariesDao.findReagents(_versionedReagent.getVendorId(), true /*Reagent.well.to(Well.library).getPath()*/);
+        Set<Reagent> reagents = _librariesDao.findReagents(_versionedReagent.getVendorId(), true /*
+                                                                                                  * Reagent.well.to(Well.
+                                                                                                  * library)
+                                                                                                  */);
         reagents.remove(_versionedReagent);
         _otherWellsDataModel = new ListDataModel(Lists.newArrayList(reagents));
       }
@@ -202,7 +204,7 @@ public class WellViewer extends SearchResultContextEntityViewerBackingBean<Well,
   {
     List<AnnotationValue> annotationValues = new ArrayList<AnnotationValue>();
     if (_versionedReagent != null) {
-      getDao().needReadOnly(_versionedReagent, Reagent.annotationValues.getPath());
+      getDao().needReadOnly(_versionedReagent, Reagent.annotationValues);
       annotationValues.addAll(_versionedReagent.getAnnotationValues().values());
       for (Iterator iterator = annotationValues.iterator(); iterator.hasNext();) {
         AnnotationValue annotationValue = (AnnotationValue) iterator.next();
@@ -268,24 +270,24 @@ public class WellViewer extends SearchResultContextEntityViewerBackingBean<Well,
   @Override
   protected void initializeEntity(Well well)
   {
-    getDao().needReadOnly(well, Well.library.getPath());
-    getDao().needReadOnly(well, Well.deprecationActivity.getPath());
+    getDao().needReadOnly(well, Well.library);
+    getDao().needReadOnly(well, Well.deprecationActivity);
     _versionedReagent = _libraryContentsVersionRef.value() == null ? well.getLatestReleasedReagent()
       : well.getReagents().get(_libraryContentsVersionRef.value());
     if (well.getLibrary().getReagentType().equals(SilencingReagent.class)) {
-      getDao().needReadOnly(_versionedReagent, SilencingReagent.vendorGene.to(Gene.genbankAccessionNumbers).getPath());
-      getDao().needReadOnly(_versionedReagent, SilencingReagent.vendorGene.to(Gene.entrezgeneSymbols).getPath());
-      getDao().needReadOnly(_versionedReagent, SilencingReagent.facilityGene.to(Gene.genbankAccessionNumbers).getPath());
-      getDao().needReadOnly(_versionedReagent, SilencingReagent.facilityGene.to(Gene.entrezgeneSymbols).getPath());
-      getDao().needReadOnly(_versionedReagent, SilencingReagent.duplexWells.to(Well.library).getPath());
+      getDao().needReadOnly((SilencingReagent) _versionedReagent, SilencingReagent.vendorGene.to(Gene.genbankAccessionNumbers));
+      getDao().needReadOnly((SilencingReagent) _versionedReagent, SilencingReagent.vendorGene.to(Gene.entrezgeneSymbols));
+      getDao().needReadOnly((SilencingReagent) _versionedReagent, SilencingReagent.facilityGene.to(Gene.genbankAccessionNumbers));
+      getDao().needReadOnly((SilencingReagent) _versionedReagent, SilencingReagent.facilityGene.to(Gene.entrezgeneSymbols));
+      getDao().needReadOnly((SilencingReagent) _versionedReagent, SilencingReagent.duplexWells.to(Well.library));
     }
     if (well.getLibrary().getReagentType().equals(SmallMoleculeReagent.class)) {
-      getDao().needReadOnly(_versionedReagent, SmallMoleculeReagent.compoundNames.getPath());
-      getDao().needReadOnly(_versionedReagent, SmallMoleculeReagent.pubchemCids.getPath());
-      getDao().needReadOnly(_versionedReagent, SmallMoleculeReagent.chembankIds.getPath());
-      getDao().needReadOnly(_versionedReagent, SmallMoleculeReagent.molfileList.getPath());
+      getDao().needReadOnly((SmallMoleculeReagent) _versionedReagent, SmallMoleculeReagent.compoundNames);
+      getDao().needReadOnly((SmallMoleculeReagent) _versionedReagent, SmallMoleculeReagent.pubchemCids);
+      getDao().needReadOnly((SmallMoleculeReagent) _versionedReagent, SmallMoleculeReagent.chembankIds);
+      getDao().needReadOnly((SmallMoleculeReagent) _versionedReagent, SmallMoleculeReagent.molfileList);
     }
-    getDao().needReadOnly(_versionedReagent, Reagent.libraryContentsVersion.getPath());
+    getDao().needReadOnly(_versionedReagent, Reagent.libraryContentsVersion);
   }
 
   @Override
@@ -389,7 +391,7 @@ public class WellViewer extends SearchResultContextEntityViewerBackingBean<Well,
 
       List<SilencingReagent> duplexReagents = Lists.newArrayList();
       for (SilencingReagent dr : _report.getDuplexReagents()) {
-        duplexReagents.add(getDao().reloadEntity(dr, true, SilencingReagent.well.getPath()));
+        duplexReagents.add(getDao().reloadEntity(dr, true, SilencingReagent.well.castToSubtype(SilencingReagent.class)));
       }
       _columnDataModel = new ListDataModel(duplexReagents);
     }

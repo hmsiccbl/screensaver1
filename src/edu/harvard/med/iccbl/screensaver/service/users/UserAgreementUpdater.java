@@ -16,13 +16,12 @@ import java.util.Set;
 import java.util.SortedSet;
 import java.util.TreeSet;
 
-import org.apache.log4j.Logger;
-import org.joda.time.LocalDate;
-import org.springframework.transaction.annotation.Transactional;
-
 import com.google.common.base.Joiner;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Sets;
+import org.apache.log4j.Logger;
+import org.joda.time.LocalDate;
+import org.springframework.transaction.annotation.Transactional;
 
 import edu.harvard.med.iccbl.screensaver.policy.DataSharingLevelMapper;
 import edu.harvard.med.screensaver.db.GenericEntityDAO;
@@ -40,7 +39,7 @@ import edu.harvard.med.screensaver.util.Pair;
 
 public class UserAgreementUpdater
 {
-  static final String USER_AGREEMENT_ATTACHED_FILE_TYPE = "2009 ICCB-L/NSRB Small Molecule User Agreement";
+  static final String USER_AGREEMENT_ATTACHED_FILE_TYPE = "2010 ICCB-L/NSRB Small Molecule User Agreement";
   static final String USER_AGREEMENT_CHECKLIST_ITEM_NAME = "Current Small Molecule User Agreement active";
   private static Logger log = Logger.getLogger(UserAgreementUpdater.class);
   

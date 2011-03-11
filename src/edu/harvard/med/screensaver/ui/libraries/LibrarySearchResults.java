@@ -277,10 +277,10 @@ public class LibrarySearchResults extends EntityBasedEntitySearchResults<Library
       {
         hql.
           from(Screen.class, "s").
-          from("s", Screen.assayPlates.getPath(), "ap").
-          from("ap", AssayPlate.plateScreened.getPath(), "p").
-          from("p", Plate.copy.getPath(), "c").
-          from("c", Copy.library.getPath(), "l").
+          from("s", Screen.assayPlates, "ap").
+          from("ap", AssayPlate.plateScreened, "p").
+          from("p", Plate.copy, "c").
+          from("c", Copy.library, "l").
           where("s", screen).
           where("l", Operator.EQUAL, getRootAlias());
       }
@@ -298,10 +298,10 @@ public class LibrarySearchResults extends EntityBasedEntitySearchResults<Library
       {
         hql.
           from(LibraryScreening.class, "ls").
-          from("ls", LibraryScreening.assayPlatesScreened.getPath(), "ap").
-          from("ap", AssayPlate.plateScreened.getPath(), "p").
-          from("p", Plate.copy.getPath(), "c").
-          from("c", Copy.library.getPath(), "l").
+          from("ls", LibraryScreening.assayPlatesScreened, "ap").
+          from("ap", AssayPlate.plateScreened, "p").
+          from("p", Plate.copy, "c").
+          from("c", Copy.library, "l").
           where("ls", libraryScreening).
           where("l", Operator.EQUAL, getRootAlias());
       }

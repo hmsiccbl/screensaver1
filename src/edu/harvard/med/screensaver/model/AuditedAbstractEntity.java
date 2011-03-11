@@ -13,6 +13,7 @@ import java.io.Serializable;
 import java.util.Comparator;
 import java.util.SortedSet;
 
+import javax.persistence.CascadeType;
 import javax.persistence.Column;
 import javax.persistence.FetchType;
 import javax.persistence.JoinColumn;
@@ -22,7 +23,6 @@ import javax.persistence.Transient;
 
 import com.google.common.collect.Ordering;
 import com.google.common.collect.Sets;
-import org.hibernate.annotations.Immutable;
 import org.hibernate.annotations.Type;
 import org.joda.time.DateTime;
 
@@ -57,7 +57,6 @@ public abstract class AuditedAbstractEntity<K extends Serializable> extends Abst
 {
   private static final long serialVersionUID = 1L;
 
-  public static final RelationshipPath<AuditedAbstractEntity> dateCreated = RelationshipPath.from(AuditedAbstractEntity.class).to("dateCreated");
   public static final RelationshipPath<AuditedAbstractEntity> createdBy = RelationshipPath.from(AuditedAbstractEntity.class).to("createdBy", Cardinality.TO_ONE);
   public static final RelationshipPath<AuditedAbstractEntity> updateActivities = RelationshipPath.from(AuditedAbstractEntity.class).to("updateActivities");
   
@@ -80,8 +79,8 @@ public abstract class AuditedAbstractEntity<K extends Serializable> extends Abst
   }
 
   
-  @Immutable
-  @Column(nullable=false)
+  //@Immutable
+  @Column(nullable = false, updatable = false)
   @Type(type="org.joda.time.contrib.hibernate.PersistentDateTime")
   public DateTime getDateCreated()
   {
@@ -93,11 +92,10 @@ public abstract class AuditedAbstractEntity<K extends Serializable> extends Abst
     _createdTimestamp = createdTimeStamp;
   }
 
-  @ManyToOne(fetch=FetchType.LAZY, cascade={})
+  @ManyToOne(fetch = FetchType.LAZY, cascade = { CascadeType.PERSIST, CascadeType.MERGE })
   @JoinColumn(name="createdById", updatable=false)
-  @Immutable
   @org.hibernate.annotations.LazyToOne(value=org.hibernate.annotations.LazyToOneOption.PROXY)
-  @org.hibernate.annotations.Cascade(value={})
+  @org.hibernate.annotations.Cascade(value = { org.hibernate.annotations.CascadeType.SAVE_UPDATE })
   @edu.harvard.med.screensaver.model.annotations.ToOne(unidirectional=true, hasNonconventionalSetterMethod=true /* nullable, immutable, to-one relationships not supported by domain model testing framework */)
   public ScreensaverUser getCreatedBy()
   {

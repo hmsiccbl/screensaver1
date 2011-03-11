@@ -21,7 +21,6 @@ import org.apache.log4j.Logger;
 import org.joda.time.LocalDate;
 
 import edu.harvard.med.screensaver.model.libraries.Library;
-import edu.harvard.med.screensaver.model.libraries.LibraryContentsVersion;
 import edu.harvard.med.screensaver.model.libraries.LibraryType;
 import edu.harvard.med.screensaver.model.libraries.LibraryWellType;
 import edu.harvard.med.screensaver.model.libraries.MolecularFormula;
@@ -53,27 +52,26 @@ public class MakeDummyEntities
   // static members
 
   private static Logger log = Logger.getLogger(MakeDummyEntities.class);
-  private static TestDataFactory dataFactory = new TestDataFactory();
 
-  public static ScreeningRoomUser makeDummyUser(int screenFacilityId, String first, String last)
+  public static ScreeningRoomUser makeDummyUser(String screenFacilityId, String first, String last)
   {
     return new ScreeningRoomUser(first,
                                  last + "_" + screenFacilityId);
   }
 
-  public static LabHead makeDummyLabHead(int screenFacilityId, String first, String last)
+  public static LabHead makeDummyLabHead(String screenFacilityId, String first, String last)
   {
     return new LabHead(first,
                        last + "_" + screenFacilityId,
                        new LabAffiliation("affiliation " + screenFacilityId, AffiliationCategory.HMS));
   }
 
-  public static Screen makeDummyScreen(int screenFacilityId, ScreenType screenType)
+  public static Screen makeDummyScreen(String screenFacilityId, ScreenType screenType)
   {
-    return makeDummyScreen(Integer.toString(screenFacilityId), screenType, StudyType.IN_VITRO);
+    return makeDummyScreen(screenFacilityId, screenType, StudyType.IN_VITRO);
   }
 
-  public static Screen makeDummyScreen(int screenFacilityId)
+  public static Screen makeDummyScreen(String screenFacilityId)
   {
     return makeDummyScreen(screenFacilityId, ScreenType.SMALL_MOLECULE);
   }
@@ -82,9 +80,9 @@ public class MakeDummyEntities
                                        ScreenType screenType,
                                        StudyType studyType)
   {
-    LabHead labHead = makeDummyLabHead(screenFacilityId.hashCode(), "Lab", "Head");
-    ScreeningRoomUser leadScreener = makeDummyUser(screenFacilityId.hashCode(), "Lead", "Screener");
-    AdministratorUser admin = new AdministratorUser("Admin", "Screen", "", "", "", "", "", "");
+    LabHead labHead = makeDummyLabHead(screenFacilityId, "Lab", "Head");
+    ScreeningRoomUser leadScreener = makeDummyUser(screenFacilityId, "Lead", "Screener");
+    AdministratorUser admin = new AdministratorUser("Admin", "Screen");
     Screen screen = new Screen(admin,
                                screenFacilityId,
                                leadScreener,
@@ -207,7 +205,7 @@ public class MakeDummyEntities
       throw new IllegalArgumentException("too many plates requested");
     }
 
-    AdministratorUser admin = new AdministratorUser("Admin", "User", "", "", "", "", "", "");
+    AdministratorUser admin = new AdministratorUser("Admin", "Library");
     Library library = new Library(admin,
                                   "library " + id,
                                   "l" + id,
@@ -216,7 +214,7 @@ public class MakeDummyEntities
                                   startPlate,
                                   endPlate,
                                   PlateSize.WELLS_384);
-    dataFactory.newInstance(LibraryContentsVersion.class, library);
+    library.createContentsVersion(admin);
     int nWells = nPlates * library.getPlateSize().getWellCount();
     List<Well> wells = new ArrayList<Well>(nWells);
     for (int i = 0; i < nWells; ++i) {
@@ -250,6 +248,16 @@ public class MakeDummyEntities
     }
     library.getLatestContentsVersion().release(new AdministrativeActivity((AdministratorUser) library.getLatestContentsVersion().getLoadingActivity().getPerformedBy(), new LocalDate(), AdministrativeActivityType.LIBRARY_CONTENTS_VERSION_RELEASE));
     return library;
+  }
+
+  public static Screen makeDummyScreen(int i, ScreenType screenType)
+  {
+    return makeDummyScreen(Integer.toString(i), screenType);
+  }
+
+  public static Screen makeDummyScreen(int i)
+  {
+    return makeDummyScreen(Integer.toString(i));
   }
 
 }

@@ -133,8 +133,8 @@ public class LibraryCopySearchResults extends EntityBasedEntitySearchResults<Cop
 
     builder.from(Plate.class, "p")
            .from(AssayPlate.class, "ap")
-           .from("ap", AssayPlate.libraryScreening.getPath(), "ls")
-           .from("ap", AssayPlate.screenResultDataLoading.getPath(), "dl")
+           .from("ap", AssayPlate.libraryScreening, "ls")
+           .from("ap", AssayPlate.screenResultDataLoading, "dl")
            .whereIn("p", Plate.copy.getLeaf() + ".id", result.keySet())
            .where("ap", AssayPlate.plateScreened.getLeaf(), Operator.EQUAL, "p", "id")
            .groupBy("p", "copy")
@@ -193,9 +193,9 @@ public class LibraryCopySearchResults extends EntityBasedEntitySearchResults<Cop
     // calculate plate_screening_count - the total number of times individual plates from this copy have been screened, ignoring replicates)
     final HqlBuilder builder2 = new HqlBuilder();
     builder2.from(LibraryScreening.class, "ls")
-           .from("ls", LibraryScreening.assayPlatesScreened.getPath(), "ap")
-           .from("ap", AssayPlate.plateScreened.getPath(), "p")
-           .from("p", Plate.copy.getPath(), "c")
+           .from("ls", LibraryScreening.assayPlatesScreened, "ap")
+           .from("ap", AssayPlate.plateScreened, "p")
+           .from("p", Plate.copy, "c")
            .whereIn("p", Plate.copy.getLeaf() + ".id", result.keySet())
            .where("ap", "replicateOrdinal", Operator.EQUAL, 0)
            .groupBy("c", "id")

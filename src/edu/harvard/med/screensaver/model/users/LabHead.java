@@ -13,6 +13,7 @@ import java.util.HashSet;
 import java.util.Set;
 
 import javax.persistence.CascadeType;
+import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.FetchType;
 import javax.persistence.JoinColumn;
@@ -22,12 +23,10 @@ import javax.persistence.PrimaryKeyJoinColumn;
 import javax.persistence.Transient;
 
 import org.apache.log4j.Logger;
-import org.hibernate.annotations.Immutable;
 
 import edu.harvard.med.screensaver.model.AbstractEntityVisitor;
 import edu.harvard.med.screensaver.model.BusinessRuleViolationException;
 import edu.harvard.med.screensaver.model.DataModelViolationException;
-import edu.harvard.med.screensaver.model.annotations.Column;
 import edu.harvard.med.screensaver.model.meta.Cardinality;
 import edu.harvard.med.screensaver.model.meta.RelationshipPath;
 import edu.harvard.med.screensaver.model.screens.Screen;
@@ -75,6 +74,7 @@ public class LabHead extends ScreeningRoomUser
     return visitor.visit(this);
   }
 
+  /** for test code only */
   public LabHead(String firstName,
                  String lastName,
                  LabAffiliation labAffilliation)
@@ -109,8 +109,8 @@ public class LabHead extends ScreeningRoomUser
    *             subclass, but not in the superclass
    */
   @Override
-  @Immutable
-  @Column(hasNonconventionalSetterMethod=true)
+  @Column(updatable = false)
+  @edu.harvard.med.screensaver.model.annotations.Column(hasNonconventionalSetterMethod = true)
   @Transient
   public ScreeningRoomUserClassification getUserClassification() 
   {
@@ -207,8 +207,8 @@ public class LabHead extends ScreeningRoomUser
 
   /**
    * Get the lab affiliation.
-   *
-   * @return the lab affiliation; always null unless the user is a lab head
+   * 
+   * @return the lab affiliation
    */
   @ManyToOne(fetch=FetchType.EAGER,
              cascade={ CascadeType.PERSIST, CascadeType.MERGE })

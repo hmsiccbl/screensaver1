@@ -9,6 +9,8 @@
 
 package edu.harvard.med.screensaver.ui.arch.view.aspects;
 
+import javax.persistence.OptimisticLockException;
+
 import org.apache.log4j.Logger;
 import org.aspectj.lang.ProceedingJoinPoint;
 import org.springframework.core.Ordered;
@@ -30,16 +32,9 @@ import edu.harvard.med.screensaver.ui.arch.view.EditableEntityViewer;
  */
 public class UICommandExceptionHandlerAspect extends OrderedAspect implements Ordered
 {
-  // static members
-
   private static Logger log = Logger.getLogger(UICommandExceptionHandlerAspect.class);
 
-
-  // instance data members
-
   private Messages _messages;
-
-  // public constructors and methods
 
   public void setMessages(Messages messages)
   {
@@ -54,9 +49,16 @@ public class UICommandExceptionHandlerAspect extends OrderedAspect implements Or
     catch (OperationRestrictedException e) {
       return handleException(joinPoint, e, "restrictedOperation", e.getMessage());
     }
+    // catch the JPA exception for concurrency-related failures, since this is (apparently) what's being thrown, rather than the expected Spring-translated ConcurrencyFailureException
+    // TODO: figure out why Spring-translated exceptions are not always/ever being thrown  
+    catch (OptimisticLockException e) {
+      return handleException(joinPoint, e, "concurrentModificationConflict", null);
+    }
+    // catch the Spring-translated exception for concurrency-related failures
     catch (ConcurrencyFailureException e) {
       return handleException(joinPoint, e, "concurrentModificationConflict", null);
     }
+    // catch the top-most (i.e., most general) Spring-translated exception for persistence-related failures
     catch (DataAccessException e) {
       return handleException(joinPoint, e, "databaseOperationFailed", e.getMessage());
     }
@@ -92,8 +94,5 @@ public class UICommandExceptionHandlerAspect extends OrderedAspect implements Or
     }
     return ScreensaverConstants.REDISPLAY_PAGE_ACTION_RESULT;
   }
-
-  // private methods
-
 }
 

@@ -87,7 +87,11 @@ public class LibraryCopyPlateBatchEditor extends AbstractBackingBean
   private LocationPartUISelectOneBean _freezer;
   private LocationPartUISelectOneBean _shelf;
   private LocationPartUISelectOneBean _bin;
-  private PlateLocation _newPlateLocation;
+  private String _newPlateLocationRoom;
+  private String _newPlateLocationFreezer;
+  private String _newPlateLocationShelf;
+
+  private String _newPlateLocationBin;
   private ActivityDTO _locationChangeActivity;
   private UISelectOneBean<VolumeUnit> _volumeType;
   private String _volumeValue;
@@ -125,10 +129,13 @@ public class LibraryCopyPlateBatchEditor extends AbstractBackingBean
     _freezer = null;
     _shelf = null;
     _bin = null;
-    _newPlateLocation = new PlateLocation();
     _locationChangeActivity = new ActivityDTO();
     _locationChangeActivity.setDateOfActivity(new LocalDate());
     _locationChangeActivity.setPerformedBy(getScreensaverUser());
+    _newPlateLocationRoom = null;
+    _newPlateLocationFreezer = null;
+    _newPlateLocationShelf = null;
+    _newPlateLocationBin = null;
     _comments = null;
   }
 
@@ -165,10 +172,10 @@ public class LibraryCopyPlateBatchEditor extends AbstractBackingBean
       }
     }
 
-    if (getRoom().getSelection() != null || getNewPlateLocationFields().getRoom() != null ||
-      getFreezer().getSelection() != null || getNewPlateLocationFields().getFreezer() != null ||
-      getShelf().getSelection() != null || getNewPlateLocationFields().getShelf() != null ||
-      getBin().getSelection() != null || getNewPlateLocationFields().getBin() != null) {
+    if (getRoom().getSelection() != null || getNewPlateLocationRoom() != null ||
+      getFreezer().getSelection() != null || getNewPlateLocationFreezer() != null ||
+      getShelf().getSelection() != null || getNewPlateLocationShelf() != null ||
+      getBin().getSelection() != null || getNewPlateLocationBin() != null) {
       if (_locationChangeActivity.getPerformedBy() == null) {
         showMessage("requiredValue", "plate location change performed by");
         valid = false;
@@ -256,15 +263,15 @@ public class LibraryCopyPlateBatchEditor extends AbstractBackingBean
   private PlateLocation makeNewLocation(Plate plate)
   {
     PlateLocation oldLocation = plate.getLocation();
-    String room = getNewPlateLocationFields().getRoom() != null ? getNewPlateLocationFields().getRoom()
+    String room = getNewPlateLocationRoom() != null ? getNewPlateLocationRoom()
       : getRoom().getSelection() != null
       ? getRoom().getSelection() : null;
-    String freezer = getNewPlateLocationFields().getFreezer() != null ? getNewPlateLocationFields().getFreezer()
+    String freezer = getNewPlateLocationFreezer() != null ? getNewPlateLocationFreezer()
       : getFreezer().getSelection() != null ? getFreezer().getSelection() : null;
-    String shelf = getNewPlateLocationFields().getShelf() != null ? getNewPlateLocationFields().getShelf()
+    String shelf = getNewPlateLocationShelf() != null ? getNewPlateLocationShelf()
       : getShelf().getSelection() != null
       ? getShelf().getSelection() : null;
-    String bin = getNewPlateLocationFields().getBin() != null ? getNewPlateLocationFields().getBin()
+    String bin = getNewPlateLocationBin() != null ? getNewPlateLocationBin()
       : getBin().getSelection() != null
       ? getBin().getSelection() : null;
 
@@ -468,11 +475,6 @@ public class LibraryCopyPlateBatchEditor extends AbstractBackingBean
                                                           ScreensaverUser.ToDisplayStringFunction);
   }
 
-  public PlateLocation getNewPlateLocationFields()
-  {
-    return _newPlateLocation;
-  }
-
   public String getComments()
   {
     return _comments;
@@ -481,6 +483,46 @@ public class LibraryCopyPlateBatchEditor extends AbstractBackingBean
   public void setComments(String comments)
   {
     _comments = comments;
+  }
+
+  public String getNewPlateLocationRoom()
+  {
+    return _newPlateLocationRoom;
+  }
+
+  public void setNewPlateLocationRoom(String newPlateLocationRoom)
+  {
+    _newPlateLocationRoom = newPlateLocationRoom;
+  }
+
+  public String getNewPlateLocationFreezer()
+  {
+    return _newPlateLocationFreezer;
+  }
+
+  public void setNewPlateLocationFreezer(String newPlateLocationFreezer)
+  {
+    _newPlateLocationFreezer = newPlateLocationFreezer;
+  }
+
+  public String getNewPlateLocationShelf()
+  {
+    return _newPlateLocationShelf;
+  }
+
+  public void setNewPlateLocationShelf(String newPlateLocationShelf)
+  {
+    _newPlateLocationShelf = newPlateLocationShelf;
+  }
+
+  public String getNewPlateLocationBin()
+  {
+    return _newPlateLocationBin;
+  }
+
+  public void setNewPlateLocationBin(String newPlateLocationBin)
+  {
+    _newPlateLocationBin = newPlateLocationBin;
   }
 }
 

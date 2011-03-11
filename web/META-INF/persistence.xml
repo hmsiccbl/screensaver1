@@ -1,0 +1,86 @@
+<persistence
+  xmlns="http://java.sun.com/xml/ns/persistence"
+  xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+  xsi:schemaLocation="http://java.sun.com/xml/ns/persistence http://java.sun.com/xml/ns/persistence/persistence_2_0.xsd"
+  version="2.0">
+
+  <persistence-unit
+    name="screensaverPersistenceUnit"
+    transaction-type="RESOURCE_LOCAL">
+    <provider>org.hibernate.ejb.HibernatePersistence</provider>
+
+    <class>edu.harvard.med.screensaver.model.Activity</class>
+    <class>edu.harvard.med.screensaver.model.AdministrativeActivity</class>
+    <class>edu.harvard.med.screensaver.model.AttachedFile</class>
+    <class>edu.harvard.med.screensaver.model.AttachedFileType</class>
+
+    <class>edu.harvard.med.screensaver.model.cherrypicks.CherryPickAssayPlate</class>
+    <class>edu.harvard.med.screensaver.model.cherrypicks.CherryPickLiquidTransfer</class>
+    <class>edu.harvard.med.screensaver.model.cherrypicks.CherryPickRequest</class>
+    <class>edu.harvard.med.screensaver.model.cherrypicks.SmallMoleculeCherryPickRequest</class>
+    <class>edu.harvard.med.screensaver.model.cherrypicks.LabCherryPick</class>
+    <class>edu.harvard.med.screensaver.model.cherrypicks.LegacyCherryPickAssayPlate</class>
+    <class>edu.harvard.med.screensaver.model.cherrypicks.RNAiCherryPickRequest</class>
+    <class>edu.harvard.med.screensaver.model.cherrypicks.ScreenerCherryPick</class>
+
+    <class>edu.harvard.med.screensaver.model.libraries.Copy</class>
+    <class>edu.harvard.med.screensaver.model.libraries.Plate</class>
+    <class>edu.harvard.med.screensaver.model.libraries.PlateLocation</class>
+    <class>edu.harvard.med.screensaver.model.libraries.Gene</class>
+    <class>edu.harvard.med.screensaver.model.libraries.Library</class>
+    <class>edu.harvard.med.screensaver.model.libraries.LibraryContentsVersion</class>
+    <class>edu.harvard.med.screensaver.model.libraries.NaturalProductReagent</class>
+    <class>edu.harvard.med.screensaver.model.libraries.SilencingReagent</class>
+    <class>edu.harvard.med.screensaver.model.libraries.SmallMoleculeReagent</class>
+    <class>edu.harvard.med.screensaver.model.libraries.Reagent</class>
+    <class>edu.harvard.med.screensaver.model.libraries.Well</class>
+    <class>edu.harvard.med.screensaver.model.libraries.WellVolumeAdjustment</class>
+    <class>edu.harvard.med.screensaver.model.libraries.WellVolumeCorrectionActivity</class>
+
+    <class>edu.harvard.med.screensaver.model.screens.AbaseTestset</class>
+    <class>edu.harvard.med.screensaver.model.screens.BillingInformation</class>
+    <class>edu.harvard.med.screensaver.model.screens.BillingItem</class>
+    <class>edu.harvard.med.screensaver.model.screens.EquipmentUsed</class>
+    <class>edu.harvard.med.screensaver.model.screens.FundingSupport</class>
+    <class>edu.harvard.med.screensaver.model.screens.LabActivity</class>
+    <class>edu.harvard.med.screensaver.model.screens.LibraryScreening</class>
+    <class>edu.harvard.med.screensaver.model.screens.Publication</class>
+    <class>edu.harvard.med.screensaver.model.screens.CherryPickScreening</class>
+    <class>edu.harvard.med.screensaver.model.screens.Screen</class>
+    <class>edu.harvard.med.screensaver.model.screens.Screening</class>
+    <class>edu.harvard.med.screensaver.model.screens.ScreenAttachedFileType</class>
+    <class>edu.harvard.med.screensaver.model.screens.StatusItem</class>
+
+    <class>edu.harvard.med.screensaver.model.screenresults.AnnotationType</class>
+    <class>edu.harvard.med.screensaver.model.screenresults.AnnotationValue</class>
+    <class>edu.harvard.med.screensaver.model.screenresults.AssayPlate</class>
+    <class>edu.harvard.med.screensaver.model.screenresults.AssayWell</class>
+    <class>edu.harvard.med.screensaver.model.screenresults.ResultValue</class>
+    <class>edu.harvard.med.screensaver.model.screenresults.DataColumn</class>
+    <class>edu.harvard.med.screensaver.model.screenresults.ScreenResult</class>
+
+    <class>edu.harvard.med.screensaver.model.users.AdministratorUser</class>
+    <class>edu.harvard.med.screensaver.model.users.ChecklistItem</class>
+    <class>edu.harvard.med.screensaver.model.users.ChecklistItemEvent</class>
+    <class>edu.harvard.med.screensaver.model.users.LabAffiliation</class>
+    <class>edu.harvard.med.screensaver.model.users.LabHead</class>
+    <class>edu.harvard.med.screensaver.model.users.UserAttachedFileType</class>
+    <class>edu.harvard.med.screensaver.model.users.ScreeningRoomUser</class>
+    <class>edu.harvard.med.screensaver.model.users.ScreensaverUser</class>
+
+    <exclude-unlisted-classes />
+    <shared-cache-mode>NONE</shared-cache-mode>
+    
+    <properties>
+      <property name="hibernate.dialect" value="org.hibernate.dialect.PostgreSQLDialect" />
+      <property name="hibernate.ejb.naming_strategy" value="org.hibernate.cfg.ImprovedNamingStrategy" />
+      <property name="hibernate.generate_statistics" value="false" />
+      <property name="hibernate.jdbc.batch_size" value="50"/>
+      <property name="hibernate.jdbc.batch_versioned_data" value="true" />
+      <property name="hibernate.order_inserts" value="true" />
+      <property name="hibernate.order_updates" value="true" />
+    </properties>
+
+  </persistence-unit>
+
+</persistence>

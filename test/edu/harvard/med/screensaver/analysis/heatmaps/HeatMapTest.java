@@ -17,6 +17,8 @@ import java.io.PrintWriter;
 import java.text.NumberFormat;
 import java.util.Map;
 
+import org.apache.log4j.Logger;
+
 import edu.harvard.med.screensaver.AbstractSpringTest;
 import edu.harvard.med.screensaver.ScreensaverConstants;
 import edu.harvard.med.screensaver.analysis.ChainedFilter;
@@ -27,13 +29,11 @@ import edu.harvard.med.screensaver.io.screenresults.ScreenResultParser;
 import edu.harvard.med.screensaver.io.screenresults.ScreenResultParserTest;
 import edu.harvard.med.screensaver.model.MakeDummyEntities;
 import edu.harvard.med.screensaver.model.libraries.WellKey;
-import edu.harvard.med.screensaver.model.screenresults.ResultValue;
 import edu.harvard.med.screensaver.model.screenresults.DataColumn;
+import edu.harvard.med.screensaver.model.screenresults.ResultValue;
 import edu.harvard.med.screensaver.model.screenresults.ScreenResult;
 import edu.harvard.med.screensaver.model.screens.Screen;
 import edu.harvard.med.screensaver.util.Pair;
-
-import org.apache.log4j.Logger;
 
 public class HeatMapTest extends AbstractSpringTest
 {
@@ -45,7 +45,7 @@ public class HeatMapTest extends AbstractSpringTest
   private Map<WellKey,ResultValue> _wellKeyToResultValueMap;
 
   @Override
-  protected void onSetUp() throws Exception
+  protected void setUp() throws Exception
   {
     Screen screen = MakeDummyEntities.makeDummyScreen(107);
     MockDaoForScreenResultImporter mockDao = new MockDaoForScreenResultImporter();

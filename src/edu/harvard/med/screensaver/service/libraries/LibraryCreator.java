@@ -16,6 +16,8 @@ import edu.harvard.med.screensaver.db.GenericEntityDAO;
 import edu.harvard.med.screensaver.db.LibrariesDAO;
 import edu.harvard.med.screensaver.model.DataModelViolationException;
 import edu.harvard.med.screensaver.model.libraries.Library;
+import edu.harvard.med.screensaver.model.libraries.LibraryWellType;
+import edu.harvard.med.screensaver.model.libraries.WellKey;
 
 /**
  * Service that creates a new library and its wells and imports its well
@@ -57,10 +59,22 @@ public class LibraryCreator
   public void createLibrary(Library newLibrary)
   {
     validateLibrary(newLibrary);
-    _librariesDao.loadOrCreateWellsForLibrary(newLibrary);
+    createWells(newLibrary);
     _dao.saveOrUpdateEntity(newLibrary);
     _dao.flush();
     log.info("added library definition for " + newLibrary.getLibraryName() + ", " + newLibrary);
+  }
+
+  public void createWells(Library library)
+  {
+    for (int iPlate = library.getStartPlate(); iPlate <= library.getEndPlate(); ++iPlate) {
+      for (int iRow = 0; iRow < library.getPlateSize().getRows(); ++iRow) {
+        for (int iCol = 0; iCol < library.getPlateSize().getColumns(); ++iCol) {
+          WellKey wellKey = new WellKey(iPlate, iRow, iCol);
+          library.createWell(wellKey, LibraryWellType.UNDEFINED);
+        }
+      }
+    }
   }
 
   public void validateLibrary(Library newLibrary) throws DataModelViolationException

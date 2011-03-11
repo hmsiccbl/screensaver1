@@ -9,48 +9,32 @@
 
 package edu.harvard.med.screensaver.db;
 
-import java.util.ArrayList;
 import java.util.List;
 import java.util.SortedSet;
-import java.util.TreeSet;
+
+import com.google.common.collect.Sets;
 
 import edu.harvard.med.screensaver.model.users.LabHead;
 import edu.harvard.med.screensaver.model.users.ScreeningRoomUser;
 import edu.harvard.med.screensaver.model.users.ScreensaverUserComparator;
 
-import org.apache.log4j.Logger;
-
 public class UsersDAO extends AbstractDAO
 {
-  // static members
-
-  private static Logger log = Logger.getLogger(UsersDAO.class);
-
-
-  // instance data members
-
-  // public constructors and methods
-
   /**
    * @motivation for CGLIB dynamic proxy creation
    */
   public UsersDAO()
-  {
-  }
+  {}
 
-  @SuppressWarnings("unchecked")
   public List<String> findDeveloperECommonsIds()
   {
-    return new ArrayList<String>(getHibernateTemplate().find(
-      "select ECommonsId from ScreensaverUser where ECommonsId != null and 'developer' in elements(screensaverUserRoles)"));
+    return getHibernateSession().createQuery("select ECommonsId from ScreensaverUser where ECommonsId != null and 'developer' in elements(screensaverUserRoles)").list();
   }
-
 
   /**
    * Find all the screening room users that are lab heads.
    * @return a List of {@link ScreeningRoomUser}s.
    */
-  @SuppressWarnings("unchecked")
   public SortedSet<LabHead> findAllLabHeads()
   {
     // note: we perform sorting via a TreeSet, rather than asking persistence
@@ -61,12 +45,9 @@ public class UsersDAO extends AbstractDAO
       "select distinct lh from LabHead " +
       "lh left outer join lh.labHead " +
       "left outer join fetch lh.labAffiliation";
-    SortedSet labHeads = new TreeSet<ScreeningRoomUser>(ScreensaverUserComparator.getInstance());
-    labHeads.addAll((List<ScreeningRoomUser>) getHibernateTemplate().find(hql));
+    SortedSet<LabHead> labHeads = Sets.newTreeSet(ScreensaverUserComparator.getInstance());;
+    labHeads.addAll((List<LabHead>) getHibernateSession().createQuery(hql).list());
     return labHeads;
   }
-
-  // private methods
-
 }
 

@@ -12,14 +12,18 @@ package edu.harvard.med.screensaver.ui;
 import javax.faces.context.FacesContext;
 import javax.servlet.http.HttpSession;
 
+import org.apache.log4j.Logger;
+import org.springframework.transaction.annotation.Propagation;
+import org.springframework.transaction.annotation.Transactional;
+
 import edu.harvard.med.screensaver.db.DAOTransaction;
 import edu.harvard.med.screensaver.db.GenericEntityDAO;
+import edu.harvard.med.screensaver.model.screens.Screen;
+import edu.harvard.med.screensaver.model.users.LabHead;
 import edu.harvard.med.screensaver.model.users.ScreeningRoomUser;
 import edu.harvard.med.screensaver.model.users.ScreensaverUser;
 import edu.harvard.med.screensaver.policy.EntityViewPolicy;
 import edu.harvard.med.screensaver.ui.arch.auth.ScreensaverLoginModule;
-
-import org.apache.log4j.Logger;
 
 /**
  * Like {@link CurrentScreensaverUser}, maintains the current ScreensaverUser
@@ -73,32 +77,29 @@ public class WebCurrentScreensaverUser extends CurrentScreensaverUser
     return super.getScreensaverUser();
   }
 
-  // must be called within a transaction
-  // TODO: annotate as @Transactional(REQUIRED) once we move to annotated txns
+  @Transactional(propagation = Propagation.MANDATORY)
   public void setScreensaverUser(final ScreensaverUser user)
   {
     if (user != null) {
       // semi-HACK: fetch relationships needed by data access policy
-      _dao.need(user, "screensaverUserRoles");
+      _dao.need(user, ScreensaverUser.roles);
       if (user instanceof ScreeningRoomUser) {
-        _dao.need(user,
-                  "screensLed",
-                  "screensHeaded",
-                  "screensCollaborated",
-                  "labHead.labMembers",
-                  "labMembers");
-        _dao.need(user, 
-                  "screensLed.collaborators", 
-                  "screensLed.labHead", 
-                  "screensLed.leadScreener");
-        _dao.need(user, 
-                  "screensHeaded.collaborators", 
-                  "screensHeaded.labHead", 
-                  "screensHeaded.leadScreener");
-        _dao.need(user, 
-                  "screensCollaborated.collaborators", 
-                  "screensCollaborated.labHead", 
-                  "screensCollaborated.leadScreener");
+        _dao.need((ScreeningRoomUser) user, ScreeningRoomUser.screensLed);
+        _dao.need((ScreeningRoomUser) user, ScreeningRoomUser.screensCollaborated);
+        _dao.need((ScreeningRoomUser) user, ScreeningRoomUser.LabHead.to(LabHead.labMembers));
+        _dao.need((ScreeningRoomUser) user, ScreeningRoomUser.screensLed.to(Screen.leadScreener));
+        _dao.need((ScreeningRoomUser) user, ScreeningRoomUser.screensLed.to(Screen.labHead));
+        _dao.need((ScreeningRoomUser) user, ScreeningRoomUser.screensLed.to(Screen.collaborators));
+        _dao.need((ScreeningRoomUser) user, ScreeningRoomUser.screensCollaborated.to(Screen.leadScreener));
+        _dao.need((ScreeningRoomUser) user, ScreeningRoomUser.screensCollaborated.to(Screen.labHead));
+        _dao.need((ScreeningRoomUser) user, ScreeningRoomUser.screensCollaborated.to(Screen.collaborators));
+      }
+      if (user instanceof LabHead) {
+        _dao.need((LabHead) user, LabHead.screensHeaded);
+        _dao.need((LabHead) user, LabHead.labMembers);
+        _dao.need((LabHead) user, LabHead.screensHeaded.to(Screen.leadScreener));
+        _dao.need((LabHead) user, LabHead.screensHeaded.to(Screen.labHead));
+        _dao.need((LabHead) user, LabHead.screensHeaded.to(Screen.collaborators));
       }
     }
     super.setScreensaverUser(user);

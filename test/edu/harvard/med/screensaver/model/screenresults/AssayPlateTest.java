@@ -22,7 +22,7 @@ public class AssayPlateTest extends AbstractEntityInstanceTest<AssayPlate>
     return buildTestSuite(AssayPlateTest.class, AssayPlate.class);
   }
 
-  public AssayPlateTest() throws IntrospectionException
+  public AssayPlateTest()
   {
     super(AssayPlate.class);
   }

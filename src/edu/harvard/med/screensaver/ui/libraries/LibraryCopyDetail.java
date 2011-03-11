@@ -15,7 +15,8 @@ import java.util.List;
 import javax.faces.model.SelectItem;
 
 import org.apache.log4j.Logger;
-import org.springframework.dao.DataIntegrityViolationException;
+import org.hibernate.exception.ConstraintViolationException;
+import org.springframework.orm.jpa.JpaSystemException;
 
 import edu.harvard.med.screensaver.db.GenericEntityDAO;
 import edu.harvard.med.screensaver.model.libraries.Copy;
@@ -63,7 +64,7 @@ public class LibraryCopyDetail extends EditableEntityViewerBackingBean<Copy>
   @Override
   protected void initializeEntity(Copy copy)
   {
-    getDao().needReadOnly(copy, Copy.library.getPath());
+    getDao().needReadOnly(copy, Copy.library);
   }
   
   @UICommand
@@ -79,9 +80,14 @@ public class LibraryCopyDetail extends EditableEntityViewerBackingBean<Copy>
       _libraryViewer.getContextualSearchResults().reload();
       return _libraryViewer.viewEntity(library);
     }
-    catch (DataIntegrityViolationException e) {
-      showMessage("cannotDeleteEntityInUse", "Copy " + copyName);
-      return REDISPLAY_PAGE_ACTION_RESULT;
+    catch (JpaSystemException e) {
+      if (e.contains(ConstraintViolationException.class)) {
+        showMessage("cannotDeleteEntityInUse", "Copy " + copyName);
+        return REDISPLAY_PAGE_ACTION_RESULT;
+      }
+      else {
+        throw e;
+      }
     }
   }
 
@@ -94,7 +100,7 @@ public class LibraryCopyDetail extends EditableEntityViewerBackingBean<Copy>
         return _libraryCopyViewer.reload();
       case CANCEL_NEW:
       case SAVE_NEW:
-        return _libraryViewer.viewEntity(getEntity().getLibrary());
+        return _libraryViewer.viewEntity(getDao().reloadEntity(getEntity(), true, Copy.library).getLibrary());
       default:
         return null;
     }

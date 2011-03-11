@@ -22,7 +22,7 @@ public class NaturalProductReagentTest extends AbstractEntityInstanceTest<Natura
     return buildTestSuite(NaturalProductReagentTest.class, NaturalProductReagent.class);
   }
 
-  public NaturalProductReagentTest() throws IntrospectionException
+  public NaturalProductReagentTest()
   {
     super(NaturalProductReagent.class);
   }

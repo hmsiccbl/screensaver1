@@ -18,6 +18,7 @@ import edu.harvard.med.screensaver.db.GenericEntityDAO;
 import edu.harvard.med.screensaver.model.screenresults.AnnotationType;
 import edu.harvard.med.screensaver.model.screens.Screen;
 import edu.harvard.med.screensaver.model.screens.Study;
+import edu.harvard.med.screensaver.model.users.LabHead;
 import edu.harvard.med.screensaver.ui.arch.searchresults.EntitySearchResults;
 import edu.harvard.med.screensaver.ui.arch.view.SearchResultContextEntityViewerBackingBean;
 import edu.harvard.med.screensaver.ui.libraries.WellSearchResults;
@@ -93,10 +94,11 @@ public class StudyViewer<E extends Study> extends SearchResultContextEntityViewe
   @Override
   protected void initializeEntity(E study)
   {
-    getDao().needReadOnly(study, "labHead.labMembers", "leadScreener");
-    getDao().needReadOnly((Screen) study, "collaborators"); 
-    getDao().needReadOnly((Screen) study, "publications");
-    getDao().needReadOnly((Screen) study, "annotationTypes");
+    getDao().needReadOnly((Screen) study, Screen.labHead.to(LabHead.labMembers));
+    getDao().needReadOnly((Screen) study, Screen.leadScreener);
+    getDao().needReadOnly((Screen) study, Screen.collaborators);
+    getDao().needReadOnly((Screen) study, Screen.publications);
+    getDao().needReadOnly((Screen) study, Screen.annotationTypes);
   }
 
   @Override

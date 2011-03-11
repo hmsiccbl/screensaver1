@@ -22,7 +22,7 @@ public class WellVolumeCorrectionActivityTest extends AbstractEntityInstanceTest
     return buildTestSuite(WellVolumeCorrectionActivityTest.class, WellVolumeCorrectionActivity.class);
   }
 
-  public WellVolumeCorrectionActivityTest() throws IntrospectionException
+  public WellVolumeCorrectionActivityTest()
   {
     super(WellVolumeCorrectionActivity.class);
   }

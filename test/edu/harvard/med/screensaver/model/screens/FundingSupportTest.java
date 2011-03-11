@@ -22,7 +22,7 @@ public class FundingSupportTest extends AbstractEntityInstanceTest<FundingSuppor
     return buildTestSuite(FundingSupportTest.class, FundingSupport.class);
   }
 
-  public FundingSupportTest() throws IntrospectionException
+  public FundingSupportTest()
   {
     super(FundingSupport.class);
   }

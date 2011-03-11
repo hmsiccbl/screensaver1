@@ -22,7 +22,7 @@ public class ScreenResultTest extends AbstractEntityInstanceTest<ScreenResult>
     return buildTestSuite(ScreenResultTest.class, ScreenResult.class);
   }
 
-  public ScreenResultTest() throws IntrospectionException
+  public ScreenResultTest()
   {
     super(ScreenResult.class);
   }

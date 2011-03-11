@@ -9,8 +9,6 @@
 
 package edu.harvard.med.screensaver.model.cherrypicks;
 
-import java.beans.IntrospectionException;
-
 import junit.framework.TestSuite;
 
 import edu.harvard.med.screensaver.model.AbstractEntityInstanceTest;
@@ -22,7 +20,7 @@ public class CherryPickAssayPlateTest extends AbstractEntityInstanceTest<CherryP
     return buildTestSuite(CherryPickAssayPlateTest.class, CherryPickAssayPlate.class);
   }
 
-  public CherryPickAssayPlateTest() throws IntrospectionException
+  public CherryPickAssayPlateTest()
   {
     super(CherryPickAssayPlate.class);
   }

@@ -63,6 +63,12 @@ public class MockSessionScope implements Scope
     {
       attrs.put(name, value);
     }
+
+    @Override
+    public Object resolveReference(String arg0)
+    {
+      throw new UnsupportedOperationException();
+    }
   };
 
   /**
@@ -79,7 +85,8 @@ public class MockSessionScope implements Scope
     return attrs.getSessionId();
   }
 
-  public Object get(String name, ObjectFactory objectFactory)
+  @Override
+  public Object get(String name, ObjectFactory<?> objectFactory)
   {
     Object mutex = attrs.getSessionMutex();
     synchronized (mutex) {
@@ -92,6 +99,7 @@ public class MockSessionScope implements Scope
     }
   }
 
+  @Override
   public Object remove(String name)
   {
     Object mutex = attrs.getSessionMutex();
@@ -105,4 +113,10 @@ public class MockSessionScope implements Scope
   @Override
   public void registerDestructionCallback(String name, Runnable callback)
   {}
+
+  @Override
+  public Object resolveContextualObject(String arg0)
+  {
+    throw new UnsupportedOperationException();
+  }
 }

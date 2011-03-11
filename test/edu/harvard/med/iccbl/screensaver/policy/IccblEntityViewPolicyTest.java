@@ -16,18 +16,16 @@ import com.google.common.collect.Iterables;
 import com.google.common.collect.Lists;
 import org.apache.log4j.Logger;
 import org.joda.time.LocalDate;
-import org.springframework.test.AbstractTransactionalSpringContextTests;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.test.context.ContextConfiguration;
+import org.springframework.transaction.annotation.Transactional;
 
-import edu.harvard.med.screensaver.db.GenericEntityDAO;
-import edu.harvard.med.screensaver.db.LibrariesDAO;
-import edu.harvard.med.screensaver.db.SchemaUtil;
+import edu.harvard.med.screensaver.AbstractSpringPersistenceTest;
 import edu.harvard.med.screensaver.db.ScreenResultsDAO;
 import edu.harvard.med.screensaver.model.MakeDummyEntities;
-import edu.harvard.med.screensaver.model.TestDataFactory;
 import edu.harvard.med.screensaver.model.cherrypicks.RNAiCherryPickRequest;
 import edu.harvard.med.screensaver.model.cherrypicks.SmallMoleculeCherryPickRequest;
 import edu.harvard.med.screensaver.model.libraries.Library;
-import edu.harvard.med.screensaver.model.libraries.LibraryContentsVersion;
 import edu.harvard.med.screensaver.model.libraries.LibraryType;
 import edu.harvard.med.screensaver.model.libraries.LibraryWellType;
 import edu.harvard.med.screensaver.model.libraries.PlateSize;
@@ -51,6 +49,7 @@ import edu.harvard.med.screensaver.model.users.LabHead;
 import edu.harvard.med.screensaver.model.users.ScreeningRoomUser;
 import edu.harvard.med.screensaver.model.users.ScreensaverUser;
 import edu.harvard.med.screensaver.model.users.ScreensaverUserRole;
+import edu.harvard.med.screensaver.service.libraries.LibraryCreator;
 
 /**
  * Tests WedDataAccessPolicy implementation, as well as Hibernate interceptor-based
@@ -58,19 +57,17 @@ import edu.harvard.med.screensaver.model.users.ScreensaverUserRole;
  * 
  * @author <a mailto="andrew_tolopko@hms.harvard.edu">Andrew Tolopko</a>
  */
-public class IccblEntityViewPolicyTest extends AbstractTransactionalSpringContextTests
+@ContextConfiguration(locations = { "/spring-context-test-security.xml" }, inheritLocations = false)
+@Transactional
+public class IccblEntityViewPolicyTest extends AbstractSpringPersistenceTest
 {
-  // static members
-
   private static Logger log = Logger.getLogger(IccblEntityViewPolicyTest.class);
 
-
-  // instance data members
-  
-  protected GenericEntityDAO genericEntityDao;
+  @Autowired
   protected ScreenResultsDAO screenResultsDao;
-  protected LibrariesDAO librariesDao;
-  protected SchemaUtil schemaUtil;
+  @Autowired
+  protected LibraryCreator libraryCreator;
+
   private IccblEntityViewPolicy entityViewPolicy;
 
   private LabHead me;
@@ -92,24 +89,6 @@ public class IccblEntityViewPolicyTest extends AbstractTransactionalSpringContex
   private Screen othersLevel3ScreenWithNonOverlappingHits;
   private Screen othersLevel3ScreenWithOverlappingHits;
 
-
-  @Override
-  protected String[] getConfigLocations()
-  {
-    return new String[] { "spring-context-test-security.xml" };
-  }
-
-  public IccblEntityViewPolicyTest() 
-  {
-    setPopulateProtectedVariables(true);
-  }
-  
-  @Override
-  protected void onSetUpBeforeTransaction() throws Exception
-  {
-    schemaUtil.truncateTablesOrCreateSchema();
-  }
-  
   private void initializeDataForDataSharingLevelTests() 
   {
     initializeMe();
@@ -339,10 +318,10 @@ public class IccblEntityViewPolicyTest extends AbstractTransactionalSpringContex
   
   public void testMarcusAdminRestrictions()
   {
-    AdministratorUser dataEntryAdmin = new AdministratorUser("DataEntry", "Admin", "", "", "", "", null, "");
-    AdministratorUser marcusAdmin = new AdministratorUser("Marcus", "Admin", "", "", "", "", null, "");
+    AdministratorUser dataEntryAdmin = new AdministratorUser("DataEntry", "Admin");
+    AdministratorUser marcusAdmin = new AdministratorUser("Marcus", "Admin");
     marcusAdmin.addScreensaverUserRole(ScreensaverUserRole.MARCUS_ADMIN);
-    AdministratorUser normalAdmin = new AdministratorUser("Normal", "Admin", "", "", "", "", null, "");
+    AdministratorUser normalAdmin = new AdministratorUser("Normal", "Admin");
     normalAdmin.addScreensaverUserRole(ScreensaverUserRole.READ_EVERYTHING_ADMIN);
     Screen nonMarcusScreen = MakeDummyEntities.makeDummyScreen(2);
     nonMarcusScreen.createCherryPickRequest((AdministratorUser) nonMarcusScreen.getCreatedBy());
@@ -385,10 +364,10 @@ public class IccblEntityViewPolicyTest extends AbstractTransactionalSpringContex
   
   public void testGrayAdminRestrictions()
   {
-    AdministratorUser dataEntryAdmin = new AdministratorUser("DataEntry", "Admin", "", "", "", "", null, "");
-    AdministratorUser grayAdmin = new AdministratorUser("Gray", "Admin", "", "", "", "", null, "");
+    AdministratorUser dataEntryAdmin = new AdministratorUser("DataEntry", "Admin");
+    AdministratorUser grayAdmin = new AdministratorUser("Gray", "Admin");
     grayAdmin.addScreensaverUserRole(ScreensaverUserRole.GRAY_ADMIN);
-    AdministratorUser normalAdmin = new AdministratorUser("Normal", "Admin", "", "", "", "", null, "");
+    AdministratorUser normalAdmin = new AdministratorUser("Normal", "Admin");
     normalAdmin.addScreensaverUserRole(ScreensaverUserRole.READ_EVERYTHING_ADMIN);
     Screen nonGrayScreen = MakeDummyEntities.makeDummyScreen(2);
     nonGrayScreen.createCherryPickRequest((AdministratorUser) nonGrayScreen.getCreatedBy());
@@ -431,7 +410,7 @@ public class IccblEntityViewPolicyTest extends AbstractTransactionalSpringContex
   
   public void testSilencingReagentSequenceRestriction()
   {
-    AdministratorUser admin = new AdministratorUser("Admin", "User", "", "", "", "", "", "");
+    AdministratorUser admin = new AdministratorUser("Admin", "User");
     Library library = new Library(admin,
                                   "rnai library",
                                   "rnai lib",
@@ -440,7 +419,7 @@ public class IccblEntityViewPolicyTest extends AbstractTransactionalSpringContex
                                   1,
                                   1,
                                   PlateSize.WELLS_384);
-    new TestDataFactory().newInstance(LibraryContentsVersion.class, library);
+    library.createContentsVersion(admin);
     SilencingReagent reagent = 
       library.createWell(new WellKey(1, 0, 0), LibraryWellType.EXPERIMENTAL).createSilencingReagent(new ReagentVendorIdentifier("vendor", "sirnai1"), SilencingReagentType.SIRNA, "ACTG");
 
@@ -827,7 +806,7 @@ public class IccblEntityViewPolicyTest extends AbstractTransactionalSpringContex
     genericEntityDao.saveOrUpdateEntity(users[0]);
 
     //user with library_admin has to be an Administrator user otherwise error on validation. 
-    admUsers[0] = new AdministratorUser("Joe", "Admin", "joe_admin@hms.harvard.edu", "", "", "", "", "");
+    admUsers[0] = new AdministratorUser("Joe", "Admin");
     genericEntityDao.saveOrUpdateEntity(admUsers[0]);
     admUsers[0].addScreensaverUserRole(ScreensaverUserRole.LIBRARIES_ADMIN);
 
@@ -840,13 +819,11 @@ public class IccblEntityViewPolicyTest extends AbstractTransactionalSpringContex
                                   100002,
                                   PlateSize.WELLS_384);
     library.setOwner(users[0]);
-    librariesDao.loadOrCreateWellsForLibrary(library);
+    libraryCreator.createWells(library);
     genericEntityDao.saveOrUpdateEntity(library);
-    //genericEntityDao.flush();
 
-    setComplete();
-    endTransaction();
-    startNewTransaction();
+    genericEntityDao.flush();
+    genericEntityDao.clear();
 
     //library = genericEntityDao.findEntityByProperty(Library.class, "shortName","lib1" );
     setCurrentUser(users[0]);//genericEntityDao.findEntityById(ScreensaverUser.class, users[0].getEntityId()));

@@ -395,7 +395,7 @@ public class PubchemChembankQueryUtility extends CommandLineApplication
         {
           long loopTime = System.currentTimeMillis();
           well = dao.reloadEntity(well, true,
-                                  Well.reagents.getPath());
+                                  Well.reagents);
           SmallMoleculeReagent reagent = (SmallMoleculeReagent) well.getReagents()
             .get(library.getLatestContentsVersion());
           if (reagent == null)

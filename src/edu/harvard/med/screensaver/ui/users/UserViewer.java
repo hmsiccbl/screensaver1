@@ -46,6 +46,7 @@ import edu.harvard.med.screensaver.model.screens.ScreenDataSharingLevel;
 import edu.harvard.med.screensaver.model.screens.ScreenType;
 import edu.harvard.med.screensaver.model.users.AdministratorUser;
 import edu.harvard.med.screensaver.model.users.AffiliationCategory;
+import edu.harvard.med.screensaver.model.users.ChecklistItemEvent;
 import edu.harvard.med.screensaver.model.users.ChecklistItemGroup;
 import edu.harvard.med.screensaver.model.users.FacilityUsageRole;
 import edu.harvard.med.screensaver.model.users.Lab;
@@ -203,42 +204,39 @@ public class UserViewer extends SearchResultContextEditableEntityViewerBackingBe
   @Override
   protected void initializeEntity(ScreeningRoomUser user)
   {
-    getDao().need(user, "screensaverUserRoles");
+    getDao().need(user, ScreeningRoomUser.roles);
     // note: no cross-product problem with dual labMembers associations, since only one will have size > 0
-    getDao().need(user,
-                  "labHead.labAffiliation",
-                  "labHead.labMembers",
-                  "labAffiliation",
-                  "labMembers");
+    getDao().need(user, ScreeningRoomUser.LabHead.to(LabHead.labAffiliation));
+    getDao().need(user, ScreeningRoomUser.LabHead.to(LabHead.labMembers));
+    if (user instanceof LabHead) {
+      getDao().need((LabHead) user, LabHead.labAffiliation);
+      getDao().need((LabHead) user, LabHead.labMembers);
+    }
     // for UserAgreementUpdater
-    getDao().need(user,
-                  ScreeningRoomUser.LabHead.to(ScreensaverUser.roles).getPath());
-    getDao().need(user, "screensLed.statusItems");
-    getDao().need(user, "screensHeaded.statusItems");
-    getDao().need(user, "screensCollaborated.statusItems");
-    getDao().need(user, "screensLed.labActivities");
-    getDao().need(user, "screensHeaded.labActivities");
-    getDao().need(user, "screensCollaborated.labActivities");
-    getDao().need(user,
-                  "screensLed.collaborators",
-                  "screensLed.labHead",
-    "screensLed.leadScreener");
-    getDao().need(user,
-                  "screensHeaded.collaborators",
-                  "screensHeaded.labHead",
-    "screensHeaded.leadScreener");
-    getDao().need(user,
-                  "screensCollaborated.collaborators",
-                  "screensCollaborated.labHead",
-    "screensCollaborated.leadScreener");
-    getDao().need(user,
-                  "checklistItemEvents.checklistItem",
-                  "checklistItemEvents.screeningRoomUser",
-    "checklistItemEvents.createdBy");
-    getDao().need(user,
-                  ScreeningRoomUser.attachedFiles.to(AttachedFile.fileType).getPath());
-    getDao().need(user,
-                  ScreeningRoomUser.facilityUsageRoles.getPath());
+    getDao().need(user, ScreeningRoomUser.LabHead.to(ScreensaverUser.roles));
+    getDao().need(user, ScreeningRoomUser.screensLed.to(Screen.statusItems));
+    getDao().need(user, ScreeningRoomUser.screensLed.to(Screen.labHead));
+    getDao().need(user, ScreeningRoomUser.screensLed.to(Screen.leadScreener));
+    getDao().need(user, ScreeningRoomUser.screensLed.to(Screen.collaborators));
+    getDao().need(user, ScreeningRoomUser.screensLed.to(Screen.labActivities));
+    getDao().need(user, ScreeningRoomUser.screensCollaborated.to(Screen.statusItems));
+    getDao().need(user, ScreeningRoomUser.screensCollaborated.to(Screen.labHead));
+    getDao().need(user, ScreeningRoomUser.screensCollaborated.to(Screen.leadScreener));
+    getDao().need(user, ScreeningRoomUser.screensCollaborated.to(Screen.collaborators));
+    getDao().need(user, ScreeningRoomUser.screensCollaborated.to(Screen.labActivities));
+    if (user instanceof LabHead) {
+      getDao().need((LabHead) user, LabHead.screensHeaded.to(Screen.statusItems));
+      getDao().need((LabHead) user, LabHead.screensHeaded.to(Screen.labActivities));
+      getDao().need((LabHead) user, LabHead.screensHeaded.to(Screen.labHead));
+      getDao().need((LabHead) user, LabHead.screensHeaded.to(Screen.leadScreener));
+      getDao().need((LabHead) user, LabHead.screensHeaded.to(Screen.collaborators));
+    }
+
+    getDao().need(user, ScreeningRoomUser.checklistItemEvents.to(ChecklistItemEvent.checklistItem));
+    getDao().need(user, ScreeningRoomUser.checklistItemEvents.to(ChecklistItemEvent.screeningRoomUser));
+    getDao().need(user, ScreeningRoomUser.checklistItemEvents.to(ChecklistItemEvent.createdBy));
+    getDao().need(user, ScreeningRoomUser.attachedFiles.to(AttachedFile.fileType));
+    getDao().need(user, ScreeningRoomUser.facilityUsageRoles);
   }
 
   @Override
@@ -578,8 +576,8 @@ public class UserViewer extends SearchResultContextEditableEntityViewerBackingBe
     if (isReadAdmin()) {
       if (!!!user.isHeadOfLab()) {
         user = getDao().reloadEntity(user, true, 
-                                     ScreeningRoomUser.LabHead.to(ScreeningRoomUser.roles).getPath(),
-                                     ScreeningRoomUser.roles.getPath());
+                                     ScreeningRoomUser.LabHead.to(ScreeningRoomUser.roles));
+        getDao().needReadOnly(user, ScreeningRoomUser.roles);
         if (user.getLab().getLabHead() != null) {
           SortedSet<ScreensaverUserRole> labHeadSmDslRoles = Sets.newTreeSet(Sets.intersection(DataSharingLevelMapper.UserSmDslRoles, user.getLab().getLabHead().getScreensaverUserRoles()));
           SortedSet<ScreensaverUserRole> userSmDslRoles = Sets.newTreeSet(Sets.intersection(DataSharingLevelMapper.UserSmDslRoles, user.getScreensaverUserRoles()));

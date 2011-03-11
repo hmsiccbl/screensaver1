@@ -18,6 +18,7 @@ import edu.harvard.med.screensaver.model.libraries.LibraryWellType;
 import edu.harvard.med.screensaver.model.libraries.PlateSize;
 import edu.harvard.med.screensaver.model.libraries.WellKey;
 import edu.harvard.med.screensaver.model.screens.ScreenType;
+import edu.harvard.med.screensaver.model.users.ScreeningRoomUser;
 
 
 /**
@@ -29,14 +30,13 @@ import edu.harvard.med.screensaver.model.screens.ScreenType;
  */
 public class AbstractDAOTest extends AbstractSpringPersistenceTest
 {
-
   private static final Logger log = Logger.getLogger(AbstractDAOTest.class);
   private Library _library;
 
   @Override
-  protected void onSetUp() throws Exception
+  protected void setUp() throws Exception
   {
-    super.onSetUp();
+    super.setUp();
     _library = new Library(null,
                            "library Q",
                            "Q",
@@ -45,12 +45,28 @@ public class AbstractDAOTest extends AbstractSpringPersistenceTest
                            1,
                            2,
                            PlateSize.WELLS_96);
-    _library.createWell(new WellKey(27, "A01"), LibraryWellType.EXPERIMENTAL);
-    _library.createWell(new WellKey(27, "A02"), LibraryWellType.EXPERIMENTAL);
-    _library.createWell(new WellKey(27, "A03"), LibraryWellType.EXPERIMENTAL);
+    _library.createWell(new WellKey(1, "A01"), LibraryWellType.EXPERIMENTAL);
+    _library.createWell(new WellKey(1, "A02"), LibraryWellType.EXPERIMENTAL);
+    _library.createWell(new WellKey(1, "A03"), LibraryWellType.EXPERIMENTAL);
   }
 
-  // protected instance fields
+  /**
+   * Verifies that Hibernate's flush mode is always "COMMIT", since this is the flush mode that Screensaver code has
+   * been designed to work with.
+   */
+  public void testFlushMode()
+  {
+    genericEntityDao.doInTransaction(new DAOTransaction()
+    {
+      public void runTransaction()
+      {
+        ScreeningRoomUser entity = new ScreeningRoomUser("Test", "User");
+        genericEntityDao.persistEntity(entity);
+        assertTrue("query should not trigger auto-flush", genericEntityDao.findAllEntitiesOfType(ScreeningRoomUser.class).isEmpty());
+      }
+    });
+    assertFalse("transaction commit should trigger flush", genericEntityDao.findAllEntitiesOfType(ScreeningRoomUser.class).isEmpty());
+  }
 
   public void testTransactionRollback()
   {
@@ -62,7 +78,6 @@ public class AbstractDAOTest extends AbstractSpringPersistenceTest
             genericEntityDao.saveOrUpdateEntity(_library);
             throw new RuntimeException("fooled ya!");
           }
-
         });
       fail("exception thrown from transaction didnt come thru");
     }

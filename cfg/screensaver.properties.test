@@ -13,6 +13,13 @@ screensaver.service.smtpemailservice.host=smtp.mailinator.com
 screensaver.service.smtpemailservice.username=
 screensaver.ui.imageproviderservlet.filesystempath=dummy
 
+### cellHTS2 properties
+cellHTS2report.filepath.base=cellHTS2/output/
+cellHTS2report.filepath.prefix=cellHts2_output_screenResultId_
+cellHTS2report.saveRObjects=FALSE
+cellHTS2report.saveRObjects.path=
+
+
 # database connection
 SCREENSAVER_PGSQL_SERVER=localhost
 SCREENSAVER_PGSQL_DB=testscreensaver

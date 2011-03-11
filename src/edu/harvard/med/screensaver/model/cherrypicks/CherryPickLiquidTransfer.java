@@ -12,24 +12,23 @@ package edu.harvard.med.screensaver.model.cherrypicks;
 import java.util.HashSet;
 import java.util.Set;
 
+import javax.persistence.CascadeType;
 import javax.persistence.Column;
 import javax.persistence.Entity;
-import javax.persistence.FetchType;
 import javax.persistence.OneToMany;
 import javax.persistence.PrimaryKeyJoinColumn;
 import javax.persistence.Transient;
 
+import org.apache.log4j.Logger;
+import org.joda.time.LocalDate;
+
 import edu.harvard.med.screensaver.model.AbstractEntityVisitor;
-import edu.harvard.med.screensaver.model.BusinessRuleViolationException;
 import edu.harvard.med.screensaver.model.DataModelViolationException;
 import edu.harvard.med.screensaver.model.meta.RelationshipPath;
 import edu.harvard.med.screensaver.model.screens.LabActivity;
 import edu.harvard.med.screensaver.model.screens.Screen;
 import edu.harvard.med.screensaver.model.users.AdministratorUser;
 import edu.harvard.med.screensaver.model.users.ScreensaverUser;
-
-import org.apache.log4j.Logger;
-import org.joda.time.LocalDate;
 
 /**
  * Tracks the event whereby a set of CherryPickAssayPlates have been plated for
@@ -109,7 +108,6 @@ public class CherryPickLiquidTransfer extends LabActivity
    * @return the status of the cherry pick liquid transfer
    */
   @Column(nullable=false, updatable=false)
-  @org.hibernate.annotations.Immutable
   @org.hibernate.annotations.Type(type="edu.harvard.med.screensaver.model.cherrypicks.CherryPickLiquidTransferStatus$UserType")
   public CherryPickLiquidTransferStatus getStatus()
   {
@@ -153,7 +151,7 @@ public class CherryPickLiquidTransfer extends LabActivity
    * Get the set of cherry pick assay plates.
    * @return the set of cherry pick assay plates
    */
-  @OneToMany(mappedBy="cherryPickLiquidTransfer", fetch=FetchType.LAZY)
+  @OneToMany(mappedBy = "cherryPickLiquidTransfer", cascade = { CascadeType.MERGE })
   public Set<CherryPickAssayPlate> getCherryPickAssayPlates()
   {
     return _cherryPickAssayPlates;

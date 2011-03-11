@@ -9,10 +9,13 @@
 
 package edu.harvard.med.screensaver.model.entitytesters;
 
+import javax.persistence.EntityManagerFactory;
+import javax.persistence.metamodel.IdentifiableType;
+import javax.persistence.metamodel.ManagedType;
+import javax.persistence.metamodel.SingularAttribute;
+
 import org.apache.log4j.Logger;
-import org.hibernate.SessionFactory;
 import org.hibernate.annotations.Immutable;
-import org.hibernate.metadata.ClassMetadata;
 
 import edu.harvard.med.screensaver.model.AbstractEntity;
 
@@ -25,7 +28,7 @@ extends AbstractEntityTester<E>
 {
   private static Logger log = Logger.getLogger(IsVersionedTester.class);
 
-  public IsVersionedTester(Class<E> entityClass, SessionFactory sessionFactory)
+  public IsVersionedTester(Class<E> entityClass, EntityManagerFactory sessionFactory)
   {
     super(entityClass, sessionFactory);
   }
@@ -52,19 +55,10 @@ extends AbstractEntityTester<E>
       return;
     }
       
-    ClassMetadata classMetadata = _sessionFactory.getClassMetadata(_entityClass);
-    String entityName = classMetadata.getEntityName();
-    assertTrue(
-      "hibernate class is versioned: " + entityName,
-      classMetadata.isVersioned());
+    ManagedType<? extends AbstractEntity> type = _entityManagerFactory.getMetamodel().managedType(_entityClass);
+    SingularAttribute id = ((IdentifiableType) type).getId(((IdentifiableType) type).getIdType().getJavaType());
+    assertTrue("hibernate class is versioned: " + _entityClass, ((IdentifiableType) type).hasVersionAttribute());
     
-    int versionIndex = classMetadata.getVersionProperty();
-    String versionName = classMetadata.getPropertyNames()[versionIndex];
-    assertTrue(
-      "name of version property is version: " + entityName,
-      versionName.equals("version"));
-    
-    boolean versionNullability = classMetadata.getPropertyNullability()[versionIndex];
-    assertFalse("version property is not nullable: " + entityName, versionNullability);
+    assertFalse("version property is not nullable: " + _entityClass, ((IdentifiableType) type).getVersion(Integer.class).isOptional());
   }
 }

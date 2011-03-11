@@ -15,13 +15,13 @@ import com.google.common.base.Function;
 import com.google.common.collect.Iterables;
 import com.google.common.collect.Sets;
 import junit.framework.TestSuite;
+import org.springframework.beans.factory.annotation.Autowired;
 
 import edu.harvard.med.screensaver.db.DAOTransaction;
 import edu.harvard.med.screensaver.db.LibrariesDAO;
 import edu.harvard.med.screensaver.io.screenresults.ScreenResultParser;
 import edu.harvard.med.screensaver.model.AbstractEntityInstanceTest;
 import edu.harvard.med.screensaver.model.libraries.Library;
-import edu.harvard.med.screensaver.model.libraries.LibraryContentsVersion;
 import edu.harvard.med.screensaver.model.libraries.LibraryWellType;
 import edu.harvard.med.screensaver.model.libraries.Reagent;
 import edu.harvard.med.screensaver.model.libraries.ReagentVendorIdentifier;
@@ -31,6 +31,7 @@ import edu.harvard.med.screensaver.model.libraries.WellKey;
 import edu.harvard.med.screensaver.model.screens.ProjectPhase;
 import edu.harvard.med.screensaver.model.screens.Screen;
 import edu.harvard.med.screensaver.model.screens.ScreenType;
+import edu.harvard.med.screensaver.model.users.AdministratorUser;
 
 public class AnnotationTypeTest extends AbstractEntityInstanceTest<AnnotationType>
 {
@@ -38,24 +39,30 @@ public class AnnotationTypeTest extends AbstractEntityInstanceTest<AnnotationTyp
   {
     return buildTestSuite(AnnotationTypeTest.class, AnnotationType.class);
   }
-  
+
+  @Autowired
   protected ScreenResultParser screenResultParser;
+  @Autowired
   protected LibrariesDAO librariesDao;
 
-  public AnnotationTypeTest() throws IntrospectionException
+  public AnnotationTypeTest()
   {
     super(AnnotationType.class);
   }
 
   public void testAnnotationValues()
   {
-    schemaUtil.truncateTablesOrCreateSchema();
+    schemaUtil.truncateTables();
 
     genericEntityDao.doInTransaction(new DAOTransaction() {
-      public void runTransaction() {
-        Library library = dataFactory.newInstance(Library.class);
-        dataFactory.newInstance(LibraryContentsVersion.class, library);
+      @Override
+      public void runTransaction()
+      {
+        Library library = dataFactory.newInstance(Library.class, getName());
+        library.setStartPlate(1);
+        library.setEndPlate(1);
         library.setScreenType(ScreenType.RNAI);
+        library.createContentsVersion(dataFactory.newInstance(AdministratorUser.class));
         Well well1 = library.createWell(new WellKey(1, 0, 0), LibraryWellType.EXPERIMENTAL);
         Well well2 = library.createWell(new WellKey(1, 0, 1), LibraryWellType.EXPERIMENTAL);
         Reagent reagent1 = well1.createSilencingReagent(new ReagentVendorIdentifier("vendor", "1"), SilencingReagentType.SIRNA, "ATCG");
@@ -68,13 +75,13 @@ public class AnnotationTypeTest extends AbstractEntityInstanceTest<AnnotationTyp
         assertNotNull(at.createAnnotationValue(reagent2, "b"));
         assertNull("one annotation value per reagent/annotation type pair (transient test)", 
                    at.createAnnotationValue(reagent1, "c"));;
-        genericEntityDao.persistEntity(library);
-        genericEntityDao.persistEntity(study);
-        //new EntityNetworkPersister(genericEntityDao, study).persistEntityNetwork();
+                   genericEntityDao.persistEntity(library);
+                   genericEntityDao.persistEntity(study);
+                   //new EntityNetworkPersister(genericEntityDao, study).persistEntityNetwork();
       }
     });
 
-    Screen study = genericEntityDao.findEntityByProperty(Screen.class, Screen.facilityId.getPropertyName(), "S", false, "annotationTypes.annotationValues.reagent");
+    Screen study = genericEntityDao.findEntityByProperty(Screen.class, Screen.facilityId.getPropertyName(), "S", false, Screen.annotationTypes.to(AnnotationType.annotationValues).to(AnnotationValue.reagent));
     AnnotationType at = study.getAnnotationTypes().last();
     assertEquals(at.getName(), "annotation");
     Reagent reagent1 = genericEntityDao.findEntityByProperty(Reagent.class, "vendorId.vendorIdentifier", "1");

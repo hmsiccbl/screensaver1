@@ -19,11 +19,12 @@ import java.util.Set;
 import java.util.SortedSet;
 import java.util.TreeSet;
 
-import edu.harvard.med.screensaver.model.Entity;
-
+import com.google.common.collect.Lists;
 import org.apache.commons.collections.Closure;
 import org.apache.commons.collections.Transformer;
 import org.apache.log4j.Logger;
+
+import edu.harvard.med.screensaver.model.Entity;
 
 public class CollectionUtils
 {
@@ -61,10 +62,17 @@ public class CollectionUtils
   }
 
 
-  public static <T> void fill(Collection<T> c, T o, int i)
+  public static <T> List<T> listOf(T e, int i)
+  {
+    ArrayList<T> l = Lists.newArrayListWithCapacity(i);
+    fill(l, e, i);
+    return l;
+  }
+
+  public static <T> void fill(Collection<T> c, T e, int i)
   {
     for (; i > 0; i--) {
-      c.add(o);
+      c.add(e);
     }
   }
 

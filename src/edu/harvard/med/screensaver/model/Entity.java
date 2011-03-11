@@ -54,20 +54,6 @@ public interface Entity<K extends Serializable>
   boolean isRestricted();
 
   /**
-   * Invoke domain model logic to update derived properties that can only be
-   * calculated when the entity is in a consistent state. This method should
-   * only perform the updates if {@link #invalidate()} has been called.
-   */
-  void update();
-
-  /**
-   * Flag this entity as being in need of an update of its derived properties.
-   * The {@link Entity#update()} method must be called to actually perform the
-   * updates when the entity is in a consistent state.
-   */
-  void invalidate();
-
-  /**
    * Return the "real" class of this entity, even when the object is a proxy.
    * 
    * @motivation sometimes entities are returned as proxies by Hibernate and we

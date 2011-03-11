@@ -23,6 +23,8 @@ import javax.security.auth.login.FailedLoginException;
 import javax.security.auth.login.LoginException;
 import javax.security.auth.spi.LoginModule;
 
+import org.apache.log4j.Logger;
+
 import edu.harvard.med.authentication.AuthenticationClient;
 import edu.harvard.med.authentication.AuthenticationRequestException;
 import edu.harvard.med.authentication.AuthenticationResponseException;
@@ -34,8 +36,6 @@ import edu.harvard.med.screensaver.model.users.ScreeningRoomUser;
 import edu.harvard.med.screensaver.model.users.ScreensaverUser;
 import edu.harvard.med.screensaver.model.users.ScreensaverUserRole;
 import edu.harvard.med.screensaver.util.CryptoUtils;
-
-import org.apache.log4j.Logger;
     
 
 /**
@@ -383,7 +383,7 @@ public class ScreensaverLoginModule implements LoginModule
                                                      userIdField,
                                                      userId,
                                                      true,
-                                                     "screensaverUserRoles");
+                                                     ScreensaverUser.roles);
     if (user != null) {
       log.debug("found user '" + userId + "' in database using field '" + userIdField +"'" );
     }

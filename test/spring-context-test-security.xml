@@ -1,6 +1,4 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<!DOCTYPE beans PUBLIC "-//SPRING//DTD BEAN 2.0//EN"
-    "http://www.springframework.org/dtd/spring-beans-2.0.dtd">
 
 <!--
    $HeadURL$
@@ -13,17 +11,28 @@
    the GNU General Public License.
 -->
 
-<!-- A top-level, composite Spring context configuration file, intended to test
-  the user authentication and data access policy code. Allows a full Spring 
-  configuration to be referenced via a single file.  -->
+<!-- A top-level, composite Spring context configuration file, intended for use with the 
+  Screensaver web application.  Allows a full Spring configuration to be referenced via a 
+  single file. -->
 
-<beans>
+<beans
+  xmlns="http://www.springframework.org/schema/beans"
+  xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+  xmlns:aop="http://www.springframework.org/schema/aop"
+  xsi:schemaLocation="http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans-2.0.xsd
+                      http://www.springframework.org/schema/aop http://www.springframework.org/schema/aop/spring-aop-2.0.xsd">
+                      
 
-  <import resource="spring-context-config.xml"/>
-
+  <import resource="spring-context-test.xml"/>
+  
   <bean
     id="currentScreensaverUser"
-    class="edu.harvard.med.screensaver.ui.CurrentScreensaverUser">
+    class="edu.harvard.med.screensaver.ui.WebCurrentScreensaverUser"
+    scope="session">
+    <property
+      name="dao"
+      ref="genericEntityDao" />
+    <aop:scoped-proxy />
   </bean>
   
   <bean
@@ -34,19 +43,5 @@
     <constructor-arg ref="genericEntityDao" />
   </bean>
 
-  <bean
-    id="plateFacilityIdInitializer"
-    class="edu.harvard.med.screensaver.service.libraries.DefaultPlateFacilityIdInitializer">
-  </bean>
-
-  <bean id="cherryPickPlateSourceWellMinimumVolumePolicy"
-   class="edu.harvard.med.iccbl.screensaver.policy.cherrypicks.IccblCherryPickPlateSourceWellMinimumVolumePolicy">
-  </bean>
- 
-  <import resource="spring-context-authentication.xml"/>
-  <import resource="spring-context-persistence.xml"/>
-  <import resource="spring-context-services.xml"/>
-  <import resource="spring-context-logging.xml"/>
-  
 
 </beans>

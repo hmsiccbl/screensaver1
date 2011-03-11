@@ -133,7 +133,7 @@ public class Copy extends AuditedAbstractEntity<Integer> implements Comparable<C
    */
   @ManyToOne
   @JoinColumn(name="libraryId", nullable=false, updatable=false)
-  @org.hibernate.annotations.Immutable
+  //@org.hibernate.annotations.Immutable
   @org.hibernate.annotations.ForeignKey(name="fk_copy_to_library")
   @org.hibernate.annotations.LazyToOne(value=org.hibernate.annotations.LazyToOneOption.PROXY)
   @edu.harvard.med.screensaver.model.annotations.ToOne(inverseProperty="copies")
@@ -190,7 +190,7 @@ public class Copy extends AuditedAbstractEntity<Integer> implements Comparable<C
     return _plates.get(plateNumber);
   }
 
-  @Column(nullable=false)
+  @Column(nullable = false)
   @org.hibernate.annotations.Type(type="text")
   public String getName()
   {
@@ -202,7 +202,7 @@ public class Copy extends AuditedAbstractEntity<Integer> implements Comparable<C
     _name = name;
   }
 
-  @Column(nullable=false)
+  @Column(nullable = false)
   @org.hibernate.annotations.Type(
     type="edu.harvard.med.screensaver.model.libraries.CopyUsageType$UserType"
   )

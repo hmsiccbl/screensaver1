@@ -17,6 +17,7 @@ import java.util.Set;
 import com.google.common.collect.Sets;
 import org.apache.log4j.Logger;
 import org.joda.time.LocalDate;
+import org.springframework.beans.factory.annotation.Autowired;
 
 import edu.harvard.med.screensaver.AbstractSpringPersistenceTest;
 import edu.harvard.med.screensaver.db.CherryPickRequestDAO;
@@ -61,9 +62,13 @@ public class CherryPickRequestAllocatorTest extends AbstractSpringPersistenceTes
 {
   private static Logger log = Logger.getLogger(CherryPickRequestAllocatorTest.class);
 
+  @Autowired
   protected LibrariesDAO librariesDao;
+  @Autowired
   protected CherryPickRequestDAO cherryPickRequestDao;
+  @Autowired
   protected CherryPickRequestAllocator cherryPickRequestAllocator;
+  @Autowired
   protected CherryPickRequestPlateMapper cherryPickRequestPlateMapper;
 
   private Volume _minimumSourceWellVolume = new Volume(5, VolumeUnit.MICROLITERS);
@@ -300,7 +305,7 @@ public class CherryPickRequestAllocatorTest extends AbstractSpringPersistenceTes
         genericEntityDao.saveOrUpdateEntity(library);
 
         WellVolumeCorrectionActivity wellVolumeCorrectionActivity =
-          new WellVolumeCorrectionActivity(new AdministratorUser("Joe", "Admin", "joe_admin@hms.harvard.edu", "", "", "", "Joe", ""),
+          new WellVolumeCorrectionActivity(new AdministratorUser("Joe", "Admin"),
                                            new LocalDate());
         Set<WellVolumeAdjustment> wellVolumeAdjustments = wellVolumeCorrectionActivity.getWellVolumeAdjustments();
         Well wellA01 = genericEntityDao.findEntityById(Well.class, "00001:A01");
@@ -443,44 +448,28 @@ public class CherryPickRequestAllocatorTest extends AbstractSpringPersistenceTes
       }
     });
 
-    final RNAiCherryPickRequest cpr = doTestCherryPickRequestAllocation(1,
-                                                                        requestVolume,
-                                                                        new String[] {"A01", "A02", "P23", "P24"},
-                                                                        new String[] {});
-    genericEntityDao.doInTransaction(new DAOTransaction() {
-      public void runTransaction() {
-        assertTrue("CPR is allocated", cpr.isAllocated());
-        List<WellVolumeAdjustment> wellVolumeAdjustments1 = genericEntityDao.findAllEntitiesOfType(WellVolumeAdjustment.class);
-        assertEquals("wellVolumeAdjustment count after first CPR allocation", 4, wellVolumeAdjustments1.size());
-      }
-    });
+    CherryPickRequest cpr1 = doTestCherryPickRequestAllocation(1,
+                                                               requestVolume,
+                                                               new String[] { "A01", "A02", "P23", "P24" },
+                                                               new String[] {});
+    assertTrue("CPR is allocated", cpr1.isAllocated());
+    List<WellVolumeAdjustment> wellVolumeAdjustments1 = genericEntityDao.findAllEntitiesOfType(WellVolumeAdjustment.class);
+    assertEquals("wellVolumeAdjustment count after first CPR allocation", 4, wellVolumeAdjustments1.size());
 
-    doTestCherryPickRequestAllocation(2,
-                                      requestVolume,
-                                      new String[] {"A01", "A02", "P23", "P24"},
-                                      new String[] {"A01", "A02", "P23", "P24"});
-    genericEntityDao.doInTransaction(new DAOTransaction()
-    {
-      public void runTransaction()
-      {
-        List<WellVolumeAdjustment> wellVolumeAdjustments2 = genericEntityDao.findAllEntitiesOfType(WellVolumeAdjustment.class);
-        assertEquals("wellVolumeAdjustment count after second CPR allocation", 4, wellVolumeAdjustments2.size());
-      }
-    });
+    CherryPickRequest cpr2 = doTestCherryPickRequestAllocation(2,
+                                                               requestVolume,
+                                                               new String[] { "A01", "A02", "P23", "P24" },
+                                                               new String[] { "A01", "A02", "P23", "P24" });
+    List<WellVolumeAdjustment> wellVolumeAdjustments2 = genericEntityDao.findAllEntitiesOfType(WellVolumeAdjustment.class);
+    assertEquals("2nd CPR LCPs are unfulfillable", 4, wellVolumeAdjustments2.size());
 
-    cherryPickRequestAllocator.deallocate(cpr);
-    genericEntityDao.doInTransaction(new DAOTransaction()
-    {
-      public void runTransaction()
-      {
-        List<WellVolumeAdjustment> wellVolumeAdjustments3 = genericEntityDao.findAllEntitiesOfType(WellVolumeAdjustment.class);
-        assertFalse("CPR is no longer allocated", cpr.isAllocated());
-        assertEquals("wellVolumeAdjustment count after CPR deallocation", 0, wellVolumeAdjustments3.size());
-        assertEquals("number of unfulfilled lcps (persisted value)", 
-                     4,
-                     cpr.getNumberUnfulfilledLabCherryPicks());
-      }
-    });
+    cpr1 = cherryPickRequestAllocator.deallocate(cpr1);
+    List<WellVolumeAdjustment> wellVolumeAdjustments3 = genericEntityDao.findAllEntitiesOfType(WellVolumeAdjustment.class);
+    assertFalse("CPR is no longer allocated", cpr1.isAllocated());
+    assertEquals("wellVolumeAdjustment count after CPR deallocation", 0, wellVolumeAdjustments3.size());
+    assertEquals("number of unfulfilled lcps (persisted value)",
+                 4,
+                 cpr1.getNumberUnfulfilledLabCherryPicks());
   }
 
   public void testCancelAndDeallocateAssayPlates()
@@ -494,7 +483,7 @@ public class CherryPickRequestAllocatorTest extends AbstractSpringPersistenceTes
         genericEntityDao.saveOrUpdateEntity(library);
       }
     });
-    final AdministratorUser adminUser = new AdministratorUser("Test", "Admin", "", "", "", "", "", "");
+    final AdministratorUser adminUser = new AdministratorUser("Test", "Admin");
     genericEntityDao.persistEntity(adminUser);
 
     List<WellVolumeAdjustment> wvas = genericEntityDao.findAllEntitiesOfType(WellVolumeAdjustment.class);
@@ -555,9 +544,9 @@ public class CherryPickRequestAllocatorTest extends AbstractSpringPersistenceTes
 
   public static Library makeRNAiDuplexLibrary(String name, int startPlate, int endPlate, PlateSize plateSize)
   {
-    AdministratorUser adminUser = new AdministratorUser(name, "Admin", "", "", "", "", name, "");
+    AdministratorUser adminUser = new AdministratorUser(name, "Admin");
     Library library = new Library(adminUser, name, name, ScreenType.RNAI, LibraryType.COMMERCIAL, startPlate, endPlate, PlateSize.WELLS_384);
-    LibraryContentsVersion contentsVersion = library.createContentsVersion(new AdministrativeActivity(adminUser, new LocalDate(), AdministrativeActivityType.LIBRARY_CONTENTS_LOADING));
+    LibraryContentsVersion contentsVersion = library.createContentsVersion(adminUser);
     NEXT_PLATE:
     for (int plateNumber = startPlate; plateNumber <= endPlate; plateNumber++) {
       int wellsToCreateOnPlate = plateSize.getWellCount();
@@ -579,7 +568,7 @@ public class CherryPickRequestAllocatorTest extends AbstractSpringPersistenceTes
     Screen screen = MakeDummyEntities.makeDummyScreen(screenFacilityId, ScreenType.RNAI);
     // Note: if we use screen.getLeadScreener() as requestor, Hibernate complains!
     ScreeningRoomUser cherryPickRequestor =
-      MakeDummyEntities.makeDummyUser(screenFacilityId, "Cherry", "Picker");
+      MakeDummyEntities.makeDummyUser(screen.getFacilityId(), "Cherry", "Picker");
     RNAiCherryPickRequest cherryPickRequest = (RNAiCherryPickRequest)
       screen.createCherryPickRequest((AdministratorUser) screen.getCreatedBy(), cherryPickRequestor, new LocalDate());
     cherryPickRequest.setTransferVolumePerWellApproved(volume);

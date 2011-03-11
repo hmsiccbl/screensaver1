@@ -13,7 +13,6 @@ import java.security.Principal;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
-import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -21,6 +20,7 @@ import java.util.SortedSet;
 
 import javax.persistence.CascadeType;
 import javax.persistence.Column;
+import javax.persistence.ElementCollection;
 import javax.persistence.Entity;
 import javax.persistence.FetchType;
 import javax.persistence.GeneratedValue;
@@ -32,7 +32,6 @@ import javax.persistence.JoinColumn;
 import javax.persistence.JoinTable;
 import javax.persistence.ManyToMany;
 import javax.persistence.OneToMany;
-import javax.persistence.OrderBy;
 import javax.persistence.Transient;
 import javax.persistence.Version;
 
@@ -51,7 +50,6 @@ import edu.harvard.med.screensaver.model.Activity;
 import edu.harvard.med.screensaver.model.AdministrativeActivity;
 import edu.harvard.med.screensaver.model.AuditedAbstractEntity;
 import edu.harvard.med.screensaver.model.DataModelViolationException;
-import edu.harvard.med.screensaver.model.annotations.CollectionOfElements;
 import edu.harvard.med.screensaver.model.annotations.ToMany;
 import edu.harvard.med.screensaver.model.meta.PropertyPath;
 import edu.harvard.med.screensaver.model.meta.RelationshipPath;
@@ -87,14 +85,14 @@ abstract public class ScreensaverUser extends AuditedAbstractEntity<Integer> imp
 
   private Integer _version;
   private transient HashMap<String,Boolean> _rolesMap;
-  private Set<Activity> _activitiesPerformed = new HashSet<Activity>();
+  private SortedSet<Activity> _activitiesPerformed = Sets.newTreeSet();
   private String _firstName;
   private String _lastName;
   private String _email;
   private String _phone;
   private String _mailingAddress;
   private String _comments;
-  private Set<ScreensaverUserRole> _roles = new HashSet<ScreensaverUserRole>();
+  private Set<ScreensaverUserRole> _roles = Sets.newHashSet();
   private Set<ScreensaverUserRole> _primaryRoles;
   private String _loginId;
   private String _digestedPassword;
@@ -114,21 +112,13 @@ abstract public class ScreensaverUser extends AuditedAbstractEntity<Integer> imp
     super(createdBy);
   }
 
-  protected ScreensaverUser(
-    String firstName,
-    String lastName,
-    String email,
-    String phone,
-    String mailingAddress,
-    String comments)
+  /** @motivation for test code only */
+  protected ScreensaverUser(String firstName,
+                            String lastName)
   {
     super(null); /* TODO */
     setFirstName(firstName);
     setLastName(lastName);
-    setEmail(email);
-    setPhone(phone);
-    setMailingAddress(mailingAddress);
-    setComments(comments);
   }
 
   
@@ -171,8 +161,13 @@ abstract public class ScreensaverUser extends AuditedAbstractEntity<Integer> imp
    * 
    * @return the set of user roles that this user belongs to
    */
-  @org.hibernate.annotations.CollectionOfElements
-  @CollectionOfElements(hasNonconventionalMutation=true) /* valid roles depend upon concrete entity type */
+  @ElementCollection
+  @edu.harvard.med.screensaver.model.annotations.ElementCollection(hasNonconventionalMutation = true /*
+                                                                                                      * valid roles
+                                                                                                      * depend upon
+                                                                                                      * concrete entity
+                                                                                                      * type
+                                                                                                      */)
   @Column(name = "screensaverUserRole", nullable = false)
   @JoinTable(name = "screensaverUserRole", joinColumns = @JoinColumn(name = "screensaverUserId"))
   @org.hibernate.annotations.Type(type = "edu.harvard.med.screensaver.model.users.ScreensaverUserRole$UserType")
@@ -285,16 +280,12 @@ abstract public class ScreensaverUser extends AuditedAbstractEntity<Integer> imp
   /**
    * Get the set of activities performed by this user.
    * @return the set of activities performed by this user
-   * @return the activities performed
    */
-  @OneToMany(
-    mappedBy="performedBy",
-    fetch=FetchType.LAZY
-  )
-  @OrderBy("dateOfActivity")
+  @OneToMany(mappedBy = "performedBy")
   @edu.harvard.med.screensaver.model.annotations.ToMany(singularPropertyName="activityPerformed")
   @edu.harvard.med.screensaver.model.annotations.Column(hasNonconventionalSetterMethod=true)
-  public Set<Activity> getActivitiesPerformed()
+  @Sort(type = SortType.NATURAL)
+  public SortedSet<Activity> getActivitiesPerformed()
   {
     return _activitiesPerformed;
   }
@@ -665,7 +656,7 @@ abstract public class ScreensaverUser extends AuditedAbstractEntity<Integer> imp
    * @param activitiesPerformed the screening room activities performed by this user
    * @motivation for hibernate
    */
-  private void setActivitiesPerformed(Set<Activity> activitiesPerformed)
+  private void setActivitiesPerformed(SortedSet<Activity> activitiesPerformed)
   {
     _activitiesPerformed = activitiesPerformed;
   }

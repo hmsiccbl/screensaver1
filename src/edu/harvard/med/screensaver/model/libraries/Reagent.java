@@ -32,7 +32,6 @@ import javax.persistence.UniqueConstraint;
 import org.hibernate.annotations.Immutable;
 import org.hibernate.annotations.Index;
 import org.hibernate.annotations.MapKeyManyToMany;
-import org.hibernate.annotations.Type;
 
 import edu.harvard.med.screensaver.model.AbstractEntity;
 import edu.harvard.med.screensaver.model.annotations.ContainedEntity;
@@ -56,7 +55,7 @@ import edu.harvard.med.screensaver.model.screens.Screen;
 @Immutable
 @Table(uniqueConstraints={@UniqueConstraint(columnNames={"wellId", "libraryContentsVersionId"})})
 @org.hibernate.annotations.Table(appliesTo = "reagent", indexes = {
- @Index(name = "reagent_vendor_identifier_index", columnNames = { "vendorIdentifier" }) })
+  @Index(name = "reagent_vendor_identifier_index", columnNames = { "vendorIdentifier" }) })
 @org.hibernate.annotations.Proxy(lazy=false) // proxying causes problems with casts of getLatestReleasedReagent() return value
 @Inheritance(strategy=InheritanceType.JOINED)
 @ContainedEntity(containingEntityClass=Well.class)
@@ -117,7 +116,6 @@ public abstract class Reagent extends AbstractEntity<Integer> implements Compara
   }
 
   @Column
-  @Type(type="text")
   public ReagentVendorIdentifier getVendorId()
   {
     if (_vendorId == null) {
@@ -174,7 +172,7 @@ public abstract class Reagent extends AbstractEntity<Integer> implements Compara
                                                                              * to-many relationships, tested in
                                                                              * ReagentTest#testAnnotationValueMap
                                                                              */)
-  @JoinColumn(name = "studyId", nullable = false, updatable = false)
+  //@JoinColumn(name = "studyId", nullable = false, updatable = false)
   @org.hibernate.annotations.ForeignKey(name = "fk_reagent_to_study")
   @org.hibernate.annotations.LazyCollection(value = org.hibernate.annotations.LazyCollectionOption.TRUE)
   public Set<Screen> getStudies()

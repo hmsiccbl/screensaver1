@@ -102,13 +102,12 @@ public class Well extends SemanticIDAbstractEntity<String> implements Comparable
    */
   Well(Library library, WellKey wellKey, LibraryWellType wellType)
   {
-    // TODO: reinstate once entity model test code can be made to respect this constraint
-//    if (wellKey.getPlateNumber() < library.getStartPlate() || wellKey.getPlateNumber() > library.getEndPlate()) {
-//      throw new DataModelViolationException("well " + wellKey +
-//                                            " is not within library plate range [" +
-//                                            library.getStartPlate() + "," +
-//                                            library.getEndPlate() + "]");
-//    }
+    if (wellKey.getPlateNumber() < library.getStartPlate() || wellKey.getPlateNumber() > library.getEndPlate()) {
+      throw new DataModelViolationException("well " + wellKey +
+                                            " is not within library plate range [" +
+                                            library.getStartPlate() + "," +
+                                            library.getEndPlate() + "]");
+    }
     _library = library;
     setWellId(wellKey.getKey());
     setLibraryWellType(wellType);
@@ -143,7 +142,6 @@ public class Well extends SemanticIDAbstractEntity<String> implements Comparable
 
   @ManyToOne
   @JoinColumn(name="libraryId", nullable=false, updatable=false)
-  @org.hibernate.annotations.Immutable
   @org.hibernate.annotations.ForeignKey(name="fk_well_to_library")
   @org.hibernate.annotations.LazyToOne(value=org.hibernate.annotations.LazyToOneOption.PROXY)
   public Library getLibrary()
@@ -161,11 +159,9 @@ public class Well extends SemanticIDAbstractEntity<String> implements Comparable
    * contents version number. A Well has only one reagent at a given point in
    * time.
    */
-  @MapKey(name="libraryContentsVersion")
-  @OneToMany(mappedBy="well", cascade={ CascadeType.PERSIST, CascadeType.MERGE }, fetch=FetchType.LAZY)
-  @org.hibernate.annotations.Cascade(value={ org.hibernate.annotations.CascadeType.SAVE_UPDATE, org.hibernate.annotations.CascadeType.DELETE_ORPHAN })
-  @org.hibernate.annotations.LazyCollection(value=org.hibernate.annotations.LazyCollectionOption.TRUE)
+  @OneToMany(mappedBy = "well", cascade = { CascadeType.ALL }, fetch = FetchType.LAZY)
   @ToMany(hasNonconventionalMutation=true) // Map-based collections not yet supported, tested in LibraryTest.testSmallCompoundLibraryAndrReagents
+  @MapKey(name = "libraryContentsVersion")
   public Map<LibraryContentsVersion,Reagent> getReagents()
   {
     return _reagents;
@@ -336,8 +332,7 @@ public class Well extends SemanticIDAbstractEntity<String> implements Comparable
     return (R) getReagents().get(latestContentsVersion);
   }
 
-  @org.hibernate.annotations.Immutable
-  @Column(nullable=false)
+  @Column(nullable = false, updatable = false)
   public Integer getPlateNumber()
   {
     return _wellKey.getPlateNumber();
@@ -347,8 +342,7 @@ public class Well extends SemanticIDAbstractEntity<String> implements Comparable
   {
   }
 
-  @org.hibernate.annotations.Immutable
-  @Column(nullable=false)
+  @Column(nullable = false, updatable = false)
   @org.hibernate.annotations.Type(type="text")
   public String getWellName()
   {

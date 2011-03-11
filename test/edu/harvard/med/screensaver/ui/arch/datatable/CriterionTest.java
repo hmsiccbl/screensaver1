@@ -11,15 +11,12 @@ package edu.harvard.med.screensaver.ui.arch.datatable;
 
 import java.math.BigDecimal;
 import java.util.Arrays;
-import java.util.Collections;
 
 import junit.framework.TestCase;
-
-import edu.harvard.med.screensaver.ui.arch.datatable.Criterion;
-import edu.harvard.med.screensaver.ui.arch.datatable.Criterion.Operator;
-
 import org.apache.log4j.Logger;
 import org.joda.time.LocalDate;
+
+import edu.harvard.med.screensaver.ui.arch.datatable.Criterion.Operator;
 
 // TODO: test other operators
 public class CriterionTest extends TestCase

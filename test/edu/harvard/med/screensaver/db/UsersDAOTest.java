@@ -14,6 +14,7 @@ import java.util.Set;
 import java.util.TreeSet;
 
 import org.apache.log4j.Logger;
+import org.springframework.beans.factory.annotation.Autowired;
 
 import edu.harvard.med.screensaver.AbstractSpringPersistenceTest;
 import edu.harvard.med.screensaver.model.users.AffiliationCategory;
@@ -34,6 +35,7 @@ public class UsersDAOTest extends AbstractSpringPersistenceTest
 
   private static final Logger log = Logger.getLogger(UsersDAOTest.class);
 
+  @Autowired
   protected UsersDAO usersDao;
  
   public void testFindLabHeads()

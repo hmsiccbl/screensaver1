@@ -14,19 +14,16 @@ import java.beans.IntrospectionException;
 import java.beans.Introspector;
 import java.beans.PropertyDescriptor;
 import java.lang.reflect.InvocationTargetException;
-import java.util.HashSet;
-import java.util.Set;
+
+import javax.persistence.EntityManagerFactory;
 
 import junit.framework.TestSuite;
 import org.apache.log4j.Logger;
-import org.hibernate.SessionFactory;
 import org.joda.time.DateTime;
-import org.springframework.orm.hibernate3.HibernateTemplate;
+import org.springframework.beans.factory.annotation.Autowired;
 
-import edu.harvard.med.screensaver.AbstractSpringTest;
-import edu.harvard.med.screensaver.db.GenericEntityDAO;
-import edu.harvard.med.screensaver.db.SchemaUtil;
-import edu.harvard.med.screensaver.model.EntityNetworkPersister.EntityNetworkPersisterException;
+import edu.harvard.med.screensaver.AbstractSpringPersistenceTest;
+import edu.harvard.med.screensaver.db.EntityInflator;
 import edu.harvard.med.screensaver.model.entitytesters.IdentifierAccessorModifiersTester;
 import edu.harvard.med.screensaver.model.entitytesters.IdentifierMetadataTester;
 import edu.harvard.med.screensaver.model.entitytesters.IsVersionedTester;
@@ -35,7 +32,7 @@ import edu.harvard.med.screensaver.model.entitytesters.VersionAccessorsTester;
 import edu.harvard.med.screensaver.model.users.AdministratorUser;
 import edu.harvard.med.screensaver.model.users.ScreensaverUser;
 
-public abstract class AbstractEntityInstanceTest<E extends AbstractEntity> extends AbstractSpringTest
+public abstract class AbstractEntityInstanceTest<E extends AbstractEntity> extends AbstractSpringPersistenceTest
 {
   private static Logger log = Logger.getLogger(AbstractEntityInstanceTest.class);
 
@@ -48,7 +45,7 @@ public abstract class AbstractEntityInstanceTest<E extends AbstractEntity> exten
    * @param entityClass
    * @return
    */
-  public static TestSuite buildTestSuite(Class entityTestClass,
+  public static TestSuite buildTestSuite(Class<? extends AbstractEntityInstanceTest> entityTestClass,
                                          Class<? extends AbstractEntity> entityClass)
   {
     TestSuite testSuite = new TestSuite(entityTestClass);
@@ -76,68 +73,57 @@ public abstract class AbstractEntityInstanceTest<E extends AbstractEntity> exten
   }
 
   // instance fields injected by Spring
-  /** The Hibernate <code>SessionFactory</code>. Used for getting <code>ClassMetadata</code> objects. */
-  protected SessionFactory hibernateSessionFactory;
-  protected HibernateTemplate hibernateTemplate;
-  protected GenericEntityDAO genericEntityDao;
-  protected SchemaUtil schemaUtil;
+  @Autowired protected EntityManagerFactory entityManagerFactory;
 
   private Class<E> _entityClass;
-  private BeanInfo _beanInfo;
-  protected TestDataFactory dataFactory = new TestDataFactory();
 
   // public constructors and instance methods
 
   public AbstractEntityInstanceTest(Class<E> clazz)
-  throws IntrospectionException
   {
     super(clazz.getName());
     
     _entityClass = clazz;
-    _beanInfo = Introspector.getBeanInfo(_entityClass);
   }
 
-  public void testEqualsAndHashCode()
-  {
-    schemaUtil.truncateTablesOrCreateSchema();
-    E transientEntity = dataFactory.newInstance(_entityClass);
-    Set<E> set = new HashSet<E>();
-    set.add(transientEntity);
-    assertTrue(set.contains(transientEntity));
-
-    log.debug("transient entity " + transientEntity);
-    log.debug("transient entity hashcode " + transientEntity.hashCode());
-    persistEntityNetwork(transientEntity);
-    E detachedEntity = transientEntity;
-    transientEntity = null; // no longer transient!
-    E reloadedEntity = genericEntityDao.reloadEntity(detachedEntity);
-    assertNotSame(reloadedEntity, detachedEntity);
-    assertTrue(set.contains(detachedEntity));
-    boolean isSemanticId = SemanticIDAbstractEntity.class.isAssignableFrom(_entityClass);
-    log.debug("detached = " + detachedEntity);
-    log.debug("reloaded = " + reloadedEntity);
-    if (isSemanticId) {
-      assertEquals(reloadedEntity, detachedEntity);
-      assertEquals(reloadedEntity.hashCode(), detachedEntity.hashCode());
-      assertTrue(set.contains(reloadedEntity));
-    }
-    else {
-      log.debug("reloaded entity " + reloadedEntity);
-      log.debug("reloaded entity hashcode " + reloadedEntity.hashCode());
-      log.debug("detached entity " + detachedEntity);
-      log.debug("detached entity hashcode " + detachedEntity.hashCode());
-      assertFalse("reloaded entity " + reloadedEntity + " does not equal " + detachedEntity, reloadedEntity.equals(detachedEntity));
-      assertFalse(reloadedEntity.hashCode() == detachedEntity.hashCode());
-      assertFalse(set.contains(reloadedEntity));
-    }
-  }
+  // TODO: this test is no tests what it used to test, now that TestDataFactory returns persistent instances
+//  public void testEqualsAndHashCode()
+//  {
+//    E transientEntity = dataFactory.newInstance(_entityClass);
+//    Set<E> set = new HashSet<E>();
+//    set.add(transientEntity);
+//    assertTrue(set.contains(transientEntity));
+//
+//    log.debug("transient entity " + transientEntity);
+//    log.debug("transient entity hashcode " + transientEntity.hashCode());
+//    E reloadedEntity = genericEntityDao.mergeEntity(transientEntity);
+//    assertNotSame(reloadedEntity, transientEntity);
+//    assertTrue(set.contains(transientEntity));
+//    boolean isSemanticId = SemanticIDAbstractEntity.class.isAssignableFrom(_entityClass);
+//    log.debug("transient = " + transientEntity);
+//    log.debug("reloaded = " + reloadedEntity);
+//    if (isSemanticId) {
+//      assertEquals(reloadedEntity, transientEntity);
+//      assertEquals(reloadedEntity.hashCode(), transientEntity.hashCode());
+//      assertTrue(set.contains(reloadedEntity));
+//    }
+//    else {
+//      log.debug("reloaded entity " + reloadedEntity);
+//      log.debug("reloaded entity hashcode " + reloadedEntity.hashCode());
+//      log.debug("transient entity " + transientEntity);
+//      log.debug("transient entity hashcode " + transientEntity.hashCode());
+//      assertFalse("reloaded entity " + reloadedEntity + " does not equal " + transientEntity, reloadedEntity.equals(transientEntity));
+//      assertFalse(reloadedEntity.hashCode() == transientEntity.hashCode());
+//      assertFalse(set.contains(reloadedEntity));
+//    }
+//  }
 
   /**
    * Test some basic stuff, mostly about the identifier, in the ClassMetadata.
    */
   public void testIdentifierMetadata()
   {
-    new IdentifierMetadataTester<E>(_entityClass, hibernateSessionFactory).testEntity();
+    new IdentifierMetadataTester<E>(_entityClass, entityManagerFactory).testEntity();
   }
 
   /**
@@ -146,7 +132,7 @@ public abstract class AbstractEntityInstanceTest<E extends AbstractEntity> exten
    */
   public void testIdentifierAccessorModifiers()
   {
-    new IdentifierAccessorModifiersTester<E>(_entityClass, hibernateSessionFactory).testEntity();
+    new IdentifierAccessorModifiersTester<E>(_entityClass, entityManagerFactory).testEntity();
   }
 
   /**
@@ -154,7 +140,7 @@ public abstract class AbstractEntityInstanceTest<E extends AbstractEntity> exten
    */
   public void testIsVersioned()
   {
-    new IsVersionedTester<E>(_entityClass, hibernateSessionFactory).testEntity();
+    new IsVersionedTester<E>(_entityClass, entityManagerFactory).testEntity();
   }
 
   /**
@@ -162,12 +148,12 @@ public abstract class AbstractEntityInstanceTest<E extends AbstractEntity> exten
    */
   public void testVersionAccessors()
   {
-    new VersionAccessorsTester<E>(_entityClass, hibernateSessionFactory).testEntity();
+    new VersionAccessorsTester<E>(_entityClass, entityManagerFactory).testEntity();
   }
 
   // this serves as the general test for AuditedAbstractEntity.createdBy, since
   // we must test it from a concrete instance, if we're going to verify
-  // peristence is working
+  // persistence is working
   public void testAuditProperties() throws IllegalAccessException, InvocationTargetException, NoSuchMethodException
   {
     if (!!!AuditedAbstractEntity.class.isAssignableFrom(_entityClass)) {
@@ -175,19 +161,16 @@ public abstract class AbstractEntityInstanceTest<E extends AbstractEntity> exten
       return;
     }
       
-    schemaUtil.truncateTablesOrCreateSchema();
-    AuditedAbstractEntity auditedEntity = (AuditedAbstractEntity) dataFactory.newInstance(_entityClass);
+    AuditedAbstractEntity auditedEntity = (AuditedAbstractEntity) dataFactory.newInstance(_entityClass, getName());
     ScreensaverUser dataEntryAdmin = auditedEntity.getCreatedBy();
     DateTime expectedDateCreated = auditedEntity.getDateCreated();
     AdministratorUser dataEntryUpdateAdmin = dataFactory.newInstance(AdministratorUser.class);
     AdministrativeActivity updateActivity = auditedEntity.createUpdateActivity(dataEntryUpdateAdmin, "updated!");
-    new EntityNetworkPersister(genericEntityDao, auditedEntity).persistEntityNetwork();
+    auditedEntity = genericEntityDao.mergeEntity(auditedEntity);
     
-    auditedEntity = (AuditedAbstractEntity) genericEntityDao.findEntityById(_entityClass, 
-                                                                            auditedEntity.getEntityId(), 
-                                                                            true, 
-                                                                            AuditedAbstractEntity.createdBy.getPath(),
-                                                                            AuditedAbstractEntity.updateActivities.to(Activity.performedBy).getPath());
+    auditedEntity = new EntityInflator<AuditedAbstractEntity>(genericEntityDao, auditedEntity, true).
+      need(AuditedAbstractEntity.createdBy.castToSubtype((Class<AuditedAbstractEntity>) _entityClass)).
+      need(AuditedAbstractEntity.updateActivities.to(Activity.performedBy).castToSubtype((Class<AuditedAbstractEntity>) _entityClass)).inflate();
     assertEquals("dateCreated", expectedDateCreated, auditedEntity.getDateCreated());
     if (dataEntryAdmin == null) {
       // TODO: we still need to add 'createdBy' params to all of our AuditedAbstractEntity concrete class constructors; until then the createdBy property will be null
@@ -201,17 +184,6 @@ public abstract class AbstractEntityInstanceTest<E extends AbstractEntity> exten
     assertEquals("update activity admin", dataEntryUpdateAdmin.getEntityId(), actualUpdateActivity.getPerformedBy().getEntityId());
     assertEquals("update activity date", updateActivity.getDateOfActivity(), actualUpdateActivity.getDateOfActivity());
     assertEquals("update activity comment", "updated!", actualUpdateActivity.getComments());
-  }
-
-  protected void persistEntityNetwork(final AbstractEntity root)
-  {
-    try {
-      new EntityNetworkPersister(genericEntityDao, root).persistEntityNetwork();
-    }
-    catch (EntityNetworkPersisterException e) {
-      e.printStackTrace();
-      fail(e.getMessage());
-    }
   }
 
   protected String fullPropName(PropertyDescriptor prop)

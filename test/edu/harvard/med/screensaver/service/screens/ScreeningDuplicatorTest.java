@@ -11,12 +11,13 @@ package edu.harvard.med.screensaver.service.screens;
 
 import org.apache.log4j.Logger;
 import org.joda.time.LocalDate;
+import org.springframework.beans.factory.annotation.Autowired;
 
 import edu.harvard.med.screensaver.AbstractSpringPersistenceTest;
 import edu.harvard.med.screensaver.db.DAOTransaction;
+import edu.harvard.med.screensaver.model.MakeDummyEntities;
 import edu.harvard.med.screensaver.model.MolarConcentration;
 import edu.harvard.med.screensaver.model.MolarUnit;
-import edu.harvard.med.screensaver.model.MakeDummyEntities;
 import edu.harvard.med.screensaver.model.Volume;
 import edu.harvard.med.screensaver.model.VolumeUnit;
 import edu.harvard.med.screensaver.model.cherrypicks.RNAiCherryPickRequest;
@@ -31,14 +32,15 @@ public class ScreeningDuplicatorTest extends AbstractSpringPersistenceTest
 {
   private static Logger log = Logger.getLogger(ScreeningDuplicatorTest.class);
 
+  @Autowired
   protected ScreeningDuplicator screeningDuplicator;
 
   private Screen _screen;
   
   @Override
-  protected void onSetUp() throws Exception
+  protected void setUp() throws Exception
   {
-    super.onSetUp();
+    super.setUp();
     _screen = MakeDummyEntities.makeDummyScreen(1, ScreenType.RNAI);
     genericEntityDao.persistEntity(_screen);
   }

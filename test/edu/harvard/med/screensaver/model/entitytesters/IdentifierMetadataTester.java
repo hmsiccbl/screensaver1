@@ -11,12 +11,12 @@ package edu.harvard.med.screensaver.model.entitytesters;
 
 import java.lang.reflect.Method;
 
+import javax.persistence.EntityManagerFactory;
 import javax.persistence.GeneratedValue;
+import javax.persistence.metamodel.IdentifiableType;
+import javax.persistence.metamodel.ManagedType;
 
 import org.apache.log4j.Logger;
-import org.hibernate.EntityMode;
-import org.hibernate.SessionFactory;
-import org.hibernate.metadata.ClassMetadata;
 
 import edu.harvard.med.screensaver.model.AbstractEntity;
 import edu.harvard.med.screensaver.model.SemanticIDAbstractEntity;
@@ -37,7 +37,7 @@ extends AbstractEntityTester<E>
 {
   private static Logger log = Logger.getLogger(IdentifierMetadataTester.class);
 
-  public IdentifierMetadataTester(Class<E> entityClass, SessionFactory sessionFactory)
+  public IdentifierMetadataTester(Class<E> entityClass, EntityManagerFactory sessionFactory)
   {
     super(entityClass, sessionFactory);
   }
@@ -56,20 +56,12 @@ extends AbstractEntityTester<E>
       return;
     }
 
-    ClassMetadata classMetadata = _sessionFactory.getClassMetadata(_entityClass);
-    String entityName = classMetadata.getEntityName();
-    assertTrue(
-        "hibernate class has an identifier: " + entityName,
-        classMetadata.hasIdentifierProperty());
-    assertFalse(
-        "hibernate class does not have natural identifier: " + entityName,
-        classMetadata.hasNaturalIdentifier());
-    String identifierPropertyName = classMetadata.getIdentifierPropertyName();
-    assertNotNull("identifier property name is non-null", identifierPropertyName);
-    Class mappedClass = classMetadata.getMappedClass(EntityMode.POJO);
-    assertNotNull("class metadata has non-null mapped class", mappedClass);
+    ManagedType<? extends AbstractEntity> type = _entityManagerFactory.getMetamodel().managedType(_entityClass);
+    assertTrue("hibernate class has an identifier: " + _entityClass, ((IdentifiableType) type).hasSingleIdAttribute());
     
-    testGeneratedValueAppropriateness(entityName, identifierPropertyName);
+    Class idType = ((IdentifiableType) type).getIdType().getJavaType();
+    String idName = ((IdentifiableType) type).getId(idType).getName();
+    testGeneratedValueAppropriateness(_entityClass.toString(), idName);
   }
 
   private void testGeneratedValueAppropriateness(String entityName, String identifierPropertyName)

@@ -21,6 +21,7 @@ import java.util.regex.Pattern;
 import com.google.common.collect.Sets;
 import org.apache.log4j.Logger;
 import org.joda.time.LocalDate;
+import org.springframework.beans.factory.annotation.Autowired;
 
 import edu.harvard.med.screensaver.AbstractSpringPersistenceTest;
 import edu.harvard.med.screensaver.db.DAOTransaction;
@@ -28,7 +29,6 @@ import edu.harvard.med.screensaver.db.LibrariesDAO;
 import edu.harvard.med.screensaver.io.libraries.smallmolecule.LibraryContentsVersionReference;
 import edu.harvard.med.screensaver.model.AdministrativeActivity;
 import edu.harvard.med.screensaver.model.AdministrativeActivityType;
-import edu.harvard.med.screensaver.model.TestDataFactory;
 import edu.harvard.med.screensaver.model.libraries.Library;
 import edu.harvard.med.screensaver.model.libraries.LibraryContentsVersion;
 import edu.harvard.med.screensaver.model.libraries.ReagentVendorIdentifier;
@@ -41,7 +41,10 @@ public class WellsSdfDataExporterTest extends AbstractSpringPersistenceTest
 {
   private static Logger log = Logger.getLogger(WellsSdfDataExporterTest.class);
 
+  @Autowired
   protected LibrariesDAO librariesDao;
+  @Autowired
+  protected edu.harvard.med.screensaver.service.libraries.LibraryCreator libraryCreator;
 
   private WellListDAOTransaction _wellListDAOTransaction;
 
@@ -50,13 +53,12 @@ public class WellsSdfDataExporterTest extends AbstractSpringPersistenceTest
 
     public void runTransaction()
     {
-      TestDataFactory dataFactory = new TestDataFactory();
       Library library = dataFactory.newInstance(Library.class);
       library.setScreenType(ScreenType.SMALL_MOLECULE);
       library.setStartPlate(1);
       library.setEndPlate(1);
-      librariesDao.loadOrCreateWellsForLibrary(library);
-      LibraryContentsVersion lcv1 = dataFactory.newInstance(LibraryContentsVersion.class, library);
+      libraryCreator.createWells(library);
+      LibraryContentsVersion lcv1 = library.createContentsVersion(dataFactory.newInstance(AdministratorUser.class));
       Set<Well> wellSet = library.getWells();
       for (Well well : wellSet) {
         well.createSmallMoleculeReagent(new ReagentVendorIdentifier("vendor", well.getWellKey().toString()), 
@@ -67,9 +69,11 @@ public class WellsSdfDataExporterTest extends AbstractSpringPersistenceTest
                                         null,
                                         null);
       }
-      library.getLatestContentsVersion().release(new AdministrativeActivity((AdministratorUser) library.getLatestContentsVersion().getLoadingActivity().getPerformedBy(), new LocalDate(), AdministrativeActivityType.LIBRARY_CONTENTS_VERSION_RELEASE));
+      library.getLatestContentsVersion().release(new AdministrativeActivity((AdministratorUser) library.getLatestContentsVersion().getLoadingActivity().getPerformedBy(),
+                                                                            new LocalDate(),
+                                                                            AdministrativeActivityType.LIBRARY_CONTENTS_VERSION_RELEASE));
       
-      LibraryContentsVersion lcv2 = dataFactory.newInstance(LibraryContentsVersion.class, library);
+      LibraryContentsVersion lcv2 = library.createContentsVersion(dataFactory.newInstance(AdministratorUser.class));
       for (Well well : wellSet) {
         well.createSmallMoleculeReagent(new ReagentVendorIdentifier("vendor2", well.getWellKey().toString()), 
                                         "molfile " + lcv2.getVersionNumber() + " for well " + well.getWellKey(),
@@ -78,15 +82,15 @@ public class WellsSdfDataExporterTest extends AbstractSpringPersistenceTest
                                         null,
                                         null,
                                         null);
-        genericEntityDao.saveOrUpdateEntity(library);
       }
+      genericEntityDao.persistEntity(library);
     }
   }
   
   @Override
-  protected void onSetUp() throws Exception
+  protected void setUp() throws Exception
   {
-    super.onSetUp();
+    super.setUp();
     _wellListDAOTransaction = new WellListDAOTransaction();
     genericEntityDao.doInTransaction(_wellListDAOTransaction);
   }
