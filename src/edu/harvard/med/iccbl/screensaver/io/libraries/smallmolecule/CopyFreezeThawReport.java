@@ -16,6 +16,7 @@ import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.math.BigDecimal;
+import java.util.Set;
 
 import javax.mail.MessagingException;
 import javax.mail.internet.InternetAddress;
@@ -159,11 +160,13 @@ public class CopyFreezeThawReport extends AdminEmailApplication
         + "Found " + rowCount + " copies.  Please see the attached file for the full report.";
       log.info(msg);
       EmailService emailService = app.getEmailServiceBasedOnCommandLineOption(admin);
+      Set<InternetAddress> cclist = app.getExtraRecipients();
+
       // TODO: have the emailservice take an inputstream
       emailService.send(subject,
                               msg,
                               adminEmail,
-                              new InternetAddress[] { adminEmail }, null, file);
+                              cclist.toArray(new InternetAddress[] {}), null, file);
 
     }
     catch (ParseException e) {
