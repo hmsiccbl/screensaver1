@@ -393,9 +393,9 @@ TODO:
         editable="#{screenDetailViewer.editMode}" />
     </ss:propertyGroup>
 
-    <ss:property id="fulfilledLabCherryPicksCount"
+    <ss:property id="totalPlatedLabCherryPicksCount"
       label="Total Plated Cherry Picks"
-      value="#{screenDetailViewer.entity.fulfilledLabCherryPicksCount}"
+      value="#{screenDetailViewer.entity.totalPlatedLabCherryPicks}"
       rendered="#{screenDetailViewer.allowedAccessToScreenDetails &amp;&amp; !screenDetailViewer.editMode}"
       description="The number of lab cherry picks that have been plated to date, for all cherry pick requests" />
       
@@ -589,7 +589,7 @@ TODO:
               <f:facet name="header">
                 <t:outputText value="Status" />
               </f:facet>
-              <t:outputText value="#{element.statusValue}"
+              <t:outputText value="#{element.status}"
                 styleClass="dataText" />
             </t:column>
             <t:column>

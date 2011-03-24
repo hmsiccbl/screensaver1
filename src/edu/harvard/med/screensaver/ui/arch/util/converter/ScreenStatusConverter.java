@@ -9,12 +9,12 @@
 
 package edu.harvard.med.screensaver.ui.arch.util.converter;
 
-import edu.harvard.med.screensaver.model.screens.StatusValue;
+import edu.harvard.med.screensaver.model.screens.ScreenStatus;
 
-public class StatusValueConverter extends VocabularyConverter<StatusValue>
+public class ScreenStatusConverter extends VocabularyConverter<ScreenStatus>
 {
-  public StatusValueConverter()
+  public ScreenStatusConverter()
   {
-    super(StatusValue.values());
+    super(ScreenStatus.values());
   }
 }

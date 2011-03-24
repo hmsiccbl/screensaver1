@@ -10,16 +10,21 @@
 package edu.harvard.med.screensaver.db;
 
 import java.util.List;
+import java.util.Set;
 
+import edu.harvard.med.screensaver.model.screens.LabActivity;
 import edu.harvard.med.screensaver.model.screens.Screen;
+import edu.harvard.med.screensaver.model.users.ScreensaverUser;
 
 public interface ScreenDAO
 {
   void deleteStudy(Screen study);
   int countScreenedExperimentalWells(Screen screen, boolean distinct);
-  int countFulfilledLabCherryPicks(Screen screen);
+  int countTotalPlatedLabCherryPicks(Screen screen);
 
   List<Screen> findRelatedScreens(Screen screen);
 
   boolean isScreenFacilityIdUnique(Screen screen);
+
+  Set<ScreensaverUser> findLabActivityPerformedByCandidates(LabActivity a);
 }

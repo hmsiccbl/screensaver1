@@ -204,7 +204,7 @@ public class Screen extends Study implements AttachedFilesEntity<Integer>
   private int _libraryPlatesDataAnalyzedCount;
   private int _screenedExperimentalWellCount;
   private int _uniqueScreenedExperimentalWellCount;
-  private int _fulfilledLabCherryPicksCount;
+  private int _totalPlatedLabCherryPicks;
   private Integer _minScreenedReplicateCount;
   private Integer _maxScreenedReplicateCount;
   private Integer _minDataLoadedReplicateCount;
@@ -673,15 +673,14 @@ public class Screen extends Study implements AttachedFilesEntity<Integer>
   }
 
   @Derived
-  public int getFulfilledLabCherryPicksCount()
+  public int getTotalPlatedLabCherryPicks()
   {
-    // see ScreenDao.countFulfilledLabCherryPicks(Screen)
-    return _fulfilledLabCherryPicksCount;
+    return _totalPlatedLabCherryPicks;
   }
 
-  public void setFulfilledLabCherryPicksCount(int fulfilledLabCherryPicksCount)
+  public void setTotalPlatedLabCherryPicks(int totalPlatedLabCherryPicks)
   {
-    _fulfilledLabCherryPicksCount = fulfilledLabCherryPicksCount;
+    _totalPlatedLabCherryPicks = totalPlatedLabCherryPicks;
   }
 
   /**
@@ -708,13 +707,15 @@ public class Screen extends Study implements AttachedFilesEntity<Integer>
 
   /**
    * Get the status items. A Screen may only contain one status with a given
-   * {@link StatusValue#getRank() rank} value (StatusItems with the same rank are mutually
+   * {@link ScreenStatus#getRank() rank} value (StatusItems with the same rank are mutually
    * exclusive). Ordering of StatusItems must be equivalent whether by
-   * {@link StatusValue#getRank() rank} or {@link StatusItem#getStatusDate() date}.
+   * {@link ScreenStatus#getRank() rank} or {@link StatusItem#getStatusDate() date}.
    *
    * @return the status items
    */
-  @OneToMany(mappedBy = "screen", cascade = { CascadeType.ALL }, orphanRemoval = true)
+  @ElementCollection
+  @JoinTable(name = "screen_status_item",
+             joinColumns = @JoinColumn(name = "screen_id"))
   @Sort(type=SortType.NATURAL)
   public SortedSet<StatusItem> getStatusItems()
   {
@@ -733,26 +734,28 @@ public class Screen extends Study implements AttachedFilesEntity<Integer>
   /**
    * Create and return a new <code>StatusItem</code> for this screen.
    * @param statusDate the status date
-   * @param statusValue the status value
+   * @param screenStatus the status value
    * @return the new status item
    */
-  public StatusItem createStatusItem(LocalDate statusDate, StatusValue statusValue)
+  public StatusItem createStatusItem(LocalDate statusDate, ScreenStatus screenStatus)
   {
-    StatusItem newStatusItem = new StatusItem(this, statusDate, statusValue);
-    SortedSet<StatusItem> headSet = _statusItems.headSet(newStatusItem);
-    SortedSet<StatusItem> tailSet = _statusItems.tailSet(newStatusItem);
-    if (!headSet.isEmpty() &&
-      headSet.last().getStatusDate().compareTo(newStatusItem.getStatusDate()) > 0) {
-      throw new BusinessRuleViolationException("date of new status item must not be before the date of the previous status item");
-    }
-    if (!tailSet.isEmpty()) {
-      if (tailSet.first().compareTo(newStatusItem) == 0) {
-        throw new BusinessRuleViolationException("status value " + statusValue + " is mutually exclusive with existing status item value " + tailSet.first().getStatusValue());
+    for (StatusItem statusItem : _statusItems) {
+      if (statusItem.getStatus().getRank() == screenStatus.getRank()) {
+        throw new BusinessRuleViolationException("screen status " + screenStatus +
+                                                 " is mutually exclusive with existing screen status " + statusItem.getStatus());
       }
-      if (tailSet.first().getStatusDate().compareTo(newStatusItem.getStatusDate()) < 0) {
-        throw new BusinessRuleViolationException("date of new status item must not be after date of subsequent status item");
+      if (screenStatus.getRank() < statusItem.getStatus().getRank()) {
+        if (statusDate.compareTo(statusItem.getStatusDate()) > 0) {
+          throw new BusinessRuleViolationException("date of new screen status must not be after date of subsequent screen status");
+        }
+      }
+      else {
+        if (statusDate.compareTo(statusItem.getStatusDate()) < 0) {
+          throw new BusinessRuleViolationException("date of new screen status must not be before the date of the previous screen status");
+        }
       }
     }
+    StatusItem newStatusItem = new StatusItem(statusDate, screenStatus);
     _statusItems.add(newStatusItem);
     return newStatusItem;
   }
@@ -1639,20 +1642,20 @@ public class Screen extends Study implements AttachedFilesEntity<Integer>
   }
 
   @Transient
-  public List<StatusValue> getCandidateStatusValues()
+  public List<ScreenStatus> getCandidateStatuses()
   {
-    List<StatusValue> candidateStatusValues = new ArrayList<StatusValue>(Arrays.asList(StatusValue.values()));
-    Set<Integer> illegalStatusValueRanks = new HashSet<Integer>();
+    List<ScreenStatus> candidateStatuses = new ArrayList<ScreenStatus>(Arrays.asList(ScreenStatus.values()));
+    Set<Integer> illegalStatusRanks = new HashSet<Integer>();
     for (StatusItem statusItem : getStatusItems()) {
-      illegalStatusValueRanks.add(statusItem.getStatusValue().getRank());
+      illegalStatusRanks.add(statusItem.getStatus().getRank());
     }
-    Iterator<StatusValue> iter = candidateStatusValues.iterator();
+    Iterator<ScreenStatus> iter = candidateStatuses.iterator();
     while (iter.hasNext()) {
-      if (illegalStatusValueRanks.contains(iter.next().getRank())) {
+      if (illegalStatusRanks.contains(iter.next().getRank())) {
         iter.remove();
       }
     }
-    return candidateStatusValues;
+    return candidateStatuses;
   }
 
 

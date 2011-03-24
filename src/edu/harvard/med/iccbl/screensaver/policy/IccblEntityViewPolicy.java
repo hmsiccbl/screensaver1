@@ -63,7 +63,6 @@ import edu.harvard.med.screensaver.model.screens.Publication;
 import edu.harvard.med.screensaver.model.screens.Screen;
 import edu.harvard.med.screensaver.model.screens.ScreenDataSharingLevel;
 import edu.harvard.med.screensaver.model.screens.ScreenType;
-import edu.harvard.med.screensaver.model.screens.StatusItem;
 import edu.harvard.med.screensaver.model.screens.Study;
 import edu.harvard.med.screensaver.model.users.AdministratorUser;
 import edu.harvard.med.screensaver.model.users.ChecklistItem;
@@ -576,11 +575,6 @@ public class IccblEntityViewPolicy implements EntityViewPolicy
   public boolean visit(SilencingReagent entity)
   {
     return true;
-  }
-
-  public boolean visit(StatusItem entity)
-  {
-    return isAllowedAccessToScreenActivity(entity.getScreen());
   }
 
   public boolean visit(Well entity)

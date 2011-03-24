@@ -26,15 +26,15 @@ import javax.faces.model.DataModel;
 import javax.faces.model.ListDataModel;
 import javax.faces.model.SelectItem;
 
-import org.apache.log4j.Logger;
-import org.apache.myfaces.custom.fileupload.UploadedFile;
-import org.joda.time.LocalDate;
-import org.springframework.transaction.annotation.Transactional;
 import com.google.common.base.Predicate;
 import com.google.common.collect.ImmutableSortedSet;
 import com.google.common.collect.Iterables;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Sets;
+import org.apache.log4j.Logger;
+import org.apache.myfaces.custom.fileupload.UploadedFile;
+import org.joda.time.LocalDate;
+import org.springframework.transaction.annotation.Transactional;
 
 import edu.harvard.med.screensaver.ScreensaverConstants;
 import edu.harvard.med.screensaver.db.GenericEntityDAO;
@@ -54,9 +54,9 @@ import edu.harvard.med.screensaver.model.screens.Publication;
 import edu.harvard.med.screensaver.model.screens.Screen;
 import edu.harvard.med.screensaver.model.screens.ScreenAttachedFileType;
 import edu.harvard.med.screensaver.model.screens.ScreenDataSharingLevel;
+import edu.harvard.med.screensaver.model.screens.ScreenStatus;
 import edu.harvard.med.screensaver.model.screens.Screening;
 import edu.harvard.med.screensaver.model.screens.StatusItem;
-import edu.harvard.med.screensaver.model.screens.StatusValue;
 import edu.harvard.med.screensaver.model.users.AdministratorUser;
 import edu.harvard.med.screensaver.model.users.LabHead;
 import edu.harvard.med.screensaver.model.users.ScreeningRoomUser;
@@ -98,7 +98,7 @@ public class ScreenDetailViewer extends AbstractStudyDetailViewer<Screen>
   private boolean _isPublishableProtocolDetailsCollapsed = true;
   private boolean _isBillingInformationCollapsed = true;
   private UISelectOneBean<FundingSupport> _newFundingSupport;
-  private UISelectOneBean<StatusValue> _newStatusItemValue;
+  private UISelectOneBean<ScreenStatus> _newStatusItemValue;
   private LocalDate _newStatusItemDate;
 
   private Publication _newPublication;
@@ -269,10 +269,10 @@ public class ScreenDetailViewer extends AbstractStudyDetailViewer<Screen>
     return _newFundingSupport;
   }
 
-  public UISelectOneBean<StatusValue> getNewStatusItemValue()
+  public UISelectOneBean<ScreenStatus> getNewStatusItemValue()
   {
     if (_newStatusItemValue == null) {
-      _newStatusItemValue = new UISelectOneBean<StatusValue>(getEntity().getCandidateStatusValues());
+      _newStatusItemValue = new UISelectOneBean<ScreenStatus>(getEntity().getCandidateStatuses());
     }
     return _newStatusItemValue;
   }

@@ -42,7 +42,6 @@ import edu.harvard.med.screensaver.model.screens.FundingSupport;
 import edu.harvard.med.screensaver.model.screens.LibraryScreening;
 import edu.harvard.med.screensaver.model.screens.Publication;
 import edu.harvard.med.screensaver.model.screens.Screen;
-import edu.harvard.med.screensaver.model.screens.StatusItem;
 import edu.harvard.med.screensaver.model.screens.Study;
 import edu.harvard.med.screensaver.model.users.AdministratorUser;
 import edu.harvard.med.screensaver.model.users.ChecklistItem;
@@ -106,7 +105,6 @@ public interface AbstractEntityVisitor
   public boolean visit(ScreenerCherryPick entity);
   public boolean visit(ScreeningRoomUser screeningRoomUser);
   public boolean visit(SilencingReagent entity);
-  public boolean visit(StatusItem entity);
   public boolean visit(Study study);
   public boolean visit(Well entity);
   public boolean visit(WellVolumeCorrectionActivity entity);

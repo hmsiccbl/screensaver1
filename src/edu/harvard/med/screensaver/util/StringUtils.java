@@ -14,6 +14,11 @@ import java.util.Collection;
 import java.util.Iterator;
 import java.util.List;
 
+import com.google.common.base.Function;
+import com.google.common.collect.Lists;
+
+import edu.harvard.med.screensaver.model.VocabularyTerm;
+
 public class StringUtils
 {
 
@@ -118,5 +123,18 @@ public class StringUtils
   public static boolean isEmpty(String s)
   {
     return s == null || s.trim().length() == 0;
+  }
+
+  public static List<String> getVocabularyTerms(VocabularyTerm[] terms)
+  {
+    return Lists.transform(Lists.newArrayList(terms), 
+                                                         new Function<VocabularyTerm,String>() {
+                                                           @Override
+                                                           public String apply(VocabularyTerm arg0)
+                                                        {
+                                                          return arg0.getValue();
+                                                        }
+                                                         }
+                                                        );
   }
 }

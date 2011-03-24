@@ -9,6 +9,9 @@
 
 package edu.harvard.med.screensaver.service;
 
+import java.io.File;
+import java.io.IOException;
+
 import javax.mail.MessagingException;
 import javax.mail.internet.InternetAddress;
 
@@ -27,5 +30,11 @@ public interface EmailService
                    InternetAddress[] recipients,
                    InternetAddress[] cclist) throws MessagingException;
 
+  public void send(String subject,
+                   String message,
+                   InternetAddress from,
+                   InternetAddress[] recipients,
+                   InternetAddress[] cclist,
+                   File attachedFile) throws MessagingException, IOException;
 
 }

@@ -13,10 +13,14 @@ import java.io.InputStream;
 import java.util.List;
 import java.util.Map;
 
+import com.google.common.collect.Lists;
+import com.google.common.collect.Maps;
 import jxl.BooleanCell;
 import jxl.Cell;
 import jxl.Sheet;
 import jxl.WorkbookSettings;
+import org.apache.commons.io.IOUtils;
+import org.apache.log4j.Logger;
 
 import edu.harvard.med.screensaver.db.GenericEntityDAO;
 import edu.harvard.med.screensaver.io.UnrecoverableParseException;
@@ -24,13 +28,6 @@ import edu.harvard.med.screensaver.model.libraries.Reagent;
 import edu.harvard.med.screensaver.model.libraries.ReagentVendorIdentifier;
 import edu.harvard.med.screensaver.model.screenresults.AnnotationType;
 import edu.harvard.med.screensaver.model.screens.Screen;
-
-import org.apache.commons.io.IOUtils;
-import org.apache.log4j.Logger;
-import org.springframework.transaction.annotation.Transactional;
-
-import com.google.common.collect.Lists;
-import com.google.common.collect.Maps;
 
 public class StudyAnnotationParser
 {
@@ -48,7 +45,6 @@ public class StudyAnnotationParser
     _dao = dao;
   }
 
-  @Transactional(readOnly=true)
   public void parse(Screen study,
                     InputStream workbookIn)
   {

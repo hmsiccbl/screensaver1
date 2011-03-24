@@ -15,25 +15,22 @@ import java.math.BigDecimal;
 import java.util.Collections;
 import java.util.Iterator;
 import java.util.List;
-import java.util.Map;
 import java.util.Set;
 import java.util.SortedSet;
 
+import com.google.common.base.Function;
 import com.google.common.base.Functions;
 import com.google.common.base.Predicate;
 import com.google.common.base.Predicates;
 import com.google.common.collect.Iterables;
 import com.google.common.collect.Lists;
-import com.google.common.collect.Maps;
 import com.google.common.collect.Sets;
 import org.apache.log4j.Logger;
-import org.hibernate.Session;
 import org.joda.time.DateTime;
 import org.joda.time.LocalDate;
 
 import edu.harvard.med.screensaver.db.GenericEntityDAO;
 import edu.harvard.med.screensaver.db.LibrariesDAO;
-import edu.harvard.med.screensaver.db.Query;
 import edu.harvard.med.screensaver.db.datafetcher.DataFetcherUtil;
 import edu.harvard.med.screensaver.db.datafetcher.EntityDataFetcher;
 import edu.harvard.med.screensaver.db.hqlbuilder.HqlBuilder;
@@ -49,10 +46,10 @@ import edu.harvard.med.screensaver.model.libraries.Plate;
 import edu.harvard.med.screensaver.model.libraries.PlateLocation;
 import edu.harvard.med.screensaver.model.libraries.PlateStatus;
 import edu.harvard.med.screensaver.model.libraries.PlateType;
+import edu.harvard.med.screensaver.model.libraries.Quadrant;
 import edu.harvard.med.screensaver.model.libraries.ScreeningStatistics;
+import edu.harvard.med.screensaver.model.libraries.VolumeStatistics;
 import edu.harvard.med.screensaver.model.meta.PropertyPath;
-import edu.harvard.med.screensaver.model.screenresults.AssayPlate;
-import edu.harvard.med.screensaver.model.screens.LibraryScreening;
 import edu.harvard.med.screensaver.model.screens.ScreenType;
 import edu.harvard.med.screensaver.model.users.ScreensaverUser;
 import edu.harvard.med.screensaver.model.users.ScreensaverUserRole;
@@ -62,6 +59,7 @@ import edu.harvard.med.screensaver.ui.arch.datatable.column.DateColumn;
 import edu.harvard.med.screensaver.ui.arch.datatable.column.DateTimeColumn;
 import edu.harvard.med.screensaver.ui.arch.datatable.column.IntegerColumn;
 import edu.harvard.med.screensaver.ui.arch.datatable.column.TableColumn;
+import edu.harvard.med.screensaver.ui.arch.datatable.column.VolumeColumn;
 import edu.harvard.med.screensaver.ui.arch.datatable.column.entity.DateEntityColumn;
 import edu.harvard.med.screensaver.ui.arch.datatable.column.entity.EnumEntityColumn;
 import edu.harvard.med.screensaver.ui.arch.datatable.column.entity.FixedDecimalEntityColumn;
@@ -86,7 +84,18 @@ public class LibraryCopyPlateSearchResults extends EntityBasedEntitySearchResult
 {
   private static final Logger log = Logger.getLogger(LibraryCopyPlateFinder.class);
 
-  private static final ScreeningStatistics NullScreeningStatistics = new ScreeningStatistics();
+  private static final Predicate<Plate> PlateScreeningStatisticsNotInitialized = new Predicate<Plate>() {
+    public boolean apply(Plate plate)
+    {
+      return plate.getScreeningStatistics() == null;
+    }
+  };
+  private static final Predicate<Plate> PlateVolumeStatisticsNotInitialized = new Predicate<Plate>() {
+    public boolean apply(Plate plate)
+    {
+      return plate.getVolumeStatistics() == null;
+    }
+  };
 
   private GenericEntityDAO _dao;
   private LibrariesDAO _librariesDao;
@@ -189,6 +198,7 @@ public class LibraryCopyPlateSearchResults extends EntityBasedEntitySearchResult
   }
 
   private Set<TableColumn<Plate,?>> screeningStatisticColumns;
+  private Set<TableColumn<Plate,?>> volumeStatisticColumns;
 
   private enum Mode {
     ALL,
@@ -202,13 +212,36 @@ public class LibraryCopyPlateSearchResults extends EntityBasedEntitySearchResult
   private void initialize(EntityDataFetcher<Plate,Integer> plateDataFetcher)
   {
     initialize(new InMemoryEntityDataModel<Plate,Integer>(plateDataFetcher) {
-      private Predicate<TableColumn<Plate,?>> isScreeningStatisticsColumnWithCriteria =
-        new Predicate<TableColumn<Plate,?>>() {
-          public boolean apply(TableColumn<Plate,?> column)
-          {
-            return screeningStatisticColumns.contains(column) && column.hasCriteria();
-          }
-        };
+      private Predicate<TableColumn<Plate,?>> isScreeningStatisticsColumnWithCriteria = new Predicate<TableColumn<Plate,?>>() {
+        @Override
+        public boolean apply(TableColumn<Plate,?> column)
+        {
+          return screeningStatisticColumns.contains(column) && column.hasCriteria();
+        }
+      };
+      private Function<List<Plate>,Void> calculatePlateScreeningStatistics = new Function<List<Plate>,Void>() {
+        @Override
+        public Void apply(List<Plate> plates)
+        {
+          _librariesDao.calculatePlateScreeningStatistics(plates);
+          return null;
+        }
+      };
+      private Predicate<TableColumn<Plate,?>> isVolumeStatisticsColumnWithCriteria = new Predicate<TableColumn<Plate,?>>() {
+        @Override
+        public boolean apply(TableColumn<Plate,?> column)
+        {
+          return volumeStatisticColumns.contains(column) && column.hasCriteria();
+        }
+      };
+      private Function<List<Copy>,Void> calculateCopyScreeningStatistics = new Function<List<Copy>,Void>() {
+        @Override
+        public Void apply(List<Copy> copies)
+        {
+          _librariesDao.calculateCopyScreeningStatistics(copies);
+          return null;
+        }
+      };
 
       @Override
       public void fetch(List<? extends TableColumn<Plate,?>> columns)
@@ -229,17 +262,25 @@ public class LibraryCopyPlateSearchResults extends EntityBasedEntitySearchResult
           setWrappedData(Collections.EMPTY_LIST);
         }
         else {
-          if (Iterables.any(columns, isScreeningStatisticsColumnWithCriteria)) {
-            // calculate for all rows, prior to filtering 
+          boolean calcScreeningStatisticsBeforeFiltering = Iterables.any(columns, isScreeningStatisticsColumnWithCriteria);
+          boolean calcVolumeStatisticsBeforeFiltering = Iterables.any(columns, isVolumeStatisticsColumnWithCriteria);
+          if (calcScreeningStatisticsBeforeFiltering) {
             calculateScreeningStatistics(_unfilteredData);
-            super.filter(columns);
           }
-          else {
-            // only calculate for filtered rows 
-            super.filter(columns);
-            calculateScreeningStatistics(getData());
+          if (calcVolumeStatisticsBeforeFiltering) {
+            calculateVolumeStatistics(_unfilteredData);
+          }
+
+          super.filter(columns);
+          
+          if (!calcScreeningStatisticsBeforeFiltering) {
+            calculateScreeningStatistics(_unfilteredData);
+          }
+          if (!calcVolumeStatisticsBeforeFiltering) {
+            calculateVolumeStatistics(_unfilteredData);
           }
         }
+
         updateReviewMessage();
       }
 
@@ -253,93 +294,17 @@ public class LibraryCopyPlateSearchResults extends EntityBasedEntitySearchResult
 
       private void calculateScreeningStatistics(Iterable<Plate> plates)
       {
-        List<Plate> platesWithoutStatistics = Lists.newArrayList(Iterables.filter(plates,
-                                                                                  new Predicate<Plate>() {
-                                                                                    public boolean apply(Plate plate)
-          {
-            return plate.getScreeningStatistics() == null;
-          }
-                                                                                  }));
+        List<Plate> platesWithoutStatistics = Lists.newArrayList(Iterables.filter(plates, PlateScreeningStatisticsNotInitialized));
         for (List<Plate> partition : Lists.partition(platesWithoutStatistics, 1024)) {
-          doCalculateScreeningStatistics(partition);
+          _librariesDao.calculatePlateScreeningStatistics(partition);
         }
       }
 
-      private void doCalculateScreeningStatistics(List<Plate> plates)
+      private void calculateVolumeStatistics(Iterable<Plate> plates)
       {
-        // get plate-based statistics: screening_count, assay_plate_count, first/last date screened, data_loading_count
-        final HqlBuilder builder = new HqlBuilder();
-
-        Map<Integer,Plate> result = Maps.newHashMap();
-        for (Plate p : plates) {
-          p.setScreeningStatistics(new ScreeningStatistics());
-          result.put(p.getEntityId(), p);
-        }
-
-        builder.from(Plate.class, "p")
-               .from(AssayPlate.class, "ap")
-               .from("ap", AssayPlate.libraryScreening, "ls")
-               .from("ap", AssayPlate.screenResultDataLoading, "dl")
-               .whereIn("p", "id", result.keySet())
-               .where("ap", AssayPlate.plateScreened.getLeaf(), Operator.EQUAL, "p", "id")
-               .groupBy("p", "id")
-               .select("p", "id")
-               .selectExpression("count(distinct ls)")
-               .selectExpression("count(distinct ap)")
-               .selectExpression("count(distinct dl)")
-               .selectExpression("min(dl.dateOfActivity)")
-               .selectExpression("max(dl.dateOfActivity)")
-               .selectExpression("min(ls.dateOfActivity)")
-               .selectExpression("max(ls.dateOfActivity)");
-
-        List<Object> results = _dao.runQuery(new Query() {
-          @Override
-          public List<Object> execute(Session session)
-            {
-              return builder.toQuery(session, true).list();
-            }
-        });
-        for (Object o : results) {
-          int i = 0;
-          Integer plateId = (Integer) ((Object[]) o)[i++];
-          ScreeningStatistics css = new ScreeningStatistics();
-          result.get(plateId).setScreeningStatistics(css);
-          css.setPlateCount(1);
-          css.setScreeningCount(((Long) ((Object[]) o)[i++]).intValue());
-          css.setAssayPlateCount(((Long) ((Object[]) o)[i++]).intValue());
-          css.setDataLoadingCount(((Long) ((Object[]) o)[i++]).intValue());
-          css.setFirstDateDataLoaded(((LocalDate) ((Object[]) o)[i++]));
-          css.setLastDateDataLoaded(((LocalDate) ((Object[]) o)[i++]));
-          css.setFirstDateScreened(((LocalDate) ((Object[]) o)[i++]));
-          css.setLastDateScreened(((LocalDate) ((Object[]) o)[i++]));
-        }
-
-        // calculate plate_screening_count - the total number of times individual plates from this copy have been screened, ignoring replicates)
-        final HqlBuilder builder1 = new HqlBuilder();
-        builder1.from(LibraryScreening.class, "ls")
-               .from("ls", LibraryScreening.assayPlatesScreened, "ap")
-               .from("ap", AssayPlate.plateScreened, "p")
-               .from("p", Plate.copy, "c")
-               .whereIn("p", "id", result.keySet())
-               .where("ap", "replicateOrdinal", Operator.EQUAL, 0)
-               .groupBy("p", "id");
-        builder1.select("p", "id");
-        builder1.selectExpression("count(*)");
-
-        results = _dao.runQuery(new Query() {
-          @Override
-          public List<Object> execute(Session session)
-            {
-              return builder1.toQuery(session, true).list();
-            }
-        });
-
-        for (Object o : results) {
-          Integer plateId = (Integer) ((Object[]) o)[0];
-          Integer count = ((Long) ((Object[]) o)[1]).intValue();
-
-          ScreeningStatistics css = result.get(plateId).getScreeningStatistics();
-          css.setPlateScreeningCount(css.getPlateScreeningCount() + count);
+        List<Plate> platesWithoutStatistics = Lists.newArrayList(Iterables.filter(plates, PlateVolumeStatisticsNotInitialized));
+        for (List<Plate> partition : Lists.partition(platesWithoutStatistics, 1024)) {
+          _librariesDao.calculatePlateVolumeStatistics(partition);
         }
       }
     });
@@ -351,6 +316,7 @@ public class LibraryCopyPlateSearchResults extends EntityBasedEntitySearchResult
   {
     List<TableColumn<Plate,?>> columns = Lists.newArrayList();
     screeningStatisticColumns = Sets.newHashSet();
+    volumeStatisticColumns = Sets.newHashSet();
 
     columns.add(new IntegerEntityColumn<Plate>(PropertyPath.from(Plate.class).toProperty("plateNumber"),
                                                "Plate",
@@ -425,6 +391,31 @@ public class LibraryCopyPlateSearchResults extends EntityBasedEntitySearchResult
       }
     });
     Iterables.getLast(columns).setVisible(_mode == Mode.ALL);
+
+    columns.add(new IntegerEntityColumn<Plate>(Plate.stockPlate.toProperty("plateNumber"),
+                                               "Stock Plate",
+                                               "The stock plate to which this master stock plate maps",
+                                               TableColumn.UNGROUPED) {
+      @Override
+      public Integer getCellValue(Plate plate)
+      {
+        return plate.getStockPlateMapping() == null ? null : plate.getStockPlateMapping().getPlateNumber();
+      }
+    });
+    Iterables.getLast(columns).setVisible(false);
+
+    columns.add(new EnumEntityColumn<Plate,Quadrant>(Plate.quadrant,
+                                                     "Stock Plate Quadrant",
+                                                     "The quadrant of the stock plate to which this master stock plate maps",
+                                                     TableColumn.UNGROUPED,
+                                                     Quadrant.values()) {
+      @Override
+      public Quadrant getCellValue(Plate plate)
+      {
+        return plate.getStockPlateMapping() == null ? null : plate.getStockPlateMapping().getQuadrant();
+      }
+    });
+    Iterables.getLast(columns).setVisible(false);
 
     columns.add(new EnumEntityColumn<Plate,ScreenType>(Plate.copy.to(Copy.library).toProperty("screenType"),
                                                        "Screen Type",
@@ -553,6 +544,17 @@ public class LibraryCopyPlateSearchResults extends EntityBasedEntitySearchResult
       public Volume getCellValue(Plate plate)
       {
         return plate.getWellVolume();
+      }
+    });
+    volumeStatisticColumns.add(Iterables.getLast(columns));
+
+    columns.add(new VolumeColumn<Plate>("Average Remaining Volume",
+                                        "The average volume remaining across all wells of this plate",
+                                       TableColumn.UNGROUPED) {
+      @Override
+      public Volume getCellValue(Plate plate)
+      {
+        return getNullSafeVolumeStatistics(plate).getAverageRemaining();
       }
     });
 
@@ -780,13 +782,22 @@ public class LibraryCopyPlateSearchResults extends EntityBasedEntitySearchResult
     return columns;
   }
 
-  public ScreeningStatistics getNullSafeScreeningStatistics(Plate plate)
+  private static ScreeningStatistics getNullSafeScreeningStatistics(Plate plate)
   {
     ScreeningStatistics screeningStatistics = plate.getScreeningStatistics();
     if (screeningStatistics == null) {
-      return NullScreeningStatistics;
+      return ScreeningStatistics.NullScreeningStatistics;
     }
     return screeningStatistics;
+  }
+
+  private static VolumeStatistics getNullSafeVolumeStatistics(Plate plate)
+  {
+    VolumeStatistics volumeStatistics = plate.getVolumeStatistics();
+    if (volumeStatistics == null) {
+      return VolumeStatistics.Null;
+    }
+    return volumeStatistics;
   }
 
   public boolean isBatchEditable()
@@ -839,7 +850,12 @@ public class LibraryCopyPlateSearchResults extends EntityBasedEntitySearchResult
     if (isBatchEditable()) {
       Iterator<Plate> rowIter = getDataTableModel().iterator();
       try {
-        _libraryCopyPlateBatchEditor.updatePlates(Sets.newHashSet(rowIter));
+        boolean updated = _libraryCopyPlateBatchEditor.updatePlates(Sets.newHashSet(rowIter));
+        // if user input validation fails, we do not want to reset the input fields, allowing the
+        // user to modify, as necessary; if we proceeded on below, the reload() call would reset the UI
+        if (!updated) {
+          return REDISPLAY_PAGE_ACTION_RESULT;
+        }
       }
       catch (Exception e) {
         showMessage("applicationError", e.getMessage());

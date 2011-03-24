@@ -9,21 +9,15 @@
 
 package edu.harvard.med.screensaver.model.screens;
 
-import java.util.Set;
-
 import javax.persistence.Entity;
 import javax.persistence.PrimaryKeyJoinColumn;
-import javax.persistence.Transient;
-
-import edu.harvard.med.screensaver.model.users.AdministratorUser;
-import edu.harvard.med.screensaver.model.users.ScreeningRoomUser;
-import edu.harvard.med.screensaver.model.users.ScreensaverUser;
 
 import org.apache.log4j.Logger;
 import org.hibernate.annotations.Type;
 import org.joda.time.LocalDate;
 
-import com.google.common.collect.Sets;
+import edu.harvard.med.screensaver.model.users.AdministratorUser;
+import edu.harvard.med.screensaver.model.users.ScreeningRoomUser;
 
 /**
  * A screening room activity representing a screener screening various assay
@@ -62,18 +56,6 @@ public abstract class Screening extends LabActivity
 
   // public instance methods
   
-  @Transient
-  public Set<ScreensaverUser> getPerformedByCandidates() 
-  {
-    Set<ScreensaverUser> performedByCandidates = Sets.newTreeSet();
-    performedByCandidates.addAll(getScreen().getAssociatedScreeningRoomUsers());
-    // add the current performedBy user, even if it's no longer a valid candidate
-    if (getPerformedBy() != null) {
-      performedByCandidates.add(getPerformedBy());
-    }
-    return performedByCandidates;
-  }
-
   /**
    * Get the assay protocol.
    * @return the assay protocol

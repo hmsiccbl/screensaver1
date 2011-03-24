@@ -9,7 +9,6 @@
 
 package edu.harvard.med.screensaver.model.screens;
 
-import java.beans.IntrospectionException;
 import java.io.IOException;
 import java.math.BigDecimal;
 import java.util.Arrays;
@@ -19,10 +18,12 @@ import java.util.Map;
 import java.util.Set;
 import java.util.TreeSet;
 
+import com.google.common.base.Function;
 import com.google.common.base.Joiner;
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.Iterables;
 import com.google.common.collect.Lists;
+import com.google.common.collect.Sets;
 import junit.framework.TestSuite;
 import org.apache.commons.io.IOUtils;
 import org.hibernate.LazyInitializationException;
@@ -173,54 +174,54 @@ public class ScreenTest extends AbstractEntityInstanceTest<Screen>
   public void testCandidateStatusItems()
   {
     Screen screen = MakeDummyEntities.makeDummyScreen(1);
-    Set<StatusValue> expected = new HashSet<StatusValue>(Arrays.asList(StatusValue.values()));
-    assertEquals(expected, new HashSet<StatusValue>(screen.getCandidateStatusValues()));
+    Set<ScreenStatus> expected = new HashSet<ScreenStatus>(Arrays.asList(ScreenStatus.values()));
+    assertEquals(expected, new HashSet<ScreenStatus>(screen.getCandidateStatuses()));
 
     LocalDate today = new LocalDate();
-    screen.createStatusItem(today, StatusValue.PENDING_ICCB);
-    expected.remove(StatusValue.PENDING_LEGACY);
-    expected.remove(StatusValue.PENDING_ICCB);
-    expected.remove(StatusValue.PENDING_NSRB);
-    assertEquals(expected, new HashSet<StatusValue>(screen.getCandidateStatusValues()));
+    screen.createStatusItem(today, ScreenStatus.PENDING_ICCB);
+    expected.remove(ScreenStatus.PENDING_LEGACY);
+    expected.remove(ScreenStatus.PENDING_ICCB);
+    expected.remove(ScreenStatus.PENDING_NSRB);
+    assertEquals(expected, new HashSet<ScreenStatus>(screen.getCandidateStatuses()));
 
-    screen.createStatusItem(today, StatusValue.PILOTED);
-    expected.remove(StatusValue.PILOTED);
-    assertEquals(expected, new HashSet<StatusValue>(screen.getCandidateStatusValues()));
+    screen.createStatusItem(today, ScreenStatus.PILOTED);
+    expected.remove(ScreenStatus.PILOTED);
+    assertEquals(expected, new HashSet<ScreenStatus>(screen.getCandidateStatuses()));
 
-    screen.createStatusItem(today, StatusValue.ACCEPTED);
-    expected.remove(StatusValue.ACCEPTED);
-    assertEquals(expected, new HashSet<StatusValue>(screen.getCandidateStatusValues()));
+    screen.createStatusItem(today, ScreenStatus.ACCEPTED);
+    expected.remove(ScreenStatus.ACCEPTED);
+    assertEquals(expected, new HashSet<ScreenStatus>(screen.getCandidateStatuses()));
 
-    screen.createStatusItem(today, StatusValue.ONGOING);
-    expected.remove(StatusValue.ONGOING);
-    assertEquals(expected, new HashSet<StatusValue>(screen.getCandidateStatusValues()));
+    screen.createStatusItem(today, ScreenStatus.ONGOING);
+    expected.remove(ScreenStatus.ONGOING);
+    assertEquals(expected, new HashSet<ScreenStatus>(screen.getCandidateStatuses()));
 
-    screen.createStatusItem(today, StatusValue.COMPLETED);
-    assertEquals(1, screen.getCandidateStatusValues().size());
+    screen.createStatusItem(today, ScreenStatus.COMPLETED);
+    assertEquals(1, screen.getCandidateStatuses().size());
     
-    screen.createStatusItem(today, StatusValue.TRANSFERRED_TO_BROAD_INSTITUTE);
-    assertEquals(0, screen.getCandidateStatusValues().size());
+    screen.createStatusItem(today, ScreenStatus.TRANSFERRED_TO_BROAD_INSTITUTE);
+    assertEquals(0, screen.getCandidateStatuses().size());
   }
 
   public void testAddAnachronisticStatusItem()
   {
     Screen screen = MakeDummyEntities.makeDummyScreen(1);
 
-    screen.createStatusItem(new LocalDate(2008, 6, 2), StatusValue.ONGOING);
+    screen.createStatusItem(new LocalDate(2008, 6, 2), ScreenStatus.ONGOING);
     try {
-      screen.createStatusItem(new LocalDate(2008, 6, 1), StatusValue.COMPLETED);
+      screen.createStatusItem(new LocalDate(2008, 6, 1), ScreenStatus.COMPLETED);
       fail("expected BusinessRuleViolationException");
     }
     catch (BusinessRuleViolationException e) {
-      assertEquals("date of new status item must not be before the date of the previous status item", e.getMessage());
+      assertEquals("date of new screen status must not be before the date of the previous screen status", e.getMessage());
     }
 
     try {
-      screen.createStatusItem(new LocalDate(2008, 6, 3), StatusValue.ACCEPTED);
+      screen.createStatusItem(new LocalDate(2008, 6, 3), ScreenStatus.ACCEPTED);
       fail("expected BusinessRuleViolationException");
     }
     catch (BusinessRuleViolationException e) {
-      assertEquals("date of new status item must not be after date of subsequent status item", e.getMessage());
+      assertEquals("date of new screen status must not be after date of subsequent screen status", e.getMessage());
     }
   }
 
@@ -228,15 +229,42 @@ public class ScreenTest extends AbstractEntityInstanceTest<Screen>
   {
     Screen screen = MakeDummyEntities.makeDummyScreen(1);
 
-    screen.createStatusItem(new LocalDate(2008, 6, 2), StatusValue.PENDING_ICCB);
+    screen.createStatusItem(new LocalDate(2008, 6, 2), ScreenStatus.PENDING_ICCB);
     try {
-      screen.createStatusItem(new LocalDate(2008, 6, 2), StatusValue.PENDING_NSRB);
+      screen.createStatusItem(new LocalDate(2008, 6, 2), ScreenStatus.PENDING_NSRB);
       fail("expected BusinessRuleViolationException");
     }
     catch (BusinessRuleViolationException e) {
-      assertEquals("status value Pending - NSRB is mutually exclusive with existing status item value Pending - ICCB-L",
+      assertEquals("screen status Pending - NSRB is mutually exclusive with existing screen status Pending - ICCB-L",
                    e.getMessage());    
     }
+  }
+
+  public void testHoldToCompletedStatus()
+  {
+    Screen screen = MakeDummyEntities.makeDummyScreen(1);
+
+    screen.createStatusItem(new LocalDate(2008, 6, 1), ScreenStatus.ACCEPTED);
+    screen.createStatusItem(new LocalDate(2008, 6, 2), ScreenStatus.ONGOING);
+    screen = genericEntityDao.mergeEntity(screen);
+    assertEquals(ScreenStatus.ONGOING, screen.getCurrentStatusItem().getStatus());
+    screen.createStatusItem(new LocalDate(2008, 6, 3), ScreenStatus.HOLD);
+    screen = genericEntityDao.mergeEntity(screen);
+    StatusItem holdStatusItem = screen.getCurrentStatusItem();
+    assertEquals(ScreenStatus.HOLD, holdStatusItem.getStatus());
+    screen.getStatusItems().remove(holdStatusItem);
+    screen.createStatusItem(new LocalDate(2008, 6, 3), ScreenStatus.COMPLETED);
+    assertEquals(ScreenStatus.COMPLETED, screen.getCurrentStatusItem().getStatus());
+    screen = genericEntityDao.mergeEntity(screen);
+    assertEquals(ScreenStatus.COMPLETED, screen.getCurrentStatusItem().getStatus());
+    assertEquals(Sets.newHashSet(ScreenStatus.ACCEPTED, ScreenStatus.ONGOING, ScreenStatus.COMPLETED),
+                 Sets.newHashSet(Iterables.transform(screen.getStatusItems(),
+                                                     new Function<StatusItem,ScreenStatus>() {
+                                                       public ScreenStatus apply(StatusItem si)
+                   {
+                     return si.getStatus();
+                   }
+                                                     })));
   }
 
   public void testAddAndDeleteAttachedFiles() throws IOException
@@ -467,15 +495,15 @@ public class ScreenTest extends AbstractEntityInstanceTest<Screen>
     assertEquals(Integer.valueOf(4), screen.getMaxDataLoadedReplicateCount());
   }
   
-  public void testFulfilledLabCherryPicksCount()
+  public void testTotalPlatedLabCherryPicksCount()
   {
-    doTestFulfilledLabCherryPicksCount(CherryPickLiquidTransferStatus.CANCELED, 0);
-    doTestFulfilledLabCherryPicksCount(CherryPickLiquidTransferStatus.FAILED, 0);
-    doTestFulfilledLabCherryPicksCount(CherryPickLiquidTransferStatus.SUCCESSFUL, 384);
+    doTestTotalPlatedLabCherryPicksCount(CherryPickLiquidTransferStatus.CANCELED, 0);
+    doTestTotalPlatedLabCherryPicksCount(CherryPickLiquidTransferStatus.FAILED, 0);
+    doTestTotalPlatedLabCherryPicksCount(CherryPickLiquidTransferStatus.SUCCESSFUL, 384);
   }
 
-  private void doTestFulfilledLabCherryPicksCount(final CherryPickLiquidTransferStatus status,
-                                                  int expectedFulfilledLabCherryPicksCount)
+  private void doTestTotalPlatedLabCherryPicksCount(final CherryPickLiquidTransferStatus status,
+                                                    int expectedTotalPlatedLabCherryPicksCount)
   {
     schemaUtil.truncateTables();
     final int[] ids = new int[3];
@@ -559,11 +587,11 @@ public class ScreenTest extends AbstractEntityInstanceTest<Screen>
           cplt.addCherryPickAssayPlate(cpap);
         }
 
-        screenDerivedPropertiesUpdater.updateFulfilledCherryPicksCount(screen);
+        screenDerivedPropertiesUpdater.updateTotalPlatedLabCherryPickCount(screen);
       }
     });
     Screen screen = genericEntityDao.findEntityByProperty(Screen.class, Screen.facilityId.getPropertyName(), "1");
-    assertEquals(expectedFulfilledLabCherryPicksCount, screen.getFulfilledLabCherryPicksCount());
+    assertEquals(expectedTotalPlatedLabCherryPicksCount, screen.getTotalPlatedLabCherryPicks());
   }
   
 }

@@ -78,6 +78,7 @@ public class CherryPickRequestFinder extends AbstractBackingBean
       else {
         showMessage("noSuchEntity",
                     "Cherry Pick Request " + _cherryPickRequestNumber);
+        resetSearchFields(); // if we don't reset now, and the user decides to not search again, the search criteria remain in the input fields
       }
     }
     else {

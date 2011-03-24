@@ -74,6 +74,7 @@ public class ScreenFinder extends AbstractBackingBean
       }
       else {
         showMessage("noSuchEntity", "Screen " + _screenFacilityId);
+        resetSearchFields(); // if we don't reset now, and the user decides to not search again, the search criteria remain in the input fields
       }
     }
     else {

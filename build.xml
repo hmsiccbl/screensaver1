@@ -280,16 +280,13 @@
       directory structure directly to a localhost application server.
     </description>
 		<property name="webinf.dir" value="${exploded.war.dir}/WEB-INF" />
-		<property name="metainf.dir" value="${exploded.war.dir}/META-INF" />
 		<property name="classes.dir" value="${webinf.dir}/classes" />
 
 		<antcall target="build">
 			<param name="build.dir" location="${webinf.dir}" />
 		</antcall>
 
-		<copy todir="${metainf.dir}" verbose="${verbose}">
-			<fileset dir="web/META-INF" includes="**"/>
-		</copy>
+		<copy todir="${exploded.war.dir}/META-INF" file="web/META-INF/context.xml" verbose="${verbose}"/>
 
 		<antcall target="copy-ui" />
 
@@ -628,7 +625,7 @@
 			<param name="classes.dir" location="${classes.dir}" />
 		</antcall>
 
-        <copy todir="${build.dir}/META-INF/" verbose="${verbose}" file="web/META-INF/persistence.xml"/>
+    <copy todir="${classes.dir}/META-INF/" file="resources/META-INF/persistence.xml" verbose="${verbose}" />
 
 		<copy todir="${build.dir}/lib" flatten="true" verbose="${verbose}">
 			<fileset refid="deploy.lib.fileset" />

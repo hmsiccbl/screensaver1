@@ -100,7 +100,7 @@ public class ExcelWorkbookDataExporter<T> implements TableDataExporter<T>
     return FORMAT_MIME_TYPE;
   }
 
-  private void writeWorkbook(WritableWorkbook workbook, 
+  public void writeWorkbook(WritableWorkbook workbook,
                              Iterator<T> iter)
     throws RowsExceededException, WriteException
   {

@@ -143,8 +143,8 @@ public class LabActivitySearchResults extends ActivitySearchResults<LabActivity>
     column.setVisible(false);
     columns.add(2, column);
     
-    Iterable<TableColumn<Screen,?>> screenColumns = Iterables.concat(_screenSearchResults.buildScreenSummaryColumns(),
-                                                                     _screenSearchResults.buildScreenAdminColumns(true));
+    Iterable<TableColumn<Screen,?>> screenColumns = Iterables.concat(_screenSearchResults.buildScreenSummaryColumns(true),
+                                                                     _screenSearchResults.buildScreenAdminColumns());
     
     screenColumns = Iterables.filter(screenColumns,
                                      new Predicate<TableColumn<Screen,?>>() { public boolean apply(TableColumn<Screen,?> c) { return !!!c.getName().equals("Date Of Last Activity"); } });

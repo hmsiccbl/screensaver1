@@ -47,6 +47,7 @@ import edu.harvard.med.screensaver.model.Volume;
 import edu.harvard.med.screensaver.model.annotations.ContainedEntity;
 import edu.harvard.med.screensaver.model.annotations.ToMany;
 import edu.harvard.med.screensaver.model.meta.Cardinality;
+import edu.harvard.med.screensaver.model.meta.PropertyPath;
 import edu.harvard.med.screensaver.model.meta.RelationshipPath;
 import edu.harvard.med.screensaver.model.screenresults.AssayPlate;
 import edu.harvard.med.screensaver.model.users.AdministratorUser;
@@ -69,6 +70,8 @@ public class Plate extends AuditedAbstractEntity<Integer> implements Comparable<
   public static final RelationshipPath<Plate> location = RelationshipPath.from(Plate.class).to("location", Cardinality.TO_ONE);
   public static final RelationshipPath<Plate> platedActivity = RelationshipPath.from(Plate.class).to("platedActivity", Cardinality.TO_ONE);
   public static final RelationshipPath<Plate> retiredActivity = RelationshipPath.from(Plate.class).to("retiredActivity", Cardinality.TO_ONE);
+  public static final RelationshipPath<Plate> stockPlate = PropertyPath.from(Plate.class).to("stockPlateMapping").toProperty("plate");
+  public static final PropertyPath<Plate> quadrant = PropertyPath.from(Plate.class).to("stockPlateMapping").toProperty("quadrant");
   
   public static final Function<Plate,Integer> ToPlateNumber = new Function<Plate,Integer>() { public Integer apply(Plate p) { return p.getPlateNumber(); } };
   public static final Function<Plate,Copy> ToCopy = new Function<Plate,Copy>() { public Copy apply(Plate p) { return p.getCopy(); } };
@@ -83,9 +86,7 @@ public class Plate extends AuditedAbstractEntity<Integer> implements Comparable<
     {
       return p.getStatus();
     }
-  };  
-  
-    
+  };
 
   private Integer _version;
   private Copy _copy;
@@ -102,7 +103,9 @@ public class Plate extends AuditedAbstractEntity<Integer> implements Comparable<
   private AdministrativeActivity _retiredActivity;
   private String _comments;
   private Set<AssayPlate> _assayPlates = Sets.newHashSet();//ImmutableSet.of(); (breaks JPA merge)
+  private StockPlateMapping _stockPlateMapping;
   private ScreeningStatistics _screeningStatistics;
+  private VolumeStatistics _volumeStatistics;
 
   /**
    * Construct an initialized <code>Plate</code>. Intended only for use by {@link Copy}.
@@ -358,6 +361,17 @@ public class Plate extends AuditedAbstractEntity<Integer> implements Comparable<
     return this;
   }
 
+  @Column
+  public StockPlateMapping getStockPlateMapping()
+  {
+    return _stockPlateMapping;
+  }
+
+  public void setStockPlateMapping(StockPlateMapping stockPlateMapping)
+  {
+    _stockPlateMapping = stockPlateMapping;
+  }
+
   @Transient
   public ScreeningStatistics getScreeningStatistics()
   {
@@ -413,5 +427,16 @@ public class Plate extends AuditedAbstractEntity<Integer> implements Comparable<
   public void setPlatedActivity(AdministrativeActivity platedActivity)
   {
     _platedActivity = platedActivity;
+  }
+
+  @Transient
+  public VolumeStatistics getVolumeStatistics()
+  {
+    return _volumeStatistics;
+  }
+
+  public void setVolumeStatistics(VolumeStatistics volumeStatistics)
+  {
+    _volumeStatistics = volumeStatistics;
   }
 }

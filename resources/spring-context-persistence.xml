@@ -50,7 +50,6 @@
 
   <bean id="entityManagerFactory" class="org.springframework.orm.jpa.LocalContainerEntityManagerFactoryBean">
     <property name="dataSource" ref="screensaverDataSource"/>
-    <property name="persistenceXmlLocation" value="META-INF/persistence.xml" />
     <property name="persistenceProvider">
       <bean class="org.hibernate.ejb.ConfigurableListenerBeansHibernatePersistence">
         <property name="postLoadEventListeners">

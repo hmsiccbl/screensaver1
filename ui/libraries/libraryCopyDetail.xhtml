@@ -78,11 +78,33 @@
       value="#{libraryCopyViewer.plateAggregateFields.secondaryStatuses}" 
       editable="false" rendered="#{!entity.transient}"
     />
-    <ss:property id="initialVolumes" label="Initial Volume" type="List" 
-      description="The plate initial volume(s) of the copy's plates"
-      value="#{libraryCopyViewer.plateAggregateFields.volumes}" 
+    <ss:property id="platesAvailable" label="Plates Available" 
+      description="The number of this copy's plates that have a status of 'Available'"
+      value="#{libraryCopyViewer.entity.platesAvailable}" 
       editable="false" rendered="#{!entity.transient}"
     />
+    <ss:propertyGroup label="Plate Volumes">
+      <ss:property id="initialVolumes" label="Initial"
+        type="List"
+        description="The plate initial volume(s) of the copy's plates"
+        value="#{libraryCopyViewer.plateAggregateFields.volumes}"
+        editable="false" rendered="#{!entity.transient}" />
+      <ss:property id="avgPlateRemainingVolume"
+        label="Average Remaining"
+        description="The average well volume remaining across all library screening plates of this copy"
+        value="#{libraryCopyViewer.entity.volumeStatistics.averageRemaining}"
+        editable="false" rendered="#{!entity.transient}" />
+      <ss:property id="minPlateRemainingVolume"
+        label="Min Remaining"
+        description="The minimum well volume remaining across all library screening plates of this copy"
+        value="#{libraryCopyViewer.entity.volumeStatistics.minRemaining}"
+        editable="false" rendered="#{!entity.transient}" />
+      <ss:property id="maxPlateRemainingVolume"
+        label="Max Remaining"
+        description="The maximum well volume remaining across all library screening plates of this copy"
+        value="#{libraryCopyViewer.entity.volumeStatistics.maxRemaining}"
+        editable="false" rendered="#{!entity.transient}" />
+    </ss:propertyGroup>
     
     <ss:property id="copyComments" label="Comments" type="Textarea"
       value="#{libraryCopyDetail.entity.comments}"

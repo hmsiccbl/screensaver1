@@ -48,7 +48,8 @@ public enum ChecklistItemGroup implements VocabularyTerm
   private String _value;
 
   /**
-   * Constructs a <code>StatusValue</code> vocabulary term.
+   * Constructs a <code>ChecklistItemGroup</code> vocabulary term.
+   * 
    * @param value The value of the term.
    */
   private ChecklistItemGroup(String value)

@@ -101,6 +101,7 @@ public class ScreenerFinder extends AbstractBackingBean
       column.resetCriteria().setOperatorAndValue(Operator.TEXT_LIKE, pattern);
       if (_screenerSearchResults.getRowCount() == 0) {
         showMessage("users.noUserWithMatchingName", pattern);
+        resetSearchFields(); // if we don't reset now, and the user decides to not search again, the search criteria remain in the input fields
       }
       else if (_screenerSearchResults.getRowCount() == 1) {
         _screenerSearchResults.getRowsPerPageSelector().setSelection(1);

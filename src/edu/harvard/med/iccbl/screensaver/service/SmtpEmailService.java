@@ -9,14 +9,21 @@
 
 package edu.harvard.med.iccbl.screensaver.service;
 
+import java.io.File;
+import java.io.IOException;
 import java.util.Properties;
 
+import javax.activation.DataHandler;
+import javax.activation.FileDataSource;
 import javax.mail.Message;
 import javax.mail.MessagingException;
+import javax.mail.Multipart;
 import javax.mail.Session;
 import javax.mail.Transport;
 import javax.mail.internet.InternetAddress;
+import javax.mail.internet.MimeBodyPart;
 import javax.mail.internet.MimeMessage;
+import javax.mail.internet.MimeMultipart;
 
 import org.apache.commons.cli.OptionBuilder;
 import org.apache.commons.cli.ParseException;
@@ -25,6 +32,10 @@ import org.apache.log4j.Logger;
 import edu.harvard.med.screensaver.io.CommandLineApplication;
 import edu.harvard.med.screensaver.service.EmailService;
 
+/**
+ * SMTP EmailService implementation
+ * TODO: rework this class using a builder patter for creation of the message (to better handle multipart messages).
+ */
 public class SmtpEmailService implements EmailService
 {
   private static Logger log = Logger.getLogger(SmtpEmailService.class);
@@ -38,6 +49,7 @@ public class SmtpEmailService implements EmailService
   public static final String[] MAIL_RECIPIENT_LIST_OPTION = 
   { "recipientlist", "mail-recipient-list", "the recipient(s) of the message, delimited by \"" + DELIMITER + "\"" };
   public static final String[] MAIL_MESSAGE_OPTION = { "mm", "mail-message", "the mail message" };
+  public static final String[] MAIL_FILE_ATTACHMENT = { "f", "mail-file-attachment", "file to attach" };
   public static final String[] MAIL_SUBJECT_OPTION = { "ms", "mail-subject", "the mail subject" };
   public static final String[] MAIL_SERVER_OPTION = { "mh", "mail-host", "the smtp mail server host" };
   public static final String[] MAIL_USERNAME_OPTION = { "mu", "mail-user", "the smtp mail user" };
@@ -78,59 +90,68 @@ public class SmtpEmailService implements EmailService
     this.useSmtps = useSmtps;
   }
 
-  /**
-   * For logging
-   */
-  public static String printEmail(String subject,
-                                  String message,
-                                  InternetAddress from,
-                                  InternetAddress[] recipients,
-                                  InternetAddress[] cclist)
-  {
-    return printEmailHeader(subject, from, recipients, cclist)  
-             + "\n========message========\n" + message;
-  }
- 
-  public static String printEmailHeader(String subject,
-                                  InternetAddress from,
-                                  InternetAddress[] recipients,
-                                  InternetAddress[] cclist)
-  {
-    return "\nSubject: " + subject 
-             + "\nFrom: " + from 
-             + "\nTo: " + com.google.common.base.Joiner.on(',').join(recipients) 
-             + "\nCC: " + (cclist == null ? "" : com.google.common.base.Joiner.on(',').join(cclist));
-  }
-                                  
-  public void send(String subject,
-                   String message,
-                   String from,
-                   String[] recipients,
-                   String[] cclist) throws MessagingException
-  {
-    send(subject, message, from, recipients, cclist, host, username, password, useSmtps);
-  }   
-  
   public void send(String subject,
                        String message,
                        InternetAddress from,
                        InternetAddress[] recipients,
                        InternetAddress[] cclist) throws MessagingException
   {
-    send(subject, message, from, recipients, cclist, host, username, password, useSmtps);
-  } 
+    try {
+      send(subject, message, from, recipients, cclist, null);
+    }
+    catch (IOException e) {
+      throw new RuntimeException("should not happen as there is no file attachment", e);
+    }
+  }
+
+  public void send(String subject,
+                       String message,
+                       InternetAddress from,
+                       InternetAddress[] recipients,
+                       InternetAddress[] cclist,
+                       File attachedFile) throws MessagingException, IOException
+  {
+    sendMessage(subject, message, from, recipients, cclist, attachedFile);
+  }
+
+  public void send(String subject,
+                   String message,
+                   String from,
+                   String[] recipients,
+                   String[] cclist) throws MessagingException
+  {
+    try {
+      send(subject, message, from, recipients, cclist, null);
+    }
+    catch (IOException e) {
+      throw new RuntimeException("should not happen as there is no file attachment", e);
+    }
+  }
   
-  private static void send(
+  public void send(String subject,
+                   String message,
+                   String from,
+                   String[] recipients,
+                   String[] cclist,
+                   File attachedFile) throws MessagingException, IOException
+  {
+    sendMessage(subject, message, from, recipients, cclist, attachedFile);
+  }
+
+  /**
+   * Convert string email addresses to proper InternetAddress
+   * 
+   * @throws IOException
+   */
+  private void sendMessage(
                      String subject,
                      String message,
                      String from,
                      String[] srecipients,
-                     String[] scclist,
-                     String host,
-                     String username, 
-                     String password, 
-                     boolean useSmtps) 
-    throws MessagingException
+                           String[] scclist,
+                           File attachedFile
+                     )
+                       throws MessagingException, IOException
   {
     InternetAddress[] recipients = new InternetAddress[srecipients.length];
     int i = 0;
@@ -149,22 +170,21 @@ public class SmtpEmailService implements EmailService
         cclist[i++]= new InternetAddress(r);
       }
     }
-    send(subject, message, new InternetAddress(from), recipients, cclist, host, username, password, useSmtps);
+    sendMessage(subject, message, new InternetAddress(from), recipients, cclist, attachedFile);
   }
   
-  private static void send(
+  private void sendMessage(
                      String subject,
                      String message,
                      InternetAddress from,
                      InternetAddress[] recipients,
-                     InternetAddress[] cclist,
-                     String host,
-                     String username, 
-                     String password, 
-                     boolean useSmtps) 
-    throws MessagingException
+                           InternetAddress[] cclist,
+                           File attachedFile
+                     )
+                       throws MessagingException, IOException
   {
-    log.info("try to send: " + printEmail(subject, message, from, recipients, cclist));
+    log.info("try to send: " +
+      printEmail(subject, message, from, recipients, cclist, (attachedFile == null ? "" : "" + attachedFile.getCanonicalFile())));
     log.info("host: " + host + ", useSMTPS: " + useSmtps);
     Properties props = new Properties();
     String protocol = "smtp";
@@ -180,74 +200,216 @@ public class SmtpEmailService implements EmailService
       MimeMessage msg = new MimeMessage(session);
       msg.setFrom(from);  
       msg.setSubject(subject);
-      msg.setContent(message, "text/plain");
+
+      if (attachedFile != null) {
+        setFileAsAttachment(msg, message, attachedFile);
+      }
+      else {
+        msg.setContent(message, "text/plain");
+      }
+
       msg.addRecipients(Message.RecipientType.TO, recipients );
-      msg.addRecipients(Message.RecipientType.CC, cclist);
+      if (cclist != null) msg.addRecipients(Message.RecipientType.CC, cclist);
+
       t.connect(host, username, password);
       t.sendMessage(msg, msg.getAllRecipients());
     }
     finally {
       t.close();
     }
-    log.info("sent: " + printEmailHeader(subject, from, recipients, cclist) );
+    log.info("sent: " +
+      printEmailHeader(subject, from, recipients, cclist, (attachedFile == null ? "" : "" + attachedFile.getCanonicalFile())));
   }
 
+    // Set a file as an attachment.  Uses JAF FileDataSource.
+    // from http://en.wikipedia.org/wiki/Javamail
+  private static void setFileAsAttachment(Message msg, String message, File file)
+    throws MessagingException
+  {
+    MimeBodyPart p1 = new MimeBodyPart();
+    p1.setText(message);
+
+    // Create second part
+    MimeBodyPart p2 = new MimeBodyPart();
+
+    // Put a file in the second part
+    FileDataSource fds = new FileDataSource(file);
+    p2.setDataHandler(new DataHandler(fds));
+    p2.setFileName(fds.getName());
+
+    // Create the Multipart.  Add BodyParts to it.
+    Multipart mp = new MimeMultipart();
+    mp.addBodyPart(p1);
+    mp.addBodyPart(p2);
+
+    // Set Multipart as the message's content
+    msg.setContent(mp);
+    }
+
+  
+  //    // Set a single part html content.
+  //    // Sending data of any type is similar.
+  //    // from http://en.wikipedia.org/wiki/Javamail
+  //  private static void setHTMLContent(Message msg) throws MessagingException
+  //  {
+  //
+  //        String html = "<html><head><title>" +
+  //                        msg.getSubject() +
+  //                        "</title></head><body><h1>" +
+  //                        msg.getSubject() +
+  //                        "</h1><p>This is a test of sending an HTML e-mail" +
+  //                        " through Java.</body></html>";
+  //
+  //        // HTMLDataSource is an inner class
+  //        msg.setDataHandler(new DataHandler(new HTMLDataSource(html)));
+  //    }
+  //
+  //    /*
+  //     * Inner class to act as a JAF datasource to send HTML e-mail content
+  //     */
+  //    static class HTMLDataSource implements DataSource {
+  //        private String html;
+  //
+  //        public HTMLDataSource(String htmlString) {
+  //            html = htmlString;
+  //        }
+  //
+  //        // Return html string in an InputStream.
+  //        // A new stream must be returned each time.
+  //        public InputStream getInputStream() throws IOException {
+  //            if (html == null) throw new IOException("Null HTML");
+  //            return new ByteArrayInputStream(html.getBytes());
+  //        }
+  //
+  //        public OutputStream getOutputStream() throws IOException {
+  //            throw new IOException("This DataHandler cannot write HTML");
+  //        }
+  //
+  //        public String getContentType() {
+  //            return "text/html";
+  //        }
+  //
+  //        public String getName() {
+  //            return "JAF text/html dataSource to send e-mail only";
+  //        }
+  //    }
+
+  /**
+   * For logging
+   */
+  public static String printEmail(String subject,
+                                  String message,
+                                  InternetAddress from,
+                                  InternetAddress[] recipients,
+                                  InternetAddress[] cclist, String attachedFilePath)
+  {
+    return printEmailHeader(subject, from, recipients, cclist, attachedFilePath)
+             + "\n========message========\n" + message;
+  }
+
+  public static String printEmailHeader(String subject,
+                                        InternetAddress from,
+                                        InternetAddress[] recipients,
+                                        InternetAddress[] cclist,
+                                        String attachedFilePath)
+  {
+    return "\nSubject: " + subject
+             + "\nFrom: " + from
+             + "\nTo: " + com.google.common.base.Joiner.on(',').join(recipients)
+             + "\nCC: " + (cclist == null ? "" : com.google.common.base.Joiner.on(',').join(cclist))
+               + "\nAttached File: " + attachedFilePath;
+  }
+  
   @SuppressWarnings("static-access")
   public static void main(String[] args) throws Exception
   {
 
     CommandLineApplication app = new CommandLineApplication(args);
-    app.addCommandLineOption(OptionBuilder.hasArg()
-                             .withArgName(MAIL_RECIPIENT_LIST_OPTION[SHORT_OPTION_INDEX])
-                             .isRequired()
-                             .withDescription(MAIL_RECIPIENT_LIST_OPTION[DESCRIPTION_INDEX])
-                             .withLongOpt(MAIL_RECIPIENT_LIST_OPTION[LONG_OPTION_INDEX])
-                             .create(MAIL_RECIPIENT_LIST_OPTION[SHORT_OPTION_INDEX]));
-    app.addCommandLineOption(OptionBuilder.hasArg()
-                             .withArgName(MAIL_CC_LIST_OPTION[SHORT_OPTION_INDEX])
-                             .isRequired()
-                             .withDescription(MAIL_CC_LIST_OPTION[DESCRIPTION_INDEX])
-                             .withLongOpt(MAIL_CC_LIST_OPTION[LONG_OPTION_INDEX])
-                             .create(MAIL_CC_LIST_OPTION[SHORT_OPTION_INDEX]));
-    app.addCommandLineOption(OptionBuilder.hasArg()
-                             .withArgName(MAIL_MESSAGE_OPTION[SHORT_OPTION_INDEX])
-                             .isRequired()
-                             .withDescription(MAIL_MESSAGE_OPTION[DESCRIPTION_INDEX])
-                             .withLongOpt(MAIL_MESSAGE_OPTION[LONG_OPTION_INDEX])
-                             .create(MAIL_MESSAGE_OPTION[SHORT_OPTION_INDEX]));
-    app.addCommandLineOption(OptionBuilder.hasArg()
-                             .withArgName(MAIL_SUBJECT_OPTION[SHORT_OPTION_INDEX])
-                             .isRequired()
-                             .withDescription(MAIL_SUBJECT_OPTION[DESCRIPTION_INDEX])
-                             .withLongOpt(MAIL_SUBJECT_OPTION[LONG_OPTION_INDEX])
-                             .create(MAIL_SUBJECT_OPTION[SHORT_OPTION_INDEX]));
-    app.addCommandLineOption(OptionBuilder.hasArg()
-                             .withArgName(MAIL_SERVER_OPTION[SHORT_OPTION_INDEX])
-                             .isRequired()
-                             .withDescription(MAIL_SERVER_OPTION[DESCRIPTION_INDEX])
-                             .withLongOpt(MAIL_SERVER_OPTION[LONG_OPTION_INDEX])
-                             .create(MAIL_SERVER_OPTION[SHORT_OPTION_INDEX]));
-    app.addCommandLineOption(OptionBuilder.hasArg()
-                             .withArgName(MAIL_USERNAME_OPTION[SHORT_OPTION_INDEX])
-                             .isRequired()
-                             .withDescription(MAIL_USERNAME_OPTION[DESCRIPTION_INDEX])
-                             .withLongOpt(MAIL_USERNAME_OPTION[LONG_OPTION_INDEX])
-                             .create(MAIL_USERNAME_OPTION[SHORT_OPTION_INDEX]));
-    app.addCommandLineOption(OptionBuilder.hasArg()
-                             .withArgName(MAIL_USER_PASSWORD_OPTION[SHORT_OPTION_INDEX])
-                             .isRequired()
-                             .withDescription(MAIL_USER_PASSWORD_OPTION[DESCRIPTION_INDEX])
-                             .withLongOpt(MAIL_USER_PASSWORD_OPTION[LONG_OPTION_INDEX])
-                             .create(MAIL_USER_PASSWORD_OPTION[SHORT_OPTION_INDEX]));
-    app.addCommandLineOption(OptionBuilder.hasArg()
-                             .withArgName(MAIL_FROM_OPTION[SHORT_OPTION_INDEX])
-                             .withDescription(MAIL_FROM_OPTION[DESCRIPTION_INDEX])
-                             .withLongOpt(MAIL_FROM_OPTION[LONG_OPTION_INDEX])
-                             .create(MAIL_FROM_OPTION[SHORT_OPTION_INDEX]));
-    app.addCommandLineOption(OptionBuilder.hasArg(false)
-                             .withDescription(MAIL_USE_SMTPS[DESCRIPTION_INDEX])
-                             .withLongOpt(MAIL_USE_SMTPS[LONG_OPTION_INDEX])
-                             .create(MAIL_USE_SMTPS[SHORT_OPTION_INDEX]));
+    String[] option = MAIL_RECIPIENT_LIST_OPTION;
+    app.addCommandLineOption(OptionBuilder
+                                           .withType(Integer.class)
+                                           .hasArg()
+                                          .isRequired()
+                                          .withArgName(option[SHORT_OPTION_INDEX])
+                                          .withDescription(option[DESCRIPTION_INDEX])
+                                          .withLongOpt(option[LONG_OPTION_INDEX])
+                                          .create(option[SHORT_OPTION_INDEX]));
+
+    option = MAIL_CC_LIST_OPTION;
+    app.addCommandLineOption(OptionBuilder
+                                           .hasArg()
+                                          .withArgName(option[SHORT_OPTION_INDEX])
+                                          .withDescription(option[DESCRIPTION_INDEX])
+                                          .withLongOpt(option[LONG_OPTION_INDEX])
+                                          .create(option[SHORT_OPTION_INDEX]));
+
+    option = MAIL_MESSAGE_OPTION;
+    app.addCommandLineOption(OptionBuilder
+                                           .hasArg()
+                                          .isRequired()
+                                          .withArgName(option[SHORT_OPTION_INDEX])
+                                          .withDescription(option[DESCRIPTION_INDEX])
+                                          .withLongOpt(option[LONG_OPTION_INDEX])
+                                          .create(option[SHORT_OPTION_INDEX]));
+
+    option = MAIL_FILE_ATTACHMENT;
+    app.addCommandLineOption(OptionBuilder
+                                           .hasArg()
+                                          .withArgName(option[SHORT_OPTION_INDEX])
+                                          .withDescription(option[DESCRIPTION_INDEX])
+                                          .withLongOpt(option[LONG_OPTION_INDEX])
+                                          .create(option[SHORT_OPTION_INDEX]));
+
+    option = MAIL_SUBJECT_OPTION;
+    app.addCommandLineOption(OptionBuilder
+                                           .hasArg()
+                                          .isRequired()
+                                          .withArgName(option[SHORT_OPTION_INDEX])
+                                          .withDescription(option[DESCRIPTION_INDEX])
+                                          .withLongOpt(option[LONG_OPTION_INDEX])
+                                          .create(option[SHORT_OPTION_INDEX]));
+
+    option = MAIL_SERVER_OPTION;
+    app.addCommandLineOption(OptionBuilder
+                                           .hasArg()
+                                          .isRequired()
+                                          .withArgName(option[SHORT_OPTION_INDEX])
+                                          .withDescription(option[DESCRIPTION_INDEX])
+                                          .withLongOpt(option[LONG_OPTION_INDEX])
+                                          .create(option[SHORT_OPTION_INDEX]));
+
+    option = MAIL_USERNAME_OPTION;
+    app.addCommandLineOption(OptionBuilder
+                                           .hasArg()
+                                          .isRequired()
+                                          .withArgName(option[SHORT_OPTION_INDEX])
+                                          .withDescription(option[DESCRIPTION_INDEX])
+                                          .withLongOpt(option[LONG_OPTION_INDEX])
+                                          .create(option[SHORT_OPTION_INDEX]));
+
+    option = MAIL_USER_PASSWORD_OPTION;
+    app.addCommandLineOption(OptionBuilder
+                                           .hasArg()
+                                          .isRequired()
+                                          .withArgName(option[SHORT_OPTION_INDEX])
+                                          .withDescription(option[DESCRIPTION_INDEX])
+                                          .withLongOpt(option[LONG_OPTION_INDEX])
+                                          .create(option[SHORT_OPTION_INDEX]));
+
+    option = MAIL_FROM_OPTION;
+    app.addCommandLineOption(OptionBuilder
+                                           .hasArg()
+                                          .withArgName(option[SHORT_OPTION_INDEX])
+                                          .withDescription(option[DESCRIPTION_INDEX])
+                                          .withLongOpt(option[LONG_OPTION_INDEX])
+                                          .create(option[SHORT_OPTION_INDEX]));
+
+    option = MAIL_USE_SMTPS;
+    app.addCommandLineOption(OptionBuilder
+                                          .withArgName(option[SHORT_OPTION_INDEX])
+                                          .withDescription(option[DESCRIPTION_INDEX])
+                                          .withLongOpt(option[LONG_OPTION_INDEX])
+                                          .create(option[SHORT_OPTION_INDEX]));
 
 
     try {
@@ -258,12 +420,25 @@ public class SmtpEmailService implements EmailService
       }
 
       String message = app.getCommandLineOptionValue(MAIL_MESSAGE_OPTION[SHORT_OPTION_INDEX]);
+
+      File attachedFile = null;
+      if (app.isCommandLineFlagSet(MAIL_FILE_ATTACHMENT[SHORT_OPTION_INDEX])) {
+        attachedFile = new File(app.getCommandLineOptionValue(MAIL_FILE_ATTACHMENT[SHORT_OPTION_INDEX]));
+        if (!attachedFile.exists()) {
+          log.error("Specified file does not exist: " + attachedFile.getCanonicalPath());
+          System.exit(1);
+        }
+      }
+
       String subject = app.getCommandLineOptionValue(MAIL_SUBJECT_OPTION[SHORT_OPTION_INDEX]);
       String recipientlist = app.getCommandLineOptionValue(MAIL_RECIPIENT_LIST_OPTION[SHORT_OPTION_INDEX]);
       String[] recipients = recipientlist.split(DELIMITER);
       
-      String cclist = app.getCommandLineOptionValue(MAIL_CC_LIST_OPTION[SHORT_OPTION_INDEX]);
-      String[] ccrecipients = cclist.split(DELIMITER);
+      String[] ccrecipients = null;
+      if (app.isCommandLineFlagSet(MAIL_CC_LIST_OPTION[SHORT_OPTION_INDEX])) {
+        String cclist = app.getCommandLineOptionValue(MAIL_CC_LIST_OPTION[SHORT_OPTION_INDEX]);
+        ccrecipients = cclist.split(DELIMITER);
+      }
       
       String mailHost = app.getCommandLineOptionValue(MAIL_SERVER_OPTION[SHORT_OPTION_INDEX]);
       String username = app.getCommandLineOptionValue(MAIL_USERNAME_OPTION[SHORT_OPTION_INDEX]);
@@ -275,9 +450,9 @@ public class SmtpEmailService implements EmailService
         mailFrom = app.getCommandLineOptionValue(MAIL_FROM_OPTION[SHORT_OPTION_INDEX]);
       }
       
-      //TODO: get the cclist
+      SmtpEmailService service = new SmtpEmailService(mailHost, username, password, useSmtps);
+      service.send(subject, message, mailFrom, recipients, ccrecipients, attachedFile);
 
-      send(subject, message, mailFrom, recipients, ccrecipients, mailHost, username, password, useSmtps);
       System.exit(0);
     }
     catch (ParseException e) {
@@ -287,32 +462,5 @@ public class SmtpEmailService implements EmailService
 
   }
 
-//  private void send2(String mailHost,
-//                        String username,
-//                        String password)
-//    throws NoSuchProviderException,
-//    MessagingException,
-//    AddressException
-//  {
-//    Properties props = new Properties();
-//    props.setProperty("mail.transport.protocol", "smtp");
-//    props.setProperty("mail.host", mailHost);
-//    props.setProperty("mail.user", username);
-//    props.setProperty("mail.password", password);
-//
-//
-//    Session mailSession = Session.getDefaultInstance(props, null);
-//    Transport transport = mailSession.getTransport();
-//
-//    MimeMessage message = new MimeMessage(mailSession);
-//    message.setSubject("Testing javamail plain");
-//    message.setContent("This is a test", "text/plain");
-//    message.addRecipient(Message.RecipientType.TO,
-//                         new InternetAddress("sean.erickson@gmail.com"));
-//
-//    transport.connect();
-//    transport.sendMessage(message,
-//                          message.getRecipients(Message.RecipientType.TO));
-//    transport.close();
-//  }
+
 }

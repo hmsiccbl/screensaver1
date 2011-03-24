@@ -99,11 +99,11 @@ public class ScreenDerivedPropertiesUpdater
   }
 
   @Transactional
-  public void updateFulfilledCherryPicksCount(Screen screen)
+  public void updateTotalPlatedLabCherryPickCount(Screen screen)
   {
     _dao.flush(); // ensure all of the data that were are about to query is flushed to the database
     screen = _dao.reloadEntity(screen);
-    screen.setFulfilledLabCherryPicksCount(_screenDao.countFulfilledLabCherryPicks(screen));
+    screen.setTotalPlatedLabCherryPicks(_screenDao.countTotalPlatedLabCherryPicks(screen));
   }
 
 }

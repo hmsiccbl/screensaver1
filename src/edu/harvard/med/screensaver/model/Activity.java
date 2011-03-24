@@ -9,7 +9,6 @@
 
 package edu.harvard.med.screensaver.model;
 
-import java.util.Set;
 import java.util.SortedSet;
 
 import javax.persistence.CascadeType;
@@ -120,18 +119,6 @@ public abstract class Activity extends AuditedAbstractEntity<Integer> implements
   @Transient
   abstract public String getActivityTypeName();
   
-  /**
-   * @return the set of ScreensaverUsers that may be used as an argument to
-   *         {@link #setPerformedBy(ScreensaverUser)}; null if all users are
-   *         candidates
-   */
-  @Transient
-  public Set<ScreensaverUser> getPerformedByCandidates()
-  {
-    return null;
-  }
-  
-
   /**
    * Get the user that performed the activity.
    * @return the user that performed the activity

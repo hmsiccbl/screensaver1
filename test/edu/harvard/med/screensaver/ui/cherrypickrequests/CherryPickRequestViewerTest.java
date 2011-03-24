@@ -29,12 +29,15 @@ import edu.harvard.med.screensaver.model.cherrypicks.CherryPickRequest;
 import edu.harvard.med.screensaver.model.cherrypicks.LabCherryPick;
 import edu.harvard.med.screensaver.model.libraries.CopyUsageType;
 import edu.harvard.med.screensaver.model.libraries.Library;
+import edu.harvard.med.screensaver.model.libraries.Plate;
+import edu.harvard.med.screensaver.model.libraries.PlateStatus;
 import edu.harvard.med.screensaver.model.libraries.Well;
 import edu.harvard.med.screensaver.model.screens.CherryPickScreening;
 import edu.harvard.med.screensaver.model.screens.Screen;
 import edu.harvard.med.screensaver.model.screens.ScreenType;
 import edu.harvard.med.screensaver.model.users.LabHead;
 import edu.harvard.med.screensaver.model.users.ScreeningRoomUser;
+import edu.harvard.med.screensaver.service.libraries.PlateUpdater;
 import edu.harvard.med.screensaver.ui.activities.LabActivityViewer;
 import edu.harvard.med.screensaver.ui.arch.view.AbstractBackingBeanTest;
 
@@ -48,6 +51,8 @@ public class CherryPickRequestViewerTest extends AbstractBackingBeanTest
   protected CherryPickRequestViewer cherryPickRequestViewer;
   @Autowired
   protected LabActivityViewer activityViewer;
+  @Autowired
+  protected PlateUpdater _plateUpdater;
 
   private ScreeningRoomUser _screener;
   private CherryPickRequest _cpr;
@@ -61,15 +66,17 @@ public class CherryPickRequestViewerTest extends AbstractBackingBeanTest
       @Override
       public void runTransaction()
       {
-        _admin = genericEntityDao.reattachEntity(_admin);
+        _admin = genericEntityDao.mergeEntity(_admin);
         currentScreensaverUser.setScreensaverUser(_admin);
         _screener = new LabHead(_admin);
         _screener.setFirstName("Lab");
         _screener.setLastName("Head");
         genericEntityDao.persistEntity(_screener);
         _library = MakeDummyEntities.makeDummyLibrary(1, ScreenType.SMALL_MOLECULE, 1);
-        _library.createCopy(_admin, CopyUsageType.CHERRY_PICK_SOURCE_PLATES, "A").findPlate(1000).withWellVolume(new Volume(1000));
+        Plate plate = _library.createCopy(_admin, CopyUsageType.CHERRY_PICK_SOURCE_PLATES, "A").findPlate(1000).withWellVolume(new Volume(1000));
         genericEntityDao.persistEntity(_library);
+        genericEntityDao.flush();
+        _plateUpdater.updatePlateStatus(plate, PlateStatus.AVAILABLE, _admin, _admin, new LocalDate());
         Screen screen = MakeDummyEntities.makeDummyScreen(1, ScreenType.SMALL_MOLECULE);
         _cpr = screen.createCherryPickRequest(_admin, _screener, new LocalDate());
         _cpr.setTransferVolumePerWellApproved(new Volume(1));

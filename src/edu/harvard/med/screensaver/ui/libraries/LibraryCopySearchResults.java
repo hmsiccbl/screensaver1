@@ -12,35 +12,35 @@ package edu.harvard.med.screensaver.ui.libraries;
 import java.math.BigDecimal;
 import java.math.RoundingMode;
 import java.util.List;
-import java.util.Map;
 
+import org.apache.log4j.Logger;
+import org.joda.time.LocalDate;
+import com.google.common.base.Joiner;
 import com.google.common.collect.Iterables;
 import com.google.common.collect.Lists;
-import com.google.common.collect.Maps;
-import org.apache.log4j.Logger;
-import org.hibernate.Session;
-import org.joda.time.LocalDate;
 
 import edu.harvard.med.screensaver.db.GenericEntityDAO;
-import edu.harvard.med.screensaver.db.Query;
+import edu.harvard.med.screensaver.db.LibrariesDAO;
 import edu.harvard.med.screensaver.db.datafetcher.EntityDataFetcher;
 import edu.harvard.med.screensaver.db.hqlbuilder.HqlBuilder;
 import edu.harvard.med.screensaver.model.Activity;
+import edu.harvard.med.screensaver.model.Volume;
 import edu.harvard.med.screensaver.model.libraries.Copy;
 import edu.harvard.med.screensaver.model.libraries.CopyUsageType;
 import edu.harvard.med.screensaver.model.libraries.Library;
-import edu.harvard.med.screensaver.model.libraries.Plate;
+import edu.harvard.med.screensaver.model.libraries.LibraryType;
 import edu.harvard.med.screensaver.model.libraries.PlateStatus;
-import edu.harvard.med.screensaver.model.libraries.ScreeningStatistics;
+import edu.harvard.med.screensaver.model.libraries.VolumeStatistics;
 import edu.harvard.med.screensaver.model.meta.PropertyPath;
-import edu.harvard.med.screensaver.model.screenresults.AssayPlate;
-import edu.harvard.med.screensaver.model.screens.LibraryScreening;
+import edu.harvard.med.screensaver.model.meta.RelationshipPath;
+import edu.harvard.med.screensaver.model.screens.ScreenType;
 import edu.harvard.med.screensaver.ui.activities.ActivitySearchResults;
 import edu.harvard.med.screensaver.ui.arch.datatable.Criterion.Operator;
 import edu.harvard.med.screensaver.ui.arch.datatable.column.DateColumn;
 import edu.harvard.med.screensaver.ui.arch.datatable.column.FixedDecimalColumn;
 import edu.harvard.med.screensaver.ui.arch.datatable.column.IntegerColumn;
 import edu.harvard.med.screensaver.ui.arch.datatable.column.TableColumn;
+import edu.harvard.med.screensaver.ui.arch.datatable.column.VolumeColumn;
 import edu.harvard.med.screensaver.ui.arch.datatable.column.entity.DateEntityColumn;
 import edu.harvard.med.screensaver.ui.arch.datatable.column.entity.EnumEntityColumn;
 import edu.harvard.med.screensaver.ui.arch.datatable.column.entity.IntegerEntityColumn;
@@ -48,6 +48,7 @@ import edu.harvard.med.screensaver.ui.arch.datatable.column.entity.TextEntityCol
 import edu.harvard.med.screensaver.ui.arch.datatable.model.InMemoryEntityDataModel;
 import edu.harvard.med.screensaver.ui.arch.searchresults.EntityBasedEntitySearchResults;
 import edu.harvard.med.screensaver.ui.arch.searchresults.SearchResults;
+import edu.harvard.med.screensaver.util.StringUtils;
 
 /**
  * A {@link SearchResults} for {@link Copy Copies}.
@@ -61,6 +62,7 @@ public class LibraryCopySearchResults extends EntityBasedEntitySearchResults<Cop
   protected static final int DECIMAL_SCALE = 1; // number of decimal digits (to the right of decimal point) for plate screening count average
 
   private GenericEntityDAO _dao;
+  private LibrariesDAO _librariesDao;
   private LibraryCopyViewer _libraryCopyViewer;
   private LibraryViewer _libraryViewer;
   private ActivitySearchResults<Activity> _activitesBrowser;
@@ -74,6 +76,7 @@ public class LibraryCopySearchResults extends EntityBasedEntitySearchResults<Cop
   }
 
   public LibraryCopySearchResults(GenericEntityDAO dao,
+                                  LibrariesDAO librariesDao,
                                   LibraryCopyViewer libraryCopyViewer,
                                   LibraryViewer libraryViewer,
                                   ActivitySearchResults<Activity> activitiesBrowser,
@@ -81,10 +84,22 @@ public class LibraryCopySearchResults extends EntityBasedEntitySearchResults<Cop
   {
     super(libraryCopyViewer);
     _dao = dao;
+    _librariesDao = librariesDao;
     _libraryCopyViewer = libraryCopyViewer;
     _libraryViewer = libraryViewer;
     _activitesBrowser = activitiesBrowser;
     _libraryCopyPlateSearchResults = libraryCopyPlateSearchResults;
+  }
+
+  /**
+   * For command line usage only
+   */
+  public LibraryCopySearchResults(GenericEntityDAO dao,
+                                  LibrariesDAO librariesDao)
+  {
+    super(null);
+    _dao = dao;
+    _librariesDao = librariesDao;
   }
 
   @Override
@@ -115,107 +130,10 @@ public class LibraryCopySearchResults extends EntityBasedEntitySearchResults<Cop
       public void fetch(List<? extends TableColumn<Copy,?>> columns)
       {
         super.fetch(columns);
-        calculateScreeningStatistics(_unfilteredData);
+        _librariesDao.calculateCopyScreeningStatistics(_unfilteredData);
+        _librariesDao.calculateCopyVolumeStatistics(_unfilteredData);
       }
     });
-  }
-
-  private void calculateScreeningStatistics(List<Copy> copies)
-  {
-    // get copy-based statistics: screening_count, assay_plate_count, first/last date screened, data_loading_count
-    final HqlBuilder builder = new HqlBuilder();
-
-    Map<Integer,Copy> result = Maps.newHashMap();
-    for (Copy c : copies) {
-      c.setScreeningStatistics(new ScreeningStatistics());
-      result.put(c.getEntityId(), c);
-    }
-
-    builder.from(Plate.class, "p")
-           .from(AssayPlate.class, "ap")
-           .from("ap", AssayPlate.libraryScreening, "ls")
-           .from("ap", AssayPlate.screenResultDataLoading, "dl")
-           .whereIn("p", Plate.copy.getLeaf() + ".id", result.keySet())
-           .where("ap", AssayPlate.plateScreened.getLeaf(), Operator.EQUAL, "p", "id")
-           .groupBy("p", "copy")
-           .select("p", "copy.id")
-           .selectExpression("count(distinct ls)")
-           .selectExpression("count(distinct ap)")
-           .selectExpression("count(distinct dl)")
-           .selectExpression("min(dl.dateOfActivity)")
-           .selectExpression("max(dl.dateOfActivity)")
-           .selectExpression("min(ls.dateOfActivity)")
-           .selectExpression("max(ls.dateOfActivity)");
-
-    List<Object> results = _dao.runQuery(new Query() {
-      @Override
-      public List<Object> execute(Session session)
-        {
-          return builder.toQuery(session, true).list();
-        }
-    });
-    for (Object o : results) {
-      int i = 0;
-      Integer copyId = (Integer) ((Object[]) o)[i++];
-      ScreeningStatistics css = result.get(copyId).getScreeningStatistics();
-      css.setScreeningCount(((Long) ((Object[]) o)[i++]).intValue());
-      css.setAssayPlateCount(((Long) ((Object[]) o)[i++]).intValue());
-      css.setDataLoadingCount(((Long) ((Object[]) o)[i++]).intValue());
-      css.setFirstDateDataLoaded(((LocalDate) ((Object[]) o)[i++]));
-      css.setLastDateDataLoaded(((LocalDate) ((Object[]) o)[i++]));
-      css.setFirstDateScreened(((LocalDate) ((Object[]) o)[i++]));
-      css.setLastDateScreened(((LocalDate) ((Object[]) o)[i++]));
-    }
-
-    // calculate plate count - the number of plates per copy 
-    final HqlBuilder builder1 = new HqlBuilder();
-    builder1.from(Plate.class, "p")
-           .whereIn("p", Plate.copy.getLeaf() + ".id", result.keySet())
-           .groupBy("p", Plate.copy.getLeaf() + ".id")
-           .select("p", Plate.copy.getLeaf() + ".id")
-           .selectExpression("count(*)");
-
-    results = _dao.runQuery(new Query() {
-      @Override
-      public List<Object> execute(Session session)
-        {
-          return builder1.toQuery(session, true).list();
-        }
-    });
-
-    for (Object o : results) {
-      Integer copyId = (Integer) ((Object[]) o)[0];
-      Integer count = ((Long) ((Object[]) o)[1]).intValue();
-      ScreeningStatistics css = result.get(copyId).getScreeningStatistics();
-      css.setPlateCount(count);
-    }
-
-    // calculate plate_screening_count - the total number of times individual plates from this copy have been screened, ignoring replicates)
-    final HqlBuilder builder2 = new HqlBuilder();
-    builder2.from(LibraryScreening.class, "ls")
-           .from("ls", LibraryScreening.assayPlatesScreened, "ap")
-           .from("ap", AssayPlate.plateScreened, "p")
-           .from("p", Plate.copy, "c")
-           .whereIn("p", Plate.copy.getLeaf() + ".id", result.keySet())
-           .where("ap", "replicateOrdinal", Operator.EQUAL, 0)
-           .groupBy("c", "id")
-           .select("c", "id")
-           .selectExpression("count(*)");
-
-    results = _dao.runQuery(new Query() {
-      @Override
-      public List<Object> execute(Session session)
-        {
-          return builder2.toQuery(session, true).list();
-        }
-    });
-
-    for (Object o : results) {
-      Integer copyId = (Integer) ((Object[]) o)[0];
-      Integer count = ((Long) ((Object[]) o)[1]).intValue();
-      ScreeningStatistics css = result.get(copyId).getScreeningStatistics();
-      css.setPlateScreeningCount(count);
-    }
   }
 
   @Override
@@ -247,6 +165,29 @@ public class LibraryCopySearchResults extends EntityBasedEntitySearchResults<Cop
       }
     });
     Iterables.getLast(columns).setVisible(!isNested());
+    
+    columns.add(new EnumEntityColumn<Copy,ScreenType>(RelationshipPath.from(Copy.class).toProperty("library"),
+                                                      "Screen Type", "'RNAi' or 'Small Molecule'",
+                                                      TableColumn.UNGROUPED, ScreenType.values()) {
+      @Override
+      public ScreenType getCellValue(Copy copy)
+      {
+        return copy.getLibrary().getScreenType();
+      }
+    });    
+    Iterables.getLast(columns).setVisible(false);
+    
+    String names = Joiner.on("','").join(StringUtils.getVocabularyTerms(LibraryType.values()));
+    columns.add(new EnumEntityColumn<Copy,LibraryType>(RelationshipPath.from(Copy.class).toProperty("library"),
+                                                                  "Library Type", names,
+                                                                  TableColumn.UNGROUPED, LibraryType.values()) {
+      @Override
+      public LibraryType getCellValue(Copy copy)
+      {
+        return copy.getLibrary().getLibraryType();
+      }
+    });
+    Iterables.getLast(columns).setVisible(false);
 
     columns.add(new TextEntityColumn<Copy>(PropertyPath.from(Copy.class).toProperty("name"),
                                            "Copy Name",
@@ -304,6 +245,17 @@ public class LibraryCopySearchResults extends EntityBasedEntitySearchResults<Cop
       }
     });
 
+    columns.add(new IntegerEntityColumn<Copy>(PropertyPath.from(Copy.class).toProperty("plateLocationsCount"),
+                                              "Plate Locations",
+                                              "The number different plate locations found for plates of this copy",
+                                              TableColumn.UNGROUPED) {
+      @Override
+      public Integer getCellValue(Copy copy)
+      {
+        return copy.getPlateLocationsCount();
+      }
+    });
+
     columns.add(new EnumEntityColumn<Copy,PlateStatus>(PropertyPath.from(Copy.class).toProperty("primaryPlateStatus"),
                                                        "Primary Plate Status",
                                                        "The most common plate status for plates of this copy",
@@ -313,6 +265,17 @@ public class LibraryCopySearchResults extends EntityBasedEntitySearchResults<Cop
       public PlateStatus getCellValue(Copy copy)
       {
         return copy.getPrimaryPlateStatus();
+      }
+    });
+    
+    columns.add(new IntegerEntityColumn<Copy>(PropertyPath.from(Copy.class).toProperty("platesAvailable"),
+                                              "Plates Available",
+                                              "The number of plates with a status of \"Available\"",
+                                              TableColumn.UNGROUPED) {
+      @Override
+      public Integer getCellValue(Copy copy)
+      {
+        return copy.getPlatesAvailable();
       }
     });
 
@@ -329,6 +292,34 @@ public class LibraryCopySearchResults extends EntityBasedEntitySearchResults<Cop
                                                                                                        RoundingMode.CEILING);
         return val;
       }
+    });
+
+    columns.add(new VolumeColumn<Copy>("Average Plate Remaining Volume",
+                                       "The average well volume remaining across all library screening plates of this copy",
+                                       TableColumn.UNGROUPED) {
+      @Override
+      public Volume getCellValue(Copy copy)
+      {
+        return getNullSafeVolumeStatistics(copy).getAverageRemaining();
+      }
+    });
+    columns.add(new VolumeColumn<Copy>("Min Plate Remaining Volume",
+                                       "The minimum well volume remaining across all library screening plates of this copy",
+                                       TableColumn.UNGROUPED) {
+      @Override
+      public Volume getCellValue(Copy copy)
+    {
+      return getNullSafeVolumeStatistics(copy).getMinRemaining();
+    }
+    });
+    columns.add(new VolumeColumn<Copy>("Max Plate Remaining Volume",
+                                       "The maximum well volume remaining across all library screening plates of this copy",
+                                       TableColumn.UNGROUPED) {
+      @Override
+      public Volume getCellValue(Copy copy)
+    {
+      return getNullSafeVolumeStatistics(copy).getMaxRemaining();
+    }
     });
 
     columns.add(new DateColumn<Copy>("Last Date Screened",
@@ -498,10 +489,18 @@ public class LibraryCopySearchResults extends EntityBasedEntitySearchResults<Cop
     return columns;
   }
 
+  private static VolumeStatistics getNullSafeVolumeStatistics(Copy copy)
+  {
+    VolumeStatistics volumeStatistics = copy.getVolumeStatistics();
+    if (volumeStatistics == null) {
+      return VolumeStatistics.Null;
+    }
+    return volumeStatistics;
+  }
+
   @Override
   protected Copy rowToEntity(Copy row)
   {
     return row;
   }
-
 }

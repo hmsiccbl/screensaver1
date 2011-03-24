@@ -14,11 +14,13 @@ import java.util.List;
 
 import javax.faces.model.SelectItem;
 
+import com.google.common.collect.ImmutableSet;
 import org.apache.log4j.Logger;
 import org.hibernate.exception.ConstraintViolationException;
 import org.springframework.orm.jpa.JpaSystemException;
 
 import edu.harvard.med.screensaver.db.GenericEntityDAO;
+import edu.harvard.med.screensaver.db.LibrariesDAO;
 import edu.harvard.med.screensaver.model.libraries.Copy;
 import edu.harvard.med.screensaver.model.libraries.CopyUsageType;
 import edu.harvard.med.screensaver.model.libraries.Library;
@@ -36,6 +38,8 @@ public class LibraryCopyDetail extends EditableEntityViewerBackingBean<Copy>
   private LibraryCopyViewer _libraryCopyViewer;
   private LibraryViewer _libraryViewer;
 
+  private LibrariesDAO _librariesDao;
+
   /**
    * @motivation for CGLIB2
    */
@@ -45,6 +49,7 @@ public class LibraryCopyDetail extends EditableEntityViewerBackingBean<Copy>
 
   public LibraryCopyDetail(LibraryCopyDetail libraryCopyDetailProxy,
                            GenericEntityDAO dao,
+                           LibrariesDAO librariesDao,
                            LibraryCopyViewer libraryCopyViewer,
                            LibraryViewer libraryViewer)
   {
@@ -52,6 +57,7 @@ public class LibraryCopyDetail extends EditableEntityViewerBackingBean<Copy>
           Copy.class,
           EDIT_LIBRARY_COPY,
           dao);
+    _librariesDao = librariesDao;
     _libraryCopyViewer = libraryCopyViewer;
     _libraryViewer = libraryViewer;
   }
@@ -65,6 +71,7 @@ public class LibraryCopyDetail extends EditableEntityViewerBackingBean<Copy>
   protected void initializeEntity(Copy copy)
   {
     getDao().needReadOnly(copy, Copy.library);
+    _librariesDao.calculateCopyVolumeStatistics(ImmutableSet.of(copy));
   }
   
   @UICommand

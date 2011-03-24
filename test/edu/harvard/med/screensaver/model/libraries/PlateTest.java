@@ -9,7 +9,6 @@
 
 package edu.harvard.med.screensaver.model.libraries;
 
-import java.beans.IntrospectionException;
 import java.math.BigDecimal;
 
 import junit.framework.TestSuite;

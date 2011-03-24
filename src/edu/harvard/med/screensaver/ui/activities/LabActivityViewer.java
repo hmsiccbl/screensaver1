@@ -29,6 +29,7 @@ import edu.harvard.med.screensaver.ScreensaverConstants;
 import edu.harvard.med.screensaver.db.EntityInflator;
 import edu.harvard.med.screensaver.db.GenericEntityDAO;
 import edu.harvard.med.screensaver.db.LibrariesDAO;
+import edu.harvard.med.screensaver.db.ScreenDAO;
 import edu.harvard.med.screensaver.model.MolarConcentration;
 import edu.harvard.med.screensaver.model.MolarUnit;
 import edu.harvard.med.screensaver.model.Volume;
@@ -66,6 +67,7 @@ public class LabActivityViewer extends SearchResultContextEditableEntityViewerBa
   private static Logger log = Logger.getLogger(LabActivityViewer.class);
 
   private LibrariesDAO _librariesDao;
+  private ScreenDAO _screensDao;
   private ScreenViewer _screenViewer;
   private CherryPickRequestViewer _cherryPickRequestViewer;
   private LibrarySearchResults _librarySearchResults;
@@ -90,7 +92,6 @@ public class LabActivityViewer extends SearchResultContextEditableEntityViewerBa
   private AbstractBackingBean _returnToViewAfterEdit;
   private boolean _editingNewEntity;
 
-
   /**
    * @motivation for CGLIB2
    */
@@ -101,6 +102,7 @@ public class LabActivityViewer extends SearchResultContextEditableEntityViewerBa
   public LabActivityViewer(LabActivityViewer thisProxy,
                            GenericEntityDAO dao,
                            LibrariesDAO librariesDao,
+                           ScreenDAO screensDao,
                            ActivitySearchResults activitiesBrowser,
                            ScreenViewer screenViewer,
                            CherryPickRequestViewer cherryPickRequestViewer,
@@ -112,6 +114,7 @@ public class LabActivityViewer extends SearchResultContextEditableEntityViewerBa
     _screenViewer = screenViewer;
     _cherryPickRequestViewer = cherryPickRequestViewer;
     _librariesDao = librariesDao;
+    _screensDao = screensDao;
     _librarySearchResults = librarySearchResults;
     _screenDerivedPropertiesUpdater = screenDerivedPropertiesUpdater;
     _libraryScreeningDerivedPropertiesUpdater = libraryScreeningDerivedPropertiesUpdater;
@@ -149,6 +152,7 @@ public class LabActivityViewer extends SearchResultContextEditableEntityViewerBa
     _editingNewEntity = true;
   }
   
+  @Override
   protected void initializeViewer(LabActivity activity)
   {
     _screen = null;
@@ -184,23 +188,19 @@ public class LabActivityViewer extends SearchResultContextEditableEntityViewerBa
   public UISelectOneBean<ScreensaverUser> getPerformedBy()
   {
     if (_performedBy == null) {
-      Set<ScreensaverUser> performedByCandidates = null; // TODO: reinstate: getEntity().getPerformedByCandidates();
-      if (performedByCandidates == null) {
-        performedByCandidates = Sets.newTreeSet();
-        performedByCandidates.addAll(getDao().findAllEntitiesOfType(ScreensaverUser.class));
-      }
-      _performedBy = new UISelectOneEntityBean<ScreensaverUser>(
-        performedByCandidates,
-        getEntity().getPerformedBy(),
-        getDao()) {
+      _performedBy = new UISelectOneEntityBean<ScreensaverUser>(_screensDao.findLabActivityPerformedByCandidates(getEntity()),
+                                                                getEntity().getPerformedBy(),
+                                                                getDao()) {
         @Override
-        protected String makeLabel(ScreensaverUser t) { return t.getFullNameLastFirst(); }
+        protected String makeLabel(ScreensaverUser t)
+        {
+          return t.getFullNameLastFirst();
+        }
       };
     }
     return _performedBy;
   }
   
-
   public UISelectOneBean<VolumeUnit> getVolumeTransferredPerWellType()
   {
     try {
@@ -370,9 +370,7 @@ public class LabActivityViewer extends SearchResultContextEditableEntityViewerBa
     }
     if (entity instanceof CherryPickLiquidTransfer) {
       if (_editingNewEntity) {
-        // do calculations necessitated by invalidate calls on the screen 
-        // (i.e. for screen.getFulfilledLabCherryPicksCount invalidated in CPAP.setCherryPickLiquidTransfer )...
-        _screenDerivedPropertiesUpdater.updateFulfilledCherryPicksCount(((CherryPickLiquidTransfer) entity).getScreen());
+        _screenDerivedPropertiesUpdater.updateTotalPlatedLabCherryPickCount(((CherryPickLiquidTransfer) entity).getScreen());
       }
     }
     if (entity instanceof LibraryScreening) {

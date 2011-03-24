@@ -346,6 +346,7 @@
       <bean parent="uiBean" 
             class="edu.harvard.med.screensaver.ui.libraries.LibraryCopySearchResults">
         <constructor-arg ref="genericEntityDao" />
+        <constructor-arg ref="librariesDao" />
         <constructor-arg ref="libraryCopyViewer" />
         <constructor-arg ref="libraryViewer" />
         <constructor-arg ref="labActivitiesBrowser" />
@@ -489,10 +490,11 @@
     scope="session"
     class="edu.harvard.med.screensaver.ui.libraries.LibraryCopySearchResults">
     <constructor-arg ref="genericEntityDao" />
+    <constructor-arg ref="librariesDao" />
     <constructor-arg ref="libraryCopyViewer" />
     <constructor-arg ref="libraryViewer" />
     <constructor-arg ref="labActivitiesBrowser" />
-    <constructor-arg ref="libraryCopyPlatesBrowser" />
+    <constructor-arg ref="libraryCopyPlatesBrowser" />    
     <aop:scoped-proxy/>
   </bean>
 
@@ -517,6 +519,7 @@
     class="edu.harvard.med.screensaver.ui.libraries.LibraryCopyDetail">
     <constructor-arg ref="libraryCopyDetail" />
     <constructor-arg ref="genericEntityDao" />
+    <constructor-arg ref="librariesDao" />
     <constructor-arg ref="libraryCopyViewer" />
     <constructor-arg ref="libraryViewer" />
     <property
@@ -909,6 +912,7 @@
     <constructor-arg ref="activityViewer" />
     <constructor-arg ref="genericEntityDao" />
     <constructor-arg ref="librariesDao" />
+    <constructor-arg ref="screenDao" />
     <constructor-arg ref="labActivitiesBrowser" />
     <constructor-arg ref="screenViewer" />
     <constructor-arg ref="cherryPickRequestViewer" />
@@ -978,7 +982,7 @@
 
   <bean id="silencingReagentTypeConverter" class="edu.harvard.med.screensaver.ui.arch.util.converter.SilencingReagentTypeConverter" />
 
-  <bean id="statusValueConverter" class="edu.harvard.med.screensaver.ui.arch.util.converter.StatusValueConverter" />
+  <bean id="screenStatusConverter" class="edu.harvard.med.screensaver.ui.arch.util.converter.ScreenStatusConverter" />
 
   <bean id="screeningRoomUserClassificationConverter" class="edu.harvard.med.screensaver.ui.arch.util.converter.ScreeningRoomUserClassificationConverter" />
 

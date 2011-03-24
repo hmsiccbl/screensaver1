@@ -14,6 +14,7 @@ import java.util.TreeSet;
 
 import org.apache.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.transaction.annotation.Transactional;
 
 import edu.harvard.med.screensaver.AbstractSpringPersistenceTest;
 import edu.harvard.med.screensaver.io.UnrecoverableParseException;
@@ -34,6 +35,7 @@ public class StudyAnnotationParserTest extends AbstractSpringPersistenceTest
   @Autowired
   protected StudyAnnotationParser studyAnnotationParser;
 
+  @Transactional
   public void testStudyAnnotationParser() throws UnrecoverableParseException
   {
     String[] rvIds = { "Vendor1 rnai1", "Vendor1 rnai2", "Vendor1 rnai3" };
@@ -44,8 +46,10 @@ public class StudyAnnotationParserTest extends AbstractSpringPersistenceTest
 
     Library library = MakeDummyEntities.makeDummyLibrary(1, ScreenType.RNAI, 1);
     genericEntityDao.persistEntity(library);
+    genericEntityDao.flush();
     
     Screen study = MakeDummyEntities.makeDummyScreen(1, library.getScreenType());
+    genericEntityDao.persistEntity(study);
     studyAnnotationParser.parse(study, getClass().getClassLoader().getResourceAsStream(WORKBOOK_FILE));
     assertEquals("annotation type count", expectedData.length, study.getAnnotationTypes().size());
     assertEquals("reagent count", rvIds.length, study.getReagents().size());

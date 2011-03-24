@@ -9,6 +9,10 @@
 
 package edu.harvard.med.screensaver.db;
 
+import java.io.Serializable;
+import java.math.BigDecimal;
+import java.math.RoundingMode;
+import java.util.Collection;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -20,7 +24,9 @@ import com.google.common.collect.Maps;
 import com.google.common.collect.Sets;
 import org.apache.log4j.Logger;
 import org.hibernate.Session;
+import org.joda.time.LocalDate;
 
+import edu.harvard.med.screensaver.ScreensaverConstants;
 import edu.harvard.med.screensaver.db.hqlbuilder.HqlBuilder;
 import edu.harvard.med.screensaver.db.hqlbuilder.JoinType;
 import edu.harvard.med.screensaver.io.libraries.LibraryCopyPlateListParserResult;
@@ -38,10 +44,14 @@ import edu.harvard.med.screensaver.model.libraries.Plate;
 import edu.harvard.med.screensaver.model.libraries.PlateStatus;
 import edu.harvard.med.screensaver.model.libraries.Reagent;
 import edu.harvard.med.screensaver.model.libraries.ReagentVendorIdentifier;
+import edu.harvard.med.screensaver.model.libraries.ScreeningStatistics;
 import edu.harvard.med.screensaver.model.libraries.SilencingReagent;
 import edu.harvard.med.screensaver.model.libraries.SmallMoleculeReagent;
+import edu.harvard.med.screensaver.model.libraries.VolumeStatistics;
 import edu.harvard.med.screensaver.model.libraries.Well;
 import edu.harvard.med.screensaver.model.libraries.WellKey;
+import edu.harvard.med.screensaver.model.screenresults.AssayPlate;
+import edu.harvard.med.screensaver.model.screens.LibraryScreening;
 import edu.harvard.med.screensaver.model.screens.ScreenType;
 import edu.harvard.med.screensaver.ui.arch.datatable.Criterion.Operator;
 import edu.harvard.med.screensaver.util.Pair;
@@ -189,16 +199,14 @@ public class LibrariesDAOImpl extends AbstractDAO implements LibrariesDAO
     String hql = "select c, p.wellVolume, " +
     		"(select sum(wva.volume) from WellVolumeAdjustment wva where wva.copy = c and wva.well.id=?) " +
         "from Plate p join p.copy c " +
-        "where p.plateNumber=? and (p.status = ? or p.status = ?) and c.usageType = ?";
-    
-    
+        "where p.plateNumber=? and p.status = ? and c.usageType = ?";
+
     List<Object[]> copyVolumes = 
       getHibernateSession().createQuery(hql).
         setString(0, well.getWellKey().toString()).
         setInteger(1, well.getPlateNumber()).
-        setParameter(2, PlateStatus.NOT_SPECIFIED). // TODO: temporarily allowing NOT_SPECIFIED status plates to be considered; see [#2750]
-		    setParameter(3, PlateStatus.AVAILABLE).
-        setParameter(4, CopyUsageType.CHERRY_PICK_SOURCE_PLATES).
+        setParameter(2, PlateStatus.AVAILABLE).
+        setParameter(3, CopyUsageType.CHERRY_PICK_SOURCE_PLATES).
         list();
     Map<Copy,Volume> remainingVolumes = Maps.newHashMap();
     for (Object[] row : copyVolumes) {
@@ -374,4 +382,238 @@ public class LibrariesDAOImpl extends AbstractDAO implements LibrariesDAO
     return Sets.newHashSet(plates);
   }
 
+  @Override
+  public void calculateCopyScreeningStatistics(Collection<Copy> copies)
+  {
+    // get copy-based statistics: screening_count, assay_plate_count, first/last date screened, data_loading_count
+    final HqlBuilder builder = new HqlBuilder();
+
+    Map<Integer,Copy> result = Maps.newHashMap();
+    for (Copy c : copies) {
+      c.setScreeningStatistics(new ScreeningStatistics());
+      result.put(c.getEntityId(), c);
+    }
+
+    builder.from(Plate.class, "p")
+           .from(AssayPlate.class, "ap")
+           .from("ap", AssayPlate.libraryScreening, "ls")
+           .from("ap", AssayPlate.screenResultDataLoading, "dl")
+           .whereIn("p", Plate.copy.getLeaf() + ".id", result.keySet())
+           .where("ap", AssayPlate.plateScreened.getLeaf(), Operator.EQUAL, "p", "id")
+           .groupBy("p", "copy")
+           .select("p", "copy.id")
+           .selectExpression("count(distinct ls)")
+           .selectExpression("count(distinct ap)")
+           .selectExpression("count(distinct dl)")
+           .selectExpression("min(dl.dateOfActivity)")
+           .selectExpression("max(dl.dateOfActivity)")
+           .selectExpression("min(ls.dateOfActivity)")
+           .selectExpression("max(ls.dateOfActivity)");
+
+    List<Object> results = _dao.runQuery(new Query() {
+      @Override
+      public List<Object> execute(Session session)
+        {
+          return builder.toQuery(session, true).list();
+        }
+    });
+    for (Object o : results) {
+      int i = 0;
+      Integer copyId = (Integer) ((Object[]) o)[i++];
+      ScreeningStatistics css = result.get(copyId).getScreeningStatistics();
+      css.setScreeningCount(((Long) ((Object[]) o)[i++]).intValue());
+      css.setAssayPlateCount(((Long) ((Object[]) o)[i++]).intValue());
+      css.setDataLoadingCount(((Long) ((Object[]) o)[i++]).intValue());
+      css.setFirstDateDataLoaded(((LocalDate) ((Object[]) o)[i++]));
+      css.setLastDateDataLoaded(((LocalDate) ((Object[]) o)[i++]));
+      css.setFirstDateScreened(((LocalDate) ((Object[]) o)[i++]));
+      css.setLastDateScreened(((LocalDate) ((Object[]) o)[i++]));
+    }
+
+    // calculate plate count - the number of plates per copy 
+    final HqlBuilder builder1 = new HqlBuilder();
+    builder1.from(Plate.class, "p")
+           .whereIn("p", Plate.copy.getLeaf() + ".id", result.keySet())
+           .groupBy("p", Plate.copy.getLeaf() + ".id")
+           .select("p", Plate.copy.getLeaf() + ".id")
+           .selectExpression("count(*)");
+
+    results = _dao.runQuery(new Query() {
+      @Override
+      public List<Object> execute(Session session)
+        {
+          return builder1.toQuery(session, true).list();
+        }
+    });
+
+    for (Object o : results) {
+      Integer copyId = (Integer) ((Object[]) o)[0];
+      Integer count = ((Long) ((Object[]) o)[1]).intValue();
+      ScreeningStatistics css = result.get(copyId).getScreeningStatistics();
+      css.setPlateCount(count);
+    }
+
+    // calculate plate_screening_count - the total number of times individual plates from this copy have been screened, ignoring replicates)
+    final HqlBuilder builder2 = new HqlBuilder();
+    builder2.from(LibraryScreening.class, "ls")
+           .from("ls", LibraryScreening.assayPlatesScreened, "ap")
+           .from("ap", AssayPlate.plateScreened, "p")
+           .from("p", Plate.copy, "c")
+           .whereIn("p", Plate.copy.getLeaf() + ".id", result.keySet())
+           .where("ap", "replicateOrdinal", Operator.EQUAL, 0)
+           .groupBy("c", "id")
+           .select("c", "id")
+           .selectExpression("count(*)");
+
+    results = _dao.runQuery(new Query() {
+      @Override
+      public List<Object> execute(Session session)
+        {
+          return builder2.toQuery(session, true).list();
+        }
+    });
+
+    for (Object o : results) {
+      Integer copyId = (Integer) ((Object[]) o)[0];
+      Integer count = ((Long) ((Object[]) o)[1]).intValue();
+      ScreeningStatistics css = result.get(copyId).getScreeningStatistics();
+      css.setPlateScreeningCount(count);
+    }
+  }
+
+  @Override
+  public void calculatePlateScreeningStatistics(Collection<Plate> plates)
+  {
+    // get plate-based statistics: screening_count, assay_plate_count, first/last date screened, data_loading_count
+    final HqlBuilder builder = new HqlBuilder();
+
+    Map<Integer,Plate> result = Maps.newHashMap();
+    for (Plate p : plates) {
+      p.setScreeningStatistics(new ScreeningStatistics());
+      result.put(p.getEntityId(), p);
+    }
+
+    builder.from(Plate.class, "p")
+           .from(AssayPlate.class, "ap")
+           .from("ap", AssayPlate.libraryScreening, "ls")
+           .from("ap", AssayPlate.screenResultDataLoading, "dl")
+           .whereIn("p", "id", result.keySet())
+           .where("ap", AssayPlate.plateScreened.getLeaf(), Operator.EQUAL, "p", "id")
+           .groupBy("p", "id")
+           .select("p", "id")
+           .selectExpression("count(distinct ls)")
+           .selectExpression("count(distinct ap)")
+           .selectExpression("count(distinct dl)")
+           .selectExpression("min(dl.dateOfActivity)")
+           .selectExpression("max(dl.dateOfActivity)")
+           .selectExpression("min(ls.dateOfActivity)")
+           .selectExpression("max(ls.dateOfActivity)");
+
+    List<Object> results = _dao.runQuery(new Query() {
+      @Override
+      public List<Object> execute(Session session)
+        {
+          return builder.toQuery(session, true).list();
+        }
+    });
+    for (Object o : results) {
+      int i = 0;
+      Integer plateId = (Integer) ((Object[]) o)[i++];
+      ScreeningStatistics css = new ScreeningStatistics();
+      result.get(plateId).setScreeningStatistics(css);
+      css.setPlateCount(1);
+      css.setScreeningCount(((Long) ((Object[]) o)[i++]).intValue());
+      css.setAssayPlateCount(((Long) ((Object[]) o)[i++]).intValue());
+      css.setDataLoadingCount(((Long) ((Object[]) o)[i++]).intValue());
+      css.setFirstDateDataLoaded(((LocalDate) ((Object[]) o)[i++]));
+      css.setLastDateDataLoaded(((LocalDate) ((Object[]) o)[i++]));
+      css.setFirstDateScreened(((LocalDate) ((Object[]) o)[i++]));
+      css.setLastDateScreened(((LocalDate) ((Object[]) o)[i++]));
+    }
+
+    // calculate plate_screening_count - the total number of times individual plates from this copy have been screened, ignoring replicates)
+    final HqlBuilder builder1 = new HqlBuilder();
+    builder1.from(LibraryScreening.class, "ls")
+           .from("ls", LibraryScreening.assayPlatesScreened, "ap")
+           .from("ap", AssayPlate.plateScreened, "p")
+           .from("p", Plate.copy, "c")
+           .whereIn("p", "id", result.keySet())
+           .where("ap", "replicateOrdinal", Operator.EQUAL, 0)
+           .groupBy("p", "id");
+    builder1.select("p", "id");
+    builder1.selectExpression("count(*)");
+
+    results = _dao.runQuery(new Query() {
+      @Override
+      public List<Object> execute(Session session)
+        {
+          return builder1.toQuery(session, true).list();
+        }
+    });
+
+    for (Object o : results) {
+      Integer plateId = (Integer) ((Object[]) o)[0];
+      Integer count = ((Long) ((Object[]) o)[1]).intValue();
+
+      ScreeningStatistics css = result.get(plateId).getScreeningStatistics();
+      css.setPlateScreeningCount(css.getPlateScreeningCount() + count);
+    }
+  }
+
+  @Override
+  public void calculateCopyVolumeStatistics(Collection<Copy> copies)
+  {
+    // note: we are forced to use native SQL query, as HQL does not perform volume multiplication properly (always results in value of 0)
+    String sql =
+      "select prv.copy_id, avg(prv.plate_remaining_volume), min(prv.plate_remaining_volume), max(prv.plate_remaining_volume) from "
+        + "(select p.copy_id, p.well_volume - sum(la.volume_transferred_per_well) as plate_remaining_volume "
+        + "from plate p join assay_plate ap using(plate_id) join screening ls on(ls.activity_id = ap.library_screening_id) join lab_activity la using(activity_id) "
+        + "where p.copy_id in (:copyIds) "
+        + "group by p.copy_id, p.plate_id, p.well_volume) as prv "
+        + "group by prv.copy_id";
+    javax.persistence.Query query = getEntityManager().createNativeQuery(sql);
+    Map<Serializable,Copy> copiesById = Maps.uniqueIndex(copies, Copy.ToEntityId);
+    query.setParameter("copyIds", copiesById.keySet());
+    for (Object[] row : (List<Object[]>) query.getResultList()) {
+      Copy copy = copiesById.get(row[0]);
+      VolumeStatistics volumeStatistics = new VolumeStatistics();
+      copy.setVolumeStatistics(volumeStatistics);
+      volumeStatistics.setAverageRemaining(toPlateVolume((BigDecimal) row[1]));
+      volumeStatistics.setMinRemaining(toPlateVolume((BigDecimal) row[2]));
+      volumeStatistics.setMaxRemaining(toPlateVolume((BigDecimal) row[3]));
+    }
+  }
+
+  private static Volume toPlateVolume(BigDecimal volumeLiters)
+  {
+    if (volumeLiters == null) {
+      return null;
+    }
+    return new Volume(volumeLiters.setScale(ScreensaverConstants.VOLUME_SCALE, RoundingMode.HALF_UP), VolumeUnit.LITERS).convert(VolumeUnit.MICROLITERS);
+  }
+
+  @Override
+  public void calculatePlateVolumeStatistics(Collection<Plate> plates)
+  {
+    // note: we are forced to use native SQL query, as HQL does not perform volume multiplication properly (always results in value of 0)
+    String sql =
+      "select p.plate_id, p.well_volume - sum(la.volume_transferred_per_well)"
+        + "from plate p join assay_plate ap using(plate_id) join screening ls on(ls.activity_id = ap.library_screening_id) join lab_activity la using(activity_id) "
+        + "where p.plate_id in (:plateIds)"
+        + "group by p.plate_id, p.well_volume";
+    javax.persistence.Query query = getEntityManager().createNativeQuery(sql);
+    Map<Serializable,Plate> platesById = Maps.uniqueIndex(plates, Plate.ToEntityId);
+    query.setParameter("plateIds", platesById.keySet());
+    // set statistics for all requested plates, to properly handle plates that have not been screened at all (and which will not have a result in the query, due to lack of left joins)
+    for (Plate plate : plates) {
+      VolumeStatistics volumeStatistics = new VolumeStatistics();
+      plate.setVolumeStatistics(volumeStatistics);
+      volumeStatistics.setAverageRemaining(plate.getWellVolume());
+    }
+    for (Object[] row : (List<Object[]>) query.getResultList()) {
+      Plate plate = platesById.get(row[0]);
+      BigDecimal avgRemainingVolumeLiters = (BigDecimal) row[1];
+      plate.getVolumeStatistics().setAverageRemaining(toPlateVolume(avgRemainingVolumeLiters));
+    }
+  }
 }

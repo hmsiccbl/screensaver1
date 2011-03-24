@@ -184,6 +184,10 @@ public class LibraryCopyPlateBatchEditor extends AbstractBackingBean
         showMessage("requiredValue", "plate location change date");
         valid = false;
       }
+      if (getPlateStatus().getSelection() != null) {
+        showMessage("libraries.plateStatusProhibitsNewLocation", getPlateStatus().getSelection());
+        valid = false;
+      }
     }
 
     return valid;
@@ -226,6 +230,7 @@ public class LibraryCopyPlateBatchEditor extends AbstractBackingBean
                                                     adminUser,
                                                     (AdministratorUser) _statusChangeActivity.getPerformedBy(),
                                                     _statusChangeActivity.getDateOfActivity());
+
       }
       if (!StringUtils.isEmpty(_comments)) {
         _plateUpdater.addComment(plate, adminUser, _comments);

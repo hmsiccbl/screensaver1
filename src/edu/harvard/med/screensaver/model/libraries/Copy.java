@@ -30,13 +30,13 @@ import javax.persistence.Transient;
 import javax.persistence.UniqueConstraint;
 import javax.persistence.Version;
 
-import com.google.common.base.Function;
-import com.google.common.collect.Maps;
 import org.hibernate.annotations.Parameter;
 import org.hibernate.annotations.Sort;
 import org.hibernate.annotations.SortType;
 import org.hibernate.annotations.Type;
 import org.joda.time.LocalDate;
+import com.google.common.base.Function;
+import com.google.common.collect.Maps;
 
 import edu.harvard.med.screensaver.model.AbstractEntityVisitor;
 import edu.harvard.med.screensaver.model.AdministrativeActivity;
@@ -89,9 +89,9 @@ public class Copy extends AuditedAbstractEntity<Integer> implements Comparable<C
   private PlateLocation _primaryPlateLocation;
   private PlateStatus _primaryPlateStatus;
   private ScreeningStatistics _screeningStatistics;
-
-
-  // TODO: [#2474] library copy well concentration
+  private VolumeStatistics _volumeStatistics;
+  private Integer _platesAvailable;
+  private Integer _plateLocationsCount;
 
   @Override
   public Object acceptVisitor(AbstractEntityVisitor visitor)
@@ -133,7 +133,6 @@ public class Copy extends AuditedAbstractEntity<Integer> implements Comparable<C
    */
   @ManyToOne
   @JoinColumn(name="libraryId", nullable=false, updatable=false)
-  //@org.hibernate.annotations.Immutable
   @org.hibernate.annotations.ForeignKey(name="fk_copy_to_library")
   @org.hibernate.annotations.LazyToOne(value=org.hibernate.annotations.LazyToOneOption.PROXY)
   @edu.harvard.med.screensaver.model.annotations.ToOne(inverseProperty="copies")
@@ -348,4 +347,38 @@ public class Copy extends AuditedAbstractEntity<Integer> implements Comparable<C
   {
     _primaryPlateStatus = primaryPlateStatus;
   }
+
+  @Transient
+  public VolumeStatistics getVolumeStatistics()
+  {
+    return _volumeStatistics;
+  }
+
+  public void setVolumeStatistics(VolumeStatistics volumeStatistics)
+  {
+    _volumeStatistics = volumeStatistics;
+  }
+
+  @Column(nullable = true)
+  public void setPlatesAvailable(Integer integer)
+  {
+    _platesAvailable = integer;
+  }
+
+  public Integer getPlatesAvailable()
+  {
+    return _platesAvailable;
+  }
+
+  @Column(nullable = true)
+  public void setPlateLocationsCount(Integer size)
+  {
+    _plateLocationsCount = size;
+  }
+
+  public Integer getPlateLocationsCount()
+  {
+    return _plateLocationsCount;
+  }
+
 }

@@ -13,6 +13,8 @@ import org.joda.time.LocalDate;
 
 public class ScreeningStatistics
 {
+  public static final ScreeningStatistics NullScreeningStatistics = new ScreeningStatistics();
+
   private int _assayPlateCount;
   private int _screeningCount;
   private int _plateScreeningCount;

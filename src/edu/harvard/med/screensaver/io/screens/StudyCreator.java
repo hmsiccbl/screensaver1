@@ -165,38 +165,38 @@ public class StudyCreator
     }
   }
 
-  public void createStudy()
+  public void createStudy() throws UnrecoverableParseException, FileNotFoundException
   {
     final GenericEntityDAO dao = (GenericEntityDAO) app.getSpringBean("genericEntityDao");
     
-    Screen study = dao.findEntityByProperty(Screen.class, "facilityId", facilityId);
-    if (study != null) {
-      if (!replace) {
-        log.error("study " + facilityId + " already exists (use --replace flag to delete existing study first)");
-        return;
-      }
-      dao.deleteEntity(study);
-      log.error("deleted existing study " + facilityId);
-    }
+    deleteExistingStudy(dao);
 
     dao.doInTransaction(new DAOTransaction() {
       public void runTransaction() {
         try {
           Study study = newStudy();
-          importData(study);
-          if (study.getLabHead() != null) {
-            dao.persistEntity(study.getLabHead());
-          }
-          dao.persistEntity(study.getLeadScreener());
           dao.persistEntity(study);
+          importData(study);
+          log.info("study " + facilityId + " succesfully added to database");
         }
         catch (Exception e) {
           throw new DAOTransactionRollbackException(e);
         }
       }
-
     });
-    log.info("study " + facilityId + " succesfully added to database");
+  }
+
+  protected void deleteExistingStudy(GenericEntityDAO dao)
+  {
+    Screen oldStudy = dao.findEntityByProperty(Screen.class, "facilityId", facilityId);
+    if (oldStudy != null) {
+      if (!replace) {
+        log.error("study " + facilityId + " already exists (use --replace flag to delete existing study first)");
+        return;
+      }
+      dao.deleteEntity(oldStudy);
+      log.info("deleted existing study " + facilityId);
+    }
   }
 
   protected Study newStudy()
@@ -207,7 +207,7 @@ public class StudyCreator
       leadScreener.setLab(labHead.getLab());
       log.info("set lab head for lead screener");
     }
-
+    createdBy = dao.reloadEntity(createdBy);
     Screen study = new Screen(createdBy, facilityId, leadScreener, labHead, screenType, studyType, ProjectPhase.ANNOTATION, title);
     study.setDataSharingLevel(ScreenDataSharingLevel.SHARED);
     study.setSummary(summary);

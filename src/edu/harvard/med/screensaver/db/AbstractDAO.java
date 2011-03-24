@@ -13,6 +13,7 @@ import java.util.List;
 
 import javax.persistence.EntityManager;
 import javax.persistence.PersistenceContext;
+import javax.persistence.Query;
 
 import org.hibernate.ScrollableResults;
 import org.hibernate.Session;
@@ -99,5 +100,9 @@ public class AbstractDAO
   {
     return query.execute(getHibernateSession());
   }
-}
 
+  public Query getQuery(String queryName) 
+  {
+    return _entityManager.createNamedQuery(queryName);
+  }
+}

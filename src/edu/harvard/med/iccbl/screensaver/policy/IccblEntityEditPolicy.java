@@ -45,7 +45,6 @@ import edu.harvard.med.screensaver.model.screens.FundingSupport;
 import edu.harvard.med.screensaver.model.screens.LibraryScreening;
 import edu.harvard.med.screensaver.model.screens.Publication;
 import edu.harvard.med.screensaver.model.screens.Screen;
-import edu.harvard.med.screensaver.model.screens.StatusItem;
 import edu.harvard.med.screensaver.model.screens.Study;
 import edu.harvard.med.screensaver.model.users.AdministratorUser;
 import edu.harvard.med.screensaver.model.users.ChecklistItem;
@@ -324,12 +323,6 @@ public class IccblEntityEditPolicy implements EntityEditPolicy
   public boolean visit(SilencingReagent entity)
   {
     return false;
-  }
-
-  @Override
-  public boolean visit(StatusItem entity)
-  {
-    return visit(entity.getScreen());
   }
 
   @Override

@@ -18,15 +18,15 @@ import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Set;
 
+import org.apache.log4j.Logger;
+import org.joda.time.LocalDate;
+import org.springframework.transaction.annotation.Transactional;
 import com.google.common.base.Function;
 import com.google.common.base.Predicates;
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.Iterables;
 import com.google.common.collect.Maps;
 import com.google.common.collect.Multimaps;
-import org.apache.log4j.Logger;
-import org.joda.time.LocalDate;
-import org.springframework.transaction.annotation.Transactional;
 
 import edu.harvard.med.screensaver.db.GenericEntityDAO;
 import edu.harvard.med.screensaver.db.Query;
@@ -133,11 +133,11 @@ public class PlateUpdater
 
   private void updatePrimaryPlateStatus(Copy copy)
   {
-    PlateStatus primaryPlateStatus =
-      Collections.max(Maps.transformValues(Multimaps.index(copy.getPlates().values(),
-                                                           Plate.ToStatus).asMap(), CollectionSize).entrySet(),
-                                                           plateStatusFrequencyComparator).getKey();
+    Map<PlateStatus,Integer> statusCounts = Maps.transformValues(Multimaps.index(copy.getPlates().values(),
+                                                           Plate.ToStatus).asMap(), CollectionSize);
+    PlateStatus primaryPlateStatus = Collections.max(statusCounts.entrySet(), plateStatusFrequencyComparator).getKey();
     copy.setPrimaryPlateStatus(primaryPlateStatus);
+    copy.setPlatesAvailable(statusCounts.get(PlateStatus.AVAILABLE));
   }
 
   private void plateNoLongerMaintained(Plate plate,
@@ -182,6 +182,10 @@ public class PlateUpdater
   {
     if (performedByAdmin == null) {
       throw new IllegalArgumentException("performedByAdmin required");
+    }
+    if (plate.getStatus().compareTo(PlateStatus.RETIRED) >= 0 && newLocationDto != null) {
+      throw new BusinessRuleViolationException("plate location cannot be specified for plates with status >= " +
+        PlateStatus.RETIRED);
     }
     recordedByAdmin = _dao.reloadEntity(recordedByAdmin);
     performedByAdmin = _dao.reloadEntity(performedByAdmin);
@@ -242,6 +246,7 @@ public class PlateUpdater
       PlateLocation primaryPlateLocation =
         Collections.max(plateLocationCounts, plateLocationFrequencyComparator).getKey();
       copy.setPrimaryPlateLocation(primaryPlateLocation);
+      copy.setPlateLocationsCount(plateLocationCounts.size());
     }
   }
 
@@ -276,6 +281,7 @@ public class PlateUpdater
   public void validateLocations()
   {
     _dao.flush();
+
     // ICCB-L constraint: freezer implies room
     List<String> splitFreezers = _dao.runQuery(new Query<String>() {
       @SuppressWarnings("unchecked")

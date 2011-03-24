@@ -25,7 +25,7 @@ import edu.harvard.med.screensaver.model.screens.ProjectPhase;
 import edu.harvard.med.screensaver.model.screens.Screen;
 import edu.harvard.med.screensaver.model.screens.ScreenAttachedFileType;
 import edu.harvard.med.screensaver.model.screens.ScreenType;
-import edu.harvard.med.screensaver.model.screens.StatusValue;
+import edu.harvard.med.screensaver.model.screens.ScreenStatus;
 import edu.harvard.med.screensaver.model.users.AdministratorUser;
 import edu.harvard.med.screensaver.model.users.LabHead;
 import edu.harvard.med.screensaver.model.users.ScreeningRoomUser;
@@ -119,11 +119,11 @@ public class ScreenViewerTest extends AbstractBackingBeanTest
 
     assertEquals(ScreensaverConstants.EDIT_SCREEN, screenDetailViewer.edit());
     screenDetailViewer.setNewStatusItemDate(new LocalDate(2011, 1, 1));
-    screenDetailViewer.getNewStatusItemValue().setSelection(StatusValue.ACCEPTED);
+    screenDetailViewer.getNewStatusItemValue().setSelection(ScreenStatus.ACCEPTED);
     screenDetailViewer.addStatusItem();
     assertEquals(ScreensaverConstants.BROWSE_SCREENS, screenDetailViewer.save());
     _screen = genericEntityDao.reloadEntity(_screen, true, Screen.statusItems);
-    assertEquals(StatusValue.ACCEPTED, _screen.getStatusItems().first().getStatusValue());
+    assertEquals(ScreenStatus.ACCEPTED, _screen.getStatusItems().first().getStatus());
 
     assertEquals(ScreensaverConstants.EDIT_SCREEN, screenDetailViewer.edit());
     screenDetailViewer.getEntity().getStatusItems().remove(_screen.getStatusItems().first());

@@ -8,6 +8,8 @@
     name="screensaverPersistenceUnit"
     transaction-type="RESOURCE_LOCAL">
     <provider>org.hibernate.ejb.HibernatePersistence</provider>
+    
+    <!-- mapping-file>queries.xml</mapping-file-->
 
     <class>edu.harvard.med.screensaver.model.Activity</class>
     <class>edu.harvard.med.screensaver.model.AdministrativeActivity</class>
@@ -49,7 +51,6 @@
     <class>edu.harvard.med.screensaver.model.screens.Screen</class>
     <class>edu.harvard.med.screensaver.model.screens.Screening</class>
     <class>edu.harvard.med.screensaver.model.screens.ScreenAttachedFileType</class>
-    <class>edu.harvard.med.screensaver.model.screens.StatusItem</class>
 
     <class>edu.harvard.med.screensaver.model.screenresults.AnnotationType</class>
     <class>edu.harvard.med.screensaver.model.screenresults.AnnotationValue</class>
@@ -68,7 +69,9 @@
     <class>edu.harvard.med.screensaver.model.users.ScreeningRoomUser</class>
     <class>edu.harvard.med.screensaver.model.users.ScreensaverUser</class>
 
-    <exclude-unlisted-classes />
+    <!-- superfluous in Java SE environments
+    <exclude-unlisted-classes /> 
+    -->
     <shared-cache-mode>NONE</shared-cache-mode>
     
     <properties>
@@ -80,7 +83,8 @@
       <property name="hibernate.order_inserts" value="true" />
       <property name="hibernate.order_updates" value="true" />
     </properties>
-
+    
   </persistence-unit>
+  
 
 </persistence>

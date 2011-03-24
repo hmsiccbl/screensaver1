@@ -470,4 +470,24 @@ public class MockDaoForScreenResultImporter implements GenericEntityDAO, ScreenR
   {
     return Sets.newHashSet();
   }
+
+  @Override
+  public void calculateCopyScreeningStatistics(Collection<Copy> copies)
+  {
+  }
+
+  @Override
+  public void calculateCopyVolumeStatistics(Collection<Copy> copies)
+  {
+  }
+
+  @Override
+  public void calculatePlateScreeningStatistics(Collection<Plate> plates)
+  {
+  }
+
+  @Override
+  public void calculatePlateVolumeStatistics(Collection<Plate> plates)
+  {
+  }
 }

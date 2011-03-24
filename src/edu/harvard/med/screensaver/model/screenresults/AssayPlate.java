@@ -9,9 +9,9 @@
 
 package edu.harvard.med.screensaver.model.screenresults;
 
+import javax.persistence.CascadeType;
 import javax.persistence.Column;
 import javax.persistence.Entity;
-import javax.persistence.FetchType;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
@@ -143,7 +143,7 @@ public class AssayPlate extends AbstractEntity<Integer> implements Comparable<As
     setEntityId(assayPlateId);
   }  
 
-  @ManyToOne(fetch=FetchType.LAZY, cascade={})
+  @ManyToOne(cascade = { CascadeType.MERGE })
   @JoinColumn(name="plateId", nullable=true, updatable=false)
   @org.hibernate.annotations.ForeignKey(name="fk_assay_plate_to_plate")
   @ToOne(hasNonconventionalSetterMethod = true)

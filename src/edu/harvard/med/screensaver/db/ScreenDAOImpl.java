@@ -13,14 +13,19 @@ package edu.harvard.med.screensaver.db;
 
 import java.util.Collections;
 import java.util.List;
+import java.util.Set;
 
+import com.google.common.collect.Sets;
 import org.apache.log4j.Logger;
 import org.hibernate.Query;
 import org.hibernate.Session;
 
 import edu.harvard.med.screensaver.db.hqlbuilder.HqlBuilder;
 import edu.harvard.med.screensaver.model.DataModelViolationException;
+import edu.harvard.med.screensaver.model.screens.LabActivity;
 import edu.harvard.med.screensaver.model.screens.Screen;
+import edu.harvard.med.screensaver.model.screens.Screening;
+import edu.harvard.med.screensaver.model.users.ScreensaverUser;
 import edu.harvard.med.screensaver.ui.arch.datatable.Criterion.Operator;
 
 public class ScreenDAOImpl extends AbstractDAO implements ScreenDAO
@@ -97,7 +102,7 @@ public class ScreenDAOImpl extends AbstractDAO implements ScreenDAO
   }
 
   @Override
-  public int countFulfilledLabCherryPicks(Screen screen)
+  public int countTotalPlatedLabCherryPicks(Screen screen)
   {
     String hql = "select count(*) " +
       "from Screen s " +
@@ -154,5 +159,23 @@ public class ScreenDAOImpl extends AbstractDAO implements ScreenDAO
       }
     }
     return true;
+  }
+
+  @Override
+  public Set<ScreensaverUser> findLabActivityPerformedByCandidates(LabActivity a)
+  {
+    Set<ScreensaverUser> performedByCandidates = Sets.newTreeSet();
+    if (a instanceof Screening) {
+      Screen screen = _dao.reloadEntity(a.getScreen()); // note: we have to reload the associated screen for this method to work for a transient (new) activity
+      performedByCandidates.addAll(screen.getAssociatedScreeningRoomUsers());
+      // add the current performedBy user, even if it's no longer a valid candidate
+      if (a.getPerformedBy() != null) {
+        performedByCandidates.add(a.getPerformedBy());
+      }
+    }
+    else {
+      performedByCandidates.addAll(_dao.findAllEntitiesOfType(ScreensaverUser.class));
+    }
+    return performedByCandidates;
   }
 }

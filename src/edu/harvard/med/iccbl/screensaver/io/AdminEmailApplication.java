@@ -9,6 +9,8 @@
 
 package edu.harvard.med.iccbl.screensaver.io;
 
+import java.io.File;
+import java.io.IOException;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Set;
@@ -17,13 +19,13 @@ import javax.mail.MessagingException;
 import javax.mail.internet.AddressException;
 import javax.mail.internet.InternetAddress;
 
-import com.google.common.collect.Lists;
-import com.google.common.collect.Sets;
 import org.apache.commons.cli.OptionBuilder;
 import org.apache.commons.cli.ParseException;
 import org.apache.log4j.Logger;
 import org.joda.time.format.DateTimeFormat;
 import org.joda.time.format.DateTimeFormatter;
+import com.google.common.collect.Lists;
+import com.google.common.collect.Sets;
 
 import edu.harvard.med.iccbl.screensaver.service.SmtpEmailService;
 import edu.harvard.med.screensaver.io.CommandLineApplication;
@@ -127,8 +129,23 @@ public class AdminEmailApplication extends CommandLineApplication
                          InternetAddress from,
                          InternetAddress[] recipients,
                          InternetAddress[] cclist) throws MessagingException
+       {
+         try {
+          send(subject, message, from, recipients, cclist, null);
+        }
+        catch (IOException e) {
+          // TODO Auto-generated catch block
+          e.printStackTrace();
+        }
+       }
+
+        public void send(String subject,
+                         String message,
+                         InternetAddress from,
+                         InternetAddress[] recipients,
+                         InternetAddress[] cclist, File attachedFile) throws MessagingException, IOException
         {
-          log.info("Mock Email (Not Sent):\n" + SmtpEmailService.printEmail(subject, message, from, recipients, cclist));
+          log.info("Mock Email (Not Sent):\n" + SmtpEmailService.printEmail(subject, message, from, recipients, cclist, (attachedFile == null ? "" : "" + attachedFile.getCanonicalFile())));
         }
       };
     }
@@ -145,10 +162,25 @@ public class AdminEmailApplication extends CommandLineApplication
       final EmailService wrappedEmailService = (EmailService) getSpringBean("emailService");
       emailService = new EmailService() {
         public void send(String subject,
+                           String message,
+                           InternetAddress from,
+                           InternetAddress[] recipients,
+                           InternetAddress[] cclist) throws MessagingException
+        {
+          try {
+            send(subject, message, from, recipients, cclist, null);
+          }
+          catch (IOException e) {
+            // TODO Auto-generated catch block
+            e.printStackTrace();
+          }
+        }
+
+        public void send(String subject,
                          String message,
                          InternetAddress from,
                          InternetAddress[] recipients,
-                         InternetAddress[] ccrecipients) throws MessagingException
+                         InternetAddress[] ccrecipients, File attachedFile) throws MessagingException, IOException
         {
           message = "Testing Email Wrapper:  redirect email to admin, original email to be sent to:\n" + Arrays.asList(recipients) + "\n=======message=========\n" +
                     message;
@@ -156,7 +188,8 @@ public class AdminEmailApplication extends CommandLineApplication
                                    message,
                                    finalAdminEmail,
                                    new InternetAddress[] { finalAdminEmail },
-                                   null);
+                                   null,
+                                   attachedFile);
         }
       };
     }

@@ -13,12 +13,12 @@ import java.util.Date;
 import java.util.List;
 import java.util.Set;
 
-import com.google.common.collect.Sets;
 import org.apache.log4j.Logger;
 import org.joda.time.LocalDate;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.test.annotation.Rollback;
 import org.springframework.transaction.annotation.Transactional;
+import com.google.common.collect.Sets;
 
 import edu.harvard.med.iccbl.screensaver.io.screens.ScreenPrivacyExpirationUpdater;
 import edu.harvard.med.screensaver.AbstractSpringPersistenceTest;
@@ -28,8 +28,8 @@ import edu.harvard.med.screensaver.model.screens.ProjectPhase;
 import edu.harvard.med.screensaver.model.screens.Publication;
 import edu.harvard.med.screensaver.model.screens.Screen;
 import edu.harvard.med.screensaver.model.screens.ScreenDataSharingLevel;
+import edu.harvard.med.screensaver.model.screens.ScreenStatus;
 import edu.harvard.med.screensaver.model.screens.ScreenType;
-import edu.harvard.med.screensaver.model.screens.StatusValue;
 import edu.harvard.med.screensaver.model.screens.StudyType;
 import edu.harvard.med.screensaver.model.users.AdministratorUser;
 import edu.harvard.med.screensaver.model.users.LabHead;
@@ -99,7 +99,7 @@ public class ScreenDataSharingLevelUpdaterTest extends AbstractSpringPersistence
     log.info("leads" + leadScreener);
     Screen screen = new Screen(null, Integer.toString(screen_number_counter++), leadScreener, labHead, type, StudyType.IN_VITRO, ProjectPhase.PRIMARY_SCREEN, title);
     screen.addCollaborator(collaborator);
-    screen.createStatusItem(new LocalDate(), StatusValue.ACCEPTED);
+    screen.createStatusItem(new LocalDate(), ScreenStatus.ACCEPTED);
     genericEntityDao.persistEntity(screen);
     return screen;
   }
@@ -118,6 +118,8 @@ public class ScreenDataSharingLevelUpdaterTest extends AbstractSpringPersistence
     // 1. create some screens
     Screen screen1NoActivities = createScreen("SDSL TEST1");
     Screen screen2HasActivity = createScreen("SDSL TEST2");
+    Screen screen5TransferredHasActivity = createScreen("SDSL TEST5");
+    screen5TransferredHasActivity.createStatusItem(new LocalDate(), ScreenStatus.TRANSFERRED_TO_BROAD_INSTITUTE);
     Screen screen3RnaiHasActivity = createScreen("SDSL TEST RNAI", ScreenType.RNAI);
     Screen screen4HasNoLibraryScreeningActivity = createScreen("screen4HasNoLibraryScreeningActivity");
 
@@ -137,14 +139,23 @@ public class ScreenDataSharingLevelUpdaterTest extends AbstractSpringPersistence
     
     screen3RnaiHasActivity.createLibraryScreening(admin, leadScreener, newActivityDate);
 
+    screen5TransferredHasActivity.createLibraryScreening(admin, leadScreener, newActivityDate);
+    screen5TransferredHasActivity.createLibraryScreening(admin, leadScreener, newActivityDate);
+    screen5TransferredHasActivity.createLibraryScreening(admin, leadScreener, newActivityDate);
+    screen5TransferredHasActivity.createLibraryScreening(admin, leadScreener, newActivityDate);
+    // create a screening for user provided plates
+    ls = screen5TransferredHasActivity.createLibraryScreening(admin, leadScreener, newActivityDate.plusDays(100));
+    ls.setForExternalLibraryPlates(true);
     // 3. add some results
     screen2HasActivity.createScreenResult();
+    screen5TransferredHasActivity.createScreenResult();
     screen4HasNoLibraryScreeningActivity.createScreenResult();
 
     genericEntityDao.persistEntity(screen1NoActivities);
     genericEntityDao.persistEntity(screen2HasActivity);
     genericEntityDao.persistEntity(screen3RnaiHasActivity);
     genericEntityDao.persistEntity(screen4HasNoLibraryScreeningActivity);
+    genericEntityDao.persistEntity(screen5TransferredHasActivity);
     flushAndClear();
 
     // 4. find the ones with "old" activities (activity age > SCREEN_ACTIVITY_DATA_PRIVACY_EXPIRATION_AGE_DAYS
@@ -159,8 +170,9 @@ public class ScreenDataSharingLevelUpdaterTest extends AbstractSpringPersistence
     screen2HasActivity = genericEntityDao.reloadEntity(screen2HasActivity);
     screen3RnaiHasActivity = genericEntityDao.reloadEntity(screen3RnaiHasActivity);
     screen4HasNoLibraryScreeningActivity = genericEntityDao.reloadEntity(screen4HasNoLibraryScreeningActivity);
+    screen5TransferredHasActivity = genericEntityDao.reloadEntity(screen5TransferredHasActivity);
 
-    boolean containsFirst=false, containsSecond = false, containsThird = false, containsFourth = false;
+    boolean containsFirst = false, containsSecond = false, containsThird = false, containsFourth = false, containsFifth = false;
     for(Pair<Screen,AdministrativeActivity> result:adjustment.screensAdjusted)
     {
       log.info("entry: " + result.getSecond());
@@ -168,6 +180,7 @@ public class ScreenDataSharingLevelUpdaterTest extends AbstractSpringPersistence
       if(result.getFirst().equals(screen2HasActivity)) containsSecond = true;
       if(result.getFirst().equals(screen3RnaiHasActivity)) containsThird = true;
       if(result.getFirst().equals(screen4HasNoLibraryScreeningActivity)) containsFourth = true;
+      if (result.getFirst().equals(screen5TransferredHasActivity)) containsFifth = true;
     }
     
     // TODO: update test for this
@@ -178,6 +191,7 @@ public class ScreenDataSharingLevelUpdaterTest extends AbstractSpringPersistence
     assertTrue("screen2HasActivity should have been adjusted", containsSecond);
     assertFalse("screen3RnaiHasActivity should not have been adjusted", containsThird);
     assertFalse("screen4HasNoLibraryScreeningActivity should not have been adjusted", containsFourth);
+    assertFalse("screen5TransferredHasActivity should not have been adjusted", containsFifth);
     assertEquals("new screen2HasActivity dataPrivacyExpirationDate() wrong: ",
                  newActivityDate.plusDays(ageToExpireFromActivityDateInDays),
                  screen2HasActivity.getDataPrivacyExpirationDate());
@@ -242,7 +256,7 @@ public class ScreenDataSharingLevelUpdaterTest extends AbstractSpringPersistence
     publication.setAuthors("Test Authors x");
     publication.setJournal("Test Journal x");
     publication.setTitle("Test Publication Title x");
-    screenPrivatePublishedTransferred.createStatusItem(new LocalDate(), StatusValue.TRANSFERRED_TO_BROAD_INSTITUTE);
+    screenPrivatePublishedTransferred.createStatusItem(new LocalDate(), ScreenStatus.TRANSFERRED_TO_BROAD_INSTITUTE);
     genericEntityDao.persistEntity(screenPrivatePublishedTransferred);
 
     Screen screen4Public= createScreen("SDSL screen4Public");
@@ -357,13 +371,13 @@ public class ScreenDataSharingLevelUpdaterTest extends AbstractSpringPersistence
     screen7ExpiredDropped = createScreen("test expired dropped technical");
     screen7ExpiredDropped.setDataPrivacyExpirationDate(date.minusYears(1));
     screen7ExpiredDropped.createScreenResult();
-    screen7ExpiredDropped.createStatusItem(new LocalDate(), StatusValue.DROPPED_TECHNICAL);
+    screen7ExpiredDropped.createStatusItem(new LocalDate(), ScreenStatus.DROPPED_TECHNICAL);
     genericEntityDao.persistEntity(screen7ExpiredDropped);
     
     screen8ExpiredTransferred = createScreen("test expired transferred");
     screen8ExpiredTransferred.setDataPrivacyExpirationDate(date.minusYears(1));
     screen8ExpiredTransferred.createScreenResult();
-    screen8ExpiredTransferred.createStatusItem(new LocalDate(), StatusValue.TRANSFERRED_TO_BROAD_INSTITUTE);
+    screen8ExpiredTransferred.createStatusItem(new LocalDate(), ScreenStatus.TRANSFERRED_TO_BROAD_INSTITUTE);
     genericEntityDao.persistEntity(screen8ExpiredTransferred);
 
     flushAndClear();

@@ -48,12 +48,11 @@ public class LibraryCopyPlateFinder extends AbstractBackingBean
     _librariesDao = librariesDao;
   }
 
-
-  @SuppressWarnings("unchecked")
   @UICommand
   public String findPlates()
   {
     LibraryCopyPlateListParserResult result = LibraryCopyPlateListParser.parsePlateCopies(_plateCopyInput);
+    resetSearchFields();
     if (result.hasErrors()) {
       for (String error : result.getErrors()) {
         showMessage("libraries.invalidCopyPlateInput", error);
@@ -72,33 +71,8 @@ public class LibraryCopyPlateFinder extends AbstractBackingBean
 
     _libraryCopyPlatesBrowser.searchForPlates(result.print(), plateIds);
 
-    resetSearchFields();
     return BROWSE_LIBRARY_COPY_PLATES;
   }
-
-  //  @SuppressWarnings("unchecked")
-  //  @UICommand
-  //  public String findPlate()
-  //  {
-  //    Matcher matcher = PLATE_COPY_INPUT_PATTERN.matcher(_plateCopyInput);
-  //    if (!!!matcher.matches()) {
-  //      showMessage("libraries.invalidCopyPlateInput", _plateCopyInput);
-  //      return REDISPLAY_PAGE_ACTION_RESULT;
-  //    }
-  //
-  //    _libraryCopyPlatesBrowser.searchAll();
-  //
-  //    Integer plateNumber = Integer.valueOf(matcher.group(1));
-  //    ((TableColumn<Plate,Integer>) _libraryCopyPlatesBrowser.getColumnManager().getColumn("Plate")).getCriterion().setOperatorAndValue(Operator.EQUAL, plateNumber);
-  //
-  //    String copyName = matcher.group(2);
-  //    if (!copyName.isEmpty()) {
-  //      ((TableColumn<Plate,String>) _libraryCopyPlatesBrowser.getColumnManager().getColumn("Copy")).getCriterion().setOperatorAndValue(Operator.EQUAL, copyName);
-  //    }
-  //
-  //    resetSearchFields();
-  //    return BROWSE_LIBRARY_COPY_PLATES;
-  //  }
 
   private void resetSearchFields()
   {

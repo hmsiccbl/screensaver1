@@ -56,12 +56,14 @@ import edu.harvard.med.screensaver.model.libraries.Plate;
 import edu.harvard.med.screensaver.model.libraries.PlateSize;
 import edu.harvard.med.screensaver.model.libraries.PlateStatus;
 import edu.harvard.med.screensaver.model.libraries.PlateType;
+import edu.harvard.med.screensaver.model.libraries.Quadrant;
 import edu.harvard.med.screensaver.model.libraries.Reagent;
 import edu.harvard.med.screensaver.model.libraries.ReagentVendorIdentifier;
 import edu.harvard.med.screensaver.model.libraries.SilencingReagent;
 import edu.harvard.med.screensaver.model.libraries.SilencingReagentType;
 import edu.harvard.med.screensaver.model.libraries.SmallMoleculeReagent;
 import edu.harvard.med.screensaver.model.libraries.Solvent;
+import edu.harvard.med.screensaver.model.libraries.StockPlateMapping;
 import edu.harvard.med.screensaver.model.libraries.Well;
 import edu.harvard.med.screensaver.model.libraries.WellKey;
 import edu.harvard.med.screensaver.model.libraries.WellName;
@@ -81,9 +83,10 @@ import edu.harvard.med.screensaver.model.screens.ProjectPhase;
 import edu.harvard.med.screensaver.model.screens.Screen;
 import edu.harvard.med.screensaver.model.screens.ScreenAttachedFileType;
 import edu.harvard.med.screensaver.model.screens.ScreenDataSharingLevel;
+import edu.harvard.med.screensaver.model.screens.ScreenStatus;
 import edu.harvard.med.screensaver.model.screens.ScreenType;
 import edu.harvard.med.screensaver.model.screens.Screening;
-import edu.harvard.med.screensaver.model.screens.StatusValue;
+import edu.harvard.med.screensaver.model.screens.StatusItem;
 import edu.harvard.med.screensaver.model.screens.StudyType;
 import edu.harvard.med.screensaver.model.users.AdministratorUser;
 import edu.harvard.med.screensaver.model.users.AffiliationCategory;
@@ -613,6 +616,21 @@ public class TestDataFactory
         return new MolecularFormula("CH3M2");
       }
     });
+    addBuilder(new AbstractBuilder<StockPlateMapping>(StockPlateMapping.class) {
+      @Override
+      public StockPlateMapping newInstance(String callStack)
+      {
+        return new StockPlateMapping(TestDataFactory.this.newInstance(Plate.class, callStack).getPlateNumber(),
+                                     TestDataFactory.this.newInstance(Quadrant.class, callStack));
+      }
+    });
+    addBuilder(new AbstractBuilder<Quadrant>(Quadrant.class) {
+      @Override
+      public Quadrant newInstance(String callStack)
+      {
+        return Quadrant.values()[TestDataFactory.this.newInstance(Integer.class, callStack) % Quadrant.values().length];
+      }
+    });
     addBuilder(new AbstractBuilder<ScreenType>(ScreenType.class) {
       @Override
       public ScreenType newInstance(String callStack)
@@ -667,6 +685,13 @@ public class TestDataFactory
       public ProjectPhase newInstance(String callStack)
       {
         return ProjectPhase.PRIMARY_SCREEN;
+      }
+    });
+    addBuilder(new AbstractBuilder<StatusItem>(StatusItem.class) {
+      @Override
+      public StatusItem newInstance(String callStack)
+      {
+        return new StatusItem(new LocalDate(), ScreenStatus.ONGOING);
       }
     });
     addBuilder(new AbstractBuilder<PlateType>(PlateType.class) {
@@ -753,11 +778,11 @@ public class TestDataFactory
         return SilencingReagentType.SIRNA;
       }
     });
-    addBuilder(new AbstractBuilder<StatusValue>(StatusValue.class) {
+    addBuilder(new AbstractBuilder<ScreenStatus>(ScreenStatus.class) {
       @Override
-      public StatusValue newInstance(String callStack)
+      public ScreenStatus newInstance(String callStack)
       {
-        return StatusValue.ACCEPTED;
+        return ScreenStatus.ACCEPTED;
       }
     });
     addBuilder(new AbstractBuilder<ChecklistItemGroup>(ChecklistItemGroup.class) {
@@ -805,7 +830,9 @@ public class TestDataFactory
       public Plate newInstance(String callStack)
       {
         Copy copy = TestDataFactory.this.newInstance(Copy.class, callStack);
-        return copy.findPlate(copy.getLibrary().getStartPlate());
+        Plate plate = copy.findPlate(copy.getLibrary().getStartPlate());
+        applyPostCreateHooks(callStack, plate);
+        return plate;
       }
     });
 

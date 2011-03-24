@@ -26,7 +26,9 @@ import edu.harvard.med.screensaver.model.AdministrativeActivity;
 import edu.harvard.med.screensaver.model.AdministrativeActivityType;
 import edu.harvard.med.screensaver.model.BusinessRuleViolationException;
 import edu.harvard.med.screensaver.model.MakeDummyEntities;
+import edu.harvard.med.screensaver.model.TestDataFactory.PostCreateHook;
 import edu.harvard.med.screensaver.model.Volume;
+import edu.harvard.med.screensaver.model.VolumeUnit;
 import edu.harvard.med.screensaver.model.cherrypicks.LabCherryPick;
 import edu.harvard.med.screensaver.model.cherrypicks.RNAiCherryPickRequest;
 import edu.harvard.med.screensaver.model.cherrypicks.ScreenerCherryPick;
@@ -515,5 +517,126 @@ public class LibrariesDAOTest extends AbstractSpringPersistenceTest
       return se;
     }
     return null;
+  }
+
+  public void testCalculatePlateVolumeStatistics()
+  {
+    dataFactory.addPostCreateHook(Plate.class, new PostCreateHook<Plate>() {
+      @Override
+      public void postCreate(String callStack, Plate p)
+      {
+        if (callStack.endsWith(getName())) {
+          p.setWellVolume(new Volume(10, VolumeUnit.MICROLITERS));
+        }
+      } 
+    });
+    dataFactory.addPostCreateHook(LibraryScreening.class, new PostCreateHook<LibraryScreening>() {
+      @Override
+      public void postCreate(String callStack, LibraryScreening ls) {
+        if (callStack.endsWith(getName())) {
+          ls.setVolumeTransferredPerWell(new Volume("1.5", VolumeUnit.MICROLITERS));
+          ls.setNumberOfReplicates(2);
+        }
+      } 
+    });
+    Plate plate1 = dataFactory.newInstance(Plate.class, getName());
+    Plate plate2 = dataFactory.newInstance(Plate.class, getName());
+    Plate plate3 = dataFactory.newInstance(Plate.class, getName());
+    Plate plate4 = dataFactory.newInstance(Plate.class, getName());
+    LibraryScreening libScreening1 = dataFactory.newInstance(LibraryScreening.class, getName());
+    LibraryScreening libScreening2 = dataFactory.newInstance(LibraryScreening.class, getName());
+    LibraryScreening libScreening3 = dataFactory.newInstance(LibraryScreening.class, getName());
+    libScreening1.addAssayPlatesScreened(plate1);
+    libScreening1.addAssayPlatesScreened(plate2);
+    libScreening1.addAssayPlatesScreened(plate3);
+    libScreening2.addAssayPlatesScreened(plate1);
+    libScreening2.addAssayPlatesScreened(plate2);
+    libScreening3.addAssayPlatesScreened(plate1);
+    libScreening1 = genericEntityDao.mergeEntity(libScreening1);
+    libScreening2 = genericEntityDao.mergeEntity(libScreening2);
+    libScreening3 = genericEntityDao.mergeEntity(libScreening3);
+
+    Set<Plate> plates = Sets.newHashSet(plate1, plate2, plate3, plate4);
+    librariesDao.calculatePlateVolumeStatistics(plates);
+    assertEquals(new Volume(1, VolumeUnit.MICROLITERS), plate1.getVolumeStatistics().getAverageRemaining());
+    assertEquals(new Volume(4, VolumeUnit.MICROLITERS), plate2.getVolumeStatistics().getAverageRemaining());
+    assertEquals(new Volume(7, VolumeUnit.MICROLITERS), plate3.getVolumeStatistics().getAverageRemaining());
+    assertEquals(new Volume(10, VolumeUnit.MICROLITERS), plate4.getVolumeStatistics().getAverageRemaining());
+  }
+  
+  public void testCalculateCopyVolumeStatistics()
+  {
+    Library library = dataFactory.newInstance(Library.class);
+    library.setStartPlate(1);
+    library.setEndPlate(3);
+    Copy copy1 = library.createCopy(dataFactory.newInstance(AdministratorUser.class), CopyUsageType.LIBRARY_SCREENING_PLATES, "C");
+    Copy copy2 = library.createCopy(dataFactory.newInstance(AdministratorUser.class), CopyUsageType.LIBRARY_SCREENING_PLATES, "D");
+    Copy copy3 = library.createCopy(dataFactory.newInstance(AdministratorUser.class), CopyUsageType.LIBRARY_SCREENING_PLATES, "E");
+    for (Plate p : copy1.getPlates().values()) {
+      p.setWellVolume(new Volume(10, VolumeUnit.MICROLITERS));
+    }
+    for (Plate p : copy2.getPlates().values()) {
+      p.setWellVolume(new Volume(10, VolumeUnit.MICROLITERS));
+    }
+    for (Plate p : copy3.getPlates().values()) {
+      p.setWellVolume(new Volume(10, VolumeUnit.MICROLITERS));
+    }
+    library = genericEntityDao.mergeEntity(library);
+    copy1 = library.getCopy("C");
+    copy2 = library.getCopy("D");
+    copy3 = library.getCopy("E");
+
+    LibraryScreening libScreening1 = newLibraryScreening(2, new Volume("1.0", VolumeUnit.MICROLITERS));
+    LibraryScreening libScreening2 = newLibraryScreening(2, new Volume("1.5", VolumeUnit.MICROLITERS));
+    LibraryScreening libScreening3 = newLibraryScreening(2, new Volume("2.0", VolumeUnit.MICROLITERS));
+    LibraryScreening libScreening4 = newLibraryScreening(2, new Volume("2.5", VolumeUnit.MICROLITERS));
+    LibraryScreening libScreening5 = newLibraryScreening(2, new Volume("2.0", VolumeUnit.MICROLITERS));
+    LibraryScreening libScreening6 = newLibraryScreening(2, new Volume("2.0", VolumeUnit.MICROLITERS));
+    
+    libScreening1.addAssayPlatesScreened(copy1.findPlate(1));
+    libScreening1.addAssayPlatesScreened(copy1.findPlate(2));
+    libScreening1.addAssayPlatesScreened(copy1.findPlate(3));
+    libScreening2.addAssayPlatesScreened(copy1.findPlate(1));
+    libScreening2.addAssayPlatesScreened(copy1.findPlate(2));
+    libScreening2.addAssayPlatesScreened(copy1.findPlate(3));
+
+    libScreening3.addAssayPlatesScreened(copy2.findPlate(1));
+    libScreening3.addAssayPlatesScreened(copy2.findPlate(2));
+    libScreening3.addAssayPlatesScreened(copy2.findPlate(3));
+    libScreening4.addAssayPlatesScreened(copy2.findPlate(1));
+    libScreening4.addAssayPlatesScreened(copy2.findPlate(2));
+    libScreening4.addAssayPlatesScreened(copy2.findPlate(3));
+
+    libScreening5.addAssayPlatesScreened(copy3.findPlate(1));
+    libScreening5.addAssayPlatesScreened(copy3.findPlate(2));
+    libScreening5.addAssayPlatesScreened(copy3.findPlate(3));
+    libScreening6.addAssayPlatesScreened(copy3.findPlate(1)); // subset of copy's plates screened 
+
+    genericEntityDao.mergeEntity(libScreening1);
+    genericEntityDao.mergeEntity(libScreening2);
+    genericEntityDao.mergeEntity(libScreening3);
+    genericEntityDao.mergeEntity(libScreening4);
+    genericEntityDao.mergeEntity(libScreening5);
+    genericEntityDao.mergeEntity(libScreening6);
+
+    Set<Copy> copies = Sets.newHashSet(copy1, copy2, copy3);
+    librariesDao.calculateCopyVolumeStatistics(copies);
+    assertEquals(new Volume(5, VolumeUnit.MICROLITERS), copy1.getVolumeStatistics().getAverageRemaining());
+    assertEquals(new Volume(5, VolumeUnit.MICROLITERS), copy1.getVolumeStatistics().getMinRemaining());
+    assertEquals(new Volume(5, VolumeUnit.MICROLITERS), copy1.getVolumeStatistics().getMaxRemaining());
+    assertEquals(new Volume(1, VolumeUnit.MICROLITERS), copy2.getVolumeStatistics().getAverageRemaining());
+    assertEquals(new Volume(1, VolumeUnit.MICROLITERS), copy2.getVolumeStatistics().getMinRemaining());
+    assertEquals(new Volume(1, VolumeUnit.MICROLITERS), copy2.getVolumeStatistics().getMaxRemaining());
+    assertEquals(new Volume("4.667", VolumeUnit.MICROLITERS), copy3.getVolumeStatistics().getAverageRemaining());
+    assertEquals(new Volume(2, VolumeUnit.MICROLITERS), copy3.getVolumeStatistics().getMinRemaining());
+    assertEquals(new Volume(6, VolumeUnit.MICROLITERS), copy3.getVolumeStatistics().getMaxRemaining());
+  }
+
+  private LibraryScreening newLibraryScreening(int replicates, Volume volume)
+  {
+    LibraryScreening ls = dataFactory.newInstance(LibraryScreening.class, getName());
+    ls.setNumberOfReplicates(replicates);
+    ls.setVolumeTransferredPerWell(volume);
+    return ls;
   }
 }

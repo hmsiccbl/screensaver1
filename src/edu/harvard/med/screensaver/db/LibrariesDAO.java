@@ -9,6 +9,7 @@
 
 package edu.harvard.med.screensaver.db;
 
+import java.util.Collection;
 import java.util.Map;
 import java.util.Set;
 
@@ -78,4 +79,12 @@ public interface LibrariesDAO
   public Plate findPlate(int plateNumber, String copyName);
 
   public Set<Integer> queryForPlateIds(LibraryCopyPlateListParserResult parserResult);
+
+  public void calculateCopyScreeningStatistics(Collection<Copy> copies);
+
+  public void calculatePlateScreeningStatistics(Collection<Plate> plates);
+
+  public void calculateCopyVolumeStatistics(Collection<Copy> copies);
+
+  public void calculatePlateVolumeStatistics(Collection<Plate> plates);
 }

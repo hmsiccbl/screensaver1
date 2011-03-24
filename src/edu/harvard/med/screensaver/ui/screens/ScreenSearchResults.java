@@ -32,9 +32,9 @@ import edu.harvard.med.screensaver.model.screenresults.ScreenResult;
 import edu.harvard.med.screensaver.model.screens.ProjectPhase;
 import edu.harvard.med.screensaver.model.screens.Screen;
 import edu.harvard.med.screensaver.model.screens.ScreenDataSharingLevel;
+import edu.harvard.med.screensaver.model.screens.ScreenStatus;
 import edu.harvard.med.screensaver.model.screens.ScreenType;
 import edu.harvard.med.screensaver.model.screens.StatusItem;
-import edu.harvard.med.screensaver.model.screens.StatusValue;
 import edu.harvard.med.screensaver.model.users.LabHead;
 import edu.harvard.med.screensaver.model.users.ScreeningRoomUser;
 import edu.harvard.med.screensaver.model.users.ScreensaverUser;
@@ -151,8 +151,8 @@ public class ScreenSearchResults extends EntityBasedEntitySearchResults<Screen,I
   {
     
     List<TableColumn<Screen,?>> columns = Lists.newArrayList();
-    columns.addAll(buildScreenSummaryColumns());
-    columns.addAll(buildScreenAdminColumns(false));
+    columns.addAll(buildScreenSummaryColumns(false));
+    columns.addAll(buildScreenAdminColumns());
     columns.addAll(buildScreenResultColumns());
 
 
@@ -236,21 +236,9 @@ public class ScreenSearchResults extends EntityBasedEntitySearchResults<Screen,I
     return columns;
   }
 
-  public List<TableColumn<Screen,?>> buildScreenAdminColumns(boolean isNonScreenSearchResults)
+  public List<TableColumn<Screen,?>> buildScreenAdminColumns()
   {
     List<TableColumn<Screen,?>> columns = Lists.newArrayList();
-    
-    columns.add(new DateTimeEntityColumn<Screen>(Screen.thisEntity.toProperty("dateCreated"),
-                                                 isNonScreenSearchResults ? "Date Screen Recorded" : "Date Recorded",
-                                                 "The date the screen was first recorded in the Screensaver",
-                                                 TableColumn.UNGROUPED) {
-      @Override
-      protected DateTime getDateTime(Screen screen)
-      {
-        return screen.getDateCreated();
-      }
-    });
-    Iterables.getLast(columns).setAdministrative(true);
     
     columns.add(new EnumEntityColumn<Screen,ScreenDataSharingLevel>(RelationshipPath.from(Screen.class).toProperty("dataSharingLevel"),
       "Data Sharing Level", 
@@ -294,15 +282,15 @@ public class ScreenSearchResults extends EntityBasedEntitySearchResults<Screen,I
     columns.get(columns.size() - 1).setAdministrative(true);
     columns.get(columns.size() - 1).setVisible(false);
 
-    columns.add(new EnumEntityColumn<Screen,StatusValue>(Screen.statusItems.toProperty("statusValue"),
+    columns.add(new EnumEntityColumn<Screen,ScreenStatus>(Screen.statusItems.toProperty("status"),
       "Status", "The current status of the screen, e.g., 'Completed', 'Ongoing', 'Pending', etc.",
       TableColumn.UNGROUPED,
-      StatusValue.values()) {
+      ScreenStatus.values()) {
       @Override
-      public StatusValue getCellValue(Screen screen)
+      public ScreenStatus getCellValue(Screen screen)
       {
         SortedSet<StatusItem> statusItems = screen.getStatusItems();
-        return statusItems.isEmpty() ? null : statusItems.last().getStatusValue();
+        return statusItems.isEmpty() ? null : statusItems.last().getStatus();
       }
     });
     columns.get(columns.size() - 1).setAdministrative(true);
@@ -358,11 +346,24 @@ public class ScreenSearchResults extends EntityBasedEntitySearchResults<Screen,I
     });
     columns.get(columns.size() - 1).setAdministrative(true);
     columns.get(columns.size() - 1).setVisible(false);
-
+    
+    columns.add(new IntegerEntityColumn<Screen>(RelationshipPath.from(Screen.class).toProperty("totalPlatedLabCherryPicks"),
+                                                "Total Plated Cherry Picks",
+                                                "The number of lab cherry picks that have been plated to date, for all cherry pick requests",
+                                                TableColumn.UNGROUPED) {
+      @Override
+      public Integer getCellValue(Screen screen) 
+      { 
+        return screen.getTotalPlatedLabCherryPicks();
+      }
+    });
+    columns.get(columns.size() - 1).setAdministrative(true);
+    columns.get(columns.size() - 1).setVisible(false);
+    
     return columns;
   }
 
-  public List<TableColumn<Screen,?>> buildScreenSummaryColumns()
+  public List<TableColumn<Screen,?>> buildScreenSummaryColumns(boolean isNonScreenSearchResults)
   {
     List<TableColumn<Screen,?>> columns = Lists.newArrayList();
     columns.add(new TextEntityColumn<Screen>(Screen.facilityId,
@@ -443,6 +444,18 @@ public class ScreenSearchResults extends EntityBasedEntitySearchResults<Screen,I
       @Override
       public ScreeningRoomUser getUser(Screen screen) { return screen.getLeadScreener(); }
     });
+
+    columns.add(new DateTimeEntityColumn<Screen>(Screen.thisEntity.toProperty("dateCreated"),
+                                                 isNonScreenSearchResults ? "Date Screen Recorded" : "Date Recorded",
+                                                 "The date the screen was first recorded in the Screensaver",
+                                                 TableColumn.UNGROUPED) {
+      @Override
+      protected DateTime getDateTime(Screen screen)
+      {
+        return screen.getDateCreated();
+      }
+    });
+
     return columns;
   }
 }

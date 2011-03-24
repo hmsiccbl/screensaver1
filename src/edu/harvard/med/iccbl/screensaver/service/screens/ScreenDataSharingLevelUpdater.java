@@ -14,19 +14,19 @@ import java.util.List;
 import java.util.Set;
 import java.util.SortedSet;
 
-import com.google.common.collect.Lists;
-import com.google.common.collect.Sets;
 import org.apache.log4j.Logger;
 import org.joda.time.LocalDate;
 import org.springframework.transaction.annotation.Transactional;
+import com.google.common.collect.Lists;
+import com.google.common.collect.Sets;
 
 import edu.harvard.med.screensaver.db.GenericEntityDAO;
 import edu.harvard.med.screensaver.model.AdministrativeActivity;
 import edu.harvard.med.screensaver.model.screens.LibraryScreening;
 import edu.harvard.med.screensaver.model.screens.Screen;
 import edu.harvard.med.screensaver.model.screens.ScreenDataSharingLevel;
+import edu.harvard.med.screensaver.model.screens.ScreenStatus;
 import edu.harvard.med.screensaver.model.screens.ScreenType;
-import edu.harvard.med.screensaver.model.screens.StatusValue;
 import edu.harvard.med.screensaver.model.users.AdministratorUser;
 import edu.harvard.med.screensaver.model.users.ScreensaverUser;
 import edu.harvard.med.screensaver.model.users.ScreensaverUserRole;
@@ -84,7 +84,7 @@ public class ScreenDataSharingLevelUpdater
    * <li>have ScreenResults
    * <li>have ScreenDataSharingLevel that is more restrictive than {@link ScreenDataSharingLevel#MUTUAL_SCREENS}
    * <li>have a {@link Screen#getDataPrivacyExpirationDate()} on or before the expireDate
-   * <li>do not have a status of {@link StatusValue#DROPPED_TECHNICAL} or {@link StatusValue#TRANSFERRED_TO_BROAD_INSTITUTE}
+   * <li>do not have a status of {@link ScreenStatus#DROPPED_TECHNICAL} or {@link ScreenStatus#TRANSFERRED_TO_BROAD_INSTITUTE}
    * @param expireDate
    * @return not null, empty Set if nothing is found
    */
@@ -97,14 +97,16 @@ public class ScreenDataSharingLevelUpdater
         " and s.dataSharingLevel > ? " +
         " and s.screenType = ? " +
         " and s.dataPrivacyExpirationNotifiedDate is null" +
-        " and s.screenId not in (select s.screenId from Screen s join s.statusItems si where si.statusValue in ( ?, ? ) and si.screen = s ) " + 
+      //        " and s.screenId not in (select s.screenId from Screen s join s.statusItems si where si.status in ( ?, ? ) and si.screen = s ) "
+      " and s.screenId not in (select s2.screenId from Screen s2 join s2.statusItems si where si.status in ( ?, ? ) and s2=s ) "
+      +
         " order by s.screenId";
     List<Screen> list = _dao.findEntitiesByHql(Screen.class, hql, 
                                                expireDate,
                                                ScreenDataSharingLevel.MUTUAL_SCREENS,
                                                ScreenType.SMALL_MOLECULE,
-                                               StatusValue.DROPPED_TECHNICAL,
-                                               StatusValue.TRANSFERRED_TO_BROAD_INSTITUTE);
+                                               ScreenStatus.DROPPED_TECHNICAL,
+                                               ScreenStatus.TRANSFERRED_TO_BROAD_INSTITUTE);
     log.info("Hql: " + hql + ", " + list.size());
     return list;
   }
@@ -117,14 +119,15 @@ public class ScreenDataSharingLevelUpdater
         " s.dataPrivacyExpirationDate <= ? " +
         " and s.dataSharingLevel > ? " +
         " and s.screenType = ? " +
-        " and s.screenId not in (select s.screenId from Screen s join s.statusItems si where si.statusValue in ( ?, ? ) and si.screen = s ) " + 
+      " and s.screenId not in (select s2.screenId from Screen s2 join s2.statusItems si where si.status in ( ?, ? ) and s2=s ) "
+      +
         " order by s.screenId";
     List<Screen> list = _dao.findEntitiesByHql(Screen.class, hql, 
                                   expireDate, 
                                   ScreenDataSharingLevel.MUTUAL_SCREENS, 
                                   ScreenType.SMALL_MOLECULE ,
-                                  StatusValue.DROPPED_TECHNICAL, 
-                                  StatusValue.TRANSFERRED_TO_BROAD_INSTITUTE
+                                  ScreenStatus.DROPPED_TECHNICAL, 
+                                  ScreenStatus.TRANSFERRED_TO_BROAD_INSTITUTE
                                   );
     log.info("Hql: " + hql + ", " + list.size());
     return list;
@@ -136,7 +139,7 @@ public class ScreenDataSharingLevelUpdater
    * <li>have ScreenResults
    * <li>have ScreenDataSharingLevel that is more restrictive than {@link ScreenDataSharingLevel#MUTUAL_SCREENS}
    * <li>have a {@link Screen#getDataPrivacyExpirationDate()} on or before the expireDate
-   * <li>do not have a status of {@link StatusValue#DROPPED_TECHNICAL} or {@link StatusValue#TRANSFERRED_TO_BROAD_INSTITUTE}
+   * <li>do not have a status of {@link ScreenStatus#DROPPED_TECHNICAL} or {@link ScreenStatus#TRANSFERRED_TO_BROAD_INSTITUTE}
    * </ul>
    * Expire any Screen returned from {@link ScreenDataSharingLevelUpdater#findNewExpiredNotNotified(LocalDate)} wherein the 
    * {@link Screen#getDataPrivacyExpirationDate()} is less than or equal to the passed in date.
@@ -176,7 +179,7 @@ public class ScreenDataSharingLevelUpdater
    * <li>have ScreenResults
    * <li>have ScreenDataSharingLevel that is more restrictive than {@link ScreenDataSharingLevel#MUTUAL_SCREENS}
    * <li>have a {@link Screen#getDataPrivacyExpirationDate()} on or before the expireDate
-   * <li>do not have a status of {@link StatusValue#DROPPED_TECHNICAL} or {@link StatusValue#TRANSFERRED_TO_BROAD_INSTITUTE}
+   * <li>do not have a status of {@link ScreenStatus#DROPPED_TECHNICAL} or {@link ScreenStatus#TRANSFERRED_TO_BROAD_INSTITUTE}
    * </ul>
    * This method invokes {@link Screen#setDataPrivacyExpirationDate(LocalDate)} with a value that is ageToExpireFromActivityDateInDays
    * days from the latest LabActivity (by date) for the Screen.  
@@ -195,14 +198,15 @@ public class ScreenDataSharingLevelUpdater
     		" where " +
     		" s.screenType = ? " +
     		" and s.dataSharingLevel > ? " +
-        " and s.screenId not in (select s.screenId from Screen s join s.statusItems si where si.statusValue in ( ?, ? ) and si.screen = s ) " +
+      " and s.screenId not in (select s2.screenId from Screen s2 join s2.statusItems si where si.status in ( ?, ? ) and s2=s ) "
+      +
         " order by s.screenId";
 
     List<Screen> screens = _dao.findEntitiesByHql(Screen.class, hql, 
                                                   ScreenType.SMALL_MOLECULE, 
                                                   ScreenDataSharingLevel.MUTUAL_SCREENS,
-                                                  StatusValue.DROPPED_TECHNICAL, 
-                                                  StatusValue.TRANSFERRED_TO_BROAD_INSTITUTE);
+                                                  ScreenStatus.DROPPED_TECHNICAL,
+                                                  ScreenStatus.TRANSFERRED_TO_BROAD_INSTITUTE);
     
     // Note, have to iterate in code to examine the date values as a suitable date arithmetic method was not determined for the HQL - sde4
 
@@ -291,7 +295,7 @@ public class ScreenDataSharingLevelUpdater
    * <li>have ScreenResults
    * <li>have ScreenDataSharingLevel that is more restrictive than {@link ScreenDataSharingLevel#MUTUAL_SCREENS}
    * <li>have a {@link Screen#getDataPrivacyExpirationDate()} on or before the expireDate
-   * <li>do not have a status of {@link StatusValue#DROPPED_TECHNICAL} or {@link StatusValue#TRANSFERRED_TO_BROAD_INSTITUTE}
+   * <li>do not have a status of {@link ScreenStatus#DROPPED_TECHNICAL} or {@link ScreenStatus#TRANSFERRED_TO_BROAD_INSTITUTE}
    * </ul>
    * @return
    */
@@ -302,13 +306,14 @@ public class ScreenDataSharingLevelUpdater
         " join s.screenResult sr " +
     		" where s.dataSharingLevel > ? " +
     		" and s.screenType = ? " +
-        " and s.screenId not in (select s.screenId from Screen s join s.statusItems si where si.statusValue in ( ?, ? ) and si.screen = s ) " + 
+        " and s.screenId not in (select s2.screenId from Screen s2 join s2.statusItems si where si.status in ( ?, ? ) and s2=s ) "
+      +
         " order by s.screenId";
     return _dao.findEntitiesByHql(Screen.class, hql, 
                                   ScreenDataSharingLevel.SHARED, 
                                   ScreenType.SMALL_MOLECULE,
-                                  StatusValue.DROPPED_TECHNICAL, 
-                                  StatusValue.TRANSFERRED_TO_BROAD_INSTITUTE);
+                                  ScreenStatus.DROPPED_TECHNICAL, 
+                                  ScreenStatus.TRANSFERRED_TO_BROAD_INSTITUTE);
   }
 
   @Transactional
