@@ -178,4 +178,16 @@ public class ScreenDAOImpl extends AbstractDAO implements ScreenDAO
     }
     return performedByCandidates;
   }
+
+  @Override
+  public int countLoadedExperimentalWells(Screen screen)
+  {
+    String hql = "select count(*) " +
+      "from ScreenResult sr join sr.assayWells aw join aw.libraryWell w " +
+      "where sr.screen = :screen " +
+      "and w.libraryWellType = 'experimental'";
+    javax.persistence.Query query = getEntityManager().createQuery(hql);
+    query.setParameter("screen", screen);
+    return ((Long) query.getSingleResult()).intValue();
+  }
 }

@@ -453,6 +453,7 @@ public class ScreenResult extends AuditedAbstractEntity<Integer>
    * @return the number of experimental wells that have data in this screen result
    * @motivation optimization
    */
+  // TODO: move this to Screen, to be with other screening/loading statistics 
   @Column(nullable=false)
   @edu.harvard.med.screensaver.model.annotations.Column(hasNonconventionalSetterMethod=true)
   public Integer getExperimentalWellCount()
@@ -460,11 +461,7 @@ public class ScreenResult extends AuditedAbstractEntity<Integer>
     return _experimentalWellCount;
   }
 
-  /**
-   * @motivation for Hibernate
-   * @param experimentalWellCount
-   */
-  private void setExperimentalWellCount(Integer experimentalWellCount)
+  public void setExperimentalWellCount(Integer experimentalWellCount)
   {
     _experimentalWellCount = experimentalWellCount;
   }
@@ -524,29 +521,11 @@ public class ScreenResult extends AuditedAbstractEntity<Integer>
     return rawNumericDataColumns;
   }
   
-  // package instance method
-
-  /**
-   * Increment the number of experimental wells that have data in this screen result.
-   * Intended only for use by {@link DataColumn}.
-   * @see #getExperimentalWellCount()
-   */
-  void incrementExperimentalWellCount()
-  {
-    _experimentalWellCount ++;
-  }
-
-
-  // protected constructor
-
   /**
    * Construct an uninitialized <code>ScreenResult</code>.
    * @motivation for hibernate and proxy/concrete subclass constructors
    */
   protected ScreenResult() {}
-
-
-  // private instance methods
 
   /**
    * Set the id for the screen result.

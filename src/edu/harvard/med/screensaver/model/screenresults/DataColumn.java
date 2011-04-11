@@ -40,7 +40,6 @@ import org.hibernate.annotations.OptimisticLock;
 import edu.harvard.med.screensaver.model.AbstractEntity;
 import edu.harvard.med.screensaver.model.AbstractEntityVisitor;
 import edu.harvard.med.screensaver.model.DataModelViolationException;
-import edu.harvard.med.screensaver.model.libraries.LibraryWellType;
 import edu.harvard.med.screensaver.model.libraries.WellKey;
 import edu.harvard.med.screensaver.model.meta.Cardinality;
 import edu.harvard.med.screensaver.model.meta.RelationshipPath;
@@ -1039,12 +1038,6 @@ public class DataColumn extends AbstractEntity<Integer> implements MetaDataType,
                                               booleanPositiveIndicatorValue,
                                               confirmedPositiveIndicatorValue,
                                               exclude);
-
-    if (getOrdinal() == 0) { // yuck! due to denormalization... // TODO: should move to AssayWell constructor
-      if (assayWell.getLibraryWell().getLibraryWellType() == LibraryWellType.EXPERIMENTAL) {
-        getScreenResult().incrementExperimentalWellCount();
-      }
-    }
 
     if (resultValue.isPositive()) {
       incrementPositivesCount(resultValue);

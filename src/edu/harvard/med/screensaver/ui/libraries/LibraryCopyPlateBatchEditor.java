@@ -184,7 +184,7 @@ public class LibraryCopyPlateBatchEditor extends AbstractBackingBean
         showMessage("requiredValue", "plate location change date");
         valid = false;
       }
-      if (getPlateStatus().getSelection() != null) {
+      if (getPlateStatus().getSelection() != null && !!!getPlateStatus().getSelection().isInventoried()) {
         showMessage("libraries.plateStatusProhibitsNewLocation", getPlateStatus().getSelection());
         valid = false;
       }
@@ -210,6 +210,7 @@ public class LibraryCopyPlateBatchEditor extends AbstractBackingBean
     AdministratorUser adminUser = getDao().reloadEntity((AdministratorUser) getScreensaverUser());
     for (Plate plate : plates) {
       boolean modified = false;
+      plate = getDao().reloadEntity(plate); // ensures that all plateUpdate method calls are working with the same instance, which is necessary if a method needs to inspect that state of a plate, as changed by an earlier method call
       if (!StringUtils.isEmpty(getVolumeValue())) {
         Volume newVolume = new Volume(getVolumeValue(), getVolumeType().getSelection());
         modified |= _plateUpdater.updateWellVolume(plate, newVolume, adminUser);

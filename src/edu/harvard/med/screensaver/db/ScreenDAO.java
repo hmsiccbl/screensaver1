@@ -27,4 +27,6 @@ public interface ScreenDAO
   boolean isScreenFacilityIdUnique(Screen screen);
 
   Set<ScreensaverUser> findLabActivityPerformedByCandidates(LabActivity a);
+
+  int countLoadedExperimentalWells(Screen screen);
 }

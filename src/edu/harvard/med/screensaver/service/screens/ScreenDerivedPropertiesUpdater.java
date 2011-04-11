@@ -82,6 +82,10 @@ public class ScreenDerivedPropertiesUpdater
     
     screen.setScreenedExperimentalWellCount(_screenDao.countScreenedExperimentalWells(screen, false));
     screen.setUniqueScreenedExperimentalWellCount(_screenDao.countScreenedExperimentalWells(screen, true));
+
+    if (screen.getScreenResult() != null) {
+      screen.getScreenResult().setExperimentalWellCount(_screenDao.countLoadedExperimentalWells(screen));
+    }
   }
 
   private SortedSet<Integer> findMaxReplicatesPerPlateNumber(SortedSet<AssayPlate> assayPlatesScreened)

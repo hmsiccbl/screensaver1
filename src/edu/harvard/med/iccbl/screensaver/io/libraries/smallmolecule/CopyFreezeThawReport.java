@@ -16,6 +16,7 @@ import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.math.BigDecimal;
+import java.util.Set;
 
 import javax.mail.MessagingException;
 import javax.mail.internet.InternetAddress;
@@ -155,15 +156,21 @@ public class CopyFreezeThawReport extends AdminEmailApplication
 
       InternetAddress adminEmail = app.getEmail(admin);
       String subject = "Small Molecule Freeze Thaw Report";
-      String msg = "Small Molecule Libraries freeze thaw report.\n"
-        + "Found " + rowCount + " copies.  Please see the attached file for the full report.";
+      String msg = "Small Molecule Libraries Freeze Thaw report:\n"
+        + "Found " + rowCount + " copies that match the criteria:\n" +
+            "- Plate Screening Count Average  >= " + threshold + " \n" +
+            "- has \"Available\" Plates\n" +
+            "- Libary Type != \"DOS\"\n" +
+            "Please see the attached file for the full report.";
       log.info(msg);
       EmailService emailService = app.getEmailServiceBasedOnCommandLineOption(admin);
+      Set<InternetAddress> toList = app.getExtraRecipients();
+      toList.add(adminEmail);
       // TODO: have the emailservice take an inputstream
       emailService.send(subject,
                               msg,
                               adminEmail,
-                              new InternetAddress[] { adminEmail }, null, file);
+                              toList.toArray(new InternetAddress[] {}), null, file);
 
     }
     catch (ParseException e) {

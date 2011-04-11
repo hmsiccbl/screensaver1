@@ -83,8 +83,16 @@ public class PlateUpdaterTest extends AbstractSpringPersistenceTest
       }
     });
 
-    plateUpdater.updatePlateLocation(plate, new PlateLocation("W", "X", "Y", "Z"), _admin, admin2, new LocalDate(2010, 1, 2));
-    plateUpdater.updatePlateStatus(plate, PlateStatus.AVAILABLE, _admin, admin2, new LocalDate(2010, 1, 2));
+    genericEntityDao.doInTransaction(new DAOTransaction() {
+      @Override
+      public void runTransaction()
+      {
+        Plate plate = genericEntityDao.reloadEntity(_copyC.findPlate(1));
+        plateUpdater.updatePlateStatus(plate, PlateStatus.AVAILABLE, _admin, admin2, new LocalDate(2010, 1, 2));
+        plateUpdater.updatePlateLocation(plate, new PlateLocation("W", "X", "Y", "Z"), _admin, admin2, new LocalDate(2010, 1, 2));
+      }
+    });
+
     genericEntityDao.doInTransaction(new DAOTransaction() {
       @Override
       public void runTransaction()
@@ -100,8 +108,16 @@ public class PlateUpdaterTest extends AbstractSpringPersistenceTest
       }
     });
 
-    plateUpdater.updatePlateLocation(plate, new PlateLocation("W", "X", "Y", "Z"), _admin, admin2, new LocalDate(2010, 1, 3));
-    plateUpdater.updatePlateStatus(plate, PlateStatus.NOT_AVAILABLE, _admin, admin2, new LocalDate(2010, 1, 3));
+    genericEntityDao.doInTransaction(new DAOTransaction() {
+      @Override
+      public void runTransaction()
+      {
+        Plate plate = genericEntityDao.reloadEntity(_copyC.findPlate(1));
+        plateUpdater.updatePlateStatus(plate, PlateStatus.NOT_AVAILABLE, _admin, admin2, new LocalDate(2010, 1, 3));
+        plateUpdater.updatePlateLocation(plate, new PlateLocation("W", "X", "Y", "Z"), _admin, admin2, new LocalDate(2010, 1, 3));
+      }
+    });
+
     genericEntityDao.doInTransaction(new DAOTransaction() {
       @Override
       public void runTransaction()
@@ -117,8 +133,16 @@ public class PlateUpdaterTest extends AbstractSpringPersistenceTest
       }
     });
 
-    plateUpdater.updatePlateLocation(plate, new PlateLocation("W", "X", "Y", "Z"), _admin, admin2, new LocalDate(2010, 1, 4));
-    plateUpdater.updatePlateStatus(plate, PlateStatus.AVAILABLE, _admin, admin2, new LocalDate(2010, 1, 4));
+    genericEntityDao.doInTransaction(new DAOTransaction() {
+      @Override
+      public void runTransaction()
+      {
+        Plate plate = genericEntityDao.reloadEntity(_copyC.findPlate(1));
+        plateUpdater.updatePlateLocation(plate, new PlateLocation("W", "X", "Y", "Z"), _admin, admin2, new LocalDate(2010, 1, 4));
+        plateUpdater.updatePlateStatus(plate, PlateStatus.AVAILABLE, _admin, admin2, new LocalDate(2010, 1, 4));
+      }
+    });
+
     genericEntityDao.doInTransaction(new DAOTransaction() {
       @Override
       public void runTransaction()
@@ -192,8 +216,16 @@ public class PlateUpdaterTest extends AbstractSpringPersistenceTest
       }
     });
 
-    plateUpdater.updatePlateLocation(plate, new PlateLocation("W", "X", "Y", "Z"), _admin, admin2, new LocalDate(2010, 1, 2));
-    plateUpdater.updatePlateStatus(plate, PlateStatus.AVAILABLE, _admin, admin2, new LocalDate(2010, 1, 2));
+    genericEntityDao.doInTransaction(new DAOTransaction() {
+      @Override
+      public void runTransaction()
+      {
+        Plate plate = genericEntityDao.reloadEntity(_copyC.findPlate(1));
+        plateUpdater.updatePlateStatus(plate, PlateStatus.AVAILABLE, _admin, admin2, new LocalDate(2010, 1, 2));
+        plateUpdater.updatePlateLocation(plate, new PlateLocation("W", "X", "Y", "Z"), _admin, admin2, new LocalDate(2010, 1, 2));
+      }
+    });
+
     genericEntityDao.doInTransaction(new DAOTransaction() {
       @Override
       public void runTransaction()
@@ -299,6 +331,11 @@ public class PlateUpdaterTest extends AbstractSpringPersistenceTest
   {
     final AdministratorUser admin2 = new AdministratorUser("Admin2", "User");
     genericEntityDao.persistEntity(admin2);
+    
+    // set plates to a status that allows for a plate location
+    for (Plate plate : _copyC.getPlates().values()) {
+      plate.setStatus(PlateStatus.AVAILABLE);
+    }
 
     plateUpdater.updatePlateLocation(_copyC.findPlate(1), new PlateLocation("R1", "F1", "S1", "B1"), _admin, admin2, new LocalDate(2010, 1, 1));
     plateUpdater.updatePlateLocation(_copyC.findPlate(2), new PlateLocation("R1", "F1", "S1", "B1"), _admin, admin2, new LocalDate(2010, 1, 1));
@@ -375,6 +412,7 @@ public class PlateUpdaterTest extends AbstractSpringPersistenceTest
   {
     boolean modified = false;
     for (Map.Entry<Plate,PlateLocation> entry : plateToNewLocation.entrySet()) {
+      entry.getKey().setStatus(PlateStatus.AVAILABLE); // set to a status that allows for a plate location
       modified |= plateUpdater.updatePlateLocation(entry.getKey(), entry.getValue(), recordedByAdmin, performedByAdmin, datePerformed);
     }
     plateUpdater.validateLocations();

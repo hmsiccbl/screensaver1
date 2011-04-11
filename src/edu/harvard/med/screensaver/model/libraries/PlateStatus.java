@@ -90,6 +90,10 @@ public enum PlateStatus implements VocabularyTerm
     Transitions.put(LOST, allExcept(ImmutableSet.of(NOT_SPECIFIED, NOT_CREATED)));
   }
 
+  private static final Set<PlateStatus> InventoriedPlateStatuses = ImmutableSet.of(PlateStatus.NOT_AVAILABLE,
+                                                                                  PlateStatus.AVAILABLE,
+                                                                                  PlateStatus.RETIRED);
+
   /**
    * A Hibernate <code>UserType</code> to map the {@link PlateStatus} vocabulary.
    */
@@ -123,5 +127,14 @@ public enum PlateStatus implements VocabularyTerm
   public boolean canTransitionTo(PlateStatus newStatus)
   {
     return Transitions.get(this).contains(newStatus);
+  }
+
+  /**
+   * @return true if this plate status implies that a plate is being inventoried (stored), otherwise false, implying
+   *         that a plate has no location
+   */
+  public boolean isInventoried()
+  {
+    return InventoriedPlateStatuses.contains(this);
   }
 }
