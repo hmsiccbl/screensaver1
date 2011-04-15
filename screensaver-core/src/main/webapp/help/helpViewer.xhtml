@@ -1,0 +1,509 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+<html xmlns="http://www.w3.org/1999/xhtml"
+	xmlns:ui="http://java.sun.com/jsf/facelets"
+	xmlns:h="http://java.sun.com/jsf/html"
+	xmlns:f="http://java.sun.com/jsf/core"
+	xmlns:t="http://myfaces.apache.org/tomahawk"
+	xmlns:s="http://myfaces.apache.org/sandbox">
+
+<ui:composition template="/main/template.xhtml">
+
+  <ui:param name="pageTitle" value="Help Viewer" />
+
+	<ui:define name="body">
+  <ui:param name="pageHelpURL" value="screens/screenViewerHelp.jsf" />
+
+  <h:form id="helpViewerForm">
+    <t:panelGrid columns="1" width="100%">
+
+      <t:collapsiblePanel
+        value="#{helpViewer.isPanelCollapsedMap['wellFinderHelp']}"
+        var="isCollapsed"
+        rendered="#{menu.screener || menu.readAdmin}"
+      >
+        <f:facet name="header">
+          <t:div styleClass="sectionHeader">
+            <t:headerLink immediate="true" styleClass="sectionHeader">
+              <h:graphicImage
+                value="#{isCollapsed ? &quot;/images/collapsed.png&quot; : &quot;/images/expanded.png&quot;}"
+                styleClass="icon"
+              />
+              <h:outputText value="Finding Wells" styleClass="sectionHeader" />
+            </t:headerLink>
+          </t:div>
+        </f:facet>
+        <ui:include src="libraries/wellFinderHelpBody.xhtml" />
+
+        <t:div style="margin-left: 30px">
+          <t:collapsiblePanel
+            value="#{helpViewer.isPanelCollapsedMap['wellFinderInputHelp']}"
+            var="isCollapsed"
+          >
+            <f:facet name="header">
+              <t:div styleClass="subsectionHeader">
+                <t:headerLink immediate="true" styleClass="subsectionHeader">
+                  <h:graphicImage
+                    value="#{isCollapsed ? &quot;/images/collapsed.png&quot; : &quot;/images/expanded.png&quot;}"
+                    styleClass="icon"
+                  />
+                  <h:outputText value="Entering Wells into the Well Finder" styleClass="subsectionHeader" />
+                </t:headerLink>
+              </t:div>
+            </f:facet>
+            <ui:include src="libraries/wellFinderInputHelp.xhtml" />
+          </t:collapsiblePanel>
+        </t:div>
+
+      </t:collapsiblePanel>
+
+
+      <t:collapsiblePanel
+        value="#{helpViewer.isPanelCollapsedMap['wellSearchResultsHelp']}"
+        var="isCollapsed"
+        rendered="#{menu.screener || menu.readAdmin}"
+      >
+        <f:facet name="header">
+          <t:div styleClass="sectionHeader">
+            <t:headerLink immediate="true" styleClass="sectionHeader">
+              <h:graphicImage
+                value="#{isCollapsed ? &quot;/images/collapsed.png&quot; : &quot;/images/expanded.png&quot;}"
+                styleClass="icon"
+              />
+              <h:outputText value="Viewing Well Search Results" styleClass="sectionHeader" />
+            </t:headerLink>
+          </t:div>
+        </f:facet>
+        <ui:include src="libraries/wellSearchResultsHelpBody.xhtml" />
+      </t:collapsiblePanel>
+
+      <t:collapsiblePanel
+        value="#{helpViewer.isPanelCollapsedMap['wellVolumeSearchResultsHelp']}"
+        var="isCollapsed"
+        rendered="#{helpViewer.screensaverUser.isUserInRoleOfNameMap[&quot;librariesAdmin&quot;]}"
+      >
+        <f:facet name="header">
+          <t:div styleClass="sectionHeader">
+            <t:headerLink immediate="true" styleClass="sectionHeader">
+              <h:graphicImage
+                value="#{isCollapsed ? &quot;/images/collapsed.png&quot; : &quot;/images/expanded.png&quot;}"
+                styleClass="icon"
+              />
+              <h:outputText value="Viewing Well Volume Search Results" styleClass="sectionHeader" />
+            </t:headerLink>
+          </t:div>
+        </f:facet>
+        <ui:include src="libraries/wellVolumeSearchResultsHelpBody.xhtml" />
+      </t:collapsiblePanel>
+
+			<t:collapsiblePanel
+				value="#{helpViewer.isPanelCollapsedMap['wellViewerHelp']}"
+				var="isCollapsed" rendered="#{menu.screener || menu.readAdmin}"
+		  >
+				<f:facet name="header">
+					<t:div styleClass="sectionHeader">
+						<t:headerLink immediate="true" styleClass="sectionHeader">
+							<h:graphicImage
+								value="#{isCollapsed ? &quot;/images/collapsed.png&quot; : &quot;/images/expanded.png&quot;}"
+								styleClass="icon" />
+							<h:outputText value="Viewing A Well" styleClass="sectionHeader" />
+						</t:headerLink>
+					</t:div>
+				</f:facet>
+				<ui:include src="libraries/wellViewerHelpBody.xhtml" />
+			</t:collapsiblePanel>
+
+			<t:collapsiblePanel
+        value="#{helpViewer.isPanelCollapsedMap['reagentFinderHelp']}"
+        var="isCollapsed"
+      >
+        <f:facet name="header">
+          <t:div styleClass="sectionHeader">
+            <t:headerLink immediate="true" styleClass="sectionHeader">
+              <h:graphicImage
+                value="#{isCollapsed ? &quot;/images/collapsed.png&quot; : &quot;/images/expanded.png&quot;}"
+                styleClass="icon"
+              />
+              <h:outputText value="Finding Reagents" styleClass="sectionHeader" />
+            </t:headerLink>
+          </t:div>
+        </f:facet>
+        <ui:include src="libraries/reagentFinderHelpBody.xhtml" />
+
+        <t:div style="margin-left: 30px">
+          <t:collapsiblePanel
+            value="#{helpViewer.isPanelCollapsedMap['reagentFinderInputHelp']}"
+            var="isCollapsed"
+          >
+            <f:facet name="header">
+              <t:div styleClass="subsectionHeader">
+                <t:headerLink immediate="true" styleClass="subsectionHeader">
+                  <h:graphicImage
+                    value="#{isCollapsed ? &quot;/images/collapsed.png&quot; : &quot;/images/expanded.png&quot;}"
+                    styleClass="icon"
+                  />
+                  <h:outputText value="Entering Reagents into the Reagent Finder" styleClass="subsectionHeader" />
+                </t:headerLink>
+              </t:div>
+            </f:facet>
+            <ui:include src="libraries/reagentFinderInputHelp.xhtml" />
+          </t:collapsiblePanel>
+        </t:div>
+
+      </t:collapsiblePanel>
+
+      <t:collapsiblePanel
+        value="#{helpViewer.isPanelCollapsedMap['librariesBrowserHelp']}"
+        var="isCollapsed"
+      >
+        <f:facet name="header">
+          <t:div styleClass="sectionHeader">
+            <t:headerLink immediate="true" styleClass="sectionHeader">
+              <h:graphicImage
+                value="#{isCollapsed ? &quot;/images/collapsed.png&quot; : &quot;/images/expanded.png&quot;}"
+                styleClass="icon"
+              />
+              <h:outputText value="Browsing Libraries" styleClass="sectionHeader" />
+            </t:headerLink>
+          </t:div>
+        </f:facet>
+        <ui:include src="libraries/librariesBrowserHelpBody.xhtml" />
+      </t:collapsiblePanel>
+
+      <t:collapsiblePanel
+        value="#{helpViewer.isPanelCollapsedMap['libraryViewerHelp']}"
+        var="isCollapsed"
+      >
+        <f:facet name="header">
+          <t:div styleClass="sectionHeader">
+            <t:headerLink immediate="true" styleClass="sectionHeader">
+              <h:graphicImage
+                value="#{isCollapsed ? &quot;/images/collapsed.png&quot; : &quot;/images/expanded.png&quot;}"
+                styleClass="icon"
+              />
+              <h:outputText value="Viewing a Library" styleClass="sectionHeader" />
+            </t:headerLink>
+          </t:div>
+        </f:facet>
+        <ui:include src="libraries/libraryViewerHelpBody.xhtml" />
+      </t:collapsiblePanel>
+
+      <t:collapsiblePanel
+        value="#{helpViewer.isPanelCollapsedMap['screensBrowserHelp']}"
+        var="isCollapsed"
+        rendered="#{menu.screener || menu.readAdmin}"
+      >
+        <f:facet name="header">
+          <t:div styleClass="sectionHeader">
+            <t:headerLink immediate="true" styleClass="sectionHeader">
+              <h:graphicImage
+                value="#{isCollapsed ? &quot;/images/collapsed.png&quot; : &quot;/images/expanded.png&quot;}"
+                styleClass="icon"
+              />
+              <h:outputText value="Browsing Screens" styleClass="sectionHeader" />
+            </t:headerLink>
+          </t:div>
+        </f:facet>
+        <ui:include src="screens/screensBrowserHelpBody.xhtml" />
+      </t:collapsiblePanel>
+
+			<t:collapsiblePanel
+				value="#{helpViewer.isPanelCollapsedMap['screenViewerHelp']}"
+				var="isCollapsed" rendered="#{menu.screener || menu.readAdmin}">
+				<f:facet name="header">
+					<t:div styleClass="sectionHeader">
+						<t:headerLink immediate="true" styleClass="sectionHeader">
+							<h:graphicImage
+								value="#{isCollapsed ? &quot;/images/collapsed.png&quot; : &quot;/images/expanded.png&quot;}"
+								styleClass="icon" />
+							<h:outputText value="Viewing a Screen and its Results"
+								styleClass="sectionHeader" />
+						</t:headerLink>
+					</t:div>
+				</f:facet>
+				<t:aliasBean alias="#{inHelpViewer}" value="true">
+					<ui:include src="screens/screenViewerHelpBody.xhtml" />
+				</t:aliasBean>
+
+				<t:div style="margin-left: 30px">
+
+					<t:collapsiblePanel
+						value="#{helpViewer.isPanelCollapsedMap['screenDetailsHelp']}"
+						var="isCollapsed">
+						<f:facet name="header">
+							<t:div styleClass="subsectionHeader">
+								<t:headerLink immediate="true" styleClass="subsectionHeader">
+									<h:graphicImage
+										value="#{isCollapsed ? &quot;/images/collapsed.png&quot; : &quot;/images/expanded.png&quot;}"
+										styleClass="icon" />
+									<h:outputText value="Screen Details"
+										styleClass="subsectionHeader" />
+								</t:headerLink>
+							</t:div>
+						</f:facet>
+						<ui:include src="screens/screenViewer/screenDetailsHelpBody.xhtml" />
+					</t:collapsiblePanel>
+
+					<t:collapsiblePanel
+						value="#{helpViewer.isPanelCollapsedMap['screenResultsSummaryHelp']}"
+						var="isCollapsed">
+						<f:facet name="header">
+							<t:div styleClass="subsectionHeader">
+								<t:headerLink immediate="true" styleClass="subsectionHeader">
+									<h:graphicImage
+										value="#{isCollapsed ? &quot;/images/collapsed.png&quot; : &quot;/images/expanded.png&quot;}"
+										styleClass="icon" />
+									<h:outputText value="Screen Results Summary"
+										styleClass="subsectionHeader" />
+								</t:headerLink>
+							</t:div>
+						</f:facet>
+						<ui:include src="screens/screenViewer/screenResultsSummaryHelpBody.xhtml" />
+					</t:collapsiblePanel>
+
+					<t:collapsiblePanel
+						value="#{helpViewer.isPanelCollapsedMap['dataColumnsHelp']}"
+						var="isCollapsed">
+						<f:facet name="header">
+							<t:div styleClass="subsectionHeader">
+								<t:headerLink immediate="true" styleClass="subsectionHeader">
+									<h:graphicImage
+										value="#{isCollapsed ? &quot;/images/collapsed.png&quot; : &quot;/images/expanded.png&quot;}"
+										styleClass="icon" />
+									<h:outputText value="Data Columns"
+										styleClass="subsectionHeader" />
+								</t:headerLink>
+							</t:div>
+						</f:facet>
+						<ui:include src="screens/screenViewer/dataColumnsHelpBody.xhtml" />
+					</t:collapsiblePanel>
+
+					<t:collapsiblePanel
+						value="#{helpViewer.isPanelCollapsedMap['dataHelp']}"
+						var="isCollapsed">
+						<f:facet name="header">
+							<t:div styleClass="subsectionHeader">
+								<t:headerLink immediate="true" styleClass="subsectionHeader">
+									<h:graphicImage
+										value="#{isCollapsed ? &quot;/images/collapsed.png&quot; : &quot;/images/expanded.png&quot;}"
+										styleClass="icon" />
+									<h:outputText value="Data" styleClass="subsectionHeader" />
+								</t:headerLink>
+							</t:div>
+						</f:facet>
+						<ui:include src="screens/screenViewer/dataHelpBody.xhtml" />
+					</t:collapsiblePanel>
+
+					<t:collapsiblePanel
+						value="#{helpViewer.isPanelCollapsedMap['heatMapsHelp']}"
+						var="isCollapsed">
+						<f:facet name="header">
+							<t:div styleClass="subsectionHeader">
+								<t:headerLink immediate="true" styleClass="subsectionHeader">
+									<h:graphicImage
+										value="#{isCollapsed ? &quot;/images/collapsed.png&quot; : &quot;/images/expanded.png&quot;}"
+										styleClass="icon" />
+									<h:outputText value="Heat Maps" styleClass="subsectionHeader" />
+								</t:headerLink>
+							</t:div>
+						</f:facet>
+						<ui:include src="screens/screenViewer/heatMapsHelpBody.xhtml" />
+					</t:collapsiblePanel>
+				</t:div>
+			</t:collapsiblePanel>
+
+
+      <t:collapsiblePanel
+        value="#{helpViewer.isPanelCollapsedMap['cherryPickRequestViewerHelp']}"
+        var="isCollapsed"
+        rendered="#{menu.screener || menu.readAdmin}"
+      >
+        <f:facet name="header">
+          <t:div styleClass="sectionHeader">
+            <t:headerLink immediate="true" styleClass="sectionHeader">
+              <h:graphicImage
+                value="#{isCollapsed ? &quot;/images/collapsed.png&quot; : &quot;/images/expanded.png&quot;}"
+                styleClass="icon"
+              />
+              <h:outputText value="Viewing a Cherry Pick Request" styleClass="sectionHeader" />
+            </t:headerLink>
+          </t:div>
+        </f:facet>
+        <t:aliasBean alias="#{inHelpViewer}" value="true">
+          <ui:include src="cherryPickRequests/cherryPickRequestViewerHelpBody.xhtml" />
+        </t:aliasBean>
+
+        <t:div style="margin-left: 30px">
+
+          <t:collapsiblePanel
+            value="#{helpViewer.isPanelCollapsedMap['cprvScreenSummaryHelp']}"
+            var="isCollapsed"
+          >
+            <f:facet name="header">
+              <t:div styleClass="subsectionHeader">
+                <t:headerLink immediate="true" styleClass="subsectionHeader">
+                  <h:graphicImage
+                    value="#{isCollapsed ? &quot;/images/collapsed.png&quot; : &quot;/images/expanded.png&quot;}"
+                    styleClass="icon"
+                  />
+                  <h:outputText value="Screen Summary" styleClass="subsectionHeader" />
+                </t:headerLink>
+              </t:div>
+            </f:facet>
+            <ui:include src="cherryPickRequests/cherryPickRequestViewer/screenSummaryHelpBody.xhtml" />
+          </t:collapsiblePanel>
+
+          <t:collapsiblePanel
+            value="#{helpViewer.isPanelCollapsedMap['cherryPickRequestSummaryHelp']}"
+            var="isCollapsed"
+          >
+            <f:facet name="header">
+              <t:div styleClass="subsectionHeader">
+                <t:headerLink immediate="true" styleClass="subsectionHeader">
+                  <h:graphicImage
+                    value="#{isCollapsed ? &quot;/images/collapsed.png&quot; : &quot;/images/expanded.png&quot;}"
+                    styleClass="icon"
+                  />
+                  <h:outputText value="Cherry Pick Request Details" styleClass="subsectionHeader" />
+                </t:headerLink>
+              </t:div>
+            </f:facet>
+            <ui:include src="cherryPickRequests/cherryPickRequestViewer/cherryPickRequestDetailsHelpBody.xhtml" />
+          </t:collapsiblePanel>
+
+          <t:collapsiblePanel
+            value="#{helpViewer.isPanelCollapsedMap['screenerCherryPicksHelp']}"
+            var="isCollapsed"
+          >
+            <f:facet name="header">
+              <t:div styleClass="subsectionHeader">
+                <t:headerLink immediate="true" styleClass="subsectionHeader">
+                  <h:graphicImage
+                    value="#{isCollapsed ? &quot;/images/collapsed.png&quot; : &quot;/images/expanded.png&quot;}"
+                    styleClass="icon"
+                  />
+                  <h:outputText value="Screener Cherry Picks" styleClass="subsectionHeader" />
+                </t:headerLink>
+              </t:div>
+            </f:facet>
+            <ui:include src="cherryPickRequests/cherryPickRequestViewer/screenerCherryPicksHelpBody.xhtml" />
+					</t:collapsiblePanel>
+
+          <t:collapsiblePanel
+            value="#{helpViewer.isPanelCollapsedMap['labCherryPicksHelp']}"
+            var="isCollapsed"
+          >
+            <f:facet name="header">
+              <t:div styleClass="subsectionHeader">
+                <t:headerLink immediate="true" styleClass="subsectionHeader">
+                  <h:graphicImage
+                    value="#{isCollapsed ? &quot;/images/collapsed.png&quot; : &quot;/images/expanded.png&quot;}"
+                    styleClass="icon"
+                  />
+                  <h:outputText value="Lab Cherry Picks" styleClass="subsectionHeader" />
+                </t:headerLink>
+              </t:div>
+            </f:facet>
+            <ui:include src="cherryPickRequests/cherryPickRequestViewer/labCherryPicksHelpBody.xhtml" />
+          </t:collapsiblePanel>
+
+          <t:collapsiblePanel
+            value="#{helpViewer.isPanelCollapsedMap['cherryPickPlatesHelp']}"
+            var="isCollapsed"
+          >
+            <f:facet name="header">
+              <t:div styleClass="subsectionHeader">
+                <t:headerLink immediate="true" styleClass="subsectionHeader">
+                  <h:graphicImage
+                    value="#{isCollapsed ? &quot;/images/collapsed.png&quot; : &quot;/images/expanded.png&quot;}"
+                    styleClass="icon"
+                  />
+                  <h:outputText value="Cherry Pick Plates" styleClass="subsectionHeader" />
+                </t:headerLink>
+              </t:div>
+            </f:facet>
+            <ui:include src="cherryPickRequests/cherryPickRequestViewer/cherryPickPlatesHelpBody.xhtml" />
+          </t:collapsiblePanel>
+        </t:div>
+      </t:collapsiblePanel>
+
+			<t:collapsiblePanel
+				value="#{helpViewer.isPanelCollapsedMap['studyViewerHelp']}"
+				var="isCollapsed" rendered="#{menu.screener || menu.readAdmin}">
+				<f:facet name="header">
+					<t:div styleClass="sectionHeader">
+						<t:headerLink immediate="true" styleClass="sectionHeader">
+							<h:graphicImage
+								value="#{isCollapsed ? &quot;/images/collapsed.png&quot; : &quot;/images/expanded.png&quot;}"
+								styleClass="icon" />
+							<h:outputText value="Viewing a Study and its Results"
+								styleClass="sectionHeader" />
+						</t:headerLink>
+					</t:div>
+				</f:facet>
+				<t:aliasBean alias="#{inHelpViewer}" value="true">
+					<ui:include src="screens/studyViewerHelpBody.xhtml" />
+				</t:aliasBean>
+
+				<t:div style="margin-left: 30px">
+
+					<t:collapsiblePanel
+						value="#{helpViewer.isPanelCollapsedMap['studyDetailsHelp']}"
+						var="isCollapsed">
+						<f:facet name="header">
+							<t:div styleClass="subsectionHeader">
+								<t:headerLink immediate="true" styleClass="subsectionHeader">
+									<h:graphicImage
+										value="#{isCollapsed ? &quot;/images/collapsed.png&quot; : &quot;/images/expanded.png&quot;}"
+										styleClass="icon" />
+									<h:outputText value="Study Details"
+										styleClass="subsectionHeader" />
+								</t:headerLink>
+							</t:div>
+						</f:facet>
+						<ui:include src="screens/studyViewer/studyDetailsHelpBody.xhtml" />
+					</t:collapsiblePanel>
+
+					<t:collapsiblePanel
+						value="#{helpViewer.isPanelCollapsedMap['annotationTypesHelp']}"
+						var="isCollapsed">
+						<f:facet name="header">
+							<t:div styleClass="subsectionHeader">
+								<t:headerLink immediate="true" styleClass="subsectionHeader">
+									<h:graphicImage
+										value="#{isCollapsed ? &quot;/images/collapsed.png&quot; : &quot;/images/expanded.png&quot;}"
+										styleClass="icon" />
+									<h:outputText value="Data Columns"
+										styleClass="subsectionHeader" />
+								</t:headerLink>
+							</t:div>
+						</f:facet>
+						<ui:include src="screens/studyViewer/annotationTypesHelpBody.xhtml" />
+					</t:collapsiblePanel>
+
+					<t:collapsiblePanel
+						value="#{helpViewer.isPanelCollapsedMap['annotationDataHelp']}"
+						var="isCollapsed">
+						<f:facet name="header">
+							<t:div styleClass="subsectionHeader">
+								<t:headerLink immediate="true" styleClass="subsectionHeader">
+									<h:graphicImage
+										value="#{isCollapsed ? &quot;/images/collapsed.png&quot; : &quot;/images/expanded.png&quot;}"
+										styleClass="icon" />
+									<h:outputText value="Data" styleClass="subsectionHeader" />
+								</t:headerLink>
+							</t:div>
+						</f:facet>
+						<ui:include src="screens/studyViewer/annotationDataHelpBody.xhtml" />
+					</t:collapsiblePanel>
+</t:div>
+					</t:collapsiblePanel>	
+
+	</t:panelGrid>
+  </h:form>
+
+	</ui:define>
+
+</ui:composition>
+
+</html>

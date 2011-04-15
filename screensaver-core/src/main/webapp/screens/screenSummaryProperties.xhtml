@@ -1,0 +1,102 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+<html xmlns="http://www.w3.org/1999/xhtml"
+	xmlns:ui="http://java.sun.com/jsf/facelets"
+	xmlns:h="http://java.sun.com/jsf/html"
+	xmlns:f="http://java.sun.com/jsf/core"
+	xmlns:t="http://myfaces.apache.org/tomahawk"
+	xmlns:s="http://myfaces.apache.org/sandbox"
+	xmlns:ss="http://screensaver.med.harvard.edu/ui">
+
+<!--
+ facelets parameters:
+  - screen: Screen entity
+  - editable: boolean
+  - editableLabHead: UI fragment (required if 'editable' can be true)
+  - editableLeadScreener: UI fragment (required if 'editable' can be true)
+-->
+
+<ui:composition>
+
+  <ss:property id="facilityId" label="Screen ID"
+    description="The facility-assigned unique identifier for the screen"
+    value="#{screen.facilityId}" editable="#{editable}" required="true" primary="true">
+    <ui:define name="data">
+      <ss:entityLink entity="#{screen}" property="facilityId"
+        viewer="#{screenViewer}" />
+    </ui:define>
+  </ss:property>
+
+  <ss:property id="screenType" label="Screen Type" type="Text"
+		description="'Small Molecule' or 'RNAi'" value="#{screen.screenType}"
+		editable="#{editable &amp;&amp; !screenDetailViewer.entity.dataLoaded}"
+		converter="#{screenTypeConverter}">
+		<ui:define name="editableData">
+			<ui:insert name="editableScreenType">
+      No editableScreenType definition!
+      </ui:insert>
+		</ui:define>
+	</ss:property>
+
+  <ss:property id="projectId" label="Project ID" 
+    description="The project ID shared by this screen" value="#{screen.projectId}"
+    editable="#{editable}" >
+    <ui:define name="data">
+      <t:commandLink id="projectIdLink"
+        action="#{screenViewer.browseProjectScreens}" styleClass="entityLink">
+        <f:param name="projectId" value="#{screenDetailViewer.entity.projectId}" />
+        <t:outputText id="projectIdLinkValue"
+          value="#{screenDetailViewer.entity.projectId}" />
+      </t:commandLink>
+    </ui:define>
+  </ss:property>
+
+  <ss:property id="projectPhase" label="Project Phase"
+    description="'Primary','Counter', or 'Follow-Up'" value="#{screen.projectPhase}"
+    editable="#{editable}"
+    converter="#{projectPhaseConverter}">
+    <ui:define name="editableData">
+      <ui:insert name="editableProjectPhase">
+      No editable Project Phase definition!
+      </ui:insert>
+    </ui:define>
+  </ss:property>
+
+	<!-- "lab name" == last name of "lab head", but former is required for UI, latter is for internal design -->
+	<ss:property id="labName" label="Lab Name" primary="true" 
+		description="The name of the lab carrying out the screen"
+		value="#{screen.labHead}" editable="#{editable}">
+		<ui:define name="data">
+			<ss:labName user="#{screen.labHead}" />
+		</ui:define>
+		<ui:define name="editableData">
+		  <ui:insert name="editableLabHead" >
+		  No editableLabHead definition!
+		  </ui:insert>
+		</ui:define>
+	</ss:property>
+
+	<ss:property id="leadScreener" label="Lead Screener" primary="true" 
+		description="The scientist primarily responsible for carrying out the screen"
+		value="#{screen.leadScreener}" editable="#{editable}">
+		<ui:define name="data">
+			<ss:user user="#{screen.leadScreener}" />
+		</ui:define>
+		<ui:define name="editableData">
+      <ui:insert name="editableLeadScreener" />
+		</ui:define>
+	</ss:property>
+
+	<ss:property id="title" label="Title" type="#{editable ? 'Textarea' : 'Text'}" primary="true" required="true"
+		description="The title of the screen" value="#{screen.title}"
+		editable="#{editable}" editWidth="80" editHeight="3">
+		<ui:define name="valueHeader">
+			<t:outputText
+				rendered="#{screen.screenType.value== 'Small Molecule'}"
+				value="A screen for compounds that..." styleClass="dataText" />
+		</ui:define>
+	</ss:property>
+
+</ui:composition>
+
+</html>

@@ -1,0 +1,44 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+<html xmlns="http://www.w3.org/1999/xhtml"
+	xmlns:ui="http://java.sun.com/jsf/facelets"
+	xmlns:h="http://java.sun.com/jsf/html"
+	xmlns:f="http://java.sun.com/jsf/core"
+	xmlns:t="http://myfaces.apache.org/tomahawk"
+	xmlns:s="http://myfaces.apache.org/sandbox">
+
+<ui:composition>
+
+
+		<p>The Cherry Pick Request Details section of the Cherry Pick Request
+		Viewer page displays detailed information about the Cherry Pick Request.
+		Position your mouse over any of the headers in the left-hand column
+		for a description of what that field contains.</p>
+
+		<p>The Download button allows you to download an Excel spreadsheet
+		containing the Screener Cherry Picks and Lab Cherry Picks data. The
+		contents of the spreadsheet will mirror the data displayed in the data
+		tables of the "Screener Cherry Picks" and "Lab Cherry Picks" sections,
+		but will also include the sequences for the silencing reagents of each
+		well.</p>
+
+	<t:panelGroup visibleOnUserRole="cherryPickRequestsAdmin">
+			<p>As a Cherry Pick Request Administrator, an "Edit"
+			button will be available and when clicked will allow you to edit
+			appropriate fields of the Cherry Pick Request. Note that the
+			following fields will not be editable after the "Reserve Reagent"
+			command (see "Lab Cherry Picks" section) has been invoked: "Requested
+			Volume", "Approved Volume", "Random plate well layout", "Empty
+			columns on plate".</p>
+
+			<p>As a Cherry Pick Request Administrator, a "Delete" button will
+			also be available if the Cherry Pick Request has no Screener Cherry
+			Picks or only has Lab Cherry Picks that are "unfulfilled" (see
+			below). Clicking "Delete" will delete the entire Cherry Pick Request,
+			and cannot be undone. Fortunately, you will be prompted once to
+			confirm your choice before the deletion occurs.</p>
+	</t:panelGroup>
+
+</ui:composition>
+
+</html>

@@ -1,0 +1,229 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+<html xmlns="http://www.w3.org/1999/xhtml"
+  xmlns:ui="http://java.sun.com/jsf/facelets"
+  xmlns:h="http://java.sun.com/jsf/html"
+  xmlns:f="http://java.sun.com/jsf/core"
+  xmlns:t="http://myfaces.apache.org/tomahawk"
+  xmlns:s="http://myfaces.apache.org/sandbox"
+  xmlns:ss="http://screensaver.med.harvard.edu/ui">
+
+<!--
+TODO:
+- add URL field
+-->
+
+<ui:composition template="/util/entityViewerDetails.xhtml">
+
+  <ui:param name="entity" value="#{studyDetailViewer.entity}" />
+  <ui:param name="viewer" value="#{studyDetailViewer}" />
+  <ui:param name="hideId" value="#{true}" />
+
+<!--  TODO: This file is being adapted for studyviewer from the screenviewer - sde4 -->
+
+  <!--  todo: this section left from the screenViewer: will there be admin only functions with the study view? -sde 
+  <ui:define name="entityCommands">
+    <h:commandLink id="viewAdminOnlyFieldsCommand"
+      value="#{studyDetailViewer.adminViewMode ? 'Admin &lt;&lt;' : 'Admin &gt;&gt;'}"
+      rendered="#{(studyDetailViewer.editable || studyDetailViewer.readAdmin) &amp;&amp; !studyDetailViewer.editMode}"
+      action="#{studyDetailViewer.toggleAdminViewMode}"
+      styleClass="dataText adminOnly"
+      title="Show or hide administrative fields for the study" />
+  </ui:define>
+-->
+
+<!--  TODO: This file is being adapted for studyviewer from the screenviewer
+       see old: StudyDetailViewer.xhtml 
+ -->
+  
+  <ui:define name="propertiesContent">
+    <ss:studySummaryProperties study="#{studyDetailViewer.entity}"
+      editable="false">
+    </ss:studySummaryProperties>
+
+  <ss:property id="studyType" label="Study Type"
+    value="#{studyDetailViewer.entity.studyType}"
+    rendered="true"
+    adminOnly="false" editable="#{studyDetailViewer.editMode}"
+    description="'In Vitro' or 'In Silico'" type="Text"
+    editWidth="80" editHeight="3" />
+
+  <ss:property id="libraryType" label="Library Screen Type"
+    value="#{studyDetailViewer.entity.screenType}"
+    rendered="true"
+    adminOnly="false" editable="#{studyDetailViewer.editMode}"
+    description="'Small Molecule' or 'RNAi'" type="Text"
+    editWidth="80" editHeight="3" />
+
+  <!-- TODO: Remove as there is no method for creating collaborators - sde4
+  <ss:property id="collaborators" label="Collaborators"
+    description="Other users involved in carrying out the study">
+    <ui:define name="data">
+      <ss:collectionTable id="collaboratorsTable"
+        editable="#{studyDetailViewer.editMode}"
+        dataModel="#{studyDetailViewer.collaboratorsDataModel}"
+        actionBean="#{studyDetailViewer}" addAction="addCollaborator"
+        deleteAction="deleteCollaborator">
+        <ui:define name="columns">
+          <t:column>
+            <ss:user user="#{element}" />
+          </t:column>
+        </ui:define>
+        <ui:define name="addProperties">
+          <t:selectOneMenu id="collaboratorsEditable"
+            value="#{studyDetailViewer.newCollaborator.value}"
+            rendered="#{studyDetailViewer.editMode}"
+            styleClass="inputText selectMenu">
+            <f:selectItems
+              value="#{studyDetailViewer.newCollaborator.selectItems}" />
+          </t:selectOneMenu>
+        </ui:define>
+      </ss:collectionTable>
+    </ui:define>
+  </ss:property>
+  -->
+
+  <ss:property id="summary" label="Summary"
+    value="#{studyDetailViewer.entity.summary}"
+    rendered="true"
+    editable="#{studyDetailViewer.editMode}"
+    description="A summary of the screen" type="Textarea"
+    />
+    
+  <ss:property id="url" label="Home Page"
+    value="#{studyDetailViewer.entity.url}"
+    rendered="true"
+    editable="#{studyDetailViewer.editMode}"
+    description="A URL for the home page of the study" type="Text"
+    editWidth="80" editHeight="6" />
+      
+  <!-- TODO: Remove as there is no method for creating publications - sde4
+  <ss:property id="publications" label="Publications"
+    description="Publications reporting results of the screen">
+    <ui:define name="data">
+      <ss:collectionTable id="publicationsTable"
+        dataModel="#{studyDetailViewer.publicationsDataModel}"
+        editable="#{studyDetailViewer.editMode}"
+        actionBean="#{studyDetailViewer}" addAction="addPublication"
+        deleteAction="deletePublication">
+        <ui:define name="columns">
+          <t:column>
+            <f:facet name="header">
+              <t:outputText value="Pubmed ID" />
+            </f:facet>
+            <h:outputLink
+              value="http://www.ncbi.nlm.nih.gov/entrez/query.fcgi">
+              <f:param name="cmd" value="Search" />
+              <f:param name="db" value="PubMed" />
+              <f:param name="term" value="#{element.pubmedId}[PMID]" />
+              <t:outputText value="#{element.pubmedId}" />
+            </h:outputLink>
+          </t:column>
+          <t:column>
+            <f:facet name="header">
+              <t:outputText value="PMCID" />
+            </f:facet>
+            <h:outputLink
+              value="http://www.ncbi.nlm.nih.gov/entrez/query.fcgi">
+              <f:param name="cmd" value="Search" />
+              <f:param name="db" value="pmc" />
+              <f:param name="term" value="#{element.pubmedCentralId}[UID]" />
+              <t:outputText value="#{element.pubmedCentralId}"
+                converter="#{pubmedCentralIdConverter}" />
+            </h:outputLink>
+          </t:column>
+          <t:column>
+            <f:facet name="header">
+              <t:outputText value="Citation" />
+            </f:facet>
+            <t:outputText value="#{element.citation}"
+              styleClass="dataText" />
+          </t:column>
+          <t:column>
+            <f:facet name="header">
+              <t:outputText value="File" />
+            </f:facet>
+            <t:commandLink id="downloadPublicationAttachedFileCommandLink"
+              value="#{element.attachedFile.filename}"
+              action="#{studyDetailViewer.downloadPublicationAttachedFile}"
+              styleClass="dataText" />
+          </t:column>
+        </ui:define>
+      </ss:collectionTable>
+    </ui:define>
+    <ui:define name="addProperties">
+      <t:panelGrid columns="2" styleClass="layoutPanel"
+        columnClasses="propertyLabelColumn,column">
+        <t:outputText value="PubMed ID" styleClass="label" />
+        <t:panelGroup styleClass="layoutPanel">
+          <t:inputText id="publicationPubMedId"
+            value="#{studyDetailViewer.newPublication.pubmedId}"
+            styleClass="inputText">
+            <f:converter converterId="javax.faces.Integer" />
+          </t:inputText>
+          <t:commandButton id="#{id}LookupPubMedIdCommand"
+            value="Lookup PubMed ID"
+            action="#{studyDetailViewer.lookupPublicationByPubMedId}"
+            styleClass="command" />
+        </t:panelGroup>
+        <t:outputText value="PMCID" styleClass="label" />
+        <t:panelGroup styleClass="layoutPanel">
+          <t:inputText id="publicationPubMedCentralId"
+            value="#{studyDetailViewer.newPublication.pubmedCentralId}"
+            styleClass="inputText" converter="#{pubmedCentralIdConverter}">
+          </t:inputText>
+          <h:outputLink 
+            value="http://www.ncbi.nlm.nih.gov/sites/pmctopmid" target="_blank">
+            <t:outputText value="Find PMCID for PMID..." />
+          </h:outputLink>
+        </t:panelGroup>
+        <t:outputText value="Title" styleClass="label" />
+        <t:inputText id="publicationTitle"
+          value="#{studyDetailViewer.newPublication.title}" size="80"
+          styleClass="inputText" />
+        <t:outputText value="Authors" styleClass="label" />
+        <t:inputText id="publicationAuthors"
+          value="#{studyDetailViewer.newPublication.authors}"
+          size="80" styleClass="inputText" />
+        <t:outputText value="Journal" styleClass="label" />
+        <t:inputText id="publicationJournal"
+          value="#{studyDetailViewer.newPublication.journal}"
+          size="80" styleClass="inputText" />
+        <t:outputText value="Volume" styleClass="label" />
+        <t:inputText id="publicationVolume"
+          value="#{studyDetailViewer.newPublication.volume}"
+          styleClass="inputText" />
+        <t:outputText value="Year" styleClass="label" />
+        <t:inputText id="publicationYear"
+          value="#{studyDetailViewer.newPublication.yearPublished}"
+          maxlength="4" styleClass="inputText" />
+        <t:outputText value="Pages" styleClass="label" />
+        <t:inputText id="publicationPages"
+          value="#{studyDetailViewer.newPublication.pages}"
+          styleClass="inputText" />
+        <ss:property id="uploadPublicationAttachedFile"
+          label="Upload File" adminOnly="true">
+          <ui:define name="editableData">
+            <t:inputFileUpload id="uploadPublicationAttachedFile"
+              value="#{studyDetailViewer.uploadedPublicationAttachedFileContents}"
+              styleClass="inputText" />
+          </ui:define>
+        </ss:property>
+      </t:panelGrid>
+    </ui:define>
+  </ss:property>
+  -->
+    
+  <ss:property id="comments" label="Comments"
+    value="#{studyDetailViewer.entity.comments}"
+    rendered="{studyDetailViewer.readAdmin}"
+    editable="#{studyDetailViewer.editMode}"
+    description="Administrative comments" type="Textarea"
+    editWidth="80" editHeight="3" />
+
+  </ui:define>
+
+</ui:composition>
+
+</html>
+

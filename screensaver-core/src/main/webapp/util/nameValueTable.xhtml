@@ -1,0 +1,106 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml"
+	xmlns:ui="http://java.sun.com/jsf/facelets"
+	xmlns:h="http://java.sun.com/jsf/html"
+	xmlns:f="http://java.sun.com/jsf/core"
+	xmlns:t="http://myfaces.apache.org/tomahawk"
+	xmlns:s="http://myfaces.apache.org/sandbox">
+  
+  <!-- 
+    facelets params:
+    - id
+    - value: a DataTableModel wrapping a List of SimpleCells
+   -->
+
+<ui:composition>
+
+	<h:form id="#{id}NameValueTableForm">
+    <t:dataTable id="#{id}NameValueTable"
+      value="#{value}" var="rowValue"
+      styleClass="standardTable"
+      columnClasses="propertyLabelColumn, greedyColumn" width="100%">
+      <t:column styleClass=".hiddenColumn" groupBy="true" rendered="#{rowValue.metaInformationAvailable}" >
+        <h:outputText value="#{rowValue.groupId}"
+          styleClass="propertyLabel" escape="false" />
+		    <t:dataTable id="#{id}NameValueTableHeader"
+		      value="#{rowValue.metaInformation}" var="summaryRowValue"
+		      styleClass="standardTable, greedyTable"
+		      columnClasses="propertyLabelColumn, greedyColumn">
+		      <t:column >
+		        <h:outputText value="#{summaryRowValue.title}"  
+		          title="#{summaryRowValue.title}"
+		          styleClass="propertyLabel" escape="false" />
+		      </t:column>
+		      <t:column>
+						<t:commandLink disabled="#{! summaryRowValue.commandLink}" 
+							action="#{summaryRowValue.cellAction}">
+						  <t:outputText id="text" value="#{summaryRowValue.value}" 
+						    styleClass="dataText" />
+						</t:commandLink>  
+		      </t:column>
+		    </t:dataTable>
+      </t:column>
+       <!-- note, inserting a hidden, empty column so that the column shading scheme is not altered
+           by the grouping info column  (even: shaded, odd: no shading) -->
+       <t:column width="0" styleClass="hiddenColumn" rendered="#{rowValue.metaInformationAvailable}" ></t:column>
+      <t:column >
+        <t:outputText value="#{rowValue.title}"
+          
+          styleClass="propertyLabel" escape="false" />
+      </t:column>
+      <t:column >
+        <h:outputText value="#{rowValue.value}"
+          rendered="true"
+          styleClass="propertyValue dataText" />
+<!-- 
+        <h:outputText value="#{rowValue}"
+          rendered="#{value.isUnescapedTextValue}"
+          escape="false" styleClass="propertyValue dataText" />
+
+        <h:commandLink action="#{value.action}"
+          value="#{rowValue}" rendered="#{value.isCommandValue}"
+          styleClass="propertyValue dataText">
+          <f:param name="actionValue" value="#{rowValue}" />
+        </h:commandLink>
+
+        <h:outputLink value="#{value.link[rowValue]}"
+          rendered="#{value.isLinkValue}" target="_blank"
+          styleClass="propertyValue dataText">
+          <h:outputText value="#{rowValue}" />
+        </h:outputLink>
+
+        <t:graphicImage url="#{rowValue}"
+          rendered="#{value.isImageValue}" style="float: left;">
+        </t:graphicImage>
+
+        <t:dataList id="textList" var="eltValue" value="#{rowValue}"
+          layout="simple" rendered="#{value.isTextListValue}"
+          rowIndexVar="eltIndex" rowCountVar="eltCount">
+          <t:outputText value="#{eltValue}"
+            styleClass="propertyValue dataText" />
+          <h:outputText value=";"
+            rendered="#{eltIndex &lt; eltCount - 1}"
+            styleClass="propertyValue dataText" />
+        </t:dataList>
+        
+        <t:dataList id="linkList" var="eltValue" value="#{rowValue}"
+          layout="simple" rendered="#{value.isLinkListValue}"
+          rowIndexVar="eltIndex" rowCountVar="eltCount">
+          <h:outputLink value="#{value.link[eltValue]}"
+            target="_blank">
+            <h:outputText value="#{eltValue}"
+              styleClass="propertyValue dataText" />
+          </h:outputLink>
+          <h:outputText value=";"
+            rendered="#{eltIndex &lt; eltCount - 1}"
+            styleClass="propertyValue dataText" />
+        </t:dataList>
+-->        
+      </t:column>
+    </t:dataTable>
+
+  </h:form>
+
+</ui:composition>
+
+</html>

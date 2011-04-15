@@ -1,0 +1,47 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<!--
+   $HeadURL$
+   $Id$
+
+   Copyright © 2006, 2010 by the President and Fellows of Harvard College.
+   
+   Screensaver is an open-source project developed by the ICCB-L and NSRB labs
+   at Harvard Medical School. This software is distributed under the terms of
+   the GNU General Public License.
+-->
+
+<!-- A top-level, composite Spring context configuration file, intended for use with the 
+  Screensaver web application.  Allows a full Spring configuration to be referenced via a 
+  single file. -->
+
+<beans
+  xmlns="http://www.springframework.org/schema/beans"
+  xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+  xmlns:aop="http://www.springframework.org/schema/aop"
+  xsi:schemaLocation="http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans-2.0.xsd
+                      http://www.springframework.org/schema/aop http://www.springframework.org/schema/aop/spring-aop-2.0.xsd">
+                      
+
+  <import resource="spring-context-test.xml"/>
+  
+  <bean
+    id="currentScreensaverUser"
+    class="edu.harvard.med.screensaver.ui.WebCurrentScreensaverUser"
+    scope="session">
+    <property
+      name="dao"
+      ref="genericEntityDao" />
+    <aop:scoped-proxy />
+  </bean>
+  
+  <bean
+    id="entityViewPolicy"
+    class="edu.harvard.med.iccbl.screensaver.policy.IccblEntityViewPolicy"
+    scope="prototype">
+    <constructor-arg ref="currentScreensaverUser" />
+    <constructor-arg ref="genericEntityDao" />
+  </bean>
+
+
+</beans>

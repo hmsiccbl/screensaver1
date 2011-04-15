@@ -1,0 +1,6 @@
+Filename	Plate	Replicate	Channel
+P1R1C1.txt	1	1	1
+P1R2C1.txt	1	2	1
+P2R1C1.txt	2	1	1
+P2R2C1.txt	2	2	1
+

@@ -1,0 +1,363 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<wsdl:definitions name="MoleculeWebService" targetNamespace="http://edu.mit.broad.chembank.shared.mda.webservices.service" xmlns:impl="http://edu.mit.broad.chembank.shared.mda.webservices.service" xmlns:wsdl="http://schemas.xmlsoap.org/wsdl/" xmlns:wsdlsoap="http://schemas.xmlsoap.org/wsdl/soap/" xmlns:xsd="http://www.w3.org/2001/XMLSchema">
+
+
+    <!-- WSDL Types -->
+
+     <wsdl:types>
+
+          <xsd:schema elementFormDefault="qualified" targetNamespace="http://edu.mit.broad.chembank.shared.mda.webservices.service" xmlns="http://www.w3.org/2001/XMLSchema">
+
+               <xsd:element name="findBySimilarity">
+
+                    <xsd:annotation>
+
+                         <xsd:documentation>
+
+                        
+                         </xsd:documentation>
+
+                    </xsd:annotation>
+
+                    <xsd:complexType>
+
+                         <xsd:sequence>
+
+                              <xsd:element name="smiles" nillable="false" type="xsd:string">
+
+                                   <xsd:annotation>
+
+                                        <xsd:documentation>
+
+                                    
+                                        </xsd:documentation>
+
+                                   </xsd:annotation>
+
+                              </xsd:element>
+
+                              <xsd:element name="threshold" nillable="false" type="xsd:double">
+
+                                   <xsd:annotation>
+
+                                        <xsd:documentation>
+
+                                    
+                                        </xsd:documentation>
+
+                                   </xsd:annotation>
+
+                              </xsd:element>
+
+                         </xsd:sequence>
+
+                    </xsd:complexType>
+
+               </xsd:element>
+
+               <xsd:element name="findBySimilarityResponse">
+
+                    <xsd:complexType>
+
+                         <xsd:sequence>
+
+                              <xsd:element name="findBySimilarityReturn" type="impl:ArrayOfMolecule"/>
+
+                         </xsd:sequence>
+
+                    </xsd:complexType>
+
+               </xsd:element>
+
+               <xsd:element name="findBySimilarityFault1" nillable="true" type="impl:WebServiceException"/>
+
+               <xsd:element name="findBySubstructure">
+
+                    <xsd:annotation>
+
+                         <xsd:documentation>
+
+                        
+                         </xsd:documentation>
+
+                    </xsd:annotation>
+
+                    <xsd:complexType>
+
+                         <xsd:sequence>
+
+                              <xsd:element name="smilesOrSmarts" nillable="false" type="xsd:string">
+
+                                   <xsd:annotation>
+
+                                        <xsd:documentation>
+
+                                    
+                                        </xsd:documentation>
+
+                                   </xsd:annotation>
+
+                              </xsd:element>
+
+                         </xsd:sequence>
+
+                    </xsd:complexType>
+
+               </xsd:element>
+
+               <xsd:element name="findBySubstructureResponse">
+
+                    <xsd:complexType>
+
+                         <xsd:sequence>
+
+                              <xsd:element name="findBySubstructureReturn" type="impl:ArrayOfMolecule"/>
+
+                         </xsd:sequence>
+
+                    </xsd:complexType>
+
+               </xsd:element>
+
+               <xsd:element name="findBySubstructureFault1" nillable="true" type="impl:WebServiceException"/>
+
+               <xsd:complexType name="WebServiceException">
+
+                    <xsd:annotation>
+
+                         <xsd:documentation>
+
+                        
+                         </xsd:documentation>
+
+                    </xsd:annotation>
+
+               </xsd:complexType>
+
+               <xsd:complexType name="Molecule">
+
+                    <xsd:annotation>
+
+                         <xsd:documentation>
+
+                        
+                         </xsd:documentation>
+
+                    </xsd:annotation>
+
+                    <xsd:sequence>
+
+                         <xsd:element name="chembankId" nillable="false" type="xsd:string">
+
+                              <xsd:annotation>
+
+                                   <xsd:documentation>
+
+                                
+                                   </xsd:documentation>
+
+                              </xsd:annotation>
+
+                         </xsd:element>
+
+                         <xsd:element name="inchi" nillable="false" type="xsd:string">
+
+                              <xsd:annotation>
+
+                                   <xsd:documentation>
+
+                                
+                                   </xsd:documentation>
+
+                              </xsd:annotation>
+
+                         </xsd:element>
+
+                         <xsd:element name="smiles" nillable="false" type="xsd:string">
+
+                              <xsd:annotation>
+
+                                   <xsd:documentation>
+
+                                
+                                   </xsd:documentation>
+
+                              </xsd:annotation>
+
+                         </xsd:element>
+
+                    </xsd:sequence>
+
+               </xsd:complexType>
+
+               <xsd:complexType name="ArrayOfMolecule">
+
+                    <xsd:sequence>
+
+                         <xsd:element form="qualified" maxOccurs="unbounded" minOccurs="0" name="molecule" type="impl:Molecule"/>
+
+                    </xsd:sequence>
+
+               </xsd:complexType>
+
+          </xsd:schema>
+
+     </wsdl:types>
+
+
+    <!-- Messages -->
+
+     <wsdl:message name="findBySimilarity1Request">
+
+          <wsdl:part element="impl:findBySimilarity" name="parameters"/>
+
+     </wsdl:message>
+
+     <wsdl:message name="findBySimilarity1Response">
+
+          <wsdl:part element="impl:findBySimilarityResponse" name="parameters"/>
+
+     </wsdl:message>
+
+     <wsdl:message name="findBySimilarity1Fault1">
+
+          <wsdl:part element="impl:findBySimilarityFault1" name="fault"/>
+
+     </wsdl:message>
+
+     <wsdl:message name="findBySubstructure2Request">
+
+          <wsdl:part element="impl:findBySubstructure" name="parameters"/>
+
+     </wsdl:message>
+
+     <wsdl:message name="findBySubstructure2Response">
+
+          <wsdl:part element="impl:findBySubstructureResponse" name="parameters"/>
+
+     </wsdl:message>
+
+     <wsdl:message name="findBySubstructure2Fault1">
+
+          <wsdl:part element="impl:findBySubstructureFault1" name="fault"/>
+
+     </wsdl:message>
+
+
+    <!-- Port Type -->
+
+     <wsdl:portType name="MoleculeWebService">
+
+          <wsdl:operation name="findBySimilarity">
+
+
+               <wsdl:documentation>
+
+                
+               </wsdl:documentation>
+
+               <wsdl:input message="impl:findBySimilarity1Request" name="findBySimilarity1Request"/>
+
+               <wsdl:output message="impl:findBySimilarity1Response" name="findBySimilarity1Response"/>
+
+
+               <wsdl:fault message="impl:findBySimilarity1Fault1" name="findBySimilarity1Fault1"/>
+
+          </wsdl:operation>
+
+          <wsdl:operation name="findBySubstructure">
+
+
+               <wsdl:documentation>
+
+                
+               </wsdl:documentation>
+
+               <wsdl:input message="impl:findBySubstructure2Request" name="findBySubstructure2Request"/>
+
+               <wsdl:output message="impl:findBySubstructure2Response" name="findBySubstructure2Response"/>
+
+
+               <wsdl:fault message="impl:findBySubstructure2Fault1" name="findBySubstructure2Fault1"/>
+
+          </wsdl:operation>
+
+     </wsdl:portType>
+
+
+    <!-- WSDL Binding -->
+
+     <wsdl:binding name="MoleculeWebServiceSoapBinding" type="impl:MoleculeWebService">
+
+          <wsdlsoap:binding style="document" transport="http://schemas.xmlsoap.org/soap/http"/>
+
+          <wsdl:operation name="findBySimilarity">
+
+               <wsdlsoap:operation soapAction="findBySimilarity" style="document"/>
+
+               <wsdl:input name="findBySimilarity1Request">
+
+                    <wsdlsoap:body use="literal"/>
+
+               </wsdl:input>
+
+               <wsdl:output name="findBySimilarity1Response">
+
+                    <wsdlsoap:body use="literal"/>
+
+               </wsdl:output>
+
+               <wsdl:fault name="findBySimilarity1Fault1">
+
+                    <wsdlsoap:fault name="findBySimilarity1Fault1" use="literal"/>
+
+               </wsdl:fault>
+
+         </wsdl:operation>
+
+          <wsdl:operation name="findBySubstructure">
+
+               <wsdlsoap:operation soapAction="findBySubstructure" style="document"/>
+
+               <wsdl:input name="findBySubstructure2Request">
+
+                    <wsdlsoap:body use="literal"/>
+
+               </wsdl:input>
+
+               <wsdl:output name="findBySubstructure2Response">
+
+                    <wsdlsoap:body use="literal"/>
+
+               </wsdl:output>
+
+               <wsdl:fault name="findBySubstructure2Fault1">
+
+                    <wsdlsoap:fault name="findBySubstructure2Fault1" use="literal"/>
+
+               </wsdl:fault>
+
+         </wsdl:operation>
+
+     </wsdl:binding>
+
+
+    <!-- Service Definition -->
+
+     <wsdl:service name="MoleculeWebService">
+
+          <wsdl:documentation>
+
+            
+          </wsdl:documentation>
+
+          <wsdl:port binding="impl:MoleculeWebServiceSoapBinding" name="MoleculeWebService">
+
+               <wsdlsoap:address location="http://chembank.broadinstitute.org/webservices/MoleculeWebService"/>
+
+          </wsdl:port>
+
+     </wsdl:service>
+
+
+</wsdl:definitions>

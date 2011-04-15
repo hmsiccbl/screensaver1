@@ -1,0 +1,11 @@
+Package: cellHTS2Db
+Version: 1.0
+Date: 14 October 2010
+Title: CellHTS2 input functions for database
+Author: Cor Lieftink <c.lieftink@nki.nl>
+Maintainer: Cor Lieftink <c.lieftink@nki.nl>
+Depends: R (>= 2.10.1), cellHTS2 (>= 2.10.5)
+Description: CellHTS2 input functions for database
+License: Artistic License 2.0
+	
+Packaged: 14 October 2010

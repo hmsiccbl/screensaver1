@@ -1,0 +1,701 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+  $HeadURL$
+  $Id$
+
+  Copyright © 2006, 2010 by the President and Fellows of Harvard College.
+
+  Screensaver is an open-source project developed by the ICCB-L and NSRB labs
+  at Harvard Medical School. This software is distributed under the terms of
+  the GNU General Public License.
+-->
+
+<project name="Screensaver" default="build" basedir=".">
+
+	<description>
+    Screensaver build file. Handles 1) build/deploy of Screensaver web application
+    and 2) install of Screensaver Utilities (command-line applications).
+  </description>
+
+	<!-- properties -->
+
+	<property file="${screensaver.properties.file}"
+            description="The properties file that specifies the build and runtime screensaver properties. See examples in cfg/ directory. Must be specified on the command line!"
+  />
+	<property name="app.name"
+            value="screensaver"
+            description="used to define distribution file names, deployment directories, default database name, etc."
+  />
+	<property name="debug"
+            description="controls whether tasks should be 'debug-aware'; provides a short-hand command-line option for setting all *.debug options appropriately"
+            value="true"
+  />
+	<property name="javac.debug"
+            description="controls whether Java compilation generates debug information in class files"
+            value="${debug}"
+  />
+	<property name="javac.optimize"
+            value="true"
+            description="controls whether Java compilation generates debug information in class files"
+  />
+	<condition property="javac.optimize" value="true" else="false">
+		<isfalse value="${debug}" />
+	</condition>
+	
+	<property name="verbose"
+            value="false"
+            description="controls verbosity of various Ant tasks"
+  />
+	<property environment="env" />
+	<property name="appserver.dir" location="${env.CATALINA_BASE}" />
+	<property name="appserver.app.work.dir"
+            location="${appserver.dir}/work/Catalina/localhost/${app.name}"
+  />
+	<property name="deploy.dir" location="${appserver.dir}/webapps/${app.name}" />
+	<property name="appserver.start.cmd"
+            value="${appserver.dir}/bin/catalina.sh"
+  />
+	<property name="appserver.stop.cmd"
+            value="${appserver.dir}/bin/shutdown.sh"
+  />
+	<condition property="appserver.jprofiler.opts"
+             value="-agentlib:jprofilerti -Xbootclasspath/a:/usr/local/dev/jprofiler/bin/agent.jar"
+             else=""
+  >
+		<istrue value="${profile}" />
+	</condition>
+	<condition property="appserver.java.opts"
+             value="-Xmx800M -XX:MaxPermSize=256M -ea"
+             else="-Xmx800M"
+  >
+		<istrue value="${debug}" />
+	</condition>
+	<condition property="appserver.start.cmd.options"
+             value="jpda start"
+             else="start"
+  >
+		<istrue value="${debug}" />
+	</condition>
+	<property name="src.dir" location="src" />
+	<property name="test.src.dir" location="test" />
+  <property name="contrib.dir" location="contrib" />
+	<property name="hibernate.cfg.xml" location="resources/hibernate.cfg.xml" />
+	<property name="build.dir" location="build" />
+	<property name="javadoc.dir" location="${build.dir}/api" />
+	<property name="install.dir" location="${build.dir}/${app.name}" />
+	<property name="ddl.build.dir" location="${build.dir}/ddl" />
+	<property name="test.build.dir" location="${build.dir}/test" />
+	<property name="test.coverage.build.dir" location="${build.dir}/test/coverage" />
+	<property name="cobertura.datafile" value="${test.coverage.build.dir}/cobertura.ser" />
+	<property name="jar" value="${build.dir}/${app.name}.jar" />
+	<property name="jar.build.dir" location="${build.dir}/jar" />
+	<property name="war.build.dir" location="${build.dir}/war" />
+	<property name="war" value="${build.dir}/${app.name}.war" />
+	<property name="distro.file" location="${build.dir}/${app.name}.tgz" />
+	<property name="loginmodule.config.filename" value="login.config" />
+	<property name="deployed.loginmodule.config.file"
+            location="${appserver.dir}/conf/${loginmodule.config.filename}"
+  />
+	<property name="dev.loginmodule.config.file"
+            location="cfg/tomcat/conf/${loginmodule.config.filename}"
+  />
+  <property name="build.number" value="-1" />
+  <property name="release.notes.file" value="changelog.html" />
+	<!-- The servlet authentication method to use.  If set to BASIC, facilitates UI testing by not requiring re-login,
+       as browser can cache user name and password and re-issue between web server restarts.  FORM is used for
+       production deployment.  Defaults to BASIC if debug property is true. -->
+	<condition property="servlet.authentication.method" value="FORM" else="BASIC">
+		<isfalse value="${debug}" />
+	</condition>
+
+
+	<!-- file sets -->
+
+	<fileset id="build.lib.fileset"
+           dir="lib"
+           description="JAR library files needed to build the project."
+  >
+		<include name="**/*.jar" />
+	</fileset>
+
+	<fileset id="deploy.lib.fileset"
+           dir="lib"
+           description="JAR library files needed to run the project on a web application server (may exclude JAR files that are known to be provided by the web application server)."
+  >
+		<include name="**/*.jar" />
+		<!-- exclude libs that are only needed during development/testing/etc. -->
+		<exclude name="**/.dev/**" />
+		<exclude name="testing/**" />
+		<!-- javax.servlet.jar will be explicitly ignored by any servlet container
+    that obeys the 2.3 Servlet specification (sec 9.7.2). We should exclude
+    it, but command line apps currently have a (unwanted) dependency on it
+    right now. [-ant 10/26/06] -->
+		<!--exclude name="**/javax.servlet.jar"/-->
+	</fileset>
+
+	<fileset id="pilot-build.lib.fileset"
+	           dir="lib"
+	           description="JAR library files needed to build the project."
+	  >
+	  <include name="pipelinepilot/*.jar" />
+    <include name="util/jaxws-2.1.3-20071218/**/*.jar" />
+    <include name="util/log4j*.jar" />
+	</fileset>
+
+	<!-- TODO: should also check endorsed libs when setting this uptodate property -->
+	<uptodate property="tomcat.configured"
+            targetfile="${deployed.loginmodule.config.file}"
+  >
+		<srcfiles file="${dev.loginmodule.config.file}" />
+	</uptodate>
+
+
+	<!-- classpaths -->
+
+	<path id="project.sourcepath" path="${src.dir}" />
+
+	<path id="build.library.path">
+		<fileset refid="build.lib.fileset" />
+	</path>
+
+  <path id="pilot-build.library.path">
+    <fileset refid="pilot-build.lib.fileset" />
+  </path>
+	
+	<path id="hibernatetools.classpath">
+		<path refid="build.library.path" />
+		<pathelement path="${ddl.build.dir}/classes" />
+	</path>
+
+	<path id="cobertura.classpath">
+		<fileset dir="lib/testing/cobertura">
+			<include name="*.jar" />
+		</fileset>
+	</path>
+
+	<!-- build and deploy -->
+
+	<target name="tomcat-config" unless="tomcat.configured">
+		<fail message="Tomcat installation (at '${appserver.dir}') has not been properly configured for Screensaver OR Screensaver-specific files in Tomcat installation have become out-of-date, relative to the Screensaver development directory.  Please see https://wiki.med.harvard.edu/ICCBL/Screensaver/InstallationGuide."
+    />
+	</target>
+
+	<target name="delete-images-dir" 
+	  description="delete the images directory, except for the structure-images subdirectory" >
+		<!--Note: 
+		  1. avoids using fileset scanner to selectively delete (takes too long with all the images in structure-images)
+		  2. it appears that there is no way to rename a dir with ant's move task, (you can do it if you set up a scanner, to grab all the files and move _them_)
+		 -->
+		<move failonerror="false" file="${deploy.dir}/images/structure-images" todir="${deploy.dir}/" />
+    <delete dir="${deploy.dir}/images" />
+		<mkdir dir="${deploy.dir}/images"/>
+    <move failonerror="false" file="${deploy.dir}/structure-images/" todir="${deploy.dir}/images/"  />
+	</target>
+	
+	<target name="deploy" depends="tomcat-config,delete-images-dir">
+		<description>
+      Deploy Screensaver to localhost web application server, building the exploded WAR deployment directly in its destination directory (avoids building a .war file)
+    </description>
+		<delete dir="${appserver.app.work.dir}" />
+		<antcall target="exploded.war">
+			<param name="exploded.war.dir" location="${deploy.dir}" />
+		</antcall>
+		<antcall target="set.servlet.authentication.method">
+			<param name="exploded.war.dir" location="${deploy.dir}" />
+		</antcall>
+	  
+	  <copy file="${release.notes.file}"
+	        todir="${deploy.dir}/main/"
+	        verbose="${verbose}"
+	        failonerror="false"
+	  />
+
+	</target>
+
+  <target name="set.servlet.authentication.method">
+		<replace file="${exploded.war.dir}/WEB-INF/web.xml"
+             token="FORM"
+             value="${servlet.authentication.method}"
+    />
+	</target>
+
+
+	<target name="deploy-ui">
+		<description>Deploy just the web UI definition files, for quick testing of UI edits during development cycle.</description>
+		<antcall target="copy-ui">
+			<param name="exploded.war.dir" location="${deploy.dir}" />
+		</antcall>
+	</target>
+
+	<target name="copy-ui">
+		<description>Internal target to copy UI definition files (*.xhtml), and related resources (css stylesheets, images),
+      to directory specified by 'exploded.war.dir'</description>
+		<!-- if we were to copy UI files below WEB-INF we have to map each of them in our web.xml file,
+    to allow them to be accessed -->
+		<copy todir="${exploded.war.dir}" overwrite="true" verbose="${verbose}">
+			<fileset dir="ui" includes="**/*" />
+		</copy>
+
+		<copy todir="${exploded.war.dir}/css" verbose="${verbose}">
+			<fileset dir="web/css" />
+		</copy>
+
+		<copy todir="${exploded.war.dir}/images" verbose="${verbose}">
+			<fileset dir="web/images" />
+		</copy>
+
+	</target>
+
+
+	<target name="jar">
+		<description>
+      Build Screensaver into a JAR
+    </description>
+		<delete dir="${jar.build.dir}" />
+		<delete file="${jar}" />
+		<antcall target="build">
+			<param name="build.dir" location="${jar.build.dir}" />
+		</antcall>
+		<jar destfile="${jar}" basedir="${jar.build.dir}/classes" />
+	</target>
+
+	<target name="war">
+		<description>
+      Build Screensaver into a Web ARchive (WAR) file.
+    </description>
+		<delete dir="${war.build.dir}" />
+		<delete file="${war}" />
+		<antcall target="exploded.war">
+			<param name="exploded.war.dir" location="${war.build.dir}" />
+		</antcall>
+		<jar destfile="${war}" basedir="${war.build.dir}" />
+	</target>
+
+
+	<target name="exploded.war">
+		<description>
+      A "subroutine" target that generates an exploded Web ARchive (WAR)
+      directory structure for the Screensaver web application.
+      Used to 1) create a WAR file, and 2) build an exploded WAR
+      directory structure directly to a localhost application server.
+    </description>
+		<property name="webinf.dir" value="${exploded.war.dir}/WEB-INF" />
+		<property name="classes.dir" value="${webinf.dir}/classes" />
+
+		<antcall target="build">
+			<param name="build.dir" location="${webinf.dir}" />
+		</antcall>
+
+		<copy todir="${exploded.war.dir}/META-INF" file="web/META-INF/context.xml" verbose="${verbose}"/>
+
+		<antcall target="copy-ui" />
+
+		<copy todir="${webinf.dir}" verbose="${verbose}">
+			<!-- we have to copy taglibs directly into the WEB-INF directory, if we want to avoid having
+      to provide an explicit mapping for each .tld file in our web.xml <jsp-config> element -->
+			<fileset dir="web/taglib" />
+			<fileset dir="web">
+				<include name="*.dtd" />
+				<include name="web.xml" />
+				<include name="faces-config.xml" />
+				<include name="*.taglib.xml" />
+			</fileset>
+		</copy>
+	  
+    <copy file="resources/${web.application.context.file}"
+          tofile="${classes.dir}/spring-context-web.xml"
+          verbose="${verbose}"
+          failonerror="true" overwrite="true" />        
+
+	</target>
+
+
+	<!-- generate ddl -->
+
+	<target name="ddl">
+		<description>
+      Generate the schema create and drop DDL files from the Hibernate-annotated entity model bean classes.
+    </description>
+
+    <antcall target="build">
+      <param name="build.dir" location="${ddl.build.dir}" />
+    </antcall>
+	  
+		<taskdef name="hibernatetool"
+             classname="org.hibernate.tool.ant.HibernateToolTask"
+             classpathref="hibernatetools.classpath" />
+		<hibernatetool destdir="${ddl.build.dir}">
+		  <classpath>
+        <pathelement location="${ddl.build.dir}" />
+        <pathelement location="${ddl.build.dir}/classes" />
+		    <fileset dir="${ddl.build.dir}/lib">
+		      <include name="*.jar" />
+		    </fileset>
+      </classpath>
+  	  <jpaconfiguration persistenceunit="screensaverPersistenceUnit" 
+                        namingstrategy="org.hibernate.cfg.ImprovedNamingStrategy" />
+  			<hbm2ddl export="false"
+                 format="true"
+                 outputfilename="create_schema.sql" />
+  			<hbm2ddl create="false"
+                 drop="true"
+                 export="false"
+                 format="true"
+                 outputfilename="drop_schema.sql" />
+		</hibernatetool>
+	</target>
+
+	<!-- generate javadoc -->
+
+	<target name="javadoc">
+		<javadoc doctitle="Screensaver API"
+             windowtitle="Screensaver API"
+             header="Screensaver API"
+             sourcepathref="project.sourcepath"
+             classpathref="build.library.path"
+             packagenames="edu.harvard.med.screensaver.*"
+             destdir="${javadoc.dir}"
+             overview="src/overview.html"
+             access="package"
+             author="true"
+             nodeprecated="false"
+             nodeprecatedlist="false"
+             noindex="false"
+             nonavbar="false"
+             notree="false"
+             splitindex="true"
+             use="true"
+             version="true"
+             verbose="${verbose}"
+    >
+			<tag name="motivation" description="Motivation" />
+		</javadoc>
+	</target>
+
+
+	<!-- Start and stop web application (Tomcat).  (For localhost Tomcat deployment only, not production deployments). -->
+
+	<!-- TODO: Tomcat provides a catalina.xml Ant file to perform server start/stop operations.  We should use it! -->
+
+  <target name="start"
+          description="Starts the web application on a local Tomcat server"
+          depends="deploy, start-only"
+  />
+
+	<target name="start-only"
+    description="Starts the web application on a local Tomcat server"
+    depends=""
+  >
+    <exec executable="${appserver.start.cmd}">
+    <env key="JAVA_OPTS"
+         value="${appserver.java.opts} ${appserver.jprofiler.opts}"
+    />
+    <arg line="${appserver.start.cmd.options}" />
+    </exec>
+  </target>
+
+	<target name="stop"
+          description="Stops the web application (running locally on a Tomcat server)"
+  >
+		<exec executable="${appserver.stop.cmd}">
+			<!-- requires CATALINA_PID env variable that points to a file that will store the PID -->
+			<arg line="-force" />
+		</exec>
+	</target>
+
+  <target name="restart" depends="stop,start" />
+  <target name="restart-only" depends="stop,start-only" />
+
+	<!-- testing -->
+
+	<taskdef classpathref="cobertura.classpath" resource="tasks.properties" />
+
+	<target name="test-coverage-instrument" description="Instrument all src
+    classes for test coverage analysis when unit tests are run"
+    depends="build-test">
+
+		<delete file="${cobertura.datafile}" />
+
+		<cobertura-instrument todir="${test.coverage.build.dir}/instrumented-classes" datafile="${cobertura.datafile}">
+			<!-- ignore log4j method calls -->
+			<ignore regex="org.apache.log4j.*" />
+			<fileset dir="${test.coverage.build.dir}/to-instrument-classes">
+				<include name="edu/harvard/med/screensaver/**/*.class" />
+			</fileset>
+		</cobertura-instrument>
+	</target>
+
+	<target name="test-coverage-run" description="Run all test classes for test coverage analysis"
+    depends="test-coverage-instrument">
+
+		<java classname="edu.harvard.med.screensaver.ProjectTestSuite"
+      maxmemory="512m" fork="true">
+			<classpath>
+				<pathelement location="lib/cobertura.jar" />
+				<!-- instrumented classes *must* occur before non-instrumented classes in classpath -->
+				<pathelement
+          location="${test.coverage.build.dir}/instrumented-classes" />
+				<pathelement location="${test.build.dir}/classes/" />
+				<fileset dir="${test.build.dir}/lib/" includes="*.jar" />
+			</classpath>
+			<jvmarg
+        value="-Dnet.sourceforge.cobertura.datafile=${cobertura.datafile}" />
+		</java>
+	</target>
+
+	<target name="test-coverage-report" depends="test-coverage-run"  
+    description="Report on test coverage analysis after test-coverage-instrument task is invoked and unit tests have been run" >
+
+		<cobertura-report destdir="${test.coverage.build.dir}/report" datafile="${cobertura.datafile}">
+			<fileset dir="${src.dir}">
+				<include name="edu/harvard/med/**/*.java" />
+			</fileset>
+		</cobertura-report>
+	</target>
+
+	<target name="build-test"
+          description="Build Screensaver for unit testing"  >
+		<property name="classes.dir" value="${test.build.dir}/classes" />
+
+		<delete dir="${classes.dir}" />
+		<delete dir="${test.coverage.build.dir}/to-instrument-classes" />
+
+		<antcall target="build">
+			<param name="build.dir" location="${test.build.dir}" />
+		</antcall>
+		<copy todir="${test.coverage.build.dir}/to-instrument-classes" verbose="${verbose}">
+			<fileset dir="${classes.dir}">
+				<include name="**/*.class"/>
+			</fileset>
+		</copy>
+
+		<!-- compile the test source code, which is not compiled by "build" target
+    -->
+		<antcall target="compile">
+			<param name="src.dir" location="${test.src.dir}" />
+		</antcall>
+
+		<copy todir="${classes.dir}" verbose="${verbose}">
+			<fileset dir="test">
+				<include name="spring-context*.xml" />
+			</fileset>
+		</copy>
+
+		<copy todir="${test.build.dir}/lib" flatten="true" verbose="${verbose}" >
+			<fileset dir="lib">
+				<include name="springframework*/.dev/spring-test.jar" />
+				<include name="web/.dev/*.jar" />
+				<include name="testing/**/*.jar" />
+			</fileset>
+		</copy>
+
+	</target>
+
+	<target name="test"
+    description="Runs all JUnit tests, performing a build first"
+    depends="build-test">
+
+		<property name="test" value="true" />
+
+		<taskdef name="junit" 
+      classname="org.apache.tools.ant.taskdefs.optional.junit.JUnitTask">
+		</taskdef>
+
+		<junit 
+      printsummary="true"
+      showoutput="true"
+      description="Run all project's tests">
+			<classpath>
+				<pathelement location="${test.build.dir}/classes/" />
+				<fileset dir="${test.build.dir}/lib/" includes="*.jar" />
+			</classpath>
+			<test
+        name="edu.harvard.med.screensaver.ProjectTestSuite"
+        todir="${test.build.dir}">
+			</test>
+		</junit>
+	</target>
+
+	<target name="compile">
+		<mkdir dir="${classes.dir}" />
+		<!-- note: javac task clears out ${classes.dir}, so any files we copy there should be done afterwards -->
+		<javac srcdir="${src.dir}"
+           destdir="${classes.dir}"
+           classpathref="build.library.path"
+           debug="${javac.debug}"
+           optimize="${javac.optimize}"
+           listfiles="${verbose}"
+		       excludes=""
+    >
+		</javac>
+	</target>
+
+	<!-- pipeline pilot component tasks -->
+
+	<target name="compile-pilotcomponents" depends="chembank-wsimport">
+    <property name="pilot.build.dir" value="${build.dir}/pilot" />
+	  <delete includeemptydirs="true" failonerror="false">
+	    <fileset dir="${pilot.build.dir}" includes="**/*"/>
+	  </delete>
+		
+		<mkdir dir="${pilot.build.dir}/classes" />
+		<!-- note: javac task clears out ${classes.dir}, so any files we copy there should be done afterwards -->
+		<javac 
+           destdir="${pilot.build.dir}/classes"
+           classpathref="pilot-build.library.path"
+           debug="${javac.debug}"
+           optimize="${javac.optimize}"
+           listfiles="${verbose}"
+		       includes="edu/harvard/med/iccbl/screensaver/pipelinepilot/**,edu/mit/broad/chembank/shared/mda/webservices/service/**/*"
+    >
+		  <src path="${contrib.dir}"/>
+      <src path="${src.dir}" />
+      <exclude name="**/*Test.java"/>
+		</javac>
+	</target>
+
+  <target name="jar-pilotcomponents" depends="compile-pilotcomponents" >
+    <property name="pilot.build.dir" value="${build.dir}/pilot" />
+    <property name="pipelinepilot.jar" value="${pilot.build.dir}/pilotcomponent.jar"/>
+    <delete file="${pipelinepilot.jar}" />
+    <description>
+      Build the pipeline-component jar
+    </description>
+    <jar  
+      destfile="${pipelinepilot.jar}" 
+      basedir="${pilot.build.dir}/classes" >
+    </jar>
+  </target>
+ 	
+  <target name="jar-emailservice" depends="clean" >
+    <mkdir dir="${build.dir}/classes" />
+  	<delete file="edu/harvard/med/iccbl/screensaver/service/EmailService.java" />
+    <javac srcdir="${src.dir}"
+           destdir="${build.dir}/classes"
+           classpathref="build.library.path"
+           debug="${javac.debug}"
+           optimize="${javac.optimize}"
+           listfiles="${verbose}"
+           includes="edu/harvard/med/iccbl/screensaver/service/**"
+      target="1.5"
+      source="1.5"
+    >
+    </javac>
+  	<jar 
+      destfile="mailservice.jar" 
+      basedir="${build.dir}/classes" excludes="**" >
+      <fileset dir="${build.dir}/classes">
+        <include name="edu/harvard/med/iccbl/screensaver/service/EmailService*" />
+        <include name="edu/harvard/med/screensaver/CommandLineApplication*" />
+      </fileset>
+  	</jar>
+  </target>	
+
+	<!-- 
+	 pipeline-pilot component task: build the chembank soap access classes 
+	 -->
+	<target name="chembank-wsimport">
+		<taskdef name="wsimport"
+             classname="com.sun.tools.ws.ant.WsImport2"
+             classpathref="build.library.path"
+    />
+    <delete dir="${build.dir}/chembank/" />
+	  <mkdir dir="${build.dir}/chembank/" />
+		<wsimport
+      wsdl="http://chembank.broad.harvard.edu/webservices/MoleculeWebService?wsdl"
+      sourcedestdir="${build.dir}/chembank/"
+      package="edu.mit.broad.chembank.shared.mda.webservices.service"
+      destdir="${build.dir}/chembank/"
+			verbose="true"
+    />
+	</target>
+
+
+	<!-- build -->
+
+	<target name="build">
+		<description>Basic build operation for either web or command-line utilities build.
+      Builds into the directory specified by the 'build.dir' property.  This target
+      directory will contain 'classes/', 'resources/', and 'lib/' subdirectories.
+    </description>
+
+		<property name="classes.dir" value="${build.dir}/classes" />
+
+		<antcall target="compile">
+			<param name="classes.dir" location="${classes.dir}" />
+		</antcall>
+
+    <copy todir="${classes.dir}/META-INF/" file="resources/META-INF/persistence.xml" verbose="${verbose}" />
+
+		<copy todir="${build.dir}/lib" flatten="true" verbose="${verbose}">
+			<fileset refid="deploy.lib.fileset" />
+		</copy>
+
+		<!-- ${log4j.properties.file} is defined in ${screensaver.properties.file} file -->
+		<copy file="${log4j.properties.file}"
+          tofile="${classes.dir}/log4j.properties"
+          verbose="${verbose}"
+          failonerror="false"
+    />
+
+		<copy file="${screensaver.properties.file}"
+          tofile="${classes.dir}/screensaver.properties"
+          verbose="${verbose}"
+          failonerror="true" overwrite="true"
+    />
+
+    <replace file="${classes.dir}/screensaver.properties"
+             token="BUILD_NUMBER"
+             value="${build.number}"
+    />
+
+      <copy todir="${classes.dir}" verbose="${verbose}">
+			<fileset dir="resources">
+				<include name="**/*" />
+				<exclude name="README.txt" />
+			</fileset>
+		</copy>
+
+	</target>
+
+	<target name="install"
+          description="Create an Screensaver Utilities installation in ${install.dir}"
+  >
+		<antcall target="build">
+			<param name="build.dir" location="${install.dir}" />
+		</antcall>
+
+		<copy todir="${install.dir}/bin" verbose="${verbose}">
+			<fileset dir="bin">
+				<include name="run.sh" />
+				<include name="io/*" />
+			</fileset>
+		</copy>
+	</target>
+
+	<target name="distro"
+          description="Build a tarball distribution of a Screensaver Utilities installation."
+  >
+		<delete dir="${install.dir}" />
+		<delete file="${install.dir}/../${distro.file.tgz}" />
+
+		<antcall target="install">
+			<param name="build.dir" location="${install.dir}" />
+		</antcall>
+
+		<tar destfile="${distro.file.tgz}"
+         basedir="${install.dir}/.."
+         compression="gzip"
+         longfile="gnu"
+    />
+	</target>
+
+
+	<target name="clean"
+          description="Clean out generated files by deleting the build directory."
+  >
+		<delete dir="${build.dir}" />
+	</target>
+
+
+</project>

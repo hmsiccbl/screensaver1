@@ -1,0 +1,719 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+<html xmlns="http://www.w3.org/1999/xhtml"
+  xmlns:ui="http://java.sun.com/jsf/facelets"
+  xmlns:h="http://java.sun.com/jsf/html"
+  xmlns:f="http://java.sun.com/jsf/core"
+  xmlns:t="http://myfaces.apache.org/tomahawk"
+  xmlns:s="http://myfaces.apache.org/sandbox"
+  xmlns:ss="http://screensaver.med.harvard.edu/ui">
+
+<!--
+TODO:
+- add URL field
+-->
+
+<ui:composition template="/util/entityViewerDetails.xhtml">
+
+  <ui:param name="entity" value="#{screenDetailViewer.entity}" />
+  <ui:param name="viewer" value="#{screenDetailViewer}" />
+  <ui:param name="hideId" value="#{true}" />
+
+  <ui:define name="entityCommands">
+    <h:commandButton id="addRelatedScreen"
+      value="Add Related Screen..."
+      rendered="#{(screenDetailViewer.editable || screenDetailViewer.readAdmin) &amp;&amp; !screenDetailViewer.editMode}"
+      action="#{screenDetailViewer.addRelatedScreen}"
+      title="Add a related screen (e.g. a follow-up or counter screen)" />
+    <h:commandButton id="viewAdminOnlyFieldsCommand"
+      value="#{screenDetailViewer.adminViewMode ? 'Admin &lt;&lt;' : 'Admin &gt;&gt;'}"
+      rendered="#{(screenDetailViewer.editable || screenDetailViewer.readAdmin) &amp;&amp; !screenDetailViewer.editMode}"
+      action="#{screenDetailViewer.toggleAdminViewMode}"
+      styleClass="adminOnly"
+      title="Show or hide administrative fields for the screen" />
+  </ui:define>
+
+  <ui:define name="propertiesContent">
+    <ss:screenSummaryProperties screen="#{screenDetailViewer.entity}"
+      editable="#{screenDetailViewer.editMode}">
+      <ui:define name="editableScreenType">
+        <t:selectOneMenu id="screenTypeMenu"
+          value="#{screenDetailViewer.entity.screenType}"
+          required="true" converter="#{screenTypeConverter}"
+          styleClass="inputText selectMenu">
+          <f:selectItems
+            value="#{screenDetailViewer.screenTypeSelectItems}" />
+        </t:selectOneMenu>
+      </ui:define>
+      <ui:define name="editableProjectPhase">
+        <t:selectOneMenu id="projectPhaseMenu"
+          value="#{screenDetailViewer.entity.projectPhase}"
+          required="true" converter="#{projectPhaseConverter}"
+          styleClass="inputText selectMenu">
+          <f:selectItems
+            value="#{screenDetailViewer.projectPhaseSelectItems}" />
+        </t:selectOneMenu>
+      </ui:define>
+      <ui:define name="editableLabHead">
+        <t:commandButton id="submitLabHead" immediate="true"
+          styleClass="hiddenCommand" />
+        <t:selectOneMenu id="labNameMenu"
+          value="#{screenDetailViewer.labName.value}"
+          styleClass="inputText selectMenu">
+          <f:selectItems
+            value="#{screenDetailViewer.labName.selectItems}" />
+        </t:selectOneMenu>
+      </ui:define>
+      <ui:define name="editableLeadScreener">
+        <t:selectOneMenu id="leadScreenerMenu"
+          value="#{screenDetailViewer.leadScreener.value}"
+          required="true" styleClass="inputText selectMenu">
+          <f:selectItems
+            value="#{screenDetailViewer.leadScreener.selectItems}" />
+        </t:selectOneMenu>
+      </ui:define>
+    </ss:screenSummaryProperties>
+
+    <ss:property id="collaborators" label="Collaborators"
+      description="Other users involved in carrying out the screen">
+      <ui:define name="data">
+        <ss:collectionTable id="collaboratorsTable"
+          editable="#{screenDetailViewer.editMode}"
+          dataModel="#{screenDetailViewer.collaboratorsDataModel}"
+          actionBean="#{screenDetailViewer}" addAction="addCollaborator"
+          deleteAction="deleteCollaborator">
+          <ui:define name="columns">
+            <t:column>
+              <ss:user user="#{element}" />
+            </t:column>
+          </ui:define>
+          <ui:define name="addProperties">
+            <t:selectOneMenu id="collaboratorsEditable"
+              value="#{screenDetailViewer.newCollaborator.value}"
+              rendered="#{screenDetailViewer.editMode}"
+              styleClass="inputText selectMenu">
+              <f:selectItems
+                value="#{screenDetailViewer.newCollaborator.selectItems}" />
+            </t:selectOneMenu>
+          </ui:define>
+        </ss:collectionTable>
+      </ui:define>
+    </ss:property>
+
+    <ss:propertyGroup label="Important Dates"
+      rendered="#{screenDetailViewer.editMode || screenDetailViewer.adminViewMode}"
+      adminOnly="true">
+      <ss:property id="dateOfApplication" label="Application Date"
+        description="The date the application for the screen was submitted"
+        value="#{screenDetailViewer.entity.dateOfApplication}"
+        type="Date"
+        rendered="#{screenDetailViewer.editMode || screenDetailViewer.adminViewMode}"
+        adminOnly="true" editable="#{screenDetailViewer.editMode}" />
+
+      <ss:property id="dateDataMeetingCompleted"
+        label="Data Meeting Completed"
+        description="The date the data meeting was completed"
+        value="#{screenDetailViewer.entity.dataMeetingComplete}"
+        type="Date"
+        rendered="#{screenDetailViewer.editMode || screenDetailViewer.adminViewMode}"
+        adminOnly="true" editable="#{screenDetailViewer.editMode}" />
+    </ss:propertyGroup>
+
+    <ss:property id="summary" label="Summary"
+      value="#{screenDetailViewer.entity.summary}"
+      rendered="#{screenDetailViewer.allowedAccessToScreenDetails}"
+      editable="#{screenDetailViewer.editMode}"
+      description="A summary of the screen" type="Textarea"
+      editWidth="80" editHeight="6" />
+
+    <ss:propertyGroup label="Publishable Protocol" columns="1"
+      columnClasses="column"
+      rendered="#{screenDetailViewer.allowedAccessToScreenDetails}">
+      <ss:property id="publishableProtocol" label=""
+        value="#{screenDetailViewer.entity.publishableProtocol}"
+        editable="#{screenDetailViewer.editMode}"
+        description="A publication-quality description of the protocol used for this screen"
+        type="Textarea" editWidth="80" editHeight="3" />
+      <t:panelGrid columns="2"
+        columnClasses="propertyLabelColumn,column"
+        rendered="#{screenDetailViewer.editMode || screenDetailViewer.adminViewMode}">
+        <ss:property id="publishableProtocolComments" label="Comments"
+          value="#{screenDetailViewer.entity.publishableProtocolComments}"
+          editable="#{screenDetailViewer.editMode}" adminOnly="true"
+          description="Comments associated with the publishable protocol"
+          type="Textarea" editWidth="50" editHeight="3" />
+        <ss:propertyGroup label="Entered" columns="4"
+          columnClasses="propertyLabelColumn,column,propertyLabelColumn,column"
+          adminOnly="true">
+          <ss:property id="publishableProtocolDateEntered" label="Date"
+            type="Date"
+            value="#{screenDetailViewer.entity.publishableProtocolDateEntered}"
+            editable="#{screenDetailViewer.editMode}"
+            description="The date the publishable protocol was entered" />
+          <ss:property id="publishableProtocolEnteredBy" label="By"
+            type="Text"
+            value="#{screenDetailViewer.entity.publishableProtocolEnteredBy}"
+            editable="#{screenDetailViewer.editMode}"
+            description="The initial of the person that entered the publishable protocol" />
+        </ss:propertyGroup>
+      </t:panelGrid>
+    </ss:propertyGroup>
+
+    <ss:propertyGroup label="Screen Sharing" columns="2"
+      columnClasses="column">
+      <ss:property id="dataSharingLevel" label="Level"
+        value="#{screenDetailViewer.dataSharingLevel.selection}"
+        type="Text" editable="#{screenDetailViewer.editMode}">
+        <ui:define name="editableData">
+          <t:selectOneMenu id="dataSharingLevelMenu"
+            value="#{screenDetailViewer.dataSharingLevel.value}"
+            styleClass="inputText selectMenu">
+            <f:selectItems
+              value="#{screenDetailViewer.dataSharingLevel.selectItems}" />
+          </t:selectOneMenu>
+        </ui:define>
+      </ss:property>
+
+      <ss:property id="dataPrivacyExpirationDate"
+        label="Data Privacy Expiration Date"
+        description="The date on which the screen will become visible to level 1 users, set automatically, 26 months after last Screening activity"
+        value="#{empty screenDetailViewer.entity.dataPrivacyExpirationDate ? '&lt;not specified&gt;' : screenDetailViewer.entity.dataPrivacyExpirationDate}"
+        type="Date" 
+        adminOnly="true" rendered="#{screenDetailViewer.adminViewMode}" />
+      <ss:property id="minAllowedDataPrivacyExpirationDate"
+        label="Earliest Allowed Data Privacy Expiration Date (optional)"
+        description="If set, this is the earliest date on which the Data Privacy can expire"
+        value="#{! screenDetailViewer.editMode and empty screenDetailViewer.entity.minAllowedDataPrivacyExpirationDate ? '&lt;not specified&gt;' : screenDetailViewer.entity.minAllowedDataPrivacyExpirationDate}"
+        type="Date" editable="#{screenDetailViewer.editMode}"
+        adminOnly="true" rendered="#{screenDetailViewer.adminViewMode}" />      
+      <ss:property id="maxAllowedDataPrivacyExpirationDate"
+        label="Latest Allowed Data Privacy Expiration Date (optional)"
+        description="If set, this is the latest date on which the Data Privacy can expire"
+        value="#{! screenDetailViewer.editMode and empty screenDetailViewer.entity.maxAllowedDataPrivacyExpirationDate ? '&lt;not specified&gt;' : screenDetailViewer.entity.maxAllowedDataPrivacyExpirationDate}"
+        type="Date" editable="#{screenDetailViewer.editMode}"
+        adminOnly="true" rendered="#{screenDetailViewer.adminViewMode}" />
+      <ss:property id="dataPrivacyExpirationNotifiedDate"
+        label="Data Privacy Expiration Notification Sent Date"
+        description="Date at which the data privacy expiration notification was sent"
+        value="#{screenDetailViewer.entity.dataPrivacyExpirationNotifiedDate}"
+        type="Date" 
+        adminOnly="true" rendered="#{screenDetailViewer.adminViewMode}" />
+    </ss:propertyGroup>
+
+    <ss:property id="comments" label="Comments"
+      value="#{screenDetailViewer.entity.comments}"
+      rendered="#{screenDetailViewer.editMode || screenDetailViewer.adminViewMode}"
+      adminOnly="true" editable="#{screenDetailViewer.editMode}"
+      description="Administrative comments" type="Textarea"
+      editWidth="80" editHeight="3" />
+
+    <ss:property id="publications" label="Publications"
+      description="Publications reporting results of the screen">
+      <ui:define name="data">
+        <ss:collectionTable id="publicationsTable"
+          dataModel="#{screenDetailViewer.publicationsDataModel}"
+          editable="#{screenDetailViewer.editMode}"
+          actionBean="#{screenDetailViewer}" addAction="addPublication"
+          deleteAction="deletePublication">
+          <ui:define name="columns">
+            <t:column>
+              <f:facet name="header">
+                <t:outputText value="Pubmed ID" />
+              </f:facet>
+              <h:outputLink
+                value="http://www.ncbi.nlm.nih.gov/entrez/query.fcgi">
+                <f:param name="cmd" value="Search" />
+                <f:param name="db" value="PubMed" />
+                <f:param name="term" value="#{element.pubmedId}[PMID]" />
+                <t:outputText value="#{element.pubmedId}" />
+              </h:outputLink>
+            </t:column>
+            <t:column>
+              <f:facet name="header">
+                <t:outputText value="PMCID" />
+              </f:facet>
+              <h:outputLink
+                value="http://www.ncbi.nlm.nih.gov/entrez/query.fcgi">
+                <f:param name="cmd" value="Search" />
+                <f:param name="db" value="pmc" />
+                <f:param name="term" value="#{element.pubmedCentralId}[UID]" />
+                <t:outputText value="#{element.pubmedCentralId}"
+                  converter="#{pubmedCentralIdConverter}" />
+              </h:outputLink>
+            </t:column>
+            <t:column>
+              <f:facet name="header">
+                <t:outputText value="Citation" />
+              </f:facet>
+              <t:outputText value="#{element.citation}"
+                styleClass="dataText" />
+            </t:column>
+            <t:column>
+              <f:facet name="header">
+                <t:outputText value="File" />
+              </f:facet>
+              <t:commandLink id="downloadPublicationAttachedFileCommandLink"
+                value="#{element.attachedFile.filename}"
+                action="#{screenDetailViewer.downloadPublicationAttachedFile}"
+                styleClass="dataText" />
+            </t:column>
+          </ui:define>
+        </ss:collectionTable>
+      </ui:define>
+      <ui:define name="addProperties">
+        <t:panelGrid columns="2" styleClass="layoutPanel"
+          columnClasses="propertyLabelColumn,column">
+          <t:outputText value="PubMed ID" styleClass="label" />
+          <t:panelGroup styleClass="layoutPanel">
+            <t:inputText id="publicationPubMedId"
+              value="#{screenDetailViewer.newPublication.pubmedId}"
+              styleClass="inputText">
+              <f:converter converterId="javax.faces.Integer" />
+            </t:inputText>
+            <t:commandButton id="#{id}LookupPubMedIdCommand"
+              value="Lookup PubMed ID"
+              action="#{screenDetailViewer.lookupPublicationByPubMedId}"
+              styleClass="command" />
+          </t:panelGroup>
+          <t:outputText value="PMCID" styleClass="label" />
+          <t:panelGroup styleClass="layoutPanel">
+            <t:inputText id="publicationPubMedCentralId"
+              value="#{screenDetailViewer.newPublication.pubmedCentralId}"
+              styleClass="inputText" converter="#{pubmedCentralIdConverter}">
+            </t:inputText>
+            <h:outputLink 
+              value="http://www.ncbi.nlm.nih.gov/sites/pmctopmid" target="_blank">
+              <t:outputText value="Find PMCID for PMID..." />
+            </h:outputLink>
+          </t:panelGroup>
+          <t:outputText value="Title" styleClass="label" />
+          <t:inputText id="publicationTitle"
+            value="#{screenDetailViewer.newPublication.title}" size="80"
+            styleClass="inputText" />
+          <t:outputText value="Authors" styleClass="label" />
+          <t:inputText id="publicationAuthors"
+            value="#{screenDetailViewer.newPublication.authors}"
+            size="80" styleClass="inputText" />
+          <t:outputText value="Journal" styleClass="label" />
+          <t:inputText id="publicationJournal"
+            value="#{screenDetailViewer.newPublication.journal}"
+            size="80" styleClass="inputText" />
+          <t:outputText value="Volume" styleClass="label" />
+          <t:inputText id="publicationVolume"
+            value="#{screenDetailViewer.newPublication.volume}"
+            styleClass="inputText" />
+          <t:outputText value="Year" styleClass="label" />
+          <t:inputText id="publicationYear"
+            value="#{screenDetailViewer.newPublication.yearPublished}"
+            maxlength="4" styleClass="inputText" />
+          <t:outputText value="Pages" styleClass="label" />
+          <t:inputText id="publicationPages"
+            value="#{screenDetailViewer.newPublication.pages}"
+            styleClass="inputText" />
+          <ss:property id="uploadPublicationAttachedFile"
+            label="Upload File" adminOnly="true">
+            <ui:define name="editableData">
+              <t:inputFileUpload id="uploadPublicationAttachedFile"
+                value="#{screenDetailViewer.uploadedPublicationAttachedFileContents}"
+                styleClass="inputText" />
+            </ui:define>
+          </ss:property>
+        </t:panelGrid>
+      </ui:define>
+    </ss:property>
+
+    <ss:attachedFiles attachedFiles="#{screenDetailViewer.attachedFiles}"
+      entityTypeName="screen" 
+      rendered="#{screenDetailViewer.editMode || screenDetailViewer.adminViewMode}"
+      editMode="#{screenDetailViewer.editMode}" />
+
+    <ss:property id="fundingSupports" label="Funding Support"
+      rendered="#{screenDetailViewer.editMode || screenDetailViewer.adminViewMode}"
+      adminOnly="true"
+      description="The sources of funding support for the screen">
+      <ui:define name="data">
+        <t:outputText
+          value="#{screenDetailViewer.entity.fundingSupports}"
+          converter="#{setConverter}"
+          rendered="#{screenDetailViewer.fundingSupportsDataModel.rowCount == 1 &amp;&amp; !screenDetailViewer.editMode}"
+          styleClass="dataText" />
+        <ss:collectionTable id="fundingSupportsTable"
+          dataModel="#{screenDetailViewer.fundingSupportsDataModel}"
+          rendered="#{screenDetailViewer.fundingSupportsDataModel.rowCount != 1 || screenDetailViewer.editMode}"
+          editable="#{screenDetailViewer.editMode}"
+          actionBean="#{screenDetailViewer}"
+          addAction="addFundingSupport"
+          deleteAction="deleteFundingSupport">
+          <ui:define name="columns">
+            <t:column>
+              <f:facet name="header">
+                <t:outputText value="Funding Support" />
+              </f:facet>
+              <t:outputText value="#{element.value}" />
+            </t:column>
+          </ui:define>
+          <ui:define name="addProperties">
+            <t:panelGrid columns="2">
+              <t:selectOneMenu
+                value="#{screenDetailViewer.newFundingSupport.value}"
+                required="false" styleClass="inputText selectMenu">
+                <f:selectItems
+                  value="#{screenDetailViewer.newFundingSupport.selectItems}" />
+              </t:selectOneMenu>
+            </t:panelGrid>
+          </ui:define>
+        </ss:collectionTable>
+      </ui:define>
+    </ss:property>
+
+    <ss:propertyGroup label="COMS"
+      rendered="#{screenDetailViewer.editMode || screenDetailViewer.adminViewMode}"
+      editable="#{screenDetailViewer.editMode}" adminOnly="true">
+      <ss:property id="comsRegistrationNumber"
+        label="COMS Registration Number"
+        value="#{screenDetailViewer.entity.comsRegistrationNumber}"
+        description="COMS number, provided by PI's lab" />
+      <ss:property id="comsApprovalDate"
+        label="ICCB-L/NSRB COMS Approval Date" type="Date"
+        value="#{screenDetailViewer.entity.comsApprovalDate}"
+        description="the date of approval by COMS or the date on which we determine that our existing approval already covers the proposed experiments" />
+    </ss:propertyGroup>
+
+    <ss:propertyGroup label="PubChem BioAssay">
+      <ss:property id="dateDeposited" label="Date deposited"
+        description="The date the screen result was deposited in PubChem BioAssay"
+        value="#{screenDetailViewer.entity.pubchemDepositedDate}"
+        type="Date"
+        editable="#{screenDetailViewer.editMode}" />
+
+      <ss:property id="bioAssayId" label="Assay ID" type="Link"
+        description="The PubChem Assay identifier (AID)"
+        value="#{screenDetailViewer.entity.pubchemAssayId}"
+        linkValue="http://pubchem.ncbi.nlm.nih.gov/assay/assay.cgi?aid=#{screenDetailViewer.entity.pubchemAssayId}"
+        editable="#{screenDetailViewer.editMode}" />
+    </ss:propertyGroup>
+
+    <ss:property id="totalPlatedLabCherryPicksCount"
+      label="Total Plated Cherry Picks"
+      value="#{screenDetailViewer.entity.totalPlatedLabCherryPicks}"
+      rendered="#{screenDetailViewer.allowedAccessToScreenDetails &amp;&amp; !screenDetailViewer.editMode}"
+      description="The number of lab cherry picks that have been plated to date, for all cherry pick requests" />
+      
+    <ss:property id="keywords"
+        label="#{screenDetailViewer.editMode ? 'Keywords (comma-separated)' : 'Keywords'}"
+        type="Set" value="#{screenDetailViewer.entity.keywords}"
+        editable="#{screenDetailViewer.editMode}" editWidth="80"
+        description="A set of keywords associated with the screen" />
+
+      <ss:property label="Billing Information" adminOnly="true"
+        rendered="#{(screenDetailViewer.editMode || screenDetailViewer.adminViewMode) &amp;&amp; screenDetailViewer.screensaverUser.isUserInRoleOfNameMap['billingAdmin']}"
+        description="Information for tracking billing from ICCB-L to the lab performing the screen">
+        <ui:define name="data">
+          <t:collapsiblePanel var="isBillingInformationCollapsed"
+            value="#{screenDetailViewer.billingInformationCollapsed}">
+            <f:facet name="header">
+              <t:headerLink immediate="true">
+                <t:outputText id="billingInformationToggleText"
+                  value="#{isBillingInformationCollapsed ? 'Show &gt;&gt;' : 'Hide &lt;&lt;'}"
+                  styleClass="dataText" />
+              </t:headerLink>
+            </f:facet>
+            <t:panelGrid id="billingInfoProperties" columns="4"
+              columnClasses="propertyLabelColumn,column,propertyLabelColumn,column"
+              styleClass="layoutPanel" style="width: 100%">
+              <ss:property id="billingInfoToBeRequested"
+                label="Billing Information to be Requested"
+                type="Boolean"
+                value="#{screenDetailViewer.entity.billingInformation.toBeRequested}"
+                editable="#{screenDetailViewer.editMode}" />
+              <ss:property id="billingInfoToBeRequestedSeeComment"
+                label="See comments" type="Boolean"
+                value="#{screenDetailViewer.entity.billingInformation.seeComments}"
+                editable="#{screenDetailViewer.editMode}" />
+              <ss:property id="billingForSuppliesOnly"
+                label="Billing For Supplies Only" type="Boolean"
+                value="#{screenDetailViewer.entity.billingInformation.billingForSuppliesOnly}"
+                editable="#{screenDetailViewer.editMode}" />
+              <ss:property id="feeFormOnFile" label="Fee Form on File"
+                type="Boolean"
+                value="#{screenDetailViewer.entity.billingInformation.feeFormOnFile}"
+                editable="#{screenDetailViewer.editMode}" />
+              <ss:property id="amountToBeChargedForScreen"
+                label="Amount to be charged for Screen"
+                value="#{screenDetailViewer.entity.billingInformation.amountToBeChargedForScreen}"
+                editable="#{screenDetailViewer.editMode}"
+                type="Currency" />
+              <ss:property id="facilitiesAndAdministrationCharge"
+                label="Facilities &amp; Administration Charge"
+                value="#{screenDetailViewer.entity.billingInformation.facilitiesAndAdministrationCharge}"
+                editable="#{screenDetailViewer.editMode}"
+                type="Currency" />
+              <ss:property id="feeFormRequestedDate"
+                label="Fee Form Requested Date" type="Date"
+                value="#{screenDetailViewer.entity.billingInformation.feeFormRequestedDate}"
+                editable="#{screenDetailViewer.editMode}" />
+              <ss:property id="feeFormRequestedInitial"
+                label="Fee Form Requested Initials"
+                value="#{screenDetailViewer.entity.billingInformation.feeFormRequestedInitials}"
+                editable="#{screenDetailViewer.editMode}" />
+              <ss:property id="billingInfoReturnDate"
+                label="Billing Info Return Date" type="Date"
+                value="#{screenDetailViewer.entity.billingInformation.billingInfoReturnDate}"
+                editable="#{screenDetailViewer.editMode}" />
+              <ss:property id="dateCompleted5KCompounds"
+                label="Date Completed 5K Compounds" type="Date"
+                value="#{screenDetailViewer.entity.billingInformation.dateCompleted5KCompounds}"
+                editable="#{screenDetailViewer.editMode}" />
+              <ss:property id="dateFaxedToBillingDepartment"
+                label="Date Faxed To Billing Department" type="Date"
+                value="#{screenDetailViewer.entity.billingInformation.dateFaxedToBillingDepartment}"
+                editable="#{screenDetailViewer.editMode}" />
+              <ss:property id="dateCharged" label="Date Charged"
+                type="Date"
+                value="#{screenDetailViewer.entity.billingInformation.dateCharged}"
+                editable="#{screenDetailViewer.editMode}" />
+            </t:panelGrid>
+            <t:panelGrid id="billingInfoProperties2" columns="2"
+              columnClasses="propertyLabelColumn,column"
+              styleClass="layoutPanel" style="width: 100%">
+              <ss:property id="billingInformationComments"
+                label="Comments" type="Textarea"
+                value="#{screenDetailViewer.entity.billingInformation.billingComments}"
+                editWidth="50" editHeight="3"
+                editable="#{screenDetailViewer.editMode}" />
+              <ss:property id="billingItems" label="Billing Items">
+                <ui:define name="data">
+                  <ss:collectionTable id="billingItemsTable"
+                    dataModel="#{screenDetailViewer.billingItemsDataModel}"
+                    editable="#{screenDetailViewer.editMode}"
+                    actionBean="#{screenDetailViewer}"
+                    addAction="addBillingItem"
+                    deleteAction="deleteBillingItem">
+                    <ui:define name="columns">
+                      <t:column>
+                        <f:facet name="header">
+                          <t:outputText value="Billing Item" />
+                        </f:facet>
+                        <t:outputText value="#{element.itemToBeCharged}" />
+                      </t:column>
+                      <t:column>
+                        <f:facet name="header">
+                          <t:outputText value="Amount" />
+                        </f:facet>
+                        <t:outputText value="#{element.amount}"
+                          converter="#{currencyConverter}"
+                          styleClass="dataText" />
+                      </t:column>
+                      <t:column>
+                        <f:facet name="header">
+                          <t:outputText value="Date Sent for Billing" />
+                        </f:facet>
+                        <t:outputText
+                          value="#{element.dateSentForBilling}"
+                          converter="#{dateConverter}"
+                          styleClass="dataText" />
+                      </t:column>
+                    </ui:define>
+                    <ui:define name="addProperties">
+                      <t:panelGrid columns="6">
+                        <ss:property id="newBillingItemItemToBeCharged"
+                          label="Item" type="Text"
+                          value="#{screenDetailViewer.newBillingItem.itemToBeCharged}" />
+                        <ss:property id="newBillingItemAmount"
+                          label="Amount" type="Currency"
+                          value="#{screenDetailViewer.newBillingItem.amount}" />
+                        <ss:property
+                          id="newBillingItemDateSentForBilling"
+                          label="Date Sent for Billing" type="Date"
+                          required="false"
+                          value="#{screenDetailViewer.newBillingItem.dateSentForBilling}" />
+                      </t:panelGrid>
+                    </ui:define>
+                  </ss:collectionTable>
+                </ui:define>
+              </ss:property>
+            </t:panelGrid>
+          </t:collapsiblePanel>
+        </ui:define>
+      </ss:property>
+
+      <ss:property id="pinTransferApprovalNull" type="text"
+        label="Pin Transfer Approval" adminOnly="true"
+        rendered="#{!screenDetailViewer.editMode &amp;&amp; screenDetailViewer.adminViewMode &amp;&amp; empty screenDetailViewer.entity.pinTransferApprovalActivity}"
+        value="&lt;not yet approved&gt;" />
+      <ss:propertyGroup id="pinTransferApproval"
+        label="Pin Transfer Approval" adminOnly="true"
+        rendered="#{screenDetailViewer.editMode || (screenDetailViewer.adminViewMode &amp;&amp; !empty screenDetailViewer.entity.pinTransferApprovalActivity)}">
+        <ss:property id="approvedBy" label="Approved By"
+          description="The staff member that approved for this screen to have pin transfer to assay plates performed"
+          value="#{screenDetailViewer.pinTransferApprovedBy}"
+          editable="#{screenDetailViewer.editMode &amp;&amp; empty screenDetailViewer.entity.pinTransferApprovalActivity}">
+          <ui:define name="data">
+            <ss:user user="#{value.selection}" />
+          </ui:define>
+          <ui:define name="editableData">
+            <t:selectOneMenu value="#{value.value}"
+              styleClass="inputText selectMenu">
+              <f:selectItems value="#{value.selectItems}" />
+            </t:selectOneMenu>
+          </ui:define>
+        </ss:property>
+
+        <ss:property id="pinTrasferApprovalDate" label="Date Approved"
+          type="Date"
+          description="The date this screen was approved to have pin transfer to assay plates performed"
+          value="#{screenDetailViewer.pinTransferApprovalDate}"
+          editable="#{screenDetailViewer.editMode &amp;&amp; empty screenDetailViewer.entity.pinTransferApprovalActivity}" />
+
+        <ss:property id="pinTransferApprovalComments" label="Comments"
+          type="Textarea" editWidth="80" editHeight="3"
+          description="Comments for the pin transfer approval"
+          value="#{screenDetailViewer.pinTransferApprovalComments}"
+          editable="#{screenDetailViewer.editMode }" />
+
+      </ss:propertyGroup>
+  </ui:define>
+
+  <ui:define name="tablesContent">
+    <ss:property id="statusItems" label="Status Items"
+      rendered="#{screenDetailViewer.allowedAccessToScreenActivity}"
+      description="A record of the status of the screen, such as when it was accepted, and whether it is ongoing, completed or dropped">
+      <ui:define name="data">
+        <ss:collectionTable id="statusItemsTable"
+          editable="#{screenDetailViewer.editMode}"
+          dataModel="#{screenDetailViewer.statusItemsDataModel}"
+          actionBean="#{screenDetailViewer}" addAction="addStatusItem"
+          deleteAction="deleteStatusItem">
+          <ui:define name="columns">
+            <t:column>
+              <f:facet name="header">
+                <t:outputText value="Status" />
+              </f:facet>
+              <t:outputText value="#{element.status}"
+                styleClass="dataText" />
+            </t:column>
+            <t:column>
+              <f:facet name="header">
+                <t:outputText value="Date" />
+              </f:facet>
+              <t:outputText id="statusDate"
+                value="#{element.statusDate}"
+                converter="#{dateConverter}" styleClass="dataText" />
+            </t:column>
+          </ui:define>
+          <ui:define name="addProperties">
+            <t:panelGrid columns="2">
+              <ss:property id="newStatusItemValue" label="Status"
+                type="Text"
+                value="#{screenDetailViewer.newStatusItemValue}">
+                <ui:define name="editableData">
+                  <t:selectOneMenu id="newStatusItemValue"
+                    value="#{screenDetailViewer.newStatusItemValue.value}"
+                    required="false" styleClass="inputText selectMenu">
+                    <f:selectItems
+                      value="#{screenDetailViewer.newStatusItemValue.selectItems}" />
+                  </t:selectOneMenu>
+                </ui:define>
+              </ss:property>
+              <ss:property id="newStatusItemDate" label="Date"
+                required="false" type="Date"
+                value="#{screenDetailViewer.newStatusItemDate}" />
+            </t:panelGrid>
+          </ui:define>
+        </ss:collectionTable>
+      </ui:define>
+    </ss:property>
+
+    <ss:property id="labActivities" label="Lab Activities Summary"
+      rendered="#{screenDetailViewer.allowedAccessToScreenActivity &amp;&amp; !screenDetailViewer.editMode}"
+      description="Activities carried out in the lab (e.g., screening a library, creating an assay plate, etc.)">
+      <ui:define name="data">
+        <t:panelGrid columns="2"
+          columnClasses="propertyLabelColumn,column"
+          styleClass="layoutPanel" style="width: 100%">
+          <ss:property id="activityCount" label="Activities">
+            <ui:define name="data">
+              <t:commandLink
+                value="#{screenDetailViewer.labActivitiesCount}"
+                action="#{screenViewer.browseLabActivities}" />
+            </ui:define>
+          </ss:property>
+          <ss:propertyGroup label="Last Activity">
+            <t:outputText value="&lt;none&gt;" styleClass="dataText"
+              rendered="#{empty screenDetailViewer.lastLabActivity}" />
+            <ss:property id="lastLabActivityDate" label="Date"
+              value="#{screenDetailViewer.lastLabActivity.dateOfActivity}"
+              type="Date"
+              rendered="#{!empty screenDetailViewer.lastLabActivity}" />
+            <ss:property id="lastLabActivityType" label="Activity Type"
+              value="#{screenDetailViewer.lastLabActivity.activityTypeName}"
+              type="Text"
+              rendered="#{!empty screenDetailViewer.lastLabActivity}" />
+            <ss:property id="lastLabActivityPerformedBy"
+              label="Performed By"
+              value="#{screenDetailViewer.lastLabActivity.performedBy.fullNameLastFirst}"
+              type="Text"
+              rendered="#{!empty screenDetailViewer.lastLabActivity}" />
+          </ss:propertyGroup>
+        </t:panelGrid>
+      </ui:define>
+    </ss:property>
+
+    <ss:property id="cherryPickRequests" label="Recent Cherry Pick Requests"
+      rendered="#{screenDetailViewer.allowedAccessToScreenActivity &amp;&amp; !screenDetailViewer.editMode}"
+      description="The cherry pick requests for this screen">
+      <ui:define name="data">
+        <t:panelGrid columns="1">
+          <t:outputText value="&lt;none&gt;" styleClass="dataText"
+            rendered="#{empty screenDetailViewer.entity.cherryPickRequests}" />
+          <t:dataTable id="cherryPickRequests" var="cherryPickRequest"
+            value="#{screenDetailViewer.cherryPickRequestsDataModel}"
+            preserveDataModel="false"
+            rendered="#{!empty screenDetailViewer.entity.cherryPickRequests}"
+            styleClass="standardTable" rowClasses="row1,row2"
+            columnClasses="numericColumn,fixedColumn100,column" headerClass="tableHeader">
+            <t:column>
+              <f:facet name="header">
+                <t:outputText value="#" />
+              </f:facet>
+              <ss:entityLink entity="#{cherryPickRequest}"
+                property="cherryPickRequestNumber"
+                viewer="#{cherryPickRequestViewer}" />
+            </t:column>
+            <t:column>
+              <f:facet name="header">
+                <t:outputText value="Date Requested" />
+              </f:facet>
+              <t:outputText id="dateRequested"
+                value="#{cherryPickRequest.dateRequested}"
+                converter="#{dateConverter}" styleClass="dataText" />
+            </t:column>
+            <t:column>
+              <f:facet name="header">
+                <t:outputText value="Requested By" />
+              </f:facet>
+              <t:outputText id="requestedBy"
+                value="#{cherryPickRequest.requestedBy.fullNameLastFirst}"
+                styleClass="dataText" />
+            </t:column>
+          </t:dataTable>
+          <t:panelGroup styleClass="commandPanel">
+            <t:commandButton id="browseCherryPickRequests"
+              value="Browse All..."
+              disabled="#{screenDetailViewer.cherryPickRequestsDataModel.rowCount == 0}"
+              action="#{screenViewer.browseCherryPickRequests}"
+              styleClass="command" />
+            <t:commandButton value="Add Cherry Pick Request..."
+              action="#{screenDetailViewer.addCherryPickRequest}"
+              rendered="#{screenDetailViewer.screensaverUser.isUserInRoleOfNameMap['cherryPickRequestsAdmin']}"
+              styleClass="command" />
+          </t:panelGroup>
+        </t:panelGrid>
+      </ui:define>
+    </ss:property>
+  </ui:define>
+
+</ui:composition>
+
+</html>
+

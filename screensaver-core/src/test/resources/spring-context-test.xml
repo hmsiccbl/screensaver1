@@ -1,0 +1,75 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE beans PUBLIC "-//SPRING//DTD BEAN 2.0//EN"
+    "http://www.springframework.org/dtd/spring-beans-2.0.dtd">
+
+<!--
+   $HeadURL$
+   $Id$
+
+   Copyright © 2006, 2010 by the President and Fellows of Harvard College.
+
+   Screensaver is an open-source project developed by the ICCB-L and NSRB labs
+   at Harvard Medical School. This software is distributed under the terms of
+   the GNU General Public License.
+-->
+
+
+<!-- A top-level, composite Spring context configuration file, intended to run (most) unit tests (uses unrestricted data access policy).
+  Allows a full Spring configuration to be referenced via a single file.  -->
+
+<beans>
+
+  <bean
+    id="screensaverProperties"
+    class="edu.harvard.med.screensaver.ScreensaverProperties"
+    scope="singleton">
+    <constructor-arg value="/screensaver.properties.test" />
+  </bean>
+
+  <bean id="entityViewPolicy"
+   class="edu.harvard.med.screensaver.policy.DefaultEntityViewPolicy">
+  </bean>
+
+  <bean id="entityEditPolicy"
+   class="edu.harvard.med.screensaver.policy.DefaultEntityEditPolicy">
+  </bean>
+
+  <bean id="smallMoleculeCherryPickRequestAllowancePolicy"
+   class="edu.harvard.med.iccbl.screensaver.policy.cherrypicks.SmallMoleculeCherryPickRequestAllowancePolicy">
+    <constructor-arg ref="genericEntityDao"/>
+   </bean>
+
+  <bean id="rnaiCherryPickRequestAllowancePolicy"
+   class="edu.harvard.med.iccbl.screensaver.policy.cherrypicks.RNAiCherryPickRequestAllowancePolicy" >
+    <constructor-arg ref="genericEntityDao"/>
+   </bean>
+
+  <bean id="cherryPickPlateSourceWellMinimumVolumePolicy"
+   class="edu.harvard.med.iccbl.screensaver.policy.cherrypicks.IccblCherryPickPlateSourceWellMinimumVolumePolicy">
+  </bean>
+
+   <bean
+    id="screenGenerator"
+    class="edu.harvard.med.screensaver.service.screens.DefaultScreenGenerator">
+    <constructor-arg>
+      <bean
+        id="screenFacilityIdInitializer"
+        class="edu.harvard.med.screensaver.service.screens.DefaultScreenFacilityIdInitializer" />
+    </constructor-arg>
+    <constructor-arg ref="genericEntityDao" />
+  </bean>
+
+  <bean
+    id="plateFacilityIdInitializer"
+    class="edu.harvard.med.screensaver.service.libraries.DefaultPlateFacilityIdInitializer">
+  </bean>
+
+  <import resource="spring-context-persistence.xml"/>
+  <import resource="spring-context-services.xml"/>
+  
+  <bean id="dataFactory" class="edu.harvard.med.screensaver.model.TestDataFactory">
+    <constructor-arg ref="genericEntityDao" />
+    <constructor-arg ref="entityManagerFactory" />
+  </bean>
+
+</beans>

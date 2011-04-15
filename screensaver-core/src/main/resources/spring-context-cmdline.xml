@@ -1,0 +1,60 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE beans PUBLIC "-//SPRING//DTD BEAN 2.0//EN"
+    "http://www.springframework.org/dtd/spring-beans-2.0.dtd">
+
+<!--
+   $HeadURL$
+   $Id$
+
+   Copyright © 2006, 2010 by the President and Fellows of Harvard College.
+   
+   Screensaver is an open-source project developed by the ICCB-L and NSRB labs
+   at Harvard Medical School. This software is distributed under the terms of
+   the GNU General Public License.
+-->
+
+<!-- A top-level, composite Spring context configuration file, intended for unit testing
+  Screensaver.  Allows a full Spring configuration to be referenced 
+  via a single file.  -->
+
+<beans>
+
+  <bean
+    id="commandLineArgumentsDatabaseSettingsResolver"
+    class="edu.harvard.med.screensaver.db.CommandLineArgumentsDatabaseConnectionSettingsResolver" />
+
+  <bean
+    id="screensaverProperties"
+    class="edu.harvard.med.screensaver.ScreensaverProperties"
+    scope="singleton">
+    <constructor-arg value="/screensaver.properties.util" />
+    <constructor-arg>
+      <bean class="edu.havard.med.screensaver.db.ChainingDatabaseConnectionSettingsResolver">
+        <constructor-arg>
+          <list>
+            <ref bean="commandLineArgumentsDatabaseSettingsResolver"/>
+            <bean class="edu.havard.med.screensaver.db.SystemPropertiesDatabaseConnectionSettingsResolver"/>
+            <bean class="edu.havard.med.screensaver.db.EnvironmentVariablesDatabaseConnectionSettingsResolver"/>
+          </list>
+        </constructor-arg>
+      </bean>
+    </constructor-arg>
+  </bean>
+
+  <bean id="entityViewPolicy"
+   class="edu.harvard.med.screensaver.policy.DefaultEntityViewPolicy">
+  </bean>
+
+  <bean
+    id="plateFacilityIdInitializer"
+    class="edu.harvard.med.screensaver.service.libraries.DefaultPlateFacilityIdInitializer">
+  </bean>
+
+  <bean id="cherryPickPlateSourceWellMinimumVolumePolicy"
+   class="edu.harvard.med.iccbl.screensaver.policy.cherrypicks.IccblCherryPickPlateSourceWellMinimumVolumePolicy">
+  </bean>
+ 
+  <import resource="spring-context-persistence.xml"/>
+  <import resource="spring-context-services.xml"/>
+  
+</beans>

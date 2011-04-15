@@ -1,0 +1,24 @@
+# screensaver.properties for junit tests and IDE development
+
+# Specify the Log4j properties file that will be used to control the logging output
+# You may also want to edit the =log4j.properties.web= file itself to meet your logging output needs.
+# Hint: during development, you can specify cfg/log4j.properties.debug, allowing you to maintain 
+# debug-related logging options separately from your production/deployment log output settings.
+log4j.properties.file=log4j.properties.debug
+
+screensaver.service.smtpemailservice.host=smtp.mailinator.com
+screensaver.service.smtpemailservice.username=
+screensaver.ui.imageproviderservlet.filesystempath=dummy
+
+### cellHTS2 properties
+cellHTS2report.filepath.base=cellHTS2/output/
+cellHTS2report.filepath.prefix=cellHts2_output_screenResultId_
+cellHTS2report.saveRObjects=FALSE
+cellHTS2report.saveRObjects.path=
+
+
+# database connection settings
+database.host=localhost
+database.name=testscreensaver
+database.user=testscreensaver
+database.password=

@@ -1,0 +1,26 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+<html xmlns="http://www.w3.org/1999/xhtml"
+	xmlns:ui="http://java.sun.com/jsf/facelets"
+	xmlns:h="http://java.sun.com/jsf/html"
+	xmlns:f="http://java.sun.com/jsf/core"
+	xmlns:t="http://myfaces.apache.org/tomahawk"
+	xmlns:s="http://myfaces.apache.org/sandbox">
+
+<!--
+	   facelets parameters:
+	     - id
+	     - rendered: boolean, (optional, defaults to true)
+       - radius: integer (pixels, default 4) 
+       - style
+-->
+
+<ui:composition>
+  <t:div rendered="#{empty rendered ? true : rendered}"
+    styleClass="#{styleClass}"
+    style="background-color: #336699; padding: 2px; margin-bottom: 2px; -moz-border-radius: #{empty radius ? 4 : radius}px; border-radius: #{empty radius ? 4 : radius}px; #{style}">
+    <ui:insert />
+  </t:div>
+</ui:composition>
+
+</html>

@@ -1,0 +1,135 @@
+<?xml version="1.0"?>
+<!DOCTYPE facelet-taglib PUBLIC
+  "-//Sun Microsystems, Inc.//DTD Facelet Taglib 1.0//EN"
+  "http://java.sun.com/dtd/facelet-taglib_1_0.dtd">
+
+<facelet-taglib>
+    <namespace>http://myfaces.apache.org/sandbox</namespace>
+
+   <tag>
+      <tag-name>convertBoolean</tag-name>
+      <converter>
+         <converter-id>org.apache.myfaces.custom.convertboolean.BooleanConverter</converter-id>
+      </converter>
+   </tag>
+   <tag>
+      <tag-name>fieldset</tag-name>
+      <component>
+         <component-type>org.apache.myfaces.Fieldset</component-type>
+         <renderer-type>
+            org.apache.myfaces.FieldsetRenderer
+         </renderer-type>
+      </component>
+   </tag>
+
+    <tag>
+        <tag-name>graphicImageDynamic</tag-name>
+        <component>
+            <component-type>org.apache.myfaces.GraphicImageAjax</component-type>
+            <renderer-type>org.apache.myfaces.GraphicImageAjaxRenderer</renderer-type>
+           <handler-class>
+               com.google.code.tomahawk.facelets.GraphicImageDynamicComponentHandler
+          </handler-class>
+        </component>
+    </tag>
+
+    <tag>
+        <tag-name>inputSuggest</tag-name>
+        <component>
+            <component-type>javax.faces.HtmlInputText</component-type>
+            <renderer-type>org.apache.myfaces.InputSuggest</renderer-type>
+        </component>
+    </tag>
+    <tag>
+        <tag-name>inputSuggestAjax</tag-name>
+        <component>
+            <component-type>org.apache.myfaces.InputSuggestAjax</component-type>
+            <renderer-type>org.apache.myfaces.InputSuggestAjax</renderer-type>
+            <handler-class>
+                com.google.code.tomahawk.facelets.InputSuggestAjaxComponentHandler
+            </handler-class>
+      </component>
+    </tag>
+
+    <tag>
+        <tag-name>validateCompareTo</tag-name>
+        <validator>
+            <validator-id>org.apache.myfaces.validator.CompareTo</validator-id>
+        </validator>
+    </tag>
+
+    <tag>
+        <tag-name>selectOneRow</tag-name>
+        <component>
+            <component-type>org.apache.myfaces.SelectOneRow</component-type>
+            <renderer-type>org.apache.myfaces.custom.selectOneRow.SelectOneRowRenderer</renderer-type>
+        </component>
+    </tag>
+
+    <tag>
+        <tag-name>tableSuggestAjax</tag-name>
+        <component>
+            <component-type>org.apache.myfaces.TableSuggestAjax</component-type>
+            <renderer-type>org.apache.myfaces.TableSuggestAjax</renderer-type>
+         <handler-class>
+             com.google.code.tomahawk.facelets.InputSuggestAjaxComponentHandler
+         </handler-class>
+      </component>
+    </tag>
+
+    <tag>
+        <tag-name>outputLinkDynamic</tag-name>
+        <component>
+            <component-type>org.apache.myfaces.OutputLinkDynamic</component-type>
+            <renderer-type>org.apache.myfaces.OutputLinkDynamicRenderer</renderer-type>
+        </component>
+    </tag>
+
+    <tag>
+        <tag-name>outputText</tag-name>
+        <component>
+            <component-type>org.apache.myfaces.HtmlOutputTextFor</component-type>
+        </component>
+    </tag>
+
+   <tag>
+      <tag-name>selectManyPicklist</tag-name>
+      <component>
+         <component-type>org.apache.myfaces.HtmlSelectManyPicklist</component-type>
+         <renderer-type>org.apache.myfaces.PicklistRenderer</renderer-type>
+      </component>
+   </tag>
+
+   <tag>
+        <tag-name>submitOnEvent</tag-name>
+        <component>
+            <component-type>org.apache.myfaces.SubmitOnEvent</component-type>
+            <renderer-type>org.apache.myfaces.SubmitOnEvent</renderer-type>
+        </component>
+   </tag>
+
+    <tag>
+        <tag-name>modalDialog</tag-name>
+        <component>
+            <component-type>org.apache.myfaces.ModalDialog</component-type>
+            <renderer-type>org.apache.myfaces.ModalDialog</renderer-type>
+        </component>
+   </tag>
+
+    <tag>
+        <tag-name>roundedDiv</tag-name>
+        <component>
+            <component-type>org.apache.myfaces.HtmlRoundedDiv</component-type>
+            <renderer-type>org.apache.myfaces.HtmlRoundedDiv</renderer-type>
+        </component>
+   </tag>
+
+    <tag>
+        <tag-name>focus</tag-name>
+        <component>
+            <component-type>org.apache.myfaces.Focus</component-type>
+            <renderer-type>org.apache.myfaces.Focus</renderer-type>
+        </component>
+   </tag>
+
+</facelet-taglib>

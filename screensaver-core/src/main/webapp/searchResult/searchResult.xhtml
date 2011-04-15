@@ -1,0 +1,262 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+<html xmlns="http://www.w3.org/1999/xhtml"
+	xmlns:ui="http://java.sun.com/jsf/facelets"
+	xmlns:h="http://java.sun.com/jsf/html"
+	xmlns:f="http://java.sun.com/jsf/core"
+	xmlns:t="http://myfaces.apache.org/tomahawk"
+	xmlns:s="http://myfaces.apache.org/sandbox"
+	xmlns:ss="http://screensaver.med.harvard.edu/ui">
+
+<ui:component>
+
+	<f:subview rendered="#{empty rendered ? true : rendered}">
+
+    <t:panelGrid id="searchAndColumnsPanel" columns="1"
+      columnClasses="searchPanelColumn,searchPanelColumn">
+
+      <h:form id="searchForm">
+        <t:collapsiblePanel
+          value="#{searchResults.isPanelCollapsedMap['search']}"
+          var="isCollapsed">
+          <f:facet name="header">
+            <t:headerLink immediate="true">
+              <t:outputText
+                value="Search #{isCollapsed ? '&gt;&gt;' : '&lt;&lt;'}"
+                escape="true" styleClass="label" />
+            </t:headerLink>
+          </f:facet>
+
+          <!-- Note: this button is the default form-submit button, invoked when user presses enter in an input text field -->
+          <t:commandButton id="defaultSearchButton" forceId="true"
+            styleClass="hiddenCommand" />
+
+          <t:panelGrid styleClass="groupingPanel"
+            style="margin-top: 2px">
+            <t:dataTable id="queryTable" var="column"
+              styleClass="standardTable"
+              value="#{searchResults.columnManager.sortableSearchableColumns}"
+              rendered="#{!searchResults.tableFilterMode}">
+              <t:column id="columnName" styleClass="keyColumn"
+                style="width: 33%">
+                <t:outputText value="#{column.name}" styleClass="label" />
+              </t:column>
+              <t:column id="fieldOperatorColumn">
+                <ss:operator column="#{column}" editable="true" />
+              </t:column>
+              <t:column id="fieldInputColumn">
+                <ss:criterion column="#{column}" editable="true" />
+              </t:column>
+              <t:column>
+                <t:commandButton value="Clear" immediate="true"
+                  action="#{searchResults.resetColumnFilter}"
+                  styleClass="command" />
+              </t:column>
+            </t:dataTable>
+            <t:panelGroup id="searchCommandPanel">
+              <!-- Note: this button is the default form-submit button, invoked when user presses enter in an input text field -->
+              <t:commandButton id="searchButton" value="Search"
+                styleClass="command" />
+              <t:commandButton value="Clear All" immediate="true"
+                action="#{searchResults.resetFilter}"
+                styleClass="command" />
+              <t:selectBooleanCheckbox id="showFiltersInTableOption"
+                value="#{searchResults.tableFilterMode}"
+                onchange="javascript:submit()" />
+              <t:outputLabel for="showFiltersInTableOption"
+                value="Show search fields above table columns"
+                styleClass="label" />
+            </t:panelGroup>
+          </t:panelGrid>
+        </t:collapsiblePanel>
+      </h:form>
+
+      <h:form>
+        <t:collapsiblePanel id="columnsSelectionPanel"
+          value="#{searchResults.isPanelCollapsedMap['columns']}"
+          var="isCollapsed"
+          rendered="#{!searchResults.capabilities['viewEntity'] || searchResults.summaryView}">
+          <f:facet name="header">
+            <t:headerLink immediate="true">
+              <t:outputText
+                value="Columns (add/remove) #{isCollapsed ? '&gt;&gt;' : '&lt;&lt;'}"
+                escape="true" styleClass="label" />
+            </t:headerLink>
+          </f:facet>
+          <t:panelGrid styleClass="groupingPanel"
+            style="margin-top: 2px">
+            <ss:columnSelectorTree
+              rendered="#{searchResults.columnManager.useTreeWidget}" />
+            <ss:columnSelectorReorderList
+              rendered="#{searchResults.columnManager.useReorderListWidget}" />
+          </t:panelGrid>
+        </t:collapsiblePanel>
+      </h:form>
+    </t:panelGrid>
+
+    <h:form>
+			<t:buffer into="#{dataTableBuffer}">
+				<t:dataTable id="searchResultsTable"
+					binding="#{searchResults.dataTableUIComponent}"
+					value="#{searchResults.dataTableModel}" var="row"
+					rowIndexVar="rowIndex" rowCountVar="rowCount"
+					rows="#{searchResults.rowsPerPage}" styleClass="standardTable"
+					headerClass="tableHeader" rowClasses="row1,row2"
+					sortColumn="#{searchResults.columnManager.sortColumnName}"
+					sortAscending="#{searchResults.columnManager.sortAscending}"
+					width="100%">
+
+					<t:columns id="dataColumns"
+						value="#{searchResults.columnManager.visibleColumnModel}"
+						var="column"
+						styleClass="#{column.numeric ? 'numericColumn' : 'column'}">
+						<f:facet name="header">
+							<t:panelGrid columns="1">
+								<t:popup displayAtDistanceY="20">
+									<!-- immediate="false" needed to allow UISelectMany components to be updated when sort is changed via clicking on table header -->
+									<t:commandSortHeader columnName="#{column.name}" arrow="false"
+										immediate="false" disabled="#{!column.sortableSearchable}">
+										<f:facet name="ascending">
+											<t:graphicImage value="/images/ascending-arrow.gif"
+												rendered="true" border="0" />
+										</f:facet>
+										<f:facet name="descending">
+											<t:graphicImage value="/images/descending-arrow.gif"
+												rendered="true" border="0" />
+										</f:facet>
+										<t:outputText value="#{column.name}" />
+									</t:commandSortHeader>
+									<f:facet name="popup">
+										<t:panelGrid styleClass="popupHelp">
+											<t:outputText styleClass="popupText"
+												value="#{column.description}" escape="false" />
+										</t:panelGrid>
+									</f:facet>
+								</t:popup>
+
+								<t:panelGrid id="tableColumnFilter" columns="1"
+									headerClass="tableFilterPanel" rendered="#{column.sortableSearchable}">
+									<ss:operator column="#{column}"
+										rendered="#{searchResults.tableFilterMode || !column.criterion.undefined}"
+										editable="#{searchResults.tableFilterMode}" />
+									<ss:criterion column="#{column}"
+										rendered="#{searchResults.tableFilterMode || !column.criterion.undefined}"
+										editable="#{searchResults.tableFilterMode}" 
+										editWidth="10" />
+									<t:panelGrid columns="2">
+										<t:commandButton id="search" forceId="true" value="Search"
+											styleClass="command"
+											rendered="#{searchResults.tableFilterMode}"/>
+                    <t:commandButton value="Clear" immediate="true"
+                      action="#{searchResults.resetColumnFilter}"
+                      styleClass="command"
+                      rendered="#{searchResults.tableFilterMode}" />
+                  </t:panelGrid>
+								</t:panelGrid>
+							</t:panelGrid>
+						</f:facet>
+						<t:panelStack
+							selectedPanel="#{searchResults.rowRestricted ? 'restricted' : column.editable &amp;&amp; searchResults.editMode ? 'input' : 'output'}">
+							<!-- this restricted field is a "last line of defense" against displaying data
+                 that should not be viewable by the user; in general, a search result should
+                 never contain restricted data to begin with -->
+              <t:outputText id="restricted" value="- - -"
+                styleClass="dataText" />
+              <!-- note: for editable input columns, we set tabindex to ensure tab behavior only moves between input fields (and not links in other non-editable columns) -->
+							<t:inputText id="input" value="#{searchResults.cellValue}"
+								rendered="#{column.editable &amp;&amp; searchResults.editMode}"
+								immediate="true" converter="#{column.converter}" styleClass="inputText"
+								tabindex="#{rowIndex + searchResults.columnManager.currentColumnIndex + 1}" />
+							<!-- both single-valued and collection column types are displayed in dataList -->
+							<t:dataList id="output" var="item"
+								value="#{searchResults.cellValue}" layout="simple"
+								rowIndexVar="itemIndex" rowCountVar="itemCount">
+								<t:commandLink disabled="#{! column.commandLink}"
+									action="#{searchResults.cellAction}">
+                  <t:outputText id="text" rendered="#{column.columnType.name != 'IMAGE'}" value="#{item}"
+                    converter="#{column.converter}"
+                    styleClass="dataText" />
+                  <ss:graphicImage url="#{searchResults.cellValue}"
+                    rendered="#{column.columnType.name == 'IMAGE'}" />
+                </t:commandLink>
+                <t:outputText value=", "
+                  rendered="#{itemIndex &lt; itemCount - 1}"
+                  styleClass="dataText" />
+              </t:dataList>
+						</t:panelStack>
+					</t:columns>
+				</t:dataTable>
+
+				<ui:insert name="searchResultFooter" />
+
+				<t:panelGrid
+					rendered="#{searchResults.capabilities['viewRowDetail'] &amp;&amp; searchResults.rowDetailVisible &amp;&amp; !searchResults.editMode}"
+					columns="1">
+					<t:outputText value="Row Detail:" styleClass="subsection" />
+					<t:aliasBean alias="#{rowDetail}"
+						value="#{searchResults.capabilities['viewRowDetail'] ? searchResults.rowDetail : null}">
+						<t:outputText value="Coming soon!" />
+					</t:aliasBean>
+					<t:commandButton value="Close"
+						action="#{searchResults.hideRowDetail}" />
+				</t:panelGrid>
+
+				<t:panelGroup id="commandPanel">
+					<t:panelGroup id="editCommandsPanel"
+						rendered="#{searchResults.editable}">
+						<t:commandButton id="editCommand" value="Edit"
+							action="#{searchResults.edit}"
+							rendered="#{!searchResults.editMode}" />
+						<t:commandButton id="saveCommand" value="Save"
+							action="#{searchResults.save}"
+							rendered="#{searchResults.editMode}" />
+						<t:commandButton id="cancelCommand" value="Cancel"
+							immediate="true" action="#{searchResults.cancel}"
+							rendered="#{searchResults.editMode}" />
+					</t:panelGroup>
+				</t:panelGroup>
+			</t:buffer>
+
+      <ss:dataTableNavigator dataTable="#{searchResults}">
+				<ui:define name="custom3">
+					<t:commandButton id="summaryViewerCommand"
+						rendered="#{searchResults.capabilities['viewEntity'] &amp;&amp; searchResults.entityView}"
+						value="Back to Search Results"
+						action="#{searchResults.returnToSummaryList}" styleClass="command" />
+          <t:div rendered="#{!searchResults.capabilities['viewEntity'] || !searchResults.entityView}"/>
+				</ui:define>
+
+				<ui:define name="custom4">
+          <t:panelGrid id="exportCommand" columns="2" styleClass="layout">
+            <t:commandButton id="exportSearchResultsCommandButton"
+              rendered="#{(!searchResults.capabilities['entityView'] || searchResults.summaryView) &amp;&amp; searchResults.dataExporterSelector.size > 0}"
+              value="Export"
+              action="#{searchResults.downloadSearchResults}" />
+            <t:selectOneMenu id="downloadFormat"
+              rendered="#{(!searchResults.capabilities['entityView'] || searchResults.summaryView) &amp;&amp; searchResults.dataExporterSelector.size > 1}"
+              value="#{searchResults.dataExporterSelector.value}">
+              <f:selectItems
+                value="#{searchResults.dataExporterSelector.selectItems}" />
+            </t:selectOneMenu>
+          </t:panelGrid>
+        </ui:define>
+
+			</ss:dataTableNavigator>
+
+			<t:outputText value="#{dataTableBuffer}" escape="false"
+				rendered="#{!searchResults.capabilities['viewEntity'] || !searchResults.entityView}" />
+      <t:outputText value="&lt;no results&gt;" rendered="#{searchResults.dataTableModel.rowCount == 0}"/>
+		</h:form>
+
+		<t:panelGroup
+			rendered="#{searchResults.capabilities['viewEntity'] &amp;&amp; searchResults.entityView}">
+			<ui:insert name="entityViewer">
+				<t:outputText value="entityViewer ain't got no body" />
+			</ui:insert>
+		</t:panelGroup>
+
+	</f:subview>
+
+</ui:component>
+
+</html>

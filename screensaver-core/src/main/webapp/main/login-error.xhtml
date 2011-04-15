@@ -1,0 +1,36 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+<html xmlns="http://www.w3.org/1999/xhtml"
+  xmlns:ui="http://java.sun.com/jsf/facelets"
+  xmlns:h="http://java.sun.com/jsf/html"
+  xmlns:f="http://java.sun.com/jsf/core"
+  xmlns:t="http://myfaces.apache.org/tomahawk"
+  xmlns:s="http://myfaces.apache.org/sandbox">
+
+<ui:composition template="/main/template.xhtml">
+
+  <ui:param name="pageTitle" value="Login failed! (sorry)" />
+
+  <ui:define name="menu">
+    <ui:include src="/main/menu.xhtml" />
+  </ui:define>
+
+  <ui:define name="body">
+    <h:form id="loginErrorForm">
+      <t:outputText
+        value="Based upon the user ID and password you provided, we are not yet sure of who you are.  In keeping with our policy of protecting data from unauthorized users, we cannot give you the benefit of the doubt and let you into this system. Instead, we must ask that you try once again to tell us who you are."
+        styleClass="label" />
+      <t:panelGrid columns="1">
+        <t:commandButton value="Try again" action="#{menu.viewMain}"
+          styleClass="command" />
+        <h:outputLink value="#{appInfo.applicationProperties.map['screensaver.ui.feedback_url']}" target="_blank" styleClass="label">
+          <h:outputText value="I am having trouble logging into Screensaver" />
+        </h:outputLink>
+      </t:panelGrid>
+    </h:form>
+
+  </ui:define>
+
+</ui:composition>
+
+</html>

@@ -1,0 +1,41 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+<html xmlns="http://www.w3.org/1999/xhtml"
+	xmlns:ui="http://java.sun.com/jsf/facelets"
+	xmlns:h="http://java.sun.com/jsf/html"
+	xmlns:f="http://java.sun.com/jsf/core"
+	xmlns:t="http://myfaces.apache.org/tomahawk"
+	xmlns:s="http://myfaces.apache.org/sandbox">
+
+<ui:composition>
+
+
+    <p>
+      You can easily look up the contents of wells in the ICCB-L libraries collection in
+      various ways:
+      <ul>
+        <li>
+          To look up the contents of a single well, enter in the plate number and well name in
+          the Plate/Well text boxes in the left menu pane.
+        </li>
+        <li>
+          Or, click on the "Find Wells" link in the left menu pane to get to the Well Finder
+          page.
+        </li>
+      </ul>
+     </p>
+
+     <p>
+       On the Well Finder page, you can enter in the coordinates for a single well or for
+       multiple wells. The Well Finder page contains further instructions explaining how the
+       well coordinates should be specified.
+     </p>
+
+	<t:panelGroup visibleOnUserRole="librariesAdmin">
+      As a <i>Libraries Administrator</i>, you can view click the "Find Well Volumes" button 
+      to view volume information for each of the library plate copies of the specified wells.
+	</t:panelGroup>
+
+</ui:composition>
+
+</html>

@@ -1,0 +1,38 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+<html xmlns="http://www.w3.org/1999/xhtml"
+  xmlns:ui="http://java.sun.com/jsf/facelets"
+  xmlns:h="http://java.sun.com/jsf/html"
+  xmlns:f="http://java.sun.com/jsf/core"
+  xmlns:t="http://myfaces.apache.org/tomahawk"
+  xmlns:s="http://myfaces.apache.org/sandbox"
+  xmlns:ss="http://screensaver.med.harvard.edu/ui">
+
+<ui:composition template="/main/template.xhtml">
+
+  <ui:param name="pageTitle" value="#{librariesBrowser.title}" />
+  <ui:param name="pageHelpURL"
+    value="libraries/librariesBrowserHelp.jsf" />
+
+  <ui:define name="body">
+    <ss:searchResult searchResults="#{librariesBrowser}">
+      <ui:define name="entityViewer">
+        <ui:include src="libraryViewerBody.xhtml" />
+      </ui:define>
+      <ui:define name="searchResultFooter">
+        <t:panelGrid style="padding-top: 20px">
+          <!-- for ICCB-L/NSRB -->
+          <h:outputLink
+            value="#{appInfo.applicationProperties.map['screensaver.ui.download_sd_files_url']}"
+            target="_blank" title="Download SD Files for small molecule libraries"
+            rendered="#{!empty appInfo.applicationProperties.map['screensaver.ui.download_sd_files_url']}">
+            <h:outputText value="Download SD files" />
+          </h:outputLink>
+        </t:panelGrid>
+      </ui:define>
+    </ss:searchResult>
+  </ui:define>
+
+</ui:composition>
+
+</html>
