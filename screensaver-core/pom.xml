@@ -14,115 +14,6 @@
 <!--  <version>${screensaver.ui.version}</version>-->
   <version>2.3.2</version>
   <name>Screensaver</name>
-  <description>
-    Screensaver POM
-    
-      - required command line properties:
-        build.number 
-      
-      - usage examples (build number as reported from svn):
-        - to war:  $ mvn  -Dbuild.number=`svnversion -n` clean package
-        - to jar:  $ mvn  -Dbuild.number=`svnversion -n` -Pbatch clean package
-  </description>
-  <url>http://forge.abcd.harvard.edu/gf/project/screensaver/</url>
-  <issueManagement>
-    <system>ABCD Forge</system>
-    <url>http://forge.abcd.harvard.edu/gf/project/screensaver/tracker/?action=TrackerItemBrowse&amp;tracker_id=497</url>
-  </issueManagement>
-  <developers>
-    <developer>
-      <name>Andrew Tolopko</name>
-      <id>atolopko</id>
-      <organization>Harvard Medical School, ICCB-Longwood/NSRB</organization>
-    </developer>
-    <developer>
-      <name>Sean Erickson</name>
-      <id>seanderickson1</id>
-      <organization>Harvard Medical School, ICCB-Longwood/NSRB</organization>
-    </developer>
-  </developers>
-  <contributors>
-    <contributor>
-      <name>John Sullivan</name>
-    </contributor>
-    <contributor>
-      <name>Cor Lieftink</name>
-    </contributor>
-  </contributors>
-
-  <licenses>
-    <license>
-      <name>GNU General Public License, version 2</name>
-      <url>http://www.gnu.org/licenses/old-licenses/gpl-2.0.html</url>
-      <distribution>manual</distribution>
-    </license>
-  </licenses>
-
-<!--  <profiles>-->
-<!---->
-<!--    <profile>-->
-<!--      <id>webapp</id>-->
-<!--      <activation>-->
-<!--        <activeByDefault>true</activeByDefault>-->
-<!--      </activation>-->
-<!--      <properties>-->
-<!--        <packaging.type>war</packaging.type>-->
-<!--      </properties>-->
-<!--    </profile>-->
-
-<!--    <profile>-->
-<!--      <id>batch</id>-->
-<!--      <properties>-->
-<!--        <packaging.type>jar</packaging.type>-->
-<!--      </properties>-->
-<!---->
-<!--      <build>-->
-<!--        <plugins>-->
-<!---->
-<!--           It's not necessary to specify the jar plugin if the packaging type is "jar" -->
-<!--           <plugin> -->
-<!--           <groupId>org.apache.maven.plugins</groupId> -->
-<!--           <artifactId>maven-jar-plugin</artifactId> -->
-<!--           <version>2.3.1</version> -->
-<!--           <executions> -->
-<!--           <execution> -->
-<!--           <phase>package</phase> -->
-<!--           <goals> -->
-<!--           <goal>jar</goal> -->
-<!--           </goals> -->
-<!--           <configuration> -->
-<!--           <classifier>${version}</classifier> -->
-<!--           <includes> -->
-<!--           <include>**/*</include> -->
-<!--           </includes> -->
-<!--           </configuration> -->
-<!--           </execution> -->
-<!--           </executions> -->
-<!--           </plugin> -->
-<!---->
-<!--          <plugin>-->
-<!--            <artifactId>maven-assembly-plugin</artifactId>-->
-<!--            <configuration>-->
-<!--              <descriptors>-->
-<!--                <descriptor>src/assembly/command-line.xml</descriptor>-->
-<!--              </descriptors>-->
-<!--            </configuration>-->
-<!--            <executions>-->
-<!--              <execution>-->
-<!--                <id>command-line</id>-->
-<!--                <phase>package</phase>-->
-<!--                <goals>-->
-<!--                  <goal>single</goal>-->
-<!--                </goals>-->
-<!--              </execution>-->
-<!--            </executions>-->
-<!--          </plugin>-->
-<!---->
-<!--        </plugins>-->
-<!--      </build>-->
-<!--    </profile>-->
-<!---->
-<!--  </profiles>-->
 
   <packaging>jar</packaging>
 
@@ -143,44 +34,6 @@
     </resources>
 
     <plugins>
-
-<!--      <plugin>-->
-<!--         specify the maven-war-plugin so that we can enable filtering for the web.xml -->
-<!--        <groupId>org.apache.maven.plugins</groupId>-->
-<!--        <artifactId>maven-war-plugin</artifactId>-->
-<!--        <configuration>-->
-<!--          <webResources>-->
-<!--            <resource>-->
-<!--              <directory>src/main/webapp/WEB-INF</directory>-->
-<!--              <filtering>true</filtering>-->
-<!--               override the destination directory for this resource -->
-<!--              <targetPath>WEB-INF</targetPath>-->
-<!--            </resource>-->
-<!--          </webResources>-->
-<!--        </configuration>-->
-<!--      </plugin>-->
-
-      <!-- <plugin> -->
-      <!-- <groupId>org.apache.maven.plugins</groupId> -->
-      <!-- <artifactId>maven-dependency-plugin</artifactId> -->
-      <!-- <version>2.2</version> -->
-      <!-- <executions> -->
-      <!-- <execution> -->
-      <!-- <id>copy-dependencies</id> -->
-      <!-- <phase>install</phase> -->
-      <!-- <goals> -->
-      <!-- <goal>copy-dependencies</goal> -->
-      <!-- </goals> -->
-      <!-- <configuration> -->
-      <!-- <outputDirectory>${project.build.directory}/dependencies</outputDirectory> -->
-      <!-- <overWriteReleases>false</overWriteReleases> -->
-      <!-- <overWriteSnapshots>false</overWriteSnapshots> -->
-      <!-- <overWriteIfNewer>true</overWriteIfNewer> -->
-      <!-- -->
-      <!-- </configuration> -->
-      <!-- </execution> -->
-      <!-- </executions> -->
-      <!-- </plugin> -->
 
       <plugin>
         <groupId>org.apache.maven.plugins</groupId>
@@ -594,23 +447,7 @@
       <scope>compile</scope>
     </dependency>
 
-    <!-- <dependency> -->
-    <!-- <groupId>org.apache.myfaces.core</groupId> -->
-    <!-- <artifactId>myfaces-api</artifactId> -->
-    <!-- <version>1.2.9</version> -->
-    <!-- <type>jar</type> -->
-    <!-- <scope>compile</scope> -->
-    <!-- </dependency> -->
-    <!---->
-    <!-- <dependency> -->
-    <!-- <groupId>org.apache.myfaces.core</groupId> -->
-    <!-- <artifactId>myfaces-impl</artifactId> -->
-    <!-- <version>1.2.9</version> -->
-    <!-- <type>jar</type> -->
-    <!-- <scope>compile</scope> -->
-    <!-- </dependency> -->
-
-    <dependency>
+   <dependency>
       <!-- NOTE: this file must be added to the local repository with dependency in AbstractBackingBean, on org.apache.myfaces.custom.util.ComponentUtils.findComponentById 
         mvn install:install-file -Dfile=tomahawk-sandbox-1.1.7-SNAPSHOT.jar -DgroupId=org.apache.myfaces.tomahawk -DartifactId=tomahawk-sandbox 
         -Dversion=1.1.7 -Dpackaging=jar -DgeneratePom=true -->

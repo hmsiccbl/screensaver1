@@ -7,15 +7,51 @@
   <version>2.3.2</version>
   <packaging>pom</packaging>
   <name>screensaver-maven</name>
-  <url>http://maven.apache.org</url>
-  <dependencies>
-    <dependency>
-      <groupId>junit</groupId>
-      <artifactId>junit</artifactId>
-      <version>3.8.1</version>
-      <scope>test</scope>
-    </dependency>
-  </dependencies>
+  
+  <description>
+    Screensaver POM
+    
+      - required command line properties:
+        build.number 
+      
+      - usage examples (build number as reported from svn):
+        - to war:  $ mvn  -Dbuild.number=`svnversion -n` clean package
+        - to jar:  $ mvn  -Dbuild.number=`svnversion -n` -Pbatch clean package
+  </description>
+  <url>http://forge.abcd.harvard.edu/gf/project/screensaver/</url>
+  <issueManagement>
+    <system>ABCD Forge</system>
+    <url>http://forge.abcd.harvard.edu/gf/project/screensaver/tracker/?action=TrackerItemBrowse&amp;tracker_id=497</url>
+  </issueManagement>
+  <developers>
+    <developer>
+      <name>Andrew Tolopko</name>
+      <id>atolopko</id>
+      <organization>Harvard Medical School, ICCB-Longwood/NSRB</organization>
+    </developer>
+    <developer>
+      <name>Sean Erickson</name>
+      <id>seanderickson1</id>
+      <organization>Harvard Medical School, ICCB-Longwood/NSRB</organization>
+    </developer>
+  </developers>
+  <contributors>
+    <contributor>
+      <name>John Sullivan</name>
+    </contributor>
+    <contributor>
+      <name>Cor Lieftink</name>
+    </contributor>
+  </contributors>
+
+  <licenses>
+    <license>
+      <name>GNU General Public License, version 2</name>
+      <url>http://www.gnu.org/licenses/old-licenses/gpl-2.0.html</url>
+      <distribution>manual</distribution>
+    </license>
+  </licenses>  
+  
   <properties>
     <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
   </properties>
