@@ -14,6 +14,15 @@
   
   
   <build>
+
+    <resources>
+      <!-- turn on filtering for the resources directory -->
+      <resource>
+        <directory>src/main/resources</directory>
+        <filtering>true</filtering>
+      </resource>
+    </resources>
+  
     <plugins>
           <plugin>
             <artifactId>maven-assembly-plugin</artifactId>

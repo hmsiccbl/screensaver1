@@ -132,7 +132,7 @@
 
   <build>
     <!-- do this so the version will not be part of the generated war file name -->
-    <finalName>${artifactId}</finalName>
+<!--    <finalName>${artifactId}</finalName>-->
 
     <resources>
       <!-- turn on filtering for the resources directory -->
@@ -144,21 +144,21 @@
 
     <plugins>
 
-      <plugin>
-        <!-- specify the maven-war-plugin so that we can enable filtering for the web.xml -->
-        <groupId>org.apache.maven.plugins</groupId>
-        <artifactId>maven-war-plugin</artifactId>
-        <configuration>
-          <webResources>
-            <resource>
-              <directory>src/main/webapp/WEB-INF</directory>
-              <filtering>true</filtering>
-              <!-- override the destination directory for this resource -->
-              <targetPath>WEB-INF</targetPath>
-            </resource>
-          </webResources>
-        </configuration>
-      </plugin>
+<!--      <plugin>-->
+<!--         specify the maven-war-plugin so that we can enable filtering for the web.xml -->
+<!--        <groupId>org.apache.maven.plugins</groupId>-->
+<!--        <artifactId>maven-war-plugin</artifactId>-->
+<!--        <configuration>-->
+<!--          <webResources>-->
+<!--            <resource>-->
+<!--              <directory>src/main/webapp/WEB-INF</directory>-->
+<!--              <filtering>true</filtering>-->
+<!--               override the destination directory for this resource -->
+<!--              <targetPath>WEB-INF</targetPath>-->
+<!--            </resource>-->
+<!--          </webResources>-->
+<!--        </configuration>-->
+<!--      </plugin>-->
 
       <!-- <plugin> -->
       <!-- <groupId>org.apache.maven.plugins</groupId> -->
@@ -181,24 +181,6 @@
       <!-- </execution> -->
       <!-- </executions> -->
       <!-- </plugin> -->
-
-      <plugin>
-        <groupId>org.apache.maven.plugins</groupId>
-        <artifactId>maven-eclipse-plugin</artifactId>
-        <configuration>
-          <downloadSources>true</downloadSources>
-          <downloadJavadocs>true</downloadJavadocs>
-        </configuration>
-      </plugin>
-
-      <plugin>
-        <groupId>org.apache.maven.plugins</groupId>
-        <artifactId>maven-compiler-plugin</artifactId>
-        <configuration>
-          <source>1.6</source>
-          <target>1.6</target>
-        </configuration>
-      </plugin>
 
       <plugin>
         <groupId>org.apache.maven.plugins</groupId>
@@ -310,12 +292,6 @@
   </repositories>
 
   <dependencies>
-    <dependency>
-      <groupId>junit</groupId>
-      <artifactId>junit</artifactId>
-      <version>3.8.1</version>
-      <scope>test</scope>
-    </dependency>
 
     <dependency>
       <groupId>org.hibernate</groupId>
@@ -367,11 +343,6 @@
     <!-- <scope>compile</scope> -->
     <!-- </dependency> -->
 
-    <dependency>
-      <groupId>log4j</groupId>
-      <artifactId>log4j</artifactId>
-      <version>1.2.16</version>
-    </dependency>
 
     <dependency>
       <groupId>javax.persistence</groupId>
