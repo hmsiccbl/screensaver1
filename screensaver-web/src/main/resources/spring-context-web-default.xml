@@ -93,10 +93,10 @@
   </bean>
 
   <!--  Top-level web application construction -->
-
-  <import resource="spring-context-persistence.xml"/>
-  <import resource="spring-context-services.xml"/>
+  
+  <import resource="classpath:spring-context-persistence.xml"/>
+  <import resource="classpath:spring-context-services.xml"/>
   <import resource="spring-context-ui.xml"/>
-  <import resource="spring-context-authentication.xml"/>
+  <import resource="classpath:spring-context-authentication.xml"/>
   
 </beans>
