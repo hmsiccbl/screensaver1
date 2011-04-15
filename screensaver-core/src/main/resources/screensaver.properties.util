@@ -1,7 +1,0 @@
-# screensaver.properties.util
-
-# database connection settings
-database.host=localhost
-database.name=screensaver
-database.user=screensaver
-database.password=
