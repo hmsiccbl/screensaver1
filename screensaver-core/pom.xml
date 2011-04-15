@@ -3,15 +3,16 @@
   xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
   xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
   <modelVersion>4.0.0</modelVersion>
-  <!-- <parent> -->
-  <!-- <artifactId>screensaver-maven</artifactId> -->
-  <!-- <groupId>edu.harvard.med</groupId> -->
-  <!-- <version>1.0-SNAPSHOT</version> -->
-  <!-- </parent> -->
+   <parent> 
+   <artifactId>screensaver-maven</artifactId> 
+   <groupId>edu.harvard.med</groupId> 
+   <version>2.3.2</version> 
+   </parent> 
 
   <groupId>edu.harvard.med</groupId>
-  <artifactId>screensaver</artifactId>
-  <version>${screensaver.ui.version}</version>
+  <artifactId>screensaver-core</artifactId>
+<!--  <version>${screensaver.ui.version}</version>-->
+  <version>2.3.2</version>
   <name>Screensaver</name>
   <description>
     Screensaver POM
@@ -57,73 +58,73 @@
     </license>
   </licenses>
 
-  <profiles>
+<!--  <profiles>-->
+<!---->
+<!--    <profile>-->
+<!--      <id>webapp</id>-->
+<!--      <activation>-->
+<!--        <activeByDefault>true</activeByDefault>-->
+<!--      </activation>-->
+<!--      <properties>-->
+<!--        <packaging.type>war</packaging.type>-->
+<!--      </properties>-->
+<!--    </profile>-->
 
-    <profile>
-      <id>webapp</id>
-      <activation>
-        <activeByDefault>true</activeByDefault>
-      </activation>
-      <properties>
-        <packaging.type>war</packaging.type>
-      </properties>
-    </profile>
+<!--    <profile>-->
+<!--      <id>batch</id>-->
+<!--      <properties>-->
+<!--        <packaging.type>jar</packaging.type>-->
+<!--      </properties>-->
+<!---->
+<!--      <build>-->
+<!--        <plugins>-->
+<!---->
+<!--           It's not necessary to specify the jar plugin if the packaging type is "jar" -->
+<!--           <plugin> -->
+<!--           <groupId>org.apache.maven.plugins</groupId> -->
+<!--           <artifactId>maven-jar-plugin</artifactId> -->
+<!--           <version>2.3.1</version> -->
+<!--           <executions> -->
+<!--           <execution> -->
+<!--           <phase>package</phase> -->
+<!--           <goals> -->
+<!--           <goal>jar</goal> -->
+<!--           </goals> -->
+<!--           <configuration> -->
+<!--           <classifier>${version}</classifier> -->
+<!--           <includes> -->
+<!--           <include>**/*</include> -->
+<!--           </includes> -->
+<!--           </configuration> -->
+<!--           </execution> -->
+<!--           </executions> -->
+<!--           </plugin> -->
+<!---->
+<!--          <plugin>-->
+<!--            <artifactId>maven-assembly-plugin</artifactId>-->
+<!--            <configuration>-->
+<!--              <descriptors>-->
+<!--                <descriptor>src/assembly/command-line.xml</descriptor>-->
+<!--              </descriptors>-->
+<!--            </configuration>-->
+<!--            <executions>-->
+<!--              <execution>-->
+<!--                <id>command-line</id>-->
+<!--                <phase>package</phase>-->
+<!--                <goals>-->
+<!--                  <goal>single</goal>-->
+<!--                </goals>-->
+<!--              </execution>-->
+<!--            </executions>-->
+<!--          </plugin>-->
+<!---->
+<!--        </plugins>-->
+<!--      </build>-->
+<!--    </profile>-->
+<!---->
+<!--  </profiles>-->
 
-    <profile>
-      <id>batch</id>
-      <properties>
-        <packaging.type>jar</packaging.type>
-      </properties>
-
-      <build>
-        <plugins>
-
-          <!-- It's not necessary to specify the jar plugin if the packaging type is "jar" -->
-          <!-- <plugin> -->
-          <!-- <groupId>org.apache.maven.plugins</groupId> -->
-          <!-- <artifactId>maven-jar-plugin</artifactId> -->
-          <!-- <version>2.3.1</version> -->
-          <!-- <executions> -->
-          <!-- <execution> -->
-          <!-- <phase>package</phase> -->
-          <!-- <goals> -->
-          <!-- <goal>jar</goal> -->
-          <!-- </goals> -->
-          <!-- <configuration> -->
-          <!-- <classifier>${version}</classifier> -->
-          <!-- <includes> -->
-          <!-- <include>**/*</include> -->
-          <!-- </includes> -->
-          <!-- </configuration> -->
-          <!-- </execution> -->
-          <!-- </executions> -->
-          <!-- </plugin> -->
-
-          <plugin>
-            <artifactId>maven-assembly-plugin</artifactId>
-            <configuration>
-              <descriptors>
-                <descriptor>src/assembly/command-line.xml</descriptor>
-              </descriptors>
-            </configuration>
-            <executions>
-              <execution>
-                <id>command-line</id>
-                <phase>package</phase>
-                <goals>
-                  <goal>single</goal>
-                </goals>
-              </execution>
-            </executions>
-          </plugin>
-
-        </plugins>
-      </build>
-    </profile>
-
-  </profiles>
-
-  <packaging>${packaging.type}</packaging>
+  <packaging>jar</packaging>
 
   <scm>
     <url>https://forge.abcd.harvard.edu/svn/screensaver</url>
