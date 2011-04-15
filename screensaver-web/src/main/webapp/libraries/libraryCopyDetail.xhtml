@@ -1,0 +1,119 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+<html xmlns="http://www.w3.org/1999/xhtml"
+  xmlns:ui="http://java.sun.com/jsf/facelets"
+  xmlns:h="http://java.sun.com/jsf/html"
+  xmlns:f="http://java.sun.com/jsf/core"
+  xmlns:t="http://myfaces.apache.org/tomahawk"
+  xmlns:s="http://myfaces.apache.org/sandbox"
+  xmlns:ss="http://screensaver.med.harvard.edu/ui">
+
+<ui:composition template="/util/entityViewerDetails.xhtml">
+
+  <ui:param name="entity" value="#{libraryCopyDetail.entity}" />
+  <ui:param name="viewer" value="#{libraryCopyDetail}" />
+  <ui:param name="hideId" value="#{true}" />
+
+  <ui:define name="entityCommands">
+    <t:commandButton id="deleteLibraryCopy" value="Delete"
+      action="#{libraryCopyDetail.delete}"
+      rendered="#{libraryCopyDetail.editable &amp;&amp; !libraryCopyDetail.editMode }"
+      onclick="javascript: return confirm('Are you sure you want to delete this library copy?');"
+      styleClass="command" description="Delete this copy" />
+  </ui:define>
+
+
+  <ui:define name="propertiesContent">
+    <ss:property id="copyName" label="Copy Name" rendered="true"
+      description="The name of the copy"
+      value="#{libraryCopyDetail.entity.name}" required="true"
+      editable="#{libraryCopyDetail.editMode}" editWidth="60" />
+
+    <ss:property id="library" label="Library"
+      description="The library that this copy represents">
+      <ui:define name="data">
+        <ss:entityLink entity="#{libraryCopyDetail.entity.library}"
+          property="libraryName" viewer="#{libraryViewer}" />
+      </ui:define>
+    </ss:property>
+
+    <ss:property id="copyUsageType" label="Usage Type"
+      value="#{libraryCopyDetail.entity.usageType}"
+      editable="#{libraryCopyDetail.editMode}">
+      <ui:define name="editableData">
+        <t:selectOneMenu id="usageTypeMenu"
+          value="#{libraryCopyDetail.entity.usageType}"
+          required="true" styleClass="inputText selectMenu"
+          converter="#{copyUsageTypeConverter}">
+          <f:selectItems
+            value="#{libraryCopyDetail.copyUsageTypeSelectItems}" />
+        </t:selectOneMenu>
+      </ui:define>
+    </ss:property>
+
+    <ss:property id="datePlated" label="Date Plated"
+      description="The earliest date on which a plate of this copy was created"
+      type="Date" value="#{libraryCopyDetail.entity.datePlated}"
+      editable="false" rendered="#{!entity.transient}" />
+
+    <ss:property id="locations" label="Plate Location(s)" type="List" 
+      description="The location(s) of this copy's plates"
+      value="#{libraryCopyViewer.plateAggregateFields.locations}" 
+      editable="false" rendered="#{!entity.transient}" 
+      escape="false"
+    />
+    
+    <ss:property id="type" label="Plate Type" type="List" 
+      description="The plate type(s) represented in this search"
+      value="#{libraryCopyViewer.plateAggregateFields.types}" 
+      editable="false" rendered="#{!entity.transient}"
+    />
+    <ss:property id="primaryPlateStatus" label="Status" 
+      description="The most frequently occurring plate status among this copy's plates"
+      value="#{libraryCopyViewer.entity.primaryPlateStatus}" 
+      editable="false" rendered="#{!entity.transient}"
+    />
+    <ss:property id="statuses" label="Secondary Plate Statuses" type="List" 
+      description="The non-primary statuses of the copy's plates"
+      value="#{libraryCopyViewer.plateAggregateFields.secondaryStatuses}" 
+      editable="false" rendered="#{!entity.transient}"
+    />
+    <ss:property id="platesAvailable" label="Plates Available" 
+      description="The number of this copy's plates that have a status of 'Available'"
+      value="#{libraryCopyViewer.entity.platesAvailable}" 
+      editable="false" rendered="#{!entity.transient}"
+    />
+    <ss:propertyGroup label="Plate Volumes">
+      <ss:property id="initialVolumes" label="Initial"
+        type="List"
+        description="The plate initial volume(s) of the copy's plates"
+        value="#{libraryCopyViewer.plateAggregateFields.volumes}"
+        editable="false" rendered="#{!entity.transient}" />
+      <ss:property id="avgPlateRemainingVolume"
+        label="Average Remaining"
+        description="The average well volume remaining across all library screening plates of this copy"
+        value="#{libraryCopyViewer.entity.volumeStatistics.averageRemaining}"
+        editable="false" rendered="#{!entity.transient}" />
+      <ss:property id="minPlateRemainingVolume"
+        label="Min Remaining"
+        description="The minimum well volume remaining across all library screening plates of this copy"
+        value="#{libraryCopyViewer.entity.volumeStatistics.minRemaining}"
+        editable="false" rendered="#{!entity.transient}" />
+      <ss:property id="maxPlateRemainingVolume"
+        label="Max Remaining"
+        description="The maximum well volume remaining across all library screening plates of this copy"
+        value="#{libraryCopyViewer.entity.volumeStatistics.maxRemaining}"
+        editable="false" rendered="#{!entity.transient}" />
+    </ss:propertyGroup>
+    
+    <ss:property id="copyComments" label="Comments" type="Textarea"
+      value="#{libraryCopyDetail.entity.comments}"
+      editable="#{libraryCopyDetail.editMode}" editWidth="80"
+      editHeight="3" />
+
+  </ui:define>
+
+</ui:composition>
+
+</html>
+

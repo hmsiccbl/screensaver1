@@ -1,0 +1,226 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+<html xmlns="http://www.w3.org/1999/xhtml"
+  xmlns:ui="http://java.sun.com/jsf/facelets"
+  xmlns:h="http://java.sun.com/jsf/html"
+  xmlns:f="http://java.sun.com/jsf/core"
+  xmlns:t="http://myfaces.apache.org/tomahawk"
+  xmlns:s="http://myfaces.apache.org/sandbox"
+  xmlns:ss="http://screensaver.med.harvard.edu/ui">
+
+<ui:composition template="/util/entityViewerDetails.xhtml">
+
+  <ui:param name="entity"
+    value="#{cherryPickRequestDetailViewer.entity}" />
+  <ui:param name="viewer" value="#{cherryPickRequestDetailViewer}" />
+  <ui:param name="hideId" value="#{true}" />
+
+  <ui:define name="entityCommands">
+    <t:commandButton id="showAdminWarnings"
+      value="Show Cherry Pick Warnings"
+      action="#{cherryPickRequestDetailViewer.showAdminWarnings}"
+      rendered="#{cherryPickRequestDetailViewer.readAdmin &amp;&amp; cherryPickRequestDetailViewer.screenerCherryPickCount > 0}"
+      styleClass="command"
+      description="Show administrative warnings for screener cherry picks" />
+  </ui:define>
+
+  <ui:define name="propertiesContent">
+
+    <ss:property label="Cherry Pick Request #"
+      description="The cherry pick request number"
+      value="#{cherryPickRequestDetailViewer.entity.cherryPickRequestNumber}" />
+
+    <ss:propertyGroup label="Screen">
+      <ss:screenSummaryProperties
+        screen="#{cherryPickRequestDetailViewer.entity.screen}" />
+    </ss:propertyGroup>
+
+    <ss:property id="dateRequested" label="Date Requested" type="Date"
+      description="The date the cherry pick request was made by the screener"
+      value="#{cherryPickRequestDetailViewer.entity.dateRequested}"
+      editable="#{cherryPickRequestDetailViewer.editMode}" />
+
+    <ss:property id="requestedBy" label="Requested By"
+      description="The screener that made the request"
+      value="#{cherryPickRequestDetailViewer.requestedBy}"
+      editable="#{cherryPickRequestDetailViewer.editMode}">
+      <ui:define name="data">
+        <ss:user user="#{value.selection}" />
+      </ui:define>
+      <ui:define name="editableData">
+        <t:selectOneMenu id="performedByEditable" value="#{value.value}"
+          styleClass="inputText selectMenu">
+          <f:selectItems value="#{value.selectItems}" />
+        </t:selectOneMenu>
+      </ui:define>
+    </ss:property>
+
+    <ss:propertyGroup label="Volumes">
+      <ss:property id="requestedVolume" label="Requested Volume"
+        value="#{cherryPickRequestDetailViewer.transferVolumePerWellRequestedValue}"
+        type="Volume"
+        unitsSelector="#{cherryPickRequestDetailViewer.transferVolumePerWellRequestedType}"
+        description="The volume per well that the screener requested"
+        editable="#{cherryPickRequestDetailViewer.editMode &amp;&amp; !cherryPickRequestDetailViewer.entity.allocated}"
+        editWidth="5" />
+
+      <ss:property id="approvedVolume" label="Approved Volume"
+        value="#{cherryPickRequestDetailViewer.transferVolumePerWellApprovedValue}"
+        type="Volume"
+        unitsSelector="#{cherryPickRequestDetailViewer.transferVolumePerWellApprovedType}"
+        description="The volume per well approved by the screening room"
+        editable="#{cherryPickRequestDetailViewer.editMode &amp;&amp; !cherryPickRequestDetailViewer.entity.allocated}"
+        editWidth="5" />
+
+      <ss:property id="approvedBy" label="Approved By"
+        description="The screening room staff member that approved this volume"
+        value="#{cherryPickRequestDetailViewer.volumeApprovedBy}"
+        editable="#{cherryPickRequestDetailViewer.editMode}">
+        <ui:define name="data">
+          <ss:user user="#{value.selection}" />
+        </ui:define>
+        <ui:define name="editableData">
+          <t:selectOneMenu value="#{value.value}"
+            styleClass="inputText selectMenu">
+            <f:selectItems value="#{value.selectItems}" />
+          </t:selectOneMenu>
+        </ui:define>
+      </ss:property>
+
+      <ss:property id="dateVolumeApprovedEditable" label="Date Approved"
+        type="Date"
+        description="The date the cherry pick volume was approved"
+        value="#{cherryPickRequestDetailViewer.entity.dateVolumeApproved}"
+        editable="#{cherryPickRequestDetailViewer.editMode}" />
+    </ss:propertyGroup>
+
+    <ss:propertyGroup label="Plating Options">
+      <ss:property id="plateType" label="Cherry Pick Plate Type"
+        description="The plate type, e.g., 'Eppendorf', 'Marsh', etc."
+        value="#{cherryPickRequestDetailViewer.assayPlateType}">
+        <ui:define name="data">
+          <t:selectOneMenu value="#{value.value}"
+            displayValueOnly="#{! cherryPickRequestDetailViewer.editMode || cherryPickRequestDetailViewer.entity.mapped}"
+            displayValueOnlyStyleClass="dataText" styleClass="inputText">
+            <f:selectItems value="#{value.selectItems}" />
+          </t:selectOneMenu>
+        </ui:define>
+      </ss:property>
+      
+      <ss:property id="keepSourcePlateCherryPicksTogether" label="Keep Source Plate Cherry Picks Together"
+        type="Boolean"
+        description="True when cherry picks from the same source plate should always be mapped to the same cherry pick plate"
+        value="#{cherryPickRequestDetailViewer.entity.keepSourcePlateCherryPicksTogether}"
+        editable="#{cherryPickRequestDetailViewer.editMode &amp;&amp; !cherryPickRequestDetailViewer.entity.mapped}"
+        styleClass="command" displayValueOnlyStyleClass="dataText" />
+
+      <ss:property id="randomLayout" label="Random plate well layout"
+        type="Boolean"
+        description="True when screener requested a random layout for the cherry pick plates"
+        value="#{cherryPickRequestDetailViewer.entity.randomizedAssayPlateLayout}"
+        editable="#{cherryPickRequestDetailViewer.editMode &amp;&amp; !cherryPickRequestDetailViewer.entity.mapped}"
+        styleClass="command" displayValueOnlyStyleClass="dataText" />
+        
+      <ss:property id="emptyWells" label="Wells to leave empty"
+        description="The wells that should be left empty on the cherry pick plates. (e.g. 'Col:3, Row:H, B2, N18')"
+        value="#{cherryPickRequestDetailViewer.emptyWellsOnAssayPlate}"
+        converter="#{emptyWellsConverter}"
+        editable="#{cherryPickRequestDetailViewer.editMode &amp;&amp; !cherryPickRequestDetailViewer.entity.mapped}"
+        editWidth="80" />
+    </ss:propertyGroup>
+
+    <ss:property id="cherryPickRequestComments" label="Comments"
+      type="Textarea"
+      description="Comments made by screening room staff"
+      value="#{cherryPickRequestDetailViewer.entity.comments}"
+      editHeight="5" editWidth="80"
+      editable="#{cherryPickRequestDetailViewer.editMode}" />
+
+    <ss:property id="screenerCherryPickCount"
+      label="# Screener cherry picks"
+      rendered="#{!!!cherryPickRequestDetailViewer.editMode}"
+      description="The number of screener cherry picks"
+      value="#{cherryPickRequestDetailViewer.screenerCherryPickCount}" />
+
+    <ss:property id="labCherryPickCount" label="# Lab cherry picks"
+      rendered="#{!!!cherryPickRequestDetailViewer.editMode}"
+      description="The number of lab cherry picks"
+      value="#{cherryPickRequestDetailViewer.labCherryPickCount}" />
+
+    <ss:propertyGroup label="Work Status" columns="6"
+      columnClasses="propertyLabelColumn,column,propertyLabelColumn,column,propertyLabelColumn,column"
+      rendered="#{cherryPickRequestDetailViewer.readAdmin &amp;&amp; !cherryPickRequestDetailViewer.editMode}">
+      <ss:property id="unfulfilledLabCherryPicksCount"
+        label="# Unfulfilled Lab Cherry Picks"
+        description="The number of unfulfilled lab cherry picks"
+        value="#{cherryPickRequestDetailViewer.entity.numberUnfulfilledLabCherryPicks}" />
+
+      <ss:property id="assayPlatesCompletedCount"
+        label="# Cherry Pick Plates Completed"
+        description="The number of completed cherry pick plates"
+        value="#{cherryPickRequestDetailViewer.completedCherryPickPlatesCount} of #{cherryPickRequestDetailViewer.activeCherryPickPlatesCount}" />
+
+      <ss:property id="isCompleted" label="Completed"
+        description="Has the cherry pick request been completed, such that all cherry pick plates have been plated"
+        value="#{cherryPickRequestDetailViewer.entity.plated}" />
+    </ss:propertyGroup>
+  </ui:define>
+
+  <ui:define name="footerContent">
+    <ss:collapsiblePanel id="cherryPickFollowupAssaysPanel"
+      isCollapsed="#{cherryPickRequestDetailViewer.isPanelCollapsedMap['cherryPickFollowupAssays']}"
+      label="Cherry Pick Follow-up Assays">
+      <ui:define name="content">
+        <t:panelGrid id="cherryPickRequestInfoTable" columns="2"
+          styleClass="layoutPanel"
+          columnClasses="propertyLabelColumn,column">
+          <ss:propertyGroup label="Cherry Pick Protocol Information">
+            <ss:property id="assayProtocolsFollowed"
+              label="Assay protocols followed" adminOnly="true"
+              type="Text"
+              value="#{cherryPickRequestDetailViewer.entity.cherryPickAssayProtocolsFollowed}"
+              converter="#{cherryPickAssayProtocolsFollowedConverter}"
+              editable="#{cherryPickRequestDetailViewer.editMode}">
+              <ui:define name="editableData">
+                <t:selectOneMenu id="assayProtocolsFollowed"
+                  value="#{cherryPickRequestDetailViewer.entity.cherryPickAssayProtocolsFollowed}"
+                  converter="#{cherryPickAssayProtocolsFollowedConverter}"
+                  required="false" styleClass="inputText selectMenu">
+                  <f:selectItems
+                    value="#{cherryPickRequestDetailViewer.cherryPickAssayProtocolsFollowedSelectItems}" />
+                </t:selectOneMenu>
+              </ui:define>
+            </ss:property>
+            <ss:property id="assayProtocolComments"
+              label="Assay Protocol Comments" adminOnly="true"
+              type="Textarea" editWidth="80" editHeight="5"
+              value="#{cherryPickRequestDetailViewer.entity.assayProtocolComments}"
+              editable="#{cherryPickRequestDetailViewer.editMode}" />
+          </ss:propertyGroup>
+          <ss:propertyGroup label="Cherry Pick Result Data">
+            <ss:property id="followupResultsReceived"
+              label="Follow-up Results Status" adminOnly="true"
+              type="Text"
+              value="#{cherryPickRequestDetailViewer.entity.cherryPickFollowupResultsStatus}"
+              converter="#{cherryPickFollowupResultsStatusConverter}"
+              editable="#{cherryPickRequestDetailViewer.editMode}">
+              <ui:define name="editableData">
+                <t:selectOneMenu id="followupResultsReceived"
+                  value="#{cherryPickRequestDetailViewer.entity.cherryPickFollowupResultsStatus}"
+                  converter="#{cherryPickFollowupResultsStatusConverter}"
+                  required="false" styleClass="inputText selectMenu">
+                  <f:selectItems
+                    value="#{cherryPickRequestDetailViewer.cherryPickFollowupResultsStatusSelectItems}" />
+                </t:selectOneMenu>
+              </ui:define>
+            </ss:property>
+          </ss:propertyGroup>
+        </t:panelGrid>
+      </ui:define>
+    </ss:collapsiblePanel>
+  </ui:define>
+
+</ui:composition>
+
+</html>
+

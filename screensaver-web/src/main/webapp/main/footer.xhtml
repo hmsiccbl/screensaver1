@@ -1,0 +1,43 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+<html xmlns="http://www.w3.org/1999/xhtml"
+	xmlns:ui="http://java.sun.com/jsf/facelets"
+	xmlns:h="http://java.sun.com/jsf/html"
+	xmlns:f="http://java.sun.com/jsf/core"
+	xmlns:t="http://myfaces.apache.org/tomahawk"
+	xmlns:s="http://myfaces.apache.org/sandbox">
+
+<ui:composition>
+
+	<t:div styleClass="footer">
+		<t:htmlTag value="hr" />
+    <h:outputLink value="https://wiki.med.harvard.edu/ICCBL/Screensaver" target="_blank">
+      <h:outputText value="#{appInfo.applicationTitle}" />
+      <t:outputText id="buildNumber"
+        value="&#160;(#{menu.applicationProperties.map['screensaver.ui.build_number']})"
+        visibleOnUserRole="developer"
+        title="The build number" />
+    </h:outputLink>
+    <h:outputText value=" | " />
+		<h:outputLink value="#{appInfo.applicationProperties.map['screensaver.ui.facility_url']}" target="_blank">
+			<h:outputText value="#{appInfo.applicationProperties.map['screensaver.ui.facility_name']}" />
+		</h:outputLink>
+		<h:outputText value=" | " />
+    <h:outputLink
+      value="#{appInfo.applicationProperties.map['screensaver.ui.release_notes_url']}"
+      target="_blank" title="Find out what's new in Screensaver!">
+      <h:outputText value="Release Notes" />
+    </h:outputLink>
+    <h:outputText value=" | " />
+		<h:outputLink value="#{appInfo.applicationProperties.map['screensaver.ui.feedback_url']}" target="_blank"
+			title="Let us know what you think!">
+			<h:outputText value="Feedback" />
+		</h:outputLink>
+    <h:outputText value=" | " />
+    <t:commandLink action="#{menu.viewHelp}" value="Help"
+      title="View the Screensaver help page" />
+  </t:div>
+
+</ui:composition>
+
+</html>

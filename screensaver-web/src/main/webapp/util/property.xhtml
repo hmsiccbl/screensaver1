@@ -1,0 +1,133 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+<html xmlns="http://www.w3.org/1999/xhtml"
+  xmlns:ui="http://java.sun.com/jsf/facelets"
+  xmlns:h="http://java.sun.com/jsf/html"
+  xmlns:f="http://java.sun.com/jsf/core"
+  xmlns:t="http://myfaces.apache.org/tomahawk"
+  xmlns:s="http://myfaces.apache.org/sandbox"
+  xmlns:ss="http://screensaver.med.harvard.edu/ui">
+
+<!--
+	   facelets parameters:
+	     - id
+	     - label
+	     - type: 'Text' (default), 'Textarea', 'Date', 'Boolean', 'Set', 'List', 'ListOfLinks', 'Link', 'Currency', 'Volume', 'MolarConcentration', 'Vocabulary'
+	     - description: used for popup
+	     - value
+       - linkValue: required for the type 'Link' (in this case, 'value' is the text of the link
+       - linkPrefix: required if type=='ListOfLinks' - this is the uri value to precedes the link value
+	     - unitsSelector: required if type=='Volume' || type=='MolarConcentration', must be instance of edu.harvard.med.screensaver.ui.arch.util.UiSelectOneBean
+	     - editable: boolean, (optional, defaults to false - not available for ListOfLinks, Link)
+	     - rendered: boolean, (optional, defaults to true)
+       - adminOnly: boolean (optional, defaults to false)
+       - primary: boolean (optional, defaults to false)
+	     - required: boolean, (optional, defaults to false)
+	     - editWidth
+	     - editHeight ('Textarea' type only)
+	     - converter (optional)
+	     - submitOnChange (optional, 'Boolean' and 'Vocabulary' types only)
+       - escape: boolean, (optional, sets the t:outputText escape value, defaults to true)
+       - selectItems (required for 'Vocabulary' type, ignored otherwise)
+	 -->
+
+<ui:composition>
+  <t:div
+    rendered="#{(empty rendered ? true : rendered) &amp;&amp; (adminOnly ? appInfo.screensaverUser.isUserInRoleOfNameMap['readEverythingAdmin'] : true)}"
+    styleClass="propertyLabel">
+    <ui:insert name="label">
+      <t:popup>
+        <f:facet name="popup">
+          <t:div styleClass="popupHelp popupText">#{description}</t:div>
+        </f:facet>
+        <t:outputText value="#{label}"
+          styleClass="label #{adminOnly ? 'adminOnly' : ''}" />
+      </t:popup>
+    </ui:insert>
+  </t:div>
+  <t:div
+    rendered="#{(empty rendered ? true : rendered) &amp;&amp; (adminOnly ? appInfo.screensaverUser.isUserInRoleOfNameMap['readEverythingAdmin'] : true)}">
+    <ui:insert name="valueHeader" />
+    <t:div rendered="#{!editable}"
+      styleClass="#{primary ? 'primaryPropertyValue' : 'propertyValue'}">
+      <ui:insert name="data">
+        <t:outputText id="#{id}#{type}Value" value="#{value}"
+          escape="#{(empty escape ? true : escape)}"
+          rendered="#{!(type == 'Textarea' || type == 'Volume' || type == 'MolarConcentration' || type == 'ListOfLinks' || type == 'Link' || type == 'Vocabulary')}"
+          converter="#{!empty converter ? converter : type == 'Date' ? dateConverter : type == 'Set' ? setConverter : type == 'List' ? listConverter : type == 'Volume' ? volumeConverter : type == 'MolarConcentration' ? molarConcentrationConverter : type == 'Currency' ? currencyConverter : stringConverter}" />
+        <!-- TODO: not sure why we need to repeat styleClass attribute here to make it take effect... -->
+        <t:inputTextarea id="#{id}#{type}Value1"
+          rendered="#{type == 'Textarea'}" value="#{value}"
+          readonly="true" cols="#{editWidth}" rows="#{editHeight}"
+          displayValueOnly="#{true}"
+          styleClass="#{primary ? 'primaryPropertyValue' : 'propertyValue'}" />
+        <ss:selectOneMenu id="#{id}VocabularyField" value="#{value}"
+          rendered="#{type == 'Vocabulary'}"
+          selectItems="#{selectItems}" 
+          displayValueOnly="true" />
+        <t:outputText id="#{id}#{type}Value2"
+          rendered="#{(type == 'Volume' || type == 'MolarConcentration') &amp;&amp; !empty value }"
+          value="#{value} #{unitsSelector.selection}" />
+        <t:dataList id="#{id}#{type}DataLinkList" var="eltValue"
+          value="#{value}" layout="simple"
+          rendered="#{type == 'ListOfLinks' &amp;&amp; !empty value }"
+          rowIndexVar="eltIndex" rowCountVar="eltCount">
+          <h:outputLink value="#{linkPrefix}#{eltValue}" target="_blank">
+            <h:outputText value="#{eltValue}"
+              styleClass="propertyValue dataText" />
+          </h:outputLink>
+          <h:outputText value=";"
+            rendered="#{eltIndex &lt; eltCount - 1}"
+            escape="#{(empty escape ? true : escape)}"
+            styleClass="propertyValue dataText" />
+        </t:dataList>
+        <h:outputLink value="#{linkValue}"
+          rendered="#{(type == 'Link') &amp;&amp; !empty value }"
+          target="_blank" styleClass="propertyValue dataText">
+          <h:outputText value="#{value}" />
+        </h:outputLink>
+      </ui:insert>
+    </t:div>
+
+    <t:div rendered="#{editable}">
+      <ui:insert name="editableData">
+        <t:inputText id="#{id}#{type}Field"
+          rendered="#{!(type == 'Textarea' || type == 'Boolean' || type == 'Volume' || type == 'MolarConcentration' || type == 'Vocabulary' )}"
+          required="#{required}" value="#{value}" size="#{editWidth}"
+          styleClass="inputText"
+          converter="#{!empty converter ? converter : type == 'Date' ? dateConverter : type == 'Set' ? setConverter : type == 'List' ? listConverter : type == 'Volume' ? volumeConverter : type == 'MolarConcentration' ? molarConcentrationConverter : type == 'Currency' ? currencyConverter : stringConverter}" />
+        <t:inputTextarea id="#{id}#{type}Field1"
+          rendered="#{type == 'Textarea'}" required="#{required}"
+          value="#{value}" cols="#{editWidth}" rows="#{editHeight}"
+          styleClass="inputText" />
+        <t:selectBooleanCheckbox id="#{id}BooleanField2"
+          value="#{value}" rendered="#{type == 'Boolean'}"
+          required="#{required}"
+          onclick="#{submitOnChange ? 'javascript:submit()' : ''}"
+          immediate="#{submitOnChange}" />
+        <ss:selectOneMenu id="#{id}VocabularyField1" value="#{value}"
+          rendered="#{type == 'Vocabulary'}"
+          selectItems="#{selectItems}" required="#{required}"
+          submitOnChange="#{empty submitOnChange ? false : submitOnChange}" />
+        <t:div rendered="#{type == 'Volume' || type == 'MolarConcentration'}">
+          <t:inputText id="#{id}#{type}Field3" value="#{value}" size="4"
+            styleClass="inputText">
+            <ui:insert name="editValidator" />
+          </t:inputText>
+          <t:selectOneMenu id="#{id}#{type}SelectMenu"
+            value="#{unitsSelector.value}"
+            styleClass="inputText selectMenu"
+            displayValueOnlyStyleClass="selectMenu">
+            <f:selectItems value="#{unitsSelector.selectItems}" />
+          </t:selectOneMenu>
+          <t:message showDetail="true" showSummary="true"
+            styleClass="errorMessage" id="#{id}#{type}FieldError"
+            for="#{id}#{type}Field3" />
+        </t:div>
+      </ui:insert>
+    </t:div>
+    <ui:insert name="valueFooter" />
+  </t:div>
+</ui:composition>
+
+</html>

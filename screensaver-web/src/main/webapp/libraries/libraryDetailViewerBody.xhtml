@@ -1,0 +1,198 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+<html xmlns="http://www.w3.org/1999/xhtml"
+  xmlns:ui="http://java.sun.com/jsf/facelets"
+  xmlns:h="http://java.sun.com/jsf/html"
+  xmlns:f="http://java.sun.com/jsf/core"
+  xmlns:t="http://myfaces.apache.org/tomahawk"
+  xmlns:s="http://myfaces.apache.org/sandbox"
+  xmlns:ss="http://screensaver.med.harvard.edu/ui">
+
+<ui:composition template="/util/entityViewerDetails.xhtml">
+
+  <ui:param name="entity" value="#{libraryDetailViewer.entity}" />
+  <ui:param name="viewer" value="#{libraryDetailViewer}" />
+  <ui:param name="hideId" value="#{true}" />
+
+  <ui:define name="entityCommands">
+    <ui:remove> 
+      Disabled, due to performance
+      <h:commandButton value="Delete Library"
+        action="#{libraryViewer.deleteLibrary}"
+        onclick="javascript: return confirm('Are you sure you want to delete this library?');"
+        rendered="#{libraryDetailViewer.editable &amp;&amp; !libraryDetailViewer.editMode}"
+        styleClass="command" title="Delete this library" />
+    </ui:remove>
+
+      <h:commandButton value="View Library Contents"
+        action="#{libraryViewer.viewLibraryContents}"
+        rendered="#{!libraryDetailViewer.editMode}"
+        styleClass="command"
+        title="View a list of all the wells in the library" />
+
+      <h:commandButton value="View Well Volumes"
+        action="#{libraryViewer.viewLibraryWellCopyVolumes}"
+        rendered="#{libraryViewer.readAdmin &amp;&amp; !libraryDetailViewer.editMode}" styleClass="command"
+        title="View volume information for all the wells in the library" />
+
+      <h:commandButton value="Add Copy..."
+        action="#{libraryViewer.addLibraryCopy}"
+        rendered="#{libraryViewer.screensaverUser.isUserInRoleOfNameMap['libraryCopiesAdmin'] &amp;&amp; !libraryDetailViewer.editMode}"
+        styleClass="command" title="Add a copy to the Library" />
+  </ui:define>
+  
+
+  <ui:define name="propertiesContent">
+  	<ss:property id="libraryName" label="Library Name"
+			description="The full name of the library"
+			value="#{libraryDetailViewer.entity.libraryName}" required="true"
+			editable="#{libraryDetailViewer.editMode}"
+			editWidth="60" />
+
+		<ss:property id="shortName" label="Short Name"
+			description="The abbreviated name for the library"
+			value="#{libraryDetailViewer.entity.shortName}" required="true"
+			editable="#{libraryDetailViewer.editMode}"
+			editWidth="60" />
+
+    <ss:property id="libraryProvider" label="Provider"
+      description="The name of the library provider"
+      value="#{libraryDetailViewer.entity.provider}"
+      editable="#{libraryDetailViewer.editMode}" />
+
+		<t:outputText id="screenTypeLabel" value="Screen Type"
+				title="'Small Molecule' or 'RNAi'" escape="false" styleClass="label" />
+		<t:panelGroup rendered="#{!libraryDetailViewer.editMode}">
+			<t:outputText id="screenTypeOutput"
+				value="#{libraryDetailViewer.entity.screenType}" escape="false"
+				converter="#{screenTypeConverter}" styleClass="propertyValue" />
+		</t:panelGroup>
+		<t:panelGroup rendered="#{libraryDetailViewer.editMode}">
+			<t:selectOneMenu id="screenType" styleClass="inputText selectMenu"
+				required="true" value="#{libraryDetailViewer.entity.screenType}"
+				converter="#{screenTypeConverter}">
+				<f:selectItems value="#{libraryDetailViewer.screenTypeSelectItems}" />
+			</t:selectOneMenu>
+		</t:panelGroup>
+
+    <ss:property id="solvent" label="Solvent"
+      description="Solvent used in the library wells"
+      editable="#{libraryDetailViewer.editMode}"
+      value="#{libraryDetailViewer.entity.solvent}"
+      converter="#{solventConverter}">
+      <ui:define name="editableData">
+        <t:selectOneMenu id="solvent" styleClass="inputText selectMenu"
+          required="true" value="#{libraryDetailViewer.entity.solvent}"
+          converter="#{solventConverter}">
+          <f:selectItems
+            value="#{libraryDetailViewer.solventSelectItems}" />
+        </t:selectOneMenu>
+      </ui:define>
+    </ss:property>
+
+    <t:outputText id="libraryTypeLabel" value="Library Type"
+				title="The type of library, e.g., 'Commercial', 'Known Bioactives', 'siRNA', etc."
+				escape="false" styleClass="label" />
+		<t:panelGroup rendered="#{!libraryDetailViewer.editMode}">
+			<t:outputText id="libraryTypeOutput" escape="false"
+				value="#{libraryDetailViewer.entity.libraryType}"
+				converter="#{libraryTypeConverter}" styleClass="propertyValue" />
+		</t:panelGroup>
+		<t:panelGroup rendered="#{libraryDetailViewer.editMode}">
+			<t:selectOneMenu id="libraryType" styleClass="inputText selectMenu"
+				required="true" value="#{libraryDetailViewer.entity.libraryType}"
+				converter="#{libraryTypeConverter}">
+				<f:selectItems value="#{libraryDetailViewer.libraryTypeSelectItems}" />
+			</t:selectOneMenu>
+		</t:panelGroup>
+
+    <ss:property id="isPool" label="Is Pool" type="Boolean"
+      description="Whether wells contains pools of reagents or single reagents"
+      value="#{libraryDetailViewer.entity.pool}"
+      editable="#{libraryDetailViewer.editMode}" />
+
+    <ss:property id="screeningStatus" label="Screening Status"
+      description="Status of the library for screening."
+      value="#{libraryDetailViewer.entity.screeningStatus}"
+      converter="#{libraryScreeningStatusConverter}"
+      editable="#{libraryDetailViewer.editMode}" adminOnly="true">
+      <ui:define name="editableData">
+        <t:selectOneMenu id="libraryScreeningStatus"
+          value="#{libraryDetailViewer.entity.screeningStatus}"
+          converter="#{libraryScreeningStatusConverter}"
+          styleClass="inputText selectMenu">
+          <f:selectItems
+            value="#{libraryDetailViewer.libraryScreeningStatusSelectItems}" />
+        </t:selectOneMenu>
+      </ui:define>
+    </ss:property>
+
+    <ss:property id="dateFirstPlated" label="Date First Plated"
+      description="The earliest date on which a copy of this library was plated"
+      type="Date" value="#{libraryDetailViewer.entity.dateScreenable}"
+      adminOnly="true"
+      editable="false" />
+
+    <ss:entityComments id="libraryComments"
+      comments="#{libraryDetailViewer.comments}"
+      entityTypeName="Library" 
+      editMode="#{libraryDetailViewer.editMode}"/>
+
+    <ss:propertyGroup label="Plates">
+
+      <ss:property id="startPlate" label="Start Plate"
+        description="The plate number for the first plate in the library"
+        value="#{libraryDetailViewer.entity.startPlate}" required="true"
+        editable="#{libraryDetailViewer.editMode &amp;&amp; empty libraryDetailViewer.entity.libraryId}" />
+
+      <ss:property id="endPlate" label="End Plate"
+        description="The plate number for the last plate in the library"
+        value="#{libraryDetailViewer.entity.endPlate}" required="true"
+        editable="#{libraryDetailViewer.editMode &amp;&amp; empty libraryDetailViewer.entity.libraryId}" />
+
+      <ss:property id="plateCount" label="Plate Count"
+        description="The number of plates in the library"
+        rendered="#{!libraryDetailViewer.editMode}">
+        <ui:define name="data">
+          <t:commandLink id="libraryPlatesBrowserLink"
+            value="#{(libraryDetailViewer.entity.endPlate - libraryDetailViewer.entity.startPlate) + 1}"
+            action="#{libraryDetailViewer.browseLibraryPlates}"
+            disabled="#{!libraryDetailViewer.readAdmin}"
+            styleClass="dataText" />
+        </ui:define>
+      </ss:property>
+
+    </ss:propertyGroup>
+
+    <ss:property id="description" label="Description"
+			description="A description of the library"
+			value="#{libraryDetailViewer.entity.description}"
+			editable="#{libraryDetailViewer.editMode}" type="Textarea"
+			editWidth="80" editHeight="3" />
+			
+		<t:outputText id="ownerLabel" value="Owner"
+				title="When set, only owner can see library. (optional)"
+				escape="false" styleClass="label" />
+		<t:panelGroup rendered="#{!libraryDetailViewer.editMode}">
+			<t:outputText id="ownerOutput" escape="false"
+				value="#{libraryDetailViewer.entity.owner.fullNameLastFirst}"
+				converter="#{ownerConverter}" styleClass="propertyValue" />
+		</t:panelGroup>
+		<t:panelGroup rendered="#{libraryDetailViewer.editMode}">
+		   	<t:selectOneMenu id="owner"
+          		value="#{libraryDetailViewer.owner.value}"
+          		styleClass="inputText selectMenu">
+				<f:selectItems value="#{libraryDetailViewer.owner.selectItems}" />          		
+        	</t:selectOneMenu>
+		</t:panelGroup>			
+
+    <ss:property id="experimentalWellCount"
+      label="# Experimental Wells"
+      description="The number of wells in the library with well type 'Experimental'"
+      value="#{libraryDetailViewer.entity.experimentalWellCount}" />
+  </ui:define>
+
+</ui:composition>
+
+</html>
+

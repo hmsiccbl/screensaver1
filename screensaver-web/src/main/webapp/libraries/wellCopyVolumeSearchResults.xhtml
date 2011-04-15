@@ -1,0 +1,40 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+<html xmlns="http://www.w3.org/1999/xhtml"
+	xmlns:ui="http://java.sun.com/jsf/facelets"
+	xmlns:h="http://java.sun.com/jsf/html"
+	xmlns:f="http://java.sun.com/jsf/core"
+	xmlns:t="http://myfaces.apache.org/tomahawk"
+	xmlns:s="http://myfaces.apache.org/sandbox"
+	xmlns:ss="http://screensaver.med.harvard.edu/ui">
+
+<ui:composition template="/main/template.xhtml">
+
+	<ui:param name="pageTitle" value="Well Copy Volume Search Results" />
+    <ui:param name="pageHelpURL" value="libraries/wellVolumeSearchResultsHelp.jsf" />
+
+	<ui:define name="body">
+		<h:form>
+			<t:commandButton value="View Well Volumes"
+				action="browseWellVolumes" />
+		</h:form>
+
+		<ss:searchResult searchResults="#{wellCopyVolumesBrowser}">
+			<ui:define name="searchResultFooter">
+				<t:panelGrid rendered="#{searchResults.editMode}" columns="1">
+					<t:outputLabel for="wellVolumeAdjustmentActivityComments"
+						value="Comments for well volume adjustment(s):" styleClass="label"
+						title="Comments associated with the well volume adjustment(s)" />
+					<t:inputTextarea id="wellVolumeAdjustmentActivityComments" rows="3"
+						cols="80"
+						value="#{searchResults.wellVolumeAdjustmentActivityComments}"
+						styleClass="inputText" />
+				</t:panelGrid>
+			</ui:define>
+		</ss:searchResult>
+
+	</ui:define>
+
+</ui:composition>
+
+</html>

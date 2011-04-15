@@ -1,0 +1,47 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+<html xmlns="http://www.w3.org/1999/xhtml"
+	xmlns:ui="http://java.sun.com/jsf/facelets"
+	xmlns:h="http://java.sun.com/jsf/html"
+	xmlns:f="http://java.sun.com/jsf/core"
+	xmlns:t="http://myfaces.apache.org/tomahawk"
+	xmlns:s="http://myfaces.apache.org/sandbox">
+
+<ui:composition>
+
+
+    <p>
+      The Screen Results Summary section of the Screen Viewer page provides some basic information
+      about the screen results. Position your mouse over any of the
+      headers in the left-hand column for a description of what that field contains. You can also
+      download the results in an Excel file format by clicking on the "Download" button.
+    </p>
+    <p>
+      The Screen Results Summary section only appears when screen results are available for the
+      screen. If results have not been loaded into Screensaver, or you are restricted from viewing
+      the results, an empty section with the header "Screen results not available" will
+      appear instead.
+    </p>
+
+  <t:panelGroup visibleOnUserRole="screenResultsAdmin">
+      <p>
+        As a <i>Screen Results Administrator</i>, when no screen results have been loaded for
+        this screen, you will be able to load screen results from a file. Click the "Browse..."
+        button to select the Excel file containing the screen results, and click the "Load"
+        button to load the results. Note that loading screen results can sometimes take a long
+        time. If any errors occur during the loading process, no results will be loaded into
+        the database, and a list of errors in the screen results file is presented. A
+        version of the screen result file with annotations for the errors is also available
+        for download.
+      </p>
+      <p>
+        If the screen results have already been loaded, then you will be able to delete them
+        by pressing the "Delete" button in the Screen Results Summary section. This clears the
+        way for reloading the results, which can be useful for correcting errors in a previous
+        version of the results, or when results for more plates have come back.
+      </p>
+  </t:panelGroup>
+
+</ui:composition>
+
+</html>

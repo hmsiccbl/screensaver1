@@ -1,0 +1,48 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+<html xmlns="http://www.w3.org/1999/xhtml"
+	xmlns:ui="http://java.sun.com/jsf/facelets"
+	xmlns:h="http://java.sun.com/jsf/html"
+	xmlns:f="http://java.sun.com/jsf/core"
+	xmlns:t="http://myfaces.apache.org/tomahawk"
+	xmlns:s="http://myfaces.apache.org/sandbox"
+	xmlns:ss="http://screensaver.med.harvard.edu/ui">
+
+<!--
+ facelets parameters:
+  - id
+  - label: text to appear in the panel header
+	- isCollapsed: boolean
+	- rendered
+-->
+
+<ui:composition>
+
+	<t:collapsiblePanel id="#{id}Panel" value="#{isCollapsed}"
+		title="#{label}" var="isCollapsed" titleVar="title"
+		rendered="#{empty rendered ? true : rendered}">
+		<f:facet name="header">
+      <ss:roundedDiv>
+        <t:headerLink immediate="true"
+          styleClass="transparentSectionHeader">
+          <t:graphicImage
+            value="#{isCollapsed ? &quot;/images/collapsed.png&quot; : &quot;/images/expanded.png&quot;}"
+            styleClass="icon" />
+          <t:outputText value="#{title}"
+            styleClass="transparentSectionHeader" />
+        </t:headerLink>
+      </ss:roundedDiv>
+    </f:facet>
+
+		<f:facet name="closedContent">
+			<ui:insert name="closedContent" />
+		</f:facet>
+
+		<ui:insert name="content" />
+
+	</t:collapsiblePanel>
+
+</ui:composition>
+
+</html>
+

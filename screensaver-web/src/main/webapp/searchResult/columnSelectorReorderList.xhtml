@@ -1,0 +1,74 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+<html xmlns="http://www.w3.org/1999/xhtml"
+	xmlns:ui="http://java.sun.com/jsf/facelets"
+	xmlns:h="http://java.sun.com/jsf/html"
+	xmlns:f="http://java.sun.com/jsf/core"
+	xmlns:t="http://myfaces.apache.org/tomahawk"
+	xmlns:s="http://myfaces.apache.org/sandbox"
+	xmlns:ss="http://screensaver.med.harvard.edu/ui">
+<!--
+Note: this component is for use with the "TableColumnManagerWithReorder" column managers.
+(merged code from the IMCB branch, replaces the tree column selector with the reorder column
+selector) 
+ -->
+<ui:component>
+
+	<f:subview>
+		<t:div rendered="#{(empty rendered ? true : rendered)}">
+			<t:panelGrid id="columnsSelectionPanelInternal" columns="1">
+				<h:panelGroup>
+					<t:commandButton id="updateColumnsButton" forceId="true"
+						action="#{searchResults.columnManager.updateColumnSelections}"
+						value="Update" styleClass="command"
+						title="Update the columns selection" />
+						
+					<!-- BII Kian Loon: -->
+					<t:commandButton id="updateDefaultColumnsButton" forceId="true"
+						action="#{searchResults.columnManager.updateDefaultColumns}"
+						value="Default" styleClass="command"
+						title="Update to default columns selection" />
+				</h:panelGroup>
+				<t:panelGrid columns="4">
+					<h:panelGroup>
+						<!-- left part of the picklist with scrollbar -->
+						<f:verbatim>
+							<div align="center" style="color: darkgray; font-style: oblique; text-align: center">Hidden</div>
+						</f:verbatim>
+						<h:selectManyListbox title="List of columns that are hidden" 
+							size="5" value="#{searchResults.columnManager.selectedItemsLeft}" id="selectManyLeft">
+							<f:selectItems value="#{searchResults.columnManager.allItemsLeft}" />
+						</h:selectManyListbox>
+						
+					</h:panelGroup>
+					<!-- center part of the picklist -->
+					<h:panelGroup>
+						<h:commandButton title="Move to right" value="&gt;" action="#{searchResults.columnManager.leftToRight}" />
+						<h:commandButton title="Move all to right" value="&gt;&gt;" action="#{searchResults.columnManager.allLeftToRight}" />
+						<h:commandButton title="Move to left" value="&lt;" action="#{searchResults.columnManager.rightToLeft}" />
+						<h:commandButton title="Move all to left" value="&lt;&lt;" action="#{searchResults.columnManager.allRightToLeft}" />
+					</h:panelGroup>
+					<h:panelGroup>
+						<!-- right part of the picklist with scrollbar -->
+						<f:verbatim>
+							<div align="center" style="color: darkgray; font-style: oblique; text-align: center">Visible</div>
+						</f:verbatim>
+						
+						<t:selectManyListbox title="List of columns that are visible" 
+							size="5" value="#{searchResults.columnManager.selectedItemsRight}" id="selectManyRight">
+							<f:selectItems value="#{searchResults.columnManager.allItemsRight}" />
+						
+						</t:selectManyListbox>
+		
+					</h:panelGroup>
+					<t:panelGrid columns="1">
+						<h:commandButton title="Move up" value="&#8743;" action="#{searchResults.columnManager.moveUp}" />
+						<h:commandButton title="Move down" value="&#8744;" action="#{searchResults.columnManager.moveDown}" />
+					</t:panelGrid>
+				</t:panelGrid>
+			</t:panelGrid> 
+		</t:div>
+	</f:subview>
+</ui:component>
+</html>
+		

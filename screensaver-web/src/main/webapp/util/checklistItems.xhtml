@@ -1,0 +1,95 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+<html xmlns="http://www.w3.org/1999/xhtml"
+  xmlns:ui="http://java.sun.com/jsf/facelets"
+  xmlns:h="http://java.sun.com/jsf/html"
+  xmlns:f="http://java.sun.com/jsf/core"
+  xmlns:t="http://myfaces.apache.org/tomahawk"
+  xmlns:s="http://myfaces.apache.org/sandbox"
+  xmlns:ss="http://screensaver.med.harvard.edu/ui">
+
+<!-- Facelet parameters:
+       - checklistItems: ChecklistItems
+-->
+
+<ui:composition>
+  <ss:collapsiblePanel id="checklistItemsPanel" label="Checklist Items"
+    isCollapsed="#{checklistItems.isPanelCollapsedMap['checklistItems']}"
+    rendered="#{checklistItems.readAdmin}">
+    <ui:define name="content">
+      <t:panelGrid columns="1">
+        <t:panelGroup styleClass="commandPanel">
+          <ss:editSaveCancel viewer="#{checklistItems}" />
+        </t:panelGroup>
+        <ui:repeat value="#{checklistItems.checklistItemGroups}"
+          var="group">
+          <t:outputText value="#{group}" styleClass="propertyLabel" />
+          <ss:collectionTable id="checklistItemsTable"
+            dataModel="#{checklistItems.checklistItemsDataModelMap[group]}"
+            columnClasses="fixedColumn200,fixedColumn100,fixedColumn100,fixedColumn100">
+            <ui:define name="columns">
+              <ss:textColumn columnName="Item"
+                description="The checklist item"
+                cellValue="#{element.key.itemName}"/>
+              <t:column id="statusColumn">
+                <f:facet name="header">
+                  <ss:popup value="Status"
+                    popupText="The checklist item status" />
+                </f:facet>
+                <t:outputText
+                  value="#{empty element.value ? 'Not Completed' : (element.value.notApplicable ? 'N/A' : (element.key.expirable ? (element.value.expiration ? 'Deactivated' : 'Activated') : 'Completed')) }"
+                  styleClass="dataText #{empty element.value || element.value.expiration || element.value.notApplicable  ? 'subdued' : 'eyeCatcher'}" />
+              </t:column>
+              <ss:textColumn columnName="Date"
+                description="The date the checklist item event was performed"
+                cellValue="#{empty element.value ? null : element.value.datePerformed}" />
+              <t:column id="enteredByColumn">
+                <f:facet name="header">
+                  <ss:popup
+                    popupText="The administrator that recorded this checklist item event"
+                    value="Entered By">
+                  </ss:popup>
+                </f:facet>
+                <ss:user showEmail="false"
+                  user="#{empty element.value ? null : element.value.createdBy}" />
+              </t:column>
+              <t:column columnName="Action"
+                description="Actions to update the checklist item"
+                rendered="#{checklistItems.editMode}">
+                <t:panelGrid columns="3">
+                  <t:inputText id="newChecklistItemDatePerformedField"
+                    value="#{checklistItems.newChecklistItemDatePerformed[element.key]}"
+                    rendered="#{empty element.value || (element.key.expirable &amp;&amp; !element.value.notApplicable)}"
+                    size="8" styleClass="inputText"
+                    converter="#{dateConverter}" />
+                  <t:commandButton id="activateChecklistItemCommand"
+                    rendered="#{element.key.expirable &amp;&amp; (empty element.value || (element.value.expiration &amp;&amp; !element.value.notApplicable))}"
+                    value="Activate"
+                    action="#{checklistItems.checklistItemActivated}"
+                    styleClass="command" />
+                  <t:commandButton id="deactivateChecklistItemCommand"
+                    rendered="#{element.key.expirable &amp;&amp; (!empty element.value &amp;&amp; !element.value.expiration &amp;&amp; !element.value.notApplicable)}"
+                    value="Deactivate"
+                    action="#{checklistItems.checklistItemDeactivated}"
+                    styleClass="command" />
+                  <t:commandButton id="completedChecklistItemCommand"
+                    rendered="#{!element.key.expirable &amp;&amp; empty element.value}"
+                    value="Completed"
+                    action="#{checklistItems.checklistItemCompleted}"
+                    styleClass="command" />
+                  <t:commandButton
+                    id="notApplicableChecklistItemCommand"
+                    rendered="#{empty element.value}" value="N/A"
+                    action="#{checklistItems.checklistItemNotApplicable}"
+                    styleClass="command" />
+
+                </t:panelGrid>
+              </t:column>
+            </ui:define>
+          </ss:collectionTable>
+        </ui:repeat>
+      </t:panelGrid>
+    </ui:define>
+  </ss:collapsiblePanel>
+</ui:composition>
+</html>

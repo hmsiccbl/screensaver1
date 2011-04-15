@@ -1,0 +1,34 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+
+<html xmlns="http://www.w3.org/1999/xhtml"
+	xmlns:ui="http://java.sun.com/jsf/facelets"
+	xmlns:f="http://java.sun.com/jsf/core"
+	xmlns:t="http://myfaces.apache.org/tomahawk"
+	xmlns:s="http://myfaces.apache.org/sandbox"
+	xmlns:h="http://java.sun.com/jsf/html">
+
+<ui:composition >
+
+	<h:form id="headerForm">
+		<t:panelGroup rendered="#{! empty pageTitle}">
+
+			<t:outputText styleClass="title" value="#{pageTitle}" />
+
+			<t:graphicImage id="headerSubviewHelpIcon" forceId="true"
+				alt="help icon" url="/images/help.png"
+				title="Click here to open help for this page in a separate window"
+				styleClass="helpIcon"
+				onmouseover="getElementById('headerSubviewHelpIcon').className='helpIconHover';"
+				onmouseout="getElementById('headerSubviewHelpIcon').className='helpIcon';"
+				onclick="window.open('/screensaver/help/#{pageHelpURL}','kioskHelp','status=0,toolbar=0,location=0,menubar=0,directories=0,resizable=1,scrollbars=1,height=450,width=650');"
+				rendered="#{! empty pageHelpURL}" />
+
+		</t:panelGroup>
+	</h:form>
+
+	<h:messages id="allMessages" globalOnly="false" showDetail="true"
+		styleClass="errorMessage" />
+
+</ui:composition>
+
+</html>

@@ -1,0 +1,348 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+<html xmlns="http://www.w3.org/1999/xhtml"
+  xmlns:ui="http://java.sun.com/jsf/facelets"
+  xmlns:h="http://java.sun.com/jsf/html"
+  xmlns:f="http://java.sun.com/jsf/core"
+  xmlns:t="http://myfaces.apache.org/tomahawk"
+  xmlns:s="http://myfaces.apache.org/sandbox"
+  xmlns:ss="http://screensaver.med.harvard.edu/ui">
+
+<ui:composition template="/util/entityViewerDetails.xhtml">
+
+  <ui:param name="entity" value="#{activityViewer.entity}" />
+  <ui:param name="viewer" value="#{activityViewer}" />
+
+  <ui:define name="propertiesContent">
+
+    <ss:property id="activityType" label="Activity Type"
+      description="The activity type"
+      value="#{activityViewer.entity.activityTypeName}" />
+
+    <ss:property id="dateOfActivity" label="Performed"
+      description="The date the activity was performed in the lab"
+      value="#{activityViewer.entity.dateOfActivity}" type="Date"
+      required="true" editable="#{activityViewer.editMode}" />
+
+    <ss:property id="concentration" label="Concentration"
+      value="#{activityViewer.molarConcentrationValue}" type="MolarConcentration"
+      unitsSelector="#{activityViewer.molarConcentrationType}"
+      description="Molar concentration"
+      rendered="#{activityViewer.entity.class.simpleName == 'LibraryScreening' || activityViewer.entity.class.simpleName == 'CherryPickScreening'}"
+      editable="#{activityViewer.editMode}" />
+
+    <ss:propertyGroup label="Screen">
+      <ss:screenSummaryProperties
+        screen="#{activityViewer.screen}" />
+    </ss:propertyGroup>
+
+    <ss:property id="performedBy" label="Performed By"
+      description="The person that is credited with performing the activity"
+      value="#{activityViewer.performedBy}"
+      editable="#{activityViewer.editMode}">
+      <ui:define name="data">
+        <ss:user user="#{value.selection}" />
+      </ui:define>
+      <ui:define name="editableData">
+        <t:selectOneMenu id="performedByEditable" value="#{value.value}"
+          styleClass="inputText selectMenu">
+          <f:selectItems value="#{value.selectItems}" />
+        </t:selectOneMenu>
+      </ui:define>
+    </ss:property>
+
+    <!-- LibraryScreening properties -->
+
+    <ss:property id="librariesScreenedCount" label="Libraries Screened"
+      description="The number of libraries that have been screened during this activity"
+      rendered="#{activityViewer.entity.class.simpleName == 'LibraryScreening' &amp;&amp; !activityViewer.editMode}">
+      <ui:define name="data">
+        <t:commandLink id="browseLibrariesScreened"
+          disabled="#{activityViewer.editMode}"
+          value="#{activityViewer.entity.librariesScreenedCount}"
+          action="#{activityViewer.browseLibrariesScreened}" />
+      </ui:define>
+    </ss:property>
+
+    <ss:property id="libraryPlatesScreenedCount"
+      label="Library Plates Screened"
+      description="The number of library plates that have been screened during this activity"
+      rendered="#{activityViewer.entity.class.simpleName == 'LibraryScreening' &amp;&amp; !activityViewer.editMode}">
+      <ui:define name="data">
+        <t:commandLink id="browseLibraryPlatesScreened"
+          disabled="#{activityViewer.editMode}"
+          value="#{activityViewer.entity.libraryPlatesScreenedCount}"
+          action="#{activityViewer.browseLibraryPlatesScreened}" />
+        <t:outputText
+          value="  (#{activityViewer.entity.assayPlatesScreenedCount} assay plates)"
+          styleClass="data" />
+      </ui:define>
+    </ss:property>
+
+    <ss:property id="screenedExperimentalWellCount"
+      label="# Experimental Wells Screened"
+      value="#{activityViewer.entity.screenedExperimentalWellCount}"
+      description="The number of experimental library wells that were screened during this activity (ignoring replicates)"
+      rendered="#{activityViewer.entity.class.simpleName == 'LibraryScreening' &amp;&amp; !activityViewer.editMode}" />
+
+    <ss:property id="numberOfReplicates" label="# Replicates Screened"
+      value="#{activityViewer.entity.numberOfReplicates}"
+      description="The number of replicates screened"
+      editable="#{activityViewer.editMode &amp;&amp; (activityViewer.entity.class.simpleName != 'LibraryScreening' || activityViewer.platesScreenedDataModel.rowCount == 0)}" editWidth="2"
+      rendered="#{activityViewer.entity.class.simpleName == 'LibraryScreening' || activityViewer.entity.class.simpleName == 'CherryPickScreening'}" />
+
+    <ss:property id="volumeTransferredPerWell"
+      label="Volume Transferred per Replicate"
+      value="#{activityViewer.volumeTransferredPerWellValue}"
+      type="Volume"
+      unitsSelector="#{activityViewer.volumeTransferredPerWellType}"
+      description="The volume transferred per replicate well"
+      editable="#{activityViewer.editMode}" editWidth="6"
+      rendered="#{activityViewer.entity.class.simpleName == 'LibraryScreening' || activityViewer.entity.class.simpleName == 'CherryPickScreening'}" />
+
+    <ss:property id="isForExternalLibraryPlates" type="Boolean"
+      submitOnChange="true" label="External library plates"
+      value="#{activityViewer.entity.forExternalLibraryPlates}"
+      description="Whether the library screening was performed on libraries that are not provided by the facility"
+      rendered="#{activityViewer.entity.class.simpleName == 'LibraryScreening'}"
+      editable="#{activityViewer.editMode &amp;&amp; activityViewer.platesScreenedDataModel.rowCount == 0}" />
+
+    <ss:property id="libraryPlatesScreened"
+      label="Library Plates Screened"
+      description="Plates screened by this library activity"
+      rendered="#{activityViewer.entity.class.simpleName == 'LibraryScreening' &amp;&amp; !activityViewer.entity.forExternalLibraryPlates}">
+      <ui:define name="data">
+        <t:panelGrid columns="1">
+          <ss:collectionTable id="platesScreened"
+            editable="#{activityViewer.editMode}"
+            dataModel="#{activityViewer.platesScreenedDataModel}"
+            actionBean="#{activityViewer}"
+            addAction="addNewPlateRangeScreened"
+            deleteAction="deletePlateRange">
+            <ui:define name="columns">
+              <t:column>
+                <f:facet name="header">
+                  <t:outputText value="Library" />
+                </f:facet>
+                <t:outputText
+                  value="#{element.startPlate.copy.library.shortName} [#{element.startPlate.copy.library.startPlate}..#{element.startPlate.copy.library.endPlate}]"
+                  styleClass="dataText" />
+              </t:column>
+              <t:column>
+                <f:facet name="header">
+                  <t:outputText value="Start Plate" />
+                </f:facet>
+                <t:outputText id="plate"
+                  value="#{element.startPlate.plateNumber}"
+                  styleClass="dataText" />
+              </t:column>
+              <t:column>
+                <f:facet name="header">
+                  <t:outputText value="End Plate" />
+                </f:facet>
+                <t:outputText id="plate"
+                  value="#{element.endPlate.plateNumber}"
+                  styleClass="dataText" />
+              </t:column>
+              <t:column>
+                <f:facet name="header">
+                  <t:outputText value="Copy" />
+                </f:facet>
+                <t:outputText id="copy"
+                  value="#{element.startPlate.copy.name}"
+                  styleClass="dataText" />
+              </t:column>
+              <t:column rendered="#{activityViewer.editMode}">
+                <f:facet name="header">
+                  <t:outputText value="Library Warning" />
+                </f:facet>
+                <t:outputText id="libraryWarning"
+                  value="#{element.adminLibraryWarning}"
+                  styleClass="dataText errorMessage" />
+              </t:column>
+            </ui:define>
+            <ui:define name="addProperties">
+              <t:panelGrid columns="6">
+                <ss:property id="newPlateRangeScreenedStartPlate"
+                  label="Start Plate"
+                  value="#{activityViewer.newPlateRangeScreenedStartPlate}"
+                  editable="true" />
+                <ss:property id="newPlateRangeScreenedEndPlate"
+                  label="End Plate"
+                  value="#{activityViewer.newPlateRangeScreenedEndPlate}"
+                  editable="true" />
+                <ss:property id="newPlateRangeScreenedCopy" label="Copy"
+                  editable="true">
+                  <ui:define name="editableData">
+                    <t:selectOneMenu id="copy"
+                      value="#{activityViewer.newPlateRangeScreenedCopy.value}">
+                      <f:selectItems
+                        value="#{activityViewer.newPlateRangeScreenedCopy.selectItems}" />
+                    </t:selectOneMenu>
+                  </ui:define>
+                </ss:property>
+              </t:panelGrid>
+            </ui:define>
+          </ss:collectionTable>
+        </t:panelGrid>
+      </ui:define>
+    </ss:property>
+
+    <ss:propertyGroup label="Assay Protocol" columns="1"
+      rendered="#{activityViewer.entity.class.simpleName == 'LibraryScreening'}">
+      <t:panelGrid columns="4" styleClass="layoutPanel"
+        columnClasses="propertyLabelColumn,column,propertyLabelColumn,column">
+        <ss:property id="assayProtocolType" label="Type"
+          value="#{activityViewer.assayProtocolType}"
+          description="'Preliminary' or 'Established'">
+          <ui:define name="data">
+            <t:selectOneMenu id="assayProtocolTypeEditable"
+              value="#{value.value}"
+              displayValueOnly="#{!activityViewer.editMode}"
+              converter="#{assayProtocolTypeConverter}"
+              styleClass="inputText selectMenu"
+              displayValueOnlyStyleClass="selectMenu">
+              <f:selectItems value="#{value.selectItems}" />
+            </t:selectOneMenu>
+          </ui:define>
+        </ss:property>
+        <ss:property id="assayProtocolLastModifiedDate"
+          label="Last modified"
+          value="#{activityViewer.entity.assayProtocolLastModifiedDate}"
+          description="The date this assay protocol was last modified"
+          type="Date" editable="#{activityViewer.editMode}" />
+      </t:panelGrid>
+      <ss:property id="assayProtocol" label="Protocol"
+        value="#{activityViewer.entity.assayProtocol}" type="Textarea"
+        editWidth="80" editHeight="5"
+        description="The protocol used to conduct the assay screening"
+        editable="#{activityViewer.editMode}" />
+    </ss:propertyGroup>
+
+
+    <!-- CherryPickScreening properties -->
+
+    <ss:property id="rcpsCherryPickRequest"
+      label="For Cherry Pick Request"
+      description="The cherry pick request for which this screening was performed"
+      rendered="#{activityViewer.entity.class.simpleName == 'CherryPickScreening'}">
+      <ui:define name="data">
+        <ss:entityLink
+          entity="#{activityViewer.entity.cherryPickRequest}"
+          property="cherryPickRequestNumber"
+          viewer="#{cherryPickRequestViewer}" />
+      </ui:define>
+    </ss:property>
+
+    <ss:property id="cherryPickPlatesScreened"
+      label="Cherry Pick Plates Screened"
+      description="Cherry Pick Plates screened by this cherry pick screening activity"
+      rendered="#{activityViewer.entity.class.simpleName == 'CherryPickScreening'}">
+      <ui:define name="data">
+        <t:dataTable id="cherryPickPlatesScreenedTable" forceId="true"
+          var="row" value="#{activityViewer.cherryPickPlatesDataModel}"
+          styleClass="standardTable" columnClasses="column"
+          rowClasses="row1,row2" headerClass="tableHeader">
+          <t:column>
+            <f:facet name="header">
+              <t:outputText value="Plate Number" />
+            </f:facet>
+            <t:outputText value="#{row.data.plateOrdinal + 1}" />
+          </t:column>
+          <t:column>
+            <f:facet name="header">
+              <t:outputText value="Plate Name" />
+            </f:facet>
+            <t:outputText value="&quot;#{row.data.name}&quot;" />
+          </t:column>
+          <t:column>
+            <f:facet name="header">
+              Plating Status
+            </f:facet>
+            <t:outputText value="#{row.data.statusLabel}" />
+          </t:column>
+          <t:column>
+            <f:facet name="header">
+              Screened During This Activity
+            </f:facet>
+            <t:selectBooleanCheckbox value="#{row.selected}"
+              readonly="#{!activityViewer.editMode}" />
+          </t:column>
+        </t:dataTable>
+      </ui:define>
+    </ss:property>
+
+
+    <!-- CherryPickLiquidTransfer properties -->
+
+    <ss:property id="cpltCherryPickRequest"
+      label="For Cherry Pick Request"
+      description="The cherry pick request for which this liquid transfer was performed"
+      rendered="#{activityViewer.entity.class.simpleName == 'CherryPickLiquidTransfer' &amp;&amp; !empty activityViewer.entity.cherryPickRequest}">
+      <ui:define name="data">
+        <ss:entityLink
+          entity="#{activityViewer.entity.cherryPickRequest}"
+          property="cherryPickRequestNumber"
+          viewer="#{cherryPickRequestViewer}" />
+      </ui:define>
+    </ss:property>
+
+    <ss:property id="cpltStatus" label="Plating Status"
+      description="The outcome of the plating attempt"
+      rendered="#{activityViewer.entity.class.simpleName == 'CherryPickLiquidTransfer' &amp;&amp; !empty activityViewer.entity.cherryPickRequest}"
+      value="#{activityViewer.entity.status}">
+    </ss:property>
+
+    <ss:property id="cpltCherryPickPlates" label="Cherry Pick Plates "
+      description="Cherry Pick Plates affected by this activity"
+      rendered="#{activityViewer.entity.class.simpleName == 'CherryPickLiquidTransfer'}">
+      <ui:define name="data">
+        <t:dataTable id="cpltCherryPickPlatesTable" forceId="true"
+          var="row" value="#{activityViewer.cherryPickPlatesDataModel}"
+          styleClass="standardTable" columnClasses="column"
+          rowClasses="row1,row2" headerClass="tableHeader">
+          <t:column>
+            <f:facet name="header">
+              <t:outputText value="Plate Number" />
+            </f:facet>
+            <t:outputText value="#{row.data.plateOrdinal + 1}" />
+          </t:column>
+          <t:column>
+            <f:facet name="header">
+              <t:outputText value="Plate Name" />
+            </f:facet>
+            <t:outputText value="&quot;#{row.data.name}&quot;" />
+          </t:column>
+          <t:column>
+            <f:facet name="header">
+              Plating Status
+            </f:facet>
+            <t:outputText value="#{row.data.statusLabel}" />
+          </t:column>
+          <t:column>
+            <f:facet name="header">
+               Plated During This Activity
+            </f:facet>
+            <t:selectBooleanCheckbox value="#{row.selected}"
+              readonly="#{true}" />
+          </t:column>
+        </t:dataTable>
+      </ui:define>
+    </ss:property>
+
+    <ss:property id="comments" label="Comments"
+      value="#{activityViewer.entity.comments}"
+      editable="#{activityViewer.editMode}" description="Comments"
+      type="Textarea" editWidth="80" editHeight="5" />
+
+    <s:focus id="platesUsedFocuser"
+      for="#{empty activityViewer.entity.dateOfActivity ? 'activityViewerForm:dateOfActivityDateField' : 'activityViewerForm:newPlateRangeScreenedStartPlateField'}" />
+
+  </ui:define>
+
+
+
+</ui:composition>
+
+</html>
+

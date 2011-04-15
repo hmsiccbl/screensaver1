@@ -1,0 +1,41 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+<html xmlns="http://www.w3.org/1999/xhtml"
+	xmlns:ui="http://java.sun.com/jsf/facelets"
+	xmlns:h="http://java.sun.com/jsf/html"
+	xmlns:f="http://java.sun.com/jsf/core"
+	xmlns:t="http://myfaces.apache.org/tomahawk"
+	xmlns:s="http://myfaces.apache.org/sandbox">
+
+<ui:composition>
+
+
+
+		<p>The Cherry Pick Request Viewer allows screeners and administrators
+		to view the status of a screener's Cherry Pick Request. It also
+		enables administrators to manage the physical process of creating
+		cherry pick plates for follow-up screenings, as requested by
+		screeners. <span class="helpNB">Please note</span> that the
+		Cherry Pick Request Viewer is currently only functional for RNAi screens.</p>
+
+		<p>The Cherry Pick Request Viewer page is divided into five
+		sections that you can collapse or expand by clicking on their headers.</p>
+
+  <t:panelGroup rendered="#{empty inHelpViewer}">
+      <p>
+        The five sections are:
+        <ul>
+          <li><a href="cherryPickRequestViewer/screenSummaryHelp.jsf">Screen Summary</a></li>
+          <li><a href="cherryPickRequestViewer/cherryPickRequestDetailsHelp.jsf">Cherry Pick Request Details</a></li>
+          <li><a href="cherryPickRequestViewer/screenerCherryPicksHelp.jsf">Screener Cherry Picks</a></li>
+          <li><a href="cherryPickRequestViewer/labCherryPicksHelp.jsf">Lab Cherry Picks</a></li>
+          <li><a href="cherryPickRequestViewer/cherryPickPlatesHelp.jsf">Cherry Pick Plates</a></li>
+        </ul>
+        Click on a section name in the above list for help on that particular section.
+      </p>
+  </t:panelGroup>
+
+
+</ui:composition>
+
+</html>

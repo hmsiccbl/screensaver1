@@ -1,0 +1,35 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+<html xmlns="http://www.w3.org/1999/xhtml"
+	xmlns:ui="http://java.sun.com/jsf/facelets"
+	xmlns:f="http://java.sun.com/jsf/core"
+	xmlns:t="http://myfaces.apache.org/tomahawk"
+	xmlns:s="http://myfaces.apache.org/sandbox"
+	xmlns:h="http://java.sun.com/jsf/html">
+
+<body>
+
+<f:view>
+  <t:document>
+    <t:documentHead>
+			<t:stylesheet path="/css/screensaver.css" />
+			<t:htmlTag value="title">
+        <h:outputText value="#{appInfo.applicationTitle}" />
+			  <t:outputText value=" - #{pageTitle}" rendered="#{! empty pageTitle}" />
+			</t:htmlTag>
+    </t:documentHead>
+
+    <t:documentBody>
+      <t:panelGrid columns="1">
+        <t:div styleClass="sectionHeader">
+          <t:outputText value="#{pageTitle}" styleClass="sectionHeader" rendered="#{! empty pageTitle}" />
+        </t:div>
+        <ui:insert name="body"/>
+      </t:panelGrid>
+    </t:documentBody>
+  </t:document>
+</f:view>
+
+</body>
+
+</html>

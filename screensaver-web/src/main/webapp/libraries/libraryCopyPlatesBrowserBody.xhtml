@@ -1,0 +1,198 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+<html xmlns="http://www.w3.org/1999/xhtml"
+  xmlns:ui="http://java.sun.com/jsf/facelets"
+  xmlns:h="http://java.sun.com/jsf/html"
+  xmlns:f="http://java.sun.com/jsf/core"
+  xmlns:t="http://myfaces.apache.org/tomahawk"
+  xmlns:s="http://myfaces.apache.org/sandbox"
+  xmlns:ss="http://screensaver.med.harvard.edu/ui">
+  
+  <!--
+     UI params:
+     - searchResult: LibraryCopyPlateSearchResult object
+     - viewer: required if !searchResult.nested
+   -->
+
+<ui:composition>
+
+  <ss:searchResult />
+
+  <h:form id="batchEditPlatesForm">
+
+    <ss:collapsiblePanel id="batchEdit"
+      isCollapsed="#{searchResults.batchEditor.isPanelCollapsedMap['batchEdit']}"
+      label="Batch Edit Plates"
+      rendered="#{!searchResults.nested || (!viewer.isPanelCollapsedMap['plates'] &amp;&amp; searchResults.batchEditable)}" >
+
+      <ui:define name="content">
+
+        <t:panelGrid columns="1"
+          rendered="#{searchResults.batchEditable}">
+
+          <t:panelGroup styleClass="commandPanel">
+
+            <t:commandButton id="updatePlates" value="Update"
+              action="#{searchResults.batchUpdate}"
+              onclick="javascript: return confirm('#{searchResults.reviewMessage}');"
+              disabled="#{searchResults.rowCount == 0}"
+              title="Update all plates with the specified fields" />
+
+            <t:commandButton id="clearBatchEdit" value="Clear"
+              onclick="javascript: document.getElementById('doClearBatchEdit').click(); return false;"
+              title="Clear all plate batch editing fields" />
+
+          </t:panelGroup>
+
+          <t:panelGrid id="propertiesPanel" columns="2"
+            columnClasses="propertyLabelColumn,column"
+            styleClass="layoutPanel">
+
+            <ss:property id="plateType" label="Plate Type"
+              type="Vocabulary" editable="true"
+              value="#{searchResults.batchEditor.plateType.value}"
+              selectItems="#{searchResults.batchEditor.plateType.selectItems}" />
+
+            <ss:property id="volume" label="Initial Well Volume"
+              value="#{searchResults.batchEditor.volumeValue}"
+              type="Volume"
+              unitsSelector="#{searchResults.batchEditor.volumeType}"
+              description="The volume per copy well" editable="true"
+              editWidth="6" />
+
+            <ss:property id="molarConcentration" label="Initial Well Concentration (Molar)"
+              value="#{searchResults.batchEditor.molarConcentrationValue}"
+              type="MolarConcentration"
+              unitsSelector="#{searchResults.batchEditor.molarConcentrationType}"
+              description="The molar concentration of the well reagent" editable="true"
+              editWidth="6" />
+
+            <ss:property id="mgMlConcentration" label="Initial Well Concentration (mg/mL)"
+              value="#{searchResults.batchEditor.mgMlConcentration}"
+              converter="#{mgMlConcentrationConverter}"
+              description="The mg/mL concentration of the well reagent" editable="true"
+              editWidth="6" />
+
+            <ss:propertyGroup id="plateStatusGroup" label="Status">
+
+              <ss:property id="plateStatus" label="Status"
+                type="Vocabulary"
+                value="#{searchResults.batchEditor.plateStatus.value}"
+                editable="true"
+                selectItems="#{searchResults.batchEditor.plateStatus.selectItems}" />
+
+              <ss:property id="statusChangeDate" label="Change Date"
+                type="Date"
+                description="The date the plate status changed"
+                value="#{searchResults.batchEditor.statusChangeActivity.dateOfActivity}"
+                editable="true" />
+
+              <ss:property id="statusChangedBy" label="Changed By"
+                type="Vocabulary"
+                description="The staff member that changed the plate status"
+                value="#{searchResults.batchEditor.statusChangeActivity.performedBy}"
+                selectItems="#{searchResults.batchEditor.administratorUserSelectItems}"
+                converter="#{screensaverUserConverter}" editable="true" />
+
+            </ss:propertyGroup>
+
+            <ss:propertyGroup id="plateLocationGroup" label="Location"
+              columns="1" columnClasses="column">
+
+              <t:panelGrid id="locationParts" columns="4"
+                columnClasses="propertyLabelColumn,column,propertyLabelColumn,column"
+                styleClass="layoutPanel">
+
+                <ss:property id="room" label="Room" type="Vocabulary"
+                  description="The room where the plate is stored"
+                  editable="true"
+                  value="#{searchResults.batchEditor.room.value}"
+                  selectItems="#{searchResults.batchEditor.room.selectItems}" />
+
+                <ss:property id="newRoom" label="New Room" type="Text"
+                  description="A new room where the plate is stored"
+                  editable="true"
+                  value="#{searchResults.batchEditor.newPlateLocationRoom}" />
+
+                <ss:property id="freezer" label="Freezer"
+                  type="Vocabulary"
+                  description="The freezer where the plate is stored"
+                  editable="true"
+                  value="#{searchResults.batchEditor.freezer.value}"
+                  selectItems="#{searchResults.batchEditor.freezer.selectItems}" />
+
+                <ss:property id="newFreezer" label="New Freezer"
+                  type="Text"
+                  description="A new freezer where the plate is stored"
+                  editable="true"
+                  value="#{searchResults.batchEditor.newPlateLocationFreezer}" />
+
+                <ss:property id="shelf" label="Shelf" type="Vocabulary"
+                  description="The freezer shelf where the plate is stored"
+                  editable="true"
+                  value="#{searchResults.batchEditor.shelf.value}"
+                  selectItems="#{searchResults.batchEditor.shelf.selectItems}" />
+
+                <ss:property id="newShelf" label="New Shelf" type="Text"
+                  description="A new shelf where the plate is stored"
+                  editable="true"
+                  value="#{searchResults.batchEditor.newPlateLocationShelf}" />
+
+                <ss:property id="bin" label="Bin" type="Vocabulary"
+                  description="The bin in which the plate is stored"
+                  editable="true"
+                  value="#{searchResults.batchEditor.bin.value}"
+                  selectItems="#{searchResults.batchEditor.bin.selectItems}" />
+
+                <ss:property id="newBin" label="New Bin" type="Text"
+                  description="A new bin where the plate is stored"
+                  editable="true"
+                  value="#{searchResults.batchEditor.newPlateLocationBin}" />
+
+              </t:panelGrid>
+
+              <t:panelGrid id="locationChangeActivity" columns="2"
+                columnClasses="propertyLabelColumn,column"
+                styleClass="layoutPanel">
+
+                <ss:property id="locationChangeDate" label="Change Date"
+                  type="Date"
+                  description="The date the plate location changed"
+                  value="#{searchResults.batchEditor.locationChangeActivity.dateOfActivity}"
+                  editable="true" />
+
+                <ss:property id="locationChangedBy" label="Changed By"
+                  type="Vocabulary"
+                  description="The staff member that changed the plate location"
+                  value="#{searchResults.batchEditor.locationChangeActivity.performedBy}"
+                  selectItems="#{searchResults.batchEditor.administratorUserSelectItems}"
+                  converter="#{screensaverUserConverter}"
+                  editable="true" />
+
+              </t:panelGrid>
+
+            </ss:propertyGroup>
+
+            <ss:property id="comments" label="Comments" type="Textarea"
+              editWidth="60" editHeight="3"
+              description="Comments regarding changes being made to the plate or standalone comments about the physical plate"
+              value="#{searchResults.batchEditor.comments}"
+              editable="true" />
+
+          </t:panelGrid>
+
+        </t:panelGrid>
+
+      </ui:define>
+    </ss:collapsiblePanel>
+  </h:form>
+  
+  <h:form id="jsfHackForClearCommand">
+    <t:commandButton id="doClearBatchEdit" forceId="true" 
+      styleClass="hiddenCommand"
+      action="#{searchResults.batchClear}" 
+      onClick="alert('doClearBatchEdit')"/>
+  </h:form>
+</ui:composition>
+
+</html>
