@@ -56,6 +56,9 @@
     <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
   </properties>
   
+  <!--
+          Top level dependency management: specify versions for dependencies that may be included in child projects
+   -->
   <dependencyManagement>
     <dependencies>
       
@@ -77,10 +80,7 @@
 
 
   <!--
-          Top level dependencies: place items here needed for the Eclipse builder in the child projects.
-           
-          NOTE: Eclipse does not transfer dependencies from the "dependencyManagment section to the child projects, (although maven does)
-          it does, however transfer items in the "dependencies" (top level, non-nested) element 
+          Top level dependencies: place items here needed by all child projects.
    -->
   <dependencies>
       <dependency>
