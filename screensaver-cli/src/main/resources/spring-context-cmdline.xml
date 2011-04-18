@@ -54,7 +54,7 @@
    class="edu.harvard.med.iccbl.screensaver.policy.cherrypicks.IccblCherryPickPlateSourceWellMinimumVolumePolicy">
   </bean>
  
-  <import resource="classpath:spring-context-persistence.xml"/>
-  <import resource="classpath:spring-context-services.xml"/>
+  <import resource="classpath*:spring-context-persistence.xml"/>
+  <import resource="classpath*:spring-context-services.xml"/>
   
 </beans>

@@ -20,6 +20,10 @@
 <beans>
 
   <bean
+    id="commandLineArgumentsDatabaseSettingsResolver"
+    class="edu.harvard.med.screensaver.db.CommandLineArgumentsDatabaseConnectionSettingsResolver" />
+
+  <bean
     id="screensaverProperties"
     class="edu.harvard.med.screensaver.ScreensaverProperties"
     scope="singleton">
@@ -47,7 +51,7 @@
     <property name="applicationProperties" ref="screensaverProperties"></property>
   </bean>
 
-  <import resource="classpath:spring-context-persistence.xml"/>
-  <import resource="classpath:spring-context-services.xml"/>
+  <import resource="classpath*:spring-context-persistence.xml"/>
+  <import resource="classpath*:spring-context-services.xml"/>
 
 </beans>
