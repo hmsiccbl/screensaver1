@@ -27,7 +27,7 @@
     id="screensaverProperties"
     class="edu.harvard.med.screensaver.ScreensaverProperties"
     scope="singleton">
-    <constructor-arg value="/screensaver.properties.util" />
+    <constructor-arg value="/screensaver.properties" />
     <constructor-arg>
       <bean class="edu.havard.med.screensaver.db.ChainingDatabaseConnectionSettingsResolver">
         <constructor-arg>
@@ -54,7 +54,7 @@
    class="edu.harvard.med.iccbl.screensaver.policy.cherrypicks.IccblCherryPickPlateSourceWellMinimumVolumePolicy">
   </bean>
  
-  <import resource="classpath*:spring-context-persistence.xml"/>
-  <import resource="classpath*:spring-context-services.xml"/>
+  <import resource="classpath:spring-context-persistence.xml"/>
+  <import resource="classpath:spring-context-services.xml"/>
   
 </beans>
