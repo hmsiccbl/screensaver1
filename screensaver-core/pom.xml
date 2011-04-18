@@ -93,9 +93,8 @@
           </dependency>
         </dependencies>
       </plugin>
-
+<!--
       <plugin>
-        <!-- TODO: use the tomcat plugin to restart/redeploy? -->
         <groupId>org.codehaus.mojo</groupId>
         <artifactId>tomcat-maven-plugin</artifactId>
         <version>1.1</version>
@@ -104,6 +103,7 @@
           </execution>
         </executions>
       </plugin>
+-->
     </plugins>
   </build>
 
