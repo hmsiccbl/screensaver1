@@ -19,16 +19,14 @@
     <!-- Web app authentication method can be 'FORM' (Screensaver login web page) or 'BASIC' (browser dialog). BASIC mode is useful 
       during development, to avoid repeating the login step between Tomcat restarts. (updates web.xml via Maven filtering) -->
     <servlet.authentication.method>FORM</servlet.authentication.method>
-    <!-- UNUSED! The web application name in Tomcat (affects the base URL of the web application) (may be used in the future by tomcat deployment 
-      plugin to pom) -->
-    <app.name>${project.artifactId}</app.name>
+    
   </properties>
   
   <packaging>war</packaging>  
   
   <build>
-    <!-- do this so the version will not be part of the generated war file name -->
-    <finalName>${artifactId}</finalName>
+    <!-- The final name of the webapp war file (and the webapp name) -->
+    <finalName>screensaver</finalName>
 
     <resources>
       <!-- turn on filtering for the resources directory -->
