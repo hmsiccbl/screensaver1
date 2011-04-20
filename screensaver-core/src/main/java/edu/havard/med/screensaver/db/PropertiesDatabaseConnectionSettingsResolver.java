@@ -39,7 +39,8 @@ public class PropertiesDatabaseConnectionSettingsResolver extends NamedVariables
       throw new DatabaseConnectionSettingsResolutionException("resolver not initialized with properties");
     }
     if (_properties.get(databaseVariableName) == null) {
-      return null;
+      throw new DatabaseConnectionSettingsResolutionException("must define the property: \"" + databaseVariableName + "\"");
+      //return null;
     }
     String port = _properties.getProperty(portVariableName);
     Integer portNumber = null;
