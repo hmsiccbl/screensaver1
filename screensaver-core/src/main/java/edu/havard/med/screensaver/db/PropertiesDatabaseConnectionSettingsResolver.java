@@ -39,8 +39,7 @@ public class PropertiesDatabaseConnectionSettingsResolver extends NamedVariables
       throw new DatabaseConnectionSettingsResolutionException("resolver not initialized with properties");
     }
     if (_properties.get(databaseVariableName) == null) {
-      throw new DatabaseConnectionSettingsResolutionException("must define the property: \"" + databaseVariableName + "\"");
-      //return null;
+      return null;
     }
     String port = _properties.getProperty(portVariableName);
     Integer portNumber = null;
@@ -52,10 +51,10 @@ public class PropertiesDatabaseConnectionSettingsResolver extends NamedVariables
     catch (NumberFormatException e) {
       throw new DatabaseConnectionSettingsResolutionException("invalid port number " + port);
     }
-    return new DatabaseConnectionSettings(_properties.get(hostVariableName).toString(),
+    return new DatabaseConnectionSettings((String) _properties.get(hostVariableName),
                                           portNumber,
-                                          _properties.get(databaseVariableName).toString(),
-                                          _properties.get(userVariableName).toString(),
-                                          _properties.get(passwordVariableName).toString());
+                                          (String) _properties.get(databaseVariableName),
+                                          (String) _properties.get(userVariableName),
+                                          (String) _properties.get(passwordVariableName));
   }
 }
