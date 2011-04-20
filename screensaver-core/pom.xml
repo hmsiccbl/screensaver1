@@ -12,7 +12,7 @@
   <groupId>edu.harvard.med</groupId>
   <artifactId>screensaver-core</artifactId>
   <version>2.3.2</version>
-  <name>Screensaver</name>
+  <name>Screensaver Core</name>
 
   <packaging>jar</packaging>
 
@@ -129,8 +129,6 @@
       <version>${hibernate-core.version}</version>
     </dependency>
 
-    <!-- note hibernate 3.5 only contains annotations <dependency> <groupId>org.hibernate</groupId> <artifactId>hibernate-annotations</artifactId> 
-      <version>${hibernate-core.version}</version> </dependency> -->
     <dependency>
       <groupId>org.hibernate</groupId>
       <artifactId>hibernate-validator</artifactId>
@@ -302,30 +300,12 @@
     </dependency>
 
     <dependency>
-      <!-- NOTE: this file must be added to the local repository with mvn install:install-file -Dfile=eCommonsAuth.jar -DgroupId=edu.harvard.med 
-        -DartifactId=eCommonsAuth -Dversion=5552 -Dpackaging=jar -DgeneratePom=true -->
-      <groupId>edu.harvard.med</groupId>
-      <artifactId>eCommonsAuth</artifactId>
-      <version>5552</version>
-      <type>jar</type>
-    </dependency>
-
-    <dependency>
       <!-- for cellhts -->
       <groupId>commons-math</groupId>
       <artifactId>commons-math</artifactId>
       <version>1.2</version>
       <type>jar</type>
       <scope>compile</scope>
-    </dependency>
-
-    <dependency>
-      <!-- NOTE: this file must be added to the local repository with mvn install:install-file -Dfile=annotations.jar -DgroupId=util.findbugs 
-        -DartifactId=annotations -Dversion=3480 -Dpackaging=jar -DgeneratePom=true -->
-      <groupId>util.findbugs</groupId>
-      <artifactId>annotations</artifactId>
-      <version>3480</version>
-      <type>jar</type>
     </dependency>
 
     <dependency>
@@ -368,13 +348,6 @@
     </dependency>
 
     <dependency>
-      <groupId>joda-time</groupId>
-      <artifactId>joda-time-hibernate-recompiled</artifactId>
-      <version>1.2</version>
-      <type>jar</type>
-    </dependency>
-
-    <dependency>
       <groupId>org.aspectj</groupId>
       <artifactId>aspectjweaver</artifactId>
       <version>1.6.10</version>
@@ -413,25 +386,6 @@
       <scope>compile</scope>
     </dependency>
 
-   <dependency>
-      <!-- NOTE: this file must be added to the local repository with dependency in AbstractBackingBean, on org.apache.myfaces.custom.util.ComponentUtils.findComponentById 
-        mvn install:install-file -Dfile=tomahawk-sandbox-1.1.7-SNAPSHOT.jar -DgroupId=org.apache.myfaces.tomahawk -DartifactId=tomahawk-sandbox 
-        -Dversion=1.1.7 -Dpackaging=jar -DgeneratePom=true -->
-      <groupId>org.apache.myfaces.tomahawk</groupId>
-      <artifactId>tomahawk-sandbox</artifactId>
-      <version>1.1.7</version>
-      <type>jar</type>
-    </dependency>
-
-    <dependency>
-      <!-- NOTE: this file must be added to the local repository with mvn install:install-file -Dfile=tomahawk-facelets-taglib.jar 
-        -DgroupId=tomahawk -DartifactId=tomahawk-facelets-taglib -Dversion=0.1 -Dpackaging=jar -DgeneratePom=true -->
-      <groupId>tomahawk</groupId>
-      <artifactId>tomahawk-facelets-taglib</artifactId>
-      <version>0.1</version>
-      <type>jar</type>
-    </dependency>
-
     <dependency>
       <groupId>org.apache.myfaces.tomahawk</groupId>
       <artifactId>tomahawk</artifactId>
@@ -456,7 +410,6 @@
       <scope>compile</scope>
     </dependency>
 
-
     <dependency>
       <groupId>com.sun.facelets</groupId>
       <artifactId>jsf-facelets</artifactId>
@@ -464,6 +417,57 @@
       <type>jar</type>
       <scope>compile</scope>
     </dependency>
+
+   <dependency>
+      <!-- NOTE: this file must be added to the local repository 
+        (dependency in AbstractBackingBean, on org.apache.myfaces.custom.util.ComponentUtils.findComponentById)
+        use: mvn install:install-file -Dfile=tomahawk-sandbox-1.1.7-SNAPSHOT.jar -DgroupId=org.apache.myfaces.tomahawk -DartifactId=tomahawk-sandbox 
+        -Dversion=1.1.7 -Dpackaging=jar -DgeneratePom=true -->
+      <groupId>org.apache.myfaces.tomahawk</groupId>
+      <artifactId>tomahawk-sandbox</artifactId>
+      <version>1.1.7</version>
+      <type>jar</type>
+    </dependency>
+
+    <dependency>
+      <!-- NOTE: this file must be added to the local repository with mvn install:install-file -Dfile=tomahawk-facelets-taglib.jar 
+        -DgroupId=tomahawk -DartifactId=tomahawk-facelets-taglib -Dversion=0.1 -Dpackaging=jar -DgeneratePom=true -->
+      <groupId>tomahawk</groupId>
+      <artifactId>tomahawk-facelets-taglib</artifactId>
+      <version>0.1</version>
+      <type>jar</type>
+    </dependency>
+
+    <dependency>
+      <!-- NOTE: this file must be added to the local repository with mvn install:install-file -Dfile=eCommonsAuth.jar -DgroupId=edu.harvard.med 
+        -DartifactId=eCommonsAuth -Dversion=5552 -Dpackaging=jar -DgeneratePom=true -->
+      <groupId>edu.harvard.med</groupId>
+      <artifactId>eCommonsAuth</artifactId>
+      <version>5552</version>
+      <type>jar</type>
+    </dependency>
+
+    <dependency>
+      <!-- NOTE: this file must be added to the local repository with mvn install:install-file -Dfile=annotations.jar -DgroupId=util.findbugs 
+        -DartifactId=annotations -Dversion=3480 -Dpackaging=jar -DgeneratePom=true -->
+      <groupId>util.findbugs</groupId>
+      <artifactId>annotations</artifactId>
+      <version>3480</version>
+      <type>jar</type>
+    </dependency>
+
+    <dependency>
+      <!-- Note: this file must be added to the local repository with mvn install:install-file -Dfile=joda-time-hibernate-1.2.recompiled.jar -
+      DgroupId=joda-time -DartifactId=joda-time-hibernate-recompiled -Dversion=1.2 -Dpackaging=jar -DgeneratePom=true 
+      Note: joda-time-hibernate must be compiled with a compatible hibernate library to work (3.6?).
+       -->
+      <groupId>joda-time</groupId>
+      <artifactId>joda-time-hibernate-recompiled</artifactId>
+      <version>1.2</version>
+      <type>jar</type>
+    </dependency>
+
   </dependencies>
+
 
 </project>
