@@ -15,6 +15,13 @@ import edu.harvard.med.screensaver.model.libraries.PlateSize;
 
 public interface ScreensaverConstants
 {
+  /**
+   * The name of the Java system property that specified the location (path and file name) of the screensaver.properties
+   * file, which can take on any name. If this property is not defined, the default file location, as provided via the
+   * {@link ScreensaverProperties#ScreensaverProperties(String)} constructor, will be used.
+   */
+  public static final String SCREENSAVER_PROPERTIES_FILE_PROPERTY_NAME = "screensaver.properties.file";
+
   /* Constants for application properties that are found in the screensaver.properties file.  Use these constants to retrieve property values using getApplicationProperties(). */
   public static final String APPLICATION_NAME_PROPERTY = "screensaver.ui.application_name";
   public static final String APPLICATION_VERSION_PROPERTY = "screensaver.ui.version";
@@ -111,5 +118,4 @@ public interface ScreensaverConstants
   public static final String DEFAULT_BATCH_STUDY_ID_POSITIVE_COUNT_SM = "200001";
   public static final String DEFAULT_BATCH_STUDY_ID_POSITIVE_COUNT_RNAI = "200002";
   public static final String DEFAULT_BATCH_STUDY_ID_CONFIRMATION_SUMMARY = "200003";
-
 }

@@ -10,6 +10,7 @@
 package edu.harvard.med.screensaver;
 
 import java.io.File;
+import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.Map;
@@ -32,18 +33,27 @@ public class ScreensaverProperties extends PropertiesDatabaseConnectionSettingsR
   private DatabaseConnectionSettings _databaseConnectionSettings;
   private DatabaseConnectionSettingsResolver _databaseConnectionSettingsResolver;
 
-  public ScreensaverProperties(String screensaverPropertiesFile)
+  public ScreensaverProperties(String defaultScreensaverPropertiesFile)
   {
-    InputStream screensaverPropertiesInputStream =
-      ScreensaverProperties.class.getResourceAsStream(screensaverPropertiesFile);
     try {
+      String propFileName =
+        System.getProperty(ScreensaverConstants.SCREENSAVER_PROPERTIES_FILE_PROPERTY_NAME);
+      InputStream screensaverPropertiesInputStream = null;
+      if (propFileName != null) {
+        log.info("loading screensaver properties from file location " + propFileName);
+        screensaverPropertiesInputStream =new FileInputStream(new File(propFileName));
+      }
+      else {
+        log.info("loading screensaver properties from resource " + defaultScreensaverPropertiesFile);
+        screensaverPropertiesInputStream = ScreensaverProperties.class.getResourceAsStream(defaultScreensaverPropertiesFile);
+      }
       initializeProperties(screensaverPropertiesInputStream);
       initializeFeaturesEnabled(_properties); // initialize
       validateProperties(_properties);
       setProperties(_properties);
     }
     catch (IOException e) {
-      throw new ScreensaverConfigurationException("error loading screensaver.properties resource", e);
+      throw new ScreensaverConfigurationException("error loading screensaver properties", e);
     }
   }
 
