@@ -9,16 +9,21 @@
 
 package edu.harvard.med.screensaver.db;
 
+import org.apache.log4j.Logger;
+
 import edu.harvard.med.screensaver.DatabaseConnectionSettings;
 
 public class CommandLineArgumentsDatabaseConnectionSettingsResolver implements DatabaseConnectionSettingsResolver
 {
+  private static final Logger log = Logger.getLogger(CommandLineArgumentsDatabaseConnectionSettingsResolver.class);
+
   private DatabaseConnectionSettings _settings;
 
   @Override
   public DatabaseConnectionSettings resolve() throws DatabaseConnectionSettingsResolutionException
   {
     if (_settings == null) {
+      log.warn("command line arguments do not contain database connection settings");
       return null;
     }
     return _settings;

@@ -171,14 +171,19 @@ public class ScreensaverProperties extends PropertiesDatabaseConnectionSettingsR
   public DatabaseConnectionSettings getDatabaseConnectionSettings()
   {
     if (_databaseConnectionSettings == null) {
-      log.info("resolving database connection settings using " + _databaseConnectionSettingsResolver);
       if (_databaseConnectionSettings == null && _databaseConnectionSettingsResolver != null) {
+        log.info("resolving database connection settings using " + _databaseConnectionSettingsResolver);
         _databaseConnectionSettings = _databaseConnectionSettingsResolver.resolve();
       }
-      _databaseConnectionSettings = this.resolve();
-    }
-    if (_databaseConnectionSettings == null) {
-      throw new DatabaseConnectionSettingsResolutionException("could not resolve database connection settings");
+      if (_databaseConnectionSettings == null) {
+        log.info("resolving database connection settings using " + this);
+        _databaseConnectionSettings = this.resolve();
+        if (_databaseConnectionSettings == null) {
+          throw new DatabaseConnectionSettingsResolutionException("could not resolve database connection settings");
+        }
+      }
+      assert _databaseConnectionSettings != null;
+      log.info("using database connection settings: " + _databaseConnectionSettings);
     }
     return _databaseConnectionSettings;
   }

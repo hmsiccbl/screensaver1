@@ -57,4 +57,10 @@ public class DatabaseConnectionSettings
     // TODO: make database-agnostic
     return "jdbc:postgresql://" + getHost() + (getPort() == null ? "" : (":" + getPort())) + "/" + getDatabase();
   }
+
+  @Override
+  public String toString()
+  {
+    return getJdbcUrl();
+  }
 }

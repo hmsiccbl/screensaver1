@@ -9,11 +9,15 @@
 
 package edu.havard.med.screensaver.db;
 
+import org.apache.log4j.Logger;
+
 import edu.harvard.med.screensaver.DatabaseConnectionSettings;
 import edu.harvard.med.screensaver.db.DatabaseConnectionSettingsResolutionException;
 
 public class SystemPropertiesDatabaseConnectionSettingsResolver extends NamedVariablesDatabaseConnectionSettingsResolver
 {
+  private static final Logger log = Logger.getLogger(SystemPropertiesDatabaseConnectionSettingsResolver.class);
+
   public SystemPropertiesDatabaseConnectionSettingsResolver()
   {
     super("database.host",
@@ -27,6 +31,7 @@ public class SystemPropertiesDatabaseConnectionSettingsResolver extends NamedVar
   public DatabaseConnectionSettings resolve() throws DatabaseConnectionSettingsResolutionException
   {
     if (System.getProperty(databaseVariableName) == null) {
+      log.warn("system properties do not contain database connection settings");
       return null;
     }
     return new DatabaseConnectionSettings(System.getProperty(hostVariableName, "localhost"),

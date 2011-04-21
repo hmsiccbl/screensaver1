@@ -35,6 +35,10 @@ public class IccblCommandLineArgumentsDatabaseConnectionSettingsResolver extends
   public DatabaseConnectionSettings resolve() throws DatabaseConnectionSettingsResolutionException
   {
     DatabaseConnectionSettings settings = super.resolve();
+    if (settings == null) {
+      return null;
+    }
+
     String user = settings.getUser();
     if (user == null) {
       user = System.getenv("USER");
