@@ -9,7 +9,6 @@
 
 package edu.harvard.med.screensaver.db;
 
-import edu.havard.med.screensaver.db.NamedVariablesDatabaseConnectionSettingsResolver;
 import org.apache.log4j.Logger;
 
 import edu.harvard.med.screensaver.DatabaseConnectionSettings;

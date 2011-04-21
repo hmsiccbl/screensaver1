@@ -28,7 +28,7 @@
     scope="singleton">
     <constructor-arg value="/screensaver.properties" />
     <constructor-arg>
-      <bean class="edu.havard.med.screensaver.db.ChainingDatabaseConnectionSettingsResolver">
+      <bean class="edu.harvard.med.screensaver.db.ChainingDatabaseConnectionSettingsResolver">
         <constructor-arg>
           <list>
             <bean class="edu.harvard.med.iccbl.screensaver.db.OrchestraAuthFileDatabaseConnectionSettingsResolver"/>

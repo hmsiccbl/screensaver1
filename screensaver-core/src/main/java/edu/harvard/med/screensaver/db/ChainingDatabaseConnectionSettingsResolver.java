@@ -7,7 +7,7 @@
 // at Harvard Medical School. This software is distributed under the terms of
 // the GNU General Public License.
 
-package edu.havard.med.screensaver.db;
+package edu.harvard.med.screensaver.db;
 
 import java.util.List;
 
@@ -16,8 +16,6 @@ import org.apache.log4j.Logger;
 
 import edu.harvard.med.screensaver.DatabaseConnectionSettings;
 import edu.harvard.med.screensaver.ScreensaverProperties;
-import edu.harvard.med.screensaver.db.DatabaseConnectionSettingsResolutionException;
-import edu.harvard.med.screensaver.db.DatabaseConnectionSettingsResolver;
 
 public class ChainingDatabaseConnectionSettingsResolver implements DatabaseConnectionSettingsResolver
 {
