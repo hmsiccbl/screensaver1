@@ -7,19 +7,19 @@
 // at Harvard Medical School. This software is distributed under the terms of
 // the GNU General Public License.
 
-package edu.havard.med.screensaver.db;
+package edu.harvard.med.screensaver.db;
 
-import java.util.Properties;
+import edu.havard.med.screensaver.db.NamedVariablesDatabaseConnectionSettingsResolver;
+import org.apache.log4j.Logger;
 
 import edu.harvard.med.screensaver.DatabaseConnectionSettings;
 import edu.harvard.med.screensaver.ScreensaverProperties;
-import edu.harvard.med.screensaver.db.DatabaseConnectionSettingsResolutionException;
 
-public class PropertiesDatabaseConnectionSettingsResolver extends NamedVariablesDatabaseConnectionSettingsResolver
+public class ScreensaverPropertiesDatabaseConnectionSettingsResolver extends NamedVariablesDatabaseConnectionSettingsResolver
 {
-  private Properties _properties;
+  private static final Logger log = Logger.getLogger(ScreensaverPropertiesDatabaseConnectionSettingsResolver.class);
 
-  public PropertiesDatabaseConnectionSettingsResolver()
+  public ScreensaverPropertiesDatabaseConnectionSettingsResolver()
   {
     super("database.host",
           "database.port",
@@ -31,13 +31,11 @@ public class PropertiesDatabaseConnectionSettingsResolver extends NamedVariables
   @Override
   public DatabaseConnectionSettings resolve(ScreensaverProperties screensaverProperties) throws DatabaseConnectionSettingsResolutionException
   {
-    if (_properties == null) {
-      throw new DatabaseConnectionSettingsResolutionException("resolver not initialized with properties");
-    }
-    if (_properties.get(databaseVariableName) == null) {
+    if (screensaverProperties.getProperty(databaseVariableName) == null) {
+      log.warn("screensaver properties file does not contain database connection settings");
       return null;
     }
-    String port = _properties.getProperty(portVariableName);
+    String port = System.getenv(portVariableName);
     Integer portNumber = null;
     try {
       if (port != null) {
@@ -47,10 +45,11 @@ public class PropertiesDatabaseConnectionSettingsResolver extends NamedVariables
     catch (NumberFormatException e) {
       throw new DatabaseConnectionSettingsResolutionException("invalid port number " + port);
     }
-    return new DatabaseConnectionSettings((String) _properties.get(hostVariableName),
+    return new DatabaseConnectionSettings(System.getenv(hostVariableName),
                                           portNumber,
-                                          (String) _properties.get(databaseVariableName),
-                                          (String) _properties.get(userVariableName),
-                                          (String) _properties.get(passwordVariableName));
+                                          System.getenv(databaseVariableName),
+                                          System.getenv(userVariableName),
+                                          System.getenv(passwordVariableName));
   }
+
 }

@@ -27,6 +27,9 @@
     class="edu.harvard.med.screensaver.ScreensaverProperties"
     scope="singleton">
     <constructor-arg value="/screensaver.properties" />
+    <constructor-arg>
+      <bean class="edu.harvard.med.screensaver.db.ScreensaverPropertiesDatabaseConnectionSettingsResolver" />
+    </constructor-arg>
   </bean>
 
   <!--  user authentication -->

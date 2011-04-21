@@ -14,66 +14,63 @@ import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStreamReader;
+import java.util.Map;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
+import com.google.common.collect.Maps;
 import org.apache.log4j.Logger;
 
 import edu.harvard.med.screensaver.DatabaseConnectionSettings;
 import edu.harvard.med.screensaver.ScreensaverProperties;
-import edu.harvard.med.screensaver.db.CommandLineArgumentsDatabaseConnectionSettingsResolver;
 import edu.harvard.med.screensaver.db.DatabaseConnectionSettingsResolutionException;
+import edu.harvard.med.screensaver.db.DatabaseConnectionSettingsResolver;
 
 /**
- * Resolves database connection settings from command-line arguments, with the following enhancements:
- * <ul>
- * <li>if user is not specified will resolve using the $USER environment variable</li>
- * <li>if password is not specified (as it should not be, on a multi-user host) will resolve by inspecting the uesr's
- * ~/.pgpass file</li>
- * </ul>
+ * Resolves database connection settings from a special RITG-provided production environment file.
  * 
  * @author atolopko
  */
-public class IccblCommandLineArgumentsDatabaseConnectionSettingsResolver extends CommandLineArgumentsDatabaseConnectionSettingsResolver
+public class OrchestraAuthFileDatabaseConnectionSettingsResolver implements DatabaseConnectionSettingsResolver
 {
-  private static final Logger log = Logger.getLogger(IccblCommandLineArgumentsDatabaseConnectionSettingsResolver.class);
+  private static final Logger log = Logger.getLogger(OrchestraAuthFileDatabaseConnectionSettingsResolver.class);
 
   @Override
   public DatabaseConnectionSettings resolve(ScreensaverProperties screensaverProperties) throws DatabaseConnectionSettingsResolutionException
   {
     String orchestraAuthFilename = screensaverProperties.getProperty("orchestra.db.connection.file");
     if (orchestraAuthFilename == null) {
+      log.warn("no orchestra database connection settings file specified");
       return null;
     }
     log.info("using orchestra database connection settings from file " + orchestraAuthFilename);
 
-    // parse the datasource properties out of the file
     try {
       Pattern pattern = Pattern.compile("SetEnv\\s+(\\S+)\\s+(\\S+)");
       File authFile = new File(orchestraAuthFilename);
       FileInputStream authFileInputStream = new FileInputStream(authFile);
       InputStreamReader authInputStreamReader = new InputStreamReader(authFileInputStream);
       BufferedReader authBufferedReader = new BufferedReader(authInputStreamReader);
+      Map<String,String> settings = Maps.newHashMap();
       String line = authBufferedReader.readLine();
       while (line != null) {
         Matcher matcher = pattern.matcher(line);
         if (matcher.matches()) {
           String property = matcher.group(1);
           String propertyValue = matcher.group(2);
-          //_properties.setProperty(property, propertyValue);
+          settings.put(property, propertyValue);
+          log.debug("parsed " + property + "=" + propertyValue);
         }
         line = authBufferedReader.readLine();
       }
-      return null;
+      return new DatabaseConnectionSettings(settings.get("SCREENSAVER_PGSQL_SERVER"),
+                                            null,
+                                            settings.get("SCREENSAVER_PGSQL_DB"),
+                                            settings.get("SCREENSAVER_PGSQL_USER"),
+                                            settings.get("SCREENSAVER_PGSQL_PASSWORD"));
     }
     catch (IOException e) {
       throw new DatabaseConnectionSettingsResolutionException("unable to read and parse the orchestra auth file", e);
     }
-
-    //    return new DatabaseConnectionSettings(settings.getHost(),
-    //                                          settings.getPort(),
-    //                                          settings.getDatabase(),
-    //                                          settings.getUser(),
-    //                                          settings.getPassword());
   }
 }

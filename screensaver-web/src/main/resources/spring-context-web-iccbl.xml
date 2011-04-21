@@ -28,12 +28,13 @@
     scope="singleton">
     <constructor-arg value="/screensaver.properties" />
     <constructor-arg>
-      <bean class="edu.havard.med.screensaver.db.EnvironmentVariablesDatabaseConnectionSettingsResolver">
-        <property name="hostVariableName" value="SCREENSAVER_PGSQL_SERVER" />
-        <property name="portVariableName" value="SCREENSAVER_PGSQL_PORT" />
-        <property name="databaseVariableName" value="SCREENSAVER_PGSQL_DB" />
-        <property name="userVariableName" value="SCREENSAVER_PGSQL_USER" />
-        <property name="passwordVariableName" value="SCREENSAVER_PGSQL_PASSWORD" />
+      <bean class="edu.havard.med.screensaver.db.ChainingDatabaseConnectionSettingsResolver">
+        <constructor-arg>
+          <list>
+            <bean class="edu.harvard.med.iccbl.screensaver.db.OrchestraAuthFileDatabaseConnectionSettingsResolver"/>
+            <bean class="edu.harvard.med.screensaver.db.ScreensaverPropertiesDatabaseConnectionSettingsResolver" />
+          </list>
+        </constructor-arg>
       </bean>
     </constructor-arg>
   </bean>

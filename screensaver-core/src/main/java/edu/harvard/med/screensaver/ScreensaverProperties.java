@@ -18,14 +18,13 @@ import java.util.Map.Entry;
 import java.util.Properties;
 
 import com.google.common.collect.Maps;
-import edu.havard.med.screensaver.db.PropertiesDatabaseConnectionSettingsResolver;
 import org.apache.log4j.Logger;
 
 import edu.harvard.med.screensaver.db.DatabaseConnectionSettingsResolutionException;
 import edu.harvard.med.screensaver.db.DatabaseConnectionSettingsResolver;
 import edu.harvard.med.screensaver.util.StringUtils;
 
-public class ScreensaverProperties extends PropertiesDatabaseConnectionSettingsResolver
+public class ScreensaverProperties
 {
   private static Logger log = Logger.getLogger(ScreensaverProperties.class);
   private Properties _properties = new Properties();
@@ -33,15 +32,17 @@ public class ScreensaverProperties extends PropertiesDatabaseConnectionSettingsR
   private DatabaseConnectionSettings _databaseConnectionSettings;
   private DatabaseConnectionSettingsResolver _databaseConnectionSettingsResolver;
 
-  public ScreensaverProperties(String defaultScreensaverPropertiesFile)
+  public ScreensaverProperties(String defaultScreensaverPropertiesFile,
+                               DatabaseConnectionSettingsResolver dbCxnSettingsResolver)
   {
+    _databaseConnectionSettingsResolver = dbCxnSettingsResolver;
     try {
       String propFileName =
         System.getProperty(ScreensaverConstants.SCREENSAVER_PROPERTIES_FILE_PROPERTY_NAME);
       InputStream screensaverPropertiesInputStream = null;
       if (propFileName != null) {
         log.info("loading screensaver properties from file location " + propFileName);
-        screensaverPropertiesInputStream =new FileInputStream(new File(propFileName));
+        screensaverPropertiesInputStream = new FileInputStream(new File(propFileName));
       }
       else {
         log.info("loading screensaver properties from resource " + defaultScreensaverPropertiesFile);
@@ -50,18 +51,10 @@ public class ScreensaverProperties extends PropertiesDatabaseConnectionSettingsR
       initializeProperties(screensaverPropertiesInputStream);
       initializeFeaturesEnabled(_properties); // initialize
       validateProperties(_properties);
-      setProperties(_properties);
     }
     catch (IOException e) {
       throw new ScreensaverConfigurationException("error loading screensaver properties", e);
     }
-  }
-
-  public ScreensaverProperties(String screensaverPropertiesFile,
-                               DatabaseConnectionSettingsResolver dbCxnSettingsResolver)
-  {
-    this(screensaverPropertiesFile);
-    _databaseConnectionSettingsResolver = dbCxnSettingsResolver;
   }
 
   public void initializeProperties(InputStream screensaverPropertiesInputStream) throws IOException
@@ -173,16 +166,11 @@ public class ScreensaverProperties extends PropertiesDatabaseConnectionSettingsR
     if (_databaseConnectionSettings == null) {
       if (_databaseConnectionSettings == null && _databaseConnectionSettingsResolver != null) {
         log.info("resolving database connection settings using " + _databaseConnectionSettingsResolver);
-        _databaseConnectionSettings = _databaseConnectionSettingsResolver.resolve();
+        _databaseConnectionSettings = _databaseConnectionSettingsResolver.resolve(this);
       }
       if (_databaseConnectionSettings == null) {
-        log.info("resolving database connection settings using " + this);
-        _databaseConnectionSettings = this.resolve();
-        if (_databaseConnectionSettings == null) {
-          throw new DatabaseConnectionSettingsResolutionException("could not resolve database connection settings");
-        }
+        throw new DatabaseConnectionSettingsResolutionException("could not resolve database connection settings");
       }
-      assert _databaseConnectionSettings != null;
       log.info("using database connection settings: " + _databaseConnectionSettings);
     }
     return _databaseConnectionSettings;
