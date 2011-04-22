@@ -3,11 +3,11 @@
     xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
   <modelVersion>4.0.0</modelVersion>
   <groupId>edu.harvard.med</groupId>
-  <artifactId>screensaver-maven</artifactId>
+  <artifactId>screensaver</artifactId>
   <version>2.3.2</version>
   <packaging>pom</packaging>
-  <name>screensaver-maven</name>
-  
+  <name>Screensaver HTS LIMS</name>
+
   <description>
     Screensaver POM
     
@@ -18,6 +18,9 @@
         - to war:  $ mvn  -Dbuild.number=`svnversion -n` clean package
         - to jar:  $ mvn  -Dbuild.number=`svnversion -n` -Pbatch clean package
   </description>
+  <scm>
+    <url>https://forge.abcd.harvard.edu/svn/screensaver</url>
+  </scm>
   <url>http://forge.abcd.harvard.edu/gf/project/screensaver/</url>
   <issueManagement>
     <system>ABCD Forge</system>
@@ -54,6 +57,7 @@
   
   <properties>
     <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+    <env>dev</env>
   </properties>
   
   <!--
@@ -121,9 +125,9 @@
   
   
   <modules>
-    <module>screensaver-core</module>
-    <module>screensaver-web</module>
-    <module>screensaver-cli</module>
+    <module>core</module>
+    <module>web</module>
+    <module>batch</module>
 <!--    <module>screensaver-cellhts</module>-->
   </modules>
 </project>
