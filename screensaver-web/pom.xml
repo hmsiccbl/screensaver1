@@ -17,16 +17,16 @@
     <!-- The top-level spring context file used to configure the web application (updates web.xml via Maven filtering) -->
     <web.application.context.file>spring-context-web-default.xml</web.application.context.file>
     <!-- Web app authentication method can be 'FORM' (Screensaver login web page) or 'BASIC' (browser dialog). BASIC mode is useful 
-      during development, to avoid repeating the login step between Tomcat restarts. (updates web.xml via Maven filtering) -->
+         during development, to avoid repeating the login step between Tomcat restarts. (updates web.xml via Maven filtering) -->
     <servlet.authentication.method>FORM</servlet.authentication.method>
-    
+    <facility>generic</facility>
   </properties>
   
   <packaging>war</packaging>  
   
   <build>
     <!-- The final name of the webapp war file (and the webapp name) -->
-    <finalName>screensaver</finalName>
+    <finalName>${project.artifactId}-${project.version}-${facility}-${env}</finalName>
 
     <resources>
       <!-- turn on filtering for the resources directory -->
@@ -57,6 +57,52 @@
     </plugins>
   </build>
 
+  <profiles>
+  	<profile>
+  		<id>generic</id>
+  		<activation>
+  			<activeByDefault>true</activeByDefault>
+  		</activation>
+  	</profile>
+  	<profile>
+  		<id>iccbl</id>
+      <activation>
+        <property>
+          <name>facility</name>
+          <value>iccbl</value>
+        </property>
+      </activation>
+  		<properties>
+        <!-- The top-level spring context file used to configure the web application (updates web.xml via Maven filtering) -->
+  			<web.application.context.file>spring-context-web-iccbl.xml</web.application.context.file>
+  		</properties>
+  	</profile>
+  	<profile>
+  		<id>dev</id>
+      <activation>
+        <property>
+          <name>env</name>
+          <value>dev</value>
+        </property>
+      </activation>
+  		<properties>
+  			<servlet.authentication.method>BASIC</servlet.authentication.method>
+  		</properties>
+  	</profile>
+    <profile>
+      <id>prod</id>
+      <activation>
+        <property>
+          <name>env</name>
+          <value>prod</value>
+        </property>
+      </activation>
+      <properties>
+        <servlet.authentication.method>FORM</servlet.authentication.method>
+      </properties>
+    </profile>
+  </profiles>
+  
   <dependencies>  
   	<dependency>
   		<groupId>edu.harvard.med</groupId>
