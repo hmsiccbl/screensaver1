@@ -17,7 +17,7 @@
 
 <beans>
 
-  <import resource="classpath:spring-context-cmdline.xml"/>
+  <import resource="classpath:spring-context-cmdline-generic.xml"/>
 
   <bean
     id="commandLineArgumentsDatabaseSettingsResolver"

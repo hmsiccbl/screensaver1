@@ -13,48 +13,10 @@
    the GNU General Public License.
 -->
 
-<!-- A top-level, composite Spring context configuration file, intended for unit testing
-  Screensaver.  Allows a full Spring configuration to be referenced 
-  via a single file.  -->
+<!-- A top-level, composite Spring context configuration file, intended for running command line applications at ICCB-L. -->
 
 <beans>
 
-  <bean
-    id="commandLineArgumentsDatabaseSettingsResolver"
-    class="edu.harvard.med.screensaver.db.CommandLineArgumentsDatabaseConnectionSettingsResolver" />
+  <import resource="classpath:${spring.context.cmdline.file}"/>
 
-  <bean
-    id="screensaverProperties"
-    class="edu.harvard.med.screensaver.ScreensaverProperties"
-    scope="singleton">
-    <constructor-arg value="/screensaver.properties" />
-    <constructor-arg>
-      <bean class="edu.havard.med.screensaver.db.ChainingDatabaseConnectionSettingsResolver">
-        <constructor-arg>
-          <list>
-            <ref bean="commandLineArgumentsDatabaseSettingsResolver"/>
-            <bean class="edu.havard.med.screensaver.db.SystemPropertiesDatabaseConnectionSettingsResolver"/>
-            <bean class="edu.havard.med.screensaver.db.EnvironmentVariablesDatabaseConnectionSettingsResolver"/>
-          </list>
-        </constructor-arg>
-      </bean>
-    </constructor-arg>
-  </bean>
-
-  <bean id="entityViewPolicy"
-   class="edu.harvard.med.screensaver.policy.DefaultEntityViewPolicy">
-  </bean>
-
-  <bean
-    id="plateFacilityIdInitializer"
-    class="edu.harvard.med.screensaver.service.libraries.DefaultPlateFacilityIdInitializer">
-  </bean>
-
-  <bean id="cherryPickPlateSourceWellMinimumVolumePolicy"
-   class="edu.harvard.med.iccbl.screensaver.policy.cherrypicks.IccblCherryPickPlateSourceWellMinimumVolumePolicy">
-  </bean>
- 
-  <import resource="classpath:spring-context-persistence.xml"/>
-  <import resource="classpath:spring-context-services.xml"/>
-  
 </beans>

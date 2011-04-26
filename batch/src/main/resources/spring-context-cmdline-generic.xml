@@ -3,8 +3,8 @@
     "http://www.springframework.org/dtd/spring-beans-2.0.dtd">
 
 <!--
-   $HeadURL: http://seanderickson1@forge.abcd.harvard.edu/svn/screensaver/branches/iccbl/2.3.1-dev/resources/spring-context-cmdline.xml $
-   $Id: spring-context-cmdline.xml 5158 2011-01-06 14:26:53Z atolopko $
+   $HeadURL$
+   $Id$
 
    Copyright © 2006, 2010 by the President and Fellows of Harvard College.
    
@@ -19,7 +19,27 @@
 
 <beans>
 
-  <import resource="classpath:spring-context-cmdline-iccbl.xml"/>
+  <bean
+    id="commandLineArgumentsDatabaseSettingsResolver"
+    class="edu.harvard.med.screensaver.db.CommandLineArgumentsDatabaseConnectionSettingsResolver" />
+
+  <bean
+    id="screensaverProperties"
+    class="edu.harvard.med.screensaver.ScreensaverProperties"
+    scope="singleton">
+    <constructor-arg value="/screensaver.properties" />
+    <constructor-arg>
+      <bean class="edu.harvard.med.screensaver.db.ChainingDatabaseConnectionSettingsResolver">
+        <constructor-arg>
+          <list>
+            <ref bean="commandLineArgumentsDatabaseSettingsResolver"/>
+            <bean class="edu.harvard.med.screensaver.db.SystemPropertiesDatabaseConnectionSettingsResolver"/>
+            <bean class="edu.harvard.med.screensaver.db.EnvironmentVariablesDatabaseConnectionSettingsResolver"/>
+          </list>
+        </constructor-arg>
+      </bean>
+    </constructor-arg>
+  </bean>
 
   <bean id="entityViewPolicy"
    class="edu.harvard.med.screensaver.policy.DefaultEntityViewPolicy">
@@ -33,13 +53,8 @@
   <bean id="cherryPickPlateSourceWellMinimumVolumePolicy"
    class="edu.harvard.med.iccbl.screensaver.policy.cherrypicks.IccblCherryPickPlateSourceWellMinimumVolumePolicy">
   </bean>
-
-  <bean
-    id="libraryCopiesBrowser2"
-    class="edu.harvard.med.screensaver.ui.libraries.LibraryCopySearchResults">
-    <constructor-arg ref="genericEntityDao" />
-    <constructor-arg ref="librariesDao" />
-    <property name="applicationProperties" ref="screensaverProperties"></property>
-  </bean>
-
+ 
+  <import resource="classpath:spring-context-persistence.xml"/>
+  <import resource="classpath:spring-context-services.xml"/>
+  
 </beans>
