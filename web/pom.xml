@@ -26,7 +26,7 @@
   
   <build>
     <!-- The final name of the webapp war file (and the webapp name) -->
-    <finalName>${project.artifactId}-${project.version}-${facility}-${env}</finalName>
+    <finalName>${project.artifactId}-${facility}-${project.version}</finalName>
 
     <resources>
       <!-- turn on filtering for the resources directory -->
@@ -79,7 +79,10 @@
           <value>dev</value>
         </property>
       </activation>
-  		<properties>
+      <build>
+        <finalName>${project.artifactId}-${project.version}-${facility}-SNAPSHOT</finalName>
+      </build>
+      <properties>
   			<servlet.authentication.method>BASIC</servlet.authentication.method>
   		</properties>
   	</profile>
