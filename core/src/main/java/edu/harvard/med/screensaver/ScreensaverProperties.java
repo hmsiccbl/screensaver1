@@ -166,7 +166,7 @@ public class ScreensaverProperties
     if (_databaseConnectionSettings == null) {
       if (_databaseConnectionSettings == null && _databaseConnectionSettingsResolver != null) {
         log.info("resolving database connection settings using " + _databaseConnectionSettingsResolver);
-        _databaseConnectionSettings = _databaseConnectionSettingsResolver.resolve(this);
+        _databaseConnectionSettings = _databaseConnectionSettingsResolver.resolve();
       }
       if (_databaseConnectionSettings == null) {
         throw new DatabaseConnectionSettingsResolutionException("could not resolve database connection settings");

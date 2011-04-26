@@ -15,7 +15,6 @@ import com.google.common.collect.ImmutableList;
 import org.apache.log4j.Logger;
 
 import edu.harvard.med.screensaver.DatabaseConnectionSettings;
-import edu.harvard.med.screensaver.ScreensaverProperties;
 
 public class ChainingDatabaseConnectionSettingsResolver implements DatabaseConnectionSettingsResolver
 {
@@ -32,11 +31,11 @@ public class ChainingDatabaseConnectionSettingsResolver implements DatabaseConne
   }
 
   @Override
-  public DatabaseConnectionSettings resolve(ScreensaverProperties screensaverProperties) throws DatabaseConnectionSettingsResolutionException
+  public DatabaseConnectionSettings resolve() throws DatabaseConnectionSettingsResolutionException
   {
     for (DatabaseConnectionSettingsResolver resolver : _resolvers) {
       log.info("resolving database connection settings using " + resolver);
-      DatabaseConnectionSettings settings = resolver.resolve(screensaverProperties);
+      DatabaseConnectionSettings settings = resolver.resolve();
       if (settings != null) {
         return settings;
       }

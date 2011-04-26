@@ -11,6 +11,8 @@ package edu.harvard.med.screensaver.db;
 
 import org.apache.log4j.Logger;
 
+import edu.harvard.med.screensaver.DatabaseConnectionSettings;
+
 
 public abstract class NamedVariablesDatabaseConnectionSettingsResolver implements DatabaseConnectionSettingsResolver
 {
@@ -64,4 +66,30 @@ public abstract class NamedVariablesDatabaseConnectionSettingsResolver implement
     this.passwordVariableName = passwordVariableName;
     log.debug("password variable name=" + passwordVariableName);
   }
+
+  @Override
+  public final DatabaseConnectionSettings resolve() throws DatabaseConnectionSettingsResolutionException
+  {
+    if (resolveProperty(databaseVariableName) == null) {
+      log.warn("environment variables do not contain database connection settings");
+      return null;
+    }
+    String port = resolveProperty(portVariableName);
+    Integer portNumber = null;
+    try {
+      if (port != null) {
+        portNumber = Integer.parseInt(port);
+      }
+    }
+    catch (NumberFormatException e) {
+      throw new DatabaseConnectionSettingsResolutionException("invalid port number " + port);
+    }
+    return new DatabaseConnectionSettings(resolveProperty(hostVariableName),
+                                          portNumber,
+                                          resolveProperty(databaseVariableName),
+                                          resolveProperty(userVariableName),
+                                          resolveProperty(passwordVariableName));
+  }
+
+  abstract protected String resolveProperty(String variableName);
 }

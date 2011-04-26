@@ -11,12 +11,13 @@ package edu.harvard.med.screensaver.db;
 
 import org.apache.log4j.Logger;
 
-import edu.harvard.med.screensaver.DatabaseConnectionSettings;
 import edu.harvard.med.screensaver.ScreensaverProperties;
 
-public class ScreensaverPropertiesDatabaseConnectionSettingsResolver extends NamedVariablesDatabaseConnectionSettingsResolver
+public class ScreensaverPropertiesDatabaseConnectionSettingsResolver extends NamedVariablesDatabaseConnectionSettingsResolver implements NeedsScreensaverProperties
 {
   private static final Logger log = Logger.getLogger(ScreensaverPropertiesDatabaseConnectionSettingsResolver.class);
+
+  ScreensaverProperties _screensaverProperties;
 
   public ScreensaverPropertiesDatabaseConnectionSettingsResolver()
   {
@@ -28,27 +29,14 @@ public class ScreensaverPropertiesDatabaseConnectionSettingsResolver extends Nam
   }
 
   @Override
-  public DatabaseConnectionSettings resolve(ScreensaverProperties screensaverProperties) throws DatabaseConnectionSettingsResolutionException
+  protected String resolveProperty(String variableName)
   {
-    if (screensaverProperties.getProperty(databaseVariableName) == null) {
-      log.warn("screensaver properties file does not contain database connection settings");
-      return null;
-    }
-    String port = System.getenv(portVariableName);
-    Integer portNumber = null;
-    try {
-      if (port != null) {
-        portNumber = Integer.parseInt(port);
-      }
-    }
-    catch (NumberFormatException e) {
-      throw new DatabaseConnectionSettingsResolutionException("invalid port number " + port);
-    }
-    return new DatabaseConnectionSettings(System.getenv(hostVariableName),
-                                          portNumber,
-                                          System.getenv(databaseVariableName),
-                                          System.getenv(userVariableName),
-                                          System.getenv(passwordVariableName));
+    return _screensaverProperties.getProperty(variableName);
   }
 
+  @Override
+  public void setScreensaverProperties(ScreensaverProperties screensaverProperties)
+  {
+    _screensaverProperties = screensaverProperties;
+  }
 }

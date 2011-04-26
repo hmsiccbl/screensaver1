@@ -10,7 +10,6 @@
 package edu.harvard.med.screensaver.db;
 
 import edu.harvard.med.screensaver.DatabaseConnectionSettings;
-import edu.harvard.med.screensaver.ScreensaverProperties;
 
 public interface DatabaseConnectionSettingsResolver
 {
@@ -19,5 +18,5 @@ public interface DatabaseConnectionSettingsResolver
    *         indicate an error, but rather the lack of support for a given resolution mechanism)
    * @throws DatabaseConnectionSettingsResolutionException if the resolved settings are invalid or incomplete
    */
-  DatabaseConnectionSettings resolve(ScreensaverProperties screensaverProperties) throws DatabaseConnectionSettingsResolutionException;
+  DatabaseConnectionSettings resolve() throws DatabaseConnectionSettingsResolutionException;
 }

@@ -25,20 +25,29 @@ import edu.harvard.med.screensaver.DatabaseConnectionSettings;
 import edu.harvard.med.screensaver.ScreensaverProperties;
 import edu.harvard.med.screensaver.db.DatabaseConnectionSettingsResolutionException;
 import edu.harvard.med.screensaver.db.DatabaseConnectionSettingsResolver;
+import edu.harvard.med.screensaver.db.NeedsScreensaverProperties;
 
 /**
  * Resolves database connection settings from a special RITG-provided production environment file.
  * 
  * @author atolopko
  */
-public class OrchestraAuthFileDatabaseConnectionSettingsResolver implements DatabaseConnectionSettingsResolver
+public class OrchestraAuthFileDatabaseConnectionSettingsResolver implements DatabaseConnectionSettingsResolver, NeedsScreensaverProperties
 {
   private static final Logger log = Logger.getLogger(OrchestraAuthFileDatabaseConnectionSettingsResolver.class);
 
+  private ScreensaverProperties _screensaverProperties;
+
   @Override
-  public DatabaseConnectionSettings resolve(ScreensaverProperties screensaverProperties) throws DatabaseConnectionSettingsResolutionException
+  public void setScreensaverProperties(ScreensaverProperties screensaverProperties)
   {
-    String orchestraAuthFilename = screensaverProperties.getProperty("orchestra.db.connection.file");
+    _screensaverProperties = screensaverProperties;
+  }
+
+  @Override
+  public DatabaseConnectionSettings resolve() throws DatabaseConnectionSettingsResolutionException
+  {
+    String orchestraAuthFilename = _screensaverProperties.getProperty("orchestra.db.connection.file");
     if (orchestraAuthFilename == null) {
       log.warn("no orchestra database connection settings file specified");
       return null;
