@@ -9,13 +9,7 @@
 
 package edu.harvard.med.iccbl.screensaver.db;
 
-import java.io.BufferedReader;
-import java.io.File;
-import java.io.FileInputStream;
 import java.io.IOException;
-import java.io.InputStreamReader;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
 
 import org.apache.log4j.Logger;
 
@@ -24,6 +18,7 @@ import edu.harvard.med.screensaver.ScreensaverProperties;
 import edu.harvard.med.screensaver.db.CommandLineArgumentsDatabaseConnectionSettingsResolver;
 import edu.harvard.med.screensaver.db.DatabaseConnectionSettingsResolutionException;
 import edu.harvard.med.screensaver.db.NeedsScreensaverProperties;
+import edu.harvard.med.screensaver.util.NullSafeUtils;
 
 /**
  * Resolves database connection settings from command-line arguments, with the following enhancements:
@@ -51,39 +46,28 @@ public class IccblCommandLineArgumentsDatabaseConnectionSettingsResolver extends
   @Override
   public DatabaseConnectionSettings resolve() throws DatabaseConnectionSettingsResolutionException
   {
-    String orchestraAuthFilename = _screensaverProperties.getProperty("orchestra.db.connection.file");
-    if (orchestraAuthFilename == null) {
+    DatabaseConnectionSettings settings = super.resolve();
+    if (settings == null) {
       return null;
     }
-    log.info("using orchestra database connection settings from file " + orchestraAuthFilename);
-
-    // parse the datasource properties out of the file
     try {
-      Pattern pattern = Pattern.compile("SetEnv\\s+(\\S+)\\s+(\\S+)");
-      File authFile = new File(orchestraAuthFilename);
-      FileInputStream authFileInputStream = new FileInputStream(authFile);
-      InputStreamReader authInputStreamReader = new InputStreamReader(authFileInputStream);
-      BufferedReader authBufferedReader = new BufferedReader(authInputStreamReader);
-      String line = authBufferedReader.readLine();
-      while (line != null) {
-        Matcher matcher = pattern.matcher(line);
-        if (matcher.matches()) {
-          String property = matcher.group(1);
-          String propertyValue = matcher.group(2);
-          //_properties.setProperty(property, propertyValue);
-        }
-        line = authBufferedReader.readLine();
+      if (settings.getPassword() == null) {
+        String passwordFromDotPgpassFile =
+          new DotPgpassFileParser().getPasswordFromDotPgpassFile(settings.getHost(),
+                                                                 NullSafeUtils.toString(settings.getPort(), (String) null),
+                                                                 settings.getDatabase(),
+                                                                 settings.getUser());
+        log.info("resolved database password from user's .pgpass file");
+        settings = new DatabaseConnectionSettings(settings.getHost(),
+                                                  settings.getPort(),
+                                                  settings.getDatabase(),
+                                                  settings.getUser(),
+                                                  passwordFromDotPgpassFile);
       }
-      return null;
+      return settings;
     }
     catch (IOException e) {
-      throw new DatabaseConnectionSettingsResolutionException("unable to read and parse the orchestra auth file", e);
+      throw new DatabaseConnectionSettingsResolutionException("error while trying to resolve password from .pgpass file", e);
     }
-
-    //    return new DatabaseConnectionSettings(settings.getHost(),
-    //                                          settings.getPort(),
-    //                                          settings.getDatabase(),
-    //                                          settings.getUser(),
-    //                                          settings.getPassword());
   }
 }
