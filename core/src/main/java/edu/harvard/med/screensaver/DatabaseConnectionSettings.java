@@ -9,6 +9,7 @@
 
 package edu.harvard.med.screensaver;
 
+import edu.harvard.med.screensaver.util.NullSafeUtils;
 
 public class DatabaseConnectionSettings
 {
@@ -55,7 +56,10 @@ public class DatabaseConnectionSettings
   public String getJdbcUrl()
   {
     // TODO: make database-agnostic
-    return "jdbc:postgresql://" + getHost() + (getPort() == null ? "" : (":" + getPort())) + "/" + getDatabase();
+    return "jdbc:postgresql://" +
+      NullSafeUtils.toString(getHost(), "localhost") +
+      (getPort() == null ? "" : (":" + getPort())) + "/" +
+      getDatabase();
   }
 
   @Override
