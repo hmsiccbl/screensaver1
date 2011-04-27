@@ -286,15 +286,17 @@ public class CommandLineApplication
     }
 
     if (acceptDatabaseOptions) {
-      DatabaseConnectionSettings settings = 
-        // note: we want non-specified options to be recorded as nulls, not as empty strings, as these have 
-        // different meanings (null meaning that the option has not been provided by the user at all)
-        new DatabaseConnectionSettings(isCommandLineFlagSet("H") ? getCommandLineOptionValue("H") : null,
-                                       getCommandLineOptionValue("T", Integer.class),
-                                       isCommandLineFlagSet("D") ? getCommandLineOptionValue("D") : null,
-                                       isCommandLineFlagSet("U") ? getCommandLineOptionValue("U") : null,
-                                       isCommandLineFlagSet("P") ? getCommandLineOptionValue("P") : null);
-      System.getProperties().put(CMD_LINE_ARGS_DATABASE_CONNECTION_SETTINGS, settings);
+      if (isCommandLineFlagSet("D")) {
+        DatabaseConnectionSettings settings =
+          // note: we want non-specified options to be recorded as nulls, not as empty strings, as these have 
+          // different meanings (null meaning that the option has not been provided by the user at all)
+          new DatabaseConnectionSettings(isCommandLineFlagSet("H") ? getCommandLineOptionValue("H") : null,
+                                         getCommandLineOptionValue("T", Integer.class),
+                                         getCommandLineOptionValue("D"),
+                                         isCommandLineFlagSet("U") ? getCommandLineOptionValue("U") : null,
+                                         isCommandLineFlagSet("P") ? getCommandLineOptionValue("P") : null);
+        System.getProperties().put(CMD_LINE_ARGS_DATABASE_CONNECTION_SETTINGS, settings);
+      }
     }
 
     StringBuilder s = new StringBuilder();
