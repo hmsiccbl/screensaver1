@@ -18,18 +18,22 @@ public abstract class NamedVariablesDatabaseConnectionSettingsResolver implement
 {
   private static final Logger log = Logger.getLogger(NamedVariablesDatabaseConnectionSettingsResolver.class);
 
+  protected String resolverName;
+
   protected String hostVariableName;
   protected String portVariableName;
   protected String databaseVariableName;
   protected String userVariableName;
   protected String passwordVariableName;
 
-  protected NamedVariablesDatabaseConnectionSettingsResolver(String defaultHostVariableName,
+  protected NamedVariablesDatabaseConnectionSettingsResolver(String resolverName,
+                                                             String defaultHostVariableName,
                                                              String defaultPortVariableName,
                                                              String defaultDatabaseVariableName,
                                                              String defaultUserVariableName,
                                                              String defaultPasswordVariableName)
   {
+    this.resolverName = resolverName;
     setHostVariableName(defaultHostVariableName);
     setPortVariableName(defaultPortVariableName);
     setDatabaseVariableName(defaultDatabaseVariableName);
@@ -71,7 +75,7 @@ public abstract class NamedVariablesDatabaseConnectionSettingsResolver implement
   public final DatabaseConnectionSettings resolve() throws DatabaseConnectionSettingsResolutionException
   {
     if (resolveProperty(databaseVariableName) == null) {
-      log.warn("environment variables do not contain database connection settings");
+      log.warn(resolverName + " not contain database connection settings");
       return null;
     }
     String port = resolveProperty(portVariableName);

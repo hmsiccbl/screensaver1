@@ -17,7 +17,8 @@ public class EnvironmentVariablesDatabaseConnectionSettingsResolver extends Name
 
   public EnvironmentVariablesDatabaseConnectionSettingsResolver()
   {
-    super("DB_HOST",
+    super("environment variables",
+          "DB_HOST",
           "DB_PORT",
           "DB_NAME",
           "DB_USER",

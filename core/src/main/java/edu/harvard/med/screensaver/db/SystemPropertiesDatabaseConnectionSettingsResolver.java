@@ -17,7 +17,8 @@ public class SystemPropertiesDatabaseConnectionSettingsResolver extends NamedVar
 
   public SystemPropertiesDatabaseConnectionSettingsResolver()
   {
-    super("database.host",
+    super("system properties",
+          "database.host",
           "database.port",
           "database.name",
           "database.user",

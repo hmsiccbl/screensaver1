@@ -21,7 +21,8 @@ public class ScreensaverPropertiesDatabaseConnectionSettingsResolver extends Nam
 
   public ScreensaverPropertiesDatabaseConnectionSettingsResolver()
   {
-    super("database.host",
+    super("screensaver properties file",
+          "database.host",
           "database.port",
           "database.name",
           "database.user",
