@@ -31,7 +31,6 @@ import org.springframework.context.ApplicationContext;
 import org.springframework.context.support.ClassPathXmlApplicationContext;
 
 import edu.harvard.med.screensaver.DatabaseConnectionSettings;
-import edu.harvard.med.screensaver.db.CommandLineArgumentsDatabaseConnectionSettingsResolver;
 import edu.harvard.med.screensaver.db.GenericEntityDAO;
 import edu.harvard.med.screensaver.model.users.AdministratorUser;
 
@@ -63,6 +62,7 @@ public class CommandLineApplication
 
   public static final String DEFAULT_DATE_PATTERN = "yyyy-MM-dd";
 
+  public static final String CMD_LINE_ARGS_DATABASE_CONNECTION_SETTINGS = "cmdline.args.database.connection.settings";
 
   // instance data
 
@@ -104,7 +104,6 @@ public class CommandLineApplication
   public ApplicationContext getSpringApplicationContext()
   {
     if (_appCtx == null) {
-
       _appCtx = new ClassPathXmlApplicationContext(getSpringConfigurationResource());
     }
     return _appCtx;
@@ -150,7 +149,6 @@ public class CommandLineApplication
     return optionValue == null ? "" : optionValue.toString();
   }
 
-  @SuppressWarnings("unchecked")
   public List<String> getCommandLineOptionValues(String optionName) throws ParseException
   {
     verifyOptionsProcessed();
@@ -171,7 +169,6 @@ public class CommandLineApplication
     return optionValues;
   }
 
-  @SuppressWarnings("unchecked")
   public <T> T getCommandLineOptionValue(String optionName, Class<T> ofType)
     throws ParseException
   {
@@ -194,7 +191,6 @@ public class CommandLineApplication
     return null;
   }
 
-  @SuppressWarnings("unchecked")
   public <T extends Enum<T>> T getCommandLineOptionEnumValue(String optionName, Class<T> ofEnum)
     throws ParseException
   {
@@ -290,14 +286,15 @@ public class CommandLineApplication
     }
 
     if (acceptDatabaseOptions) {
-      CommandLineArgumentsDatabaseConnectionSettingsResolver resolver = (CommandLineArgumentsDatabaseConnectionSettingsResolver) getSpringBean("commandLineArgumentsDatabaseSettingsResolver");
       DatabaseConnectionSettings settings = 
-        new DatabaseConnectionSettings(getCommandLineOptionValue("H"),
+        // note: we want non-specified options to be recorded as nulls, not as empty strings, as these have 
+        // different meanings (null meaning that the option has not been provided by the user at all)
+        new DatabaseConnectionSettings(isCommandLineFlagSet("H") ? getCommandLineOptionValue("H") : null,
                                        getCommandLineOptionValue("T", Integer.class),
-                                       getCommandLineOptionValue("D"),
-                                       getCommandLineOptionValue("U"),
-                                       getCommandLineOptionValue("P"));
-      resolver.setDatabaseConnectionSettings(settings);
+                                       isCommandLineFlagSet("D") ? getCommandLineOptionValue("D") : null,
+                                       isCommandLineFlagSet("U") ? getCommandLineOptionValue("U") : null,
+                                       isCommandLineFlagSet("P") ? getCommandLineOptionValue("P") : null);
+      System.getProperties().put(CMD_LINE_ARGS_DATABASE_CONNECTION_SETTINGS, settings);
     }
 
     StringBuilder s = new StringBuilder();
