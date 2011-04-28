@@ -13,15 +13,19 @@ import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;
+import java.util.Iterator;
+import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Properties;
 
+import com.google.common.collect.ImmutableList;
 import com.google.common.collect.Maps;
 import org.apache.log4j.Logger;
 
 import edu.harvard.med.screensaver.db.DatabaseConnectionSettingsResolutionException;
 import edu.harvard.med.screensaver.db.DatabaseConnectionSettingsResolver;
+import edu.harvard.med.screensaver.db.NeedsScreensaverProperties;
 import edu.harvard.med.screensaver.util.StringUtils;
 
 public class ScreensaverProperties
@@ -30,12 +34,19 @@ public class ScreensaverProperties
   private Properties _properties = new Properties();
   private Map<String,Boolean> _featuresEnabled;
   private DatabaseConnectionSettings _databaseConnectionSettings;
-  private DatabaseConnectionSettingsResolver _databaseConnectionSettingsResolver;
+  private List<DatabaseConnectionSettingsResolver> _databaseConnectionSettingsResolvers;
 
   public ScreensaverProperties(String defaultScreensaverPropertiesFile,
                                DatabaseConnectionSettingsResolver dbCxnSettingsResolver)
   {
-    _databaseConnectionSettingsResolver = dbCxnSettingsResolver;
+    this(defaultScreensaverPropertiesFile,
+         ImmutableList.of(dbCxnSettingsResolver));
+  }
+
+  public ScreensaverProperties(String defaultScreensaverPropertiesFile,
+                               List<DatabaseConnectionSettingsResolver> dbCxnSettingsResolvers)
+  {
+    _databaseConnectionSettingsResolvers = dbCxnSettingsResolvers;
     try {
       String propFileName =
         System.getProperty(ScreensaverConstants.SCREENSAVER_PROPERTIES_FILE_PROPERTY_NAME);
@@ -164,9 +175,14 @@ public class ScreensaverProperties
   public DatabaseConnectionSettings getDatabaseConnectionSettings()
   {
     if (_databaseConnectionSettings == null) {
-      if (_databaseConnectionSettings == null && _databaseConnectionSettingsResolver != null) {
-        log.info("resolving database connection settings using " + _databaseConnectionSettingsResolver);
-        _databaseConnectionSettings = _databaseConnectionSettingsResolver.resolve();
+      Iterator<DatabaseConnectionSettingsResolver> iter = _databaseConnectionSettingsResolvers.iterator();
+      while (_databaseConnectionSettings == null && iter.hasNext()) {
+        DatabaseConnectionSettingsResolver resolver = iter.next();
+        log.info("resolving database connection settings using " + resolver);
+        if (resolver instanceof NeedsScreensaverProperties) {
+          ((NeedsScreensaverProperties) resolver).setScreensaverProperties(this);
+        }
+        _databaseConnectionSettings = resolver.resolve();
       }
       if (_databaseConnectionSettings == null) {
         throw new DatabaseConnectionSettingsResolutionException("could not resolve database connection settings");

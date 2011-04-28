@@ -23,7 +23,14 @@
     id="screensaverProperties"
     class="edu.harvard.med.screensaver.ScreensaverProperties"
     scope="singleton">
-    <constructor-arg value="/screensaver.properties.test" />
+    <constructor-arg value="/screensaver.properties" />
+    <constructor-arg>
+      <list>
+        <bean class="edu.harvard.med.screensaver.db.ScreensaverPropertiesDatabaseConnectionSettingsResolver"/>
+        <bean class="edu.harvard.med.screensaver.db.SystemPropertiesDatabaseConnectionSettingsResolver"/>
+        <bean class="edu.harvard.med.screensaver.db.EnvironmentVariablesDatabaseConnectionSettingsResolver"/>
+      </list>
+    </constructor-arg>
   </bean>
 
   <bean id="entityViewPolicy"

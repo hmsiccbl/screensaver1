@@ -29,15 +29,11 @@
     scope="singleton">
     <constructor-arg value="/screensaver.properties" />
     <constructor-arg>
-      <bean class="edu.harvard.med.screensaver.db.ChainingDatabaseConnectionSettingsResolver">
-        <constructor-arg>
-          <list>
-            <ref bean="commandLineArgumentsDatabaseSettingsResolver"/>
-            <bean class="edu.harvard.med.screensaver.db.SystemPropertiesDatabaseConnectionSettingsResolver"/>
-            <bean class="edu.harvard.med.screensaver.db.EnvironmentVariablesDatabaseConnectionSettingsResolver"/>
-          </list>
-        </constructor-arg>
-      </bean>
+      <list>
+        <ref bean="commandLineArgumentsDatabaseSettingsResolver"/>
+        <bean class="edu.harvard.med.screensaver.db.SystemPropertiesDatabaseConnectionSettingsResolver"/>
+        <bean class="edu.harvard.med.screensaver.db.EnvironmentVariablesDatabaseConnectionSettingsResolver"/>
+      </list>
     </constructor-arg>
   </bean>
 
