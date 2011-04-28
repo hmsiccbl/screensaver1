@@ -19,12 +19,12 @@ import javax.faces.model.DataModel;
 import javax.faces.model.ListDataModel;
 import javax.servlet.http.Cookie;
 
+import org.springframework.dao.ConcurrencyFailureException;
+
 import edu.harvard.med.screensaver.model.users.ScreensaverUser;
 import edu.harvard.med.screensaver.model.users.ScreensaverUserRole;
 import edu.harvard.med.screensaver.ui.arch.view.AbstractBackingBean;
 import edu.harvard.med.screensaver.ui.arch.view.aspects.UICommand;
-
-import org.springframework.dao.ConcurrencyFailureException;
 
 /**
  * Backing bean for developer-only view that displays environment information
@@ -230,7 +230,7 @@ public class Environment extends AbstractBackingBean
     throw new ConcurrencyFailureException("You asked for it!");
   }
 
-  @edu.umd.cs.findbugs.annotations.SuppressWarnings(justification="developer-only feature")
+  //  @edu.umd.cs.findbugs.annotations.SuppressWarnings(justification="developer-only feature")
   public String runGC()
   {
     Runtime.getRuntime().gc();
