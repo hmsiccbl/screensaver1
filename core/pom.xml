@@ -193,12 +193,14 @@
       <version>${org.springframework.version}</version>
     </dependency>
 
+<!-- 
     <dependency>
       <groupId>org.springframework</groupId>
       <artifactId>spring-webmvc</artifactId>
       <version>${org.springframework.version}</version>
     </dependency>
-
+ -->
+ 
     <dependency>
       <groupId>org.springframework</groupId>
       <artifactId>spring-tx</artifactId>
@@ -223,7 +225,8 @@
       <artifactId>spring-test</artifactId>
       <version>${org.springframework.version}</version>
       <type>jar</type>
-      <scope>compile</scope>
+      <!-- TODO: should be test scope, but AbstractBackingBean currently has a dependency -->
+      <!-- <scope>test</scope>  -->
     </dependency>
 
     <!-- new dependencies, merging ss -->
@@ -443,6 +446,7 @@
       <artifactId>annotations</artifactId>
       <version>3480</version>
       <type>jar</type>
+      <scope>test</scope>
     </dependency>
 
     <dependency>
