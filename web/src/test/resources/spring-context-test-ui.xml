@@ -19,8 +19,8 @@
 
 <beans>
 
-  <import resource="spring-context-test.xml"/>
-  <import resource="spring-context-ui.xml"/>
+  <import resource="classpath:spring-context-test.xml"/>
+  <import resource="classpath:spring-context-ui.xml"/>
 
   <bean
     id="currentScreensaverUser"
