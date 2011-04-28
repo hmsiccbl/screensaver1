@@ -17,7 +17,7 @@ import edu.harvard.med.screensaver.AbstractSpringPersistenceTest;
 import edu.harvard.med.screensaver.model.users.AdministratorUser;
 import edu.harvard.med.screensaver.ui.CurrentScreensaverUser;
 
-@ContextConfiguration(locations = { "/spring-context-test-ui.xml" }, inheritLocations = false)
+@ContextConfiguration(locations = { "classpath:spring-context-test-ui.xml" }, inheritLocations = false)
 public abstract class AbstractBackingBeanTest extends AbstractSpringPersistenceTest
 {
   private static Logger log = Logger.getLogger(AbstractBackingBeanTest.class);

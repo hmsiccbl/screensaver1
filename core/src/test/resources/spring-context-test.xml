@@ -26,7 +26,6 @@
     <constructor-arg value="/screensaver.properties" />
     <constructor-arg>
       <list>
-        <bean class="edu.harvard.med.screensaver.db.ScreensaverPropertiesDatabaseConnectionSettingsResolver"/>
         <bean class="edu.harvard.med.screensaver.db.SystemPropertiesDatabaseConnectionSettingsResolver"/>
         <bean class="edu.harvard.med.screensaver.db.EnvironmentVariablesDatabaseConnectionSettingsResolver"/>
       </list>
