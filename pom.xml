@@ -104,6 +104,9 @@
   
   
   <build>
+  
+    <finalName>${project.artifactId}-${facility}-${project.version}</finalName>
+  
     <pluginManagement>
       <plugins>
 
