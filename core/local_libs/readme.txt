@@ -1,12 +1,7 @@
-These libraries need to be installed in the local repository in order for the
-build/runtime to work. Run these commands from this directory.
+These libraries in this directory are required by the Screensaver project, but
+are not available via any Maven remote repositories and so need to be
+installed in the local repository in order for the Maven build to work. 
 
-mvn install:install-file -Dfile=eCommonsAuth.jar -DgroupId=edu.harvard.med -DartifactId=eCommonsAuth -Dversion=5552 -Dpackaging=jar -DgeneratePom=true
+To install into your local Maven repository, run:
 
-mvn install:install-file -Dfile=annotations.jar -DgroupId=util.findbugs -DartifactId=annotations -Dversion=3480 -Dpackaging=jar -DgeneratePom=true
-
-mvn install:install-file -Dfile=joda-time-hibernate-1.2.recompiled.jar -DgroupId=joda-time -DartifactId=joda-time-hibernate-recompiled -Dversion=1.2 -Dpackaging=jar -DgeneratePom=true
-
-mvn install:install-file -Dfile=tomahawk-sandbox-1.1.7-SNAPSHOT.jar -DgroupId=org.apache.myfaces.tomahawk -DartifactId=tomahawk-sandbox -Dversion=1.1.7 -Dpackaging=jar -DgeneratePom=true
-
-mvn install:install-file -Dfile=tomahawk-facelets-taglib.jar -DgroupId=tomahawk -DartifactId=tomahawk-facelets-taglib -Dversion=0.1 -Dpackaging=jar -DgeneratePom=true
+ ../src/main/scripts/dev/maven-install-local-libs.sh
