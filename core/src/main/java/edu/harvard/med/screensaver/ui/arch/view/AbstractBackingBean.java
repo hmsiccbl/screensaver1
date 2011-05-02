@@ -81,7 +81,7 @@ public abstract class AbstractBackingBean implements ScreensaverConstants
    */
   public String getApplicationVersion()
   {
-      return _applicationProperties.getProperty(APPLICATION_VERSION_PROPERTY);
+    return _applicationProperties.getVersion();
   }
 
   /**

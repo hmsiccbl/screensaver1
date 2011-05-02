@@ -1012,19 +1012,6 @@
   <bean
     id="envInfo"
     parent="uiBean"
-    class="edu.harvard.med.screensaver.ui.Environment">
-    <property
-      name="host"
-      value="#{screensaverProperties.databaseConnectionSettings.host}" />
-    <property
-      name="db"
-      value="#{screensaverProperties.databaseConnectionSettings.database}" />
-    <property
-      name="user"
-      value="#{screensaverProperties.databaseConnectionSettings.user}" />
-    <property
-      name="url"
-      value="#{screensaverProperties.databaseConnectionSettings.jdbcUrl}" />
-  </bean>
+    class="edu.harvard.med.screensaver.ui.Environment" />
 
 </beans>

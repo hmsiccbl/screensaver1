@@ -21,11 +21,12 @@ public interface ScreensaverConstants
    * {@link ScreensaverProperties#ScreensaverProperties(String)} constructor, will be used.
    */
   public static final String SCREENSAVER_PROPERTIES_FILE_PROPERTY_NAME = "screensaver.properties.file";
+  public static final String VERSION_PROPERTIES_RESOURCE = "/version.properties";
+  public static final String BUILD_NUMBER_PROPERTY = "build.number";
+  public static final String VERSION_PROPERTY = "version";
 
   /* Constants for application properties that are found in the screensaver.properties file.  Use these constants to retrieve property values using getApplicationProperties(). */
   public static final String APPLICATION_NAME_PROPERTY = "screensaver.ui.application_name";
-  public static final String APPLICATION_VERSION_PROPERTY = "screensaver.ui.version";
-  public static final String APPLICATION_BUILD_NUMBER = "screensaver.ui.build_number";
   public static final String FEEDBACK_URL_PROPERTY = "screensaver.ui.feedback_url";
   public static final String RELEASE_NOTES_URL = "screensaver.ui.release_notes_url";
   public static final String FACILITY_NAME = "screensaver.ui.facility_name";

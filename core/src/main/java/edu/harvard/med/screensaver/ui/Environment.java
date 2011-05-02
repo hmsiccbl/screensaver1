@@ -35,11 +35,6 @@ import edu.harvard.med.screensaver.ui.arch.view.aspects.UICommand;
  */
 public class Environment extends AbstractBackingBean
 {
-  private String _db;
-  private String _user;
-  private String _host;
-  private String _url;
-
   public static class Row
   {
     private String _name;
@@ -89,18 +84,6 @@ public class Environment extends AbstractBackingBean
     for (Object paramName : reqParamMap.keySet()) {
       data.add(new Row(paramName.toString(),
                       reqParamMap.get(paramName).toString()));
-    }
-    String[] dbParamNames = {
-      "SCREENSAVER_PGSQL_SERVER",
-      "SCREENSAVER_PGSQL_DB",
-      "SCREENSAVER_PGSQL_USER",
-      "SCREENSAVER_PGSQL_PASSWORD",
-    };
-    for (int i = 0; i < dbParamNames.length; i++) {
-      String paramName = dbParamNames[i];
-      Object value= reqParamMap.get(paramName);
-      data.add(new Row(paramName,
-                       value == null ? "<null>" : value.toString()));
     }
     return new ListDataModel(data);
   }
@@ -167,6 +150,17 @@ public class Environment extends AbstractBackingBean
     return new ListDataModel(env);
   }
 
+  public DataModel getScreensaverPropsTableModel()
+  {
+    List<Row> propsData = new ArrayList<Row>();
+    Properties properties = getApplicationProperties().getMap();
+    for (Object propKey : properties.keySet()) {
+      propsData.add(new Row(propKey.toString(),
+                            properties.get(propKey).toString()));
+    }
+    return new ListDataModel(propsData);
+  }
+
   public DataModel getSysPropsTableModel()
   {
     List<Row> propsData = new ArrayList<Row>();
@@ -176,46 +170,6 @@ public class Environment extends AbstractBackingBean
                             properties.get(propKey).toString()));
     }
     return new ListDataModel(propsData);
-  }
-
-  public String getUrl()
-  {
-    return _url;
-  }
-
-  public void setUrl(String url)
-  {
-    _url = url;
-  }
-
-  public String getDb()
-  {
-    return _db;
-  }
-
-  public void setDb(String db)
-  {
-    _db = db;
-  }
-
-  public String getHost()
-  {
-    return _host;
-  }
-
-  public void setHost(String host)
-  {
-    _host = host;
-  }
-
-  public String getUser()
-  {
-    return _user;
-  }
-
-  public void setUser(String user)
-  {
-    _user = user;
   }
 
   /** for testing purposes only! */

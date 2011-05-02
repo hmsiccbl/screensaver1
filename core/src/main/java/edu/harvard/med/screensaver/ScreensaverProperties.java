@@ -28,10 +28,11 @@ import edu.harvard.med.screensaver.db.DatabaseConnectionSettingsResolver;
 import edu.harvard.med.screensaver.db.NeedsScreensaverProperties;
 import edu.harvard.med.screensaver.util.StringUtils;
 
-public class ScreensaverProperties
+public class ScreensaverProperties implements ScreensaverConstants
 {
   private static Logger log = Logger.getLogger(ScreensaverProperties.class);
   private Properties _properties = new Properties();
+  private Properties _versionProperties = new Properties();
   private Map<String,Boolean> _featuresEnabled;
   private DatabaseConnectionSettings _databaseConnectionSettings;
   private List<DatabaseConnectionSettingsResolver> _databaseConnectionSettingsResolvers;
@@ -43,39 +44,54 @@ public class ScreensaverProperties
          ImmutableList.of(dbCxnSettingsResolver));
   }
 
-  public ScreensaverProperties(String defaultScreensaverPropertiesFile,
+  public ScreensaverProperties(String screensaverPropertiesFile,
                                List<DatabaseConnectionSettingsResolver> dbCxnSettingsResolvers)
   {
     _databaseConnectionSettingsResolvers = dbCxnSettingsResolvers;
     try {
-      String propFileName =
-        System.getProperty(ScreensaverConstants.SCREENSAVER_PROPERTIES_FILE_PROPERTY_NAME);
-      InputStream screensaverPropertiesInputStream = null;
-      if (propFileName != null) {
-        log.info("loading screensaver properties from file location " + propFileName);
-        screensaverPropertiesInputStream = new FileInputStream(new File(propFileName));
-      }
-      else {
-        log.info("loading screensaver properties from resource " + defaultScreensaverPropertiesFile);
-        screensaverPropertiesInputStream = ScreensaverProperties.class.getResourceAsStream(defaultScreensaverPropertiesFile);
-      }
-      initializeProperties(screensaverPropertiesInputStream);
+      initializeProperties(screensaverPropertiesFile);
+      initializeVersionProperties();
       initializeFeaturesEnabled(_properties); // initialize
-      validateProperties(_properties);
+      validateProperties();
     }
     catch (IOException e) {
       throw new ScreensaverConfigurationException("error loading screensaver properties", e);
     }
   }
 
-  public void initializeProperties(InputStream screensaverPropertiesInputStream) throws IOException
+  public void initializeProperties(String propertiesFile) throws IOException
   {
+    String propFileName =
+      System.getProperty(ScreensaverConstants.SCREENSAVER_PROPERTIES_FILE_PROPERTY_NAME);
+    InputStream screensaverPropertiesInputStream = null;
+    if (propFileName != null) {
+      log.info("loading screensaver properties from file location " + propFileName);
+      screensaverPropertiesInputStream = new FileInputStream(new File(propFileName));
+    }
+    else {
+      log.info("loading screensaver properties from resource " + propertiesFile);
+      screensaverPropertiesInputStream = ScreensaverProperties.class.getResourceAsStream(propertiesFile);
+    }
     _properties.load(screensaverPropertiesInputStream);
-    logProperties(_properties);
+    logProperties("Screensaver properties", _properties);
   }
 
-  private void validateProperties(Properties screensaverProperties)
+  public void initializeVersionProperties() throws IOException
   {
+    log.info("loading version properties from resource " + ScreensaverConstants.VERSION_PROPERTIES_RESOURCE);
+    InputStream versionPropertiesInputStream = ScreensaverProperties.class.getResourceAsStream(ScreensaverConstants.VERSION_PROPERTIES_RESOURCE);
+    _versionProperties.load(versionPropertiesInputStream);
+    logProperties("Version properties", _versionProperties);
+  }
+
+  private void validateProperties()
+  {
+    if (!!!_versionProperties.containsKey(VERSION_PROPERTY)) {
+      throw new ScreensaverConfigurationException("undefined version property '" + VERSION_PROPERTY + "'");
+    }
+    if (!!!_versionProperties.containsKey(BUILD_NUMBER_PROPERTY)) {
+      throw new ScreensaverConfigurationException("undefined version property '" + BUILD_NUMBER_PROPERTY + "'");
+    }
     if (isFeatureEnabled("cellHTS2")) {
       if (!isPropertySet("cellHTS2.report.directory")) {
         throw new ScreensaverConfigurationException("undefined system property 'cellHTS2.report.directory'");
@@ -136,14 +152,25 @@ public class ScreensaverProperties
     return !StringUtils.isEmpty(_properties.getProperty(name));
   }
   
+  public String getVersion()
+  {
+    return _versionProperties.getProperty(VERSION_PROPERTY);
+  }
+
+  public String getBuildNumber()
+  {
+    return _versionProperties.getProperty(BUILD_NUMBER_PROPERTY);
+  }
+
   public String getProperty(String name)
   {
     return _properties.getProperty(name);
   }
   
-  private static void logProperties(Properties screensaverProperties)
+  private static void logProperties(String name,
+                                    Properties screensaverProperties)
   {
-    log.info("Screensaver system properties:");
+    log.info(name);
     for (Entry<Object,Object> entry : screensaverProperties.entrySet()) {
       String value = entry.getValue().toString();
       if (entry.getKey().toString().matches(".*(?i)password.*")) {
