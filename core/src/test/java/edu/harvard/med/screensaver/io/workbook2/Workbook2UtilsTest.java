@@ -12,7 +12,6 @@
 package edu.harvard.med.screensaver.io.workbook2;
 
 import java.io.File;
-import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.InputStream;
 import java.io.OutputStream;
@@ -35,7 +34,7 @@ public class Workbook2UtilsTest extends TestCase
     OutputStream out = new FileOutputStream(file);
     WritableWorkbook workbook = Workbook.createWorkbook(out);
     WritableSheet sheet = workbook.createSheet("sheet1", 0);
-    InputStream imageIn = new FileInputStream("src/main/webapp/images/arrow-first.png");
+    InputStream imageIn = Workbook2UtilsTest.class.getResourceAsStream("arrow-first.png");
     byte[] imageData = IOUtils.toByteArray(imageIn);
     Workbook2Utils.writeCell(sheet, 1, 0, "image:");
     Workbook2Utils.writeImage(sheet, 1, 1, imageData);
