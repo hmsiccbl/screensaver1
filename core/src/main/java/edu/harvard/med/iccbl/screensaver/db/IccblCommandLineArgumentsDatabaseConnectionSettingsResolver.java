@@ -23,7 +23,7 @@ import edu.harvard.med.screensaver.util.NullSafeUtils;
 /**
  * Resolves database connection settings from command-line arguments, with the following enhancements:
  * <ul>
- * <li>if user is not specified will resolve using the $USER environment variable</li>
+ * <li><strike>if user is not specified will resolve using the $USER environment variable</strike></li>
  * <li>if password is not specified (as it should not be, on a multi-user host) will resolve by inspecting the uesr's
  * ~/.pgpass file</li>
  * </ul>
@@ -52,6 +52,7 @@ public class IccblCommandLineArgumentsDatabaseConnectionSettingsResolver extends
     }
     try {
       if (settings.getPassword() == null) {
+        // TODO: if user is undefined, use the USER env variable 
         String passwordFromDotPgpassFile =
           new DotPgpassFileParser().getPasswordFromDotPgpassFile(settings.getHost(),
                                                                  NullSafeUtils.toString(settings.getPort(), (String) null),
