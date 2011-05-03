@@ -1,0 +1,109 @@
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+  <modelVersion>4.0.0</modelVersion>
+  <parent>
+    <artifactId>screensaver</artifactId>
+    <version>2.3.2</version>
+    <groupId>edu.harvard.med</groupId>
+    <relativePath>../pom.xml</relativePath>
+  </parent>
+  
+  <groupId>edu.harvard.med</groupId>
+  <artifactId>screensaver-web</artifactId>
+  <version>2.3.2</version>
+  <name>Screensaver Web</name>
+  <description>Screensaver web application</description>
+
+  <properties>
+    <!-- The top-level spring context file used to configure the web application (updates web.xml via Maven filtering) -->
+    <web.application.context.file>spring-context-web-default.xml</web.application.context.file>
+    <!-- Web app authentication method can be 'FORM' (Screensaver login web page) or 'BASIC' (browser dialog). BASIC mode is useful 
+         during development, to avoid repeating the login step between Tomcat restarts. (updates web.xml via Maven filtering) -->
+    <servlet.authentication.method>FORM</servlet.authentication.method>
+    <facility>generic</facility>
+  </properties>
+  
+  <packaging>war</packaging>  
+  
+  <build>
+    <resources>
+      <!-- turn on filtering for the resources directory -->
+      <resource>
+        <directory>src/main/resources</directory>
+        <filtering>true</filtering>
+      </resource>
+    </resources>
+    
+    <plugins>
+
+      <plugin>
+        <!-- specify the maven-war-plugin so that we can enable filtering for the web.xml -->
+        <groupId>org.apache.maven.plugins</groupId>
+        <artifactId>maven-war-plugin</artifactId>
+        <configuration>
+          <webResources>
+            <resource>
+              <directory>src/main/webapp/WEB-INF</directory>
+              <filtering>true</filtering>
+              <!-- override the destination directory for this resource -->
+              <targetPath>WEB-INF</targetPath>
+            </resource>
+          </webResources>
+        </configuration>
+      </plugin>
+      
+    </plugins>
+  </build>
+
+  <profiles>
+  	<profile>
+  		<id>iccbl</id>
+      <activation>
+        <property>
+          <name>facility</name>
+          <value>iccbl</value>
+        </property>
+      </activation>
+  		<properties>
+        <!-- The top-level spring context file used to configure the web application (updates web.xml via Maven filtering) -->
+  			<web.application.context.file>spring-context-web-iccbl.xml</web.application.context.file>
+  		</properties>
+  	</profile>
+  	<profile>
+  		<id>dev</id>
+      <activation>
+        <property>
+          <name>env</name>
+          <value>dev</value>
+        </property>
+      </activation>
+      <build>
+        <finalName>${project.artifactId}-${facility}-${project.version}-SNAPSHOT</finalName>
+      </build>
+      <properties>
+  			<servlet.authentication.method>BASIC</servlet.authentication.method>
+  		</properties>
+  	</profile>
+    <profile>
+      <id>prod</id>
+      <activation>
+        <property>
+          <name>env</name>
+          <value>prod</value>
+        </property>
+      </activation>
+      <properties>
+        <servlet.authentication.method>FORM</servlet.authentication.method>
+      </properties>
+    </profile>
+  </profiles>
+  
+  <dependencies>  
+  	<dependency>
+  		<groupId>edu.harvard.med</groupId>
+  		<artifactId>screensaver-core</artifactId>
+  		<version>2.3.2</version>
+  		<scope>compile</scope>
+      <type>jar</type>
+  	</dependency>
+  </dependencies>
+</project>

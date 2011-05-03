@@ -1,0 +1,220 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE beans PUBLIC "-//SPRING//DTD BEAN 2.0//EN"
+    "http://www.springframework.org/dtd/spring-beans-2.0.dtd">
+
+<!--
+   $HeadURL$
+   $Id$
+
+   Copyright © 2006, 2010 by the President and Fellows of Harvard College.
+
+   Screensaver is an open-source project developed by the ICCB-L and NSRB labs
+   at Harvard Medical School. This software is distributed under the terms of
+   the GNU General Public License.
+-->
+
+<beans>
+
+  <bean
+  id="screenDerivedPropertiesUpdater"
+  class="edu.harvard.med.screensaver.service.screens.ScreenDerivedPropertiesUpdater"
+  autowire="constructor">
+  </bean>
+
+  <bean
+  id="libraryScreeningDerivedPropertiesUpdater"
+  class="edu.harvard.med.screensaver.service.libraries.LibraryScreeningDerivedPropertiesUpdater"
+  autowire="constructor">
+  </bean>
+
+  <bean
+    id="screenResultParser"
+    class="edu.harvard.med.screensaver.io.screenresults.ScreenResultParser"
+    scope="prototype">
+    <constructor-arg ref="librariesDao"/>
+    <constructor-arg ref="screenResultsDao"/>
+    <constructor-arg ref="genericEntityDao"/>
+  </bean>
+
+  <bean
+    id="screenResultLoader" 
+    class="edu.harvard.med.screensaver.service.screenresult.ScreenResultLoader"
+    scope="singleton" 
+    autowire="constructor">
+    <lookup-method name="createScreenResultParser" bean="screenResultParser"/>
+  </bean>
+
+  <bean
+    id="screenResultDeleter"
+    class="edu.harvard.med.screensaver.service.screenresult.ScreenResultDeleter"
+    scope="singleton"
+    autowire="constructor">
+  </bean>
+
+  <!-- TODO: place this in a spring-context-testing.xml file, or something similar -->
+  <bean
+    id="mockScreenResultParser"
+    class="edu.harvard.med.screensaver.io.screenresults.ScreenResultParser"
+    scope="prototype">
+    <description>A ScreenResultParser that does not need access to a database.  Used for testing.</description>
+    <constructor-arg index="0" >
+      <bean class="edu.harvard.med.screensaver.io.screenresults.MockDaoForScreenResultImporter"/>
+    </constructor-arg>
+    <constructor-arg index="1" >
+      <bean class="edu.harvard.med.screensaver.io.screenresults.MockDaoForScreenResultImporter"/>
+    </constructor-arg>
+    <constructor-arg index="2" >
+      <bean class="edu.harvard.med.screensaver.io.screenresults.MockDaoForScreenResultImporter"/>
+    </constructor-arg>
+  </bean>
+
+  <bean
+    id="studyAnnotationParser"
+    class="edu.harvard.med.screensaver.io.screens.StudyAnnotationParser"
+    scope="prototype">
+    <constructor-arg ref="genericEntityDao"/>
+  </bean>
+
+  <bean
+    id="publicationInfoProvider"
+    class="edu.harvard.med.screensaver.util.eutils.PublicationInfoProvider"
+    scope="prototype" />
+
+  <bean
+    id="reagentVendorIdentiferListParser"
+    class="edu.harvard.med.screensaver.io.libraries.ReagentVendorIdentifierListParser"
+    scope="singleton">
+  </bean>
+
+  <bean
+  id="libraryCreator"
+  class="edu.harvard.med.screensaver.service.libraries.LibraryCreator"
+  scope="singleton">
+    <constructor-arg ref="genericEntityDao"/>
+    <constructor-arg ref="librariesDao"/>
+    <constructor-arg ref="libraryContentsLoader"/>
+  </bean>
+ 
+  <bean
+  id="libraryContentsLoader"
+  class="edu.harvard.med.screensaver.service.libraries.LibraryContentsLoader"
+  scope="singleton">
+    <constructor-arg ref="genericEntityDao"/>
+    <constructor-arg ref="librariesDao"/>
+    <constructor-arg ref="libraryContentsVersionManager"/>
+  </bean>
+ 
+  <bean
+    id="libraryContentsVersionManager"
+    class="edu.harvard.med.screensaver.service.libraries.LibraryContentsVersionManager"
+    scope="singleton">
+    <constructor-arg ref="genericEntityDao"/>
+  </bean>
+
+  <bean
+    id="cherryPickRequestAllocator"
+    class="edu.harvard.med.screensaver.service.cherrypicks.CherryPickRequestAllocator"
+    scope="singleton">
+    <constructor-arg ref="genericEntityDao"/>
+    <constructor-arg ref="librariesDao"/>
+    <constructor-arg ref="cherryPickRequestDao"/>
+    <constructor-arg ref="cherryPickPlateSourceWellMinimumVolumePolicy"/>
+  </bean>
+
+  <bean
+    id="cherryPickRequestPlateMapper"
+    class="edu.harvard.med.screensaver.service.cherrypicks.CherryPickRequestPlateMapper"
+    scope="singleton">
+    <constructor-arg ref="genericEntityDao"/>
+  </bean>
+
+  <bean
+    id="cherryPickRequestPlateMapFilesBuilder"
+    class="edu.harvard.med.screensaver.service.cherrypicks.CherryPickRequestPlateMapFilesBuilder"
+    scope="singleton">
+    <constructor-arg ref="genericEntityDao"/>
+    <constructor-arg ref="cherryPickRequestPlateMapper"/>
+  </bean>
+
+  <bean
+    id="cherryPickRequestCherryPicksAdder"
+    class="edu.harvard.med.screensaver.service.cherrypicks.CherryPickRequestCherryPicksAdder"
+    scope="singleton">
+    <constructor-arg ref="genericEntityDao"/>
+  </bean>
+
+  <bean
+    id="sdfWellsDataExporter"
+    class="edu.harvard.med.screensaver.io.libraries.WellsSdfDataExporter"
+    scope="singleton">
+    <constructor-arg ref="genericEntityDao" />
+    <constructor-arg>
+      <bean
+        id="libraryContentsVersionRef"
+        class="edu.harvard.med.screensaver.io.libraries.smallmolecule.LibraryContentsVersionReference" />
+    </constructor-arg>
+  </bean>
+  
+  <bean
+    id="screeningDuplicator"
+    class="edu.harvard.med.screensaver.service.screens.ScreeningDuplicator"
+    scope="singleton">
+    <constructor-arg ref="genericEntityDao" />
+  </bean>
+ 
+  <bean
+    id="cellHts2Annotator"
+    class="edu.harvard.med.screensaver.service.cellhts2.CellHts2Annotator"
+    scope="prototype">
+    <constructor-arg ref="genericEntityDao"/>
+  </bean>
+  
+  <bean id="userAgreementUpdater" class="edu.harvard.med.iccbl.screensaver.service.users.UserAgreementUpdater" scope="singleton">
+    <constructor-arg ref="genericEntityDao"/>
+  </bean>
+
+  <bean id="emailService"
+        class="edu.harvard.med.iccbl.screensaver.service.SmtpEmailService" 
+        scope="singleton">
+    <constructor-arg value="#{screensaverProperties.map['screensaver.service.smtpemailservice.host']}" />
+    <constructor-arg value="#{screensaverProperties.map['screensaver.service.smtpemailservice.username']}" />
+  </bean>
+
+  <bean id="screenResultReporter"
+        class="edu.harvard.med.screensaver.service.screenresult.ScreenResultReporter"
+        scope="singleton"  >
+    <constructor-arg ref="genericEntityDao"/>
+  </bean>
+  
+  <bean
+    id="serviceMessages"
+    class="edu.harvard.med.screensaver.service.ServiceMessages">
+    <property name="messageSource">
+      <bean
+        class="org.springframework.context.support.ReloadableResourceBundleMessageSource">
+        <!-- specify the properties (or xml) resource containing the localized messages, without a locale extension and without a file extension -->
+        <property
+          name="basename"
+          value="classpath:service_messages" />
+      </bean>
+    </property>
+    <!--  TODO property name="locale" value=""/-->
+  </bean>
+
+  <bean 
+    id="screenDataSharingLevelUpdater" 
+    class="edu.harvard.med.iccbl.screensaver.service.screens.ScreenDataSharingLevelUpdater" 
+    scope="singleton">
+    <constructor-arg ref="genericEntityDao"/>
+    <constructor-arg ref="serviceMessages"/>
+  </bean>
+  
+  <bean 
+    id="plateUpdater" 
+    class="edu.harvard.med.screensaver.service.libraries.PlateUpdater" 
+    scope="singleton">
+    <constructor-arg ref="genericEntityDao"/>
+    <constructor-arg ref="plateFacilityIdInitializer"/>
+  </bean>
+
+</beans>

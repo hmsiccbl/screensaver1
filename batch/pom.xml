@@ -1,0 +1,107 @@
+<project
+  xmlns="http://maven.apache.org/POM/4.0.0"
+  xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+  xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+  <modelVersion>4.0.0</modelVersion>
+  <parent>
+    <artifactId>screensaver</artifactId>
+    <version>2.3.2</version>
+    <groupId>edu.harvard.med</groupId>
+    <relativePath>../pom.xml</relativePath>
+  </parent>
+  <groupId>edu.harvard.med</groupId>
+  <artifactId>screensaver-batch</artifactId>
+  <version>2.3.2</version>
+  <packaging>pom</packaging>
+  <name>Screensaver Batch</name>
+  <description>Screensaver command-line applications for batch I/O</description>
+  
+  <properties>
+    <facility>generic</facility>
+    <spring.context.cmdline.file>spring-context-cmdline-generic.xml</spring.context.cmdline.file>
+  </properties>
+
+  <build>
+
+    <resources>
+      <!-- turn on filtering for the resources directory -->
+      <resource>
+        <directory>src/main/resources</directory>
+        <filtering>true</filtering>
+      </resource>
+    </resources>
+
+    <plugins>
+      <plugin>
+        <artifactId>maven-assembly-plugin</artifactId>
+        <configuration>
+          <descriptors>
+            <descriptor>src/main/assembly/command-line.xml</descriptor>
+          </descriptors>
+        </configuration>
+        <executions>
+          <execution>
+            <id>command-line</id>
+            <phase>package</phase>
+            <goals>
+              <goal>single</goal>
+            </goals>
+          </execution>
+        </executions>
+      </plugin>
+    </plugins>
+
+  </build>
+
+  <profiles>
+    <profile>
+      <id>iccbl</id>
+      <activation>
+        <property>
+          <name>facility</name>
+          <value>iccbl</value>
+        </property>
+      </activation>
+      <properties>
+        <spring.context.cmdline.file>spring-context-cmdline-iccbl.xml</spring.context.cmdline.file>
+      </properties>
+    </profile>
+    <profile>
+      <id>dev</id>
+      <activation>
+        <property>
+          <name>env</name>
+          <value>dev</value>
+        </property>
+      </activation>
+    </profile>
+    <profile>
+      <id>prod</id>
+      <activation>
+        <property>
+          <name>env</name>
+          <value>prod</value>
+        </property>
+      </activation>
+    </profile>
+  </profiles>
+
+  <dependencies>
+    <!-- It is entirely wrong for batch apps to depend upon a servlet-api! However, this is a workaround for one app that makes use 
+      of a DataTable... (to be fixed! [#2625]) -->
+    <dependency>
+      <groupId>javax.servlet</groupId>
+      <artifactId>servlet-api</artifactId>
+      <version>2.3</version>
+      <scope>provided</scope>
+    </dependency>
+
+    <dependency>
+      <groupId>edu.harvard.med</groupId>
+      <artifactId>screensaver-core</artifactId>
+      <version>2.3.2</version>
+      <scope>compile</scope>
+      <type>jar</type>
+    </dependency>
+  </dependencies>
+</project>

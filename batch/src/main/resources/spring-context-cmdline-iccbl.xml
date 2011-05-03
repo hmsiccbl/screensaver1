@@ -1,0 +1,26 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE beans PUBLIC "-//SPRING//DTD BEAN 2.0//EN"
+    "http://www.springframework.org/dtd/spring-beans-2.0.dtd">
+
+<!--
+   $HeadURL: http://forge.abcd.harvard.edu/svn/screensaver/branches/iccbl/maven/src/main/resources/spring-context-cmdline.xml $
+   $Id: spring-context-cmdline.xml 5658 2011-04-13 20:37:01Z atolopko $
+
+   Copyright © 2006, 2010 by the President and Fellows of Harvard College.
+   
+   Screensaver is an open-source project developed by the ICCB-L and NSRB labs
+   at Harvard Medical School. This software is distributed under the terms of
+   the GNU General Public License.
+-->
+
+<!-- A top-level, composite Spring context configuration file, intended for running command line applications at ICCB-L. -->
+
+<beans>
+
+  <import resource="classpath:spring-context-cmdline-generic.xml"/>
+
+  <bean
+    id="commandLineArgumentsDatabaseSettingsResolver"
+    class="edu.harvard.med.iccbl.screensaver.db.IccblCommandLineArgumentsDatabaseConnectionSettingsResolver" />
+  
+</beans>

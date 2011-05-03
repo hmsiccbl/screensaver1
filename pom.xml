@@ -1,0 +1,137 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd" xmlns="http://maven.apache.org/POM/4.0.0"
+    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+  <modelVersion>4.0.0</modelVersion>
+  <groupId>edu.harvard.med</groupId>
+  <artifactId>screensaver</artifactId>
+  <version>2.3.2</version>
+  <packaging>pom</packaging>
+  <name>Screensaver HTS LIMS</name>
+
+  <description>
+    usage:
+    $ mvn -Dbuild.number=`svnversion -n` [-Dfacility={generic,iccbl}] [-Denv={dev,prod}] clean package
+  </description>
+  <scm>
+    <url>https://forge.abcd.harvard.edu/svn/screensaver</url>
+  </scm>
+  <url>http://forge.abcd.harvard.edu/gf/project/screensaver/</url>
+  <issueManagement>
+    <system>ABCD Forge</system>
+    <url>http://forge.abcd.harvard.edu/gf/project/screensaver/tracker/?action=TrackerItemBrowse&amp;tracker_id=497</url>
+  </issueManagement>
+  <developers>
+    <developer>
+      <name>Andrew Tolopko</name>
+      <id>atolopko</id>
+      <organization>Harvard Medical School, ICCB-Longwood/NSRB</organization>
+    </developer>
+    <developer>
+      <name>Sean Erickson</name>
+      <id>seanderickson1</id>
+      <organization>Harvard Medical School, ICCB-Longwood/NSRB</organization>
+    </developer>
+  </developers>
+  <contributors>
+    <contributor>
+      <name>John Sullivan</name>
+    </contributor>
+    <contributor>
+      <name>Cor Lieftink</name>
+    </contributor>
+  </contributors>
+
+  <licenses>
+    <license>
+      <name>GNU General Public License, version 2</name>
+      <url>http://www.gnu.org/licenses/old-licenses/gpl-2.0.html</url>
+      <distribution>manual</distribution>
+    </license>
+  </licenses>  
+  
+  <properties>
+    <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+    <env>dev</env>
+  </properties>
+  
+  <!--
+          Top level dependency management: specify versions for dependencies that may be included in child projects
+   -->
+  <dependencyManagement>
+    <dependencies>
+      
+      <dependency>
+        <groupId>junit</groupId>
+        <artifactId>junit</artifactId>
+        <version>3.8.1</version>
+        <scope>test</scope>
+      </dependency>
+
+      <dependency>
+        <groupId>log4j</groupId>
+        <artifactId>log4j</artifactId>
+        <version>1.2.16</version>
+      </dependency>
+          
+    </dependencies>
+  </dependencyManagement>
+
+
+  <!--
+          Top level dependencies: place items here needed by all child projects.
+   -->
+  <dependencies>
+    <dependency>
+      <groupId>junit</groupId>
+      <artifactId>junit</artifactId>
+      <version>3.8.1</version>
+      <scope>test</scope>
+    </dependency>
+    <!-- Because this is a web app, we also have a dependency on the servlet api. -->
+    <dependency>
+      <groupId>javax.servlet</groupId>
+      <artifactId>servlet-api</artifactId>
+      <version>2.3</version>
+      <scope>provided</scope>
+    </dependency>
+  </dependencies>
+  
+  
+  <build>
+  
+    <finalName>${project.artifactId}-${facility}-${project.version}</finalName>
+  
+    <pluginManagement>
+      <plugins>
+
+        <plugin>
+          <groupId>org.apache.maven.plugins</groupId>
+          <artifactId>maven-eclipse-plugin</artifactId>
+          <configuration>
+            <downloadSources>true</downloadSources>
+            <downloadJavadocs>true</downloadJavadocs>
+          </configuration>
+        </plugin>
+  
+        <plugin>
+          <groupId>org.apache.maven.plugins</groupId>
+          <artifactId>maven-compiler-plugin</artifactId>
+          <configuration>
+            <source>1.6</source>
+            <target>1.6</target>
+          </configuration>
+        </plugin>
+      
+      </plugins>
+    </pluginManagement>
+    
+  </build>
+  
+  
+  <modules>
+    <module>core</module>
+    <module>web</module>
+    <module>batch</module>
+<!--    <module>screensaver-cellhts</module>-->
+  </modules>
+</project>
