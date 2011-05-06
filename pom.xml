@@ -52,6 +52,7 @@
   <properties>
     <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
     <env>dev</env>
+    <facility>generic</facility>
   </properties>
   
   <!--
