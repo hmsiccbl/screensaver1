@@ -19,7 +19,6 @@
     <!-- Web app authentication method can be 'FORM' (Screensaver login web page) or 'BASIC' (browser dialog). BASIC mode is useful 
          during development, to avoid repeating the login step between Tomcat restarts. (updates web.xml via Maven filtering) -->
     <servlet.authentication.method>FORM</servlet.authentication.method>
-    <facility>generic</facility>
   </properties>
   
   <packaging>war</packaging>  
@@ -102,8 +101,15 @@
   		<groupId>edu.harvard.med</groupId>
   		<artifactId>screensaver-core</artifactId>
   		<version>2.3.2</version>
-  		<scope>compile</scope>
       <type>jar</type>
+      <classifier>tests</classifier>
+      <scope>test</scope>
+  	</dependency>
+  	<dependency>
+  		<groupId>edu.harvard.med</groupId>
+  		<artifactId>screensaver-core</artifactId>
+  		<version>2.3.2</version>
+  		<type>jar</type>
   	</dependency>
   </dependencies>
 </project>
