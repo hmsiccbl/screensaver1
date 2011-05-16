@@ -142,11 +142,11 @@
 
       <ss:property id="startPlate" label="Start Plate"
         description="The plate number for the first plate in the library"
-        value="#{libraryDetailViewer.entity.startPlate}" required="true"
+        value="#{libraryDetailViewer.entity.startPlate}" required="true" type="Integer"
         editable="#{libraryDetailViewer.editMode &amp;&amp; empty libraryDetailViewer.entity.libraryId}" />
 
       <ss:property id="endPlate" label="End Plate"
-        description="The plate number for the last plate in the library"
+        description="The plate number for the last plate in the library" type="Integer"
         value="#{libraryDetailViewer.entity.endPlate}" required="true"
         editable="#{libraryDetailViewer.editMode &amp;&amp; empty libraryDetailViewer.entity.libraryId}" />
 

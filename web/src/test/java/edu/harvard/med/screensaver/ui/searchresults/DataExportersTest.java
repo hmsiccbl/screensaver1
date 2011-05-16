@@ -54,8 +54,8 @@ import edu.harvard.med.screensaver.model.screens.Screen;
 import edu.harvard.med.screensaver.model.screens.ScreenType;
 import edu.harvard.med.screensaver.policy.DefaultEntityViewPolicy;
 import edu.harvard.med.screensaver.ui.arch.datatable.Criterion;
-import edu.harvard.med.screensaver.ui.arch.datatable.DataTableModelType;
 import edu.harvard.med.screensaver.ui.arch.datatable.Criterion.Operator;
+import edu.harvard.med.screensaver.ui.arch.datatable.DataTableModelType;
 import edu.harvard.med.screensaver.ui.arch.datatable.column.TableColumn;
 import edu.harvard.med.screensaver.ui.arch.datatable.column.TextColumn;
 import edu.harvard.med.screensaver.ui.arch.datatable.column.entity.BooleanTupleColumn;
@@ -247,9 +247,7 @@ public class DataExportersTest extends AbstractSpringPersistenceTest
     final CommandLineApplication app = new CommandLineApplication(args);
     
     app.addCommandLineOption(OptionBuilder.isRequired().hasArg().withArgName("output workbook file").create("f"));
-    if (!app.processOptions(true, false, true)) {
-      System.exit(1);
-    }
+    app.processOptions(true, false);
     GenericEntityDAO dao = (GenericEntityDAO) app.getSpringBean("genericEntityDao");
     WellSearchResults searchResults = new WellSearchResults(dao,
                                                             null,

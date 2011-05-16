@@ -80,7 +80,7 @@ import org.apache.log4j.Logger;
     for (T newUnit : _unit.getValues()) {
       newQuantity._value = convertUnits(newQuantity, newUnit);
       newQuantity._unit = newUnit;
-      if (newQuantity._value.compareTo(BigDecimal.ONE) >= 0) {
+      if (newQuantity._value.abs().compareTo(BigDecimal.ONE) >= 0) {
         break;
       }
     }

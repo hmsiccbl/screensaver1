@@ -19,13 +19,13 @@ import javax.mail.MessagingException;
 import javax.mail.internet.AddressException;
 import javax.mail.internet.InternetAddress;
 
+import com.google.common.collect.Lists;
+import com.google.common.collect.Sets;
 import org.apache.commons.cli.OptionBuilder;
 import org.apache.commons.cli.ParseException;
 import org.apache.log4j.Logger;
 import org.joda.time.format.DateTimeFormat;
 import org.joda.time.format.DateTimeFormatter;
-import com.google.common.collect.Lists;
-import com.google.common.collect.Sets;
 
 import edu.harvard.med.iccbl.screensaver.service.SmtpEmailService;
 import edu.harvard.med.screensaver.io.CommandLineApplication;
@@ -100,7 +100,7 @@ public class AdminEmailApplication extends CommandLineApplication
   }
   
   public InternetAddress getEmail(ScreensaverUser user)
-    throws MessagingException, ParseException
+    throws MessagingException
   {
     try {
       return new InternetAddress(user.getEmail());
@@ -119,7 +119,7 @@ public class AdminEmailApplication extends CommandLineApplication
   }
   
   public final EmailService getEmailServiceBasedOnCommandLineOption(AdministratorUser admin)
-    throws ParseException, AddressException
+    throws AddressException
   {
     EmailService emailService = null;
     if (isCommandLineFlagSet(NO_NOTIFY_OPTION[SHORT_OPTION_INDEX])) {
@@ -228,7 +228,7 @@ public class AdminEmailApplication extends CommandLineApplication
   }  
 
   @Override
-  public AdministratorUser findAdministratorUser() throws ParseException, IllegalArgumentException
+  public AdministratorUser findAdministratorUser() throws IllegalArgumentException
   {
     AdministratorUser admin = super.findAdministratorUser();
     if (admin != null) {
@@ -244,7 +244,7 @@ public class AdminEmailApplication extends CommandLineApplication
    * @throws ParseException
    * @throws AddressException
    */
-  public final Set<InternetAddress> getExtraRecipients() throws ParseException, AddressException
+  public final Set<InternetAddress> getExtraRecipients() throws AddressException
   {
     Set<String> stringSet = Sets.newHashSet();
     if (isCommandLineFlagSet(EMAIL_RECIPIENT_LIST_OPTION[SHORT_OPTION_INDEX])) {

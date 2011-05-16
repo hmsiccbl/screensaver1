@@ -13,11 +13,11 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.Set;
 import java.util.SortedSet;
+import java.util.TreeSet;
 
 import javax.faces.model.DataModel;
 import javax.faces.model.ListDataModel;
 
-import com.google.common.base.Predicate;
 import com.google.common.collect.Iterables;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Sets;
@@ -92,6 +92,8 @@ public class LabActivityViewer extends SearchResultContextEditableEntityViewerBa
   private AbstractBackingBean _returnToViewAfterEdit;
   private boolean _editingNewEntity;
 
+  private TreeSet<Plate> _platesScreened;
+
   /**
    * @motivation for CGLIB2
    */
@@ -130,6 +132,7 @@ public class LabActivityViewer extends SearchResultContextEditableEntityViewerBa
     if (activity instanceof LibraryScreening) {
       getDao().needReadOnly(activity, LibraryScreening.Screen.to(Screen.assayPlates));
       getDao().needReadOnly((LibraryScreening) activity, LibraryScreening.assayPlatesScreened.to(AssayPlate.plateScreened).to(Plate.copy).to(Copy.library));
+      _platesScreened = Sets.newTreeSet(Iterables.transform(((LibraryScreening) activity).getAssayPlatesScreened(), AssayPlate.ToPlate));
     }
     if (activity instanceof CherryPickScreening) {
       getDao().needReadOnly((CherryPickScreening) activity, CherryPickScreening.cherryPickRequest.to(CherryPickRequest.requestedBy));
@@ -148,6 +151,7 @@ public class LabActivityViewer extends SearchResultContextEditableEntityViewerBa
     // TODO: this model shouldn't allow this null value, and we should really set to null at the UI component level only
     if (activity instanceof LibraryScreening) {
       activity.setDateOfActivity(null);
+      _platesScreened = Sets.newTreeSet();
     }
     _editingNewEntity = true;
   }
@@ -374,7 +378,17 @@ public class LabActivityViewer extends SearchResultContextEditableEntityViewerBa
       }
     }
     if (entity instanceof LibraryScreening) {
-      _libraryScreeningDerivedPropertiesUpdater.updateScreeningStatistics((LibraryScreening) entity);
+      LibraryScreening libraryScreening = (LibraryScreening) entity;
+      Set<Plate> originalPlates = Sets.newHashSet(Iterables.transform(libraryScreening.getAssayPlatesScreened(), AssayPlate.ToPlate));
+      Set<Plate> deletedPlates = Sets.difference(originalPlates, _platesScreened);
+      Set<Plate> addedPlates = Sets.difference(_platesScreened, originalPlates);
+      for (Plate deletedPlate : deletedPlates) {
+        libraryScreening.removeAssayPlatesScreened(deletedPlate);
+      }
+      for (Plate addedPlate : addedPlates) {
+        libraryScreening.addAssayPlatesScreened(addedPlate);
+      }
+      _libraryScreeningDerivedPropertiesUpdater.updateScreeningStatistics(libraryScreening);
     }
     // note: execute this after parent entity (Screen/CPR) is reattached, to avoid NonUniqueObjectExceptions
     entity.setPerformedBy(getPerformedBy().getSelection());
@@ -384,8 +398,7 @@ public class LabActivityViewer extends SearchResultContextEditableEntityViewerBa
   {
     if (_platesScreenedDataModel == null) {
       if (getEntity() instanceof LibraryScreening) {
-        LibraryScreening libraryScreening = (LibraryScreening) getEntity();
-        _platesScreenedDataModel = new ListDataModel(PlateRange.splitIntoPlateCopyRanges(libraryScreening.getAssayPlatesScreened()));
+        _platesScreenedDataModel = new ListDataModel(PlateRange.splitIntoPlateCopyRanges(_platesScreened));
       }
     }
     return _platesScreenedDataModel;
@@ -543,7 +556,6 @@ public class LabActivityViewer extends SearchResultContextEditableEntityViewerBa
       }
       if (getNewPlateRangeScreenedStartPlate() != null &&
         getNewPlateRangeScreenedCopy() != null) {
-        Set<Plate> newPlates = Sets.newHashSet();
         Library library = null;
         if (getNewPlateRangeScreenedEndPlate() == null) {
           setNewPlateRangeScreenedEndPlate(getNewPlateRangeScreenedStartPlate());
@@ -567,15 +579,11 @@ public class LabActivityViewer extends SearchResultContextEditableEntityViewerBa
             }
           }
           */
-          if (Iterables.any(libraryScreening.getAssayPlatesScreened(), 
-                            new Predicate<AssayPlate>() { public boolean apply(AssayPlate ap) { return ap.getPlateNumber() == plate.getPlateNumber(); } })) {
+          if (_platesScreened.contains(plate)) {
             reportApplicationError("A plate number can only be screened once per library screening (" + plate.getPlateNumber() + ")");  
             return REDISPLAY_PAGE_ACTION_RESULT;
           }
-          newPlates.add(plate);
-        }
-        for (Plate newPlate : newPlates) {
-          libraryScreening.addAssayPlatesScreened(newPlate);
+          _platesScreened.add(plate);
         }
       }
       _platesScreenedDataModel = null;
@@ -587,15 +595,20 @@ public class LabActivityViewer extends SearchResultContextEditableEntityViewerBa
   }
 
   @UICommand
+  @Transactional
+  // Note: this is an immediate, permanent action! Cancel command will NOT revert deleted plates and other changes will be committed at the same time. This is a workaround for [#3030] and [#2513]
   public String deletePlateRange()
   {
     if (getEntity() instanceof LibraryScreening) {
-      LibraryScreening libraryScreening = (LibraryScreening) getEntity();
       PlateRange plateRange = (PlateRange) getPlatesScreenedDataModel().getRowData();
-      for (AssayPlate assayPlate : plateRange) {
-        libraryScreening.removeAssayPlatesScreened(assayPlate.getPlateScreened());
+      for (Plate plate : plateRange) {
+        _platesScreened.remove(plate);
+        //libraryScreening.removeAssayPlatesScreened(plate);
       }
       _platesScreenedDataModel = null;
+      //      getDao().mergeEntity(getEntity().getScreen());
+      //      save(); // save NOW! (see above)
+      //      edit(); // resume edit mode
     }
     return REDISPLAY_PAGE_ACTION_RESULT;
   }

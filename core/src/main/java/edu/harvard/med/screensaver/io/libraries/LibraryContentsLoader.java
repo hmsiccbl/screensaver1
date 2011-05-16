@@ -13,7 +13,6 @@ import java.io.File;
 import java.io.FileInputStream;
 
 import org.apache.commons.cli.OptionBuilder;
-import org.apache.commons.cli.ParseException;
 import org.apache.log4j.Logger;
 
 import edu.harvard.med.screensaver.db.GenericEntityDAO;
@@ -47,7 +46,7 @@ public class LibraryContentsLoader
   };
 
   @SuppressWarnings("static-access")
-  public static void main(String[] args) throws ParseException
+  public static void main(String[] args)
   {
     CommandLineApplication application = new CommandLineApplication(args);
     application.addCommandLineOption(
@@ -67,9 +66,7 @@ public class LibraryContentsLoader
             .withLongOpt(INPUT_FILE_OPTION[LONG_OPTION_INDEX])
             .create(INPUT_FILE_OPTION[SHORT_OPTION_INDEX]));
 
-    if (!application.processOptions(true, true, true)) {
-      return;
-    }
+    application.processOptions(true, true);
     String libraryShortName =
         application.getCommandLineOptionValue(LIBRARY_SHORT_NAME_OPTION[SHORT_OPTION_INDEX]);
     File libraryContentsFile =

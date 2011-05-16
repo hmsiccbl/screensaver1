@@ -17,16 +17,16 @@ import javax.faces.context.FacesContext;
 import javax.faces.convert.Converter;
 import javax.faces.convert.ConverterException;
 
+import com.google.common.base.Joiner;
+
 import edu.harvard.med.screensaver.model.Volume;
 import edu.harvard.med.screensaver.model.VolumeUnit;
-
-import com.google.common.base.Joiner;
 
 
 public class VolumeConverter implements Converter
 {
   
-  private static Pattern volumeAndUnitsPattern = Pattern.compile("\\s*([0-9.]+)\\s*([mun]?[lL])?");
+  private static Pattern volumeAndUnitsPattern = Pattern.compile("\\s*(-?[0-9.]+)\\s*([mun]?[lL])?");
   
   public Object getAsObject(FacesContext arg0, UIComponent arg1, String s)
     throws ConverterException

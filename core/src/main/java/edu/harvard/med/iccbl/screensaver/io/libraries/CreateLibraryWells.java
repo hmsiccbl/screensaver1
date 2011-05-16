@@ -12,7 +12,6 @@ package edu.harvard.med.iccbl.screensaver.io.libraries;
 import java.util.List;
 
 import org.apache.commons.cli.OptionBuilder;
-import org.apache.commons.cli.ParseException;
 import org.apache.log4j.Logger;
 
 import edu.harvard.med.screensaver.db.DAOTransaction;
@@ -31,16 +30,14 @@ public class CreateLibraryWells
   private static Logger log = Logger.getLogger(CreateLibraryWells.class);
 
   @SuppressWarnings("static-access")
-  public static void main(String[] args) throws ParseException
+  public static void main(String[] args)
   {
     final CommandLineApplication app = new CommandLineApplication(args);
     app.addCommandLineOption(OptionBuilder.hasArgs().isRequired()
                              .withArgName("short name").withLongOpt("short-name")
                              .withDescription("a short name for identifying the library").create("l"));
 
-    if (!app.processOptions(true, false, true)) {
-      System.exit(1);
-    }
+    app.processOptions(true, false);
 
     final GenericEntityDAO dao = (GenericEntityDAO) app.getSpringBean("genericEntityDao");
     dao.doInTransaction(new DAOTransaction() {

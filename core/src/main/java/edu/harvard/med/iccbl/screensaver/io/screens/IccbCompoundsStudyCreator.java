@@ -11,7 +11,6 @@ package edu.harvard.med.iccbl.screensaver.io.screens;
 
 import java.util.Set;
 
-import org.apache.commons.cli.ParseException;
 import org.apache.log4j.Logger;
 
 import edu.harvard.med.screensaver.db.DAOTransaction;
@@ -49,12 +48,8 @@ public class IccbCompoundsStudyCreator
   public static void main(String[] args)
   {
     final CommandLineApplication app = new CommandLineApplication(args);
-    try {
-      app.processOptions(true, true, true);
-    }
-    catch (ParseException e1) {
-      System.exit(1);
-    }
+    app.processOptions(true, true);
+
     final GenericEntityDAO dao = (GenericEntityDAO) app.getSpringBean("genericEntityDao");
     final LibrariesDAO librariesDao = (LibrariesDAO) app.getSpringBean("librariesDao");
     final ScreenDAO screenDao = (ScreenDAO) app.getSpringBean("screenDao");

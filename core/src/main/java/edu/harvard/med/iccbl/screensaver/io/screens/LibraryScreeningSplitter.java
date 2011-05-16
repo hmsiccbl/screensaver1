@@ -18,7 +18,6 @@ import java.util.Set;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
 import com.google.common.collect.Sets;
-import org.apache.commons.cli.ParseException;
 import org.apache.log4j.Logger;
 import org.hibernate.SQLQuery;
 import org.hibernate.Session;
@@ -45,13 +44,11 @@ public class LibraryScreeningSplitter
   private static final String MIGRATION_COMMENT_TEMPLATE = "This library screening was created automatically during data migration.  It was created to accommodate library plates that were screened multiple times within the original library screening (#).";
   private static Logger log = Logger.getLogger(LibraryScreeningSplitter.class);
 
-  public static void main(String[] args) throws ParseException
+  public static void main(String[] args)
   {
     final CommandLineApplication app = new CommandLineApplication(args);
 
-    if (!app.processOptions(true, false, true)) {
-      System.exit(1);
-    }
+    app.processOptions(true, false);
 
     final GenericEntityDAO dao = (GenericEntityDAO) app.getSpringBean("genericEntityDao");
 

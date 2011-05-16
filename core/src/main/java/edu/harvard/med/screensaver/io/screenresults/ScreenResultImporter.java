@@ -110,12 +110,8 @@ public class ScreenResultImporter extends CommandLineApplication
 
     File inputFile = null;
     try {
-      if (!app.processOptions(/* acceptDatabaseOptions= */true,
-                              /* acceptAdminUserOptions= */true,
-                              /* showHelpOnError= */true)) {
-        return;
-
-      }
+      app.processOptions(/* acceptDatabaseOptions= */true,
+                         /* acceptAdminUserOptions= */true);
       GenericEntityDAO dao = (GenericEntityDAO) app.getSpringBean("genericEntityDao");
 
       // if parse-only mode is requested, use a spring configuration that does not have a database dependency
@@ -185,9 +181,6 @@ public class ScreenResultImporter extends CommandLineApplication
     catch (FileNotFoundException e) {
       String msg = "Screen result file not found: " + inputFile;
       log.error(msg);
-    }
-    catch (ParseException e) {
-      log.error("error parsing command line options: " + e.getMessage());
     }
     catch (EntityNotFoundException e) {
       log.error(e.getMessage());

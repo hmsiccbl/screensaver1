@@ -67,9 +67,7 @@ public class SmallMoleculePlateBatchUpdater
     try {
       app.addCommandLineOption(OptionBuilder.hasArg().isRequired().withArgName("file").withLongOpt("input-file").withDescription("workbook file containing plate information").create("f"));
       app.addCommandLineOption(OptionBuilder.hasArg(false).withLongOpt("no-update").withDescription("do not perform update to database (test run only)").create("n"));
-      if (!app.processOptions(true, true, true)) {
-        System.exit(1);
-      }
+      app.processOptions(true, true);
 
       final GenericEntityDAO dao = (GenericEntityDAO) app.getSpringBean("genericEntityDao");
       final LibrariesDAO librariesDao = (LibrariesDAO) app.getSpringBean("librariesDao");

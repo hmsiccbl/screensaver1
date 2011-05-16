@@ -178,9 +178,9 @@ public class ScreenResult extends AuditedAbstractEntity<Integer>
                                                               String comments)
   {
     Set<AssayPlate> assayPlatesDataLoaded = findOrCreateAssayPlatesDataLoaded(plateNumbersLoadedWithMaxReplicates);
-    Set<Integer> plateNumbers = Sets.newHashSet(Iterables.transform(assayPlatesDataLoaded, AssayPlate.ToPlateNumber));
-    String mandatoryComments = "Loaded data for " + plateNumbers.size() + " plates " +
-    Joiner.on(",").join(PlateRange.splitIntoPlateRanges(Sets.newTreeSet(assayPlatesDataLoaded)));
+    SortedSet<Plate> plates = Sets.newTreeSet(Iterables.transform(assayPlatesDataLoaded, AssayPlate.ToPlate));
+    String mandatoryComments = "Loaded data for " + plates.size() + " plates " +
+      Joiner.on(",").join(PlateRange.splitIntoPlateRanges(plates));
     
     if (StringUtils.isEmpty(comments)) {
       comments = "";

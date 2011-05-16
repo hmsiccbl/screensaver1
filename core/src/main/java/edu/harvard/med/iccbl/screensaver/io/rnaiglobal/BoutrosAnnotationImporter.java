@@ -63,9 +63,7 @@ public class BoutrosAnnotationImporter
     app.addCommandLineOption(OptionBuilder.hasArg().isRequired().withDescription("data file to import").withArgName("Excel workbook file").create("f"));
     app.addCommandLineOption(OptionBuilder.hasArg().isRequired().withDescription("password for RNAi Global user").withArgName("password").create("rp"));
     app.addCommandLineOption(OptionBuilder.hasArg().isRequired().withDescription("password for user accounts associated with study").withArgName("password").create("up"));
-    if (!app.processOptions(true, true, true)) {
-      System.exit(1);
-    }
+    app.processOptions(true, true);
 
     final File file = app.getCommandLineOptionValue("f", File.class);
     if (!(file.exists() && file.canRead())) {

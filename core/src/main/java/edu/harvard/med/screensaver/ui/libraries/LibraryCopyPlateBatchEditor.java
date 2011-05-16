@@ -125,6 +125,7 @@ public class LibraryCopyPlateBatchEditor extends AbstractBackingBean
     _volumeType = null;
     _molarConcentrationValue = null;
     _molarConcentrationType = null;
+    _mgMlConcentration = null;
     _room = null;
     _freezer = null;
     _shelf = null;

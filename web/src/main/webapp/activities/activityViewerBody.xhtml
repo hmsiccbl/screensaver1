@@ -87,6 +87,7 @@
 
     <ss:property id="numberOfReplicates" label="# Replicates Screened"
       value="#{activityViewer.entity.numberOfReplicates}"
+      type="Integer"
       description="The number of replicates screened"
       editable="#{activityViewer.editMode &amp;&amp; (activityViewer.entity.class.simpleName != 'LibraryScreening' || activityViewer.platesScreenedDataModel.rowCount == 0)}" editWidth="2"
       rendered="#{activityViewer.entity.class.simpleName == 'LibraryScreening' || activityViewer.entity.class.simpleName == 'CherryPickScreening'}" />
@@ -165,10 +166,12 @@
               <t:panelGrid columns="6">
                 <ss:property id="newPlateRangeScreenedStartPlate"
                   label="Start Plate"
+                  type="Integer"
                   value="#{activityViewer.newPlateRangeScreenedStartPlate}"
                   editable="true" />
                 <ss:property id="newPlateRangeScreenedEndPlate"
                   label="End Plate"
+                  type="Integer"
                   value="#{activityViewer.newPlateRangeScreenedEndPlate}"
                   editable="true" />
                 <ss:property id="newPlateRangeScreenedCopy" label="Copy"

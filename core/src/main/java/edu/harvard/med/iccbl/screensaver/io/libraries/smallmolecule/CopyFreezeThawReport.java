@@ -26,7 +26,6 @@ import jxl.write.WritableWorkbook;
 import jxl.write.WriteException;
 import jxl.write.biff.RowsExceededException;
 import org.apache.commons.cli.OptionBuilder;
-import org.apache.commons.cli.ParseException;
 import org.apache.log4j.Logger;
 
 import edu.harvard.med.iccbl.screensaver.io.AdminEmailApplication;
@@ -95,11 +94,8 @@ public class CopyFreezeThawReport extends AdminEmailApplication
                                           .create(option[SHORT_OPTION_INDEX]));
 
     try {
-      if (!app.processOptions(/* acceptDatabaseOptions= */true,
-                              /* acceptAdminUserOptions= */true,
-                              /* showHelpOnError= */true)) {
-        return;
-      }
+      app.processOptions(/* acceptDatabaseOptions= */true,
+                         /* acceptAdminUserOptions= */true);
       AdministratorUser admin = app.findAdministratorUser();
 
       String fileName = app.getCommandLineOptionValue(OPTION_OUTPUT_FILE[SHORT_OPTION_INDEX]);
@@ -172,10 +168,6 @@ public class CopyFreezeThawReport extends AdminEmailApplication
                               adminEmail,
                               toList.toArray(new InternetAddress[] {}), null, file);
 
-    }
-    catch (ParseException e) {
-      log.error("error parsing command line options: " + e.getMessage());
-      System.exit(1); // error
     }
     catch (IOException e) {
       log.error("Error exporting", e);

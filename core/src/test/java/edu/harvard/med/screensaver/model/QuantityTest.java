@@ -12,7 +12,6 @@ package edu.harvard.med.screensaver.model;
 import java.math.BigDecimal;
 
 import junit.framework.TestCase;
-
 import org.apache.log4j.Logger;
 
 public class QuantityTest extends TestCase
@@ -89,7 +88,11 @@ public class QuantityTest extends TestCase
     c = new MolarConcentration("0.001", MolarUnit.MICROMOLAR).convertToReasonableUnits();
     assertEquals(MolarUnit.NANOMOLAR, c.getUnits());
     assertEquals(new BigDecimal("1.000"), c.getValue());
-}
+
+    c = new MolarConcentration("-5.0", MolarUnit.MICROMOLAR).convertToReasonableUnits();
+    assertEquals(MolarUnit.MICROMOLAR, c.getUnits());
+    assertEquals(new BigDecimal("-5.000000"), c.getValue());
+  }
   
   public void testValueExceedsScale()
   {

@@ -128,65 +128,53 @@ public class SmallMoleculeUserExpirationUpdater extends AdminEmailApplication
                              .withDescription(EXPIRATION_EMAIL_MESSAGE_LOCATION[DESCRIPTION_INDEX])
                              .withLongOpt(EXPIRATION_EMAIL_MESSAGE_LOCATION[LONG_OPTION_INDEX])
                              .create(EXPIRATION_EMAIL_MESSAGE_LOCATION[SHORT_OPTION_INDEX]));
-    
+
     app.addCommandLineOption(OptionBuilder
-                         .withDescription(TEST_ONLY[DESCRIPTION_INDEX])
-                         .withLongOpt(TEST_ONLY[LONG_OPTION_INDEX])
-                         .create(TEST_ONLY[SHORT_OPTION_INDEX]));
-    
-    try {
-      if (!app.processOptions(/* acceptDatabaseOptions= */true,
-                              /* acceptAdminOptions= */true,
-                              /* showHelpOnError= */true))
+                             .withDescription(TEST_ONLY[DESCRIPTION_INDEX])
+                             .withLongOpt(TEST_ONLY[LONG_OPTION_INDEX])
+                             .create(TEST_ONLY[SHORT_OPTION_INDEX]));
+
+    app.processOptions(true, true);
+
+    final GenericEntityDAO dao = (GenericEntityDAO) app.getSpringBean("genericEntityDao");
+
+    dao.doInTransaction(new DAOTransaction() {
+      public void runTransaction()
       {
-        return;
-      }
-
-      final GenericEntityDAO dao = (GenericEntityDAO) app.getSpringBean("genericEntityDao");
-
-      dao.doInTransaction(new DAOTransaction() {
-        public void runTransaction()
+        try
         {
-          try 
-          {
-            AdministratorUser admin = app.findAdministratorUser();
-            EmailService emailService = app.getEmailServiceBasedOnCommandLineOption(admin);
+          AdministratorUser admin = app.findAdministratorUser();
+          EmailService emailService = app.getEmailServiceBasedOnCommandLineOption(admin);
 
-            int timeToExpireDays = DEFAULT_EXPIRATION_TIME_DAYS;
-            if(app.isCommandLineFlagSet(EXPIRATION_TIME_OPTION[SHORT_OPTION_INDEX])) {
-              timeToExpireDays = app.getCommandLineOptionValue(EXPIRATION_TIME_OPTION[SHORT_OPTION_INDEX], Integer.class);
-            }
-            
-            if (app.isCommandLineFlagSet(NOTIFY_DAYS_AHEAD_OPTION[SHORT_OPTION_INDEX])) 
-            {
-              Integer daysAheadToNotify = app.getCommandLineOptionValue(NOTIFY_DAYS_AHEAD_OPTION[SHORT_OPTION_INDEX],
-                                                                        Integer.class);
-              app.notifyAhead(admin, emailService, daysAheadToNotify, timeToExpireDays);
-            }
-            else if (app.isCommandLineFlagSet(EXPIRE_OPTION[SHORT_OPTION_INDEX]))
-            {
-              app.expire(admin, emailService, timeToExpireDays);
-            } else {
-              log.info("Must specify either the \"" + NOTIFY_DAYS_AHEAD_OPTION[LONG_OPTION_INDEX] + "\" option or the \"" + EXPIRE_OPTION[LONG_OPTION_INDEX] + "\" option");
-              app.showHelp();
-              System.exit(1);
-            }
-            if(app.isCommandLineFlagSet(TEST_ONLY[SHORT_OPTION_INDEX])) {
-              throw new DAOTransactionRollbackException("Rollback, testing only");
-            }
+          int timeToExpireDays = DEFAULT_EXPIRATION_TIME_DAYS;
+          if (app.isCommandLineFlagSet(EXPIRATION_TIME_OPTION[SHORT_OPTION_INDEX])) {
+            timeToExpireDays = app.getCommandLineOptionValue(EXPIRATION_TIME_OPTION[SHORT_OPTION_INDEX], Integer.class);
           }
-          catch (Exception e) {
-            throw new DAOTransactionRollbackException(e);
+
+          if (app.isCommandLineFlagSet(NOTIFY_DAYS_AHEAD_OPTION[SHORT_OPTION_INDEX]))
+          {
+            Integer daysAheadToNotify = app.getCommandLineOptionValue(NOTIFY_DAYS_AHEAD_OPTION[SHORT_OPTION_INDEX],
+                                                                      Integer.class);
+            app.notifyAhead(admin, emailService, daysAheadToNotify, timeToExpireDays);
+          }
+          else if (app.isCommandLineFlagSet(EXPIRE_OPTION[SHORT_OPTION_INDEX]))
+          {
+            app.expire(admin, emailService, timeToExpireDays);
+          }
+          else {
+            app.showHelpAndExit("Must specify either the \"" + NOTIFY_DAYS_AHEAD_OPTION[LONG_OPTION_INDEX] + "\" option or the \"" +
+                         EXPIRE_OPTION[LONG_OPTION_INDEX] + "\" option");
+          }
+          if (app.isCommandLineFlagSet(TEST_ONLY[SHORT_OPTION_INDEX])) {
+            throw new DAOTransactionRollbackException("Rollback, testing only");
           }
         }
-      }); 
-      System.exit(0);
-    }
-    catch (ParseException e) {
-      log.error("error parsing command line options: " + e.getMessage());
-    }
-
-    System.exit(1); // error
+        catch (Exception e) {
+          throw new DAOTransactionRollbackException(e);
+        }
+      }
+    });
+    System.exit(0);
   }
 
 

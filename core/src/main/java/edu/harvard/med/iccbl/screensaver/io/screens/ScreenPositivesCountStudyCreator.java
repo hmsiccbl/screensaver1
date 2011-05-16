@@ -15,7 +15,6 @@ package edu.harvard.med.iccbl.screensaver.io.screens;
 import javax.mail.internet.InternetAddress;
 
 import org.apache.commons.cli.OptionBuilder;
-import org.apache.commons.cli.ParseException;
 import org.apache.log4j.Logger;
 
 import edu.harvard.med.iccbl.screensaver.io.AdminEmailApplication;
@@ -144,139 +143,124 @@ public class ScreenPositivesCountStudyCreator extends AdminEmailApplication
     app.addCommandLineOption(OptionBuilder.withDescription(TEST_ONLY[DESCRIPTION_INDEX])
                                           .withLongOpt(TEST_ONLY[LONG_OPTION_INDEX])
                                           .create(TEST_ONLY[SHORT_OPTION_INDEX]));
-    try {
-      if (!app.processOptions(/* acceptDatabaseOptions= */true,
-                              /* acceptAdminUserOptions= */true,
-                              /* showHelpOnError= */true)) {
-        return;
-      }
+    app.processOptions(/* acceptDatabaseOptions= */true,
+                       /* acceptAdminUserOptions= */true);
 
-      final GenericEntityDAO dao = (GenericEntityDAO) app.getSpringBean("genericEntityDao");
-      final ScreenResultReporter report = (ScreenResultReporter) app.getSpringBean("screenResultReporter");
-      final ScreenResultsDAO screenResultsDao = (ScreenResultsDAO) app.getSpringBean("screenResultsDao");
-      final ScreenDAO screenDao = (ScreenDAO) app.getSpringBean("screenDao");
+    final GenericEntityDAO dao = (GenericEntityDAO) app.getSpringBean("genericEntityDao");
+    final ScreenResultReporter report = (ScreenResultReporter) app.getSpringBean("screenResultReporter");
+    final ScreenResultsDAO screenResultsDao = (ScreenResultsDAO) app.getSpringBean("screenResultsDao");
+    final ScreenDAO screenDao = (ScreenDAO) app.getSpringBean("screenDao");
 
-      //TODO: Move the transactional code out of this class and into service methods
-      dao.doInTransaction(new DAOTransaction() {
-        public void runTransaction()
-        {
-          try {
-            AdministratorUser admin = app.findAdministratorUser();
+    //TODO: Move the transactional code out of this class and into service methods
+    dao.doInTransaction(new DAOTransaction() {
+      public void runTransaction()
+      {
+        try {
+          AdministratorUser admin = app.findAdministratorUser();
 
-            boolean replaceStudyIfExists = app.isCommandLineFlagSet(OPTION_REPLACE[SHORT_OPTION_INDEX]);
-            String title = null;
-            String summary = null;
-            String annotationDesc = null;
-            String overallAnnotationDesc = null;
+          boolean replaceStudyIfExists = app.isCommandLineFlagSet(OPTION_REPLACE[SHORT_OPTION_INDEX]);
+          String title = null;
+          String summary = null;
+          String annotationDesc = null;
+          String overallAnnotationDesc = null;
 
-            String studyFacilityId = null;
-            ScreenType screenType = null;
+          String studyFacilityId = null;
+          ScreenType screenType = null;
+          if (app.isCommandLineFlagSet(OPTION_SCREEN_TYPE_SM[SHORT_OPTION_INDEX])) {
+            screenType = ScreenType.SMALL_MOLECULE;
+            studyFacilityId = ScreensaverConstants.DEFAULT_BATCH_STUDY_ID_POSITIVE_COUNT_SM;
+            if (app.isCommandLineFlagSet(OPTION_STUDY_NUMBER[SHORT_OPTION_INDEX])) {
+              studyFacilityId = app.getCommandLineOptionValue(OPTION_STUDY_NUMBER[SHORT_OPTION_INDEX], String.class);
+            }
+            // todo: title = getMessages().getMessage("admin.studies.cross_screen_comparison_study.study_title");
+            title = DEFAULT_SM_STUDY_TITLE;
+            summary = DEFAULT_SM_STUDY_SUMMARY;
+            annotationDesc = DEFAULT_SM_POSITIVES_ANNOTATION_DESC;
+            overallAnnotationDesc = DEFAULT_SM_OVERALL_ANNOTATION_DESC;
+          }
+          if (app.isCommandLineFlagSet(OPTION_SCREEN_TYPE_RNAI[SHORT_OPTION_INDEX])) {
             if(app.isCommandLineFlagSet(OPTION_SCREEN_TYPE_SM[SHORT_OPTION_INDEX])) {
-              screenType = ScreenType.SMALL_MOLECULE;
-              studyFacilityId = ScreensaverConstants.DEFAULT_BATCH_STUDY_ID_POSITIVE_COUNT_SM;
-              if (app.isCommandLineFlagSet(OPTION_STUDY_NUMBER[SHORT_OPTION_INDEX])) {
-                studyFacilityId = app.getCommandLineOptionValue(OPTION_STUDY_NUMBER[SHORT_OPTION_INDEX], String.class);
-              }
-              // todo: title = getMessages().getMessage("admin.studies.cross_screen_comparison_study.study_title");
-              title = DEFAULT_SM_STUDY_TITLE;
-              summary = DEFAULT_SM_STUDY_SUMMARY;
-              annotationDesc = DEFAULT_SM_POSITIVES_ANNOTATION_DESC;
-              overallAnnotationDesc = DEFAULT_SM_OVERALL_ANNOTATION_DESC;
+              app.showHelpAndExit("Must specify either the \"" + OPTION_SCREEN_TYPE_SM[SHORT_OPTION_INDEX] + "\" or the \"" +
+                OPTION_SCREEN_TYPE_RNAI[SHORT_OPTION_INDEX] + "\" Option");
             }
-            if(app.isCommandLineFlagSet(OPTION_SCREEN_TYPE_RNAI[SHORT_OPTION_INDEX])) {
-              if(app.isCommandLineFlagSet(OPTION_SCREEN_TYPE_SM[SHORT_OPTION_INDEX])) {
-                System.out.println("Must specify either the \""+ OPTION_SCREEN_TYPE_SM[SHORT_OPTION_INDEX]
-                        + "\" or the \""+ OPTION_SCREEN_TYPE_RNAI[SHORT_OPTION_INDEX]+ "\" Option");
-                app.showHelp();
-                System.exit(1);
-              }
-              screenType = ScreenType.RNAI;
-              studyFacilityId = ScreensaverConstants.DEFAULT_BATCH_STUDY_ID_POSITIVE_COUNT_RNAI;
-              if (app.isCommandLineFlagSet(OPTION_STUDY_NUMBER[SHORT_OPTION_INDEX])) {
-                studyFacilityId = app.getCommandLineOptionValue(OPTION_STUDY_NUMBER[SHORT_OPTION_INDEX], String.class);
-              }
-              title = DEFAULT_RNAi_STUDY_TITLE;
-              summary = DEFAULT_RNAi_STUDY_SUMMARY;
-              annotationDesc = DEFAULT_RNAi_POSITIVES_ANNOTATION_DESC;
-              overallAnnotationDesc = DEFAULT_RNAi_OVERALL_ANNOTATION_DESC;
+            screenType = ScreenType.RNAI;
+            studyFacilityId = ScreensaverConstants.DEFAULT_BATCH_STUDY_ID_POSITIVE_COUNT_RNAI;
+            if (app.isCommandLineFlagSet(OPTION_STUDY_NUMBER[SHORT_OPTION_INDEX])) {
+              studyFacilityId = app.getCommandLineOptionValue(OPTION_STUDY_NUMBER[SHORT_OPTION_INDEX], String.class);
             }
-            if(screenType == null) {
-                System.out.println("Must specify either the \""+ OPTION_SCREEN_TYPE_SM[SHORT_OPTION_INDEX]
-                        + "\" or the \""+ OPTION_SCREEN_TYPE_RNAI[SHORT_OPTION_INDEX]+ "\" Option");
-              app.showHelp();
-              System.exit(1);
-            }
-            
+            title = DEFAULT_RNAi_STUDY_TITLE;
+            summary = DEFAULT_RNAi_STUDY_SUMMARY;
+            annotationDesc = DEFAULT_RNAi_POSITIVES_ANNOTATION_DESC;
+            overallAnnotationDesc = DEFAULT_RNAi_OVERALL_ANNOTATION_DESC;
+          }
+          if (screenType == null) {
+            app.showHelpAndExit("Must specify either the \"" + OPTION_SCREEN_TYPE_SM[SHORT_OPTION_INDEX] + "\" or the \"" +
+              OPTION_SCREEN_TYPE_RNAI[SHORT_OPTION_INDEX] + "\" Option");
+          }
 
-            //            if(app.isCommandLineFlagSet(OPTION_STUDY_NUMBER[SHORT_OPTION_INDEX])) {
-            //              app.getCommandLineOptionValue(OPTION_STUDY_NUMBER[SHORT_OPTION_INDEX], Integer.class);
-            //            }
-            if(app.isCommandLineFlagSet(OPTION_STUDY_TITLE[SHORT_OPTION_INDEX])){
-              title = app.getCommandLineOptionValue(OPTION_STUDY_TITLE[SHORT_OPTION_INDEX]);
-            }
-            if(app.isCommandLineFlagSet(OPTION_STUDY_SUMMARY[SHORT_OPTION_INDEX])){
-              summary = app.getCommandLineOptionValue(OPTION_STUDY_SUMMARY[SHORT_OPTION_INDEX]);
-            }
+          //            if(app.isCommandLineFlagSet(OPTION_STUDY_NUMBER[SHORT_OPTION_INDEX])) {
+          //              app.getCommandLineOptionValue(OPTION_STUDY_NUMBER[SHORT_OPTION_INDEX], Integer.class);
+          //            }
+          if (app.isCommandLineFlagSet(OPTION_STUDY_TITLE[SHORT_OPTION_INDEX])) {
+            title = app.getCommandLineOptionValue(OPTION_STUDY_TITLE[SHORT_OPTION_INDEX]);
+          }
+          if (app.isCommandLineFlagSet(OPTION_STUDY_SUMMARY[SHORT_OPTION_INDEX])) {
+            summary = app.getCommandLineOptionValue(OPTION_STUDY_SUMMARY[SHORT_OPTION_INDEX]);
+          }
 
-            Screen study = dao.findEntityByProperty(Screen.class, Screen.facilityId.getPropertyName(), studyFacilityId);
-            if (study != null) {
-              // first check if the study is out of date
-              ScreenResult latestScreenResult = screenResultsDao.getLatestScreenResult();
-              if (latestScreenResult == null)
-              {
-                log.info("No screen results found in the database");
-                System.exit(0);
-              }
-              else if (study.getDateCreated().compareTo(latestScreenResult.getDateCreated()) < 1) {
-                screenDao.deleteStudy(study);
-              }
-              else if (replaceStudyIfExists) {
-                screenDao.deleteStudy(study);
-              }else {                
-                String msg = "study " + studyFacilityId +
-                  " already exists and is up-to-date (as determined by the date of the latest uploaded screen result).  " +
-                  "Use the --" + OPTION_REPLACE[LONG_OPTION_INDEX] + " flag to delete the existing study first.";
-                log.info(msg);
-                System.exit(0);
-                }
+          Screen study = dao.findEntityByProperty(Screen.class, Screen.facilityId.getPropertyName(), studyFacilityId);
+          if (study != null) {
+            // first check if the study is out of date
+            ScreenResult latestScreenResult = screenResultsDao.getLatestScreenResult();
+            if (latestScreenResult == null)
+            {
+              log.info("No screen results found in the database");
+              System.exit(0);
             }
-
-            int count = report.createReagentCountStudy(admin,
-                                                    studyFacilityId,
-                                                title,
-                                                summary,
-                                                DEFAULT_POSITIVES_ANNOTATION_NAME,
-                                                annotationDesc,
-                                                DEFAULT_OVERALL_ANNOTATION_NAME,
-                                                overallAnnotationDesc,
-                                                screenType);
-            
-            InternetAddress adminEmail = app.getEmail(admin);
-            String subject = "Study created: " + study.getTitle(); //app.getMessages().getMessage("Study generated");
-            String msg = "Study: " + study.getFacilityId() + ", " + study.getTitle() + ": " + study.getSummary()
-              + "\nCross-screen Reagents found: " + count;
-            log.info(msg);
-            EmailService emailService = app.getEmailServiceBasedOnCommandLineOption(admin);
-            emailService.send(subject,
-                              msg,
-                              adminEmail,
-                              new InternetAddress[] { adminEmail }, null);
-    
-            if (app.isCommandLineFlagSet(TEST_ONLY[SHORT_OPTION_INDEX])) {
-              throw new DAOTransactionRollbackException("Rollback, testing only");
+            else if (study.getDateCreated().compareTo(latestScreenResult.getDateCreated()) < 1) {
+              screenDao.deleteStudy(study);
+            }
+            else if (replaceStudyIfExists) {
+              screenDao.deleteStudy(study);
+            }
+            else {
+              String msg = "study " + studyFacilityId +
+                " already exists and is up-to-date (as determined by the date of the latest uploaded screen result).  " +
+                "Use the --" + OPTION_REPLACE[LONG_OPTION_INDEX] + " flag to delete the existing study first.";
+              log.info(msg);
+              System.exit(0);
             }
           }
-          catch (Exception e) {
-            throw new DAOTransactionRollbackException(e);
+
+          int count = report.createReagentCountStudy(admin,
+                                                     studyFacilityId,
+                                                     title,
+                                                     summary,
+                                                     DEFAULT_POSITIVES_ANNOTATION_NAME,
+                                                     annotationDesc,
+                                                     DEFAULT_OVERALL_ANNOTATION_NAME,
+                                                     overallAnnotationDesc,
+                                                     screenType);
+
+          InternetAddress adminEmail = app.getEmail(admin);
+          String subject = "Study created: " + study.getTitle(); //app.getMessages().getMessage("Study generated");
+          String msg = "Study: " + study.getFacilityId() + ", " + study.getTitle() + ": " + study.getSummary()
+            + "\nCross-screen Reagents found: " + count;
+          log.info(msg);
+          EmailService emailService = app.getEmailServiceBasedOnCommandLineOption(admin);
+          emailService.send(subject,
+                            msg,
+                            adminEmail,
+                            new InternetAddress[] { adminEmail }, null);
+
+          if (app.isCommandLineFlagSet(TEST_ONLY[SHORT_OPTION_INDEX])) {
+            throw new DAOTransactionRollbackException("Rollback, testing only");
           }
         }
-      });
-      System.exit(0);
-    }
-    catch (ParseException e) {
-      log.error("error parsing command line options: " + e.getMessage());
-    }
-    System.exit(1); // error
+        catch (Exception e) {
+          throw new DAOTransactionRollbackException(e);
+        }
+      }
+    });
   }
-
 }

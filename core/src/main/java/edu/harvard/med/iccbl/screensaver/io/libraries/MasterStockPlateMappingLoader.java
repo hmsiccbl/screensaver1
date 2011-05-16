@@ -40,14 +40,11 @@ public class MasterStockPlateMappingLoader extends CommandLineApplication
   private static final Logger log = Logger.getLogger(MasterStockPlateMappingLoader.class);
 
   @SuppressWarnings("static-access")
-  public static void main(String[] args) throws ParseException, IOException
+  public static void main(String[] args) throws IOException
   {
     final MasterStockPlateMappingLoader app = new MasterStockPlateMappingLoader(args);
     app.addCommandLineOption(OptionBuilder.isRequired().hasArg(true).withArgName("file").withLongOpt("input-file").withDescription("The path of a CSV file containing the stock plate mapping data (master stock plate number, stock plate number, quadrant").create("f"));
-    boolean result = app.processOptions(true, false, true);
-    if (!result) {
-      System.exit(1);
-    }
+    app.processOptions(true, false);
     GenericEntityDAO dao = (GenericEntityDAO) app.getSpringBean("genericEntityDao");
     dao.doInTransaction(new DAOTransaction() {
       @Override

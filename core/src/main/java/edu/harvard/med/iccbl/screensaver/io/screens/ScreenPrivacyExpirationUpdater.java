@@ -168,77 +168,72 @@ public class ScreenPrivacyExpirationUpdater extends AdminEmailApplication
                          .withLongOpt(TEST_ONLY[LONG_OPTION_INDEX])
                          .create(TEST_ONLY[SHORT_OPTION_INDEX]));
     
-    try {
-      if (!app.processOptions(/* acceptDatabaseOptions= */true,
-                              /* acceptAdminUserOptions= */true,
-                              /* showHelpOnError= */true)) {
-        return;
-      }
+    app.processOptions(/* acceptDatabaseOptions= */true,
+                       /* acceptAdminUserOptions= */true);
 
-      final GenericEntityDAO dao = (GenericEntityDAO) app.getSpringBean("genericEntityDao");
+    final GenericEntityDAO dao = (GenericEntityDAO) app.getSpringBean("genericEntityDao");
 
-      dao.doInTransaction(new DAOTransaction() {
-        public void runTransaction()
-        {
-          try {
-            AdministratorUser admin = app.findAdministratorUser();
-     
-            EmailService emailService = app.getEmailServiceBasedOnCommandLineOption(admin);
+    dao.doInTransaction(new DAOTransaction() {
+      public void runTransaction()
+      {
+        try {
+          AdministratorUser admin = app.findAdministratorUser();
 
-            // check that not too many options are specified
-            int numberOfActions = 0;
-            if (app.isCommandLineFlagSet(NOTIFY_PRIVACY_EXPIRATION[SHORT_OPTION_INDEX])) numberOfActions++; 
-            if (app.isCommandLineFlagSet(NOTIFY_OF_PUBLICATIONS[SHORT_OPTION_INDEX])) numberOfActions++;
-            if (app.isCommandLineFlagSet(EXPIRE_PRIVACY[SHORT_OPTION_INDEX])) numberOfActions++;
-            if (app.isCommandLineFlagSet(ADJUST_DATA_PRIVACY_EXPIRATION_DATE_BASED_ON_ACTIVITY[SHORT_OPTION_INDEX])) numberOfActions++; 
-            if (numberOfActions > 1 ) 
-            {
-              log.error("May only specify one of: " + NOTIFY_PRIVACY_EXPIRATION[SHORT_OPTION_INDEX] 
-                                                    + ", " + NOTIFY_OF_PUBLICATIONS[SHORT_OPTION_INDEX] 
-                                                    + ", " + EXPIRE_PRIVACY[SHORT_OPTION_INDEX] 
-                                                    + ", " + ADJUST_DATA_PRIVACY_EXPIRATION_DATE_BASED_ON_ACTIVITY[SHORT_OPTION_INDEX] );
-              System.exit(1);
-            }
-            
-            if (app.isCommandLineFlagSet(NOTIFY_PRIVACY_EXPIRATION[SHORT_OPTION_INDEX])) 
-            {
-              Integer daysAheadToNotify = app.getCommandLineOptionValue(NOTIFY_PRIVACY_EXPIRATION[SHORT_OPTION_INDEX],
-                                                                        Integer.class);
-              app.findNewExpiredAndNotifyAhead(admin, daysAheadToNotify, emailService);
-            }
-            else if (app.isCommandLineFlagSet(NOTIFY_OF_PUBLICATIONS[SHORT_OPTION_INDEX])) 
-            {
-              app.notifyOfPublications(admin, emailService);
-            }
-            else if (app.isCommandLineFlagSet(EXPIRE_PRIVACY[SHORT_OPTION_INDEX])) 
-            {
-              app.expireScreenDataSharingLevels(admin, emailService);
-            }
-            else if (app.isCommandLineFlagSet(ADJUST_DATA_PRIVACY_EXPIRATION_DATE_BASED_ON_ACTIVITY[SHORT_OPTION_INDEX])) 
-            {
-              Integer ageToExpireFromActivityDateInDays = 
-                app.getCommandLineOptionValue(ADJUST_DATA_PRIVACY_EXPIRATION_DATE_BASED_ON_ACTIVITY[SHORT_OPTION_INDEX],Integer.class);
-              app.adjustDataPrivacyExpirationByActivities(admin, ageToExpireFromActivityDateInDays, emailService);
-            }else {
-              log.error("No action specified (expire, notify of privacy expirations, notify of publications, or adjust)?");
-              app.showHelp();
-              System.exit(1);
-            }
-            if(app.isCommandLineFlagSet(TEST_ONLY[SHORT_OPTION_INDEX])) {
-              throw new DAOTransactionRollbackException("Rollback, testing only");
-            }
+          EmailService emailService = app.getEmailServiceBasedOnCommandLineOption(admin);
+
+          // check that not too many options are specified
+          int numberOfActions = 0;
+          if (app.isCommandLineFlagSet(NOTIFY_PRIVACY_EXPIRATION[SHORT_OPTION_INDEX])) numberOfActions++;
+          if (app.isCommandLineFlagSet(NOTIFY_OF_PUBLICATIONS[SHORT_OPTION_INDEX])) numberOfActions++;
+          if (app.isCommandLineFlagSet(EXPIRE_PRIVACY[SHORT_OPTION_INDEX])) numberOfActions++;
+          if (app.isCommandLineFlagSet(ADJUST_DATA_PRIVACY_EXPIRATION_DATE_BASED_ON_ACTIVITY[SHORT_OPTION_INDEX])) numberOfActions++;
+          if (numberOfActions > 1)
+          {
+            log.error("May only specify one of: " +
+              NOTIFY_PRIVACY_EXPIRATION[SHORT_OPTION_INDEX]
+                                                                              +
+              ", " +
+              NOTIFY_OF_PUBLICATIONS[SHORT_OPTION_INDEX]
+                                                                                                              +
+              ", " +
+              EXPIRE_PRIVACY[SHORT_OPTION_INDEX]
+                                                                                                                                      +
+              ", " + ADJUST_DATA_PRIVACY_EXPIRATION_DATE_BASED_ON_ACTIVITY[SHORT_OPTION_INDEX]);
+            System.exit(1);
           }
-          catch (Exception e) {
-            throw new DAOTransactionRollbackException(e);
+
+          if (app.isCommandLineFlagSet(NOTIFY_PRIVACY_EXPIRATION[SHORT_OPTION_INDEX]))
+          {
+            Integer daysAheadToNotify = app.getCommandLineOptionValue(NOTIFY_PRIVACY_EXPIRATION[SHORT_OPTION_INDEX],
+                                                                      Integer.class);
+            app.findNewExpiredAndNotifyAhead(admin, daysAheadToNotify, emailService);
+          }
+          else if (app.isCommandLineFlagSet(NOTIFY_OF_PUBLICATIONS[SHORT_OPTION_INDEX]))
+          {
+            app.notifyOfPublications(admin, emailService);
+          }
+          else if (app.isCommandLineFlagSet(EXPIRE_PRIVACY[SHORT_OPTION_INDEX]))
+          {
+            app.expireScreenDataSharingLevels(admin, emailService);
+          }
+          else if (app.isCommandLineFlagSet(ADJUST_DATA_PRIVACY_EXPIRATION_DATE_BASED_ON_ACTIVITY[SHORT_OPTION_INDEX]))
+          {
+            Integer ageToExpireFromActivityDateInDays =
+              app.getCommandLineOptionValue(ADJUST_DATA_PRIVACY_EXPIRATION_DATE_BASED_ON_ACTIVITY[SHORT_OPTION_INDEX], Integer.class);
+            app.adjustDataPrivacyExpirationByActivities(admin, ageToExpireFromActivityDateInDays, emailService);
+          }
+          else {
+            app.showHelpAndExit("No action specified (expire, notify of privacy expirations, notify of publications, or adjust)?");
+          }
+          if (app.isCommandLineFlagSet(TEST_ONLY[SHORT_OPTION_INDEX])) {
+            throw new DAOTransactionRollbackException("Rollback, testing only");
           }
         }
-      });      
-      System.exit(0);
-    }
-    catch (ParseException e) {
-      log.error("error parsing command line options: " + e.getMessage());
-    }
-    System.exit(1); // error
+        catch (Exception e) {
+          throw new DAOTransactionRollbackException(e);
+        }
+      }
+    });
   }
   
   private void notifyOfPublications(AdministratorUser admin,

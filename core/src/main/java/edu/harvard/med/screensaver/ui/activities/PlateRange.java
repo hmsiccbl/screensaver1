@@ -26,16 +26,15 @@ import edu.harvard.med.screensaver.model.libraries.Library;
 import edu.harvard.med.screensaver.model.libraries.LibraryScreeningStatus;
 import edu.harvard.med.screensaver.model.libraries.Plate;
 import edu.harvard.med.screensaver.model.libraries.PlateStatus;
-import edu.harvard.med.screensaver.model.screenresults.AssayPlate;
 
 
-public class PlateRange implements Iterable<AssayPlate>
+public class PlateRange implements Iterable<Plate>
 {
-  private SortedSet<AssayPlate> _assayPlates;
+  private SortedSet<Plate> _plates;
 
-  public static List<PlateRange> splitIntoPlateCopyRanges(SortedSet<AssayPlate> assayPlates)
+  public static List<PlateRange> splitIntoPlateCopyRanges(SortedSet<Plate> plates)
   {
-    PeekingIterator<AssayPlate> iter = Iterators.peekingIterator(assayPlates.iterator());
+    PeekingIterator<Plate> iter = Iterators.peekingIterator(plates.iterator());
     List<PlateRange> plateRanges = Lists.newArrayList();;
     while (iter.hasNext()) {
       PlateRange plateRange = PlateRange.findNextPlateRange(iter, true);
@@ -44,9 +43,9 @@ public class PlateRange implements Iterable<AssayPlate>
     return plateRanges;
   }
   
-  public static List<PlateRange> splitIntoPlateRanges(SortedSet<AssayPlate> assayPlates)
+  public static List<PlateRange> splitIntoPlateRanges(SortedSet<Plate> plates)
   {
-    PeekingIterator<AssayPlate> iter = Iterators.peekingIterator(assayPlates.iterator());
+    PeekingIterator<Plate> iter = Iterators.peekingIterator(plates.iterator());
     List<PlateRange> plateRanges = Lists.newArrayList();;
     while (iter.hasNext()) {
       PlateRange plateRange = PlateRange.findNextPlateRange(iter, false);
@@ -55,57 +54,57 @@ public class PlateRange implements Iterable<AssayPlate>
     return plateRanges;
   }
   
-  private static PlateRange findNextPlateRange(PeekingIterator<AssayPlate> iter, boolean splitOnCopy) 
+  private static PlateRange findNextPlateRange(PeekingIterator<Plate> iter, boolean splitOnCopy)
   {
-    SortedSet<AssayPlate> assayPlatesScreened = Sets.newTreeSet();
-    assayPlatesScreened.add(iter.next());
+    SortedSet<Plate> platesScreened = Sets.newTreeSet();
+    platesScreened.add(iter.next());
     while (iter.hasNext()) {
-      AssayPlate next = iter.peek();
-      AssayPlate last = assayPlatesScreened.last();
+      Plate next = iter.peek();
+      Plate last = platesScreened.last();
       if (next.getPlateNumber() > last.getPlateNumber() + 1) {
         break;
       }
-      else if (splitOnCopy && !next.getPlateScreened().getCopy().equals(last.getPlateScreened().getCopy())) {
+      else if (splitOnCopy && !next.getCopy().equals(last.getCopy())) {
         break;
       }
-      assayPlatesScreened.add(iter.next());
+      platesScreened.add(iter.next());
     }
-    return new PlateRange(assayPlatesScreened);
+    return new PlateRange(platesScreened);
   }
 
-  private PlateRange(SortedSet<AssayPlate> assayPlatesScreened)
+  private PlateRange(SortedSet<Plate> platesScreened)
   {
-    _assayPlates = assayPlatesScreened;
+    _plates = platesScreened;
   }
   
   public Plate getStartPlate()
   {
-    return _assayPlates.first().getPlateScreened();
+    return _plates.first();
   }
   
   public Plate getEndPlate()
   {
-    return _assayPlates.last().getPlateScreened();
+    return _plates.last();
   }
   
   public int getSize()
   {
-    return _assayPlates.size();
+    return _plates.size();
   }
   
-  public SortedSet<AssayPlate> getAssayPlates()
+  public SortedSet<Plate> getPlates()
   {
-    return _assayPlates;
+    return _plates;
   }
 
-  public Iterator<AssayPlate> iterator()
+  public Iterator<Plate> iterator()
   {
-    return _assayPlates.iterator();
+    return _plates.iterator();
   }
 
   public Library getLibrary()
   {
-    return _assayPlates.first().getPlateScreened().getCopy().getLibrary();
+    return _plates.first().getCopy().getLibrary();
   }
 
   public String getAdminLibraryWarning()
@@ -124,7 +123,7 @@ public class PlateRange implements Iterable<AssayPlate>
         return p.getStatus() != PlateStatus.AVAILABLE;
       }
     };
-    Set<Plate> invalidPlates = Sets.newTreeSet(Iterables.filter(Iterables.transform(_assayPlates, AssayPlate.ToPlate), plateStatusNotAvailable));
+    Set<Plate> invalidPlates = Sets.newTreeSet(Iterables.filter(_plates, plateStatusNotAvailable));
     Set<PlateStatus> invalidStatuses = Sets.newTreeSet(Iterables.transform(invalidPlates, Plate.ToStatus));
     warnings.add("Plate(s) have invalid status(es): " + Joiner.on(", ").join(invalidStatuses));
 
@@ -134,6 +133,6 @@ public class PlateRange implements Iterable<AssayPlate>
   @Override
   public String toString()
   {
-    return "[" + _assayPlates.first().getPlateNumber() + ".." + _assayPlates.last().getPlateNumber() + "]";
+    return "[" + _plates.first().getPlateNumber() + ".." + _plates.last().getPlateNumber() + "]";
   }
 }

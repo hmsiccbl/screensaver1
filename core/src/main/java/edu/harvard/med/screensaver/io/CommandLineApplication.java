@@ -137,7 +137,7 @@ public class CommandLineApplication
     _option2DefaultValue.put(option.getOpt(), defaultValue);
   }
 
-  public String getCommandLineOptionValue(String optionName) throws ParseException
+  public String getCommandLineOptionValue(String optionName)
   {
     verifyOptionsProcessed();
     _lastAccessOption = _options.getOption(optionName);
@@ -149,7 +149,7 @@ public class CommandLineApplication
     return optionValue == null ? "" : optionValue.toString();
   }
 
-  public List<String> getCommandLineOptionValues(String optionName) throws ParseException
+  public List<String> getCommandLineOptionValues(String optionName)
   {
     verifyOptionsProcessed();
     _lastAccessOption = _options.getOption(optionName);
@@ -170,7 +170,6 @@ public class CommandLineApplication
   }
 
   public <T> T getCommandLineOptionValue(String optionName, Class<T> ofType)
-    throws ParseException
   {
     verifyOptionsProcessed();
     _lastAccessOption = _options.getOption(optionName);
@@ -185,14 +184,14 @@ public class CommandLineApplication
         return (T) cstr.newInstance(value);
       }
       catch (Exception e) {
-        throw new ParseException("could not parse option " + optionName + " with arg " + value + " as type " + ofType.getSimpleName() + e);
+        showHelpAndExit("could not parse option " + optionName + " with arg " + value + " as type " + ofType.getSimpleName() + ": " +
+          e);
       }
     }
     return null;
   }
 
   public <T extends Enum<T>> T getCommandLineOptionEnumValue(String optionName, Class<T> ofEnum)
-    throws ParseException
   {
     verifyOptionsProcessed();
     _lastAccessOption = _options.getOption(optionName);
@@ -207,7 +206,8 @@ public class CommandLineApplication
         return (T) valueOf;
       }
       catch (Exception e) {
-        throw new ParseException("could not parse option " + optionName + " with arg " + value + " as enum " + ofEnum.getClass().getSimpleName());
+        showHelpAndExit("could not parse option " + optionName + " with arg " + value + " as enum " +
+          ofEnum.getClass().getSimpleName());
       }
     }
     return null;
@@ -235,30 +235,30 @@ public class CommandLineApplication
     return null;
   }
 
-  public boolean isCommandLineFlagSet(String optionName) throws ParseException
+  public boolean isCommandLineFlagSet(String optionName)
   {
     verifyOptionsProcessed();
     return _cmdLine.hasOption(optionName);
   }
 
-  public void showHelp()
+  public void showHelpAndExit(String errorMessage)
   {
+    if (errorMessage != null) {
+      System.out.println(errorMessage);
+    }
     new HelpFormatter().printHelp("command", _options, true);
+    System.exit(errorMessage != null ? 1 : 0);
   }
 
   /**
+   * Parses command line arguments. On error, shows help and exits JVM process with status 1.
+   * 
    * @param acceptDatabaseOptions
    * @param acceptAdminUserOptions
-   * @param showHelpOnError if true and method returns false, calling code
-   *          should not call {@link #getCommandLineOptionValue} or {@link #isCommandLineFlagSet(String)}.
-   * @return true if options were successfully processed, false if options were not successfully processed and
-   *         showHelpOnError is true
-   * @throws ParseException if options were not successfully processed and showHelpOnError is false
    */
   @SuppressWarnings("unchecked")
-  public boolean processOptions(boolean acceptDatabaseOptions,
-                                boolean acceptAdminUserOptions,
-                                boolean showHelpOnError) throws ParseException
+  public void processOptions(boolean acceptDatabaseOptions,
+                             boolean acceptAdminUserOptions)
   {
     if (acceptDatabaseOptions) {
       addDatabaseOptions();
@@ -269,51 +269,42 @@ public class CommandLineApplication
 
     try {
       _cmdLine = new GnuParser().parse(_options, _cmdLineArgs);
+      if (acceptDatabaseOptions) {
+        if (isCommandLineFlagSet("D")) {
+          DatabaseConnectionSettings settings =
+            // note: we want non-specified options to be recorded as nulls, not as empty strings, as these have 
+            // different meanings (null meaning that the option has not been provided by the user at all)
+            new DatabaseConnectionSettings(isCommandLineFlagSet("H") ? getCommandLineOptionValue("H") : null,
+                                           getCommandLineOptionValue("T", Integer.class),
+                                           getCommandLineOptionValue("D"),
+                                           isCommandLineFlagSet("U") ? getCommandLineOptionValue("U") : null,
+                                           isCommandLineFlagSet("P") ? getCommandLineOptionValue("P") : null);
+          System.getProperties().put(CMD_LINE_ARGS_DATABASE_CONNECTION_SETTINGS, settings);
+        }
+      }
+
+      StringBuilder s = new StringBuilder();
+      for (Option option : (Collection<Option>) _options.getOptions()) {
+        if (_cmdLine.hasOption(option.getOpt())) {
+          if (s.length() > 0) {
+            s.append(", ");
+          }
+          s.append(option.getLongOpt());
+          if (option.hasArg()) {
+            s.append("=").append(_cmdLine.getOptionValue(option.getOpt()));
+          }
+        }
+      }
+      log.info("command line options: " + s.toString());
     }
     catch (ParseException e) {
-      if (showHelpOnError) {
-        System.out.println(e.getMessage());
-        showHelp();
-        return false;
-      }
-      else {
-        throw e;
-      }
+      showHelpAndExit(e.getMessage());
     }
 
     if (_cmdLine.hasOption("help")) {
-      showHelp();
+      showHelpAndExit(null);
     }
 
-    if (acceptDatabaseOptions) {
-      if (isCommandLineFlagSet("D")) {
-        DatabaseConnectionSettings settings =
-          // note: we want non-specified options to be recorded as nulls, not as empty strings, as these have 
-          // different meanings (null meaning that the option has not been provided by the user at all)
-          new DatabaseConnectionSettings(isCommandLineFlagSet("H") ? getCommandLineOptionValue("H") : null,
-                                         getCommandLineOptionValue("T", Integer.class),
-                                         getCommandLineOptionValue("D"),
-                                         isCommandLineFlagSet("U") ? getCommandLineOptionValue("U") : null,
-                                         isCommandLineFlagSet("P") ? getCommandLineOptionValue("P") : null);
-        System.getProperties().put(CMD_LINE_ARGS_DATABASE_CONNECTION_SETTINGS, settings);
-      }
-    }
-
-    StringBuilder s = new StringBuilder();
-    for (Option option : (Collection<Option>) _options.getOptions()) {
-      if (_cmdLine.hasOption(option.getOpt())) {
-        if (s.length() > 0) {
-          s.append(", ");
-        }
-        s.append(option.getLongOpt());
-        if (option.hasArg()) {
-          s.append("=").append(_cmdLine.getOptionValue(option.getOpt()));
-        }
-      }
-    }
-    log.info("command line options: " + s.toString());
-
-    return true;
   }
 
 
@@ -391,7 +382,7 @@ public class CommandLineApplication
                          .create("AE"));
   }
 
-  public AdministratorUser findAdministratorUser() throws ParseException
+  public AdministratorUser findAdministratorUser()
   {
     AdministratorUser admin;
     String criterionMessage;

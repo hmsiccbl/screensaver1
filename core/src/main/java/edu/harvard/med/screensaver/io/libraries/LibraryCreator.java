@@ -89,9 +89,7 @@ public class LibraryCreator
           .withDescription(StringUtils.makeListString(Arrays.asList(PlateSize.values()), ", "))
             .withLongOpt("plate-size").create("ps"));
 
-      if (!app.processOptions(true, true, true)) {
-        System.exit(1);
-      }
+      app.processOptions(true, true);
 
       String libraryName = app.getCommandLineOptionValue("n");
       String shortName = app.getCommandLineOptionValue("s");

@@ -26,7 +26,6 @@ import javax.mail.internet.MimeMessage;
 import javax.mail.internet.MimeMultipart;
 
 import org.apache.commons.cli.OptionBuilder;
-import org.apache.commons.cli.ParseException;
 import org.apache.log4j.Logger;
 
 import edu.harvard.med.screensaver.io.CommandLineApplication;
@@ -412,55 +411,40 @@ public class SmtpEmailService implements EmailService
                                           .create(option[SHORT_OPTION_INDEX]));
 
 
-    try {
-      if (!app.processOptions(/* acceptDatabaseOptions= */true,
-                              /* acceptAdminOptions = */true,
-                              /* showHelpOnError= */true)) {
-        return;
+    app.processOptions(true, true);
+
+    String message = app.getCommandLineOptionValue(MAIL_MESSAGE_OPTION[SHORT_OPTION_INDEX]);
+
+    File attachedFile = null;
+    if (app.isCommandLineFlagSet(MAIL_FILE_ATTACHMENT[SHORT_OPTION_INDEX])) {
+      attachedFile = new File(app.getCommandLineOptionValue(MAIL_FILE_ATTACHMENT[SHORT_OPTION_INDEX]));
+      if (!attachedFile.exists()) {
+        log.error("Specified file does not exist: " + attachedFile.getCanonicalPath());
+        System.exit(1);
       }
-
-      String message = app.getCommandLineOptionValue(MAIL_MESSAGE_OPTION[SHORT_OPTION_INDEX]);
-
-      File attachedFile = null;
-      if (app.isCommandLineFlagSet(MAIL_FILE_ATTACHMENT[SHORT_OPTION_INDEX])) {
-        attachedFile = new File(app.getCommandLineOptionValue(MAIL_FILE_ATTACHMENT[SHORT_OPTION_INDEX]));
-        if (!attachedFile.exists()) {
-          log.error("Specified file does not exist: " + attachedFile.getCanonicalPath());
-          System.exit(1);
-        }
-      }
-
-      String subject = app.getCommandLineOptionValue(MAIL_SUBJECT_OPTION[SHORT_OPTION_INDEX]);
-      String recipientlist = app.getCommandLineOptionValue(MAIL_RECIPIENT_LIST_OPTION[SHORT_OPTION_INDEX]);
-      String[] recipients = recipientlist.split(DELIMITER);
-      
-      String[] ccrecipients = null;
-      if (app.isCommandLineFlagSet(MAIL_CC_LIST_OPTION[SHORT_OPTION_INDEX])) {
-        String cclist = app.getCommandLineOptionValue(MAIL_CC_LIST_OPTION[SHORT_OPTION_INDEX]);
-        ccrecipients = cclist.split(DELIMITER);
-      }
-      
-      String mailHost = app.getCommandLineOptionValue(MAIL_SERVER_OPTION[SHORT_OPTION_INDEX]);
-      String username = app.getCommandLineOptionValue(MAIL_USERNAME_OPTION[SHORT_OPTION_INDEX]);
-      String password = app.getCommandLineOptionValue(MAIL_USER_PASSWORD_OPTION[SHORT_OPTION_INDEX]);
-      boolean useSmtps = app.isCommandLineFlagSet(MAIL_USE_SMTPS[SHORT_OPTION_INDEX]);
-
-      String mailFrom = username;
-      if(app.isCommandLineFlagSet(MAIL_FROM_OPTION[SHORT_OPTION_INDEX])){
-        mailFrom = app.getCommandLineOptionValue(MAIL_FROM_OPTION[SHORT_OPTION_INDEX]);
-      }
-      
-      SmtpEmailService service = new SmtpEmailService(mailHost, username, password, useSmtps);
-      service.send(subject, message, mailFrom, recipients, ccrecipients, attachedFile);
-
-      System.exit(0);
     }
-    catch (ParseException e) {
-      log.error("error parsing command line options: " + e.getMessage());
-    }
-    System.exit(1); // error
 
+    String subject = app.getCommandLineOptionValue(MAIL_SUBJECT_OPTION[SHORT_OPTION_INDEX]);
+    String recipientlist = app.getCommandLineOptionValue(MAIL_RECIPIENT_LIST_OPTION[SHORT_OPTION_INDEX]);
+    String[] recipients = recipientlist.split(DELIMITER);
+
+    String[] ccrecipients = null;
+    if (app.isCommandLineFlagSet(MAIL_CC_LIST_OPTION[SHORT_OPTION_INDEX])) {
+      String cclist = app.getCommandLineOptionValue(MAIL_CC_LIST_OPTION[SHORT_OPTION_INDEX]);
+      ccrecipients = cclist.split(DELIMITER);
+    }
+
+    String mailHost = app.getCommandLineOptionValue(MAIL_SERVER_OPTION[SHORT_OPTION_INDEX]);
+    String username = app.getCommandLineOptionValue(MAIL_USERNAME_OPTION[SHORT_OPTION_INDEX]);
+    String password = app.getCommandLineOptionValue(MAIL_USER_PASSWORD_OPTION[SHORT_OPTION_INDEX]);
+    boolean useSmtps = app.isCommandLineFlagSet(MAIL_USE_SMTPS[SHORT_OPTION_INDEX]);
+
+    String mailFrom = username;
+    if (app.isCommandLineFlagSet(MAIL_FROM_OPTION[SHORT_OPTION_INDEX])) {
+      mailFrom = app.getCommandLineOptionValue(MAIL_FROM_OPTION[SHORT_OPTION_INDEX]);
+    }
+
+    SmtpEmailService service = new SmtpEmailService(mailHost, username, password, useSmtps);
+    service.send(subject, message, mailFrom, recipients, ccrecipients, attachedFile);
   }
-
-
 }

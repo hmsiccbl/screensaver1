@@ -55,9 +55,7 @@ public class WellDeprecator
       app.addCommandLineOption(OptionBuilder.hasArg().isRequired().withArgName("yyyy-mm-dd").withLongOpt("approval-date").withDescription("date this well deprecation activity was approved").create("d"));
       app.addCommandLineOption(OptionBuilder.hasArg().isRequired().withArgName("text").withLongOpt("comments").create("c"));
       app.addCommandLineOption(OptionBuilder.hasArg().isRequired().withArgName("file").withLongOpt("input-file").withDescription("workbook file containing list of wells to be deprecated").create("f"));
-      if (!app.processOptions(true, true, true)) {
-        System.exit(1);
-      }
+      app.processOptions(true, true);
 
       String comments = app.getCommandLineOptionValue("c");
       Integer approvedByAdminId = app.getCommandLineOptionValue("aa", Integer.class);

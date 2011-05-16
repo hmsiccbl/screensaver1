@@ -10,6 +10,7 @@
 package edu.harvard.med.iccbl.screensaver.io.libraries;
 
 import java.io.File;
+import java.io.FileNotFoundException;
 import java.util.Map;
 
 import com.google.common.collect.Maps;
@@ -56,47 +57,37 @@ public class PlateBatchUpdater
   private static Logger log = Logger.getLogger(PlateBatchUpdater.class);
 
   @SuppressWarnings("static-access")
-  public static void main(String[] args)
+  public static void main(String[] args) throws FileNotFoundException
   {
     final CommandLineApplication app = new CommandLineApplication(args);
-    try {
-      app.addCommandLineOption(OptionBuilder.hasArg().isRequired().withArgName("file").withLongOpt("input-file").withDescription("workbook file containing plate information").create("f"));
-      app.addCommandLineOption(OptionBuilder.hasArg(false).withLongOpt("no-update").withDescription("do not perform update to database (test run only)").create("n"));
-      if (!app.processOptions(true, true, true)) {
-        System.exit(1);
-      }
+    app.addCommandLineOption(OptionBuilder.hasArg().isRequired().withArgName("file").withLongOpt("input-file").withDescription("workbook file containing plate information").create("f"));
+    app.addCommandLineOption(OptionBuilder.hasArg(false).withLongOpt("no-update").withDescription("do not perform update to database (test run only)").create("n"));
+    app.processOptions(true, true);
 
-      final GenericEntityDAO dao = (GenericEntityDAO) app.getSpringBean("genericEntityDao");
-      final LibrariesDAO librariesDao = (LibrariesDAO) app.getSpringBean("librariesDao");
-      final PlateUpdater plateUpdater = (PlateUpdater) app.getSpringBean("plateUpdater");
-      final AdministratorUser recordedBy = app.findAdministratorUser();
-      final boolean isNoUpdateMode = app.isCommandLineFlagSet("n");
-      File file = app.getCommandLineOptionValue("f", File.class);
-      Workbook wbk = new Workbook(file);
-      final Worksheet worksheet = wbk.getWorksheet(0).forOrigin(0, 1);
+    final GenericEntityDAO dao = (GenericEntityDAO) app.getSpringBean("genericEntityDao");
+    final LibrariesDAO librariesDao = (LibrariesDAO) app.getSpringBean("librariesDao");
+    final PlateUpdater plateUpdater = (PlateUpdater) app.getSpringBean("plateUpdater");
+    final AdministratorUser recordedBy = app.findAdministratorUser();
+    final boolean isNoUpdateMode = app.isCommandLineFlagSet("n");
+    File file = app.getCommandLineOptionValue("f", File.class);
+    Workbook wbk = new Workbook(file);
+    final Worksheet worksheet = wbk.getWorksheet(0).forOrigin(0, 1);
 
-      dao.doInTransaction(new DAOTransaction() {
-        @Override
-        public void runTransaction()
-        {
-          int nPlatesUpdated = updatePlates(worksheet,
-                                            dao,
-                                            librariesDao,
-                                            plateUpdater,
-                                            recordedBy);
-          log.info("successfully updated " + nPlatesUpdated + " plates");
-          if (isNoUpdateMode) {
-            throw new DAOTransactionRollbackException("performed test run only; aborting updates");
-          }
+    dao.doInTransaction(new DAOTransaction() {
+      @Override
+      public void runTransaction()
+      {
+        int nPlatesUpdated = updatePlates(worksheet,
+                                          dao,
+                                          librariesDao,
+                                          plateUpdater,
+                                          recordedBy);
+        log.info("successfully updated " + nPlatesUpdated + " plates");
+        if (isNoUpdateMode) {
+          throw new DAOTransactionRollbackException("performed test run only; aborting updates");
         }
-      });
-
-    }
-    catch (Exception e) {
-      e.printStackTrace();
-      log.error(e.toString());
-      System.exit(1);
-    }
+      }
+    });
   }
 
   private static Map<String,PlateStatus> plateStatusMap = Maps.newHashMap();

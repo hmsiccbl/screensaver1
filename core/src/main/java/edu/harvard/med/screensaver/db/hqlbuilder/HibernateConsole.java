@@ -33,22 +33,14 @@ import edu.harvard.med.screensaver.util.StringUtils;
  */
 public class HibernateConsole 
 {
-  // static members
-
   private static Logger log = Logger.getLogger(HibernateConsole.class);
 
-  /**
-   * @param args
-   */
-  @SuppressWarnings("unchecked")
   public static void main(String[] args)
   {
     BufferedReader br = null;
     try {
       CommandLineApplication app = new CommandLineApplication(args);
-      if (!app.processOptions(true, false, true)) {
-        System.exit(1);
-      }
+      app.processOptions(true, false);
       br = new BufferedReader(new InputStreamReader(System.in));
 
       EntityManagerFactory emf = (EntityManagerFactory) app.getSpringBean("entityManagerFactory");

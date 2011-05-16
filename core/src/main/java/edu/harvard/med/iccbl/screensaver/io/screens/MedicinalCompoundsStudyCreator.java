@@ -16,7 +16,6 @@ import java.util.SortedMap;
 import java.util.TreeMap;
 
 import org.apache.commons.cli.OptionBuilder;
-import org.apache.commons.cli.ParseException;
 import org.apache.log4j.Logger;
 
 import edu.harvard.med.screensaver.db.DAOTransaction;
@@ -98,17 +97,8 @@ public class MedicinalCompoundsStudyCreator extends CommandLineApplication
   {
     final MedicinalCompoundsStudyCreator app = new MedicinalCompoundsStudyCreator(args);
     app.addCommandLineOption(OptionBuilder.isRequired().hasArg().withArgName("workbook file").withLongOpt("input-file").create("f"));
-    try {
-      if (!app.processOptions(true, true, true)) {
-        return;
-      }
-    }
-    catch (ParseException e1) {
-      System.exit(1);
-    }
-
+    app.processOptions(true, true);
     app.run();
-
   }
 
   public void run()

@@ -87,9 +87,8 @@ public class StudyCreator
     app = new CommandLineApplication(args);
     configureCommandLineArguments(app);
 
-    if (!app.processOptions(true, /* acceptAdminUserOptions= */true, true)) { // require acceptAdminUserOptions=true for app.findAdministratorUser
-      throw new IllegalArgumentException("invalid usage");
-    }
+    // require acceptAdminUserOptions=true for app.findAdministratorUser
+    app.processOptions(true, true);
 
     dao = (GenericEntityDAO) app.getSpringBean("genericEntityDao");
 

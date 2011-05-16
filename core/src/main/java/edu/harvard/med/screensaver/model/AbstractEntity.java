@@ -15,6 +15,7 @@ import java.lang.reflect.Method;
 import java.util.Collection;
 import java.util.Map;
 
+import javax.persistence.Embeddable;
 import javax.persistence.Transient;
 
 import org.apache.commons.beanutils.PropertyUtils;
@@ -293,8 +294,13 @@ public abstract class AbstractEntity<K extends Serializable> implements Entity<K
     if (method.getAnnotation(Column.class) != null && method.getAnnotation(Column.class).isNotEquivalenceProperty()) {
       return false;
     }
+    // do not check embeddable types (as this would require descending into the embeddable to check equivalence)
+    if (property.getPropertyType().getAnnotation(Embeddable.class) != null) {
+      return false;
+    }
 
-    return !(Collection.class.isAssignableFrom(property.getPropertyType()) || Map.class.isAssignableFrom(property.getPropertyType()) || AbstractEntity.class.isAssignableFrom(property.getPropertyType()));
+    return !(Collection.class.isAssignableFrom(property.getPropertyType()) ||
+      Map.class.isAssignableFrom(property.getPropertyType()) || AbstractEntity.class.isAssignableFrom(property.getPropertyType()));
   }
 
   /**

@@ -85,11 +85,12 @@
             <artifactId>hibernate-core</artifactId>
             <version>${hibernate-core.version}</version>
           </dependency>
+          <!-- 
           <dependency>
             <groupId>org.hibernate</groupId>
             <artifactId>hibernate-validator</artifactId>
             <version>${hibernate-validator-version}</version>
-          </dependency>
+          </dependency>  -->
           <dependency>
             <groupId>org.hibernate</groupId>
             <artifactId>hibernate-entitymanager</artifactId>
@@ -104,7 +105,7 @@
   <properties>
     <org.springframework.version>3.0.5.RELEASE</org.springframework.version>
     <hibernate-core.version>3.6.2.Final</hibernate-core.version>
-    <hibernate-validator-version>4.1.0.Final</hibernate-validator-version>
+    <!--hibernate-validator-version>4.1.0.Final</hibernate-validator-version-->
     <hibernate-entity-manager-version>3.6.0.Final</hibernate-entity-manager-version>
   </properties>
 
@@ -130,18 +131,29 @@
 
   <dependencies>
 
+    <!-- "0_" prefix allows this to be found in classpath before hibernate-core*.jar -->
+    <!-- NOTE: this file must be added to the local repository with: 
+         mvn install:install-file -DgroupId=edu.harvard.med.iccbl -DartifactId=hibernate-core-patch -Dversion=3.6.2.Final-patch -Dpackaging=jar -Dfile=target/0_hibernate-core-patch-3.6.2.Final-patch.jar
+    -->
+    <dependency>
+      <groupId>edu.harvard.med.iccbl</groupId>
+      <artifactId>0_hibernate-core-patch</artifactId>
+      <version>${hibernate-core.version}</version>
+    </dependency>
+
     <dependency>
       <groupId>org.hibernate</groupId>
       <artifactId>hibernate-core</artifactId>
       <version>${hibernate-core.version}</version>
     </dependency>
 
+<!-- 
     <dependency>
       <groupId>org.hibernate</groupId>
       <artifactId>hibernate-validator</artifactId>
       <version>${hibernate-validator-version}</version>
     </dependency>
-
+ -->
     <dependency>
       <groupId>org.hibernate</groupId>
       <artifactId>hibernate-entitymanager</artifactId>

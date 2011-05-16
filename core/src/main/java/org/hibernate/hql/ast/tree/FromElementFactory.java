@@ -55,6 +55,9 @@ import org.slf4j.LoggerFactory;
 public class FromElementFactory implements SqlTokenTypes {
 
 	private static final Logger log = LoggerFactory.getLogger( FromElementFactory.class );
+  static {
+    log.info("using local patched version of " + FromElementFactory.class);
+  }
 
 	private FromClause fromClause;
 	private FromElement origin;

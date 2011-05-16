@@ -1,11 +1,12 @@
+#!/bin/bash
 # runs a Screensaver command-line utility
-# usage: run.sh <fully qualifed class> <arg>...
+# usage: run.sh <fully qualified class> <arg>...
 
-while getopts 'd' opt; do
+if [[ $1 == '-debug' ]]; then
   echo Running in debug mode...
   DEBUG_OPTIONS=-agentlib:jdwp=transport=dt_socket,server=y,address=8000
-done
-shift $(( $OPTIND - 1 ))
+  shift 1
+fi
 
 SCREENSAVER=.
 JAVA=$JAVA_HOME/bin/java 

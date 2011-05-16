@@ -52,7 +52,7 @@ public class ScreenDerivedPropertiesUpdater
   }
 
   @Transactional
-  public void updateScreeningStatistics(Screen screenIn)
+  public Screen updateScreeningStatistics(Screen screenIn)
   {
     _dao.flush(); // ensure all of the data that were are about to query is flushed to the database
     Screen screen = (Screen) _dao.reloadEntity(screenIn);
@@ -86,6 +86,7 @@ public class ScreenDerivedPropertiesUpdater
     if (screen.getScreenResult() != null) {
       screen.getScreenResult().setExperimentalWellCount(_screenDao.countLoadedExperimentalWells(screen));
     }
+    return screen;
   }
 
   private SortedSet<Integer> findMaxReplicatesPerPlateNumber(SortedSet<AssayPlate> assayPlatesScreened)

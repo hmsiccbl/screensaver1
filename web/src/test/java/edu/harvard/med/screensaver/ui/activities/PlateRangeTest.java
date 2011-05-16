@@ -9,7 +9,6 @@
 
 package edu.harvard.med.screensaver.ui.activities;
 
-import java.util.Iterator;
 import java.util.List;
 
 import com.google.common.collect.ImmutableSortedSet;
@@ -21,7 +20,6 @@ import edu.harvard.med.screensaver.model.libraries.Copy;
 import edu.harvard.med.screensaver.model.libraries.CopyUsageType;
 import edu.harvard.med.screensaver.model.libraries.Library;
 import edu.harvard.med.screensaver.model.libraries.Plate;
-import edu.harvard.med.screensaver.model.screenresults.AssayPlate;
 import edu.harvard.med.screensaver.model.screens.LibraryScreening;
 import edu.harvard.med.screensaver.model.screens.Screen;
 import edu.harvard.med.screensaver.model.users.AdministratorUser;
@@ -48,38 +46,28 @@ public class PlateRangeTest extends TestCase
     libraryScreening.addAssayPlatesScreened(plate101);
     libraryScreening.addAssayPlatesScreened(plate102);
     libraryScreening.addAssayPlatesScreened(plate103);
-    Iterator<AssayPlate> iter = libraryScreening.getAssayPlatesScreened().iterator();
-    AssayPlate assayPlate100r1 = iter.next();
-    AssayPlate assayPlate100r2 = iter.next();
-    AssayPlate assayPlate101r1 = iter.next();
-    AssayPlate assayPlate101r2 = iter.next();
-    AssayPlate assayPlate102r1 = iter.next();
-    AssayPlate assayPlate102r2 = iter.next();
-    AssayPlate assayPlate103r1 = iter.next();
-    AssayPlate assayPlate103r2 = iter.next();
 
-    List<PlateRange> plateRanges = PlateRange.splitIntoPlateRanges(ImmutableSortedSet.of(assayPlate100r1, assayPlate100r2, assayPlate101r1, assayPlate101r2, assayPlate103r1, assayPlate103r2));
+    List<PlateRange> plateRanges = PlateRange.splitIntoPlateRanges(ImmutableSortedSet.of(plate100, plate101, plate103));
     assertEquals(2, plateRanges.size());
-    assertEquals(ImmutableSortedSet.of(assayPlate100r1, assayPlate101r1, assayPlate100r2, assayPlate101r2), plateRanges.get(0).getAssayPlates());
-    assertEquals(ImmutableSortedSet.of(assayPlate103r1,assayPlate103r2), plateRanges.get(1).getAssayPlates());
+    assertEquals(ImmutableSortedSet.of(plate100, plate101), plateRanges.get(0).getPlates());
+    assertEquals(ImmutableSortedSet.of(plate103), plateRanges.get(1).getPlates());
     
-    plateRanges = PlateRange.splitIntoPlateCopyRanges(ImmutableSortedSet.of(assayPlate100r1, assayPlate100r2, assayPlate101r1, assayPlate101r2, assayPlate103r1, assayPlate103r2));
+    plateRanges = PlateRange.splitIntoPlateCopyRanges(ImmutableSortedSet.of(plate100, plate101, plate103));
     assertEquals(2, plateRanges.size());
-    assertEquals(ImmutableSortedSet.of(assayPlate100r1, assayPlate101r1, assayPlate100r2, assayPlate101r2), plateRanges.get(0).getAssayPlates());
-    assertEquals(ImmutableSortedSet.of(assayPlate103r1,assayPlate103r2), plateRanges.get(1).getAssayPlates());
+    assertEquals(ImmutableSortedSet.of(plate100, plate101), plateRanges.get(0).getPlates());
+    assertEquals(ImmutableSortedSet.of(plate103), plateRanges.get(1).getPlates());
 
-    plateRanges = PlateRange.splitIntoPlateRanges(ImmutableSortedSet.of(assayPlate100r1, assayPlate101r1, assayPlate102r1, assayPlate103r1, assayPlate100r2, assayPlate101r2, assayPlate102r2, assayPlate103r2));
+    plateRanges = PlateRange.splitIntoPlateRanges(ImmutableSortedSet.of(plate100, plate101, plate102, plate103));
     assertEquals(1, plateRanges.size());
-    assertEquals(ImmutableSortedSet.of(assayPlate100r1, assayPlate101r1, assayPlate102r1, assayPlate103r1, assayPlate100r2, assayPlate101r2, assayPlate102r2, assayPlate103r2), plateRanges.get(0).getAssayPlates());
+    assertEquals(ImmutableSortedSet.of(plate100, plate101, plate102, plate103), plateRanges.get(0).getPlates());
 
-    plateRanges = PlateRange.splitIntoPlateCopyRanges(ImmutableSortedSet.of(assayPlate100r1, assayPlate101r1, assayPlate102r1, assayPlate103r1, assayPlate100r2, assayPlate101r2, assayPlate102r2, assayPlate103r2));
+    plateRanges = PlateRange.splitIntoPlateCopyRanges(ImmutableSortedSet.of(plate100, plate101, plate102, plate103));
     assertEquals(3, plateRanges.size());
-    assertEquals(ImmutableSortedSet.of(assayPlate100r1, assayPlate101r1, assayPlate100r2, assayPlate101r2), plateRanges.get(0).getAssayPlates());
-    assertEquals(ImmutableSortedSet.of(assayPlate102r1, assayPlate102r2), plateRanges.get(1).getAssayPlates());
-    assertEquals(ImmutableSortedSet.of(assayPlate103r1, assayPlate103r2), plateRanges.get(2).getAssayPlates());
+    assertEquals(ImmutableSortedSet.of(plate100, plate101), plateRanges.get(0).getPlates());
+    assertEquals(ImmutableSortedSet.of(plate102), plateRanges.get(1).getPlates());
+    assertEquals(ImmutableSortedSet.of(plate103), plateRanges.get(2).getPlates());
 
-    plateRanges = PlateRange.splitIntoPlateRanges(ImmutableSortedSet.<AssayPlate>of());
+    plateRanges = PlateRange.splitIntoPlateRanges(ImmutableSortedSet.<Plate>of());
     assertEquals(0, plateRanges.size());
   }
-
 }
