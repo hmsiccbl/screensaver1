@@ -92,7 +92,7 @@
 		editable="#{editable}" editWidth="80" editHeight="3">
 		<ui:define name="valueHeader">
 			<t:outputText
-				rendered="#{screen.screenType.value== 'Small Molecule'}"
+        rendered="#{screen.screenType.value== 'Small Molecule' &amp;&amp; screenDetailViewer.applicationProperties.map['screensaver.ui.facility_name'] != 'LINCS'}"
 				value="A screen for compounds that..." styleClass="dataText" />
 		</ui:define>
 	</ss:property>
