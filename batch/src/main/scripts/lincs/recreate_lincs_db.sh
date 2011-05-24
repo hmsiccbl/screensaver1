@@ -2,13 +2,12 @@
 
 # This script will recreate the LINCS database
 
-#DIR=/home/sde4/workspace/LINCS/build/screensaver
-DIR=.
-DATA_DIRECTORY=/home/sde4/sean/docs/work/LINCS/data/current
+DIR=/groups/pharmacoresponse/
+DATA_DIRECTORY=${DIR}/data/current
 
 if [[ $# -lt 1 ]]
 then
-  echo "Usage: $0 [dev || stage || prod ] "
+  echo "Usage: $0 [local || dev || stage || prod ] "
   exit $WRONG_ARGS
 fi
 
@@ -17,34 +16,37 @@ SERVER=$1
 if [[ "$SERVER" == "PROD" ]] || [[ "$SERVER" == "prod" ]] 
 then
   SERVER=""
-  RUN_DIR=${DIR}/screensaver/prod-utils
   DB=${SERVER}pharmacoresponse
   DB_USER=${SERVER}pharmacoresponseweb
-  SCREENSAVER_PROPERTIES_FILE=/groups/pharmacoresponse/screensaver/cfg/pharmacoresponse.properties.util.prod
+  export SCREENSAVER_PROPERTIES_FILE=/groups/pharmacoresponse/screensaver/cfg/pharmacoresponse.properties.util.prod
 elif [[ "$SERVER" == "STAGE" ]] || [[ "$SERVER" == "stage" ]] 
 then
   SERVER="stage"
-  RUN_DIR=${DIR}/screensaver/stage-utils
   DB=${SERVER}pharmacoresponse
   DB_USER=${SERVER}pharmacoresponseweb
-  SCREENSAVER_PROPERTIES_FILE=/groups/pharmacoresponse/screensaver/cfg/pharmacoresponse.properties.util.stage
+  export SCREENSAVER_PROPERTIES_FILE=/groups/pharmacoresponse/screensaver/cfg/pharmacoresponse.properties.util.stage
 elif [[ "$SERVER" == "DEV" ]] || [[ "$SERVER" == "dev" ]] 
 then
   SERVER="dev"
-  RUN_DIR=$DIR
-#  RUN_DIR=${DIR}/screensaver/dev-utils
+  DB=${SERVER}pharmacoresponse
+  DB_USER=${SERVER}pharmacoresponseweb
+  PGHOST=dev.pgsql.orchestra
+  export SCREENSAVER_PROPERTIES_FILE=/groups/pharmacoresponse/screensaver/cfg/pharmacoresponse.properties.util.dev
+elif [[ "$SERVER" == "LOCAL" ]] || [[ "$SERVER" == "local" ]] 
+then
+  DIR=.
+  DATA_DIRECTORY=/home/sde4/sean/docs/work/LINCS/data/current
   DB=screensavergo
   DB_USER=screensavergo
-  SCREENSAVER_PROPERTIES_FILE=/home/sde4/workspace/current/screensaver.properties.LINCS
+  export SCREENSAVER_PROPERTIES_FILE=/home/sde4/workspace/current/screensaver.properties.LINCS
 else
   echo "Unknown option: \"$SERVER\""
   exit 1
 fi
 
-cd $RUN_DIR
-
 # TODO: parameterize
-ECOMMONS_ADMIN=sde_admin
+ECOMMONS_ADMIN=djw11
+#ECOMMONS_ADMIN=sde_admin
 
 check_errs()
 {
@@ -80,48 +82,48 @@ LIBRARY_5_SHORTNAME="LINCS-5"
 set -x 
 ./run.sh edu.harvard.med.screensaver.io.libraries.LibraryCreator \
 -n "HMS LINCS BATCH 001" -s $LIBRARY_1_SHORTNAME \
--lt "Commercial" -st SMALL_MOLECULE -sp 1 -ep 1 -AL $ECOMMONS_ADMIN
+-lt "Commercial" -st SMALL_MOLECULE -sp 1 -ep 1 -AE $ECOMMONS_ADMIN
 
 ./run.sh edu.harvard.med.screensaver.io.libraries.LibraryContentsLoader \
 --release-library-contents-version \
 -l $LIBRARY_1_SHORTNAME \
--f $DATA_DIRECTORY/HMS_LINCS-1.sdf -AL $ECOMMONS_ADMIN
+-f $DATA_DIRECTORY/HMS_LINCS-1.sdf -AE $ECOMMONS_ADMIN
 
 ./run.sh edu.harvard.med.screensaver.io.libraries.LibraryCreator \
 -n "HMS LINCS Anti-Mitotics" -s $LIBRARY_2_SHORTNAME \
--lt "Commercial" -st SMALL_MOLECULE -sp 2 -ep 2 -AL $ECOMMONS_ADMIN
+-lt "Commercial" -st SMALL_MOLECULE -sp 2 -ep 2 -AE $ECOMMONS_ADMIN
 
 ./run.sh edu.harvard.med.screensaver.io.libraries.LibraryContentsLoader \
 --release-library-contents-version \
 -l $LIBRARY_2_SHORTNAME \
--f $DATA_DIRECTORY/HMS_LINCS-2.sdf -AL $ECOMMONS_ADMIN
+-f $DATA_DIRECTORY/HMS_LINCS-2.sdf -AE $ECOMMONS_ADMIN
 
 ./run.sh edu.harvard.med.screensaver.io.libraries.LibraryCreator \
 -n "HMS LINCS Batch 001 Stock Plates" -s $LIBRARY_3_SHORTNAME -ps WELLS_96 \
--lt "Commercial" -st SMALL_MOLECULE -sp 3 -ep 4 -AL $ECOMMONS_ADMIN 
+-lt "Commercial" -st SMALL_MOLECULE -sp 3 -ep 4 -AE $ECOMMONS_ADMIN 
 
 ./run.sh edu.harvard.med.screensaver.io.libraries.LibraryContentsLoader \
 --release-library-contents-version \
 -l $LIBRARY_3_SHORTNAME \
--f $DATA_DIRECTORY/HMS_LINCS-3.sdf -AL $ECOMMONS_ADMIN
+-f $DATA_DIRECTORY/HMS_LINCS-3.sdf -AE $ECOMMONS_ADMIN
 
 ./run.sh edu.harvard.med.screensaver.io.libraries.LibraryCreator \
 -n "HMS LINCS Plated 5 Anti-Mitotics" -s $LIBRARY_4_SHORTNAME \
--lt "Commercial" -st SMALL_MOLECULE -sp 5 -ep 5 -AL $ECOMMONS_ADMIN
+-lt "Commercial" -st SMALL_MOLECULE -sp 5 -ep 5 -AE $ECOMMONS_ADMIN
 
 ./run.sh edu.harvard.med.screensaver.io.libraries.LibraryContentsLoader \
 --release-library-contents-version \
 -l $LIBRARY_4_SHORTNAME \
--f $DATA_DIRECTORY/HMS_LINCS-4.sdf -AL $ECOMMONS_ADMIN
+-f $DATA_DIRECTORY/HMS_LINCS-4.sdf -AE $ECOMMONS_ADMIN
 
 ./run.sh edu.harvard.med.screensaver.io.libraries.LibraryCreator \
 -n "HMS LINCS Plated 6 Anti-Mitotics" -s $LIBRARY_5_SHORTNAME \
--lt "Commercial" -st SMALL_MOLECULE -sp 6 -ep 6 -AL $ECOMMONS_ADMIN
+-lt "Commercial" -st SMALL_MOLECULE -sp 6 -ep 6 -AE $ECOMMONS_ADMIN
 
 ./run.sh edu.harvard.med.screensaver.io.libraries.LibraryContentsLoader \
 --release-library-contents-version \
 -l $LIBRARY_5_SHORTNAME \
--f $DATA_DIRECTORY/HMS_LINCS-5.sdf -AL $ECOMMONS_ADMIN
+-f $DATA_DIRECTORY/HMS_LINCS-5.sdf -AE $ECOMMONS_ADMIN
 
 ## Create the screens
 
@@ -133,15 +135,31 @@ LAB_HEAD_LAST="Gray"
 LAB_HEAD_EMAIL="nathanael_gray@dfci.harvard.edu"
 
 ./run.sh edu.harvard.med.screensaver.io.screens.ScreenCreator \
--AL $ECOMMONS_ADMIN  \
+-AE $ECOMMONS_ADMIN  \
 -st SMALL_MOLECULE  \
 -hf $LAB_HEAD_FIRST -hl $LAB_HEAD_LAST -he $LAB_HEAD_EMAIL -lf $LEAD_SCREENER_FIRST -ll $LEAD_SCREENER_LAST -le $LEAD_SCREENER_EMAIL \
--t 'Moerke 3 Color Apoptosis: IA-LM_24hr'  \
--i 10000 \
---summary "screen test"
+-t 'Moerke 2 Color Apoptosis: IA-LM cells.'  \
+-i 10001 \
+--summary "Moerke 2 Color Apoptosis: IA-LM cells. Dose response of anti-mitotic compounds in human cancer cell line IA-LM at 24, 48 and 72 hours to determine effect on apoptosis and cell death." \
+-p 'Day 1: Seed cells in 384-well assay plates, with 3 plates per cell line (for 24, 48, 72 hr time points).  Add 30 uL cell suspension per well
+Day 2: Add compounds to plates by pin transfer.
+Day 2: Prepare the 4X apoptosis reagent mixture fresh in PBS
+4X apoptosis reagent mixture composition:
+(1) DEVD-NucView488 caspase substrate: 1 uM
+(2) Hoechst 33342:  2 ug/mL
+For 4 384-well plates, 25 mL of this mixture will be sufficient and allow plenty of dead volume.
+For 25 mL of mixture add 25 uL of DEVD-NucView488 substrate (in small refrigerator) and 50 uL of Hoechst 33342 (in freezer).
+Use WellMate (hood or bench is fine) to add the mixture, using the designated manifold (labeled �NucView�).  Add 10 uL per well, skipping the 1st 2 and last 2 columns.  Spin plates briefly at 1000 rpm in plate centrifuge and put in incubator for 90 minutes.
+Prepare 2X fixative solution: 2 % formaldehyde in PBS.  Dilute a 36-36.5% formaldehyde stock bottle 1:20 in PBS.  100 mL fixative total is sufficient for 4 plates; add 5 mL formaldehyde stock to 95 mL PBS.
+After 90 minutes, use benchtop (not hood) WellMate to add fixative to plates.  Use the manifold labeled �Fixative�  Add 40 uL per well (again skipping 1st 2 and last 2 columns).  Spin plates briefly as before.  Let fix 20-30 minutes at RT, then seal with metal foil, and image right away or store in the cold room until you are ready to image.
+
+Reagent stocks:
+Hoechst 33342 (Invitrogen ) � 1 mg/mL stock in H2O, store at -20 degrees C
+DEVD-NucView488 (Biotium) �  1 mM in DMSO, store at 4 degrees C protected from light' \
+
 
 ./run.sh edu.harvard.med.screensaver.io.screenresults.ScreenResultImporter \
--AL $ECOMMONS_ADMIN \
+-AE $ECOMMONS_ADMIN \
 -f $DATA_DIRECTORY/screen/moerke_IA-LM_24hr.xls \
 -s 10000 -i 
 
@@ -159,7 +177,7 @@ LEAD_SCREENER_EMAIL="qingsong_liu@hms.harvard.edu"
 
 # NOTE: (2011-02-08) qingsong-compound-study-data.xls fails -sde4
 ./run.sh edu.harvard.med.screensaver.io.screens.StudyCreator \
--AL $ECOMMONS_ADMIN  \
+-AE $ECOMMONS_ADMIN  \
 -y SMALL_MOLECULE -yy IN_VITRO \
 -hf $LAB_HEAD_FIRST -hl $LAB_HEAD_LAST -he $LAB_HEAD_EMAIL -lf $LEAD_SCREENER_FIRST -ll $LEAD_SCREENER_LAST -le $LEAD_SCREENER_EMAIL \
 -keyByFacilityId \
@@ -169,7 +187,7 @@ LEAD_SCREENER_EMAIL="qingsong_liu@hms.harvard.edu"
 --summary "Provides uncurated data for compounds' kinase targets, screening concentrations, and relevant publication citations"
 
 ./run.sh edu.harvard.med.screensaver.io.screens.StudyCreator \
--AL $ECOMMONS_ADMIN -annotationNamesInCol1  \
+-AE $ECOMMONS_ADMIN -annotationNamesInCol1  \
 -y SMALL_MOLECULE -yy IN_VITRO \
 -hf $LAB_HEAD_FIRST -hl $LAB_HEAD_LAST -he $LAB_HEAD_EMAIL -lf $LEAD_SCREENER_FIRST -ll $LEAD_SCREENER_LAST -le $LEAD_SCREENER_EMAIL \
 -keyByFacilityId \
@@ -179,7 +197,7 @@ LEAD_SCREENER_EMAIL="qingsong_liu@hms.harvard.edu"
 --summary "`cat $DATA_DIRECTORY/study/ambit_protocol.txt`" 
 
 ./run.sh edu.harvard.med.screensaver.io.screens.StudyCreator \
--AL $ECOMMONS_ADMIN -annotationNamesInCol1  \
+-AE $ECOMMONS_ADMIN -annotationNamesInCol1  \
 -y SMALL_MOLECULE -yy IN_VITRO \
 -hf $LAB_HEAD_FIRST -hl $LAB_HEAD_LAST -he $LAB_HEAD_EMAIL -lf $LEAD_SCREENER_FIRST -ll $LEAD_SCREENER_LAST -le $LEAD_SCREENER_EMAIL \
 -keyByFacilityId \
@@ -189,7 +207,7 @@ LEAD_SCREENER_EMAIL="qingsong_liu@hms.harvard.edu"
 --summary "`cat $DATA_DIRECTORY/study/ambit_protocol.txt`"
 
 ./run.sh edu.harvard.med.screensaver.io.screens.StudyCreator \
--AL $ECOMMONS_ADMIN -annotationNamesInCol1  \
+-AE $ECOMMONS_ADMIN -annotationNamesInCol1  \
 -y SMALL_MOLECULE -yy IN_VITRO \
 -hf $LAB_HEAD_FIRST -hl $LAB_HEAD_LAST -he $LAB_HEAD_EMAIL -lf $LEAD_SCREENER_FIRST -ll $LEAD_SCREENER_LAST -le $LEAD_SCREENER_EMAIL \
 -keyByFacilityId \
@@ -199,7 +217,7 @@ LEAD_SCREENER_EMAIL="qingsong_liu@hms.harvard.edu"
 --summary "`cat $DATA_DIRECTORY/study/ambit_protocol.txt`"
 
 ./run.sh edu.harvard.med.screensaver.io.screens.StudyCreator \
--AL $ECOMMONS_ADMIN -annotationNamesInCol1  \
+-AE $ECOMMONS_ADMIN -annotationNamesInCol1  \
 -y SMALL_MOLECULE -yy IN_VITRO \
 -hf $LAB_HEAD_FIRST -hl $LAB_HEAD_LAST -he $LAB_HEAD_EMAIL -lf $LEAD_SCREENER_FIRST -ll $LEAD_SCREENER_LAST -le $LEAD_SCREENER_EMAIL \
 -keyByFacilityId \
@@ -209,7 +227,7 @@ LEAD_SCREENER_EMAIL="qingsong_liu@hms.harvard.edu"
 --summary "`cat $DATA_DIRECTORY/study/ambit_protocol.txt`"
 
 ./run.sh edu.harvard.med.screensaver.io.screens.StudyCreator \
--AL $ECOMMONS_ADMIN -annotationNamesInCol1  \
+-AE $ECOMMONS_ADMIN -annotationNamesInCol1  \
 -y SMALL_MOLECULE -yy IN_VITRO \
 -hf $LAB_HEAD_FIRST -hl $LAB_HEAD_LAST -he $LAB_HEAD_EMAIL -lf $LEAD_SCREENER_FIRST -ll $LEAD_SCREENER_LAST -le $LEAD_SCREENER_EMAIL \
 -keyByFacilityId \
@@ -219,7 +237,7 @@ LEAD_SCREENER_EMAIL="qingsong_liu@hms.harvard.edu"
 --summary "`cat $DATA_DIRECTORY/study/ambit_protocol.txt`"
 
 ./run.sh edu.harvard.med.screensaver.io.screens.StudyCreator \
--AL $ECOMMONS_ADMIN -annotationNamesInCol1  \
+-AE $ECOMMONS_ADMIN -annotationNamesInCol1  \
 -y SMALL_MOLECULE -yy IN_VITRO \
 -hf $LAB_HEAD_FIRST -hl $LAB_HEAD_LAST -he $LAB_HEAD_EMAIL -lf $LEAD_SCREENER_FIRST -ll $LEAD_SCREENER_LAST -le $LEAD_SCREENER_EMAIL \
 -keyByFacilityId \
@@ -229,7 +247,7 @@ LEAD_SCREENER_EMAIL="qingsong_liu@hms.harvard.edu"
 --summary "`cat $DATA_DIRECTORY/study/ambit_protocol.txt`"
 
 ./run.sh edu.harvard.med.screensaver.io.screens.StudyCreator \
--AL $ECOMMONS_ADMIN -annotationNamesInCol1  \
+-AE $ECOMMONS_ADMIN -annotationNamesInCol1  \
 -y SMALL_MOLECULE -yy IN_VITRO \
 -hf $LAB_HEAD_FIRST -hl $LAB_HEAD_LAST -he $LAB_HEAD_EMAIL -lf $LEAD_SCREENER_FIRST -ll $LEAD_SCREENER_LAST -le $LEAD_SCREENER_EMAIL \
 -keyByFacilityId \
@@ -239,7 +257,7 @@ LEAD_SCREENER_EMAIL="qingsong_liu@hms.harvard.edu"
 --summary "`cat $DATA_DIRECTORY/study/ambit_protocol.txt`"
 
 ./run.sh edu.harvard.med.screensaver.io.screens.StudyCreator \
--AL $ECOMMONS_ADMIN -annotationNamesInCol1  \
+-AE $ECOMMONS_ADMIN -annotationNamesInCol1  \
 -y SMALL_MOLECULE -yy IN_VITRO \
 -hf $LAB_HEAD_FIRST -hl $LAB_HEAD_LAST -he $LAB_HEAD_EMAIL -lf $LEAD_SCREENER_FIRST -ll $LEAD_SCREENER_LAST -le $LEAD_SCREENER_EMAIL \
 -keyByFacilityId \
@@ -249,7 +267,7 @@ LEAD_SCREENER_EMAIL="qingsong_liu@hms.harvard.edu"
 --summary "`cat $DATA_DIRECTORY/study/ambit_protocol.txt`"
 
 ./run.sh edu.harvard.med.screensaver.io.screens.StudyCreator \
--AL $ECOMMONS_ADMIN -annotationNamesInCol1  \
+-AE $ECOMMONS_ADMIN -annotationNamesInCol1  \
 -y SMALL_MOLECULE -yy IN_VITRO \
 -hf $LAB_HEAD_FIRST -hl $LAB_HEAD_LAST -he $LAB_HEAD_EMAIL -lf $LEAD_SCREENER_FIRST -ll $LEAD_SCREENER_LAST -le $LEAD_SCREENER_EMAIL \
 -keyByFacilityId \
@@ -259,7 +277,7 @@ LEAD_SCREENER_EMAIL="qingsong_liu@hms.harvard.edu"
 --summary "`cat $DATA_DIRECTORY/study/ambit_protocol.txt`"
 
 ./run.sh edu.harvard.med.screensaver.io.screens.StudyCreator \
--AL $ECOMMONS_ADMIN -annotationNamesInCol1  \
+-AE $ECOMMONS_ADMIN -annotationNamesInCol1  \
 -y SMALL_MOLECULE -yy IN_VITRO \
 -hf $LAB_HEAD_FIRST -hl $LAB_HEAD_LAST -he $LAB_HEAD_EMAIL -lf $LEAD_SCREENER_FIRST -ll $LEAD_SCREENER_LAST -le $LEAD_SCREENER_EMAIL \
 -keyByFacilityId \
@@ -269,7 +287,7 @@ LEAD_SCREENER_EMAIL="qingsong_liu@hms.harvard.edu"
 --summary "`cat $DATA_DIRECTORY/study/ambit_protocol.txt`"
 
 ./run.sh edu.harvard.med.screensaver.io.screens.StudyCreator \
--AL $ECOMMONS_ADMIN -annotationNamesInCol1  \
+-AE $ECOMMONS_ADMIN -annotationNamesInCol1  \
 -y SMALL_MOLECULE -yy IN_VITRO \
 -hf $LAB_HEAD_FIRST -hl $LAB_HEAD_LAST -he $LAB_HEAD_EMAIL -lf $LEAD_SCREENER_FIRST -ll $LEAD_SCREENER_LAST -le $LEAD_SCREENER_EMAIL \
 -keyByFacilityId \
@@ -279,7 +297,7 @@ LEAD_SCREENER_EMAIL="qingsong_liu@hms.harvard.edu"
 --summary "`cat $DATA_DIRECTORY/study/ambit_protocol.txt`"
 
 ./run.sh edu.harvard.med.screensaver.io.screens.StudyCreator \
--AL $ECOMMONS_ADMIN -annotationNamesInCol1  \
+-AE $ECOMMONS_ADMIN -annotationNamesInCol1  \
 -y SMALL_MOLECULE -yy IN_VITRO \
 -hf $LAB_HEAD_FIRST -hl $LAB_HEAD_LAST -he $LAB_HEAD_EMAIL -lf $LEAD_SCREENER_FIRST -ll $LEAD_SCREENER_LAST -le $LEAD_SCREENER_EMAIL \
 -keyByFacilityId \
@@ -289,7 +307,7 @@ LEAD_SCREENER_EMAIL="qingsong_liu@hms.harvard.edu"
 --summary "`cat $DATA_DIRECTORY/study/ambit_protocol.txt`"
 
 ./run.sh edu.harvard.med.screensaver.io.screens.StudyCreator \
--AL $ECOMMONS_ADMIN -annotationNamesInCol1  \
+-AE $ECOMMONS_ADMIN -annotationNamesInCol1  \
 -y SMALL_MOLECULE -yy IN_VITRO \
 -hf $LAB_HEAD_FIRST -hl $LAB_HEAD_LAST -he $LAB_HEAD_EMAIL -lf $LEAD_SCREENER_FIRST -ll $LEAD_SCREENER_LAST -le $LEAD_SCREENER_EMAIL \
 -keyByFacilityId \
@@ -299,7 +317,7 @@ LEAD_SCREENER_EMAIL="qingsong_liu@hms.harvard.edu"
 --summary "`cat $DATA_DIRECTORY/study/ambit_protocol.txt`"
 
 ./run.sh edu.harvard.med.screensaver.io.screens.StudyCreator \
--AL $ECOMMONS_ADMIN -annotationNamesInCol1  \
+-AE $ECOMMONS_ADMIN -annotationNamesInCol1  \
 -y SMALL_MOLECULE -yy IN_VITRO \
 -hf $LAB_HEAD_FIRST -hl $LAB_HEAD_LAST -he $LAB_HEAD_EMAIL -lf $LEAD_SCREENER_FIRST -ll $LEAD_SCREENER_LAST -le $LEAD_SCREENER_EMAIL \
 -keyByFacilityId \
@@ -309,7 +327,7 @@ LEAD_SCREENER_EMAIL="qingsong_liu@hms.harvard.edu"
 --summary "`cat $DATA_DIRECTORY/study/ambit_protocol.txt`"
 
 ./run.sh edu.harvard.med.screensaver.io.screens.StudyCreator \
--AL $ECOMMONS_ADMIN -annotationNamesInCol1  \
+-AE $ECOMMONS_ADMIN -annotationNamesInCol1  \
 -y SMALL_MOLECULE -yy IN_VITRO \
 -hf $LAB_HEAD_FIRST -hl $LAB_HEAD_LAST -he $LAB_HEAD_EMAIL -lf $LEAD_SCREENER_FIRST -ll $LEAD_SCREENER_LAST -le $LEAD_SCREENER_EMAIL \
 -keyByFacilityId \
@@ -319,7 +337,7 @@ LEAD_SCREENER_EMAIL="qingsong_liu@hms.harvard.edu"
 --summary "`cat $DATA_DIRECTORY/study/ambit_protocol.txt`"
 
 ./run.sh edu.harvard.med.screensaver.io.screens.StudyCreator \
--AL $ECOMMONS_ADMIN -annotationNamesInCol1  \
+-AE $ECOMMONS_ADMIN -annotationNamesInCol1  \
 -y SMALL_MOLECULE -yy IN_VITRO \
 -hf $LAB_HEAD_FIRST -hl $LAB_HEAD_LAST -he $LAB_HEAD_EMAIL -lf $LEAD_SCREENER_FIRST -ll $LEAD_SCREENER_LAST -le $LEAD_SCREENER_EMAIL \
 -keyByFacilityId \
@@ -329,7 +347,7 @@ LEAD_SCREENER_EMAIL="qingsong_liu@hms.harvard.edu"
 --summary "`cat $DATA_DIRECTORY/study/ambit_protocol.txt`"
 
 ./run.sh edu.harvard.med.screensaver.io.screens.StudyCreator \
--AL $ECOMMONS_ADMIN -annotationNamesInCol1  \
+-AE $ECOMMONS_ADMIN -annotationNamesInCol1  \
 -y SMALL_MOLECULE -yy IN_VITRO \
 -hf $LAB_HEAD_FIRST -hl $LAB_HEAD_LAST -he $LAB_HEAD_EMAIL -lf $LEAD_SCREENER_FIRST -ll $LEAD_SCREENER_LAST -le $LEAD_SCREENER_EMAIL \
 -keyByFacilityId \
@@ -339,7 +357,7 @@ LEAD_SCREENER_EMAIL="qingsong_liu@hms.harvard.edu"
 --summary "`cat $DATA_DIRECTORY/study/ambit_protocol.txt`"
 
 ./run.sh edu.harvard.med.screensaver.io.screens.StudyCreator \
--AL $ECOMMONS_ADMIN -annotationNamesInCol1  \
+-AE $ECOMMONS_ADMIN -annotationNamesInCol1  \
 -y SMALL_MOLECULE -yy IN_VITRO \
 -hf $LAB_HEAD_FIRST -hl $LAB_HEAD_LAST -he $LAB_HEAD_EMAIL -lf $LEAD_SCREENER_FIRST -ll $LEAD_SCREENER_LAST -le $LEAD_SCREENER_EMAIL \
 -keyByFacilityId \
@@ -349,7 +367,7 @@ LEAD_SCREENER_EMAIL="qingsong_liu@hms.harvard.edu"
 --summary "`cat $DATA_DIRECTORY/study/ambit_protocol.txt`"
 
 ./run.sh edu.harvard.med.screensaver.io.screens.StudyCreator \
--AL $ECOMMONS_ADMIN -annotationNamesInCol1  \
+-AE $ECOMMONS_ADMIN -annotationNamesInCol1  \
 -y SMALL_MOLECULE -yy IN_VITRO \
 -hf $LAB_HEAD_FIRST -hl $LAB_HEAD_LAST -he $LAB_HEAD_EMAIL -lf $LEAD_SCREENER_FIRST -ll $LEAD_SCREENER_LAST -le $LEAD_SCREENER_EMAIL \
 -keyByFacilityId \
@@ -359,7 +377,7 @@ LEAD_SCREENER_EMAIL="qingsong_liu@hms.harvard.edu"
 --summary "`cat $DATA_DIRECTORY/study/ambit_protocol.txt`"
 
 ./run.sh edu.harvard.med.screensaver.io.screens.StudyCreator \
--AL $ECOMMONS_ADMIN -annotationNamesInCol1  \
+-AE $ECOMMONS_ADMIN -annotationNamesInCol1  \
 -y SMALL_MOLECULE -yy IN_VITRO \
 -hf $LAB_HEAD_FIRST -hl $LAB_HEAD_LAST -he $LAB_HEAD_EMAIL -lf $LEAD_SCREENER_FIRST -ll $LEAD_SCREENER_LAST -le $LEAD_SCREENER_EMAIL \
 -keyByFacilityId \
@@ -369,7 +387,7 @@ LEAD_SCREENER_EMAIL="qingsong_liu@hms.harvard.edu"
 --summary "`cat $DATA_DIRECTORY/study/ambit_protocol.txt`"
 
 ./run.sh edu.harvard.med.screensaver.io.screens.StudyCreator \
--AL $ECOMMONS_ADMIN -annotationNamesInCol1  \
+-AE $ECOMMONS_ADMIN -annotationNamesInCol1  \
 -y SMALL_MOLECULE -yy IN_VITRO \
 -hf $LAB_HEAD_FIRST -hl $LAB_HEAD_LAST -he $LAB_HEAD_EMAIL -lf $LEAD_SCREENER_FIRST -ll $LEAD_SCREENER_LAST -le $LEAD_SCREENER_EMAIL \
 -keyByFacilityId \
@@ -379,7 +397,7 @@ LEAD_SCREENER_EMAIL="qingsong_liu@hms.harvard.edu"
 --summary "`cat $DATA_DIRECTORY/study/ambit_protocol.txt`"
 
 ./run.sh edu.harvard.med.screensaver.io.screens.StudyCreator \
--AL $ECOMMONS_ADMIN -annotationNamesInCol1  \
+-AE $ECOMMONS_ADMIN -annotationNamesInCol1  \
 -y SMALL_MOLECULE -yy IN_VITRO \
 -hf $LAB_HEAD_FIRST -hl $LAB_HEAD_LAST -he $LAB_HEAD_EMAIL -lf $LEAD_SCREENER_FIRST -ll $LEAD_SCREENER_LAST -le $LEAD_SCREENER_EMAIL \
 -keyByFacilityId \
@@ -389,7 +407,7 @@ LEAD_SCREENER_EMAIL="qingsong_liu@hms.harvard.edu"
 --summary "`cat $DATA_DIRECTORY/study/ambit_protocol.txt`"
 
 ./run.sh edu.harvard.med.screensaver.io.screens.StudyCreator \
--AL $ECOMMONS_ADMIN -annotationNamesInCol1  \
+-AE $ECOMMONS_ADMIN -annotationNamesInCol1  \
 -y SMALL_MOLECULE -yy IN_VITRO \
 -hf $LAB_HEAD_FIRST -hl $LAB_HEAD_LAST -he $LAB_HEAD_EMAIL -lf $LEAD_SCREENER_FIRST -ll $LEAD_SCREENER_LAST -le $LEAD_SCREENER_EMAIL \
 -keyByFacilityId \
@@ -399,7 +417,7 @@ LEAD_SCREENER_EMAIL="qingsong_liu@hms.harvard.edu"
 --summary "`cat $DATA_DIRECTORY/study/ambit_protocol.txt`"
 
 ./run.sh edu.harvard.med.screensaver.io.screens.StudyCreator \
--AL $ECOMMONS_ADMIN -annotationNamesInCol1  \
+-AE $ECOMMONS_ADMIN -annotationNamesInCol1  \
 -y SMALL_MOLECULE -yy IN_VITRO \
 -hf $LAB_HEAD_FIRST -hl $LAB_HEAD_LAST -he $LAB_HEAD_EMAIL -lf $LEAD_SCREENER_FIRST -ll $LEAD_SCREENER_LAST -le $LEAD_SCREENER_EMAIL \
 -keyByFacilityId \
@@ -409,7 +427,7 @@ LEAD_SCREENER_EMAIL="qingsong_liu@hms.harvard.edu"
 --summary "`cat $DATA_DIRECTORY/study/ambit_protocol.txt`"
 
 ./run.sh edu.harvard.med.screensaver.io.screens.StudyCreator \
--AL $ECOMMONS_ADMIN -annotationNamesInCol1  \
+-AE $ECOMMONS_ADMIN -annotationNamesInCol1  \
 -y SMALL_MOLECULE -yy IN_VITRO \
 -hf $LAB_HEAD_FIRST -hl $LAB_HEAD_LAST -he $LAB_HEAD_EMAIL -lf $LEAD_SCREENER_FIRST -ll $LEAD_SCREENER_LAST -le $LEAD_SCREENER_EMAIL \
 -keyByFacilityId \
@@ -419,7 +437,7 @@ LEAD_SCREENER_EMAIL="qingsong_liu@hms.harvard.edu"
 --summary "`cat $DATA_DIRECTORY/study/ambit_protocol.txt`"
 
 ./run.sh edu.harvard.med.screensaver.io.screens.StudyCreator \
--AL $ECOMMONS_ADMIN -annotationNamesInCol1  \
+-AE $ECOMMONS_ADMIN -annotationNamesInCol1  \
 -y SMALL_MOLECULE -yy IN_VITRO \
 -hf $LAB_HEAD_FIRST -hl $LAB_HEAD_LAST -he $LAB_HEAD_EMAIL -lf $LEAD_SCREENER_FIRST -ll $LEAD_SCREENER_LAST -le $LEAD_SCREENER_EMAIL \
 -keyByFacilityId \
@@ -429,7 +447,7 @@ LEAD_SCREENER_EMAIL="qingsong_liu@hms.harvard.edu"
 --summary "`cat $DATA_DIRECTORY/study/ambit_protocol.txt`"
 
 ./run.sh edu.harvard.med.screensaver.io.screens.StudyCreator \
--AL $ECOMMONS_ADMIN -annotationNamesInCol1  \
+-AE $ECOMMONS_ADMIN -annotationNamesInCol1  \
 -y SMALL_MOLECULE -yy IN_VITRO \
 -hf $LAB_HEAD_FIRST -hl $LAB_HEAD_LAST -he $LAB_HEAD_EMAIL -lf $LEAD_SCREENER_FIRST -ll $LEAD_SCREENER_LAST -le $LEAD_SCREENER_EMAIL \
 -keyByFacilityId \
@@ -439,7 +457,7 @@ LEAD_SCREENER_EMAIL="qingsong_liu@hms.harvard.edu"
 --summary "`cat $DATA_DIRECTORY/study/ambit_protocol.txt`"
 
 ./run.sh edu.harvard.med.screensaver.io.screens.StudyCreator \
--AL $ECOMMONS_ADMIN -annotationNamesInCol1  \
+-AE $ECOMMONS_ADMIN -annotationNamesInCol1  \
 -y SMALL_MOLECULE -yy IN_VITRO \
 -hf $LAB_HEAD_FIRST -hl $LAB_HEAD_LAST -he $LAB_HEAD_EMAIL -lf $LEAD_SCREENER_FIRST -ll $LEAD_SCREENER_LAST -le $LEAD_SCREENER_EMAIL \
 -keyByFacilityId \
@@ -449,7 +467,7 @@ LEAD_SCREENER_EMAIL="qingsong_liu@hms.harvard.edu"
 --summary "`cat $DATA_DIRECTORY/study/ambit_protocol.txt`"
 
 ./run.sh edu.harvard.med.screensaver.io.screens.StudyCreator \
--AL $ECOMMONS_ADMIN -annotationNamesInCol1  \
+-AE $ECOMMONS_ADMIN -annotationNamesInCol1  \
 -y SMALL_MOLECULE -yy IN_VITRO \
 -hf $LAB_HEAD_FIRST -hl $LAB_HEAD_LAST -he $LAB_HEAD_EMAIL -lf $LEAD_SCREENER_FIRST -ll $LEAD_SCREENER_LAST -le $LEAD_SCREENER_EMAIL \
 -keyByFacilityId \
