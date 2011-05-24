@@ -7,8 +7,6 @@
     <format>dir</format>
   </formats>
   
-  
-  
   <files>
     <file>
       <source>src/main/scripts/run.sh</source>

@@ -44,6 +44,7 @@ import edu.harvard.med.screensaver.model.libraries.SmallMoleculeReagent;
 import edu.harvard.med.screensaver.model.libraries.Well;
 import edu.harvard.med.screensaver.model.screenresults.AnnotationValue;
 import edu.harvard.med.screensaver.model.screenresults.ConfirmedPositiveValue;
+import edu.harvard.med.screensaver.model.screens.Publication;
 import edu.harvard.med.screensaver.model.screens.Screen;
 import edu.harvard.med.screensaver.model.screens.Study;
 import edu.harvard.med.screensaver.policy.EntityViewPolicy;
@@ -70,21 +71,25 @@ public class WellViewer extends SearchResultContextEntityViewerBackingBean<Well,
     "http://pubchem.ncbi.nlm.nih.gov/summary/summary.cgi?cid=";
   public static final String CHEMBANK_ID_LOOKUP_URL_PREFIX =
     "http://chembank.broad.harvard.edu/chemistry/viewMolecule.htm?cbid=";
+  public static final String CHEMBL_ID_LOOKUP_URL_PREFIX =
+    "http://www.ebi.ac.uk/chembldb/index.php/compound/inspect/";
 
   private LibraryViewer _libraryViewer;
   private LibrariesDAO _librariesDao;
   private EntityViewPolicy _entityViewPolicy;
   private StructureImageProvider _structureImageProvider;
-  //  private NameValueTable _nameValueTable;
+
   private List<SimpleCell> _annotationNameValueTable;
   private StudyViewer _studyViewer;
   private WellsSdfDataExporter _wellsSdfDataExporter;
   private LibraryContentsVersionReference _libraryContentsVersionRef;
+  private AnnotationSearchResults _annotationSearchResults;
 
   private DataModel _otherWellsDataModel;
   private DataModel _duplexWellsDataModel;
   private Reagent _versionedReagent;
 
+  private boolean _isAnnotationSearchResultsInitialized = false;
   private ConfirmationReportTableModel _confirmationReportTableModel;
   private ScreenResultReporter _screenResultReporter;
   
@@ -103,6 +108,7 @@ public class WellViewer extends SearchResultContextEntityViewerBackingBean<Well,
                     StudyViewer studyViewer,
                     WellsSdfDataExporter wellsSdfDataExporter,
                     LibraryContentsVersionReference libraryContentsVersionRef,
+                    AnnotationSearchResults annotationSearchResults,
                     ScreenResultReporter screenResultReporter)
   {
     super(thisProxy,
@@ -119,10 +125,12 @@ public class WellViewer extends SearchResultContextEntityViewerBackingBean<Well,
     _wellsSdfDataExporter = wellsSdfDataExporter;
     _libraryContentsVersionRef = libraryContentsVersionRef == null ? new LibraryContentsVersionReference()
       : libraryContentsVersionRef;
+    _annotationSearchResults = annotationSearchResults;
     _screenResultReporter = screenResultReporter;
     getIsPanelCollapsedMap().put("otherWells", Boolean.TRUE);
     getIsPanelCollapsedMap().put("duplexWells", Boolean.TRUE);
     getIsPanelCollapsedMap().put("annotations", Boolean.TRUE);
+    getIsPanelCollapsedMap().put("studyHeaders", Boolean.TRUE);
   }
 
   public Reagent getVersionedReagent()
@@ -188,6 +196,21 @@ public class WellViewer extends SearchResultContextEntityViewerBackingBean<Well,
       }
     }
     return _otherWellsDataModel;
+  }
+
+  public AnnotationSearchResults getAnnotationSearchResults()
+  {
+    // lazy initialization of _annotationSearchResults, for performance (avoid expense of determining columns, if not being viewed)
+    if (!_isAnnotationSearchResultsInitialized && !getIsPanelCollapsedMap().get("annotations")) {
+      _annotationSearchResults.searchForAnnotations(getEntity());
+      _isAnnotationSearchResultsInitialized = true;
+    }
+    return _annotationSearchResults;
+  }
+
+  public DataModel getAnnotationTableModel()
+  {
+    return new ListDataModel(Lists.newArrayList(_versionedReagent.getAnnotationValues().values()));
   }
 
   public DataModel getAnnotationNameValueTable()
@@ -285,9 +308,12 @@ public class WellViewer extends SearchResultContextEntityViewerBackingBean<Well,
       getDao().needReadOnly((SmallMoleculeReagent) _versionedReagent, SmallMoleculeReagent.compoundNames);
       getDao().needReadOnly((SmallMoleculeReagent) _versionedReagent, SmallMoleculeReagent.pubchemCids);
       getDao().needReadOnly((SmallMoleculeReagent) _versionedReagent, SmallMoleculeReagent.chembankIds);
+      getDao().needReadOnly((SmallMoleculeReagent) _versionedReagent, SmallMoleculeReagent.chemblIds);
       getDao().needReadOnly((SmallMoleculeReagent) _versionedReagent, SmallMoleculeReagent.molfileList);
     }
     getDao().needReadOnly(_versionedReagent, Reagent.libraryContentsVersion);
+    getDao().needReadOnly(_versionedReagent, Reagent.publications);
+		_isAnnotationSearchResultsInitialized = false;
   }
 
   @Override
@@ -296,6 +322,7 @@ public class WellViewer extends SearchResultContextEntityViewerBackingBean<Well,
     initializeAnnotationValuesTable(well);
     _otherWellsDataModel = null;
     _duplexWellsDataModel = null;
+    _isAnnotationSearchResultsInitialized = false;
     _confirmationReportTableModel = null;
   }
 
@@ -359,20 +386,39 @@ public class WellViewer extends SearchResultContextEntityViewerBackingBean<Well,
     return CHEMBANK_ID_LOOKUP_URL_PREFIX;
   }
 
+  public String getChemblIdUrlPrefix()
+  {
+    return CHEMBL_ID_LOOKUP_URL_PREFIX;
+  }
+
   public String getCompoundImageUrl()
   {
     if (!isAllowedAccessToSmallMoleculeReagent()) return null; //TODO: is there a RTE to throw? - sde4
-    // TODO: should we be using well.getLatestReleasedReagent()? - sde4
     return "" + _structureImageProvider.getImageUrl((SmallMoleculeReagent) getVersionedReagent());
   }
 
   public String getCompoundMolecularFormula()
   {
     if (!isAllowedAccessToSmallMoleculeReagent()) return null; //TODO: is there a RTE to throw? - sde4
-    // TODO: should we be using well.getLatestReleasedReagent()? - sde4
     return ((SmallMoleculeReagent) getVersionedReagent()).getMolecularFormula() == null ?
       "" : ((SmallMoleculeReagent) getVersionedReagent()).getMolecularFormula().toHtml();
   }
+
+  public DataModel getPublicationsDataModel()
+  {
+    if (getVersionedReagent() == null) return null;
+
+    ArrayList<Publication> publications = new ArrayList<Publication>(getVersionedReagent().getPublications());
+    Collections.sort(publications,
+                     new Comparator<Publication>() {
+                       public int compare(Publication p1, Publication p2)
+      {
+        return p1.getAuthors().compareTo(p2.getAuthors());
+      }
+                     });
+    return new ListDataModel(publications);
+  }
+
 
   //// confirmation report table model
   public class ConfirmationReportTableModel
@@ -463,6 +509,13 @@ public class WellViewer extends SearchResultContextEntityViewerBackingBean<Well,
     return _confirmationReportTableModel;
   }
 
+  public SmallMoleculeReagent getSmallMoleculeReagent()
+  {
+    if (isAllowedAccessToSmallMoleculeReagent()) {
+      return (SmallMoleculeReagent) _versionedReagent;
+    }
+    return null;
+  }
 
 
 }

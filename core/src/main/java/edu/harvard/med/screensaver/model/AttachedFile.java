@@ -40,6 +40,7 @@ import org.hibernate.annotations.Type;
 import edu.harvard.med.screensaver.model.annotations.ContainedEntity;
 import edu.harvard.med.screensaver.model.annotations.ToMany;
 import edu.harvard.med.screensaver.model.annotations.ToOne;
+import edu.harvard.med.screensaver.model.libraries.Reagent;
 import edu.harvard.med.screensaver.model.meta.Cardinality;
 import edu.harvard.med.screensaver.model.meta.RelationshipPath;
 import edu.harvard.med.screensaver.model.screens.Screen;
@@ -66,17 +67,21 @@ public class AttachedFile extends AuditedAbstractEntity<Integer> implements Comp
   public static final RelationshipPath<AttachedFile> fileType = RelationshipPath.from(AttachedFile.class).to("fileType", Cardinality.TO_ONE);
   public static final RelationshipPath<AttachedFile> screen = RelationshipPath.from(AttachedFile.class).to("screen", Cardinality.TO_ONE);
   public static final RelationshipPath<AttachedFile> screeningRoomUser = RelationshipPath.from(AttachedFile.class).to("screeningRoomUser", Cardinality.TO_ONE);
+  public static final RelationshipPath<AttachedFile> reagent = RelationshipPath.from(AttachedFile.class).to("reagent", Cardinality.TO_ONE);
 
 
   // instance fields
 
   private Integer _version;
+
+  // note: an AttachedFile can be associated with one of the following entities:
   private Screen _screen;
   private ScreeningRoomUser _screeningRoomUser;
+  private Reagent _reagent;
+
   private String _filename;
   private AttachedFileType _fileType;
   private byte[] _fileContents;
-
 
   // public constructor
 
@@ -147,6 +152,23 @@ public class AttachedFile extends AuditedAbstractEntity<Integer> implements Comp
   private void setScreeningRoomUser(ScreeningRoomUser screeningRoomUser)
   {
     _screeningRoomUser = screeningRoomUser;
+  }
+
+  @ManyToOne(fetch = FetchType.LAZY,
+             cascade = { CascadeType.PERSIST, CascadeType.MERGE })
+  @JoinColumn(name = "reagentId", nullable = true, updatable = false)
+  @org.hibernate.annotations.Immutable
+  @org.hibernate.annotations.ForeignKey(name = "fk_attached_file_to_reagent")
+  @org.hibernate.annotations.LazyToOne(value = org.hibernate.annotations.LazyToOneOption.PROXY)
+  @ToOne(hasNonconventionalSetterMethod = true /* mutually-exclusive parenting relationships */)
+  public Reagent getReagent()
+  {
+    return _reagent;
+  }
+
+  private void setReagent(Reagent reagent)
+  {
+    _reagent = reagent;
   }
 
   /**
@@ -254,10 +276,31 @@ public class AttachedFile extends AuditedAbstractEntity<Integer> implements Comp
     _filename = filename;
     _fileType = fileType;
     _fileContents = IOUtils.toByteArray(fileContents);
+  	  }
 
+  /**
+   * Construct an initialized <code>AttachedFile</code>. Intended only for use
+   * by {@link Reagent}; use {@link Reagent#createAttachedFile(String, AttachedFileType, InputStream)} or
+   * {@link Reagent#createAttachedFile(String, AttachedFileType, String)}.
+   * 
+   * @param reagent the reagent
+   * @param filename the filename
+   * @param fileContents the file contents
+   * @throws IOException
+   */
+  public AttachedFile(Reagent reagent, String filename, AttachedFileType fileType, InputStream fileContents) throws IOException
+  {
+    super(null); /* TODO */
+    if (reagent == null) {
+      throw new NullPointerException();
+    }
+    _reagent = reagent;
+    _filename = filename;
+    _fileType = fileType;
+    _fileContents = IOUtils.toByteArray(fileContents);
   }
-
-  // protected constructor
+  
+    // protected constructor
 
   /**
    * Construct an uninitialized <code>AttachedFile</code> object.

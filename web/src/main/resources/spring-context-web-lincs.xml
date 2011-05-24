@@ -1,0 +1,63 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<!--
+   $HeadURL: http://forge.abcd.harvard.edu/svn/screensaver/branches/iccbl/2.2.2-dev/resources/spring-context-web.xml $
+   $Id: spring-context-web.xml 4914 2010-11-03 12:56:07Z atolopko $
+
+   Copyright © 2006, 2010 by the President and Fellows of Harvard College.
+   
+   Screensaver is an open-source project developed by the ICCB-L and NSRB labs
+   at Harvard Medical School. This software is distributed under the terms of
+   the GNU General Public License.
+-->
+
+<!-- A top-level, composite Spring context configuration file, intended for use with the 
+  Screensaver web application.  Allows a full Spring configuration to be referenced via a 
+  single file. -->
+
+<beans
+  xmlns="http://www.springframework.org/schema/beans"
+  xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+  xmlns:aop="http://www.springframework.org/schema/aop"
+  xsi:schemaLocation="http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans-2.0.xsd
+                      http://www.springframework.org/schema/aop http://www.springframework.org/schema/aop/spring-aop-2.0.xsd">
+
+  <import resource="spring-context-web-default.xml"/>
+  
+  <bean id="structureImageProvider"
+        class="edu.harvard.med.lincs.screensaver.io.libraries.smallmolecule.SmallMoleculeReagentFacilitySaltIdStructureImageProvider">
+    <constructor-arg value="#{screensaverProperties.map['screensaver.images.base_url']}/compound-images-by-facility-salt-id/" />
+  </bean>
+  
+  <bean id="studyImageProvider"
+        class="edu.harvard.med.lincs.screensaver.io.screens.StudyFacilityIdStudyImageProvider">
+    <constructor-arg value="#{screensaverProperties.map['screensaver.images.base_url']}/screen-images-by-facility-id/" />
+  </bean>
+
+  <bean
+    id="wellViewer"
+    parent="uiBean"
+    scope="session"
+    class="edu.harvard.med.lincs.screensaver.ui.libraries.WellViewer">
+    <constructor-arg ref="wellViewer" />
+    <constructor-arg ref="wellsBrowser" />
+    <constructor-arg ref="genericEntityDao" />
+    <constructor-arg ref="librariesDao" />
+    <constructor-arg ref="entityViewPolicy" />
+    <constructor-arg ref="libraryViewer" />
+    <constructor-arg ref="structureImageProvider" />
+    <constructor-arg ref="studyViewer" />
+    <constructor-arg ref="wellsSdfDataExporterForUi" />
+    <constructor-arg ref="libraryContentsVersionRef" />
+    <constructor-arg ref="annotationsBrowser" />
+    <constructor-arg ref="screenResultReporter" />
+    <constructor-arg>
+      <bean class="edu.harvard.med.lincs.screensaver.io.screens.SmallMoleculeReagentFacilitySaltIdStudyImageProvider">
+        <constructor-arg value="#{screensaverProperties.map['screensaver.images.base_url']}/ambit-study-compound-images-by-facility-salt-id/" />
+      </bean>
+    </constructor-arg>
+    <constructor-arg ref="attachedFiles" />
+    <aop:scoped-proxy/>
+  </bean>
+  
+</beans>

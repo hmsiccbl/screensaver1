@@ -28,7 +28,10 @@ import edu.harvard.med.screensaver.model.libraries.ReagentVendorIdentifier;
 import edu.harvard.med.screensaver.model.libraries.SmallMoleculeReagent;
 import edu.harvard.med.screensaver.model.libraries.Well;
 import edu.harvard.med.screensaver.model.libraries.WellKey;
+import edu.harvard.med.screensaver.model.screens.Publication;
 import edu.harvard.med.screensaver.util.Pair;
+import edu.harvard.med.screensaver.util.eutils.EutilsException;
+import edu.harvard.med.screensaver.util.eutils.PublicationInfoProvider;
 
 /**
  * Parses the contents of a small molecule Library from an SDFile into the
@@ -41,6 +44,7 @@ public class SmallMoleculeLibraryContentsParser extends LibraryContentsParser<Sm
 {
   private static final Logger log = Logger.getLogger(SmallMoleculeLibraryContentsParser.class);
   private SDRecordParser _sdRecordParser;
+  PublicationInfoProvider _publicationInfoProvider;
 
   public SmallMoleculeLibraryContentsParser(GenericEntityDAO dao, InputStream stream, Library library) throws IOException
   {
@@ -107,17 +111,38 @@ public class SmallMoleculeLibraryContentsParser extends LibraryContentsParser<Sm
       log.warn("facility ID for well " + key + " changed from " + well.getFacilityId() + " to " + sdRecordData.getFacilityId());
       well.setFacilityId(sdRecordData.getFacilityId());
     }
+    if (sdRecordData.getConcentration() != null &&
+        !sdRecordData.getConcentration().equals(well.getMolarConcentration())) {
+      log.warn("Concentration for well " + key + " changed from " + well.getMolarConcentration() + " to " +
+        sdRecordData.getConcentration());
+      well.setMolarConcentration(sdRecordData.getConcentration());
+    }
     SmallMoleculeReagent reagent = null;
     if (sdRecordData.getLibraryWellType() == LibraryWellType.EXPERIMENTAL) {
-      reagent = addSmallMoleculeReagentForWell(well, sdRecordData);
+      reagent = addSmallMoleculeReagentForWell(well, dao, sdRecordData);
     }
     return new Pair<Well,SmallMoleculeReagent>(well, reagent);
   }
 
   /**
-   * Retrieve or create a small molecule reagent for the smiles.
+   * not thread-safe
+   * LINCS feature
    */
-  private SmallMoleculeReagent addSmallMoleculeReagentForWell(Well well, SDRecord sdRecordData)
+  private PublicationInfoProvider getPublicationInfoProvider()
+  {
+    if (_publicationInfoProvider == null) {
+      _publicationInfoProvider = new PublicationInfoProvider();
+    }
+    return _publicationInfoProvider;
+  }
+
+  /**
+   * Retrieve or create a small molecule reagent for the smiles.
+   * 
+   * @throws IOException if publication info cannot be retrieved for a provided Pubmed ID see
+   *           {@link PublicationInfoProvider#getPubmedInfo(Publication)}
+   */
+  private SmallMoleculeReagent addSmallMoleculeReagentForWell(Well well, GenericEntityDAO dao, SDRecord sdRecordData) throws IOException
   {
     ReagentVendorIdentifier rvi = new ReagentVendorIdentifier(sdRecordData.getVendor(),
                                                               sdRecordData.getVendorIdentifier());
@@ -133,6 +158,27 @@ public class SmallMoleculeLibraryContentsParser extends LibraryContentsParser<Sm
     smallMoleculeReagent.getCompoundNames().addAll(sdRecordData.getCompoundNames());
     smallMoleculeReagent.getPubchemCids().addAll(sdRecordData.getPubchemCids());
     smallMoleculeReagent.getChembankIds().addAll(sdRecordData.getChembankIds());
+    smallMoleculeReagent.getChemblIds().addAll(sdRecordData.getChemblIds());
+    
+    smallMoleculeReagent.forVendorBatchId(sdRecordData.getVendorBatchId());
+    smallMoleculeReagent.forFacilityBatchId(sdRecordData.getFacilityBatchId());
+    smallMoleculeReagent.forSaltFormId(sdRecordData.getSaltFormId());
+
+    log.info("add pubmed ids: " + sdRecordData.getPubmedIds());
+    for (Integer pubmedId : sdRecordData.getPubmedIds()) {
+      Publication publication = new Publication();
+      publication.setPubmedId(pubmedId);
+      smallMoleculeReagent.addPublication(publication);
+      try {
+        getPublicationInfoProvider().getPubmedInfo(publication);
+      }
+      catch (EutilsException e) {
+        throw new IOException("Publication info lookup failure", e);
+      }
+      // TODO: have to do this because otherwise only the first publication gets added; 
+      // I'm guessing because hibernate doesn't know to create all the items in the collection and it just compresses it down to one? - sde4
+      dao.saveOrUpdateEntity(publication);
+    }
     return smallMoleculeReagent;
   }
 }

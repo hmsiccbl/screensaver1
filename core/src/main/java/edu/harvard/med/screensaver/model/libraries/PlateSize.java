@@ -22,6 +22,7 @@ import com.google.common.collect.Sets;
 
 public enum PlateSize implements VocabularyTerm
 {
+  WELLS_1(1, 1), // NOTE: this "vial" size is a LINCS-only feature
   WELLS_96(12, 8),
   WELLS_384(24, 16),
   WELLS_1536(48, 32);

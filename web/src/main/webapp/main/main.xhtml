@@ -10,38 +10,36 @@
 <ui:composition template="/main/template.xhtml">
 
   <ui:define name="body">
-
     <t:outputText id="welcomeMessage"
-      value="Welcome to Screensaver, #{menu.screensaverUser.fullNameFirstLast}!"
+      value="Welcome to #{appInfo.applicationProperties.map['screensaver.ui.application_name']} , #{menu.screensaverUser.fullNameFirstLast}!"
       styleClass="title" />
 
     <div id="ie_detection_message"
-      style="display: none; color: fuchsia;">The Screensaver
-    development team recommends the <a href="www.mozilla.com">Mozilla
-    Firefox Browser</a> (version 1.5 or higher). While we work to support
-    other browsers, it's not always possible for us to test every
-    feature across all browser types. <script type="text/javascript">
-            if (! Array.every) { // if not firefox >=1.5
+      style="display: none; color: fuchsia;">The <a href="www.mozilla.com">Mozilla
+    Firefox Browser</a> (version 3.6 or higher) is recommended for use with #{appInfo.applicationProperties.map['screensaver.ui.application_name']}.
+           <script type="text/javascript">
+            if (! Array.every) { // if not firefox
               document.getElementById("ie_detection_message").style.display = "block";
             }
           </script></div>
 
-    <t:div id="screenerWelcomeMessage" rendered="#{!menu.readAdmin}">
+    <t:div id="screenerWelcomeMessage"
+      rendered="#{appInfo.applicationProperties.map['screensaver.ui.facility_name'] == 'LINCS' &amp;&amp; !menu.readAdmin}">
       <ul>
         <li>Use "Browse Libraries" to view the set of small
-        molecule and RNAi libraries available for use at the screening
-        facility. For each library, you can view descriptive information
-        on the Library Viewer page. From that page, you can navigate to
-        the Wells Browser page, to browse the contents of each library
-        well and reagent information including structures, SMILES strings,
-        and links to PubChem, ChemBank, and GenBank.</li>
+          molecule and RNAi libraries available for use at the screening
+          facility. For each library, you can view descriptive
+          information on the Library Viewer page. From that page, you
+          can navigate to the Wells Browser page, to browse the contents
+          of each library well and reagent information including
+          structures, SMILES strings, and links to PubChem, ChemBank,
+          and GenBank.</li>
         <t:htmlTag value="li" rendered="#{menu.screener}">
       Use "Find Wells" or "Find Reagents" to search for information on library reagents,
       using library plate/well designations or vendor-assigned reagent identifiers,
       respectively.
 			</t:htmlTag>
-        <t:htmlTag value="li"
-          rendered="#{menu.screener}">Use
+        <t:htmlTag value="li" rendered="#{menu.screener}">Use
 				"My Screens" to view your own screens and result
 				data, and "Browse Screens" to view basic information about other screens 
         performed at ICCB-L. For your own screens, you can browse, filter, sort, 
@@ -49,41 +47,69 @@
         and studies.  You can also view each screening data plate with a heat map 
         viewer and export the screen result data as a spreadsheet.
         <ul>
-            <li style="font-size: small">If your screen result
-            data is not shown, please contact <a
+            <li style="font-size: small">If your screen result data
+              is not shown, please contact <a
               href="mailto:david_wrobel@hms.harvard.edu">David
-            Wrobel</a> and we will make it a priority to import your data.</li>
-            <li style="font-size: small">Note that you will
-            not be able to view screen results from any screens other
-            than your own unless they have been classified as "shared"
-            by the screener, in which case they are available for
-            viewing. ICCB-L is in the process of developing guidelines
-            for data sharing. Please contact <a
+                Wrobel</a> and we will make it a priority to import your
+              data.</li>
+            <li style="font-size: small">Note that you will not be
+              able to view screen results from any screens other than
+              your own unless they have been classified as "shared" by
+              the screener, in which case they are available for
+              viewing. ICCB-L is in the process of developing guidelines
+              for data sharing. Please contact <a
               href="mailto:caroline_shamu@hms.harvard.edu">Caroline
-            Shamu</a> or <a href="mailto:su_chiang@hms.harvard.edu">Su
-            Chiang</a> if you have any questions.</li>
+                Shamu</a> or <a href="mailto:su_chiang@hms.harvard.edu">Su
+                Chiang</a> if you have any questions.</li>
           </ul>
         </t:htmlTag>
         <li>Use "Browse Studies" to view the studies that have been
-        added to Screensaver. Studies associate biologically significant
-        annotations with library reagents.</li>
+          added to Screensaver. Studies associate biologically
+          significant annotations with library reagents.</li>
         <li>Use "Browse Lab Activities" to view the activities you
-        have performed at our facility.</li>
+          have performed at our facility.</li>
         <li>Use "Browse Associates" to view the individuals you
-        have been working with, including your fellow lab members and
-        screen collaborators. Click on your account name (at the top of
-        the menu panel) to view your own information, including screens,
-        lab members, etc.</li>
+          have been working with, including your fellow lab members and
+          screen collaborators. Click on your account name (at the top
+          of the menu panel) to view your own information, including
+          screens, lab members, etc.</li>
         <li>Use "Data Downloads" to download SD files for all
-        ICCB-L libraries, either as a single file or as individual
-        library files.</li>
+          ICCB-L libraries, either as a single file or as individual
+          library files.</li>
       </ul>
 
+      <p style="font-weight: bold; font-style: italic">
+        Questions? Suggestions? Problems?
+        <f:verbatim>&amp;nbsp;</f:verbatim>
+        <h:outputLink
+          value="#{appInfo.applicationProperties.map['screensaver.ui.feedback_url']}"
+          target="_blank" title="Contact us!">Contact us!</h:outputLink>
+      </p>
+    </t:div>
+
+    <t:div id="lincsWelcomeMessage" 
+      rendered="#{appInfo.applicationProperties.map['screensaver.ui.facility_name'] == 'LINCS' &amp;&amp; !menu.readAdmin}">
+      <ul>
+        <li>This data repository is under development, improvements are ongoing.</li>
+        <li>To browse the HMS LINCS compound collection, click on “Libraries”, click on the library name<br/>
+                you want to view, then select “View Library Contents,” click on an individual compound in the<br/>
+                “Facility-Salt-Batch-ID” column to see details about that compound.</li>
+        <li>You can download the viewed data as an Excel or SD file by clicking the “export” button.</li>
+        <li>To search for a single or list of compounds by compound name, use the “Find by... Compound Name”<br/>
+                feature on the menu.</li>
+        <li>QC information for compound batches is accessible through the “Attached Files” links in the<br/>
+                compound view (note that not all compounds have QC information available).</li>
+        <li>Use "Browse Studies" to view the studies (Ambit/Kinomescan and ActiveX data) that have been <br/>added to this repository.</li>
+        <li>To find the target(s) of an inhibitor as reported in the literature, the information can currently be <br/>
+                found in Study 300001, or when viewing a single compound, by scrolling to the “Studies” section <br/>
+                at the bottom of the page.</li>
+      </ul>
       <p style="font-weight: bold; font-style: italic">Questions?
       Suggestions? Problems?<f:verbatim>&amp;nbsp;</f:verbatim><h:outputLink
         value="#{appInfo.applicationProperties.map['screensaver.ui.feedback_url']}" target="_blank" title="Contact us!">Contact us!</h:outputLink>
       </p>
-      </t:div>
+    </t:div>
+
   </ui:define>
 
 </ui:composition>

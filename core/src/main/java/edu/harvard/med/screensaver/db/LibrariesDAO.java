@@ -22,6 +22,7 @@ import edu.harvard.med.screensaver.model.libraries.LibraryContentsVersion;
 import edu.harvard.med.screensaver.model.libraries.Plate;
 import edu.harvard.med.screensaver.model.libraries.Reagent;
 import edu.harvard.med.screensaver.model.libraries.ReagentVendorIdentifier;
+import edu.harvard.med.screensaver.model.libraries.SmallMoleculeReagent;
 import edu.harvard.med.screensaver.model.libraries.Well;
 import edu.harvard.med.screensaver.model.libraries.WellKey;
 import edu.harvard.med.screensaver.model.screens.ScreenType;
@@ -48,6 +49,20 @@ public interface LibrariesDAO
    *         latest released version.
    */
   public Set<Reagent> findReagents(ReagentVendorIdentifier rvi, boolean latestReleasedVersionsOnly);
+
+  /**
+   * NOTE: this is a LINCS-only feature
+   * 
+   * @param facilityId
+   * @param saltId
+   * @param batchId
+   * @param latestReleasedVersionsOnly
+   * @return
+   */
+  public Set<SmallMoleculeReagent> findReagents(String facilityId,
+                                                Integer saltId,
+                                                Integer batchId,
+                                                boolean latestReleasedVersionsOnly);
 
   /**
    * Find and return the library that contains the specified plate, or null if
@@ -80,11 +95,22 @@ public interface LibrariesDAO
 
   public Set<Integer> queryForPlateIds(LibraryCopyPlateListParserResult parserResult);
 
-  public void calculateCopyScreeningStatistics(Collection<Copy> copies);
+  /**
+   * NOTE: LINCS-only feature
+   * Find Wells containing Small Molecule Reagents where one of the compound names matches the compoundSearchName,
+   * case insensitive, greedy match.
+   * 
+   * @param compoundSearchName
+   * @return
+   */
+  public Set<WellKey> findWellKeysForCompoundName(String compoundSearchName);
 
   public void calculatePlateScreeningStatistics(Collection<Plate> plates);
 
   public void calculateCopyVolumeStatistics(Collection<Copy> copies);
 
   public void calculatePlateVolumeStatistics(Collection<Plate> plates);
+  
+  public void calculateCopyScreeningStatistics(Collection<Copy> copies);
+
 }

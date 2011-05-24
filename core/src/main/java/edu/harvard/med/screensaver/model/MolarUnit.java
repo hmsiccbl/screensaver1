@@ -74,5 +74,21 @@ public enum MolarUnit implements QuantityUnit<MolarUnit>
     return DEFAULT;
   }
 
+  public static MolarUnit forSymbol(String units)
+  {
+    if (units != null) {
+      String temp = units.toLowerCase().trim();
+      if (temp.equals(MOLAR.getSymbol()))
+        return MOLAR;
+      else if (temp.equals(MILLIMOLAR.getSymbol().toLowerCase()))
+        return MILLIMOLAR;
+      else if (temp.equals(MICROMOLAR.getSymbol().toLowerCase()))
+        return MICROMOLAR;
+      else if (temp.equals(NANOMOLAR.getSymbol().toLowerCase()))
+        return NANOMOLAR;
+      else if (temp.equals(PICOMOLAR.getSymbol().toLowerCase())) return PICOMOLAR;
+    }
+    throw new IllegalArgumentException("Units not supported: " + units);
+  }
 
 }

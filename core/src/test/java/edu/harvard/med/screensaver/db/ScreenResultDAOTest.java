@@ -303,9 +303,10 @@ public class ScreenResultDAOTest extends AbstractSpringPersistenceTest
       AssayWell assayWell = screenResult.createAssayWell(well);
       expectedAssayWells.add(assayWell);
       boolean exclude = i % 8 == 0;
+      boolean positive = i % 10 == 0;
       PartitionedValue col1Value = PartitionedValue.values()[i % 4];
       col1.createPartitionedPositiveResultValue(assayWell, col1Value, exclude);
-      col2.createBooleanPositiveResultValue(assayWell, false, false);
+      col2.createBooleanPositiveResultValue(assayWell, positive, false);
       if (well.getLibraryWellType() == LibraryWellType.EXPERIMENTAL) {
         expectedExperimentalWellCount++;
         if (!exclude && col1Value != PartitionedValue.NOT_POSITIVE) {
@@ -321,11 +322,14 @@ public class ScreenResultDAOTest extends AbstractSpringPersistenceTest
 
     flushAndClear();
 
+    screenDerivedPropertiesUpdater.updateScreeningStatistics(screen);
+
     screen = genericEntityDao.findEntityByProperty(Screen.class, Screen.facilityId.getPropertyName(), "1");
     assertEquals("wells", expectedAssayWells, screen.getScreenResult().getAssayWells());
     assertEquals("experimental well count", expectedExperimentalWellCount, screen.getScreenResult().getExperimentalWellCount().intValue());
     assertEquals("positives", expectedPositives, screen.getScreenResult().getDataColumnsList().get(0).getPositivesCount().intValue());
-    assertEquals("0 positives (but not null)", 0, screen.getScreenResult().getDataColumnsList().get(1).getPositivesCount().intValue());
+    assertEquals("1 positives ",1, screen.getScreenResult().getDataColumnsList().get(1).getPositivesCount().intValue());
+    assertEquals("hit ratio",0.1,screen.getScreenResult().getDataColumnsList().get(1).getPositivesRatio().doubleValue(), 0.01);
   }
 
 

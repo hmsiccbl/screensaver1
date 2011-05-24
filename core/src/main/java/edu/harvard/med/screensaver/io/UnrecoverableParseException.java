@@ -17,6 +17,11 @@ public class UnrecoverableParseException extends RuntimeException
   {
     super(e);
   }
+
+  public UnrecoverableParseException(String message, Exception e)
+  {
+    super(message, e);
+  }
   
   public UnrecoverableParseException(String s)
   {

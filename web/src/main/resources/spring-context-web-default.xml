@@ -75,19 +75,12 @@
   </bean>
  
   <bean id="structureImageProvider"
-        class="edu.harvard.med.iccbl.screensaver.io.libraries.smallmolecule.PlateWellFileNameStructureImageProvider">
-    <constructor-arg value="#{screensaverProperties.map['screensaver.ui.structure_images_base_url']}" />
+        class="edu.harvard.med.iccbl.screensaver.io.libraries.smallmolecule.PlateWellStructureImageProvider">
+    <constructor-arg value="#{screensaverProperties.map['screensaver.images.base_url']}/structure_images/" />
   </bean>
   
-  <bean
-    id="screenGenerator"
-    class="edu.harvard.med.screensaver.service.screens.DefaultScreenGenerator">
-    <constructor-arg>
-      <bean
-        id="screenFacilityIdInitializer"
-        class="edu.harvard.med.screensaver.service.screens.DefaultScreenFacilityIdInitializer" />
-    </constructor-arg>
-    <constructor-arg ref="genericEntityDao" />
+  <bean id="studyImageProvider"
+        class="edu.harvard.med.screensaver.io.screens.NoOpStudyImageProvider">
   </bean>
 
   <bean
@@ -99,7 +92,7 @@
   
   <import resource="classpath:spring-context-persistence.xml"/>
   <import resource="classpath:spring-context-services.xml"/>
-  <import resource="spring-context-ui.xml"/>
+  <import resource="classpath:spring-context-ui.xml"/>
   <import resource="classpath:spring-context-authentication.xml"/>
   
 </beans>

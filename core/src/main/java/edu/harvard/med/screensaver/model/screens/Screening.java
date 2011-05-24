@@ -9,6 +9,7 @@
 
 package edu.harvard.med.screensaver.model.screens;
 
+import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.PrimaryKeyJoinColumn;
 
@@ -16,6 +17,8 @@ import org.apache.log4j.Logger;
 import org.hibernate.annotations.Type;
 import org.joda.time.LocalDate;
 
+import edu.harvard.med.screensaver.ScreensaverConstants;
+import edu.harvard.med.screensaver.model.Volume;
 import edu.harvard.med.screensaver.model.users.AdministratorUser;
 import edu.harvard.med.screensaver.model.users.ScreeningRoomUser;
 
@@ -52,7 +55,7 @@ public abstract class Screening extends LabActivity
   private LocalDate _assayProtocolLastModifiedDate;
   private AssayProtocolType _assayProtocolType;
   private Integer _numberOfReplicates;
-  
+  private Volume _assayWellVolume;
 
   // public instance methods
   
@@ -73,6 +76,22 @@ public abstract class Screening extends LabActivity
   public void setAssayProtocol(String assayProtocol)
   {
     _assayProtocol = assayProtocol;
+  }
+
+  /**
+   */
+  @Column(precision = ScreensaverConstants.VOLUME_PRECISION, scale = ScreensaverConstants.VOLUME_SCALE)
+  @org.hibernate.annotations.Type(type = "edu.harvard.med.screensaver.db.usertypes.VolumeType")
+  public Volume getAssayWellVolume()
+  {
+    return _assayWellVolume;
+  }
+
+  /**
+   */
+  public void setAssayWellVolume(Volume value)
+  {
+    _assayWellVolume = value;
   }
 
   /**

@@ -134,6 +134,7 @@ public class ScreeningDuplicator
     toScreening.setAssayProtocolLastModifiedDate(fromScreening.getAssayProtocolLastModifiedDate());
     toScreening.setAssayProtocolType(fromScreening.getAssayProtocolType());
     toScreening.setNumberOfReplicates(fromScreening.getNumberOfReplicates());
+    toScreening.setAssayWellVolume(fromScreening.getAssayWellVolume());
   }
 
   private void copyActivityProperties(LabActivity fromActivity, LabActivity toActivity)

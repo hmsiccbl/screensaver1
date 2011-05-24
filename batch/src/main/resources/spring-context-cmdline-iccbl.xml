@@ -22,5 +22,20 @@
   <bean
     id="commandLineArgumentsDatabaseSettingsResolver"
     class="edu.harvard.med.iccbl.screensaver.db.IccblCommandLineArgumentsDatabaseConnectionSettingsResolver" />
-  
+
+  <!-- TODO: this bean def is also in spring-context-web-iccbl.xml, so we should define in a common spring context file -->  
+  <bean
+    id="screenGenerator"
+    class="edu.harvard.med.iccbl.screensaver.service.screens.IccblScreenGenerator">
+    <constructor-arg>
+      <bean
+        id="screenFacilityIdInitializer"
+        class="edu.harvard.med.iccbl.screensaver.service.screens.IccblScreenFacilityIdInitializer" >
+        <constructor-arg ref="genericEntityDao" />
+        <constructor-arg ref="screenDao" />
+      </bean>
+    </constructor-arg>
+    <constructor-arg ref="genericEntityDao" />
+  </bean>
+
 </beans>

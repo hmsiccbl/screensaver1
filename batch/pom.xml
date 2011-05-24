@@ -18,6 +18,7 @@
   
   <properties>
     <facility>generic</facility>
+    <assembly-type>default</assembly-type>
     <spring.context.cmdline.file>spring-context-cmdline-generic.xml</spring.context.cmdline.file>
   </properties>
 
@@ -36,7 +37,7 @@
         <artifactId>maven-assembly-plugin</artifactId>
         <configuration>
           <descriptors>
-            <descriptor>src/main/assembly/command-line.xml</descriptor>
+            <descriptor>src/main/assembly/command-line-${assembly-type}.xml</descriptor>
           </descriptors>
         </configuration>
         <executions>
@@ -64,6 +65,18 @@
       </activation>
       <properties>
         <spring.context.cmdline.file>spring-context-cmdline-iccbl.xml</spring.context.cmdline.file>
+      </properties>
+    </profile>    
+    <profile>
+      <id>lincs</id>
+      <activation>
+        <property>
+          <name>facility</name>
+          <value>lincs</value>
+        </property>
+      </activation>
+      <properties>
+        <assembly-type>lincs</assembly-type>
       </properties>
     </profile>
     <profile>

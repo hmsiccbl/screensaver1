@@ -135,4 +135,9 @@
       <source>../util/graphicImage.xhtml</source>
     </tag>
 
+    <tag>
+      <tag-name>publications</tag-name>
+      <source>../util/publications.xhtml</source>
+    </tag>
+
 </facelet-taglib>

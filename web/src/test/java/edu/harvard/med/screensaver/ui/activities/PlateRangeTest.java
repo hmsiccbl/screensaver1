@@ -47,27 +47,18 @@ public class PlateRangeTest extends TestCase
     libraryScreening.addAssayPlatesScreened(plate102);
     libraryScreening.addAssayPlatesScreened(plate103);
 
-    List<PlateRange> plateRanges = PlateRange.splitIntoPlateRanges(ImmutableSortedSet.of(plate100, plate101, plate103));
+    List<PlateRange> plateRanges = PlateRange.splitIntoPlateCopyRanges(ImmutableSortedSet.of(plate100, plate101, plate103));
     assertEquals(2, plateRanges.size());
     assertEquals(ImmutableSortedSet.of(plate100, plate101), plateRanges.get(0).getPlates());
     assertEquals(ImmutableSortedSet.of(plate103), plateRanges.get(1).getPlates());
     
-    plateRanges = PlateRange.splitIntoPlateCopyRanges(ImmutableSortedSet.of(plate100, plate101, plate103));
-    assertEquals(2, plateRanges.size());
-    assertEquals(ImmutableSortedSet.of(plate100, plate101), plateRanges.get(0).getPlates());
-    assertEquals(ImmutableSortedSet.of(plate103), plateRanges.get(1).getPlates());
-
-    plateRanges = PlateRange.splitIntoPlateRanges(ImmutableSortedSet.of(plate100, plate101, plate102, plate103));
-    assertEquals(1, plateRanges.size());
-    assertEquals(ImmutableSortedSet.of(plate100, plate101, plate102, plate103), plateRanges.get(0).getPlates());
-
     plateRanges = PlateRange.splitIntoPlateCopyRanges(ImmutableSortedSet.of(plate100, plate101, plate102, plate103));
     assertEquals(3, plateRanges.size());
     assertEquals(ImmutableSortedSet.of(plate100, plate101), plateRanges.get(0).getPlates());
     assertEquals(ImmutableSortedSet.of(plate102), plateRanges.get(1).getPlates());
     assertEquals(ImmutableSortedSet.of(plate103), plateRanges.get(2).getPlates());
 
-    plateRanges = PlateRange.splitIntoPlateRanges(ImmutableSortedSet.<Plate>of());
+    plateRanges = PlateRange.splitIntoPlateCopyRanges(ImmutableSortedSet.<Plate>of());
     assertEquals(0, plateRanges.size());
   }
 }

@@ -48,6 +48,12 @@
             <t:outputText styleClass="menuSectionHeader"
               value="Browse..." />
 
+            <t:commandLink action="#{wellCompoundNameFinder.findWells}"
+              styleClass="menuItem" accesskey="R"
+              title="Browse all available library reagents"
+              rendered="#{menu.readAdmin &amp;&amp; menu.applicationProperties.map['screensaver.ui.facility_name'] == 'LINCS'}">
+            R<u>e</u>agents</t:commandLink>
+
             <t:panelGrid columns="2" styleClass="layoutPanel"
               onmouseover="javascript:document.getElementById('librariesSubmenu').style.visibility='visible'"
               onmouseout="javascript:document.getElementById('librariesSubmenu').style.visibility='hidden'">
@@ -111,7 +117,7 @@
               <u>M</u>y Screens</t:commandLink>
 
             <t:commandLink action="#{menu.browseStudies}"
-              styleClass="menuItem" accesskey="T"
+              styleClass="menuItem" accesskey="t"
               title="Browse the studies currently available and accessible to you">
             S<u>t</u>udies</t:commandLink>
 
@@ -120,7 +126,7 @@
               onmouseout="javascript:document.getElementById('cprsSubmenu').style.visibility='hidden'"
               rendered="#{menu.screener || menu.readAdmin}">
               <t:commandLink action="#{menu.browseCherryPickRequests}"
-                styleClass="menuItem" accesskey="Q"
+                styleClass="menuItem" accesskey="q"
                 title="Browse the cherry pick requests currently available and accessible to you">
                 CP Re<u>q</u>uests</t:commandLink>
               <t:panelGrid columns="2" id="cprsSubmenu" forceId="true"
@@ -145,7 +151,7 @@
 
             <t:commandLink action="#{menu.browseScreeners}"
               styleClass="menuItem" rendered="#{menu.readAdmin}"
-              title="Browse the screeners" accesskey="R">
+              title="Browse the screeners" accesskey="r">
               Sc<u>r</u>eeners
             </t:commandLink>
 
@@ -168,6 +174,21 @@
 
         <t:outputText styleClass="menuSectionHeader"
           value="Find Wells by..." />
+        <h:form id="findWellByCompoundNameForm"
+          title="Find the information for a small molecule reagent by the compound name ">
+          <t:panelGrid columns="2">
+            <t:outputLabel for="compoundNameInput" value="Compound Name"
+              styleClass="menuItem" />
+            <t:outputText value="" />
+            <t:inputText id="compoundNameInput"
+              value="#{wellCompoundNameFinder.compoundSearchName}"
+              styleClass="inputText" size="10" />
+            <t:commandButton
+              action="#{wellCompoundNameFinder.findWells}"
+              id="findWellByCompoundNameCommand" value="Go"
+              image="/images/arrow-next.png" />
+          </t:panelGrid>
+        </h:form>
         <h:form>
           <t:panelGrid columns="1" styleClass="layoutPanel">
             Plate/Well ID

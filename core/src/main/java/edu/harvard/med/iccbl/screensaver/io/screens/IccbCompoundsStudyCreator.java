@@ -20,7 +20,7 @@ import edu.harvard.med.screensaver.db.LibrariesDAO;
 import edu.harvard.med.screensaver.db.ScreenDAO;
 import edu.harvard.med.screensaver.io.CommandLineApplication;
 import edu.harvard.med.screensaver.io.libraries.ExtantLibraryException;
-import edu.harvard.med.screensaver.io.screens.ScreenCreator;
+import edu.harvard.med.screensaver.io.screens.StudyCreator;
 import edu.harvard.med.screensaver.model.libraries.Reagent;
 import edu.harvard.med.screensaver.model.libraries.ReagentVendorIdentifier;
 import edu.harvard.med.screensaver.model.screenresults.AnnotationType;
@@ -65,7 +65,7 @@ public class IccbCompoundsStudyCreator
           if (labAffiliation == null) {
             throw new RuntimeException("expected lab affiliation " + LAB_AFFILIATION_NAME + " to exist");
           }
-          LabHead labHead = (LabHead) ScreenCreator.findOrCreateScreeningRoomUser(dao, "Caroline", "Shamu", "caroline_shamu@hms.harvard.edu", true, labAffiliation);
+          LabHead labHead = (LabHead) StudyCreator.findOrCreateScreeningRoomUser(dao, "Caroline", "Shamu", "caroline_shamu@hms.harvard.edu", true, labAffiliation);
           ScreeningRoomUser leadScreener = labHead;
 
           study = new Screen(app.findAdministratorUser(),

@@ -11,9 +11,11 @@
 
 package edu.harvard.med.screensaver.db;
 
+import java.math.BigDecimal;
 import java.sql.SQLException;
 import java.util.Set;
 
+import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.Sets;
 import org.apache.log4j.Logger;
 import org.hibernate.exception.ConstraintViolationException;
@@ -36,7 +38,9 @@ import edu.harvard.med.screensaver.model.libraries.Copy;
 import edu.harvard.med.screensaver.model.libraries.CopyUsageType;
 import edu.harvard.med.screensaver.model.libraries.Library;
 import edu.harvard.med.screensaver.model.libraries.LibraryContentsVersion;
+import edu.harvard.med.screensaver.model.libraries.LibraryType;
 import edu.harvard.med.screensaver.model.libraries.LibraryWellType;
+import edu.harvard.med.screensaver.model.libraries.MolecularFormula;
 import edu.harvard.med.screensaver.model.libraries.Plate;
 import edu.harvard.med.screensaver.model.libraries.PlateSize;
 import edu.harvard.med.screensaver.model.libraries.PlateStatus;
@@ -44,6 +48,7 @@ import edu.harvard.med.screensaver.model.libraries.Reagent;
 import edu.harvard.med.screensaver.model.libraries.ReagentVendorIdentifier;
 import edu.harvard.med.screensaver.model.libraries.SilencingReagent;
 import edu.harvard.med.screensaver.model.libraries.SilencingReagentType;
+import edu.harvard.med.screensaver.model.libraries.SmallMoleculeReagent;
 import edu.harvard.med.screensaver.model.libraries.Well;
 import edu.harvard.med.screensaver.model.libraries.WellKey;
 import edu.harvard.med.screensaver.model.libraries.WellVolumeAdjustment;
@@ -632,11 +637,93 @@ public class LibrariesDAOTest extends AbstractSpringPersistenceTest
     assertEquals(new Volume(6, VolumeUnit.MICROLITERS), copy3.getVolumeStatistics().getMaxRemaining());
   }
 
+  public void testCalculateCopyVolumeStatisticsEmptyCopies()
+  {
+    librariesDao.calculateCopyVolumeStatistics(ImmutableSet.<Copy>of());
+  }
+
   private LibraryScreening newLibraryScreening(int replicates, Volume volume)
   {
     LibraryScreening ls = dataFactory.newInstance(LibraryScreening.class, getName());
     ls.setNumberOfReplicates(replicates);
     ls.setVolumeTransferredPerWell(volume);
     return ls;
+  }
+    /**
+   * NOTE: this is a LINCS-only feature
+   */
+  public void testFindWellsForCompoundName()
+  {
+    genericEntityDao.doInTransaction(new DAOTransaction() {
+      public void runTransaction()
+      {
+        AdministratorUser adminUser = new AdministratorUser("Admin", "User");
+        Library library = new Library(adminUser, "Small Molecule Library", "smLib", ScreenType.SMALL_MOLECULE, LibraryType.COMMERCIAL, 1, 2, PlateSize.WELLS_384);
+        library.createContentsVersion(adminUser);
+        PlateSize plateSize = library.getPlateSize();
+
+        int plate = 1, row = 0, col = 0;
+        Well well = library.createWell(new WellKey(plate, row, col),
+                                       LibraryWellType.UNDEFINED);
+
+         /* SmallMoleculeReagent reagent = */
+        SmallMoleculeReagent r = well.createSmallMoleculeReagent(new ReagentVendorIdentifier("vendor", well.getWellKey().toString()),
+                                              "molfile",
+                                              "smiles",
+                                              "inchi",
+                                              new BigDecimal("1.000"),
+                                              new BigDecimal("1.002"),
+                                              new MolecularFormula("M1F2"));
+        r.getCompoundNames().add("xyzNAME");
+        r.getCompoundNames().add("abc");
+
+        row = 1;
+        col = 0;
+        well = library.createWell(new WellKey(plate, row, col),
+                                       LibraryWellType.UNDEFINED);
+        /* SmallMoleculeReagent reagent = */
+        r = well.createSmallMoleculeReagent(new ReagentVendorIdentifier("vendor", well.getWellKey().toString()),
+                                              "molfile",
+                                              "smiles",
+                                              "inchi",
+                                              new BigDecimal("1.000"),
+                                              new BigDecimal("1.002"),
+                                              new MolecularFormula("M1F2"));
+        r.getCompoundNames().add("XYZname1");
+        r.getCompoundNames().add("def");
+
+        row = 2;
+        col = 0;
+        well = library.createWell(new WellKey(plate, row, col),
+                                       LibraryWellType.UNDEFINED);
+        /* SmallMoleculeReagent reagent = */
+        r = well.createSmallMoleculeReagent(new ReagentVendorIdentifier("vendor", well.getWellKey().toString()),
+                                              "molfile",
+                                              "smiles",
+                                              "inchi",
+                                              new BigDecimal("1.000"),
+                                              new BigDecimal("1.002"),
+                                              new MolecularFormula("M1F2"));
+        r.getCompoundNames().add("ABCname1");
+        r.getCompoundNames().add("def");
+        genericEntityDao.persistEntity(adminUser);
+        genericEntityDao.persistEntity(library);
+      }
+    });
+
+    Set<WellKey> wellKeys = librariesDao.findWellKeysForCompoundName("xyz");
+    assertFalse(wellKeys.isEmpty());
+    assertEquals(2, wellKeys.size());
+
+    wellKeys = librariesDao.findWellKeysForCompoundName("XYZ");
+    assertFalse(wellKeys.isEmpty());
+    assertEquals(2, wellKeys.size());
+
+    wellKeys = librariesDao.findWellKeysForCompoundName("naME");
+    assertFalse(wellKeys.isEmpty());
+    assertEquals(3, wellKeys.size());
+
+    wellKeys = librariesDao.findWellKeysForCompoundName("jkl");
+    assertTrue(wellKeys.isEmpty());
   }
 }

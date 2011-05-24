@@ -20,6 +20,7 @@ import edu.harvard.med.screensaver.io.CommandLineApplication;
 import edu.harvard.med.screensaver.io.ParseError;
 import edu.harvard.med.screensaver.io.ParseErrorsException;
 import edu.harvard.med.screensaver.model.libraries.Library;
+import edu.harvard.med.screensaver.model.libraries.LibraryContentsVersion;
 import edu.harvard.med.screensaver.model.users.AdministratorUser;
 import edu.harvard.med.screensaver.service.libraries.LibraryCreator;
 
@@ -39,12 +40,18 @@ public class LibraryContentsLoader
     "input-file",
     "the file to load library contents from"
   };
+
   static final String[] LIBRARY_SHORT_NAME_OPTION = {
     "l",
     "library-short-name",
     "the short name of the library to load contents for"
   };
 
+  static final String[] RELEASE_IF_SUCCESS_OPTION = {
+    "r",
+    "release-library-contents-version",
+    "release the library contents version if successful"
+  };
   @SuppressWarnings("static-access")
   public static void main(String[] args)
   {
@@ -65,15 +72,24 @@ public class LibraryContentsLoader
             .withDescription(INPUT_FILE_OPTION[DESCRIPTION_INDEX])
             .withLongOpt(INPUT_FILE_OPTION[LONG_OPTION_INDEX])
             .create(INPUT_FILE_OPTION[SHORT_OPTION_INDEX]));
+    application.addCommandLineOption(
+        OptionBuilder
+            .isRequired(false)
+            .withDescription(RELEASE_IF_SUCCESS_OPTION[DESCRIPTION_INDEX])
+            .withLongOpt(RELEASE_IF_SUCCESS_OPTION[LONG_OPTION_INDEX])
+            .create(RELEASE_IF_SUCCESS_OPTION[SHORT_OPTION_INDEX]));
 
     application.processOptions(true, true);
     String libraryShortName =
         application.getCommandLineOptionValue(LIBRARY_SHORT_NAME_OPTION[SHORT_OPTION_INDEX]);
     File libraryContentsFile =
         application.getCommandLineOptionValue(INPUT_FILE_OPTION[SHORT_OPTION_INDEX], File.class);
-    
+    boolean releaseIfSuccess = application.isCommandLineFlagSet(RELEASE_IF_SUCCESS_OPTION[SHORT_OPTION_INDEX]);
+
     edu.harvard.med.screensaver.service.libraries.LibraryContentsLoader libraryContentsLoader =
       (edu.harvard.med.screensaver.service.libraries.LibraryContentsLoader) application.getSpringBean("libraryContentsLoader");
+    edu.harvard.med.screensaver.service.libraries.LibraryContentsVersionManager libraryContentsVersionManager =
+      (edu.harvard.med.screensaver.service.libraries.LibraryContentsVersionManager) application.getSpringBean("libraryContentsVersionManager");
     GenericEntityDAO dao = (GenericEntityDAO) application.getSpringBean("genericEntityDao");
 
     try {
@@ -82,11 +98,15 @@ public class LibraryContentsLoader
       if (library == null) {
         throw new IllegalArgumentException("no library with short name: " + libraryShortName);
       }
-      libraryContentsLoader.loadLibraryContents(library, admin, null /*TODO*/, new FileInputStream(libraryContentsFile));
+      LibraryContentsVersion lcv = libraryContentsLoader.loadLibraryContents(library, admin, null /*TODO*/, new FileInputStream(libraryContentsFile));
+      if (releaseIfSuccess) {
+        log.info("releasing...");
+        libraryContentsVersionManager.releaseLibraryContentsVersion(lcv, admin);
+      }
     } 
     catch (ParseErrorsException e) {
       for (ParseError error : e.getErrors()) {
-        log.error(error.toString());
+        log.error(error.toString(), e);
       }
     }
     catch (Exception e) {

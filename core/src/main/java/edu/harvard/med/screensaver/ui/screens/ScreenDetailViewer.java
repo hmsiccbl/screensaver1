@@ -625,7 +625,12 @@ public class ScreenDetailViewer extends AbstractStudyDetailViewer<Screen>
           return REDISPLAY_PAGE_ACTION_RESULT;
         }
         _uploadedPublicationAttachedFileContents = null;
-        publication.createAttachedFile(filename, contentsInputStream, _publicationAttachedFileType);
+        AttachedFileType publicationAttachedFileType = getDao().findEntityByProperty(AttachedFileType.class, "value", Publication.PUBLICATION_ATTACHED_FILE_TYPE_VALUE);
+        if (publicationAttachedFileType == null) {
+          reportApplicationError("'publication' attached file type does not exist");
+          return REDISPLAY_PAGE_ACTION_RESULT;
+        }
+        publication.setAttachedFile(getEntity().createAttachedFile(filename, publicationAttachedFileType, contentsInputStream));
       }
     }
     catch (IOException e) {

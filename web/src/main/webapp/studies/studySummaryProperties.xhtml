@@ -23,37 +23,53 @@
         and was visibleOnUserRole="developer" - how to do this? and do we want this? sde4 -->
 
 
-	<ss:property id="studyFacilityId" label="Study Facility ID"
-		description="The unique identifier for the study"
-		value="#{study.facilityId}" editable="false">
-		<ui:define name="data">
+  <ss:property id="studyFacilityId" label="Study Facility ID"
+    description="The unique identifier for the study"
+    value="#{study.facilityId}" editable="false">
+    <ui:define name="data">
       <ss:entityLink entity="#{study}" property="facilityId"
         viewer="#{studyViewer}" />
     </ui:define>
-	</ss:property>
-
-  <ss:property id="title" label="Title" type="#{editable ? 'Textarea' : 'Text'}" primary="true" required="true"
-    description="The title of the study" value="#{study.title}"
-    editable="#{editable}" editWidth="80" editHeight="3">
   </ss:property>
-  
+
+  <ss:property id="title" label="Title"
+    type="#{editable ? 'Textarea' : 'Text'}" primary="true"
+    required="true" description="The title of the study"
+    value="#{study.title}" editable="#{editable}" editWidth="80"
+    editHeight="3">
+  </ss:property>
+
   <!-- "lab name" == last name of "lab head", but former is required for UI, latter is for internal design -->
-  <ss:property id="labName" label="Lab Name" primary="true" 
+  <ss:property id="labName" label="Lab Name" primary="true"
     description="Information about the Administrator in charge of the study"
     value="#{study.labHead}" editable="#{editable}">
     <ui:define name="data">
       <ss:labName user="#{study.labHead}" />
     </ui:define>
   </ss:property>
-  
-	<ss:property id="studyLead" label="Study Lead" primary="true" 
-		description="Administrator who created this study"
-		value="#{study.leadScreener}" editable="#{editable}">
-		<ui:define name="data">
-			<ss:user user="#{study.leadScreener}" />
-		</ui:define>
-	</ss:property>
 
+  <ss:property id="studyLead" label="Study Lead" primary="true"
+    description="Administrator who created this study"
+    value="#{study.leadScreener}" editable="#{editable}">
+    <ui:define name="data">
+      <ss:user user="#{study.leadScreener}" />
+    </ui:define>
+  </ss:property>
+
+  <!-- NOTE: for [#2417] this is a LINCS-only feature -->
+  <ss:property id="studyImage" label="Study Image"
+    description="Study Image" rendered="#{studyViewer.applicationProperties.map['screensaver.ui.facility_name'] == 'LINCS'}">
+    <ui:define name="data">
+      <t:graphicImage url="#{studyViewer.studyImageUrl}" height="200"
+        onclick="w=window.open('#{studyViewer.studyImageUrl}','image','height=500,width=500');w.moveTo(500,400);"
+        rendered="#{! empty studyViewer.studyImageUrl}"
+        style="float: left;">
+      </t:graphicImage>
+      <t:outputText value="data not available"
+        rendered="#{empty studyViewer.studyImageUrl}"
+        styleClass="propertyValue dataText" />
+    </ui:define>
+  </ss:property>
 
 </ui:composition>
 

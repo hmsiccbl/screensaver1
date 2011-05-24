@@ -31,7 +31,8 @@ public interface ScreensaverConstants
   public static final String RELEASE_NOTES_URL = "screensaver.ui.release_notes_url";
   public static final String FACILITY_NAME = "screensaver.ui.facility_name";
   public static final String FACILITY_URL = "screensaver.ui.facility_url";
-  public static final String STRUCTURE_IMAGES_BASE_URL = "screensaver.ui.structure_images_base_url";
+  public static final String IMAGES_BASE_DIR = "screensaver.images.base_dir";
+  public static final String IMAGES_BASE_URL = "screensaver.images.base_url";
   /** Prefix for properties that define whether a particular UI feature should be enabled or disabled.  Property value must TRUE or FALSE. */
   public static final String SCREENSAVER_UI_FEATURE_PREFIX = "screensaver.ui.feature.";
 
@@ -56,9 +57,11 @@ public interface ScreensaverConstants
   public static final String VIEW_LIBRARY = "viewLibrary";
   public static final String EDIT_LIBRARY = "editLibrary";
   public static final String BROWSE_WELLS = "browseWells";
+  public static final String BROWSE_ANNOTATIONS = "browseAnnotations";
   public static final String BROWSE_WELL_VOLUMES = "browseWellVolumes";
   public static final String BROWSE_WELL_COPY_VOLUMES = "browseWellCopyVolumes";
   public static final String VIEW_WELL = "viewWell";
+  public static final String VIEW_ANNOTATION = "viewAnnotation";
   public static final String IMPORT_LIBRARY_CONTENTS = "importLibraryContents";
   public static final String VIEW_SCREENING_ROOM_USER_ACTION_RESULT = "viewScreeningRoomUser";
   public static final String SHOW_SEARCH_RESULTS_SUMMARY_ACTION = "showSearchResultsSummary";
@@ -102,6 +105,9 @@ public interface ScreensaverConstants
   public static final int MOLAR_CONCENTRATION_SCALE = 9;
   public static final int MG_ML_CONCENTRATION_PRECISION = 4;
   public static final int MG_ML_CONCENTRATION_SCALE = 1;
+  // TODO: The CONCENTRATION scale/precision are for LINCS-only, but we should determine if we can merge with the above MOLAR and MG_ML constants
+  public static final int CONCENTRATION_FULL_SCALE = 12;
+  public static final int CONCENTRATION_FULL_PRECISION = 15;
   public static final int MOLECULAR_MASS_PRECISION = 15;
   public static final int MOLECULAR_MASS_SCALE = 9;
   public static final int MOLECULAR_WEIGHT_PRECISION = 15;
@@ -119,4 +125,5 @@ public interface ScreensaverConstants
   public static final String DEFAULT_BATCH_STUDY_ID_POSITIVE_COUNT_SM = "200001";
   public static final String DEFAULT_BATCH_STUDY_ID_POSITIVE_COUNT_RNAI = "200002";
   public static final String DEFAULT_BATCH_STUDY_ID_CONFIRMATION_SUMMARY = "200003";
+
 }

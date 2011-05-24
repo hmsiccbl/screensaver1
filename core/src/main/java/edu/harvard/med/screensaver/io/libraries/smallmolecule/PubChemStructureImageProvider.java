@@ -9,29 +9,21 @@
 
 package edu.harvard.med.screensaver.io.libraries.smallmolecule;
 
-import java.io.InputStream;
 import java.net.MalformedURLException;
 import java.net.URL;
 
-import edu.harvard.med.screensaver.model.libraries.SmallMoleculeReagent;
-
 import org.apache.log4j.Logger;
 
-public class PubChemStructureImageProvider implements StructureImageProvider
-{
-  // static members
+import edu.harvard.med.screensaver.model.libraries.SmallMoleculeReagent;
 
+public class PubChemStructureImageProvider implements StructureImageProvider<SmallMoleculeReagent>
+{
   private static Logger log = Logger.getLogger(PubChemStructureImageProvider.class);
   
   private static final String IMAGE_URL_PREFIX =
     "http://pubchem.ncbi.nlm.nih.gov/image/imagefly.cgi?width=300&height=300&cid=";
-  
 
-  public InputStream getImage(SmallMoleculeReagent reagent)
-  {
-    return null;
-  }
-
+  @Override
   public URL getImageUrl(SmallMoleculeReagent reagent)
   {
     try {
@@ -54,16 +46,4 @@ public class PubChemStructureImageProvider implements StructureImageProvider
     }
     return null;
   }
-    
-  
-//return _imageProvider.getImageUrl(_reagent).toString();
-//try {
-//  value = URLEncoder.encode(value, "UTF-8");
-//}
-//catch (UnsupportedEncodingException ex){
-//  throw new RuntimeException("UTF-8 not supported", ex);
-//}
-//return SMALL_MOLECULE_IMAGE_URL_PREFIX + value;
-
-
 }

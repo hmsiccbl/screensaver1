@@ -11,10 +11,10 @@
 
 	<t:div styleClass="footer">
 		<t:htmlTag value="hr" />
-    <h:outputLink value="https://wiki.med.harvard.edu/ICCBL/Screensaver" target="_blank">
+    <h:outputLink value="#{appInfo.applicationProperties.map['screensaver.project.url']}" target="_blank">
       <h:outputText value="#{appInfo.applicationTitle}" />
       <t:outputText id="buildNumber"
-        value="&#160;(#{menu.applicationProperties.buildNumber})"
+        value="&#160;(#{appInfo.applicationProperties.buildNumber})"
         visibleOnUserRole="developer"
         title="The build number" />
     </h:outputLink>

@@ -66,7 +66,7 @@ public class Workbook implements Iterable<Worksheet>
     _errors = new ParseErrorManager();
   }
 
-  private WorkbookSettings getWorkbookSettings() 
+  public WorkbookSettings getWorkbookSettings()
   {
     if(_workbookSettings == null) _workbookSettings = new WorkbookSettings();
     return _workbookSettings;

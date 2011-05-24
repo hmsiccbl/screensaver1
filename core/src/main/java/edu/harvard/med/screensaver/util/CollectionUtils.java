@@ -13,6 +13,7 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -22,6 +23,7 @@ import java.util.TreeSet;
 import com.google.common.collect.Lists;
 import org.apache.commons.collections.Closure;
 import org.apache.commons.collections.Transformer;
+import org.apache.commons.lang.math.IntRange;
 import org.apache.log4j.Logger;
 
 import edu.harvard.med.screensaver.model.Entity;
@@ -102,6 +104,28 @@ public class CollectionUtils
       ids.add((I) entity.getEntityId());
     }
     return ids;
+  }
+
+
+  public static List<IntRange> splitIntoSequentialRanges(SortedSet<Integer> integers)
+  {
+    List<IntRange> ranges = Lists.newArrayList();
+    Iterator<Integer> iter = integers.iterator();
+    if (iter.hasNext()) {
+      IntRange range = new IntRange(iter.next());
+      while (iter.hasNext()) {
+        int next = iter.next();
+        if (next - 1 == range.getMaximumInteger()) {
+          range = new IntRange(range.getMinimumInteger(), next);
+        }
+        else {
+          ranges.add(range);
+          range = new IntRange(next);
+        }
+      }
+      ranges.add(range);
+    }
+    return ranges;
   }
 
 

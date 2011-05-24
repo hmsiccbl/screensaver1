@@ -32,9 +32,10 @@
     <class>edu.harvard.med.screensaver.model.libraries.Library</class>
     <class>edu.harvard.med.screensaver.model.libraries.LibraryContentsVersion</class>
     <class>edu.harvard.med.screensaver.model.libraries.NaturalProductReagent</class>
+    <class>edu.harvard.med.screensaver.model.libraries.Reagent</class>
+    <class>edu.harvard.med.screensaver.model.libraries.ReagentAttachedFileType</class>
     <class>edu.harvard.med.screensaver.model.libraries.SilencingReagent</class>
     <class>edu.harvard.med.screensaver.model.libraries.SmallMoleculeReagent</class>
-    <class>edu.harvard.med.screensaver.model.libraries.Reagent</class>
     <class>edu.harvard.med.screensaver.model.libraries.Well</class>
     <class>edu.harvard.med.screensaver.model.libraries.WellVolumeAdjustment</class>
     <class>edu.harvard.med.screensaver.model.libraries.WellVolumeCorrectionActivity</class>

@@ -13,22 +13,17 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
+import com.google.common.collect.ImmutableList;
+import com.google.common.collect.ImmutableSortedSet;
 import junit.framework.TestCase;
-
 import org.apache.commons.collections.Transformer;
+import org.apache.commons.lang.math.IntRange;
 import org.apache.log4j.Logger;
 
 public class CollectionUtilsTest extends TestCase
 {
-  // static members
-
   private static Logger log = Logger.getLogger(CollectionUtilsTest.class);
 
-
-  // instance data members
-
-  // public constructors and methods
-  
   private static class Struct
   {
     Integer key;
@@ -44,7 +39,6 @@ public class CollectionUtilsTest extends TestCase
   public void testIndexCollection()
   {
     Transformer getKey = new Transformer() {
-      @SuppressWarnings("unchecked")
       public Object transform(Object e)
       {
         return ((Struct) e).key;
@@ -64,7 +58,25 @@ public class CollectionUtilsTest extends TestCase
     assertEquals(c.get(2), index.get(3));
   }
 
-  // private methods
-
+  public void testSplitIntoSequentialRanges()
+  {
+    assertEquals(ImmutableList.of(new IntRange(1)),
+                 CollectionUtils.splitIntoSequentialRanges(ImmutableSortedSet.of(1)));
+    assertEquals(ImmutableList.of(new IntRange(1, 3)),
+                 CollectionUtils.splitIntoSequentialRanges(ImmutableSortedSet.of(1, 2, 3)));
+    assertEquals(ImmutableList.of(new IntRange(1, 1),
+                                  new IntRange(3, 3)),
+                 CollectionUtils.splitIntoSequentialRanges(ImmutableSortedSet.of(1, 3)));
+    assertEquals(ImmutableList.of(new IntRange(1, 2),
+                                  new IntRange(4, 5)),
+                 CollectionUtils.splitIntoSequentialRanges(ImmutableSortedSet.of(1, 2, 4, 5)));
+    assertEquals(ImmutableList.of(new IntRange(1, 2),
+                                  new IntRange(4, 4)),
+                                  CollectionUtils.splitIntoSequentialRanges(ImmutableSortedSet.of(1, 2, 4)));
+    assertEquals(ImmutableList.of(new IntRange(1, 2),
+                                  new IntRange(4, 4),
+                                  new IntRange(6, 8)),
+                                  CollectionUtils.splitIntoSequentialRanges(ImmutableSortedSet.of(1, 2, 4, 6, 7, 8)));
+  }
 }
 

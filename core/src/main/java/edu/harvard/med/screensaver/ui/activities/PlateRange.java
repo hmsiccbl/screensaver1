@@ -37,24 +37,13 @@ public class PlateRange implements Iterable<Plate>
     PeekingIterator<Plate> iter = Iterators.peekingIterator(plates.iterator());
     List<PlateRange> plateRanges = Lists.newArrayList();;
     while (iter.hasNext()) {
-      PlateRange plateRange = PlateRange.findNextPlateRange(iter, true);
+      PlateRange plateRange = PlateRange.findNextPlateRange(iter);
       plateRanges.add(plateRange);
     }
     return plateRanges;
   }
   
-  public static List<PlateRange> splitIntoPlateRanges(SortedSet<Plate> plates)
-  {
-    PeekingIterator<Plate> iter = Iterators.peekingIterator(plates.iterator());
-    List<PlateRange> plateRanges = Lists.newArrayList();;
-    while (iter.hasNext()) {
-      PlateRange plateRange = PlateRange.findNextPlateRange(iter, false);
-      plateRanges.add(plateRange);
-    }
-    return plateRanges;
-  }
-  
-  private static PlateRange findNextPlateRange(PeekingIterator<Plate> iter, boolean splitOnCopy)
+  private static PlateRange findNextPlateRange(PeekingIterator<Plate> iter)
   {
     SortedSet<Plate> platesScreened = Sets.newTreeSet();
     platesScreened.add(iter.next());
@@ -64,7 +53,7 @@ public class PlateRange implements Iterable<Plate>
       if (next.getPlateNumber() > last.getPlateNumber() + 1) {
         break;
       }
-      else if (splitOnCopy && !next.getCopy().equals(last.getCopy())) {
+      else if (!next.getCopy().equals(last.getCopy())) {
         break;
       }
       platesScreened.add(iter.next());
@@ -133,6 +122,11 @@ public class PlateRange implements Iterable<Plate>
   @Override
   public String toString()
   {
-    return "[" + _plates.first().getPlateNumber() + ".." + _plates.last().getPlateNumber() + "]";
+    return toString(_plates.first().getPlateNumber(), _plates.last().getPlateNumber());
+  }
+
+  public static String toString(Integer firstPlateNumber, Integer lastPlateNumber)
+  {
+    return String.format("[%d..%d]", firstPlateNumber, lastPlateNumber);
   }
 }

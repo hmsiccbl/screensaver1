@@ -109,6 +109,7 @@ public class DataColumn extends AbstractEntity<Integer> implements MetaDataType,
   private Integer channel;
   private Integer timePointOrdinal;
   private Integer zdepthOrdinal;
+  private String _cellLine;
 
 
   /**
@@ -371,7 +372,13 @@ public class DataColumn extends AbstractEntity<Integer> implements MetaDataType,
     setAssayPhenotype(phenotype);
     return this;
   }
-
+  
+  public DataColumn forCellLine(String cellLine)
+  {
+    setCellLine(cellLine);
+    return this;
+  }
+  
   @Column(updatable = false)
   //@Immutable
   @edu.harvard.med.screensaver.model.annotations.Column(hasNonconventionalSetterMethod=true /*uses makeNumeric() builder method*/)
@@ -1147,5 +1154,17 @@ public class DataColumn extends AbstractEntity<Integer> implements MetaDataType,
   {
     this.zdepthOrdinal = zdepthOrdinal;
   }
-
+  
+  @Column(updatable = false)
+  @edu.harvard.med.screensaver.model.annotations.Column(hasNonconventionalSetterMethod=true /*uses forCellLine() builder method*/)
+  @org.hibernate.annotations.Type(type="text")
+  public String getCellLine()
+  {
+    return _cellLine;
+  }
+  
+  private void setCellLine(String string)
+  {
+    _cellLine = string;
+  }
 }

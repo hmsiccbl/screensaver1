@@ -22,6 +22,7 @@ import javax.servlet.http.HttpServletResponse;
 import org.apache.commons.io.IOUtils;
 import org.apache.log4j.Logger;
 
+import edu.harvard.med.screensaver.ScreensaverConstants;
 import edu.harvard.med.screensaver.ui.ApplicationInfo;
 import edu.harvard.med.screensaver.util.StringUtils;
 
@@ -49,11 +50,10 @@ import edu.harvard.med.screensaver.util.StringUtils;
  */
 public class ImageProviderServlet extends HttpServlet
 {
-  private static final String APPLICATION_PROPERTY_FILESYSTEMPATH = "screensaver.ui.imageproviderservlet.filesystempath";
   private static final long serialVersionUID = 1L;
   private static Logger log = Logger.getLogger(ImageProviderServlet.class);
 
-  private String _fileSystemPath;
+  private String _imagesFileSystemPath;
   private ApplicationInfo _appInfo;
 
   /**
@@ -63,12 +63,12 @@ public class ImageProviderServlet extends HttpServlet
   public ImageProviderServlet(ApplicationInfo appInfo)
   {
     _appInfo = appInfo;
-    _fileSystemPath = appInfo.getApplicationProperties().getProperty(APPLICATION_PROPERTY_FILESYSTEMPATH);
+    _imagesFileSystemPath = appInfo.getApplicationProperties().getProperty(ScreensaverConstants.IMAGES_BASE_DIR);
 
-    if (StringUtils.isEmpty(_fileSystemPath)) {
-      throw new IllegalStateException("The application property: " + APPLICATION_PROPERTY_FILESYSTEMPATH + " must be defined.");
+    if (StringUtils.isEmpty(_imagesFileSystemPath)) {
+      throw new IllegalStateException("The application property: " + ScreensaverConstants.IMAGES_BASE_DIR + " must be defined.");
     }
-    log.debug("ImageProviderServlet: \"" + APPLICATION_PROPERTY_FILESYSTEMPATH + "\": " + _fileSystemPath);
+    log.debug("ImageProviderServlet: \"" + ScreensaverConstants.IMAGES_BASE_DIR + "\": " + _imagesFileSystemPath);
   }
 
 
@@ -94,7 +94,7 @@ public class ImageProviderServlet extends HttpServlet
   protected void service(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException
   {
     if (log.isDebugEnabled()) {
-      log.debug("ImageProviderServlet: \"" + APPLICATION_PROPERTY_FILESYSTEMPATH + "\": " + _fileSystemPath);
+      log.debug("ImageProviderServlet: \"" + ScreensaverConstants.IMAGES_BASE_DIR + "\": " + _imagesFileSystemPath);
       log.debug("service: req.getPathInfo(): " + req.getPathInfo());
     }
     String pathInfo = req.getPathInfo();
@@ -117,7 +117,7 @@ public class ImageProviderServlet extends HttpServlet
     }
 
     if (pathInfo != null) {
-      String temp = _fileSystemPath;
+      String temp = _imagesFileSystemPath;
       // make a relative path if its not absolute, this is not uber-useful, 
       // but it allows a *default* screensaver.properties to specify a valid system file path 
       // as simply a relative one, the actual deployment should specify absolute system paths, however.

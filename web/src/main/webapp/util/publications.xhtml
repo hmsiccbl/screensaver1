@@ -1,0 +1,148 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+<html xmlns="http://www.w3.org/1999/xhtml"
+	xmlns:ui="http://java.sun.com/jsf/facelets"
+	xmlns:h="http://java.sun.com/jsf/html"
+	xmlns:f="http://java.sun.com/jsf/core"
+	xmlns:t="http://myfaces.apache.org/tomahawk"
+	xmlns:s="http://myfaces.apache.org/sandbox"
+	xmlns:ss="http://screensaver.med.harvard.edu/ui">
+	
+	<!-- facelet params:
+	     id
+       label
+       description
+	     datamodel
+       isEditable
+       actionBean - only needed if editable - must support "addPublication"/"deletePublication"
+       newPublication - if using the "addProperties" method to add a publication (see screenDetailViewer)
+       also:
+       insert name="fileUpload" for the file uploader dialog to be inserted as in:
+       
+      <ui:define name="fileUpload">
+          <ss:property id="uploadPublicationAttachedFile"
+            label="Upload File" adminOnly="true">
+            <ui:define name="editableData">
+              <t:inputFileUpload id="uploadPublicationAttachedFile"
+                value="#{screenDetailViewer.uploadedPublicationAttachedFileContents}"
+                styleClass="inputText" />
+            </ui:define>
+          </ss:property>
+      </ui:define>
+          	 
+   -->
+<ui:composition>
+
+
+    <ss:property id="#{id}Publications" label="#{label}"
+      description="#{description}">
+      <ui:define name="data">
+        <ss:collectionTable id="#{id}PublicationsTable"
+          dataModel="#{datamodel}"
+          editable="#{isEditable}"
+          actionBean="#{actionBean}" addAction="addPublication"
+          deleteAction="deletePublication">
+          <ui:define name="columns">
+            <t:column>
+              <f:facet name="header">
+                <t:outputText value="Pubmed ID" />
+              </f:facet>
+              <h:outputLink
+                value="http://www.ncbi.nlm.nih.gov/entrez/query.fcgi">
+                <f:param name="cmd" value="Search" />
+                <f:param name="db" value="PubMed" />
+                <f:param name="term" value="#{element.pubmedId}[PMID]" />
+                <t:outputText value="#{element.pubmedId}" />
+              </h:outputLink>
+            </t:column>
+            <t:column>
+              <f:facet name="header">
+                <t:outputText value="PMCID" />
+              </f:facet>
+              <h:outputLink
+                value="http://www.ncbi.nlm.nih.gov/entrez/query.fcgi">
+                <f:param name="cmd" value="Search" />
+                <f:param name="db" value="pmc" />
+                <f:param name="term" value="#{element.pubmedCentralId}[UID]" />
+                <t:outputText value="#{element.pubmedCentralId}"
+                  converter="#{pubmedCentralIdConverter}" />
+              </h:outputLink>
+            </t:column>
+            <t:column>
+              <f:facet name="header">
+                <t:outputText value="Citation" />
+              </f:facet>
+              <t:outputText value="#{element.citation}"
+                styleClass="dataText" />
+            </t:column>
+            <t:column>
+              <f:facet name="header">
+                <t:outputText value="File" />
+              </f:facet>
+              <t:commandLink id="#{id}downloadPublicationAttachedFileCommandLink"
+                value="#{element.attachedFile.filename}"
+                action="#{screenDetailViewer.downloadPublicationAttachedFile}"
+                styleClass="dataText" />
+            </t:column>
+          </ui:define>
+      <ui:define name="addProperties">
+        <t:panelGrid columns="2" styleClass="layoutPanel"
+          columnClasses="propertyLabelColumn,column">
+          <t:outputText value="PubMed ID" styleClass="label" />
+          <t:panelGroup styleClass="layoutPanel">
+            <t:inputText id="#{id}publicationPubMedId"
+              value="#{newPublication.pubmedId}"
+              styleClass="inputText">
+              <f:converter converterId="javax.faces.Integer" />
+            </t:inputText>
+            <t:commandButton id="#{id}LookupPubMedIdCommand"
+              value="Lookup PubMed ID"
+              action="#{screenDetailViewer.lookupPublicationByPubMedId}"
+              styleClass="command" />
+          </t:panelGroup>
+          <t:outputText value="PMCID" styleClass="label" />
+          <t:panelGroup styleClass="layoutPanel">
+            <t:inputText id="#{id}publicationPubMedCentralId"
+              value="#{newPublication.pubmedCentralId}"
+              styleClass="inputText" converter="#{pubmedCentralIdConverter}">
+            </t:inputText>
+            <h:outputLink 
+              value="http://www.ncbi.nlm.nih.gov/sites/pmctopmid" target="_blank">
+              <t:outputText value="Find PMCID for PMID..." />
+            </h:outputLink>
+          </t:panelGroup>
+          <t:outputText value="Title" styleClass="label" />
+          <t:inputText id="#{id}publicationTitle"
+            value="#{newPublication.title}" size="80"
+            styleClass="inputText" />
+          <t:outputText value="Authors" styleClass="label" />
+          <t:inputText id="#{id}publicationAuthors"
+            value="#{newPublication.authors}"
+            size="80" styleClass="inputText" />
+          <t:outputText value="Journal" styleClass="label" />
+          <t:inputText id="#{id}publicationJournal"
+            value="#{newPublication.journal}"
+            size="80" styleClass="inputText" />
+          <t:outputText value="Volume" styleClass="label" />
+          <t:inputText id="#{id}publicationVolume"
+            value="#{newPublication.volume}"
+            styleClass="inputText" />
+          <t:outputText value="Year" styleClass="label" />
+          <t:inputText id="#{id}publicationYear"
+            value="#{newPublication.yearPublished}"
+            maxlength="4" styleClass="inputText" />
+          <t:outputText value="Pages" styleClass="label" />
+          <t:inputText id="#{id}publicationPages"
+            value="#{newPublication.pages}"
+            styleClass="inputText" />
+         <ui:insert name="fileUploader" />
+         <!-- todo: move this out to th pafren -->
+         <ui:insert name="fileUpload" />
+        </t:panelGrid>
+      </ui:define>
+        </ss:collectionTable>
+      </ui:define>
+    </ss:property>
+
+</ui:composition>
+</html>

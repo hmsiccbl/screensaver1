@@ -190,6 +190,14 @@
       label="# Experimental Wells"
       description="The number of wells in the library with well type 'Experimental'"
       value="#{libraryDetailViewer.entity.experimentalWellCount}" />
+      
+    <ss:property id="qualityControlInformation" label="Quality Control Information"
+      description="Information on quality control tests (i.e. Liquid chromatography-mass spectrometry)"
+      value="#{libraryDetailViewer.entity.qualityControlInformation}"
+      rendered="#{appInfo.applicationProperties.map['screensaver.ui.facility_name'] == 'LINCS'}"
+      editable="#{libraryDetailViewer.editMode}" type="Textarea"
+      editWidth="80" editHeight="3" />      
+
   </ui:define>
 
 </ui:composition>

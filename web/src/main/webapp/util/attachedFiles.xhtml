@@ -13,11 +13,12 @@
        - entityTypeName: string
        - rendered: boolean
        - editMode: boolean
+       - adminOnly: boolean
 -->
 
 <ui:composition>
   <ss:property id="attachedFiles" label="Attached Files"
-    rendered="#{rendered}" adminOnly="true"
+    rendered="#{rendered}" adminOnly="#{adminOnly}"
     description="Downloadable files associated with the #{entityTypeName}">
     <ui:define name="data">
       <ss:collectionTable id="attachedFilesTable"

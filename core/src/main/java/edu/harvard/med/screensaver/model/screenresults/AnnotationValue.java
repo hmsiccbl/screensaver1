@@ -52,7 +52,10 @@ public class AnnotationValue extends AbstractEntity<Integer>
   private static Logger log = Logger.getLogger(AnnotationValue.class);
 
   public static final RelationshipPath<AnnotationValue> annotationType = RelationshipPath.from(AnnotationValue.class).to("annotationType", Cardinality.TO_ONE);
-  public static final RelationshipPath<AnnotationValue> reagent = RelationshipPath.from(AnnotationValue.class).to("reagent");
+  public static final RelationshipPath<AnnotationValue> reagent = RelationshipPath.from(AnnotationValue.class).to("reagent", Cardinality.TO_ONE);
+  public static final RelationshipPath<AnnotationValue> study =
+    RelationshipPath.from(AnnotationValue.class).to("annotationType", Cardinality.TO_ONE)
+                                                .to("study", Cardinality.TO_ONE);
 
   private AnnotationType _annotationType;
   private Reagent _reagent;
@@ -138,7 +141,7 @@ public class AnnotationValue extends AbstractEntity<Integer>
   @Transient
   public String getFormattedValue()
   {
-    return _value;
+    return _value == null ? (_numericValue == null ? "null" : _numericValue.toString()) : _value;
   }
 
 

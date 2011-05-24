@@ -12,17 +12,22 @@ package edu.harvard.med.screensaver.io.libraries.smallmolecule;
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.math.BigDecimal;
+import java.util.Set;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
+
+import com.google.common.base.Joiner;
+import com.google.common.collect.Sets;
+import org.apache.log4j.Logger;
 
 import edu.harvard.med.screensaver.io.DataExporter;
 import edu.harvard.med.screensaver.io.ParseError;
 import edu.harvard.med.screensaver.io.ParseException;
+import edu.harvard.med.screensaver.model.MolarConcentration;
+import edu.harvard.med.screensaver.model.MolarUnit;
 import edu.harvard.med.screensaver.model.libraries.LibraryWellType;
 import edu.harvard.med.screensaver.model.libraries.MolecularFormula;
 import edu.harvard.med.screensaver.model.libraries.WellName;
-
-import org.apache.log4j.Logger;
 
 //TODO: use common file specification with WellSdfWriter
 public class SDRecordParser
@@ -30,8 +35,13 @@ public class SDRecordParser
   private static final String END_OF_MOLFILE_MARKER = "M  END";
   private static final String END_OF_RECORD_DELIMITER = "$$$$";
 
+  public static Set EMPTY_FIELD_MARKERS = Sets.newHashSet(new String[] { "n/a", "none" });
+
   private static final Logger log = Logger.getLogger(SDRecordParser.class);
   private static final Pattern dataHeaderPattern = Pattern.compile("^>.*<(.*)>.*");
+  private static final Pattern molarConcentrationPattern = Pattern.compile("(\\d+\\.?\\d*)\\s*(" +
+                                                                      Joiner.on('|').join(MolarUnit.DISPLAY_VALUES) + ")");
+  private static final Pattern mgMlConcentrationPattern = Pattern.compile("(\\d+\\.?\\d*)\\s*mg/ml");
 
   private BufferedReader _sdFileReader;
   private int _lineNumber;
@@ -85,6 +95,7 @@ public class SDRecordParser
         String fieldName = dataHeaderMatcher.group(1).toLowerCase();
         line = readNextLine().trim();
         if (line.length() == 0) continue;
+        if (EMPTY_FIELD_MARKERS.contains(line)) continue;
         try {
           boolean unusedField = false;
           if (fieldName.equals("plate")) { 
@@ -97,6 +108,7 @@ public class SDRecordParser
             sdRecord.setLibraryWellType(LibraryWellType.valueOf(line.toUpperCase()));
           }
           else if (fieldName.equals("facility_reagent_id")) {
+            log.info("facility reagent id: " + line);
             sdRecord.setFacilityId(line);
           }
           else if (fieldName.equals("vendor")) {
@@ -105,8 +117,23 @@ public class SDRecordParser
           else if (fieldName.equals("vendor_reagent_id")) {
             sdRecord.setVendorIdentifier(line);
           }
+          else if (fieldName.equals("vendor_batch_id")) {
+            sdRecord.setVendorBatchId(line);
+          }
+          else if (fieldName.equals("facility_batch_id")) {
+            sdRecord.setFacilityBatchId(Integer.parseInt(line));
+          }
+          else if (fieldName.equals("salt_form_id")) {
+            sdRecord.setSaltFormId(Integer.parseInt(line));
+          }
           else if (fieldName.equals("chemical_name")) {
-            sdRecord.getCompoundNames().add(line);
+            String[] names = line.split(DataExporter.LIST_DELIMITER);
+            for (String name : names) {
+              // trim whitespace from the names
+              name = name.trim();
+              sdRecord.getCompoundNames().add(name);
+            }
+            //sdRecord.getCompoundNames().add(line);
           }
           else if (fieldName.equals("pubchem_cid")) 
           {
@@ -121,6 +148,38 @@ public class SDRecordParser
             for(String id:ids)
             {
               sdRecord.getChembankIds().add(Integer.parseInt(id));
+            }
+          }
+          else if (fieldName.equals("chembl_id")) {
+            String[] ids = line.split(DataExporter.LIST_DELIMITER);
+            for(String id:ids)
+            {
+              sdRecord.getChemblIds().add(Integer.parseInt(id));
+            }
+          }
+          else if (fieldName.equals("pubmed_id")) {
+            String[] ids = line.split(DataExporter.LIST_DELIMITER);
+            for (String id : ids) {
+              sdRecord.getPubmedIds().add(Integer.parseInt(id));
+              log.info("pubmed id: " + id);
+            }
+          }
+          else if (fieldName.equals("concentration")) {
+            Matcher matcher = molarConcentrationPattern.matcher(line);
+            if (matcher.matches()) {
+              MolarUnit unit = MolarUnit.forSymbol(matcher.group(2));
+              sdRecord.setConcentration(MolarConcentration.makeConcentration(matcher.group(1), unit));
+            }
+            else {
+              matcher = mgMlConcentrationPattern.matcher(line);
+              if (matcher.matches()) {
+                // TODO
+                log.warn("mg/ml concentration not yet supported");
+              }
+              else {
+                throw new ParseException(new ParseError("field 'concentration' value could not be interpreted as a molar or mg/ml concentration:" +
+                  line));
+              }
             }
           }
           else if (fieldName.equals("molecular_mass")) {
@@ -150,7 +209,10 @@ public class SDRecordParser
         }
         catch (Exception e) {
           skipRestOfRecord();
-          throw new ParseException(new ParseError("bad value in field '" + fieldName + "'", _lineNumber));
+          log.warn("bad value in field '" + fieldName + "'" + _lineNumber, e);
+          if (e instanceof ParseException) throw (ParseException) e;
+          //TODO: why not add something from the exception message here (this would show up in the UI)? - sde4
+          throw new ParseException(new ParseError("field '" + fieldName + "' error: " + e.getMessage(), _lineNumber));
         }
       }
       line = readNextLine();

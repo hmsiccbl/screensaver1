@@ -685,6 +685,7 @@ public class Screen extends Study implements AttachedFilesEntity<Integer>
 
   /**
    * Create and return a new screen result for the screen.
+   * 
    * @return the new screen result
    */
   public ScreenResult createScreenResult()
@@ -930,28 +931,18 @@ public class Screen extends Study implements AttachedFilesEntity<Integer>
    * Get the publications.
    * @return the publications
    */
-  @OneToMany(mappedBy = "screen", cascade = { CascadeType.ALL }, orphanRemoval = true)
+  @ManyToMany(cascade = { CascadeType.PERSIST, CascadeType.MERGE, CascadeType.REMOVE }, fetch = FetchType.LAZY)
+  @JoinTable(name = "screenPublicationLink", joinColumns = @JoinColumn(name = "screenId"), inverseJoinColumns = @JoinColumn(name = "publicationId"))
+  @org.hibernate.annotations.ForeignKey(name = "fk_screen_publication_link_to_screen")
   public Set<Publication> getPublications()
   {
     return _publications;
   }
 
-  /**
-   * Create a new publication for this screen.
-   *
-   * @return the new publication
-   */
-  public Publication createPublication()
-  {
-    Publication publication = new Publication(this);
-    _publications.add(publication);
-    return publication;
-  }
-
   // note: for automated model unit tests, we can't name this createPublication or addPublication
   public Publication addCopyOfPublication(Publication publicationDTO)
   {
-    Publication publication = createPublication();
+    Publication publication = new Publication();
     publication.setPubmedId(publicationDTO.getPubmedId());
     publication.setPubmedCentralId(publicationDTO.getPubmedCentralId());
     publication.setTitle(publicationDTO.getTitle());
@@ -960,6 +951,7 @@ public class Screen extends Study implements AttachedFilesEntity<Integer>
     publication.setJournal(publicationDTO.getJournal());
     publication.setVolume(publicationDTO.getVolume());
     publication.setPages(publicationDTO.getPages());
+    addPublication(publication);
     return publication;
   }
 
@@ -1639,6 +1631,11 @@ public class Screen extends Study implements AttachedFilesEntity<Integer>
       return true;
     }
     return false;
+  }
+
+  public boolean addPublication(Publication p)
+  {
+    return _publications.add(p);
   }
 
   @Transient

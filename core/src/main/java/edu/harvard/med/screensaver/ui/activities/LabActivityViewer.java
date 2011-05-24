@@ -79,8 +79,10 @@ public class LabActivityViewer extends SearchResultContextEditableEntityViewerBa
   private UISelectOneBean<AssayProtocolType> _assayProtocolType;
   private UISelectOneBean<MolarUnit> _concentrationType;
   private UISelectOneBean<VolumeUnit> _volumeType;
+  private UISelectOneBean<VolumeUnit> _assayWellVolumeType;
   private String _concentrationValue;
   private String _volumeValue;
+  private String _assayWellVolumeValue;
   private DataModel _cherryPickPlatesDataModel;
 
   private DataModel _platesScreenedDataModel;
@@ -171,6 +173,8 @@ public class LabActivityViewer extends SearchResultContextEditableEntityViewerBa
     _concentrationValue = null;
     _volumeType = null;
     _volumeValue = null;
+    _assayWellVolumeValue = null;
+    _assayWellVolumeType = null;
   }
   
   /**
@@ -314,7 +318,57 @@ public class LabActivityViewer extends SearchResultContextEditableEntityViewerBa
     return _assayProtocolType;
   }
 
+  /**
+   * This method exists to grab the value portion of the Quantity stored
+   */
+  public String getAssayWellVolumeValue()
+  {
+    if (_assayWellVolumeValue == null) {
+      if (getEntity() instanceof Screening) {
+        Volume volume = ((Screening) getEntity()).getAssayWellVolume();
+        if (volume != null) {
+          _assayWellVolumeValue = volume.getDisplayValue().toString();
+        }
+      }
+    }
+    return _assayWellVolumeValue;
+  }
 
+  /**
+   * This method exists to set the value portion of the Quantity stored
+   * 
+   * @see #save()
+   */
+  public void setAssayWellVolumeValue(String value)
+  {
+    _assayWellVolumeValue = value;
+  }
+
+  public UISelectOneBean<VolumeUnit> getAssayWellVolumeType()
+  {
+    try {
+      if (_assayWellVolumeType == null) {
+        Volume v = (getEntity() instanceof Screening ?
+                                    ((Screening) getEntity()).getAssayWellVolume() :
+                                    null);
+        VolumeUnit unit = (v == null ? VolumeUnit.NANOLITERS : v.getUnits());
+
+        _assayWellVolumeType = new UISelectOneBean<VolumeUnit>(VolumeUnit.DISPLAY_VALUES, unit)
+          {
+            @Override
+            protected String makeLabel(VolumeUnit t)
+            {
+              return t.getValue();
+            }
+          };
+      }
+      return _assayWellVolumeType;
+    }
+    catch (Exception e) {
+      log.error("err: " + e);
+      return null;
+    }
+  }
   
   @Override
   protected boolean validateEntity(LabActivity entity)
@@ -327,6 +381,14 @@ public class LabActivityViewer extends SearchResultContextEditableEntityViewerBa
       } 
       catch (Exception e) {
         showFieldInputError("Volume Transferred Per Replicate", e.getLocalizedMessage());
+        valid = false;
+      }
+      try {
+        Volume.makeVolume(getAssayWellVolumeValue(),
+                          getAssayWellVolumeType().getSelection());
+      }
+      catch (Exception e) {
+        showFieldInputError("Assay Well Volume", e.getLocalizedMessage());
         valid = false;
       }
       try {
@@ -359,6 +421,7 @@ public class LabActivityViewer extends SearchResultContextEditableEntityViewerBa
   {
     if (entity instanceof Screening) {
       ((Screening) entity).setVolumeTransferredPerWell(Volume.makeVolume(_volumeValue, _volumeType.getSelection()));
+      ((Screening) entity).setAssayWellVolume(Volume.makeVolume(_assayWellVolumeValue, _assayWellVolumeType.getSelection()));
       ((Screening) entity).setMolarConcentration(MolarConcentration.makeConcentration(_concentrationValue, _concentrationType.getSelection()));
     }
     if (entity instanceof CherryPickScreening) {

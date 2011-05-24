@@ -16,6 +16,8 @@ import org.apache.log4j.Logger;
 import org.joda.time.LocalDate;
 import org.joda.time.format.DateTimeFormat;
 import org.joda.time.format.DateTimeFormatter;
+import com.google.common.base.Function;
+import com.google.common.collect.Lists;
 
 import edu.harvard.med.screensaver.ScreensaverConstants;
 import edu.harvard.med.screensaver.io.CommandLineApplication;
@@ -56,7 +58,13 @@ public class LibraryCreator
                                .create("lt"));
       app.addCommandLineOption(OptionBuilder.hasArg().isRequired()
                                .withArgName("screen type").withLongOpt("screen-type")
-                               .withDescription(StringUtils.makeListString(Arrays.asList(ScreenType.values()), ", "))
+                               .withDescription(StringUtils.makeListString(Lists.transform(Lists.newArrayList(ScreenType.values()), new Function<ScreenType,String>() {
+                                 @Override
+                                 public String apply(ScreenType arg0)
+                                {
+                                  return arg0.name();
+                                }
+                               }), ", "))
                                .create("st"));
       app.addCommandLineOption(OptionBuilder.hasArg(false)
                                .withLongOpt("is-pool")

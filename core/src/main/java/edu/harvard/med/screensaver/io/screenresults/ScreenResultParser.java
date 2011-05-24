@@ -460,6 +460,9 @@ public class ScreenResultParser implements ScreenResultWorkbookSpecification
       if (dataColumnPropertyRows.containsKey(DataColumnProperty.ZDEPTH_ORDINAL)) {
         dataColumn.forZdepthOrdinal(dataColumnPropertyRows.get(DataColumnProperty.ZDEPTH_ORDINAL).getCell(iDataColumn).getInteger());
       }
+      if (dataColumnPropertyRows.containsKey(DataColumnProperty.CELL_LINE)) {
+        dataColumn.forCellLine(dataColumnPropertyRows.get(DataColumnProperty.CELL_LINE).getCell(iDataColumn).getString());
+      }
       // note: we do this last so that _columnsDerivedFromParser does not allow the current column to be considered a valid "derived from" value
       _worksheetColumnLabel2DataColumnObjectMap.put(dataColumnPropertyRows.get(DataColumnProperty.COLUMN_IN_DATA_WORKSHEET).getCell(iDataColumn, true).getAsString(), dataColumn);
     }

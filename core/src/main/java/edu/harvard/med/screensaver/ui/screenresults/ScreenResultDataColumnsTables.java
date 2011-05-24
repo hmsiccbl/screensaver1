@@ -29,6 +29,7 @@ public class ScreenResultDataColumnsTables extends MetaDataTable<DataColumn>
      new MetaDataTableRowDefinition<DataColumn>("decimalPlaces", "Decimal Places", "The number of decimal places that are significant"),
      new MetaDataTableRowDefinition<DataColumn>("replicateOrdinal", "Replicate Number", "To which replicate this data column refers"),
      new MetaDataTableRowDefinition<DataColumn>("timePoint", "Time Point", "The time point the readout was taken"),
+     new MetaDataTableRowDefinition<DataColumn>("cellLine", "Cell Line", "The cell line used"),
      new MetaDataTableRowDefinition<DataColumn>("timePointOrdinal", "Time Point Ordinal", "The ordinal of the time point the image was taken"),
      new MetaDataTableRowDefinition<DataColumn>("channel", "Channel", "The channel in which the readout was done"),
      new MetaDataTableRowDefinition<DataColumn>("zdepthOrdinal", "Zdepth Ordinal", "The depth or z-value the image was taken "),

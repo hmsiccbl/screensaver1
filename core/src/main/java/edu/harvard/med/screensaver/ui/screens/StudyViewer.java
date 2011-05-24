@@ -9,12 +9,14 @@
 
 package edu.harvard.med.screensaver.ui.screens;
 
+import java.net.URL;
 import java.util.ArrayList;
 
 import org.apache.log4j.Logger;
 
 import edu.harvard.med.screensaver.ScreensaverConstants;
 import edu.harvard.med.screensaver.db.GenericEntityDAO;
+import edu.harvard.med.screensaver.io.screens.StudyImageProvider;
 import edu.harvard.med.screensaver.model.screenresults.AnnotationType;
 import edu.harvard.med.screensaver.model.screens.Screen;
 import edu.harvard.med.screensaver.model.screens.Study;
@@ -31,6 +33,7 @@ public class StudyViewer<E extends Study> extends SearchResultContextEntityViewe
   private StudyDetailViewer _studyDetailViewer;
   private AnnotationTypesTable _annotationTypesTable;
   private WellSearchResults _wellsBrowser;
+  private StudyImageProvider _studyImageProvider; // LINCS-only feature
 
 
   /**
@@ -45,7 +48,8 @@ public class StudyViewer<E extends Study> extends SearchResultContextEntityViewe
                      StudySearchResults studiesBrowser,
                      GenericEntityDAO dao,
                      AnnotationTypesTable annotationTypesTable,
-                     WellSearchResults wellsBrowser)
+                     WellSearchResults wellsBrowser,
+                     StudyImageProvider studyImageProvider)
   {
     super(thisProxy,
           (Class<E>) Study.class,
@@ -56,6 +60,7 @@ public class StudyViewer<E extends Study> extends SearchResultContextEntityViewe
     _studyDetailViewer = studyDetailViewer;
     _annotationTypesTable = annotationTypesTable;
     _wellsBrowser = wellsBrowser;
+    _studyImageProvider = studyImageProvider;
 
     getIsPanelCollapsedMap().put("reagentsData", false);
   }
@@ -89,6 +94,14 @@ public class StudyViewer<E extends Study> extends SearchResultContextEntityViewe
   public AnnotationTypesTable getAnnotationTypesTable()
   {
     return _annotationTypesTable;
+  }
+
+  public String getStudyImageUrl()
+  {
+    if (_studyImageProvider == null) return null;
+
+    URL url = _studyImageProvider.getImageUrl((Screen) getEntity());
+    return url == null ? null : url.toString();
   }
 
   @Override

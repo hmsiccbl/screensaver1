@@ -9,8 +9,7 @@
 
 package edu.harvard.med.screensaver.model.libraries;
 
-import java.beans.IntrospectionException;
-
+import com.google.common.collect.Lists;
 import com.google.common.collect.Sets;
 import junit.framework.TestSuite;
 import org.joda.time.LocalDate;
@@ -21,6 +20,7 @@ import edu.harvard.med.screensaver.db.LibrariesDAO;
 import edu.harvard.med.screensaver.model.AbstractEntityInstanceTest;
 import edu.harvard.med.screensaver.model.AdministrativeActivity;
 import edu.harvard.med.screensaver.model.AdministrativeActivityType;
+import edu.harvard.med.screensaver.model.TestDataFactory.PostCreateHook;
 import edu.harvard.med.screensaver.model.screens.ScreenType;
 import edu.harvard.med.screensaver.model.users.AdministratorUser;
 import edu.harvard.med.screensaver.model.users.ScreensaverUserRole;
@@ -57,7 +57,8 @@ public class SmallMoleculeReagentTest extends AbstractEntityInstanceTest<SmallMo
     
     Reagent reagent2 = genericEntityDao.findEntityById(SmallMoleculeReagent.class, reagent.getReagentId());
     assertNotNull(reagent2);
-    assertEquals(Sets.newHashSet("compound1", "compound2"), reagent.getCompoundNames());
+    assertEquals(Lists.newArrayList("compound1", "compound2"), reagent.getCompoundNames());
+    assertEquals("compound1", reagent.getPrimaryCompoundName());
     assertEquals(Sets.newHashSet(1, 2), reagent.getPubchemCids());
     assertEquals(Sets.newHashSet(10, 11), reagent.getChembankIds());
   }
@@ -119,6 +120,23 @@ public class SmallMoleculeReagentTest extends AbstractEntityInstanceTest<SmallMo
     }
     catch (Exception e) {
     }
+  }
+
+  public void testOptionalImmutableProperties()
+  {
+    dataFactory.addPostCreateHook(SmallMoleculeReagent.class, new PostCreateHook<SmallMoleculeReagent>() {
+      @Override
+      public void postCreate(String callStack, SmallMoleculeReagent smr)
+      {
+        if (callStack.endsWith(getName())) {
+          smr.forFacilityBatchId(1).forSaltFormId(2).forVendorBatchId("batchId");
+        }
+      }
+    });
+    SmallMoleculeReagent smallMoleculeReagent = dataFactory.newInstance(SmallMoleculeReagent.class, getName());
+    assertEquals(Integer.valueOf(1), smallMoleculeReagent.getFacilityBatchId());
+    assertEquals(Integer.valueOf(2), smallMoleculeReagent.getSaltFormId());
+    assertEquals("batchId", smallMoleculeReagent.getVendorBatchId());
   }
 }
 

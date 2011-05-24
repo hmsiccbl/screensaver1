@@ -32,12 +32,14 @@ import javax.persistence.OneToOne;
 import javax.persistence.Transient;
 import javax.persistence.Version;
 
+import com.google.common.base.Function;
 import com.google.common.base.Joiner;
 import com.google.common.base.Predicate;
 import com.google.common.collect.ImmutableSortedSet;
 import com.google.common.collect.Iterables;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Sets;
+import org.apache.commons.lang.math.IntRange;
 import org.hibernate.annotations.Sort;
 import org.hibernate.annotations.SortType;
 
@@ -56,6 +58,7 @@ import edu.harvard.med.screensaver.model.screens.LibraryScreening;
 import edu.harvard.med.screensaver.model.screens.Screen;
 import edu.harvard.med.screensaver.model.users.AdministratorUser;
 import edu.harvard.med.screensaver.ui.activities.PlateRange;
+import edu.harvard.med.screensaver.util.CollectionUtils;
 import edu.harvard.med.screensaver.util.StringUtils;
 
 /**
@@ -95,6 +98,10 @@ public class ScreenResult extends AuditedAbstractEntity<Integer>
   public static final RelationshipPath<ScreenResult> screen = RelationshipPath.from(ScreenResult.class).to("screen");
   public static final RelationshipPath<ScreenResult> dataColumns = RelationshipPath.from(ScreenResult.class).to("dataColumns");
   public static final RelationshipPath<ScreenResult> assayWells = RelationshipPath.from(ScreenResult.class).to("assayWells");
+
+  private static final Function<IntRange,String> formatPlateNumberRange = new Function<IntRange,String>() {
+    public String apply(IntRange range) { return PlateRange.toString(range.getMinimumInteger(), range.getMaximumInteger()); }
+  };
 
 
   // private instance data
@@ -178,9 +185,10 @@ public class ScreenResult extends AuditedAbstractEntity<Integer>
                                                               String comments)
   {
     Set<AssayPlate> assayPlatesDataLoaded = findOrCreateAssayPlatesDataLoaded(plateNumbersLoadedWithMaxReplicates);
-    SortedSet<Plate> plates = Sets.newTreeSet(Iterables.transform(assayPlatesDataLoaded, AssayPlate.ToPlate));
-    String mandatoryComments = "Loaded data for " + plates.size() + " plates " +
-      Joiner.on(",").join(PlateRange.splitIntoPlateRanges(plates));
+    SortedSet<Integer> plateNumbers = Sets.newTreeSet(Iterables.transform(assayPlatesDataLoaded, AssayPlate.ToPlateNumber));
+    String mandatoryComments = "Loaded data for " + plateNumbers.size() + " plates " +
+      Joiner.on(",").join(Iterables.transform(CollectionUtils.splitIntoSequentialRanges(plateNumbers),
+                                              formatPlateNumberRange));
     
     if (StringUtils.isEmpty(comments)) {
       comments = "";

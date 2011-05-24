@@ -29,15 +29,18 @@ import javax.persistence.Transient;
 import javax.persistence.UniqueConstraint;
 import javax.persistence.Version;
 
-import com.google.common.collect.Maps;
 import org.apache.log4j.Logger;
 import org.hibernate.annotations.MapKeyManyToMany;
+import com.google.common.collect.Maps;
 
+import edu.harvard.med.screensaver.ScreensaverConstants;
 import edu.harvard.med.screensaver.model.AbstractEntityVisitor;
 import edu.harvard.med.screensaver.model.AdministrativeActivity;
 import edu.harvard.med.screensaver.model.AdministrativeActivityType;
 import edu.harvard.med.screensaver.model.DataModelViolationException;
 import edu.harvard.med.screensaver.model.DuplicateEntityException;
+import edu.harvard.med.screensaver.model.MolarConcentration;
+import edu.harvard.med.screensaver.model.MolarUnit;
 import edu.harvard.med.screensaver.model.SemanticIDAbstractEntity;
 import edu.harvard.med.screensaver.model.annotations.ToMany;
 import edu.harvard.med.screensaver.model.annotations.ToOne;
@@ -91,6 +94,7 @@ public class Well extends SemanticIDAbstractEntity<String> implements Comparable
   private String _facilityId;
   private Map<DataColumn,ResultValue> _resultValues = new HashMap<DataColumn,ResultValue>();
   private AdministrativeActivity _deprecationActivity;
+  private MolarConcentration _concentration;
 
 
   /**
@@ -518,5 +522,27 @@ public class Well extends SemanticIDAbstractEntity<String> implements Comparable
   private void setVersion(Integer version)
   {
     _version = version;
+  }
+
+  public void setMolarConcentration(MolarConcentration value)
+  {
+    _concentration = value;
+  }
+  
+  /**
+   * Concentration, in nanoMolar units
+   * @return
+   */
+  @Column(precision = ScreensaverConstants.CONCENTRATION_FULL_PRECISION, scale = ScreensaverConstants.CONCENTRATION_FULL_SCALE)
+  @org.hibernate.annotations.Type(type = "edu.harvard.med.screensaver.db.usertypes.MolarConcentrationType")
+  public MolarConcentration getMolarConcentration()
+  {
+    return _concentration;
+  }
+
+  @Transient
+  public MolarUnit getConcentrationUnit()
+  {
+    return _concentration.getUnits();
   }
 }

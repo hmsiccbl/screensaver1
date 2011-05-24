@@ -133,6 +133,7 @@ public class LibraryCopyPlatesBatchEditorTest extends AbstractBackingBeanTest
     libraryCopyPlatesBrowser.searchAll();
     ((TableColumn<Plate,String>) libraryCopyPlatesBrowser.getColumnManager().getColumn("Copy")).getCriterion().setOperatorAndValue(Operator.EQUAL, "C");
     assertTrue(libraryCopyPlatesBrowser.getRowCount() > 0);
+    libraryCopyPlatesBrowser.getBatchEditor().getPlateStatus().setSelection(PlateStatus.AVAILABLE);
     libraryCopyPlatesBrowser.getBatchEditor().setNewPlateLocationRoom("Room1");
     libraryCopyPlatesBrowser.getBatchEditor().getLocationChangeActivity().setPerformedBy(_admin);
     libraryCopyPlatesBrowser.getBatchEditor().getLocationChangeActivity().setDateOfActivity(new LocalDate());
@@ -167,6 +168,7 @@ public class LibraryCopyPlatesBatchEditorTest extends AbstractBackingBeanTest
     libraryCopyPlatesBrowser.searchAll();
     ((TableColumn<Plate,String>) libraryCopyPlatesBrowser.getColumnManager().getColumn("Copy")).getCriterion().setOperatorAndValue(Operator.EQUAL, "C");
     assertTrue(libraryCopyPlatesBrowser.getRowCount() > 0);
+    libraryCopyPlatesBrowser.getBatchEditor().getPlateStatus().setSelection(PlateStatus.AVAILABLE);
     libraryCopyPlatesBrowser.getBatchEditor().setNewPlateLocationRoom("Room1");
     libraryCopyPlatesBrowser.getBatchEditor().setNewPlateLocationFreezer("Freezer1");
     libraryCopyPlatesBrowser.getBatchEditor().setNewPlateLocationShelf("Shelf1");
@@ -177,6 +179,7 @@ public class LibraryCopyPlatesBatchEditorTest extends AbstractBackingBeanTest
     ((TableColumn<Plate,String>) libraryCopyPlatesBrowser.getColumnManager().getColumn("Copy")).getCriterion().setOperatorAndValue(Operator.EQUAL, "D");
     assertTrue(libraryCopyPlatesBrowser.getRowCount() > 0);
     libraryCopyPlatesBrowser.getBatchEditor().initialize();
+    libraryCopyPlatesBrowser.getBatchEditor().getPlateStatus().setSelection(PlateStatus.AVAILABLE);
     libraryCopyPlatesBrowser.getBatchEditor().setNewPlateLocationRoom("Room2");
     libraryCopyPlatesBrowser.getBatchEditor().setNewPlateLocationFreezer("Freezer2");
     libraryCopyPlatesBrowser.getBatchEditor().setNewPlateLocationShelf("Shelf1");

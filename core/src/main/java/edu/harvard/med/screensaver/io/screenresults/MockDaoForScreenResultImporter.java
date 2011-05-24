@@ -17,10 +17,10 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
-import com.google.common.collect.Maps;
-import com.google.common.collect.Sets;
 import org.apache.log4j.Logger;
 import org.hibernate.ScrollableResults;
+import com.google.common.collect.Maps;
+import com.google.common.collect.Sets;
 
 import edu.harvard.med.screensaver.db.DAOTransaction;
 import edu.harvard.med.screensaver.db.GenericEntityDAO;
@@ -44,6 +44,7 @@ import edu.harvard.med.screensaver.model.libraries.Plate;
 import edu.harvard.med.screensaver.model.libraries.PlateSize;
 import edu.harvard.med.screensaver.model.libraries.Reagent;
 import edu.harvard.med.screensaver.model.libraries.ReagentVendorIdentifier;
+import edu.harvard.med.screensaver.model.libraries.SmallMoleculeReagent;
 import edu.harvard.med.screensaver.model.libraries.Well;
 import edu.harvard.med.screensaver.model.libraries.WellCopy;
 import edu.harvard.med.screensaver.model.libraries.WellKey;
@@ -490,4 +491,21 @@ public class MockDaoForScreenResultImporter implements GenericEntityDAO, ScreenR
   public void calculatePlateVolumeStatistics(Collection<Plate> plates)
   {
   }
+  
+  public Set<SmallMoleculeReagent> findReagents(String facilityId,
+                                                Integer saltId,
+                                                Integer batchId,
+                                                boolean latestReleasedVersionsOnly)
+  {
+    // TODO Auto-generated method stub
+    return null;
+  }
+
+  @Override
+  public Set<WellKey> findWellKeysForCompoundName(String compoundSearchName)
+  {
+    // TODO Auto-generated method stub
+    return null;
+  }
+  
 }

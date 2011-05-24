@@ -18,8 +18,10 @@ import java.util.Map;
 import java.util.Set;
 import java.util.TreeSet;
 
+import com.google.common.base.Function;
 import com.google.common.base.Functions;
 import com.google.common.collect.Iterables;
+import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
 import com.google.common.collect.Sets;
 import org.apache.log4j.Logger;
@@ -104,6 +106,30 @@ public class LibrariesDAOImpl extends AbstractDAO implements LibrariesDAO
     log.debug(hql.toString());
     List<Reagent> reagents = _dao.runQuery(new Query<Reagent>() {
       public List<Reagent> execute(Session session)
+      {
+        return hql.toQuery(session, true).list();
+      }
+    });
+    return Sets.newHashSet(reagents);
+  }
+
+  public Set<SmallMoleculeReagent> findReagents(String facilityId, Integer saltId, Integer batchId, boolean latestReleasedVersionsOnly)
+  {
+    final HqlBuilder hql = new HqlBuilder();
+    hql.from(SmallMoleculeReagent.class, "r").
+      from("r", SmallMoleculeReagent.well, "w", JoinType.LEFT_FETCH).
+      from("w", Well.library, "l", JoinType.LEFT_FETCH).
+      where("w", "facilityId", Operator.EQUAL, facilityId).
+      where("r", "saltFormId", Operator.EQUAL, saltId).
+      where("r", SmallMoleculeReagent.facilityBatchId.getPropertyName(), Operator.EQUAL, batchId);
+    if (latestReleasedVersionsOnly) {
+      hql.from("w", Well.latestReleasedReagent, "lrr").
+      where("lrr", Operator.EQUAL, "r");
+    }
+    hql.select("r");
+    log.info(hql.toString());
+    List<SmallMoleculeReagent> reagents = _dao.runQuery(new Query<SmallMoleculeReagent>() {
+      public List<SmallMoleculeReagent> execute(Session session)
       {
         return hql.toQuery(session, true).list();
       }
@@ -563,6 +589,9 @@ public class LibrariesDAOImpl extends AbstractDAO implements LibrariesDAO
   @Override
   public void calculateCopyVolumeStatistics(Collection<Copy> copies)
   {
+    if (copies.isEmpty()) {
+      return;
+    }
     // note: we are forced to use native SQL query, as HQL does not perform volume multiplication properly (always results in value of 0)
     String sql =
       "select prv.copy_id, avg(prv.plate_remaining_volume), min(prv.plate_remaining_volume), max(prv.plate_remaining_volume) from "
@@ -615,5 +644,69 @@ public class LibrariesDAOImpl extends AbstractDAO implements LibrariesDAO
       BigDecimal avgRemainingVolumeLiters = (BigDecimal) row[1];
       plate.getVolumeStatistics().setAverageRemaining(toPlateVolume(avgRemainingVolumeLiters));
     }
+  }
+  /**
+   * NOTE: LINCS-only feature
+   * Find Wells containing Small Molecule Reagents where one of the compound names matches the compoundSearchName,
+   * case insensitive, greedy match.
+   * 
+   * @param compoundSearchName
+   * @return
+   */
+  @Override
+  public Set<WellKey> findWellKeysForCompoundName(final String compoundSearchName)
+  {
+    List<SmallMoleculeReagent> reagents = null;
+
+    if (compoundSearchName == null) {
+      final HqlBuilder hql = new HqlBuilder();
+      hql.from(SmallMoleculeReagent.class, "r").
+            from("r", SmallMoleculeReagent.well, "w", JoinType.LEFT_FETCH);
+      hql.select("r");
+      reagents = _dao.runQuery(new Query<SmallMoleculeReagent>() {
+        public List<SmallMoleculeReagent> execute(Session session)
+            {
+              return hql.toQuery(session, true).list();
+            }
+      });
+    }
+    else {
+      // TODO: find an HQL-way to do this.  Currently, can find no way to search, insensitively, and greedily (i.e. using substrings) for 
+      // names in the SmallMoleculeReagent.compoundNames collection.  If we make compoundName into a first class 
+      // Hibernate entity, I believe then we could use the HQL Operator.TEXT_LIKE to do the match - sde4 
+      final Object[] result = new Object[1];
+      runQuery(new edu.harvard.med.screensaver.db.Query() {
+        public List<?> execute(Session session)
+        {
+          String sql = "select reagent_id from small_molecule_compound_name where lower(compound_name) like :name";
+          org.hibernate.Query query = session.createSQLQuery(sql);
+          query.setParameter("name", "%" + compoundSearchName.toLowerCase() + "%");
+          result[0] = query.list();
+          return null;
+        }
+      });
+      Set<Integer> reagent_ids = Sets.newHashSet((List<Integer>) result[0]);
+      log.info("reagent ids found: " + reagent_ids);
+      final HqlBuilder hql = new HqlBuilder();
+      hql.from(SmallMoleculeReagent.class, "r").
+            from("r", SmallMoleculeReagent.well, "w", JoinType.LEFT_FETCH).
+            whereIn("r", "id", reagent_ids);
+      hql.select("r");
+      reagents = _dao.runQuery(new Query<SmallMoleculeReagent>() {
+        public List<SmallMoleculeReagent> execute(Session session)
+            {
+              return hql.toQuery(session, true).list();
+            }
+      });
+    }
+    
+    Set<WellKey> wellKeys = Sets.newHashSet(Lists.transform(reagents, new Function<SmallMoleculeReagent,WellKey>() {
+      @Override
+      public WellKey apply(SmallMoleculeReagent from)
+      {
+        return from.getWell().getWellKey();
+      }
+    }));
+    return wellKeys;
   }
 }

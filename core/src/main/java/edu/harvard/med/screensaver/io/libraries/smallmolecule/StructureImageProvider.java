@@ -9,37 +9,12 @@
 
 package edu.harvard.med.screensaver.io.libraries.smallmolecule;
 
-import java.io.IOException;
-import java.io.InputStream;
-import java.net.URL;
-
-import edu.harvard.med.screensaver.model.libraries.SmallMoleculeReagent;
+import edu.harvard.med.screensaver.model.Entity;
+import edu.harvard.med.screensaver.ui.arch.images.ImageProvider;
 
 /**
- * Interface for services that can provide images of small molecule structures,
- * given a {@link SmallMoleculeReagent}.
- * 
- * @author <a mailto="andrew_tolopko@hms.harvard.edu">Andrew Tolopko</a>
+ * Type-safe tag interface for services that can provide images of small molecule structures.
  */
-public interface StructureImageProvider
+public interface StructureImageProvider<E extends Entity> extends ImageProvider<E>
 {
-  /**
-   * Get the URL identifying an image of the structure of the specified
-   * small molecule reagent.
-   * 
-   * @param reagent the reagent
-   * @return URL identifying an image of the specified reagent; null if image
-   *         cannot be provided for any reason
-   */
-  URL getImageUrl(SmallMoleculeReagent reagent);
-
-  /**
-   * Get the InputStream providing the data for an image of the structure of the
-   * specified reagent.
-   * 
-   * @param reagent the reagent
-   * @return InputStream providing the data for an image of the structure of the
-   *         specified reagent.
-   */
-  InputStream getImage(SmallMoleculeReagent reagent) throws IOException;
 }

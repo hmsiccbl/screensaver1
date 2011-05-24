@@ -9,12 +9,15 @@
 
 package edu.harvard.med.screensaver.ui.libraries;
 
+import java.math.BigDecimal;
+import java.math.RoundingMode;
 import java.net.URL;
 import java.util.Collections;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.SortedSet;
 
 import com.google.common.base.Function;
 import com.google.common.collect.ImmutableSet;
@@ -24,6 +27,7 @@ import com.google.common.collect.Sets;
 import org.apache.log4j.Logger;
 import org.hibernate.Session;
 
+import edu.harvard.med.lincs.screensaver.LincsScreensaverConstants;
 import edu.harvard.med.screensaver.db.GenericEntityDAO;
 import edu.harvard.med.screensaver.db.LibrariesDAO;
 import edu.harvard.med.screensaver.db.Query;
@@ -37,6 +41,8 @@ import edu.harvard.med.screensaver.io.DataExporter;
 import edu.harvard.med.screensaver.io.libraries.smallmolecule.LibraryContentsVersionReference;
 import edu.harvard.med.screensaver.io.libraries.smallmolecule.StructureImageProvider;
 import edu.harvard.med.screensaver.model.Entity;
+import edu.harvard.med.screensaver.model.MolarConcentration;
+import edu.harvard.med.screensaver.model.Volume;
 import edu.harvard.med.screensaver.model.libraries.Gene;
 import edu.harvard.med.screensaver.model.libraries.Library;
 import edu.harvard.med.screensaver.model.libraries.LibraryContentsVersion;
@@ -59,12 +65,15 @@ import edu.harvard.med.screensaver.model.screenresults.DataType;
 import edu.harvard.med.screensaver.model.screenresults.PartitionedValue;
 import edu.harvard.med.screensaver.model.screenresults.ResultValue;
 import edu.harvard.med.screensaver.model.screenresults.ScreenResult;
+import edu.harvard.med.screensaver.model.screens.LabActivity;
+import edu.harvard.med.screensaver.model.screens.LibraryScreening;
 import edu.harvard.med.screensaver.model.screens.Screen;
 import edu.harvard.med.screensaver.model.screens.ScreenType;
 import edu.harvard.med.screensaver.model.screens.Study;
 import edu.harvard.med.screensaver.policy.EntityViewPolicy;
 import edu.harvard.med.screensaver.ui.arch.datatable.Criterion;
 import edu.harvard.med.screensaver.ui.arch.datatable.Criterion.Operator;
+import edu.harvard.med.screensaver.ui.arch.datatable.column.ColumnType;
 import edu.harvard.med.screensaver.ui.arch.datatable.column.TableColumn;
 import edu.harvard.med.screensaver.ui.arch.datatable.column.TableColumnManager;
 import edu.harvard.med.screensaver.ui.arch.datatable.column.entity.BooleanTupleColumn;
@@ -72,6 +81,7 @@ import edu.harvard.med.screensaver.ui.arch.datatable.column.entity.EnumTupleColu
 import edu.harvard.med.screensaver.ui.arch.datatable.column.entity.ImageTupleColumn;
 import edu.harvard.med.screensaver.ui.arch.datatable.column.entity.IntegerSetTupleColumn;
 import edu.harvard.med.screensaver.ui.arch.datatable.column.entity.IntegerTupleColumn;
+import edu.harvard.med.screensaver.ui.arch.datatable.column.entity.MolarConcentrationTupleColumn;
 import edu.harvard.med.screensaver.ui.arch.datatable.column.entity.RealTupleColumn;
 import edu.harvard.med.screensaver.ui.arch.datatable.column.entity.TextSetTupleColumn;
 import edu.harvard.med.screensaver.ui.arch.datatable.column.entity.TextTupleColumn;
@@ -95,6 +105,7 @@ public class WellSearchResults extends TupleBasedEntitySearchResults<Well,String
 
   private static final String WELL_COLUMNS_GROUP = "Well Columns";
   private static final String SILENCING_REAGENT_COLUMNS_GROUP = "Silencing Reagent Columns";
+  private static final String ASSAY_DESCRIPTORS_COLUMNS_GROUP = "Assay Descriptors";
   private static final String COMPOUND_COLUMNS_GROUP = "Compound Reagent Columns";
   private static final String OUR_DATA_COLUMNS_GROUP = "Screen Result Data Columns";
   private static final String OTHER_DATA_COLUMNS_GROUP = "Screen Result Data Columns (Other Screen Results)";
@@ -139,6 +150,9 @@ public class WellSearchResults extends TupleBasedEntitySearchResults<Well,String
   private Set<ScreenType> _screenTypes;
   private ScreenResult _screenResult;
   private Study _study;
+  
+  /** flag to indicate that this instantiation of WSR is for the LINCS project **/
+  private boolean _isLINCS = false;
 
 
   public class RowsToFetchReference implements ValueReference<Integer>
@@ -383,7 +397,8 @@ public class WellSearchResults extends TupleBasedEntitySearchResults<Well,String
   }
 
   private void initialize(DataFetcher<Tuple<String>,String,PropertyPath<Well>> dataFetcher)
-  {
+  {    
+    _isLINCS = LincsScreensaverConstants.FACILITY_NAME.equals(getApplicationProperties().getProperty(FACILITY_NAME));
     DataTableModel<Tuple<String>> dataModel =
       new VirtualPagingEntityDataModel<String,Well,Tuple<String>>(dataFetcher, new RowsToFetchReference());
     initialize(dataModel);
@@ -393,10 +408,18 @@ public class WellSearchResults extends TupleBasedEntitySearchResults<Well,String
   protected List<? extends TableColumn<Tuple<String>,?>> buildColumns()
   {
     List<TableColumn<Tuple<String>,?>> columns = Lists.newArrayList();
-    buildWellPropertyColumns(columns);
-    buildReagentPropertyColumns(columns);
-    buildCompoundPropertyColumns(columns);
-    buildSilencingReagentPropertyColumns(columns);
+    if (_isLINCS) {
+      buildCompoundPropertyColumns(columns);
+      buildWellPropertyColumns(columns);
+      buildReagentPropertyColumns(columns);
+      buildSilencingReagentPropertyColumns(columns);
+    }else{
+      buildWellPropertyColumns(columns);
+      buildReagentPropertyColumns(columns);
+      buildCompoundPropertyColumns(columns);
+      buildSilencingReagentPropertyColumns(columns);
+    }
+
 
     // Split the column list so that we can put the other data columns after the annotations 
     // (see: [#2266] command to auto-select data headers for positives from mutual positives screens,
@@ -505,6 +528,68 @@ public class WellSearchResults extends TupleBasedEntitySearchResults<Well,String
     RelationshipPath<Well> relPath = getWellToReagentRelationshipPath();
 
     final PropertyPath<Well> reagentIdPropertyPath = relPath.toProperty("id");
+    if (_isLINCS) {
+      columns.add(new TextTupleColumn<Well,String>(reagentIdPropertyPath,
+                                                    "Facility-Salt-Batch-ID",
+                                                      "the full Facility ID - SALT",
+                                                      COMPOUND_COLUMNS_GROUP) {
+        @Override
+        public String getCellValue(Tuple<String> tuple)
+        {
+          Integer reagentId = (Integer) tuple.getProperty(TupleDataFetcher.makePropertyKey(reagentIdPropertyPath));
+          if (reagentId != null) {
+            SmallMoleculeReagent smallMoleculeReagent = _dao.findEntityById(SmallMoleculeReagent.class, reagentId, true, Reagent.well.castToSubtype(SmallMoleculeReagent.class));
+            return smallMoleculeReagent.getWell().getFacilityId() + LincsScreensaverConstants.FACILITY_ID_SEPARATOR
+                + smallMoleculeReagent.getSaltFormId() + LincsScreensaverConstants.FACILITY_ID_SEPARATOR +
+              smallMoleculeReagent.getFacilityBatchId();
+          }
+          return null;
+        }
+  
+        @Override
+        public boolean isCommandLink()
+        {
+          return true;
+        }
+  
+        @Override
+        public Object cellAction(Tuple<String> tuple)
+        {
+          return viewSelectedEntity();
+        }
+  
+      });;
+      columns.get(columns.size() - 1).setVisible(true);
+  
+      //NOTE: This is a LINCS-only feature
+      columns.add(new TextTupleColumn<Well,String>(relPath.toProperty("vendorBatchId"),
+                                                   "Vendor Batch Id",
+                                                   "Vendor assigned batch Id",
+                                                   COMPOUND_COLUMNS_GROUP));
+      columns.get(columns.size() - 1).setVisible(false);
+  
+      //NOTE: This is a LINCS-only feature
+      columns.add(new TextTupleColumn<Well,String>(reagentIdPropertyPath,
+                                                      "Primary Compound Name",
+                                                      "The primary compound name",
+                                                      COMPOUND_COLUMNS_GROUP) {
+        @Override
+        public String getCellValue(Tuple<String> tuple)
+        {
+          Integer reagentId = (Integer) tuple.getProperty(TupleDataFetcher.makePropertyKey(reagentIdPropertyPath));
+          if (reagentId != null) {
+            SmallMoleculeReagent smallMoleculeReagent =
+              _dao.findEntityById(SmallMoleculeReagent.class, reagentId, true, SmallMoleculeReagent.compoundNames);
+            return smallMoleculeReagent.getPrimaryCompoundName();
+          }
+          return null;
+        }
+      });;
+      columns.get(columns.size() - 1).setVisible(true);
+    }
+
+      
+    
     columns.add(new ImageTupleColumn<Well,String>(reagentIdPropertyPath,
                                                   "Compound Structure Image",
                                                   "The structure image for the compound in the well",
@@ -543,7 +628,7 @@ public class WellSearchResults extends TupleBasedEntitySearchResults<Well,String
                                                     "Compound Names",
                                                     "The names of the compound in the well",
                                                     COMPOUND_COLUMNS_GROUP));
-    columns.get(columns.size() - 1).setVisible(false);
+    columns.get(columns.size() - 1).setVisible(_isLINCS ? true : false);
 
     columns.add(new IntegerSetTupleColumn<Well,String>(relPath.to(SmallMoleculeReagent.pubchemCids),
       "PubChem CIDs",
@@ -556,6 +641,12 @@ public class WellSearchResults extends TupleBasedEntitySearchResults<Well,String
       "The ChemBank IDs of the primary compound in the well",
       COMPOUND_COLUMNS_GROUP));
     columns.get(columns.size() - 1).setVisible(false);
+    
+    columns.add(new IntegerSetTupleColumn<Well,String>(relPath.to(SmallMoleculeReagent.chemblIds),
+                                                       "CHEMBL IDs",
+                                                       "The CHEMBL IDs of the primary compound in the well",
+                                                       COMPOUND_COLUMNS_GROUP));
+      columns.get(columns.size() - 1).setVisible(false);
   }
 
   private void buildReagentPropertyColumns(List<TableColumn<Tuple<String>,?>> columns)
@@ -600,6 +691,7 @@ public class WellSearchResults extends TupleBasedEntitySearchResults<Well,String
         return viewSelectedEntity();
       }
     });
+    if(_isLINCS) columns.get(columns.size() - 1).setVisible(false);
 
     columns.add(new TextTupleColumn<Well,String>(Well.library.toProperty("libraryName"),
       "Library",
@@ -630,11 +722,15 @@ public class WellSearchResults extends TupleBasedEntitySearchResults<Well,String
                                                             "The library screen type",
                                                             WELL_COLUMNS_GROUP,
                                                             ScreenType.values()));
+    if(_isLINCS) columns.get(columns.size() - 1).setVisible(false);
+
+    
     columns.add(new EnumTupleColumn<Well,String,LibraryWellType>(RelationshipPath.from(Well.class).toProperty("libraryWellType"),
                                                                  "Library Well Type",
                                                                  "The type of well, e.g., 'Experimental', 'Control', 'Empty', etc.",
                                                                  WELL_COLUMNS_GROUP,
                                                                  LibraryWellType.values()));
+    if(_isLINCS) columns.get(columns.size() - 1).setVisible(false);
 
     columns.add(new TextTupleColumn<Well,String>(RelationshipPath.from(Well.class).toProperty("facilityId"),
       "Facility ID",
@@ -658,7 +754,7 @@ public class WellSearchResults extends TupleBasedEntitySearchResults<Well,String
   private void buildDataColumns(List<TableColumn<Tuple<String>,?>> columns, List<DataColumn> dataColumns)
   {
     List<TableColumn<Tuple<String>,?>> otherColumns = Lists.newArrayList();
-    boolean isAssayWellTypeColumnCreated = false;
+    boolean areAssayWellColumnsCreated = false;
 
     for (final DataColumn dataColumn : dataColumns) {
       if (dataColumn.isRestricted()) {
@@ -740,15 +836,113 @@ public class WellSearchResults extends TupleBasedEntitySearchResults<Well,String
       // request eager fetching of dataColumn, since Hibernate will otherwise fetch these with individual SELECTs
       // we also need to eager fetch all the way "up" to Screen, for data access policy checks
       //((HasFetchPaths<Well>) column).addRelationshipPath(Well.resultValues.to(ResultValue.DataColumn).to(DataColumn.ScreenResult).to(ScreenResult.screen));
-
-      if (!isAssayWellTypeColumnCreated && column.getGroup().equals(OUR_DATA_COLUMNS_GROUP)) {
+      if (!areAssayWellColumnsCreated && column.getGroup().equals(OUR_DATA_COLUMNS_GROUP)) {
         columns.add(new EnumTupleColumn<Well,String,AssayWellControlType>(Well.resultValues.restrict(ResultValue.DataColumn.getLeaf(), dataColumn).toProperty("assayWellControlType"),
                                                                           "Assay Well Control Type",
                                                                           "The type of assay well control",
-                                                                          column.getGroup(),
+                                                                          ASSAY_DESCRIPTORS_COLUMNS_GROUP,
                                                                           AssayWellControlType.values()));
-        isAssayWellTypeColumnCreated = true;
+        if (_isLINCS) {
+          final LibraryScreening libraryScreening = getLibraryScreening();
+          if (libraryScreening != null && _mode == WellSearchResultMode.SCREEN_RESULT_WELLS) {
+
+            columns.add(new TableColumn<Tuple<String>,Volume>("Assay Well Volume",
+                                                              "The volume of the assay in the assay well, before transferring a volume of the library compound",
+                                                              ColumnType.VOLUME,
+                                                              ASSAY_DESCRIPTORS_COLUMNS_GROUP) {
+              @Override
+              public Volume getCellValue(Tuple<String> tuple)
+              {
+                if (libraryScreening != null) {
+                  return libraryScreening.getAssayWellVolume();
+                }
+                return null;
+              }
+
+              @Override
+              public boolean isSortableSearchable()
+              {
+                return false;
+              }
+            });
+            columns.get(columns.size() - 1).setVisible(false);
+
+            // TODO: determine the visiblity for this column
+            columns.add(new TableColumn<Tuple<String>,Volume>("Volume Transferred per Well",
+                                                              "The volume of library compound transferred to the assay well",
+                                                              ColumnType.VOLUME,
+                                                              ASSAY_DESCRIPTORS_COLUMNS_GROUP) {
+              @Override
+              public Volume getCellValue(Tuple<String> tuple)
+              {
+                if (libraryScreening != null) {
+                  return libraryScreening.getVolumeTransferredPerWell();
+                }
+                return null;
+              }
+
+              @Override
+              public boolean isSortableSearchable()
+              {
+                return false;
+              }
+            });
+            columns.get(columns.size() - 1).setVisible(false);
+
+            columns.add(new TableColumn<Tuple<String>,Volume>("Final Assay Well Volume",
+                                                              "The sum of the assay well volume and the volume of library compound transferred to the assay well",
+                                                              ColumnType.VOLUME,
+                                                              ASSAY_DESCRIPTORS_COLUMNS_GROUP) {
+              @Override
+              public Volume getCellValue(Tuple<String> tuple)
+              {
+                if (libraryScreening != null)
+                {
+                  return libraryScreening.getVolumeTransferredPerWell().add(libraryScreening.getAssayWellVolume());
+                }
+                return null;
+              }
+
+              @Override
+              public boolean isSortableSearchable()
+              {
+                return false;
+              }
+            });
+            columns.get(columns.size() - 1).setVisible(false);
+
+            columns.add(new MolarConcentrationTupleColumn<Well,String>(RelationshipPath.from(Well.class).toProperty("molarConcentration"),
+                                                                       "Assay Well Concentration",
+                                                                       "The molar concentration of the library compound in the assay well",
+                                                                       ASSAY_DESCRIPTORS_COLUMNS_GROUP) {
+              @Override
+              public MolarConcentration getCellValue(Tuple<String> tuple)
+              {
+                if (libraryScreening != null) { // TODO: don't show if well.type != experimental
+                  MolarConcentration libraryWellConcentration = super.getCellValue(tuple);
+                  Volume volumeXferred = libraryScreening.getVolumeTransferredPerWell();
+                  if (libraryWellConcentration == null || volumeXferred == null ||
+                    libraryScreening.getAssayWellVolume() == null) return null;
+                  Volume finalAssayVolume = volumeXferred.add(libraryScreening.getAssayWellVolume());
+                  BigDecimal dilutionFactor = volumeXferred.getValue().divide(finalAssayVolume.getValue(), 4, RoundingMode.HALF_EVEN);
+                  return MolarConcentration.makeConcentration(libraryWellConcentration.getValue().multiply(dilutionFactor).toPlainString(),
+                                                              libraryWellConcentration.getUnits(),
+                                                              RoundingMode.HALF_UP);
+                }
+                return null;
+              }
+
+              @Override
+              public boolean isSortableSearchable()
+              {
+                return false;
+              }
+            });
+          }
+        }
+        areAssayWellColumnsCreated = true;
       }
+
       if (column.getGroup().equals(OUR_DATA_COLUMNS_GROUP)) {
         columns.add(column);
         column.setVisible(true);
@@ -759,6 +953,13 @@ public class WellSearchResults extends TupleBasedEntitySearchResults<Well,String
       }
     }
     columns.addAll(otherColumns);
+  }
+
+  private LibraryScreening getLibraryScreening()
+  {
+    if (_screenResult == null) return null;
+    SortedSet<? extends LabActivity> temp = _screenResult.getScreen().getLabActivitiesOfType(LibraryScreening.class);
+    return temp.isEmpty() ? null : (LibraryScreening) temp.last();
   }
 
   private String makeScreenColumnGroup(String facilityId, String screenTitle)

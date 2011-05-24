@@ -1125,7 +1125,7 @@ public class TestDataFactory
 
   protected static Constructor findMaxArgConstructor(Class<? extends AbstractEntity> entityClass)
   {
-    int maxArgs = 0;
+    int maxArgs = -1;
     Constructor maxArgConstructor = null;
     for (Constructor constructor : entityClass.getConstructors()) {
       if (Modifier.isPublic(constructor.getModifiers())) {

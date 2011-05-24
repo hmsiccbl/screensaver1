@@ -1,0 +1,59 @@
+// $HeadURL: http://seanderickson1@forge.abcd.harvard.edu/svn/screensaver/branches/go/trunk/src/edu/harvard/med/screensaver/ui/table/column/entity/DateTupleColumn.java $
+// $Id: DateTupleColumn.java 4405 2010-07-15 16:15:38Z seanderickson1 $
+//
+// Copyright © 2006, 2010 by the President and Fellows of Harvard College.
+//
+// Screensaver is an open-source project developed by the ICCB-L and NSRB labs
+// at Harvard Medical School. This software is distributed under the terms of
+// the GNU General Public License.
+
+package edu.harvard.med.screensaver.ui.arch.datatable.column.entity;
+
+import java.util.Set;
+
+import edu.harvard.med.screensaver.db.datafetcher.Tuple;
+import edu.harvard.med.screensaver.db.datafetcher.TupleDataFetcher;
+import edu.harvard.med.screensaver.model.AbstractEntity;
+import edu.harvard.med.screensaver.model.MolarConcentration;
+import edu.harvard.med.screensaver.model.meta.PropertyPath;
+import edu.harvard.med.screensaver.model.meta.RelationshipPath;
+import edu.harvard.med.screensaver.ui.arch.datatable.column.MolarConcentrationColumn;
+
+public class MolarConcentrationTupleColumn<E extends AbstractEntity,K> extends MolarConcentrationColumn<Tuple<K>> implements HasFetchPaths<E>
+{
+  private FetchPaths<E,Tuple<K>> _fetchPaths;
+  private String _propertyKey;
+  
+  public MolarConcentrationTupleColumn(PropertyPath<E> propertyPath, String name, String description, String group)
+  {
+    super(name, description, group);
+    _fetchPaths = new FetchPaths<E,Tuple<K>>(propertyPath);
+    _propertyKey = TupleDataFetcher.makePropertyKey(_fetchPaths.getPropertyPath());
+  }
+
+  public void addRelationshipPath(RelationshipPath<E> path)
+  {
+    _fetchPaths.addRelationshipPath(path);
+  }
+
+  public PropertyPath<E> getPropertyPath()
+  {
+    return _fetchPaths.getPropertyPath();
+  }
+
+  public Set<RelationshipPath<E>> getRelationshipPaths()
+  {
+    return _fetchPaths.getRelationshipPaths();
+  }
+
+  public boolean isFetchableProperty()
+  {
+    return _fetchPaths.isFetchableProperty();
+  }
+
+  @Override
+  public MolarConcentration getCellValue(Tuple<K> tuple)
+  {
+    return (MolarConcentration) tuple.getProperty(_propertyKey);
+  }
+}

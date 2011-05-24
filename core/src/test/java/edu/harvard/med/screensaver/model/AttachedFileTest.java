@@ -9,13 +9,15 @@
 
 package edu.harvard.med.screensaver.model;
 
-import java.beans.IntrospectionException;
 import java.io.IOException;
 import java.io.StringReader;
 
 import junit.framework.TestSuite;
 import org.hibernate.lob.ReaderInputStream;
 
+import edu.harvard.med.screensaver.model.libraries.Reagent;
+import edu.harvard.med.screensaver.model.libraries.ReagentAttachedFileType;
+import edu.harvard.med.screensaver.model.libraries.SmallMoleculeReagent;
 import edu.harvard.med.screensaver.model.screens.Screen;
 import edu.harvard.med.screensaver.model.screens.ScreenAttachedFileType;
 import edu.harvard.med.screensaver.model.users.ScreeningRoomUser;
@@ -63,5 +65,22 @@ public class AttachedFileTest extends AbstractEntityInstanceTest<AttachedFile>
     for (AttachedFile attachedFile : user.getAttachedFiles()) {
       assertEquals(user, attachedFile.getScreeningRoomUser());
     }
+  }
+  
+  public void testReagentRelationship() throws IOException
+  {
+    schemaUtil.truncateTables();
+    Reagent reagent = dataFactory.newInstance(SmallMoleculeReagent.class);
+    AttachedFileType attachedFileType = new ReagentAttachedFileType("Application");
+    genericEntityDao.saveOrUpdateEntity(attachedFileType);
+    AttachedFile attachedFile1 = reagent.createAttachedFile("filename1", attachedFileType, new ReaderInputStream(new StringReader("file contents 1")));
+    AttachedFile attachedFile2 = reagent.createAttachedFile("filename2", attachedFileType, "file contents 2");
+    genericEntityDao.saveOrUpdateEntity(reagent.getLibraryContentsVersion().getLibrary());
+
+    reagent = genericEntityDao.reloadEntity(reagent);
+    AttachedFile attachedFile1b = genericEntityDao.findEntityById(AttachedFile.class, attachedFile1.getEntityId(), true, AttachedFile.reagent);
+    AttachedFile attachedFile2b = genericEntityDao.findEntityById(AttachedFile.class, attachedFile2.getEntityId(), true, AttachedFile.reagent);
+    assertEquals(reagent, attachedFile1b.getReagent());
+    assertEquals(reagent, attachedFile2b.getReagent());
   }
 }

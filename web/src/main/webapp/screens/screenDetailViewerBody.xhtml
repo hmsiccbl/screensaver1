@@ -177,21 +177,24 @@ TODO:
       <ss:property id="dataPrivacyExpirationDate"
         label="Data Privacy Expiration Date"
         description="The date on which the screen will become visible to level 1 users, set automatically, 26 months after last Screening activity"
-        value="#{empty screenDetailViewer.entity.dataPrivacyExpirationDate ? '&lt;not specified&gt;' : screenDetailViewer.entity.dataPrivacyExpirationDate}"
+        value="#{screenDetailViewer.entity.dataPrivacyExpirationDate}"
+        emptyValue="&lt;not specified&gt;"
         type="Date" 
-        adminOnly="true" rendered="#{screenDetailViewer.adminViewMode}" />
+        adminOnly="true" rendered="#{screenDetailViewer.editMode || screenDetailViewer.adminViewMode}" />
       <ss:property id="minAllowedDataPrivacyExpirationDate"
         label="Earliest Allowed Data Privacy Expiration Date (optional)"
         description="If set, this is the earliest date on which the Data Privacy can expire"
-        value="#{! screenDetailViewer.editMode and empty screenDetailViewer.entity.minAllowedDataPrivacyExpirationDate ? '&lt;not specified&gt;' : screenDetailViewer.entity.minAllowedDataPrivacyExpirationDate}"
+        value="#{screenDetailViewer.entity.minAllowedDataPrivacyExpirationDate}"
+        emptyValue="&lt;not specified&gt;"
         type="Date" editable="#{screenDetailViewer.editMode}"
-        adminOnly="true" rendered="#{screenDetailViewer.adminViewMode}" />      
+        adminOnly="true" rendered="#{screenDetailViewer.editMode || screenDetailViewer.adminViewMode}" />
       <ss:property id="maxAllowedDataPrivacyExpirationDate"
         label="Latest Allowed Data Privacy Expiration Date (optional)"
         description="If set, this is the latest date on which the Data Privacy can expire"
-        value="#{! screenDetailViewer.editMode and empty screenDetailViewer.entity.maxAllowedDataPrivacyExpirationDate ? '&lt;not specified&gt;' : screenDetailViewer.entity.maxAllowedDataPrivacyExpirationDate}"
-        type="Date" editable="#{screenDetailViewer.editMode}"
-        adminOnly="true" rendered="#{screenDetailViewer.adminViewMode}" />
+        value="#{screenDetailViewer.entity.maxAllowedDataPrivacyExpirationDate}"
+        emptyValue="&lt;not specified&gt;" type="Date"
+        editable="#{screenDetailViewer.editMode}" adminOnly="true"
+        rendered="#{screenDetailViewer.editMode || screenDetailViewer.adminViewMode}" />
       <ss:property id="dataPrivacyExpirationNotifiedDate"
         label="Data Privacy Expiration Notification Sent Date"
         description="Date at which the data privacy expiration notification was sent"
@@ -207,123 +210,30 @@ TODO:
       description="Administrative comments" type="Textarea"
       editWidth="80" editHeight="3" />
 
-    <ss:property id="publications" label="Publications"
-      description="Publications reporting results of the screen">
-      <ui:define name="data">
-        <ss:collectionTable id="publicationsTable"
-          dataModel="#{screenDetailViewer.publicationsDataModel}"
-          editable="#{screenDetailViewer.editMode}"
-          actionBean="#{screenDetailViewer}" addAction="addPublication"
-          deleteAction="deletePublication">
-          <ui:define name="columns">
-            <t:column>
-              <f:facet name="header">
-                <t:outputText value="Pubmed ID" />
-              </f:facet>
-              <h:outputLink
-                value="http://www.ncbi.nlm.nih.gov/entrez/query.fcgi">
-                <f:param name="cmd" value="Search" />
-                <f:param name="db" value="PubMed" />
-                <f:param name="term" value="#{element.pubmedId}[PMID]" />
-                <t:outputText value="#{element.pubmedId}" />
-              </h:outputLink>
-            </t:column>
-            <t:column>
-              <f:facet name="header">
-                <t:outputText value="PMCID" />
-              </f:facet>
-              <h:outputLink
-                value="http://www.ncbi.nlm.nih.gov/entrez/query.fcgi">
-                <f:param name="cmd" value="Search" />
-                <f:param name="db" value="pmc" />
-                <f:param name="term" value="#{element.pubmedCentralId}[UID]" />
-                <t:outputText value="#{element.pubmedCentralId}"
-                  converter="#{pubmedCentralIdConverter}" />
-              </h:outputLink>
-            </t:column>
-            <t:column>
-              <f:facet name="header">
-                <t:outputText value="Citation" />
-              </f:facet>
-              <t:outputText value="#{element.citation}"
-                styleClass="dataText" />
-            </t:column>
-            <t:column>
-              <f:facet name="header">
-                <t:outputText value="File" />
-              </f:facet>
-              <t:commandLink id="downloadPublicationAttachedFileCommandLink"
-                value="#{element.attachedFile.filename}"
-                action="#{screenDetailViewer.downloadPublicationAttachedFile}"
-                styleClass="dataText" />
-            </t:column>
-          </ui:define>
-        </ss:collectionTable>
-      </ui:define>
-      <ui:define name="addProperties">
-        <t:panelGrid columns="2" styleClass="layoutPanel"
-          columnClasses="propertyLabelColumn,column">
-          <t:outputText value="PubMed ID" styleClass="label" />
-          <t:panelGroup styleClass="layoutPanel">
-            <t:inputText id="publicationPubMedId"
-              value="#{screenDetailViewer.newPublication.pubmedId}"
-              styleClass="inputText">
-              <f:converter converterId="javax.faces.Integer" />
-            </t:inputText>
-            <t:commandButton id="#{id}LookupPubMedIdCommand"
-              value="Lookup PubMed ID"
-              action="#{screenDetailViewer.lookupPublicationByPubMedId}"
-              styleClass="command" />
-          </t:panelGroup>
-          <t:outputText value="PMCID" styleClass="label" />
-          <t:panelGroup styleClass="layoutPanel">
-            <t:inputText id="publicationPubMedCentralId"
-              value="#{screenDetailViewer.newPublication.pubmedCentralId}"
-              styleClass="inputText" converter="#{pubmedCentralIdConverter}">
-            </t:inputText>
-            <h:outputLink 
-              value="http://www.ncbi.nlm.nih.gov/sites/pmctopmid" target="_blank">
-              <t:outputText value="Find PMCID for PMID..." />
-            </h:outputLink>
-          </t:panelGroup>
-          <t:outputText value="Title" styleClass="label" />
-          <t:inputText id="publicationTitle"
-            value="#{screenDetailViewer.newPublication.title}" size="80"
-            styleClass="inputText" />
-          <t:outputText value="Authors" styleClass="label" />
-          <t:inputText id="publicationAuthors"
-            value="#{screenDetailViewer.newPublication.authors}"
-            size="80" styleClass="inputText" />
-          <t:outputText value="Journal" styleClass="label" />
-          <t:inputText id="publicationJournal"
-            value="#{screenDetailViewer.newPublication.journal}"
-            size="80" styleClass="inputText" />
-          <t:outputText value="Volume" styleClass="label" />
-          <t:inputText id="publicationVolume"
-            value="#{screenDetailViewer.newPublication.volume}"
-            styleClass="inputText" />
-          <t:outputText value="Year" styleClass="label" />
-          <t:inputText id="publicationYear"
-            value="#{screenDetailViewer.newPublication.yearPublished}"
-            maxlength="4" styleClass="inputText" />
-          <t:outputText value="Pages" styleClass="label" />
-          <t:inputText id="publicationPages"
-            value="#{screenDetailViewer.newPublication.pages}"
-            styleClass="inputText" />
-          <ss:property id="uploadPublicationAttachedFile"
+    <ss:publications
+       id="screenDetail"
+       label="Publications"
+       description="Publications reporting results of the screen"
+       datamodel="#{screenDetailViewer.publicationsDataModel}"
+       isEditable="#{screenDetailViewer.editMode}"
+       actionBean="#{screenDetailViewer}"
+       newPublication="#{screenDetailViewer.newPublication}"
+    >
+      <ui:define name="fileUpload">
+          <ss:property id="XXuploadPublicationAttachedFile"
             label="Upload File" adminOnly="true">
             <ui:define name="editableData">
-              <t:inputFileUpload id="uploadPublicationAttachedFile"
+              <t:inputFileUpload id="XuploadPublicationAttachedFile"
                 value="#{screenDetailViewer.uploadedPublicationAttachedFileContents}"
                 styleClass="inputText" />
             </ui:define>
           </ss:property>
-        </t:panelGrid>
-      </ui:define>
-    </ss:property>
-
+      </ui:define>    
+    </ss:publications>
+    
     <ss:attachedFiles attachedFiles="#{screenDetailViewer.attachedFiles}"
       entityTypeName="screen" 
+      adminOnly="#{screenDetailViewer.applicationProperties.map['screensaver.ui.facility_name'] == 'LINCS'}"
       rendered="#{screenDetailViewer.editMode || screenDetailViewer.adminViewMode}"
       editMode="#{screenDetailViewer.editMode}" />
 
@@ -481,7 +391,7 @@ TODO:
                 value="#{screenDetailViewer.entity.billingInformation.billingComments}"
                 editWidth="50" editHeight="3"
                 editable="#{screenDetailViewer.editMode}" />
-              <ss:property id="billingItems" label="Billing Items">
+              <ss:property id="billingItems" label="Billing Items" rendered="#{! empty screenDetailViewer.billingItemsDataModel}">
                 <ui:define name="data">
                   <ss:collectionTable id="billingItemsTable"
                     dataModel="#{screenDetailViewer.billingItemsDataModel}"

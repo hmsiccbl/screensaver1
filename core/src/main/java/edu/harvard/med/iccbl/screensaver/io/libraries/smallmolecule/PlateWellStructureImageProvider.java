@@ -10,8 +10,6 @@
 package edu.harvard.med.iccbl.screensaver.io.libraries.smallmolecule;
 
 import java.io.File;
-import java.io.IOException;
-import java.io.InputStream;
 import java.net.MalformedURLException;
 import java.net.URL;
 
@@ -24,22 +22,17 @@ import edu.harvard.med.screensaver.model.libraries.WellKey;
 /**
  * @author <a mailto="andrew_tolopko@hms.harvard.edu">Andrew Tolopko</a>
  */
-public class PlateWellFileNameStructureImageProvider implements StructureImageProvider
+public class PlateWellStructureImageProvider implements StructureImageProvider<SmallMoleculeReagent>
 {
   private static final String IMAGE_FILE_EXTENSION = ".png";
 
-  private static Logger log = Logger.getLogger(PlateWellFileNameStructureImageProvider.class);
+  private static Logger log = Logger.getLogger(PlateWellStructureImageProvider.class);
   
   private String _baseUrl;
 
-  public PlateWellFileNameStructureImageProvider(String baseUrl)
+  public PlateWellStructureImageProvider(String baseUrl)
   {
     _baseUrl = baseUrl;
-  }
-
-  public InputStream getImage(SmallMoleculeReagent reagent) throws IOException
-  {
-    return getImageUrl(reagent).openStream();
   }
 
   public URL getImageUrl(SmallMoleculeReagent reagent)

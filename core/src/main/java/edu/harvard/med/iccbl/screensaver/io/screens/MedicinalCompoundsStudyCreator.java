@@ -25,7 +25,7 @@ import edu.harvard.med.screensaver.db.LibrariesDAO;
 import edu.harvard.med.screensaver.db.ScreenDAO;
 import edu.harvard.med.screensaver.io.CommandLineApplication;
 import edu.harvard.med.screensaver.io.FatalParseException;
-import edu.harvard.med.screensaver.io.screens.ScreenCreator;
+import edu.harvard.med.screensaver.io.screens.StudyCreator;
 import edu.harvard.med.screensaver.io.workbook2.Cell;
 import edu.harvard.med.screensaver.io.workbook2.CellVocabularyParser;
 import edu.harvard.med.screensaver.io.workbook2.Workbook;
@@ -115,8 +115,8 @@ public class MedicinalCompoundsStudyCreator extends CommandLineApplication
           if (labAffiliation == null) {
             throw new RuntimeException("expected lab affiliation " + LAB_AFFILIATION_NAME + " to exist");
           }
-          LabHead labHead = (LabHead) ScreenCreator.findOrCreateScreeningRoomUser(_dao, "Gregory", "Cuny", "gcuny@rics.bwh.harvard.edu", true, labAffiliation);
-          ScreeningRoomUser leadScreener = ScreenCreator.findOrCreateScreeningRoomUser(_dao, "Kyungae", "Lee", "kyungae_lee@hms.harvard.edu", false, null);
+          LabHead labHead = (LabHead) StudyCreator.findOrCreateScreeningRoomUser(_dao, "Gregory", "Cuny", "gcuny@rics.bwh.harvard.edu", true, labAffiliation);
+          ScreeningRoomUser leadScreener = StudyCreator.findOrCreateScreeningRoomUser(_dao, "Kyungae", "Lee", "kyungae_lee@hms.harvard.edu", false, null);
 
           study = new Screen(findAdministratorUser(),
                              STUDY_NAME,

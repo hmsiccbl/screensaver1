@@ -333,35 +333,6 @@ public class ScreenResultParserTest extends AbstractSpringTest
     assertEquals(960, screen.getScreenResult().getAssayWells().size());
   }
 
-  public void testPositivesCount() throws Exception
-  {
-    File workbookFile = new File(TEST_INPUT_FILE_DIR, HIT_COUNT_TEST_WORKBOOK_FILE);
-    ScreenResult screenResult = mockScreenResultParser.parse(MakeDummyEntities.makeDummyScreen(115),
-                                                             workbookFile);
-    assertEquals(Collections.EMPTY_LIST, mockScreenResultParser.getErrors());
-
-    int resultValues = 10;
-    assertEquals("result value count",
-                 resultValues,
-                 screenResult.getDataColumnsList().get(0).getResultValues().size());
-    int experimentalWells = 7;
-    List<Integer> expectedHitCount = Arrays.asList(4, 2); // only experimental wells and non-excluded wells are considered
-    List<Double> expectedHitRatio = Arrays.asList(expectedHitCount.get(0) / (double) experimentalWells,
-                                                  expectedHitCount.get(1) / (double) experimentalWells);
-
-    int iPositiveIndicatorCol = 0;
-    for (DataColumn col : screenResult.getDataColumnsList()) {
-      if (col.isPositiveIndicator()) {
-        assertEquals("hit count", expectedHitCount.get(iPositiveIndicatorCol), col.getPositivesCount());
-        assertEquals("hit ratio",
-                     expectedHitRatio.get(iPositiveIndicatorCol).doubleValue(),
-                     col.getPositivesRatio().doubleValue(),
-                     0.01);
-        ++iPositiveIndicatorCol;
-      }
-    }
-  }
-
   public void testMultiCharColumnLabels() throws FileNotFoundException
   {
     Screen screen = MakeDummyEntities.makeDummyScreen(115);
@@ -419,6 +390,11 @@ public class ScreenResultParserTest extends AbstractSpringTest
   private void doTestScreenResult115ParseResult(ScreenResult screenResult)
   {
     assertEquals("replicate count", 2, screenResult.getReplicateCount().intValue());
+    
+    for(DataColumn dc: screenResult.getDataColumns())
+    {
+      assertEquals("1a", dc.getCellLine());
+    }
 
     ScreenResult expectedScreenResult = makeScreenResult();
     Map<Integer,DataColumn> expectedDataColumns = new HashMap<Integer,DataColumn>();
@@ -428,6 +404,7 @@ public class ScreenResultParserTest extends AbstractSpringTest
     dataColumn = expectedScreenResult.createDataColumn("Luminescence1");
     dataColumn.setDescription("Desc1");
     dataColumn.forReplicate(1);
+    dataColumn.forCellLine("1a");
     dataColumn.forTimePoint("0:10");
     dataColumn.setAssayReadoutType(AssayReadoutType.LUMINESCENCE);
     dataColumn.forPhenotype("Phenotype1");
@@ -438,6 +415,7 @@ public class ScreenResultParserTest extends AbstractSpringTest
     dataColumn = expectedScreenResult.createDataColumn("Luminescence2");
     dataColumn.setDescription("Desc2");
     dataColumn.forReplicate(2);
+    dataColumn.forCellLine("1a");
     dataColumn.forTimePoint("0:10");
     dataColumn.setAssayReadoutType(AssayReadoutType.LUMINESCENCE);
     dataColumn.forPhenotype("Phenotype1");
@@ -449,6 +427,7 @@ public class ScreenResultParserTest extends AbstractSpringTest
     dataColumn = expectedScreenResult.createDataColumn("FI1");
     dataColumn.setDescription("Fold Induction");
     dataColumn.forReplicate(1);
+    dataColumn.forCellLine("1a");
     dataColumn.makeDerived("Divide compound well by plate median", Sets.newHashSet(expectedDataColumns.get(0)));
     dataColumn.forPhenotype("Phenotype1");
     dataColumn.makeNumeric(2);
@@ -457,6 +436,7 @@ public class ScreenResultParserTest extends AbstractSpringTest
     dataColumn = expectedScreenResult.createDataColumn("FI2");
     dataColumn.setDescription("Fold Induction");
     dataColumn.forReplicate(2);
+    dataColumn.forCellLine("1a");
     dataColumn.makeDerived("Divide compound well by plate median", Sets.newHashSet(expectedDataColumns.get(1)));
     dataColumn.forPhenotype("Phenotype1");
     dataColumn.setFollowUpData(true);
@@ -466,20 +446,24 @@ public class ScreenResultParserTest extends AbstractSpringTest
     dataColumn = expectedScreenResult.createDataColumn("Average");
     dataColumn.makeDerived("Average", Sets.newHashSet(expectedDataColumns.get(2), expectedDataColumns.get(3)));
     dataColumn.makeNumeric(2);
+    dataColumn.forCellLine("1a");
     expectedDataColumns.put(4, dataColumn);
 
     dataColumn = expectedScreenResult.createDataColumn("PositiveIndicator2");
     dataColumn.makeDerived("W<=1.6, M<=1.7, S<=1.8", Sets.newHashSet(expectedDataColumns.get(4)));
+    dataColumn.forCellLine("1a");
     dataColumn.makePartitionPositiveIndicator();
     expectedDataColumns.put(5, dataColumn);
 
     dataColumn = expectedScreenResult.createDataColumn("PositiveIndicator3");
     dataColumn.makeDerived("PositiveIndicator2 is S", Sets.newHashSet(expectedDataColumns.get(5)));
+    dataColumn.forCellLine("1a");
     dataColumn.makeBooleanPositiveIndicator();
     expectedDataColumns.put(6, dataColumn);
 
     dataColumn = expectedScreenResult.createDataColumn("PositiveIndicator4");
     dataColumn.setDescription("Desc8");
+    dataColumn.forCellLine("1a");
     dataColumn.makeDerived("PositiveIndicator2 is M or S", Sets.newHashSet(expectedDataColumns.get(5)));
     dataColumn.makeConfirmedPositiveIndicator();
     expectedDataColumns.put(7, dataColumn);

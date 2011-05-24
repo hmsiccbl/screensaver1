@@ -11,5 +11,5 @@ package edu.harvard.med.iccbl.screensaver;
 
 public interface IccblScreensaverConstants
 {
-  public static final String ICCBL_LONGWOOD_NSRB_FACILITY_NAME = "ICCB-Longwood/NSRB";
+  public static final String FACILITY_NAME = "ICCB-Longwood/NSRB";
 }

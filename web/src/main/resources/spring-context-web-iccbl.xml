@@ -22,7 +22,9 @@
   xsi:schemaLocation="http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans-2.0.xsd
                       http://www.springframework.org/schema/aop http://www.springframework.org/schema/aop/spring-aop-2.0.xsd">
 
-  <bean
+  <import resource="spring-context-web-default.xml"/>
+  
+   <bean
     id="screensaverProperties"
     class="edu.harvard.med.screensaver.ScreensaverProperties"
     scope="singleton">
@@ -34,20 +36,6 @@
       </list>
     </constructor-arg>
   </bean>
-
-  <!--  user authentication -->
-
-  <bean
-    id="currentScreensaverUser"
-    class="edu.harvard.med.screensaver.ui.WebCurrentScreensaverUser"
-    scope="session">
-    <property
-      name="dao"
-      ref="genericEntityDao" />
-    <aop:scoped-proxy />
-  </bean>
-
-  <!--  Policy & Service configuration section for web application-->
 
   <bean
     id="entityViewPolicy"
@@ -81,8 +69,8 @@
   </bean>
  
   <bean id="structureImageProvider"
-        class="edu.harvard.med.iccbl.screensaver.io.libraries.smallmolecule.PlateWellFileNameStructureImageProvider">
-    <constructor-arg value="#{screensaverProperties.map['screensaver.ui.structure_images_base_url']}" />
+        class="edu.harvard.med.iccbl.screensaver.io.libraries.smallmolecule.PlateWellStructureImageProvider">
+    <constructor-arg value="#{screensaverProperties.map['screensaver.images.base_url']}/structure-images/" />
   </bean>
   
   <bean
@@ -98,17 +86,5 @@
     </constructor-arg>
     <constructor-arg ref="genericEntityDao" />
   </bean>
-
-  <bean
-    id="plateFacilityIdInitializer"
-    class="edu.harvard.med.screensaver.service.libraries.DefaultPlateFacilityIdInitializer">
-  </bean>
-
-  <!--  Top-level web application construction -->
-
-  <import resource="classpath:spring-context-persistence.xml"/>
-  <import resource="classpath:spring-context-services.xml"/>
-  <import resource="spring-context-ui.xml"/>
-  <import resource="classpath:spring-context-authentication.xml"/>
   
 </beans>

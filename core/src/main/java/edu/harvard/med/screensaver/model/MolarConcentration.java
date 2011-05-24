@@ -10,6 +10,7 @@
 package edu.harvard.med.screensaver.model;
 
 import java.math.BigDecimal;
+import java.math.RoundingMode;
 
 import edu.harvard.med.screensaver.util.StringUtils;
 
@@ -52,6 +53,11 @@ public class MolarConcentration extends Quantity<MolarConcentration,MolarUnit>
     super(new BigDecimal(value), units);
   }
 
+  public MolarConcentration(String value, MolarUnit units, RoundingMode roundingMode)
+  {
+    super(new BigDecimal(value), units, roundingMode);
+  }
+
   public MolarConcentration(BigDecimal value, MolarUnit units)
   {
     super(value, units);
@@ -76,5 +82,12 @@ public class MolarConcentration extends Quantity<MolarConcentration,MolarUnit>
     return c;
   }
   
-
+  public static MolarConcentration makeConcentration(String value, MolarUnit unit, RoundingMode roundingMode)
+  {
+    MolarConcentration c = null;
+    if (!StringUtils.isEmpty(value)) {
+      c = new MolarConcentration(value, unit, roundingMode).convertToReasonableUnits();
+    }
+    return c;
+  }
 }

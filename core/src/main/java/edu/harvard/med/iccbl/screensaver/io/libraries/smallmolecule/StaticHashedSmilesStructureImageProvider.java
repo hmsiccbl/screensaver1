@@ -11,15 +11,14 @@ package edu.harvard.med.iccbl.screensaver.io.libraries.smallmolecule;
 
 import java.io.File;
 import java.io.IOException;
-import java.io.InputStream;
 import java.net.MalformedURLException;
 import java.net.URL;
+
+import org.apache.log4j.Logger;
 
 import edu.harvard.med.screensaver.io.libraries.smallmolecule.StructureImageProvider;
 import edu.harvard.med.screensaver.model.libraries.SmallMoleculeReagent;
 import edu.harvard.med.screensaver.util.CryptoUtils;
-
-import org.apache.log4j.Logger;
 
 /**
  * Service that provides images of small molecule structures, given a
@@ -33,7 +32,7 @@ import org.apache.log4j.Logger;
  * @author <a mailto="andrew_tolopko@hms.harvard.edu">Andrew Tolopko</a>
  * @see SmallMoleculeLibraryStructureImageGenerator
  */
-public class StaticHashedSmilesStructureImageProvider implements StructureImageProvider
+public class StaticHashedSmilesStructureImageProvider implements StructureImageProvider<SmallMoleculeReagent>
 {
   private static Logger log = Logger.getLogger(StaticHashedSmilesStructureImageProvider.class);
 
@@ -44,15 +43,7 @@ public class StaticHashedSmilesStructureImageProvider implements StructureImageP
     _baseUrl = baseUrl;
   }
 
-  public InputStream getImage(SmallMoleculeReagent reagent) throws IOException
-  {
-    String smiles = reagent.getSmiles();
-    if (smiles == null) {
-      return null;
-    }
-    return getImageUrl(reagent).openStream();
-  }
-
+  @Override
   public URL getImageUrl(SmallMoleculeReagent reagent)
   {
     try {

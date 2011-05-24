@@ -9,11 +9,15 @@
 
 package edu.harvard.med.screensaver.model.libraries;
 
+import java.io.ByteArrayInputStream;
+import java.io.IOException;
+import java.io.InputStream;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
 
+import javax.persistence.CascadeType;
 import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.FetchType;
@@ -23,17 +27,22 @@ import javax.persistence.Id;
 import javax.persistence.Inheritance;
 import javax.persistence.InheritanceType;
 import javax.persistence.JoinColumn;
+import javax.persistence.JoinTable;
 import javax.persistence.ManyToMany;
 import javax.persistence.ManyToOne;
 import javax.persistence.OneToMany;
 import javax.persistence.Table;
 import javax.persistence.UniqueConstraint;
 
+import com.google.common.collect.Sets;
 import org.hibernate.annotations.Immutable;
 import org.hibernate.annotations.Index;
 import org.hibernate.annotations.MapKeyManyToMany;
 
 import edu.harvard.med.screensaver.model.AbstractEntity;
+import edu.harvard.med.screensaver.model.AttachedFile;
+import edu.harvard.med.screensaver.model.AttachedFileType;
+import edu.harvard.med.screensaver.model.AttachedFilesEntity;
 import edu.harvard.med.screensaver.model.annotations.ContainedEntity;
 import edu.harvard.med.screensaver.model.annotations.ToMany;
 import edu.harvard.med.screensaver.model.meta.Cardinality;
@@ -41,6 +50,7 @@ import edu.harvard.med.screensaver.model.meta.PropertyPath;
 import edu.harvard.med.screensaver.model.meta.RelationshipPath;
 import edu.harvard.med.screensaver.model.screenresults.AnnotationType;
 import edu.harvard.med.screensaver.model.screenresults.AnnotationValue;
+import edu.harvard.med.screensaver.model.screens.Publication;
 import edu.harvard.med.screensaver.model.screens.Screen;
 
 
@@ -59,7 +69,7 @@ import edu.harvard.med.screensaver.model.screens.Screen;
 @org.hibernate.annotations.Proxy(lazy=false) // proxying causes problems with casts of getLatestReleasedReagent() return value
 @Inheritance(strategy=InheritanceType.JOINED)
 @ContainedEntity(containingEntityClass=Well.class)
-public abstract class Reagent extends AbstractEntity<Integer> implements Comparable<Reagent>
+public abstract class Reagent extends AbstractEntity<Integer> implements Comparable<Reagent>, AttachedFilesEntity<Integer>
 {
   private static final long serialVersionUID = 1;
 
@@ -70,12 +80,16 @@ public abstract class Reagent extends AbstractEntity<Integer> implements Compara
   public static final RelationshipPath<Reagent> studies = RelationshipPath.from(Reagent.class).to("studies");
   public static final PropertyPath<Reagent> vendorName = RelationshipPath.from(Reagent.class).toProperty("vendorId.vendorName");
   public static final PropertyPath<Reagent> vendorIdentifier = RelationshipPath.from(Reagent.class).toProperty("vendorId.vendorIdentifier");
+  public static final RelationshipPath<Reagent> publications = RelationshipPath.from(Reagent.class).to("publications");
+  public static final RelationshipPath<Reagent> attachedFiles = RelationshipPath.from(Reagent.class).to("attachedFiles");
 
   private LibraryContentsVersion _libraryContentsVersion;
   private Well _well;
   private ReagentVendorIdentifier _vendorId;
   private Map<AnnotationType,AnnotationValue> _annotationValues = new HashMap<AnnotationType,AnnotationValue>();
   private Set<Screen> _studies = new HashSet<Screen>();
+  private Set<Publication> _publications = Sets.newHashSet();
+  private Set<AttachedFile> _attachedFiles = new HashSet<AttachedFile>();
 
 
   /**
@@ -218,4 +232,91 @@ public abstract class Reagent extends AbstractEntity<Integer> implements Compara
   {
     _studies = studies;
   }
+
+  /**
+   * Get the publications.
+   * 
+   * @return the publications
+   */
+  @ManyToMany(cascade = { CascadeType.PERSIST, CascadeType.MERGE, CascadeType.REMOVE }, fetch = FetchType.LAZY)
+  @ToMany(hasNonconventionalMutation = true)
+  @JoinTable(name = "reagentPublicationLink", joinColumns = @JoinColumn(name = "reagentId"), inverseJoinColumns = @JoinColumn(name = "publicationId"))
+  @org.hibernate.annotations.ForeignKey(name = "fk_reagent_publication_link_to_reagent")
+  @org.hibernate.annotations.LazyCollection(value = org.hibernate.annotations.LazyCollectionOption.TRUE)
+  public Set<Publication> getPublications()
+  {
+    return _publications;
+  }
+
+  private void setPublications(Set<Publication> publications)
+  {
+    _publications = publications;
+  }
+
+  public boolean addPublication(Publication p)
+  {
+    return _publications.add(p);
+  }
+
+  /**
+   * Get the attached files.
+   * 
+   * @return the attached files
+   */
+  @OneToMany(mappedBy = "reagent",
+             cascade = { CascadeType.PERSIST, CascadeType.MERGE, CascadeType.REMOVE },
+             fetch = FetchType.LAZY,
+             orphanRemoval = true)
+  @ToMany(hasNonconventionalMutation = true)
+  public Set<AttachedFile> getAttachedFiles()
+  {
+    return _attachedFiles;
+  }
+
+  /**
+   * Create and return a new attached file for the screen.
+   * 
+   * @param filename the filename
+   * @param fileType the file type
+   * @param fileContents the file contents
+   * @throws IOException
+   */
+  public AttachedFile createAttachedFile(String filename, AttachedFileType fileType, String fileContents) throws IOException
+  {
+    return createAttachedFile(filename, fileType, new ByteArrayInputStream(fileContents.getBytes()));
+  }
+
+  /**
+   * Create and return a new attached file for the screen. Use {@link Publication#createAttachedFile} to create an
+   * attached file that is
+   * associated with a Publication.
+   * 
+   * @param filename the filename
+   * @param fileType the file type
+   * @param fileContents the file contents
+   * @throws IOException
+   */
+  public AttachedFile createAttachedFile(String filename, AttachedFileType fileType, InputStream fileContents) throws IOException
+  {
+    AttachedFile attachedFile = new AttachedFile(this, filename, fileType, fileContents);
+    _attachedFiles.add(attachedFile);
+    return attachedFile;
+  }
+
+  public void removeAttachedFile(AttachedFile attachedFile)
+  {
+    _attachedFiles.remove(attachedFile);
+  }
+
+  /**
+   * Set the attached files.
+   * 
+   * @param attachedFiles the new attached files
+   * @motivation for hibernate
+   */
+  private void setAttachedFiles(Set<AttachedFile> attachedFiles)
+  {
+    _attachedFiles = attachedFiles;
+  }
+
 }

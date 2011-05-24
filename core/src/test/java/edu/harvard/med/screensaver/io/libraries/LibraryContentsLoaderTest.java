@@ -17,6 +17,7 @@ import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStream;
 import java.math.BigDecimal;
+import java.util.List;
 import java.util.Set;
 
 import org.apache.log4j.Logger;
@@ -32,6 +33,8 @@ import edu.harvard.med.screensaver.io.ParseError;
 import edu.harvard.med.screensaver.io.ParseErrorsException;
 import edu.harvard.med.screensaver.model.AdministrativeActivity;
 import edu.harvard.med.screensaver.model.AdministrativeActivityType;
+import edu.harvard.med.screensaver.model.MolarConcentration;
+import edu.harvard.med.screensaver.model.MolarUnit;
 import edu.harvard.med.screensaver.model.libraries.Gene;
 import edu.harvard.med.screensaver.model.libraries.Library;
 import edu.harvard.med.screensaver.model.libraries.LibraryContentsVersion;
@@ -47,6 +50,7 @@ import edu.harvard.med.screensaver.model.libraries.SilencingReagentType;
 import edu.harvard.med.screensaver.model.libraries.SmallMoleculeReagent;
 import edu.harvard.med.screensaver.model.libraries.Well;
 import edu.harvard.med.screensaver.model.libraries.WellKey;
+import edu.harvard.med.screensaver.model.screens.Publication;
 import edu.harvard.med.screensaver.model.screens.ScreenType;
 import edu.harvard.med.screensaver.model.users.AdministratorUser;
 import edu.harvard.med.screensaver.model.users.ScreensaverUser;
@@ -558,7 +562,7 @@ public class LibraryContentsLoaderTest extends AbstractSpringPersistenceTest
         assertEquals(new ReagentVendorIdentifier("Biomol-TimTec", "ST001215"), well.<Reagent>getLatestReleasedReagent().getVendorId());
         assertEquals("ICCB-00589082", well.getFacilityId());
         SmallMoleculeReagent compound = well.<SmallMoleculeReagent>getLatestReleasedReagent();
-        Set<String> compoundNames = compound.getCompoundNames();
+        List<String> compoundNames = compound.getCompoundNames();
         assertEquals("compound must have one compound name", compoundNames.size(), 1);
         String compoundName = compoundNames.iterator().next();
         assertEquals("fake compound name 1", compoundName);
@@ -597,6 +601,144 @@ public class LibraryContentsLoaderTest extends AbstractSpringPersistenceTest
         assertEquals("compound inchi", "InChI=1/C23H28O4/c1-22(2)10-15(24)20(16(25)11-22)19(14-8-6-5-7-9-14)21-17(26)12-23(3,4)13-18(21)27/h5-9,19-20,26H,10-13H2,1-4H3", compound.getInchi());
         assertEquals("molecular mass", new BigDecimal("368.46602"), compound.getMolecularMass().setScale(5));
         assertEquals("molecular weight", new BigDecimal("369.00020"), compound.getMolecularWeight().setScale(5));
+        
+        assertEquals("molecular formula", new MolecularFormula("C23H28O4"), compound.getMolecularFormula());
+        assertEquals("pubchem cid", Sets.newHashSet(558309, 7335957), compound.getPubchemCids());
+        assertEquals("chembank id", Sets.newHashSet(6066882,1665724), compound.getChembankIds());
+      }
+    });
+  }
+    
+  public void testCleanDataSmallMolecule_LINCS() throws IOException
+  {
+    genericEntityDao.doInTransaction(new DAOTransaction()
+    {
+      public void runTransaction()
+      {
+        _admin = genericEntityDao.reloadEntity(_admin, false, ScreensaverUser.activitiesPerformed.castToSubtype(AdministratorUser.class));
+        Library library = new Library(_admin,
+                                      "COMP",
+                                      "COMP",
+                                      ScreenType.SMALL_MOLECULE,
+                                      LibraryType.OTHER,
+                                      1534,
+                                      1534,
+                                      PlateSize.WELLS_384);
+        libraryCreator.createLibrary(library);
+        library = genericEntityDao.reloadEntity(library, false);
+
+        String filename = "clean_data_small_molecule_LINCS.sdf";
+        File file = new File(TEST_INPUT_FILE_DIR, filename);
+        InputStream stream = null;
+        try {
+          stream = new FileInputStream(file);
+        }
+        catch (FileNotFoundException e) {
+          log.warn("file not found: " + file);
+          fail("file not found: " + file);
+        }
+        //libraryCreator.createLibrary(library);
+
+        try {
+          LibraryContentsVersion lcv = libraryContentsLoader.loadLibraryContents(library, _admin, "clean data small molecule", stream);
+          libraryContentsVersionManager.releaseLibraryContentsVersion(lcv, _admin);
+          log.info("added library definition for " + library);
+        }
+        catch (ParseErrorsException e)
+        {
+          log.warn(e.getErrors());
+          fail("input file has errors");
+        }
+        catch (IOException e) {
+          log.error(e);
+          fail("could not load the file: " + filename);
+        }
+      }
+    });
+    
+    genericEntityDao.doInTransaction(new DAOTransaction() {
+      public void runTransaction()
+      {
+        // test non-specified well is undefined
+        Well well = librariesDao.findWell(new WellKey(1534, "A23"));
+        assertNotNull(well);
+        assertEquals(LibraryWellType.UNDEFINED, well.getLibraryWellType());
+  
+        // test empty well is empty
+        well = librariesDao.findWell(new WellKey(1534, "A09"));
+        assertNotNull(well);
+        assertEquals(LibraryWellType.EMPTY, well.getLibraryWellType());
+  
+        // test sd record with empty molfile
+        well = librariesDao.findWell(new WellKey(1534, "A01"));
+        SmallMoleculeReagent compound = well.<SmallMoleculeReagent>getLatestReleasedReagent();
+        assertNotNull(well);
+        assertEquals(LibraryWellType.EXPERIMENTAL, well.getLibraryWellType());
+        assertEquals(new ReagentVendorIdentifier("Biomol-TimTec", "SPL000058"), well.<Reagent>getLatestReleasedReagent().getVendorId());
+        assertEquals("ICCB-00589081", well.getFacilityId());
+        assertEquals("chembl id", Sets.newHashSet(100001, 100002, 111102), compound.getChemblIds());
+
+        // new LINCS fields
+        assertEquals("vendor batch", "HM-001_TM-20090805", compound.getVendorBatchId());
+        assertEquals("facility batch", new Integer(8), compound.getFacilityBatchId());
+        assertEquals("salt form id", new Integer(101), compound.getSaltFormId());
+  
+        assertTrue(!well.<Reagent>getLatestReleasedReagent().getPublications().isEmpty());
+        Set<Integer> expectedPubmedIds = Sets.newHashSet(20653109, 20653081);
+        for (Publication publication : well.<Reagent>getLatestReleasedReagent().getPublications()) {
+          expectedPubmedIds.remove(publication.getPubmedId());
+        }
+        assertTrue("pubmed ids not saved: " + expectedPubmedIds, expectedPubmedIds.isEmpty());
+  
+        // doTestNonstructuralCompoundAttributes
+        // ICCB_NUM; CompoundName
+        well = librariesDao.findWell(new WellKey(1534, "A02"));
+        assertNotNull(well);
+        assertEquals(LibraryWellType.EXPERIMENTAL, well.getLibraryWellType());
+        assertEquals(new ReagentVendorIdentifier("Biomol-TimTec", "ST001215"), well.<Reagent>getLatestReleasedReagent().getVendorId());
+        assertEquals("ICCB-00589082", well.getFacilityId());
+        compound = well.<SmallMoleculeReagent>getLatestReleasedReagent();
+        List<String> compoundNames = compound.getCompoundNames();
+        assertEquals("compound must have one compound name", compoundNames.size(), 1);
+        String compoundName = compoundNames.iterator().next();
+        assertEquals("fake compound name 1", compoundName);
+  
+        // ICCB_Num; compound_identifier
+        well = librariesDao.findWell(new WellKey(1534, "A03"));
+        compound = well.<SmallMoleculeReagent>getLatestReleasedReagent();
+        compoundNames = compound.getCompoundNames();
+        assertEquals("compound must have one compound name", 1, compoundNames.size());
+        compoundName = compoundNames.iterator().next();
+        assertEquals("fake compound name 2", compoundName);
+  
+        // ChemicalName
+        well = librariesDao.findWell(new WellKey(1534, "A04"));
+        compound = well.<SmallMoleculeReagent>getLatestReleasedReagent();
+        compoundNames = compound.getCompoundNames();
+        assertEquals("compound must have one compound name", 1, compoundNames.size());
+        compoundName = compoundNames.iterator().next();
+        assertEquals("fake compound name 3", compoundName);
+  
+        // Chemical_Name
+        well = librariesDao.findWell(new WellKey(1534, "A05"));
+        compound = well.<SmallMoleculeReagent>getLatestReleasedReagent();
+        compoundNames = compound.getCompoundNames();
+        assertEquals("compound has one compound name", 1, compoundNames.size());
+        compoundName = compoundNames.iterator().next();
+        assertEquals("fake compound name 4", compoundName);
+        assertEquals("concentration", MolarConcentration.makeConcentration("115", MolarUnit.PICOMOLAR), well.getMolarConcentration());
+  
+        // doTestStructuralCompoundAttributes()
+        well = librariesDao.findWell(new WellKey(1534, "A08"));
+        compound = well.<SmallMoleculeReagent>getLatestReleasedReagent();
+        assertTrue("molfile contents", compound.getMolfile().contains("Structure113") &&
+                   compound.getMolfile().contains("15 14  1  0  0  0  0") &&
+                   compound.getMolfile().contains("M  END"));
+        assertEquals("compound smiles", "O=C1CC(C)(C)CC(=O)C1C(c1ccccc1)C1=C(O)CC(C)(C)CC1=O", compound.getSmiles());
+        assertEquals("compound inchi", "InChI=1/C23H28O4/c1-22(2)10-15(24)20(16(25)11-22)19(14-8-6-5-7-9-14)21-17(26)12-23(3,4)13-18(21)27/h5-9,19-20,26H,10-13H2,1-4H3", compound.getInchi());
+        assertEquals("molecular mass", new BigDecimal("368.46602"), compound.getMolecularMass().setScale(5));
+        assertEquals("molecular weight", new BigDecimal("369.00020"), compound.getMolecularWeight().setScale(5));
+        assertEquals("concentration", MolarConcentration.makeConcentration("115", MolarUnit.NANOMOLAR), well.getMolarConcentration());
         
         assertEquals("molecular formula", new MolecularFormula("C23H28O4"), compound.getMolecularFormula());
         assertEquals("pubchem cid", Sets.newHashSet(558309, 7335957), compound.getPubchemCids());

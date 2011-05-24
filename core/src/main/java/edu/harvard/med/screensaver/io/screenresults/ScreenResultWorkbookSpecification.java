@@ -36,7 +36,8 @@ public interface ScreenResultWorkbookSpecification
     COMMENTS("Comments"),
     CHANNEL("Channel"),
     TIME_POINT_ORDINAL("Time point ordinal"),
-    ZDEPTH_ORDINAL("Zdepth ordinal");
+    ZDEPTH_ORDINAL("Zdepth ordinal"),
+    CELL_LINE("Cell Line");
 
     private String _displayText;
 

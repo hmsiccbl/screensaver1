@@ -171,7 +171,7 @@ public class UserSearchResults<E extends ScreensaverUser> extends EntityBasedEnt
       columns.get(columns.size() - 1).setVisible(false);
     }
 
-    if (IccblScreensaverConstants.ICCBL_LONGWOOD_NSRB_FACILITY_NAME.equals(getApplicationProperties().getProperty(FACILITY_NAME))) {
+    if (IccblScreensaverConstants.FACILITY_NAME.equals(getApplicationProperties().getProperty(FACILITY_NAME))) {
       columns.add(new TextEntityColumn<E>(pathRoot.toProperty("ECommonsId"),
                                           "eCommons ID",
                                           "The eCommons ID of the user",

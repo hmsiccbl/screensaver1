@@ -35,7 +35,7 @@
   </bean>
 
   <bean id="structureImageProvider"
-        class="edu.harvard.med.iccbl.screensaver.io.libraries.smallmolecule.PlateWellFileNameStructureImageProvider">
+        class="edu.harvard.med.iccbl.screensaver.io.libraries.smallmolecule.PlateWellStructureImageProvider">
     <constructor-arg value="http://localhost:8080/" />
   </bean>
 

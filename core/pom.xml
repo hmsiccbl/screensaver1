@@ -55,7 +55,9 @@
         <version>2.2</version>
         <executions>
           <execution>
+          <!-- 
             <phase>package</phase>
+             -->
             <goals>
               <goal>hbm2ddl</goal>
             </goals>

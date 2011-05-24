@@ -460,6 +460,7 @@
     <constructor-arg ref="studyViewer" />
     <constructor-arg ref="wellsSdfDataExporterForUi" />
     <constructor-arg ref="libraryContentsVersionRef" />
+    <constructor-arg ref="annotationsBrowser" />
     <constructor-arg ref="screenResultReporter" />
     <aop:scoped-proxy/>
   </bean>
@@ -551,6 +552,8 @@
         parent="uiBean" />
     </constructor-arg>
     <constructor-arg ref="wellsBrowser" />
+    <!-- LINCS -->
+    <constructor-arg ref="studyImageProvider"/>
     <aop:scoped-proxy/>
   </bean>
 
@@ -824,6 +827,7 @@
     class="edu.harvard.med.screensaver.ui.arch.util.servlet.ImageProviderServlet">
     <constructor-arg ref="appInfo" />
   </bean>
+  
   <!-- === users backing beans === -->
 
   <bean
@@ -940,6 +944,44 @@
     <aop:scoped-proxy/>
   </bean>
   
+  <!-- LINCS -->
+  
+  <bean
+    id="annotationsBrowser"
+    parent="uiBean"
+    scope="session"
+    class="edu.harvard.med.screensaver.ui.libraries.AnnotationSearchResults">
+    <constructor-arg ref="annotationViewer" />
+    <constructor-arg ref="studyViewer" />
+    <constructor-arg ref="entityViewPolicy" />
+    <constructor-arg ref="genericEntityDao" />
+    <aop:scoped-proxy/>
+  </bean>
+
+  <bean
+    id="annotationViewer"
+    parent="uiBean"
+    scope="session"
+    class="edu.harvard.med.screensaver.ui.annotations.AnnotationViewer">
+    <constructor-arg ref="annotationViewer" />
+    <constructor-arg ref="annotationsBrowser" />
+    <constructor-arg ref="genericEntityDao" />
+    <constructor-arg ref="entityViewPolicy" />
+    <constructor-arg ref="studyViewer" />
+    <aop:scoped-proxy/>
+  </bean>
+  
+  <bean
+    id="wellCompoundNameFinder"
+    parent="uiBean"
+    scope="session"
+    class="edu.harvard.med.screensaver.ui.libraries.WellByCompoundNameFinder">
+    <constructor-arg ref="genericEntityDao" />
+    <constructor-arg ref="librariesDao" />
+    <constructor-arg ref="wellsBrowser" />
+    <aop:scoped-proxy/>
+  </bean>
+    
   <!-- converters -->
 
   <bean id="operatorConverter" class="edu.harvard.med.screensaver.ui.arch.util.converter.OperatorConverter" />
@@ -971,6 +1013,10 @@
   <bean id="volumeConverter" class="edu.harvard.med.screensaver.ui.arch.util.converter.VolumeConverter" />
 
   <bean id="molarConcentrationConverter" class="edu.harvard.med.screensaver.ui.arch.util.converter.MolarConcentrationConverter" />
+
+  <bean id="molecularMassConverter" class="edu.harvard.med.screensaver.ui.arch.util.converter.BigDecimalConverter" >
+    <constructor-arg value="2" />
+  </bean>
 
   <bean id="silencingReagentTypeConverter" class="edu.harvard.med.screensaver.ui.arch.util.converter.SilencingReagentTypeConverter" />
 

@@ -37,6 +37,12 @@ public abstract class SearchResultContextEntityViewerBackingBean<E extends Entit
     _entitySearchResults = entitySearchResults;
   }
 
+  /** @motivation allows "alternate" viewer beans to be defined in spring context file that redirect to a custom view */
+  public void setBrowserActionResult(String browserActionResult)
+  {
+    _browserActionResult = browserActionResult;
+  }
+
   public EntitySearchResults<E,R,?> getContextualSearchResults()
   {
     return _entitySearchResults;

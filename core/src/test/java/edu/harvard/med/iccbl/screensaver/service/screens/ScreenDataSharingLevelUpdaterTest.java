@@ -13,12 +13,12 @@ import java.util.Date;
 import java.util.List;
 import java.util.Set;
 
+import com.google.common.collect.Sets;
 import org.apache.log4j.Logger;
 import org.joda.time.LocalDate;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.test.annotation.Rollback;
 import org.springframework.transaction.annotation.Transactional;
-import com.google.common.collect.Sets;
 
 import edu.harvard.med.iccbl.screensaver.io.screens.ScreenPrivacyExpirationUpdater;
 import edu.harvard.med.screensaver.AbstractSpringPersistenceTest;
@@ -225,47 +225,52 @@ public class ScreenDataSharingLevelUpdaterTest extends AbstractSpringPersistence
 
     Screen screen2Published = createScreen("SDSL TEST2 Published");
     screen2Published.createScreenResult();
-    Publication publication = screen2Published.createPublication();
+    Publication publication = new Publication();
     publication.setAuthors("Test Authors");
     publication.setJournal("Test Journal");
     publication.setTitle("Test Publication Title");
+    screen2Published.addPublication(publication);
     genericEntityDao.persistEntity(screen2Published);
 
     Screen screen3Mutual= createScreen("SDSL screen3Mutual");
     screen3Mutual.createScreenResult();
     screen3Mutual.setDataSharingLevel(ScreenDataSharingLevel.MUTUAL_SCREENS);
-    publication = screen3Mutual.createPublication();
+    publication = new Publication();
     publication.setAuthors("Test Authors x");
     publication.setJournal("Test Journal x");
     publication.setTitle("Test Publication Title x");
+    screen3Mutual.addPublication(publication);
     genericEntityDao.persistEntity(screen3Mutual);
 
     Screen screen4Private= createScreen("SDSL private");
     screen4Private.createScreenResult();
     screen4Private.setDataSharingLevel(ScreenDataSharingLevel.PRIVATE);
-    publication = screen4Private.createPublication();
+    publication = new Publication();
     publication.setAuthors("Test Authors x");
     publication.setJournal("Test Journal x");
     publication.setTitle("Test Publication Title x");
+    screen4Private.addPublication(publication);
     genericEntityDao.persistEntity(screen4Private);
     
     Screen screenPrivatePublishedTransferred = createScreen("SDSL screenPrivatePublishedTransferred");
     screenPrivatePublishedTransferred.createScreenResult();
     screenPrivatePublishedTransferred.setDataSharingLevel(ScreenDataSharingLevel.PRIVATE);
-    publication = screenPrivatePublishedTransferred.createPublication();
+    publication = new Publication();
     publication.setAuthors("Test Authors x");
     publication.setJournal("Test Journal x");
     publication.setTitle("Test Publication Title x");
     screenPrivatePublishedTransferred.createStatusItem(new LocalDate(), ScreenStatus.TRANSFERRED_TO_BROAD_INSTITUTE);
+    screenPrivatePublishedTransferred.addPublication(publication);
     genericEntityDao.persistEntity(screenPrivatePublishedTransferred);
 
     Screen screen4Public= createScreen("SDSL screen4Public");
     screen4Public.createScreenResult();
     screen4Public.setDataSharingLevel(ScreenDataSharingLevel.SHARED);
-    publication = screen4Public.createPublication();
+    publication = new Publication();
     publication.setAuthors("Test Authors xx");
     publication.setJournal("Test Journal xx");
     publication.setTitle("Test Publication Title xx");
+    screen4Public.addPublication(publication);
     genericEntityDao.persistEntity(screen4Public);
 
     flushAndClear();
@@ -317,7 +322,7 @@ public class ScreenDataSharingLevelUpdaterTest extends AbstractSpringPersistence
     Screen screen4Published = createScreen("is testing a published Screen");
     screen4Published.createScreenResult();
     screen4Published.createLibraryScreening(admin, leadScreener, activityDateToNotifyToday);
-    screen4Published.createPublication();
+    screen4Published.addPublication(new Publication());
     
     genericEntityDao.persistEntity(screen1ToExpireTodayAfterAdjust);
     genericEntityDao.persistEntity(screen2ToNotifyTodayAfterAdjust);

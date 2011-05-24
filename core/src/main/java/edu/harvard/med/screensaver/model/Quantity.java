@@ -45,12 +45,22 @@ import org.apache.log4j.Logger;
    */
   public Quantity(String value, T unit)
   {
+    this(new BigDecimal(value), unit, RoundingMode.UNNECESSARY);
+  }
+
+  public Quantity(String value, T unit, RoundingMode roundingMode)
+  {
     this(new BigDecimal(value), unit);
   }
 
   public Quantity(BigDecimal value, T unit)
   {
-    _value = scaleValue(value, unit);
+    _value = scaleValue(value, unit, RoundingMode.UNNECESSARY);
+    _unit = unit;
+  }
+  public Quantity(BigDecimal value, T unit, RoundingMode roundingMode)
+  {
+    _value = scaleValue(value, unit, roundingMode);
     _unit = unit;
   }
 
@@ -90,8 +100,13 @@ import org.apache.log4j.Logger;
 
   protected BigDecimal scaleValue(BigDecimal value, QuantityUnit<T> unit)
   {
+    return scaleValue(value, unit, RoundingMode.UNNECESSARY);
+  }
+
+  protected BigDecimal scaleValue(BigDecimal value, QuantityUnit<T> unit, RoundingMode roundingMode)
+  {
     return value.setScale(unit.getValues()[unit.getValues().length - 1].getScale() - unit.getScale(),
-                          RoundingMode.UNNECESSARY);
+                          roundingMode);
   }
 
   protected BigDecimal convertUnits(Q q, T newUnits)

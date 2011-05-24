@@ -15,6 +15,7 @@
 	     - type: 'Text' (default), 'Textarea', 'Integer', 'Date', 'Boolean', 'Set', 'List', 'ListOfLinks', 'Link', 'Currency', 'Volume', 'MolarConcentration', 'Vocabulary'
 	     - description: used for popup
 	     - value
+       - emptyValue: (optional) if the value is null, the value to show instead of an empty value in non-edit mode only  
        - linkValue: required for the type 'Link' (in this case, 'value' is the text of the link
        - linkPrefix: required if type=='ListOfLinks' - this is the uri value to precedes the link value
 	     - unitsSelector: required if type=='Volume' || type=='MolarConcentration', must be instance of edu.harvard.med.screensaver.ui.arch.util.UiSelectOneBean
@@ -29,13 +30,15 @@
 	     - submitOnChange (optional, 'Boolean' and 'Vocabulary' types only)
        - escape: boolean, (optional, sets the t:outputText escape value, defaults to true)
        - selectItems (required for 'Vocabulary' type, ignored otherwise)
+       - labelStyle (defaults to 'propertyLabel')
+       - valueStyle (defaults to 'propertyValue' or 'primaryPropertyValue')
 	 -->
 
 <ui:composition>
 
   <t:div
     rendered="#{(empty rendered ? true : rendered) &amp;&amp; (adminOnly ? appInfo.screensaverUser.isUserInRoleOfNameMap['readEverythingAdmin'] : true)}"
-    styleClass="propertyLabel">
+    styleClass="#{(empty labelStyle ? propertyLabel : labelStyle ) }">
     <ui:insert name="label">
       <t:popup>
         <f:facet name="popup">
@@ -50,28 +53,29 @@
     rendered="#{(empty rendered ? true : rendered) &amp;&amp; (adminOnly ? appInfo.screensaverUser.isUserInRoleOfNameMap['readEverythingAdmin'] : true)}">
     <ui:insert name="valueHeader" />
     <t:div rendered="#{!editable}"
-      styleClass="#{primary ? 'primaryPropertyValue' : 'propertyValue'}">
+      styleClass="#{primary ? 'primaryPropertyValue' : (empty valueStyle ? 'propertyValue' : valueStyle )}">
       <ui:insert name="data">
+        <t:outputText rendered="#{empty value}" value="#{!empty emptyValue ? emptyValue : ''}" />
         <t:outputText id="#{id}#{type}Value" value="#{value}"
           escape="#{(empty escape ? true : escape)}"
-          rendered="#{!(type == 'Textarea' || type == 'Volume' || type == 'MolarConcentration' || type == 'ListOfLinks' || type == 'Link' || type == 'Vocabulary')}"
+          rendered="#{!empty value &amp;&amp; !(type == 'Textarea' || type == 'Volume' || type == 'MolarConcentration' || type == 'ListOfLinks' || type == 'Link' || type == 'Vocabulary')}"
           converter="#{!empty converter ? converter : (empty type || type == 'Text' || type == 'Textarea') ? stringConverter : type == 'Integer' ? javax.faces.convert.IntegerConverter : type == 'Date' ? dateConverter : type == 'Set' ? setConverter : type == 'List' ? listConverter : type == 'Volume' ? volumeConverter : type == 'MolarConcentration' ? molarConcentrationConverter : type == 'Currency' ? currencyConverter : null}" />
-        <!-- TODO: not sure why we need to repeat styleClass attribute here to make it take effect... -->
         <t:inputTextarea id="#{id}#{type}Value1"
-          rendered="#{type == 'Textarea'}" value="#{value}"
+          rendered="#{!empty value &amp;&amp; type == 'Textarea'}"
+          value="#{value}"
           readonly="true" cols="#{editWidth}" rows="#{editHeight}"
           displayValueOnly="#{true}"
           styleClass="#{primary ? 'primaryPropertyValue' : 'propertyValue'}" />
         <ss:selectOneMenu id="#{id}VocabularyField" value="#{value}"
-          rendered="#{type == 'Vocabulary'}"
+          rendered="#{!empty value &amp;&amp; type == 'Vocabulary'}"
           selectItems="#{selectItems}" 
           displayValueOnly="true" />
         <t:outputText id="#{id}#{type}Value2"
-          rendered="#{(type == 'Volume' || type == 'MolarConcentration') &amp;&amp; !empty value }"
+          rendered="#{!empty value &amp;&amp; (type == 'Volume' || type == 'MolarConcentration')}"
           value="#{value} #{unitsSelector.selection}" />
         <t:dataList id="#{id}#{type}DataLinkList" var="eltValue"
           value="#{value}" layout="simple"
-          rendered="#{type == 'ListOfLinks' &amp;&amp; !empty value }"
+          rendered="#{!empty value &amp;&amp; type == 'ListOfLinks'}"
           rowIndexVar="eltIndex" rowCountVar="eltCount">
           <h:outputLink value="#{linkPrefix}#{eltValue}" target="_blank">
             <h:outputText value="#{eltValue}"
@@ -83,7 +87,7 @@
             styleClass="propertyValue dataText" />
         </t:dataList>
         <h:outputLink value="#{linkValue}"
-          rendered="#{(type == 'Link') &amp;&amp; !empty value }"
+          rendered="#{!empty value &amp;&amp; (type == 'Link')}"
           target="_blank" styleClass="propertyValue dataText">
           <h:outputText value="#{value}" />
         </h:outputLink>

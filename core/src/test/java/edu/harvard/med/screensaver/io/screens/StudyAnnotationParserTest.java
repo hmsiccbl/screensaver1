@@ -14,13 +14,15 @@ import java.util.TreeSet;
 
 import org.apache.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.transaction.annotation.Transactional;
 
 import edu.harvard.med.screensaver.AbstractSpringPersistenceTest;
+import edu.harvard.med.screensaver.db.EntityInflator;
 import edu.harvard.med.screensaver.io.UnrecoverableParseException;
+import edu.harvard.med.screensaver.io.workbook2.Workbook;
 import edu.harvard.med.screensaver.model.MakeDummyEntities;
 import edu.harvard.med.screensaver.model.libraries.Library;
 import edu.harvard.med.screensaver.model.libraries.Reagent;
+import edu.harvard.med.screensaver.model.libraries.SmallMoleculeReagent;
 import edu.harvard.med.screensaver.model.screenresults.AnnotationType;
 import edu.harvard.med.screensaver.model.screenresults.AnnotationValue;
 import edu.harvard.med.screensaver.model.screens.Screen;
@@ -28,15 +30,128 @@ import edu.harvard.med.screensaver.model.screens.ScreenType;
 
 public class StudyAnnotationParserTest extends AbstractSpringPersistenceTest
 {
-  private static final String WORKBOOK_FILE = "edu/harvard/med/screensaver/io/screens/test-study.xls";
+  private static final String WORKBOOK_FILE_BY_RVI = "edu/harvard/med/screensaver/io/screens/test-study-by-rvi.xls";
+  private static final String WORKBOOK_FILE_BY_WELLKEY = "edu/harvard/med/screensaver/io/screens/test-study-by-wellkey.xls";
+  private static final String WORKBOOK_FILE_WITH_AT_IN_COL1_BY_WELLKEY = "edu/harvard/med/screensaver/io/screens/test-study-with-at-in-col1-by-wellkey.xls";
+  private static final String WORKBOOK_FILE_WITH_AT_IN_COL1_BY_COMPOUND_NAME = "edu/harvard/med/screensaver/io/screens/test-study-with-at-in-col1-by-compoundName.xls";
 
   private static Logger log = Logger.getLogger(StudyAnnotationParserTest.class);
 
   @Autowired
   protected StudyAnnotationParser studyAnnotationParser;
 
-  @Transactional
-  public void testStudyAnnotationParser() throws UnrecoverableParseException
+  public void testStudyAnnotationParseByRvi() throws UnrecoverableParseException
+  {
+    Library library = MakeDummyEntities.makeDummyLibrary(1, ScreenType.RNAI, 1);
+    genericEntityDao.persistEntity(library);
+
+    Screen study = MakeDummyEntities.makeDummyScreen(1, library.getScreenType());
+    String workbookLocation = WORKBOOK_FILE_BY_RVI;
+    studyAnnotationParser.parse(study,
+                                new Workbook(workbookLocation, getClass().getClassLoader().getResourceAsStream(workbookLocation)),
+                                StudyAnnotationParser.KEY_COLUMN.RVI,
+                                false);
+    doTest(study);
+  }
+
+  public void testStudyAnnotationParseByWellKey() throws UnrecoverableParseException
+  {
+    Library library = MakeDummyEntities.makeDummyLibrary(1, ScreenType.RNAI, 1);
+    genericEntityDao.persistEntity(library);
+
+    Screen study = MakeDummyEntities.makeDummyScreen(2, library.getScreenType());
+    String workbookLocation = WORKBOOK_FILE_BY_WELLKEY;
+    studyAnnotationParser.parse(study,
+                                new Workbook(workbookLocation, getClass().getClassLoader().getResourceAsStream(workbookLocation)),
+                                StudyAnnotationParser.KEY_COLUMN.WELL_ID,
+                                false);
+    doTest(study);
+  }
+
+  public void testStudyAnnotationParseWithTypeInCol1ByCompoundName() throws UnrecoverableParseException
+  {
+    Library library = MakeDummyEntities.makeDummyLibrary(1, ScreenType.SMALL_MOLECULE, 1);
+    genericEntityDao.persistEntity(library);
+
+    Screen study = MakeDummyEntities.makeDummyScreen(3, library.getScreenType());
+    String workbookLocation = WORKBOOK_FILE_WITH_AT_IN_COL1_BY_COMPOUND_NAME;
+    studyAnnotationParser.parse(study,
+                                new Workbook(workbookLocation, getClass().getClassLoader().getResourceAsStream(workbookLocation)),
+                                StudyAnnotationParser.KEY_COLUMN.COMPOUND_NAME,
+                                true);
+    genericEntityDao.persistEntity(study);
+    doSMCompoundTest(study);
+  }
+
+  public void testStudyAnnotationParseWithTypeInCol1ByWellKey() throws UnrecoverableParseException
+  {
+    Library library = MakeDummyEntities.makeDummyLibrary(1, ScreenType.RNAI, 1);
+    genericEntityDao.persistEntity(library);
+
+    Screen study = MakeDummyEntities.makeDummyScreen(3, library.getScreenType());
+    String workbookLocation = WORKBOOK_FILE_WITH_AT_IN_COL1_BY_WELLKEY;
+    studyAnnotationParser.parse(study,
+                                new Workbook(workbookLocation, getClass().getClassLoader().getResourceAsStream(workbookLocation)),
+                                StudyAnnotationParser.KEY_COLUMN.WELL_ID,
+                                true);
+    doTest(study);
+  }
+
+  private void doSMCompoundTest(Screen study)
+  {
+    String[] compoundNames = { "compound1", "compound2", "compound3" };
+    Object[][] expectedData = {
+      { 1.0, 3.0, 2.0 },
+      { "a", "c", "b" }
+    };
+
+
+//    Library library = MakeDummyEntities.makeDummyLibrary(1, ScreenType.RNAI, 1);
+    //    genericEntityDao.persistEntity(library);
+    
+    //Screen study = MakeDummyEntities.makeDummyScreen(1, library.getScreenType());
+    //studyAnnotationParser.parse(study, getClass().getClassLoader().getResourceAsStream(WORKBOOK_FILE));
+    assertEquals("annotation type count", expectedData.length, study.getAnnotationTypes().size());
+    assertEquals("reagent count", compoundNames.length, study.getReagents().size());
+    
+    study = new EntityInflator<Screen>(genericEntityDao, study, true).
+      need(Screen.annotationTypes).
+      need(Screen.annotationTypes.to(AnnotationType.annotationValues)).
+      need(Screen.reagents).inflate();
+
+    AnnotationType numericAnnotationType = study.getAnnotationTypes().first(); 
+    AnnotationType textAnnotationType = study.getAnnotationTypes().last();
+    
+    assertTrue(numericAnnotationType.isNumeric());
+    assertFalse(textAnnotationType.isNumeric());
+    assertEquals("NumericAnnotation", numericAnnotationType.getName());
+    assertEquals("numeric annotation", numericAnnotationType.getDescription());
+    assertEquals("TextAnnotation", textAnnotationType.getName());
+    assertEquals("text annotation", textAnnotationType.getDescription());
+    assertEquals(3, numericAnnotationType.getAnnotationValues().size());
+    assertEquals(3, textAnnotationType.getAnnotationValues().size());
+    
+    Map<Reagent,AnnotationValue> numericAnnotationValues = study.getAnnotationTypes().first().getAnnotationValues();
+    Map<Reagent,AnnotationValue> textAnnotationValues = study.getAnnotationTypes().last().getAnnotationValues();
+    
+    int i = 0;
+    for (Reagent reagent : new TreeSet<Reagent>(study.getReagents())) {
+      SmallMoleculeReagent smr = new EntityInflator<SmallMoleculeReagent>(genericEntityDao, (SmallMoleculeReagent) reagent, true).
+        need(SmallMoleculeReagent.compoundNames).
+        need(Reagent.annotationValues.castToSubtype(SmallMoleculeReagent.class)).
+        inflate();
+
+      assertEquals(compoundNames[i], smr.getPrimaryCompoundName());
+      assertEquals(expectedData[0][i], numericAnnotationValues.get(smr).getNumericValue());
+      assertTrue(!smr.getAnnotationValues().isEmpty());
+      assertEquals(expectedData[0][i], smr.getAnnotationValues().get(numericAnnotationType).getNumericValue());
+      assertEquals(expectedData[1][i], textAnnotationValues.get(smr).getValue());
+      assertEquals(expectedData[1][i], smr.getAnnotationValues().get(textAnnotationType).getValue());
+      ++i;
+    }
+  }
+
+  private void doTest(Screen study)
   {
     String[] rvIds = { "Vendor1 rnai1", "Vendor1 rnai2", "Vendor1 rnai3" };
     Object[][] expectedData = {
@@ -44,13 +159,6 @@ public class StudyAnnotationParserTest extends AbstractSpringPersistenceTest
       { "a", "b", "c" }
     };
 
-    Library library = MakeDummyEntities.makeDummyLibrary(1, ScreenType.RNAI, 1);
-    genericEntityDao.persistEntity(library);
-    genericEntityDao.flush();
-    
-    Screen study = MakeDummyEntities.makeDummyScreen(1, library.getScreenType());
-    genericEntityDao.persistEntity(study);
-    studyAnnotationParser.parse(study, getClass().getClassLoader().getResourceAsStream(WORKBOOK_FILE));
     assertEquals("annotation type count", expectedData.length, study.getAnnotationTypes().size());
     assertEquals("reagent count", rvIds.length, study.getReagents().size());
     

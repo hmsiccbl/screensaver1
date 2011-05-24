@@ -21,6 +21,7 @@ import javax.persistence.JoinColumn;
 import javax.persistence.JoinTable;
 import javax.persistence.Transient;
 
+import com.google.common.collect.Lists;
 import com.google.common.collect.Sets;
 import org.hibernate.annotations.Immutable;
 import org.hibernate.annotations.IndexColumn;
@@ -49,7 +50,9 @@ public class SmallMoleculeReagent extends Reagent
   public static final PropertyPath<SmallMoleculeReagent> compoundNames = RelationshipPath.from(SmallMoleculeReagent.class).toCollectionOfValues("compoundNames");
   public static final PropertyPath<SmallMoleculeReagent> pubchemCids = RelationshipPath.from(SmallMoleculeReagent.class).toCollectionOfValues("pubchemCids");
   public static final PropertyPath<SmallMoleculeReagent> chembankIds = RelationshipPath.from(SmallMoleculeReagent.class).toCollectionOfValues("chembankIds");
+  public static final PropertyPath<SmallMoleculeReagent> chemblIds = RelationshipPath.from(SmallMoleculeReagent.class).toCollectionOfValues("chemblIds");
   public static final PropertyPath<SmallMoleculeReagent> molfileList = RelationshipPath.from(SmallMoleculeReagent.class).toCollectionOfValues("molfileList");
+  public static final PropertyPath<SmallMoleculeReagent> facilityBatchId = RelationshipPath.from(SmallMoleculeReagent.class).toProperty("facilityBatchId");
   
   public static final SmallMoleculeReagent NullSmallMoleculeReagent = 
     new SmallMoleculeReagent(ReagentVendorIdentifier.NULL_VENDOR_ID,
@@ -68,9 +71,13 @@ public class SmallMoleculeReagent extends Reagent
   private BigDecimal _molecularMass;
   private BigDecimal _molecularWeight;
   private MolecularFormula _molecularFormula;
-  private Set<String> _compoundNames = Sets.newHashSet();
+  private List<String> _compoundNames = Lists.newArrayList();
   private Set<Integer> _pubchemCids = Sets.newHashSet();
   private Set<Integer> _chembankIds = Sets.newHashSet();
+  private Set<Integer> _chemblIds = Sets.newHashSet();
+  private String _vendorBatchId;
+  private Integer _facilityBatchId;
+  private Integer _saltFormId;
 
   /**
    * @motivation for hibernate and proxy/concrete subclass constructors
@@ -117,16 +124,17 @@ public class SmallMoleculeReagent extends Reagent
   }
 
   @ElementCollection
-  @edu.harvard.med.screensaver.model.annotations.ElementCollection(hasNonconventionalMutation = true)
   /* immutable, unless transient */
-  @Column(name="compoundName", nullable=false)
+  @edu.harvard.med.screensaver.model.annotations.ElementCollection(hasNonconventionalMutation = true)
+  @Column(name = "compoundName", nullable = false, unique = false)
   @JoinTable(
     name="smallMoleculeCompoundName",
-    joinColumns=@JoinColumn(name="reagentId")
+    joinColumns = @JoinColumn(name = "reagentId")
   )
+  @IndexColumn(name = "ordinal")
   @org.hibernate.annotations.Type(type="text")
   @org.hibernate.annotations.ForeignKey(name="fk_small_molecule_compound_name_id_to_small_molecule_reagent")
-  public Set<String> getCompoundNames()
+  public List<String> getCompoundNames()
   {
     return _compoundNames;
   }
@@ -135,6 +143,13 @@ public class SmallMoleculeReagent extends Reagent
   public int getNumCompoundNames()
   {
     return _compoundNames.size();
+  }
+
+  @Transient
+  public String getPrimaryCompoundName()
+  {
+    if (_compoundNames.isEmpty()) return null;
+    return _compoundNames.get(0);
   }
 
   @ElementCollection
@@ -175,6 +190,25 @@ public class SmallMoleculeReagent extends Reagent
   public int getNumChembankIds()
   {
     return _chembankIds.size();
+  }
+
+  @ElementCollection
+  @edu.harvard.med.screensaver.model.annotations.ElementCollection(hasNonconventionalMutation = true)
+  @Column(name="chemblId", nullable=false)
+  @JoinTable(
+    name="smallMoleculeChemblId",
+    joinColumns=@JoinColumn(name="reagentId")
+  )
+  @org.hibernate.annotations.ForeignKey(name="fk_small_molecule_chembl_id_to_small_molecule_reagent")
+  public Set<Integer> getChemblIds()
+  {
+    return _chemblIds;
+  }
+
+  @Transient
+  public int getNumChemblIds()
+  {
+    return _chemblIds.size();
   }
 
   /**
@@ -275,7 +309,7 @@ public class SmallMoleculeReagent extends Reagent
   /**
    * @motivation for hibernate
    */
-  private void setCompoundNames(Set<String> compoundNames)
+  private void setCompoundNames(List<String> compoundNames)
   {
     _compoundNames = compoundNames;
   }
@@ -294,5 +328,78 @@ public class SmallMoleculeReagent extends Reagent
   private void setChembankIds(Set<Integer> chembankIds)
   {
     _chembankIds = chembankIds;
+  }
+  
+  /**
+   * @motivation for hibernate
+   */
+  private void setChemblIds(Set<Integer> chemblIds)
+  {
+    _chemblIds = chemblIds;
+  }
+
+  @org.hibernate.annotations.Type(type = "text")
+  @edu.harvard.med.screensaver.model.annotations.Column(hasNonconventionalSetterMethod = true)
+  // we don't want to include this LINCS-only property in the constructor
+  public String getVendorBatchId()
+  {
+    return _vendorBatchId;
+  }
+
+  @edu.harvard.med.screensaver.model.annotations.Column(hasNonconventionalSetterMethod = true)
+  // we don't want to include this LINCS-only property in the constructor
+  public Integer getFacilityBatchId()
+  {
+    return _facilityBatchId;
+  }
+
+  @edu.harvard.med.screensaver.model.annotations.Column(hasNonconventionalSetterMethod = true)
+  // we don't want to include this LINCS-only property in the constructor
+  public Integer getSaltFormId()
+  {
+    return _saltFormId;
+  }
+
+  /**
+   * @motivation for hibernate
+   */
+  private void setVendorBatchId(String vendorBatchId)
+  {
+    _vendorBatchId = vendorBatchId;
+  }
+
+  public SmallMoleculeReagent forVendorBatchId(String vendorBatchId)
+  {
+    _vendorBatchId = vendorBatchId;
+    return this;
+  }
+
+  /**
+   * @motivation for hibernate
+   */
+  private void setFacilityBatchId(Integer facilityBatchId)
+  {
+    _facilityBatchId = facilityBatchId;
+  }
+
+  public SmallMoleculeReagent forFacilityBatchId(Integer facilityBatchId)
+  {
+    _facilityBatchId = facilityBatchId;
+    return this;
+  }
+
+  /**
+   * @motivation for hibernate
+   */
+  private SmallMoleculeReagent setSaltFormId(Integer saltFormId)
+  {
+    _saltFormId = saltFormId;
+    return this;
+  }
+
+  public SmallMoleculeReagent forSaltFormId(Integer saltFormId)
+  {
+    _saltFormId = saltFormId;
+    return this;
   }
 }

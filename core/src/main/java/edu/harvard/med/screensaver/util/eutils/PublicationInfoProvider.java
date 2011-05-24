@@ -55,14 +55,21 @@ public class PublicationInfoProvider extends EutilsUtils
    */
   public synchronized Publication getPublicationForPubmedId(Integer pubmedId) throws EutilsException
   {
+    Publication publication = new Publication();
+    publication.setPubmedId(pubmedId);
     _pubmedId = pubmedId;
-    Document esummaryDocument = getXMLForEutilsQuery("esummary.fcgi", "&db=pubmed&id=" + pubmedId);
+    return getPubmedInfo(publication);
+  }
+
+  public synchronized Publication getPubmedInfo(Publication publication) throws EutilsException
+  {
+    if (publication.getPubmedId() == null) throw new IllegalArgumentException("Pubmed id must be set.");
+
+    Document esummaryDocument = getXMLForEutilsQuery("esummary.fcgi", "&db=pubmed&id=" + publication.getPubmedId());
     if (esummaryDocument == null) {
       return null;
     }
     NodeList nodes = esummaryDocument.getElementsByTagName("Item");
-    Publication publication = new Publication();
-    publication.setPubmedId(pubmedId);
     publication.setTitle(getNamedItemFromNodeList(nodes, "Title"));
     publication.setYearPublished(getYearPublishedFromNodeList(nodes));
     publication.setAuthors(getAuthorsFromNodeList(nodes));

@@ -12,18 +12,19 @@ package edu.harvard.med.screensaver.io.libraries.smallmolecule;
 import java.math.BigDecimal;
 import java.util.List;
 
+import com.google.common.base.Joiner;
+import com.google.common.collect.Lists;
+
+import edu.harvard.med.screensaver.model.MolarConcentration;
 import edu.harvard.med.screensaver.model.libraries.LibraryWellType;
 import edu.harvard.med.screensaver.model.libraries.MolecularFormula;
 import edu.harvard.med.screensaver.model.libraries.WellName;
-
-import com.google.common.base.Joiner;
-import com.google.common.collect.Lists;
 
 /**
  * Data-only class containing all the necessary information to be parsed from as
  * SDFile record.
  */
-class SDRecord
+public class SDRecord
 {
   private Integer _plateNumber;
   private WellName _wellName;
@@ -40,6 +41,15 @@ class SDRecord
   private List<String> _compoundNames = Lists.newLinkedList();
   private List<Integer> _pubchemCids = Lists.newLinkedList();
   private List<Integer> _chembankIds = Lists.newLinkedList();
+  private List<Integer> _chemblIds = Lists.newLinkedList();
+  private MolarConcentration _concentration;
+  private BigDecimal _mgMlConcentration;
+  private List<Integer> _pubmedIds = Lists.newLinkedList();
+
+  // for LINCS
+  private String _vendorBatchId;
+  private Integer _facilityBatchId;
+  private Integer _saltFormId;
   
   public LibraryWellType getLibraryWellType() { return _libraryWellType; }
   public void setLibraryWellType(LibraryWellType libraryWellType) { _libraryWellType = libraryWellType; }
@@ -47,10 +57,36 @@ class SDRecord
   public void setSmiles(String smiles) { _smiles = smiles; }
   public String getInChi() { return _inChi; }
   public void setInChi(String inChi) { _inChi = inChi; }
-  String getFacilityId() { return _facilityId; }
-  void setFacilityId(String facilityId) { _facilityId = facilityId; }
-  String getMolfile() { return _molfile; }
-  void setMolfile(String molfile) { _molfile = molfile; }
+
+  public String getFacilityId()
+  {
+    return _facilityId;
+  }
+
+  public void setFacilityId(String facilityId)
+  {
+    _facilityId = facilityId;
+  }
+
+  public String getMolfile()
+  {
+    return _molfile;
+  }
+
+  public void setMolfile(String molfile)
+  {
+    _molfile = molfile;
+  }
+
+  public MolarConcentration getConcentration()
+  {
+    return _concentration;
+  }
+
+  public void setConcentration(MolarConcentration value)
+  {
+    _concentration = value;
+  }
   public BigDecimal getMolecularMass() { return _molecularMass; }
   public void setMolecularMass(BigDecimal molecularMass) { _molecularMass = molecularMass; }
   public BigDecimal getMolecularWeight() { return _molecularWeight; }
@@ -68,21 +104,59 @@ class SDRecord
   public void setCompoundNames(List<String> compoundNames) { _compoundNames = compoundNames; }
   public void setPubchemCids(List<Integer> pubchemCids) { _pubchemCids = pubchemCids; }
   public void setChembankIds(List<Integer> chembankIds) { _chembankIds = chembankIds; }  
+  public void setChemblIds(List<Integer> chembIds) { _chembankIds = chembIds; }  
   public List<String> getCompoundNames() { return _compoundNames; }
   public List<Integer> getPubchemCids() { return _pubchemCids; }
   public List<Integer> getChembankIds() { return _chembankIds; }
+  public List<Integer> getChemblIds() { return _chemblIds; }
+  public List<Integer> getPubmedIds() { return _pubmedIds;  }
+
+  public void setVendorBatchId(String line)
+  {
+    _vendorBatchId = line;
+  }
+
+  public String getVendorBatchId()
+  {
+    return _vendorBatchId;
+  }
+
+  public void setFacilityBatchId(Integer value)
+  {
+    _facilityBatchId = value;
+  }
+
+  public Integer getFacilityBatchId()
+  {
+    return _facilityBatchId;
+  }
+
+  public void setSaltFormId(Integer value)
+  {
+    _saltFormId = value;
+  }
   
+  public Integer getSaltFormId()
+  {
+    return _saltFormId;
+  }
   public String toString() {
     return
       "MOLFILE = " + _molfile          + "\n" +
       "MOLMASS = " + _molecularMass    + "\n" +
       "MOLFORM = " + _molecularFormula + "\n" +
+      "CONCENTRATION = " + _concentration + "\n" +
       "PLATE   = " + _plateNumber      + "\n" +
       "WELL    = " + _wellName         + "\n" +
       "VEND ID = " + _vendorIdentifier + "\n" +
+      "VEND BID = " + _vendorBatchId + "\n" +
       "FACY_ID = " + _facilityId       + "\n" +
+      "FACY_BID = " + _facilityBatchId + "\n" +
+      "SALT_ID = " + _saltFormId + "\n" +
       "C NAMES  = " + Joiner.on(",").join(_compoundNames) + "\n" +
       "PC IDS  = " + Joiner.on(",").join(_pubchemCids)+ "\n" +
-      "CB IDS  = " + Joiner.on(",").join(_chembankIds)+ "\n";
+      "CB IDS  = " + Joiner.on(",").join(_chembankIds)+ "\n" +
+      "Chembl IDS  = " + Joiner.on(",").join(_chemblIds) + "\n" +
+      "PubMed IDS  = " + Joiner.on(",").join(_pubmedIds) + "\n";
   }
 }

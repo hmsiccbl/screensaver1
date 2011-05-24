@@ -134,6 +134,7 @@ public class LibraryScreeningSplitter
     newLibraryScreening.setForExternalLibraryPlates(libraryScreening.isForExternalLibraryPlates());
     newLibraryScreening.setNumberOfReplicates(libraryScreening.getNumberOfReplicates());
     newLibraryScreening.setVolumeTransferredPerWell(libraryScreening.getVolumeTransferredPerWell());
+    newLibraryScreening.setAssayWellVolume(libraryScreening.getAssayWellVolume());
     for (AssayPlate assayPlate : assayPlatesToMove) {
       assayPlate.setLibraryScreening(newLibraryScreening);
       dao.saveOrUpdateEntity(assayPlate);
