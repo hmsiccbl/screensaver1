@@ -181,7 +181,7 @@ a.heatMapValue:link,a.heatMapValue:visited {
   vertical-align: bottom;
 }
 
-.dataText,.inputText,.label,.inverseLabel,.propertyValue,.propertyLabel,.dataHeader
+.dataText,.inputText,.label,.inverseLabel,.propertyValue,.subduedPropertyValue,.propertyLabel,.subduedLabel,.dataHeader
   {
   font-size: small;
 }
@@ -259,9 +259,17 @@ a.heatMapValue:link,a.heatMapValue:visited {
   width: 1px;
 }
 
-.propertyLabelColumn,.propertyLabel {
+.propertyLabelColumn,.propertyLabel, .subduedLabel {
   font-weight: bold;
   background-color: #dddddd;
+}
+
+.subduedLabel {
+  color: gray;  
+}
+
+.subduedPropertyValue {
+  color: graytext;
 }
 
 .propertyLabelColumn {
