@@ -93,7 +93,7 @@ public class LibrarySearchResults extends EntityBasedEntitySearchResults<Library
   public void searchAll()
   {
     setTitle("Libraries");
-    initialize(new InMemoryEntityDataModel<Library,Integer>(new EntityDataFetcher<Library,Integer>(Library.class, _dao) {
+    initialize(new InMemoryEntityDataModel<Library,Integer,Library>(new EntityDataFetcher<Library,Integer>(Library.class, _dao) {
       @Override
       public void addDomainRestrictions(HqlBuilder hql)
       {
@@ -105,7 +105,7 @@ public class LibrarySearchResults extends EntityBasedEntitySearchResults<Library
   public void searchLibraryScreenType(ScreenType screenType)
   {
     setTitle(screenType + " Libraries");
-    initialize(new InMemoryEntityDataModel<Library,Integer>(new EntityDataFetcher<Library,Integer>(Library.class, _dao) {
+    initialize(new InMemoryEntityDataModel<Library,Integer,Library>(new EntityDataFetcher<Library,Integer>(Library.class, _dao) {
       @Override
       public void addDomainRestrictions(HqlBuilder hql)
       {
@@ -285,7 +285,7 @@ public class LibrarySearchResults extends EntityBasedEntitySearchResults<Library
           where("l", Operator.EQUAL, getRootAlias());
       }
     };
-    initialize(new InMemoryEntityDataModel<Library,Integer>(dataFetcher));
+    initialize(new InMemoryEntityDataModel<Library,Integer,Library>(dataFetcher));
     getColumnManager().getColumn("Copies").setVisible(false);
   }
 
@@ -306,7 +306,7 @@ public class LibrarySearchResults extends EntityBasedEntitySearchResults<Library
           where("l", Operator.EQUAL, getRootAlias());
       }
     };
-    initialize(new InMemoryEntityDataModel<Library,Integer>(dataFetcher));
+    initialize(new InMemoryEntityDataModel<Library,Integer,Library>(dataFetcher));
     getColumnManager().getColumn("Copies").setVisible(false);
   }
 

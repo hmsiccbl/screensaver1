@@ -17,6 +17,7 @@ import java.util.Collections;
 import java.util.List;
 import java.util.SortedSet;
 
+import javax.faces.context.FacesContext;
 import javax.faces.model.DataModel;
 import javax.faces.model.ListDataModel;
 
@@ -25,9 +26,12 @@ import com.google.common.base.Predicates;
 import com.google.common.collect.Iterables;
 import com.google.common.collect.Lists;
 import org.apache.myfaces.custom.fileupload.UploadedFile;
+import org.joda.time.LocalDate;
 import org.springframework.transaction.annotation.Transactional;
 
 import edu.harvard.med.screensaver.ScreensaverConstants;
+import edu.harvard.med.screensaver.db.DAOTransaction;
+import edu.harvard.med.screensaver.db.DAOTransactionRollbackException;
 import edu.harvard.med.screensaver.db.GenericEntityDAO;
 import edu.harvard.med.screensaver.model.AttachedFile;
 import edu.harvard.med.screensaver.model.AttachedFileType;
@@ -43,20 +47,32 @@ public class AttachedFiles extends AbstractBackingBean
   private AttachedFilesEntity _entity;
   private String _newAttachedFileName;
   private UISelectOneBean<AttachedFileType> _newAttachedFileType;
+  private LocalDate _newAttachedFileDate;
   private UploadedFile _uploadedAttachedFileContents;
   private String _newAttachedFileContents;
   private Predicate<AttachedFile> _attachedFileFilter = Predicates.alwaysTrue();
   
-  AttachedFiles() {}
+  protected AttachedFiles()
+  {}
   
   public AttachedFiles(GenericEntityDAO dao)
   {
     _dao = dao;
   }
   
+  protected GenericEntityDAO getDao()
+  {
+    return _dao;
+  }
+
   public void setAttachedFilesEntity(AttachedFilesEntity entity)
   {
     _entity = entity;
+  }
+
+  protected AttachedFilesEntity getAttachedFilesEntity()
+  {
+    return _entity;
   }
 
   public void setAttachedFileTypes(SortedSet<AttachedFileType> attachedFileTypes)
@@ -74,6 +90,7 @@ public class AttachedFiles extends AbstractBackingBean
     _newAttachedFileName = null;
     _newAttachedFileContents = null;
     _newAttachedFileType = null;
+    _newAttachedFileDate = null;
     _uploadedAttachedFileContents = null;
   }
                    
@@ -90,7 +107,10 @@ public class AttachedFiles extends AbstractBackingBean
   public UISelectOneBean<AttachedFileType> getNewAttachedFileType()
   {
     if (_newAttachedFileType == null) {
-      _newAttachedFileType = new UISelectOneBean<AttachedFileType>(_attachedFileTypes, null, true) {
+      _newAttachedFileType = new UISelectOneBean<AttachedFileType>(_attachedFileTypes,
+                                                                   _attachedFileTypes.size() == 1 ? _attachedFileTypes.first()
+                                                                     : null,
+                                                                     _attachedFileTypes.size() > 1) {
         @Override
         protected String getEmptyLabel()
         {
@@ -99,6 +119,16 @@ public class AttachedFiles extends AbstractBackingBean
       };
     }
     return _newAttachedFileType;
+  }
+
+  public LocalDate getNewAttachedFileDate()
+  {
+    return _newAttachedFileDate;
+  }
+
+  public void setNewAttachedFileDate(LocalDate newAttachedFileDate)
+  {
+    _newAttachedFileDate = newAttachedFileDate;
   }
 
   public String getNewAttachedFileContents()
@@ -123,6 +153,9 @@ public class AttachedFiles extends AbstractBackingBean
 
   public DataModel getAttachedFilesDataModel()
   {
+    if (_entity == null) {
+      return new ListDataModel();
+    }
     List<AttachedFile> attachedFiles = Lists.newArrayList(Iterables.filter(_entity.getAttachedFiles(), _attachedFileFilter));
     Collections.sort(attachedFiles);
     return new ListDataModel(attachedFiles);
@@ -130,6 +163,17 @@ public class AttachedFiles extends AbstractBackingBean
 
   @UICommand
   public String addAttachedFile()
+  {
+    if (_entity == null) {
+      return REDISPLAY_PAGE_ACTION_RESULT;
+    }
+    doAddAttachedFile();
+    reset();
+    return REDISPLAY_PAGE_ACTION_RESULT;
+  }
+
+  @SuppressWarnings("unchecked")
+  protected void doAddAttachedFile()
   {
     String filename;
     InputStream contentsInputStream;
@@ -140,7 +184,7 @@ public class AttachedFiles extends AbstractBackingBean
       }
       catch (IOException e) {
         reportApplicationError(e.getMessage());
-        return REDISPLAY_PAGE_ACTION_RESULT;
+        return;
       }
       _uploadedAttachedFileContents = null;
     }
@@ -152,22 +196,21 @@ public class AttachedFiles extends AbstractBackingBean
     try {
       if (filename == null || filename.trim().length() == 0) {
         showMessage("requiredValue", "Attached File Name");
-        return REDISPLAY_PAGE_ACTION_RESULT;
+        return;
       }
       if (_newAttachedFileType.getSelection() == null) {
         showMessage("requiredValue", "Attached File Type");
-        return REDISPLAY_PAGE_ACTION_RESULT;
+        return;
       }
 
       _entity.createAttachedFile(filename,
                                  _newAttachedFileType.getSelection(),
+                                 _newAttachedFileDate,
                                  contentsInputStream);
     }
     catch (IOException e) {
       reportApplicationError("could not attach the file contents");
     }
-    reset();
-    return REDISPLAY_PAGE_ACTION_RESULT;
   }
 
   @UICommand
@@ -185,24 +228,39 @@ public class AttachedFiles extends AbstractBackingBean
   public String downloadAttachedFile() throws IOException, SQLException
   {
     AttachedFile attachedFile = (AttachedFile) getRequestMap().get("element");
-    return doDownloadAttachedFile(attachedFile);
+    return doDownloadAttachedFile(attachedFile, getFacesContext(), _dao);
   }
 
-  public String doDownloadAttachedFile(AttachedFile attachedFile)
+  public static String doDownloadAttachedFile(final AttachedFile attachedFileIn,
+                                              final FacesContext facesContext,
+                                              final GenericEntityDAO dao)
   throws IOException, SQLException
   {
-    if (attachedFile != null) {
-      // attachedFile must be Hibernate-managed in order to access the contents (a LOB type)
-      // if attachedFile is transient, we should not attempt to reattach, and contents will be accessible
-      if (attachedFile.getAttachedFileId() != null) {
-        attachedFile = _dao.reloadEntity(attachedFile, true);
-      }
-      if (attachedFile != null) {
-        JSFUtils.handleUserDownloadRequest(getFacesContext(),
-                                           new ByteArrayInputStream(attachedFile.getFileContents()),
-                                           attachedFile.getFilename(),
-                                           null);
-      }
+    if (attachedFileIn != null) {
+      dao.doInTransaction(new DAOTransaction() {
+
+        @Override
+        public void runTransaction()
+        {
+          // attachedFile must be Hibernate-managed in order to access the contents (a LOB type)
+          // if attachedFile is transient, we should not attempt to reattach, and contents will be accessible
+          AttachedFile attachedFile = attachedFileIn;
+          if (attachedFileIn.getAttachedFileId() != null) {
+            attachedFile = dao.reloadEntity(attachedFileIn, true);
+          }
+          if (attachedFile != null) {
+            try {
+              JSFUtils.handleUserDownloadRequest(facesContext,
+                                                 new ByteArrayInputStream(attachedFile.getFileContents()),
+                                                 attachedFile.getFilename(),
+                                                 null);
+            }
+            catch (IOException e) {
+              throw new DAOTransactionRollbackException(e);
+            }
+          }
+        }
+      });
     }
     return REDISPLAY_PAGE_ACTION_RESULT;
   }

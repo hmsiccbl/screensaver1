@@ -477,9 +477,9 @@ public class LibraryCopyPlateBatchEditor extends AbstractBackingBean
 
   public List<SelectItem> getAdministratorUserSelectItems()
   {
-    return JSFUtils.createUISelectItemsWithEmptySelection(getDao().findAllEntitiesOfType(AdministratorUser.class),
+    return JSFUtils.createUISelectItemsWithEmptySelection(Sets.newTreeSet(getDao().findAllEntitiesOfType(AdministratorUser.class)),
                                                           ScreensaverConstants.REQUIRED_VOCAB_FIELD_PROMPT,
-                                                          ScreensaverUser.ToDisplayStringFunction);
+                                                          ScreensaverUser.ToFullNameLastFirstAndId);
   }
 
   public String getComments()

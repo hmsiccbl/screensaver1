@@ -15,12 +15,14 @@ import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 
 import javax.faces.model.DataModel;
 import javax.faces.model.ListDataModel;
 
 import com.google.common.collect.Lists;
+import com.google.common.collect.Maps;
 import org.apache.log4j.Logger;
 import org.joda.time.LocalDate;
 import org.springframework.transaction.annotation.Transactional;
@@ -46,6 +48,7 @@ import edu.harvard.med.screensaver.model.cherrypicks.LabCherryPick;
 import edu.harvard.med.screensaver.model.cherrypicks.LabCherryPick.LabCherryPickStatus;
 import edu.harvard.med.screensaver.model.cherrypicks.ScreenerCherryPick;
 import edu.harvard.med.screensaver.model.libraries.Gene;
+import edu.harvard.med.screensaver.model.libraries.Plate;
 import edu.harvard.med.screensaver.model.libraries.Reagent;
 import edu.harvard.med.screensaver.model.libraries.SilencingReagent;
 import edu.harvard.med.screensaver.model.libraries.Well;
@@ -55,6 +58,7 @@ import edu.harvard.med.screensaver.model.meta.RelationshipPath;
 import edu.harvard.med.screensaver.model.screens.CherryPickScreening;
 import edu.harvard.med.screensaver.model.screens.ScreenType;
 import edu.harvard.med.screensaver.model.users.AdministratorUser;
+import edu.harvard.med.screensaver.model.users.ScreensaverUserRole;
 import edu.harvard.med.screensaver.service.cherrypicks.CherryPickRequestAllocator;
 import edu.harvard.med.screensaver.service.cherrypicks.CherryPickRequestCherryPicksAdder;
 import edu.harvard.med.screensaver.service.cherrypicks.CherryPickRequestPlateMapFilesBuilder;
@@ -76,6 +80,7 @@ import edu.harvard.med.screensaver.ui.arch.util.JSFUtils;
 import edu.harvard.med.screensaver.ui.arch.view.SearchResultContextEntityViewerBackingBean;
 import edu.harvard.med.screensaver.ui.arch.view.aspects.UICommand;
 import edu.harvard.med.screensaver.ui.libraries.WellCopyVolumeSearchResults;
+import edu.harvard.med.screensaver.util.NullSafeUtils;
 
 /**
  * Backing bean for Cherry Pick Request Viewer page.
@@ -112,6 +117,7 @@ public class CherryPickRequestViewer extends SearchResultContextEntityViewerBack
   private RNAiCherryPickRequestAllowancePolicy _rnaiCherryPickRequestAllowancePolicy;
 
   private String _cherryPicksInput;
+  private boolean _labCherryPicksSourceCopyEditMode = false; /* disabled, for now */
 
   private EntitySearchResults<ScreenerCherryPick,ScreenerCherryPick,Integer> _screenerCherryPicksSearchResult;
   private EntitySearchResults<LabCherryPick,LabCherryPick,Integer> _labCherryPicksSearchResult;
@@ -162,6 +168,7 @@ public class CherryPickRequestViewer extends SearchResultContextEntityViewerBack
   private void buildLabCherryPickSearchResult()
   {
     _labCherryPicksSearchResult = new EntityBasedEntitySearchResults<LabCherryPick,Integer>() {
+
       @Override
       public void searchAll()
       {
@@ -175,8 +182,45 @@ public class CherryPickRequestViewer extends SearchResultContextEntityViewerBack
         _labCherryPicksSearchResult.getColumnManager().addAllCompoundSorts(buildLabCherryPicksTableCompoundSorts(labCherryPicksTableColumns));
         return labCherryPicksTableColumns;
       }
-    };
 
+      Map<LabCherryPick,String> lcpNewSourceCopies = Maps.newHashMap();
+
+      @Override
+      protected void doEdit()
+      {
+        lcpNewSourceCopies = Maps.newHashMap();
+      }
+
+      @Override
+      protected void doSave()
+      {
+        boolean hasError = false;
+        for (LabCherryPick lcp : lcpNewSourceCopies.keySet()) {
+          String newSourceCopyName = lcpNewSourceCopies.get(lcp);
+          if (!NullSafeUtils.nullSafeEquals(lcp.getSourceCopy().getName(), newSourceCopyName)) {
+            Plate newSourceCopyPlate = _librariesDao.findPlate(lcp.getSourceWell().getPlateNumber(),
+                                                  lcpNewSourceCopies.get(lcp));
+            if (newSourceCopyPlate == null) {
+              showMessage("libraries.noSuchCopyForPlate", lcpNewSourceCopies.get(lcp), lcp.getSourceWell().getPlateNumber());
+              hasError = true;
+            }
+            else {
+              log.info("updating source copy for lab cherry pick " + lcp.getSourceWell() + ":" + lcp.getSourceCopy() + " from " + lcp.getSourceCopy().getName() + " to " + newSourceCopyName);
+              if (lcp.isAllocated()) {
+                lcp.setAllocated(null);
+              }
+              lcp.setAllocated(newSourceCopyPlate.getCopy());
+            }
+          }
+        }
+        if (!hasError) {
+          for (LabCherryPick lcp : lcpNewSourceCopies.keySet()) {
+            getDao().mergeEntity(lcp);
+          }
+        }
+      }
+    };
+    _labCherryPicksSearchResult.setEditingRole(ScreensaverUserRole.CHERRY_PICK_REQUESTS_ADMIN);
     _labCherryPicksSearchResult.setCurrentScreensaverUser(getCurrentScreensaverUser());
     _labCherryPicksSearchResult.setMessages(getMessages());
     _labCherryPicksSearchResult.setApplicationProperties(getApplicationProperties());
@@ -408,6 +452,17 @@ public class CherryPickRequestViewer extends SearchResultContextEntityViewerBack
       "Source Copy", "The library plate copy of the cherry picked well", TableColumn.UNGROUPED) {
       @Override
       public String getCellValue(LabCherryPick lcp) { return lcp.getSourceCopy() != null ? lcp.getSourceCopy().getName() : ""; }
+
+      @Override
+      public void setCellValue(LabCherryPick lcp, String newCopyName)
+        {
+        }
+
+      @Override
+      public boolean isEditable()
+      {
+        return _labCherryPicksSourceCopyEditMode;
+      }
     });
 
     labCherryPicksTableColumns.add(new LabCherryPickReagentEntityColumn<Reagent,String>(
@@ -624,7 +679,7 @@ public class CherryPickRequestViewer extends SearchResultContextEntityViewerBack
       return new InMemoryDataModel<T>(new NoOpDataFetcher<T,Integer,PropertyPath<T>>());
     }
     else {
-      return new InMemoryEntityDataModel<T,Integer>(new EntityDataFetcher<T,Integer>(clazz, getDao()) {
+      return new InMemoryEntityDataModel<T,Integer,T>(new EntityDataFetcher<T,Integer>(clazz, getDao()) {
         @Override
         public void addDomainRestrictions(HqlBuilder hql)
         {

@@ -31,6 +31,7 @@ import javax.persistence.OneToOne;
 import javax.persistence.PrimaryKeyJoinColumn;
 import javax.persistence.Transient;
 
+import com.google.common.base.Function;
 import com.google.common.collect.Sets;
 import org.apache.log4j.Logger;
 import org.hibernate.annotations.Sort;
@@ -39,7 +40,6 @@ import org.joda.time.LocalDate;
 
 import edu.harvard.med.screensaver.model.AbstractEntityVisitor;
 import edu.harvard.med.screensaver.model.AttachedFile;
-import edu.harvard.med.screensaver.model.AttachedFileType;
 import edu.harvard.med.screensaver.model.AttachedFilesEntity;
 import edu.harvard.med.screensaver.model.BusinessRuleViolationException;
 import edu.harvard.med.screensaver.model.DataModelViolationException;
@@ -62,7 +62,7 @@ import edu.harvard.med.screensaver.model.screens.ScreenType;
 @PrimaryKeyJoinColumn(name="screensaverUserId")
 @org.hibernate.annotations.ForeignKey(name="fk_screening_room_user_to_screensaver_user")
 @org.hibernate.annotations.Proxy
-public class ScreeningRoomUser extends ScreensaverUser implements AttachedFilesEntity<Integer>, ChecklistItemsEntity<Integer>
+public class ScreeningRoomUser extends ScreensaverUser implements AttachedFilesEntity<UserAttachedFileType,Integer>, ChecklistItemsEntity<Integer>
 {
 
   // private static data
@@ -76,6 +76,21 @@ public class ScreeningRoomUser extends ScreensaverUser implements AttachedFilesE
   public static final RelationshipPath<ScreeningRoomUser> screensCollaborated = RelationshipPath.from(ScreeningRoomUser.class).to("screensCollaborated");
   public static final PropertyPath<ScreeningRoomUser> facilityUsageRoles = PropertyPath.from(ScreeningRoomUser.class).toCollectionOfValues("facilityUsageRoles");
   public static final RelationshipPath<ScreeningRoomUser> checklistItemEvents = RelationshipPath.from(ScreeningRoomUser.class).to("checklistItemEvents");
+
+  public static final Function<ScreeningRoomUser,String> ToDisplayStringFunction = new Function<ScreeningRoomUser,String>() {
+    public String apply(ScreeningRoomUser u)
+    {
+      return ScreensaverUser.ToDisplayStringFunction.apply(u);
+    }
+  };
+  public static final Function<ScreeningRoomUser,String> ToFullNameLastFirstAndIdAndLabName = new Function<ScreeningRoomUser,String>() {
+    public String apply(ScreeningRoomUser lh)
+    {
+      return ScreeningRoomUser.ToFullNameLastFirstAndId.apply(lh)
+        + (lh.getLab().getLabAffiliation() == null ? "" : (" - " + lh.getLab().getLabAffiliation().getAffiliationName()));
+    }
+  };
+
 
   // private instance data
 
@@ -407,14 +422,17 @@ public class ScreeningRoomUser extends ScreensaverUser implements AttachedFilesE
     _attachedFiles = attachedFiles;
   }
 
-  public AttachedFile createAttachedFile(String filename, AttachedFileType fileType, String fileContents) throws IOException
+  public AttachedFile createAttachedFile(String filename, UserAttachedFileType fileType, LocalDate fileDate, String fileContents) throws IOException
   {
-    return createAttachedFile(filename, fileType, new ByteArrayInputStream(fileContents.getBytes()));
+    return createAttachedFile(filename, fileType, fileDate, new ByteArrayInputStream(fileContents.getBytes()));
   }
 
-  public AttachedFile createAttachedFile(String filename, AttachedFileType fileType, InputStream fileContents) throws IOException
+  public AttachedFile createAttachedFile(String filename,
+                                         UserAttachedFileType fileType,
+                                         LocalDate fileDate,
+                                         InputStream fileContents) throws IOException
   {
-    AttachedFile attachedFile = new AttachedFile(this, filename, fileType, fileContents);
+    AttachedFile attachedFile = new AttachedFile(this, filename, fileType, fileDate, fileContents);
     _attachedFiles.add(attachedFile);
     return attachedFile;
   }

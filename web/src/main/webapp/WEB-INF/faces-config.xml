@@ -286,6 +286,14 @@ Config 1.1//EN" "http://java.sun.com/dtd/web-facesconfig_1_1.dtd">
       <redirect/>
     </navigation-case>
     
+    
+    <navigation-case>
+      <from-outcome>browseAttachedFiles</from-outcome>
+      <to-view-id>/attachedFiles/attachedFilesBrowser</to-view-id>
+      <redirect/>
+    </navigation-case>
+    
+    
   </navigation-rule>
 
 

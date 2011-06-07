@@ -146,6 +146,8 @@ public class ScreenPositivesCountStudyCreator extends AdminEmailApplication
     app.processOptions(/* acceptDatabaseOptions= */true,
                        /* acceptAdminUserOptions= */true);
 
+   log.info("==== Running ScreenPositivesCountStudyCreator: " + app.toString() + "======");
+    
     final GenericEntityDAO dao = (GenericEntityDAO) app.getSpringBean("genericEntityDao");
     final ScreenResultReporter report = (ScreenResultReporter) app.getSpringBean("screenResultReporter");
     final ScreenResultsDAO screenResultsDao = (ScreenResultsDAO) app.getSpringBean("screenResultsDao");
@@ -262,5 +264,7 @@ public class ScreenPositivesCountStudyCreator extends AdminEmailApplication
         }
       }
     });
+    log.info("==== finished ScreenPositivesCountStudyCreator ======");
+
   }
 }

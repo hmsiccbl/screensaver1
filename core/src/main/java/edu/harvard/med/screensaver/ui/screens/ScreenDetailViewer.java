@@ -625,12 +625,12 @@ public class ScreenDetailViewer extends AbstractStudyDetailViewer<Screen>
           return REDISPLAY_PAGE_ACTION_RESULT;
         }
         _uploadedPublicationAttachedFileContents = null;
-        AttachedFileType publicationAttachedFileType = getDao().findEntityByProperty(AttachedFileType.class, "value", Publication.PUBLICATION_ATTACHED_FILE_TYPE_VALUE);
+        ScreenAttachedFileType publicationAttachedFileType = getDao().findEntityByProperty(ScreenAttachedFileType.class, "value", Publication.PUBLICATION_ATTACHED_FILE_TYPE_VALUE);
         if (publicationAttachedFileType == null) {
           reportApplicationError("'publication' attached file type does not exist");
           return REDISPLAY_PAGE_ACTION_RESULT;
         }
-        publication.setAttachedFile(getEntity().createAttachedFile(filename, publicationAttachedFileType, contentsInputStream));
+        publication.setAttachedFile(getEntity().createAttachedFile(filename, publicationAttachedFileType, null, contentsInputStream));
       }
     }
     catch (IOException e) {
@@ -670,7 +670,7 @@ public class ScreenDetailViewer extends AbstractStudyDetailViewer<Screen>
   {
     Publication publication = (Publication) getRequestMap().get("element");
     if (publication != null) {
-      return _attachedFiles.doDownloadAttachedFile(publication.getAttachedFile());
+      return _attachedFiles.doDownloadAttachedFile(publication.getAttachedFile(), getFacesContext(), getDao());
     }
     return REDISPLAY_PAGE_ACTION_RESULT;
   }
@@ -794,4 +794,12 @@ public class ScreenDetailViewer extends AbstractStudyDetailViewer<Screen>
         return null;
     }
   }
+  
+  public DataModel getAssociatedScreensDataModel()
+  {
+    List<Screen> screens = _screenDao.findRelatedScreens(getEntity());
+    screens.remove(getEntity());
+    return new ListDataModel(screens);
+  }
+
 }

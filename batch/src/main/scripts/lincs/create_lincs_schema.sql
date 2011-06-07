@@ -75,6 +75,7 @@
     create table assay_well (
         assay_well_id int4 not null,
         assay_well_control_type text,
+        confirmed_positive_value text,
         is_positive bool not null,
         version int4 not null,
         well_id text not null,
@@ -87,6 +88,7 @@
         attached_file_id int4 not null,
         date_created timestamp not null,
         file_contents oid not null,
+        file_date date,
         filename text not null,
         version int4 not null,
         created_by_id int4,
@@ -221,6 +223,8 @@
         name text not null,
         plate_locations_count int4,
         plates_available int4,
+        primary_plate_mg_ml_concentration numeric(4, 1),
+        primary_plate_molar_concentration numeric(12, 9),
         primary_plate_status text not null,
         usage_type text not null,
         version int4 not null,
@@ -851,6 +855,8 @@
         add constraint fk_assay_plate_to_library_screening 
         foreign key (library_screening_id) 
         references library_screening;
+
+    create index assay_well_confirmed_positives_data_only_index on assay_well (confirmed_positive_value);
 
     create index assay_well_well_positives_only_index on assay_well (is_positive);
 

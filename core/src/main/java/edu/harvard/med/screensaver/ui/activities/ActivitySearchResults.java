@@ -80,13 +80,13 @@ public abstract class ActivitySearchResults<A extends Activity> extends EntityBa
   public void searchAll()
   {
     setTitle("Lab Activities");
-    initialize(new InMemoryEntityDataModel<A,Integer>(new EntityDataFetcher<A,Integer>(_type, _dao)));
+    initialize(new InMemoryEntityDataModel<A,Integer,A>(new EntityDataFetcher<A,Integer>(_type, _dao)));
   }
 
   public void searchActivitiesForUser(final ScreensaverUser user)
   {
     setTitle("Lab Activities for " + user.getFullNameFirstLast());
-    initialize(new InMemoryEntityDataModel<A,Integer>(new EntityDataFetcher<A,Integer>(_type, _dao) {
+    initialize(new InMemoryEntityDataModel<A,Integer,A>(new EntityDataFetcher<A,Integer>(_type, _dao) {
       @Override
       public void addDomainRestrictions(HqlBuilder hql)
       {
@@ -98,7 +98,7 @@ public abstract class ActivitySearchResults<A extends Activity> extends EntityBa
   public void searchLibraryScreeningActivitiesForCopy(final Copy copy)
   {
     setTitle("Library Screenings for library " + copy.getLibrary().getLibraryName() + ", copy " + copy.getName());
-    initialize(new InMemoryEntityDataModel<A,Integer>(new EntityDataFetcher<A,Integer>(_type, _dao) {
+    initialize(new InMemoryEntityDataModel<A,Integer,A>(new EntityDataFetcher<A,Integer>(_type, _dao) {
       @Override
       public void addDomainRestrictions(HqlBuilder hql)
       {
@@ -110,7 +110,7 @@ public abstract class ActivitySearchResults<A extends Activity> extends EntityBa
   public void searchLibraryScreeningActivitiesForPlate(final Plate plate)
   {
     setTitle("Library Screenings for plate " + plate.getPlateNumber());
-    initialize(new InMemoryEntityDataModel<A,Integer>(new EntityDataFetcher<A,Integer>(_type, _dao) {
+    initialize(new InMemoryEntityDataModel<A,Integer,A>(new EntityDataFetcher<A,Integer>(_type, _dao) {
       @Override
       public void addDomainRestrictions(HqlBuilder hql)
       {
@@ -122,7 +122,7 @@ public abstract class ActivitySearchResults<A extends Activity> extends EntityBa
   public void searchActivities(final Set<A> activities, String title)
   {
     setTitle(title);
-    initialize(new InMemoryEntityDataModel<A,Integer>(new EntityDataFetcher<A,Integer>(_type, _dao) {
+    initialize(new InMemoryEntityDataModel<A,Integer,A>(new EntityDataFetcher<A,Integer>(_type, _dao) {
       @Override
       public void addDomainRestrictions(HqlBuilder hql)
       {

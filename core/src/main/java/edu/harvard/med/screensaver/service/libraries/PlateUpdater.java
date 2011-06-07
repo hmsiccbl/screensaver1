@@ -17,13 +17,18 @@ import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Set;
+import java.util.SortedMap;
 
 import com.google.common.base.Function;
 import com.google.common.base.Predicates;
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.Iterables;
+import com.google.common.collect.Iterators;
+import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
 import com.google.common.collect.Multimaps;
+import org.apache.commons.collections.BagUtils;
+import org.apache.commons.collections.MapUtils;
 import org.apache.log4j.Logger;
 import org.joda.time.LocalDate;
 import org.springframework.transaction.annotation.Transactional;
@@ -41,6 +46,7 @@ import edu.harvard.med.screensaver.model.libraries.PlateLocation;
 import edu.harvard.med.screensaver.model.libraries.PlateStatus;
 import edu.harvard.med.screensaver.model.libraries.PlateType;
 import edu.harvard.med.screensaver.model.users.AdministratorUser;
+import edu.harvard.med.screensaver.ui.arch.util.converter.MgMlConcentrationConverter;
 import edu.harvard.med.screensaver.util.NullSafeUtils;
 
 public class PlateUpdater
@@ -138,6 +144,38 @@ public class PlateUpdater
     PlateStatus primaryPlateStatus = Collections.max(statusCounts.entrySet(), plateStatusFrequencyComparator).getKey();
     copy.setPrimaryPlateStatus(primaryPlateStatus);
     copy.setPlatesAvailable(statusCounts.get(PlateStatus.AVAILABLE));
+  }
+        
+  private void updatePrimaryPlateConcentrations(Copy copy)
+  {
+    Map<BigDecimal,Integer> mgMlCounts = Maps.transformValues(Multimaps.index(
+                                                                              Lists.newArrayList(Iterators.filter(copy.getPlates().values().iterator(),
+                                                                                                                  Predicates.compose(Predicates.notNull(),Plate.ToMgMlConcentration))),
+                                                                                                                  Plate.ToMgMlConcentration).asMap(), CollectionSize);
+                                                                                                                  
+    if(!mgMlCounts.isEmpty()) copy.setPrimaryPlateMgMlConcentration(findMaxByValueThenKey(mgMlCounts).getKey());
+
+    Map<MolarConcentration,Integer> molarCounts = Maps.transformValues(Multimaps.index(
+                                                                                       Lists.newArrayList(Iterators.filter(copy.getPlates().values().iterator(),
+                                                                                                        Predicates.compose(Predicates.notNull(), Plate.ToMolarConcentration))),
+                                                                                                        Plate.ToMolarConcentration).asMap(), CollectionSize);
+    if(!molarCounts.isEmpty()) copy.setPrimaryPlateMolarConcentration(findMaxByValueThenKey(molarCounts).getKey());
+  }
+  
+  private <T extends Comparable<? super T>, U extends Comparable<? super U>> Map.Entry<T,U> findMaxByValueThenKey(Map<T,U> map)
+  {
+    // This method avoids having to define a comparator for each type
+    // TODO: figure out a nice generic/functional way to do this
+    if(map.isEmpty()) return null;
+    Map.Entry<T,U> max = null;
+    for(Map.Entry<T,U> entry: map.entrySet())
+    {
+      if(max == null || entry.getValue().compareTo(max.getValue()) > 0 ) max = entry;
+      if(entry.getValue().compareTo(max.getValue()) == 0) {
+        if(entry.getKey().compareTo(max.getKey()) > 0 ) max = entry;
+      }
+    }
+    return max;
   }
 
   private void plateNoLongerMaintained(Plate plate,
@@ -344,6 +382,7 @@ public class PlateUpdater
       StringBuilder updateComments = new StringBuilder().append("Concentration (molar) changed from '").append(NullSafeUtils.toString(plate.getMolarConcentration(), "<not specified>")).append("' to '").append(newConcentration).append("'");
       plate.createUpdateActivity(recordByAdmin, updateComments.toString());
       plate.setMolarConcentration(newConcentration);
+      updatePrimaryPlateConcentrations(plate.getCopy());
       return true;
     }
     return false;
@@ -357,6 +396,7 @@ public class PlateUpdater
       StringBuilder updateComments = new StringBuilder().append("Concentration (mg/mL) changed from '").append(NullSafeUtils.toString(plate.getMgMlConcentration(), "<not specified>")).append("' to '").append(newConcentration).append("'");
       plate.createUpdateActivity(recordByAdmin, updateComments.toString());
       plate.setMgMlConcentration(newConcentration);
+      updatePrimaryPlateConcentrations(plate.getCopy());
       return true;
     }
     return false;

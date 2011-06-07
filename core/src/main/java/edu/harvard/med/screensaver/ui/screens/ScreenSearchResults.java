@@ -92,7 +92,7 @@ public class ScreenSearchResults extends EntityBasedEntitySearchResults<Screen,I
       showMessage("screens.noScreensForUser");
     }
     else {
-      initialize(new InMemoryEntityDataModel<Screen,Integer>(new EntityDataFetcher<Screen,Integer>(Screen.class, _dao) {
+      initialize(new InMemoryEntityDataModel<Screen,Integer,Screen>(new EntityDataFetcher<Screen,Integer>(Screen.class, _dao) {
         @Override
         public void addDomainRestrictions(HqlBuilder hql)
         {
@@ -107,7 +107,7 @@ public class ScreenSearchResults extends EntityBasedEntitySearchResults<Screen,I
   public void searchScreensForProject(final String projectId)
   {
     setTitle("Screens for project " + projectId);
-    initialize(new InMemoryEntityDataModel<Screen,Integer>(new EntityDataFetcher<Screen,Integer>(Screen.class, _dao) {
+    initialize(new InMemoryEntityDataModel<Screen,Integer,Screen>(new EntityDataFetcher<Screen,Integer>(Screen.class, _dao) {
       @Override
       public void addDomainRestrictions(HqlBuilder hql)
       {
@@ -125,7 +125,7 @@ public class ScreenSearchResults extends EntityBasedEntitySearchResults<Screen,I
   public void searchAll()
   {
     setTitle("Screens");
-    initialize(new InMemoryEntityDataModel<Screen,Integer>(new EntityDataFetcher<Screen,Integer>(Screen.class, _dao) {
+    initialize(new InMemoryEntityDataModel<Screen,Integer,Screen>(new EntityDataFetcher<Screen,Integer>(Screen.class, _dao) {
       @Override
       public void addDomainRestrictions(HqlBuilder hql)
       {

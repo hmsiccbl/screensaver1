@@ -119,7 +119,7 @@
          rendered="#{wellViewer.allowedAccessToSmallMoleculeReagent}" >
          <ui:define name="data">
            <t:graphicImage url="#{wellViewer.compoundImageUrl}"
-             rendered="#{wellViewer.allowedAccessToSmallMoleculeReagent}" style="float: left;">
+             rendered="#{wellViewer.allowedAccessToSmallMoleculeReagent &amp;&amp; ! empty wellViewer.compoundImageUrl}" style="float: left;">
            </t:graphicImage>
          </ui:define>
        </ss:property>

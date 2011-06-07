@@ -9,7 +9,7 @@
 
   <files>
     <file>
-      <source>src/main/scripts/run.sh</source>
+      <source>src/main/scripts/lincs/run.sh</source>
       <outputDirectory>/</outputDirectory>
       <fileMode>0755</fileMode>
     </file>

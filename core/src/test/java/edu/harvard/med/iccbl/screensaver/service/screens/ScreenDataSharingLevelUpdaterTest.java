@@ -122,6 +122,7 @@ public class ScreenDataSharingLevelUpdaterTest extends AbstractSpringPersistence
     screen5TransferredHasActivity.createStatusItem(new LocalDate(), ScreenStatus.TRANSFERRED_TO_BROAD_INSTITUTE);
     Screen screen3RnaiHasActivity = createScreen("SDSL TEST RNAI", ScreenType.RNAI);
     Screen screen4HasNoLibraryScreeningActivity = createScreen("screen4HasNoLibraryScreeningActivity");
+    Screen screen6MinMaxSet = createScreen("screen6MinMaxSet");
 
     // 2. add some activities
     LocalDate newActivityDate = new LocalDate();
@@ -150,12 +151,20 @@ public class ScreenDataSharingLevelUpdaterTest extends AbstractSpringPersistence
     screen2HasActivity.createScreenResult();
     screen5TransferredHasActivity.createScreenResult();
     screen4HasNoLibraryScreeningActivity.createScreenResult();
-
+    
+    LocalDate maxAllowedDataPrivacyExpirationDate = newActivityDate.minusDays(10);
+    LocalDate minAllowedDataPrivacyExpirationDate = newActivityDate.minusDays(20);
+    screen6MinMaxSet.setMinAllowedDataPrivacyExpirationDate(minAllowedDataPrivacyExpirationDate);
+    screen6MinMaxSet.setMaxAllowedDataPrivacyExpirationDate(maxAllowedDataPrivacyExpirationDate);
+    screen6MinMaxSet.createLibraryScreening(admin, leadScreener, newActivityDate);
+    screen6MinMaxSet.createScreenResult();
+    
     genericEntityDao.persistEntity(screen1NoActivities);
     genericEntityDao.persistEntity(screen2HasActivity);
     genericEntityDao.persistEntity(screen3RnaiHasActivity);
     genericEntityDao.persistEntity(screen4HasNoLibraryScreeningActivity);
     genericEntityDao.persistEntity(screen5TransferredHasActivity);
+    genericEntityDao.persistEntity(screen6MinMaxSet);
     flushAndClear();
 
     // 4. find the ones with "old" activities (activity age > SCREEN_ACTIVITY_DATA_PRIVACY_EXPIRATION_AGE_DAYS
@@ -171,8 +180,9 @@ public class ScreenDataSharingLevelUpdaterTest extends AbstractSpringPersistence
     screen3RnaiHasActivity = genericEntityDao.reloadEntity(screen3RnaiHasActivity);
     screen4HasNoLibraryScreeningActivity = genericEntityDao.reloadEntity(screen4HasNoLibraryScreeningActivity);
     screen5TransferredHasActivity = genericEntityDao.reloadEntity(screen5TransferredHasActivity);
+    screen6MinMaxSet = genericEntityDao.reloadEntity(screen6MinMaxSet);
 
-    boolean containsFirst = false, containsSecond = false, containsThird = false, containsFourth = false, containsFifth = false;
+    boolean containsFirst = false, containsSecond = false, containsThird = false, containsFourth = false, containsFifth = false, containsSixth = false;
     for(Pair<Screen,AdministrativeActivity> result:adjustment.screensAdjusted)
     {
       log.info("entry: " + result.getSecond());
@@ -181,17 +191,21 @@ public class ScreenDataSharingLevelUpdaterTest extends AbstractSpringPersistence
       if(result.getFirst().equals(screen3RnaiHasActivity)) containsThird = true;
       if(result.getFirst().equals(screen4HasNoLibraryScreeningActivity)) containsFourth = true;
       if (result.getFirst().equals(screen5TransferredHasActivity)) containsFifth = true;
+      if (result.getFirst().equals(screen6MinMaxSet)) containsSixth = true;
     }
     
     // TODO: update test for this
-    assertTrue("there should be no screens that where adjustment was not allowed", 
+    assertTrue("no screens should not be allowed", 
                adjustment.screenPrivacyAdjustmentNotAllowed.isEmpty());
+    assertFalse("the sixth screen should adjusted to allowed", 
+               adjustment.screensAdjustedToAllowed.isEmpty());
     
     assertFalse("screen1NoActivities should not have been adjusted", containsFirst);
     assertTrue("screen2HasActivity should have been adjusted", containsSecond);
     assertFalse("screen3RnaiHasActivity should not have been adjusted", containsThird);
     assertFalse("screen4HasNoLibraryScreeningActivity should not have been adjusted", containsFourth);
     assertFalse("screen5TransferredHasActivity should not have been adjusted", containsFifth);
+    assertFalse("screen6MinMaxSet should not have been adjusted", containsSixth);
     assertEquals("new screen2HasActivity dataPrivacyExpirationDate() wrong: ",
                  newActivityDate.plusDays(ageToExpireFromActivityDateInDays),
                  screen2HasActivity.getDataPrivacyExpirationDate());
@@ -340,6 +354,7 @@ public class ScreenDataSharingLevelUpdaterTest extends AbstractSpringPersistence
   Screen screen6ExpiredNoResults = null;
   Screen screen7ExpiredDropped = null;
   Screen screen8ExpiredTransferred = null;
+  Screen screen9ExpiredMaxDatePassed = null;
   
   public void testFindExpired() throws Exception
   {
@@ -360,6 +375,13 @@ public class ScreenDataSharingLevelUpdaterTest extends AbstractSpringPersistence
     screen3Expired.createScreenResult();
     screen3Expired.setDataPrivacyExpirationDate(date.minusYears(1));
     genericEntityDao.persistEntity(screen3Expired);
+    
+    screen9ExpiredMaxDatePassed = createScreen("screen9ExpiredMaxDatePassed");
+    screen9ExpiredMaxDatePassed.createScreenResult();
+    screen9ExpiredMaxDatePassed.setMinAllowedDataPrivacyExpirationDate(date.minusYears(2));
+    screen9ExpiredMaxDatePassed.setMaxAllowedDataPrivacyExpirationDate(date.minusYears(2));
+    screen9ExpiredMaxDatePassed.setDataPrivacyExpirationDate(date.minusYears(2));
+    genericEntityDao.persistEntity(screen9ExpiredMaxDatePassed);
     
     screen4Default = createScreen("SDSL TEST4");
     genericEntityDao.persistEntity(screen4Default);
@@ -410,9 +432,12 @@ public class ScreenDataSharingLevelUpdaterTest extends AbstractSpringPersistence
     screen6ExpiredNoResults = genericEntityDao.reloadEntity(screen6ExpiredNoResults);
     screen7ExpiredDropped = genericEntityDao.reloadEntity(screen7ExpiredDropped);
     screen8ExpiredTransferred = genericEntityDao.reloadEntity(screen8ExpiredTransferred);
+    screen9ExpiredMaxDatePassed = genericEntityDao.reloadEntity(screen9ExpiredMaxDatePassed);
     
     assertTrue("screen2Expired should be expired: ", screens.contains(screen2Expired));
     assertTrue("screen3Expired should be expired: ", screens.contains(screen3Expired));
+    assertTrue("screen9ExpiredMaxDatePassed should be expired: ", screens.contains(screen9ExpiredMaxDatePassed));
+
     assertFalse("screen4Default should not be expired: ", screens.contains(screen4Default));
     assertFalse("screen1NotExpired should not be expired: ", screens.contains(screen1NotExpired));
     assertFalse("screen5RnaiExpired should not be expired: ", screens.contains(screen5RnaiExpired));
@@ -449,6 +474,7 @@ public class ScreenDataSharingLevelUpdaterTest extends AbstractSpringPersistence
     screen6ExpiredNoResults = genericEntityDao.reloadEntity(screen6ExpiredNoResults);
     screen7ExpiredDropped = genericEntityDao.reloadEntity(screen7ExpiredDropped);
     screen8ExpiredTransferred = genericEntityDao.reloadEntity(screen8ExpiredTransferred);
+    screen9ExpiredMaxDatePassed = genericEntityDao.reloadEntity(screen9ExpiredMaxDatePassed);
     
     List<Pair<Screen,AdministrativeActivity>> results = screenDataSharingLevelUpdater.expireScreenDataSharingLevels(date, admin);
     //TODO: Do some checking of the activities as well.
@@ -478,6 +504,9 @@ public class ScreenDataSharingLevelUpdaterTest extends AbstractSpringPersistence
     
     assertFalse("screen5RnaiExpired should not be expired: ", screens.contains(screen5RnaiExpired));
     assertTrue("screen5RnaiExpired should not be public: ", screen5RnaiExpired.getDataSharingLevel() != ScreenDataSharingLevel.MUTUAL_SCREENS );
+    
+    assertTrue("screen9ExpiredMaxDatePassed should be expired: ", screens.contains(screen9ExpiredMaxDatePassed));
+    assertTrue("screen9ExpiredMaxDatePassed should be public: ", screen9ExpiredMaxDatePassed.getDataSharingLevel() == ScreenDataSharingLevel.MUTUAL_SCREENS );
   }
 
   /**

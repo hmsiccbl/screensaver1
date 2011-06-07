@@ -68,6 +68,7 @@ public class AssayWell extends AbstractEntity<Integer> implements Comparable<Ass
   private Well _libraryWell;
   private AssayWellControlType _assayWellControlType;
   private boolean _isPositive;
+  private ConfirmedPositiveValue _confirmedPositiveValue;
   private Map<DataColumn,ResultValue> _resultValues = new HashMap<DataColumn,ResultValue>();
 
 
@@ -175,6 +176,7 @@ public class AssayWell extends AbstractEntity<Integer> implements Comparable<Ass
    * @return true if at least one the assay well's {@link ResultValue}s is a {@link ResultValue#isPositive() positive}.
    */
   @Column(nullable=false, name="isPositive")
+  // Note: for improved performance (in PostgreSQL) this index should be created as a partial index using "where is_positive"
   @org.hibernate.annotations.Index(name="assay_well_well_positives_only_index")
   public boolean isPositive()
   {
@@ -201,6 +203,19 @@ public class AssayWell extends AbstractEntity<Integer> implements Comparable<Ass
   public void setPositive(boolean isPositive)
   {
     _isPositive = isPositive;
+  }
+
+  @org.hibernate.annotations.Type(type = "edu.harvard.med.screensaver.model.screenresults.ConfirmedPositiveValueUserType")
+  // Note: for improved performance (in PostgreSQL) this index should be created as a partial index using "where confirmed_positive_value is not null"
+  @org.hibernate.annotations.Index(name = "assay_well_confirmed_positives_data_only_index")
+  public ConfirmedPositiveValue getConfirmedPositiveValue()
+  {
+    return _confirmedPositiveValue;
+  }
+
+  public void setConfirmedPositiveValue(ConfirmedPositiveValue confirmedPositiveValue)
+  {
+    _confirmedPositiveValue = confirmedPositiveValue;
   }
 
   /**

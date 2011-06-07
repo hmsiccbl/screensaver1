@@ -75,7 +75,6 @@ public class CopyFreezeThawReport extends AdminEmailApplication
     final CopyFreezeThawReport app = new CopyFreezeThawReport(args);
 
     app.setSpringConfigurationResource("spring-context-cmdline-copies-to-retire.xml");
-//    app.setSpringConfigurationResource("spring-context-cmdline.xml");
     
     String[] option = OPTION_FREEZE_THAW_THRESHOLD;
     app.addCommandLineOption(OptionBuilder.hasArg().withType(Integer.class)
@@ -93,9 +92,11 @@ public class CopyFreezeThawReport extends AdminEmailApplication
                                           .withLongOpt(option[LONG_OPTION_INDEX])
                                           .create(option[SHORT_OPTION_INDEX]));
 
-    try {
-      app.processOptions(/* acceptDatabaseOptions= */true,
+    app.processOptions(/* acceptDatabaseOptions= */true,
                          /* acceptAdminUserOptions= */true);
+    log.info("==== Running CopyFreezeThawReport: " + app.toString() + "======");
+
+    try {
       AdministratorUser admin = app.findAdministratorUser();
 
       String fileName = app.getCommandLineOptionValue(OPTION_OUTPUT_FILE[SHORT_OPTION_INDEX]);
@@ -185,6 +186,6 @@ public class CopyFreezeThawReport extends AdminEmailApplication
       log.error("Error mailing", e);
       System.exit(1); // error
     }
+    log.info("==== Running CopyFreezeThawReport: " + app.toString() + "======");
   }
-
 }

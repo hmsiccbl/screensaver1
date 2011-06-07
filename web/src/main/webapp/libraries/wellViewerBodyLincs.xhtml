@@ -120,7 +120,7 @@
 
    <!-- NOTE: for [#2417] this is a LINCS-only feature -->
    <ss:property id="ambitStudyImage" label="Ambit Images"
-    rendered="#{wellViewer.allowedAccessToSmallMoleculeReagent}"
+    rendered="#{wellViewer.allowedAccessToSmallMoleculeReagent &amp;&amp; ! empty wellViewer.ambitImageImageUrl}"
     description="Ambit study image"
     >
     <ui:define name="data">

@@ -36,6 +36,7 @@ import org.apache.log4j.Logger;
 import org.hibernate.annotations.Sort;
 import org.hibernate.annotations.SortType;
 import org.hibernate.annotations.Type;
+import org.joda.time.LocalDate;
 
 import edu.harvard.med.screensaver.model.annotations.ContainedEntity;
 import edu.harvard.med.screensaver.model.annotations.ToMany;
@@ -81,6 +82,7 @@ public class AttachedFile extends AuditedAbstractEntity<Integer> implements Comp
 
   private String _filename;
   private AttachedFileType _fileType;
+  private LocalDate _fileDate;
   private byte[] _fileContents;
 
   // public constructor
@@ -243,7 +245,11 @@ public class AttachedFile extends AuditedAbstractEntity<Integer> implements Comp
    * @param fileContents the file contents
    * @throws IOException
    */
-  public AttachedFile(Screen screen, String filename, AttachedFileType fileType, InputStream fileContents) throws IOException
+  public AttachedFile(Screen screen,
+                      String filename,
+                      AttachedFileType fileType,
+                      LocalDate fileDate,
+                      InputStream fileContents) throws IOException
   {
     super(null); /* TODO */
     if (screen == null) {
@@ -252,6 +258,7 @@ public class AttachedFile extends AuditedAbstractEntity<Integer> implements Comp
     _screen = screen;
     _filename = filename;
     _fileType = fileType;
+    _fileDate = fileDate;
     _fileContents = IOUtils.toByteArray(fileContents);
   }
 
@@ -266,7 +273,11 @@ public class AttachedFile extends AuditedAbstractEntity<Integer> implements Comp
    * @param fileContents the file contents
    * @throws IOException
    */
-  public AttachedFile(ScreeningRoomUser screeningRoomUser, String filename, AttachedFileType fileType, InputStream fileContents) throws IOException
+  public AttachedFile(ScreeningRoomUser screeningRoomUser,
+                      String filename,
+                      AttachedFileType fileType,
+                      LocalDate fileDate,
+                      InputStream fileContents) throws IOException
   {
     super(null); /* TODO */
     if (screeningRoomUser == null) {
@@ -275,6 +286,7 @@ public class AttachedFile extends AuditedAbstractEntity<Integer> implements Comp
     _screeningRoomUser = screeningRoomUser;
     _filename = filename;
     _fileType = fileType;
+    _fileDate = fileDate;
     _fileContents = IOUtils.toByteArray(fileContents);
   	  }
 
@@ -288,7 +300,7 @@ public class AttachedFile extends AuditedAbstractEntity<Integer> implements Comp
    * @param fileContents the file contents
    * @throws IOException
    */
-  public AttachedFile(Reagent reagent, String filename, AttachedFileType fileType, InputStream fileContents) throws IOException
+  public AttachedFile(Reagent reagent, String filename, AttachedFileType fileType, LocalDate fileDate, InputStream fileContents) throws IOException
   {
     super(null); /* TODO */
     if (reagent == null) {
@@ -359,5 +371,16 @@ public class AttachedFile extends AuditedAbstractEntity<Integer> implements Comp
       }
     }
     return result;
+  }
+
+  @Type(type = "edu.harvard.med.screensaver.db.usertypes.LocalDateType")
+  public LocalDate getFileDate()
+  {
+    return _fileDate;
+  }
+
+  public void setFileDate(LocalDate fileDate)
+  {
+    _fileDate = fileDate;
   }
 }

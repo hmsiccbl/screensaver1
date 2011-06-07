@@ -79,6 +79,12 @@ abstract public class ScreensaverUser extends AuditedAbstractEntity<Integer> imp
   public static final PropertyPath<ScreensaverUser> roles = RelationshipPath.from(ScreensaverUser.class).toCollectionOfValues("screensaverUserRoles");
 
   public static final Function<ScreensaverUser,String> ToDisplayStringFunction = new Function<ScreensaverUser,String>() { public String apply(ScreensaverUser u) { return u.getFullNameFirstLast() + " (" + u.getEntityId() + ")"; } };
+  public static final Function<ScreensaverUser,String> ToFullNameLastFirstAndId = new Function<ScreensaverUser,String>() {
+    public String apply(ScreensaverUser u)
+    {
+      return u.getFullNameLastFirst() + " (" + u.getEntityId() + ")";
+    }
+  };
 
 
   // instance fields

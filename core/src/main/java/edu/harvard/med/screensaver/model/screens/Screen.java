@@ -58,7 +58,6 @@ import edu.harvard.med.screensaver.model.AbstractEntityVisitor;
 import edu.harvard.med.screensaver.model.AdministrativeActivity;
 import edu.harvard.med.screensaver.model.AdministrativeActivityType;
 import edu.harvard.med.screensaver.model.AttachedFile;
-import edu.harvard.med.screensaver.model.AttachedFileType;
 import edu.harvard.med.screensaver.model.AttachedFilesEntity;
 import edu.harvard.med.screensaver.model.BusinessRuleViolationException;
 import edu.harvard.med.screensaver.model.DataModelViolationException;
@@ -97,7 +96,7 @@ import edu.harvard.med.screensaver.util.NullSafeUtils;
  */
 @Entity
 @org.hibernate.annotations.Proxy
-public class Screen extends Study implements AttachedFilesEntity<Integer>
+public class Screen extends Study implements AttachedFilesEntity<ScreenAttachedFileType,Integer>
 {
 
   // private static data
@@ -973,9 +972,12 @@ public class Screen extends Study implements AttachedFilesEntity<Integer>
    * @param fileContents the file contents
    * @throws IOException
    */
-  public AttachedFile createAttachedFile(String filename, AttachedFileType fileType, String fileContents) throws IOException
+  public AttachedFile createAttachedFile(String filename,
+                                         ScreenAttachedFileType fileType,
+                                         LocalDate fileDate,
+                                         String fileContents) throws IOException
   {
-    return createAttachedFile(filename, fileType, new ByteArrayInputStream(fileContents.getBytes()));
+    return createAttachedFile(filename, fileType, fileDate, new ByteArrayInputStream(fileContents.getBytes()));
   }
 
   /**
@@ -988,9 +990,12 @@ public class Screen extends Study implements AttachedFilesEntity<Integer>
    * @param fileContents the file contents
    * @throws IOException
    */
-  public AttachedFile createAttachedFile(String filename, AttachedFileType fileType, InputStream fileContents) throws IOException
+  public AttachedFile createAttachedFile(String filename,
+                                         ScreenAttachedFileType fileType,
+                                         LocalDate fileDate,
+                                         InputStream fileContents) throws IOException
   {
-    AttachedFile attachedFile = new AttachedFile(this, filename, fileType, fileContents);
+    AttachedFile attachedFile = new AttachedFile(this, filename, fileType, fileDate, fileContents);
     _attachedFiles.add(attachedFile);
     return attachedFile;
   }

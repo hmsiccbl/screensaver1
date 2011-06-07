@@ -1034,7 +1034,7 @@ public class DataColumn extends AbstractEntity<Integer> implements MetaDataType,
                                         Double numericValue,
                                         PartitionedValue partitionPositiveIndicatorValue,
                                         Boolean booleanPositiveIndicatorValue,
-                                        ConfirmedPositiveValue confirmedPositiveIndicatorValue,
+                                        ConfirmedPositiveValue confirmedPositiveValue,
                                         boolean exclude)
   {
     ResultValue resultValue = new ResultValue(this,
@@ -1043,12 +1043,18 @@ public class DataColumn extends AbstractEntity<Integer> implements MetaDataType,
                                               numericValue,
                                               partitionPositiveIndicatorValue,
                                               booleanPositiveIndicatorValue,
-                                              confirmedPositiveIndicatorValue,
+                                              confirmedPositiveValue,
                                               exclude);
 
     if (resultValue.isPositive()) {
       incrementPositivesCount(resultValue);
       assayWell.setPositive(true);
+    }
+    if (confirmedPositiveValue != null) {
+      if (assayWell.getConfirmedPositiveValue() != null) {
+        throw new DataModelViolationException("can only have one confirmed positive result per assay well");
+      }
+      assayWell.setConfirmedPositiveValue(confirmedPositiveValue);
     }
     _resultValues.add(resultValue);
     

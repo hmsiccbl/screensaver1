@@ -13,6 +13,8 @@ import java.util.Set;
 
 import org.apache.log4j.Logger;
 
+import edu.harvard.med.iccbl.screensaver.IccblScreensaverConstants;
+import edu.harvard.med.screensaver.ScreensaverConstants;
 import edu.harvard.med.screensaver.db.GenericEntityDAO;
 import edu.harvard.med.screensaver.db.LibrariesDAO;
 import edu.harvard.med.screensaver.model.libraries.WellKey;
@@ -57,7 +59,9 @@ public class WellByCompoundNameFinder extends AbstractBackingBean
     if (_wellsBrowser.getRowCount() == 1) {
       _wellsBrowser.getRowsPerPageSelector().setSelection(1);
     }
-    _wellsBrowser.getColumnManager().setVisibilityOfColumnsInGroup("Compound Reagent Columns", true);
+    if (IccblScreensaverConstants.FACILITY_NAME.equals(getApplicationProperties().getProperty(ScreensaverConstants.FACILITY_NAME))) {
+      _wellsBrowser.getColumnManager().setVisibilityOfColumnsInGroup("Compound Reagent Columns", true);
+    }
     resetSearchFields();
     return BROWSE_WELLS;
   }

@@ -15,6 +15,8 @@ import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;
+import java.io.PrintWriter;
+import java.io.StringWriter;
 import java.text.MessageFormat;
 import java.util.Collection;
 import java.util.List;
@@ -41,6 +43,7 @@ import edu.harvard.med.screensaver.model.users.ChecklistItemEvent;
 import edu.harvard.med.screensaver.model.users.ScreeningRoomUser;
 import edu.harvard.med.screensaver.model.users.ScreensaverUser;
 import edu.harvard.med.screensaver.service.EmailService;
+import edu.harvard.med.screensaver.service.OperationRestrictedException;
 import edu.harvard.med.screensaver.util.Pair;
 
 /**
@@ -136,6 +139,8 @@ public class SmallMoleculeUserExpirationUpdater extends AdminEmailApplication
 
     app.processOptions(true, true);
 
+    log.info("==== Running SmallMoleculeUserExpirationUpdater: " + app.toString() + "======");
+
     final GenericEntityDAO dao = (GenericEntityDAO) app.getSpringBean("genericEntityDao");
 
     dao.doInTransaction(new DAOTransaction() {
@@ -150,21 +155,34 @@ public class SmallMoleculeUserExpirationUpdater extends AdminEmailApplication
           if (app.isCommandLineFlagSet(EXPIRATION_TIME_OPTION[SHORT_OPTION_INDEX])) {
             timeToExpireDays = app.getCommandLineOptionValue(EXPIRATION_TIME_OPTION[SHORT_OPTION_INDEX], Integer.class);
           }
-
-          if (app.isCommandLineFlagSet(NOTIFY_DAYS_AHEAD_OPTION[SHORT_OPTION_INDEX]))
+          
+          try 
           {
-            Integer daysAheadToNotify = app.getCommandLineOptionValue(NOTIFY_DAYS_AHEAD_OPTION[SHORT_OPTION_INDEX],
-                                                                      Integer.class);
-            app.notifyAhead(admin, emailService, daysAheadToNotify, timeToExpireDays);
+            if (app.isCommandLineFlagSet(NOTIFY_DAYS_AHEAD_OPTION[SHORT_OPTION_INDEX]))
+            {
+              Integer daysAheadToNotify = app.getCommandLineOptionValue(NOTIFY_DAYS_AHEAD_OPTION[SHORT_OPTION_INDEX],
+                                                                        Integer.class);
+              app.notifyAhead(admin, emailService, daysAheadToNotify, timeToExpireDays);
+            }
+            else if (app.isCommandLineFlagSet(EXPIRE_OPTION[SHORT_OPTION_INDEX]))
+            {
+              app.expire(admin, emailService, timeToExpireDays);
+            }
+            else {
+              app.showHelpAndExit("Must specify either the \"" + NOTIFY_DAYS_AHEAD_OPTION[LONG_OPTION_INDEX] + "\" option or the \"" +
+                           EXPIRE_OPTION[LONG_OPTION_INDEX] + "\" option");
+            }
+          }catch (OperationRestrictedException e) {
+            InternetAddress address = app.getEmail(admin);
+            StringWriter out = new StringWriter();
+            e.printStackTrace(new PrintWriter(out));
+            emailService.send("Warn: Could not complete expiration service operation", 
+                            "Exception: " + e + "\n " + out.toString(), 
+                            address
+                            ,new InternetAddress[] { address }, null);
+            throw e;
           }
-          else if (app.isCommandLineFlagSet(EXPIRE_OPTION[SHORT_OPTION_INDEX]))
-          {
-            app.expire(admin, emailService, timeToExpireDays);
-          }
-          else {
-            app.showHelpAndExit("Must specify either the \"" + NOTIFY_DAYS_AHEAD_OPTION[LONG_OPTION_INDEX] + "\" option or the \"" +
-                         EXPIRE_OPTION[LONG_OPTION_INDEX] + "\" option");
-          }
+          
           if (app.isCommandLineFlagSet(TEST_ONLY[SHORT_OPTION_INDEX])) {
             throw new DAOTransactionRollbackException("Rollback, testing only");
           }
@@ -174,6 +192,8 @@ public class SmallMoleculeUserExpirationUpdater extends AdminEmailApplication
         }
       }
     });
+    log.info("==== finishedSmallMoleculeUserExpirationUpdater ======");
+
     System.exit(0);
   }
 

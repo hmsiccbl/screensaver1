@@ -70,7 +70,8 @@ public abstract class AbstractEntityConverter<E extends AbstractEntity> implemen
       return ""; // handle conversion of "empty" SelectItem.value, which is not allowed to be null
     }
     if (!!!_entityType.isInstance(entity)) {
-      throw new ConverterException("expected type " + _entityType);
+      return entity.toString();
+      //throw new ConverterException("expected type " + _entityType);
     }
     return ((E) entity).getEntityId().toString();
   }

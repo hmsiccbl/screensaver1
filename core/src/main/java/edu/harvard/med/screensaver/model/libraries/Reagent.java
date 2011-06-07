@@ -38,10 +38,10 @@ import com.google.common.collect.Sets;
 import org.hibernate.annotations.Immutable;
 import org.hibernate.annotations.Index;
 import org.hibernate.annotations.MapKeyManyToMany;
+import org.joda.time.LocalDate;
 
 import edu.harvard.med.screensaver.model.AbstractEntity;
 import edu.harvard.med.screensaver.model.AttachedFile;
-import edu.harvard.med.screensaver.model.AttachedFileType;
 import edu.harvard.med.screensaver.model.AttachedFilesEntity;
 import edu.harvard.med.screensaver.model.annotations.ContainedEntity;
 import edu.harvard.med.screensaver.model.annotations.ToMany;
@@ -69,7 +69,7 @@ import edu.harvard.med.screensaver.model.screens.Screen;
 @org.hibernate.annotations.Proxy(lazy=false) // proxying causes problems with casts of getLatestReleasedReagent() return value
 @Inheritance(strategy=InheritanceType.JOINED)
 @ContainedEntity(containingEntityClass=Well.class)
-public abstract class Reagent extends AbstractEntity<Integer> implements Comparable<Reagent>, AttachedFilesEntity<Integer>
+public abstract class Reagent extends AbstractEntity<Integer> implements Comparable<Reagent>, AttachedFilesEntity<ReagentAttachedFileType,Integer>
 {
   private static final long serialVersionUID = 1;
 
@@ -281,9 +281,12 @@ public abstract class Reagent extends AbstractEntity<Integer> implements Compara
    * @param fileContents the file contents
    * @throws IOException
    */
-  public AttachedFile createAttachedFile(String filename, AttachedFileType fileType, String fileContents) throws IOException
+  public AttachedFile createAttachedFile(String filename,
+                                         ReagentAttachedFileType fileType,
+                                         LocalDate fileDate,
+                                         String fileContents) throws IOException
   {
-    return createAttachedFile(filename, fileType, new ByteArrayInputStream(fileContents.getBytes()));
+    return createAttachedFile(filename, fileType, fileDate, new ByteArrayInputStream(fileContents.getBytes()));
   }
 
   /**
@@ -296,9 +299,12 @@ public abstract class Reagent extends AbstractEntity<Integer> implements Compara
    * @param fileContents the file contents
    * @throws IOException
    */
-  public AttachedFile createAttachedFile(String filename, AttachedFileType fileType, InputStream fileContents) throws IOException
+  public AttachedFile createAttachedFile(String filename,
+                                         ReagentAttachedFileType fileType,
+                                         LocalDate fileDate,
+                                         InputStream fileContents) throws IOException
   {
-    AttachedFile attachedFile = new AttachedFile(this, filename, fileType, fileContents);
+    AttachedFile attachedFile = new AttachedFile(this, filename, fileType, fileDate, fileContents);
     _attachedFiles.add(attachedFile);
     return attachedFile;
   }

@@ -15,7 +15,9 @@ import java.io.Serializable;
 import java.util.Iterator;
 import java.util.List;
 
+import edu.harvard.med.screensaver.db.datafetcher.DataFetcher;
 import edu.harvard.med.screensaver.db.datafetcher.EntityDataFetcher;
+import edu.harvard.med.screensaver.db.datafetcher.PropertyPathDataFetcher;
 import edu.harvard.med.screensaver.model.Entity;
 import edu.harvard.med.screensaver.model.meta.PropertyPath;
 import edu.harvard.med.screensaver.policy.EntityViewPolicy;
@@ -33,24 +35,35 @@ import edu.harvard.med.screensaver.ui.arch.datatable.column.entity.FetchPaths;
  * 
  * @author drew
  */
-public class InMemoryEntityDataModel<E extends Entity<K>, K extends Serializable> extends InMemoryDataModel<E>
+public class InMemoryEntityDataModel<E extends Entity<K>,K extends Serializable,R> extends InMemoryDataModel<R>
 {
-  public InMemoryEntityDataModel(EntityDataFetcher<E,?> dataFetcher)
+  private DataFetcher<R,K,PropertyPath<E>> _dataFetcher;
+
+  public InMemoryEntityDataModel(PropertyPathDataFetcher<R,E,K> dataFetcher)
   {
     super(dataFetcher);
+    _dataFetcher = dataFetcher;
   }
   
   @Override
-  public void fetch(List<? extends TableColumn<E,?>> columns)
+  public void fetch(List<? extends TableColumn<R,?>> columns)
   {
     List<PropertyPath<E>> propertyPaths = FetchPaths.getPropertyPaths(columns);
-    ((EntityDataFetcher<E,?>) _dataFetcher).setPropertiesToFetch(propertyPaths);
+    _dataFetcher.setPropertiesToFetch(propertyPaths);
     super.fetch(columns);
-    for (Iterator<E> iter = _unfilteredData.iterator(); iter.hasNext();) {
-      E entity = iter.next();
-      if (entity.isRestricted()) {
+    for (Iterator<R> iter = _unfilteredData.iterator(); iter.hasNext();) {
+      R row = iter.next();
+      if (isRestricted(row)) {
         iter.remove();
       }
     }
+  }
+
+  protected boolean isRestricted(R row)
+  {
+    if (row instanceof Entity) {
+      return (((Entity<K>) row).isRestricted());
+    }
+    return false;
   }
 }

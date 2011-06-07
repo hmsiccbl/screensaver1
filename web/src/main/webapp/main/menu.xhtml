@@ -167,6 +167,21 @@
               title="Browse the staff members of the lab">
             Sta<u>f</u>f
             </t:commandLink>
+
+<!-- 
+            <t:commandLink action="#{menu.browseAttachedFiles}"
+              styleClass="menuItem" rendered="#{menu.readAdmin}"
+              title="Browse attached files">
+            Attached Files
+            </t:commandLink>
+ -->
+            <t:commandLink action="#{menu.browseLettersOfSupport}"
+              styleClass="menuItem"
+              rendered="#{menu.readAdmin &amp;&amp; menu.applicationProperties.map['screensaver.ui.facility_name'] != 'LINCS'}"
+              title="Letters of Support">
+              Letters of Support
+            </t:commandLink>
+
           </t:panelGrid>
         </h:form>
 

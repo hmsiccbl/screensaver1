@@ -15,6 +15,8 @@ import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;
+import java.io.PrintWriter;
+import java.io.StringWriter;
 import java.text.MessageFormat;
 import java.util.ArrayList;
 import java.util.Collections;
@@ -26,11 +28,11 @@ import java.util.Set;
 import javax.mail.MessagingException;
 import javax.mail.internet.InternetAddress;
 
-import com.google.common.collect.Lists;
 import org.apache.commons.cli.OptionBuilder;
 import org.apache.commons.cli.ParseException;
 import org.apache.log4j.Logger;
 import org.joda.time.LocalDate;
+import com.google.common.collect.Lists;
 
 import edu.harvard.med.iccbl.screensaver.io.AdminEmailApplication;
 import edu.harvard.med.iccbl.screensaver.service.screens.ScreenDataSharingLevelUpdater;
@@ -43,6 +45,7 @@ import edu.harvard.med.screensaver.model.screens.ScreenDataSharingLevel;
 import edu.harvard.med.screensaver.model.users.AdministratorUser;
 import edu.harvard.med.screensaver.model.users.ScreensaverUser;
 import edu.harvard.med.screensaver.service.EmailService;
+import edu.harvard.med.screensaver.service.OperationRestrictedException;
 import edu.harvard.med.screensaver.util.Pair;
 
 /**
@@ -171,6 +174,8 @@ public class ScreenPrivacyExpirationUpdater extends AdminEmailApplication
     app.processOptions(/* acceptDatabaseOptions= */true,
                        /* acceptAdminUserOptions= */true);
 
+    log.info("==== Running ScreenPrivacyExpirationUpdater: " + app.toString() + "======");
+    
     final GenericEntityDAO dao = (GenericEntityDAO) app.getSpringBean("genericEntityDao");
 
     dao.doInTransaction(new DAOTransaction() {
@@ -202,29 +207,42 @@ public class ScreenPrivacyExpirationUpdater extends AdminEmailApplication
             System.exit(1);
           }
 
-          if (app.isCommandLineFlagSet(NOTIFY_PRIVACY_EXPIRATION[SHORT_OPTION_INDEX]))
-          {
-            Integer daysAheadToNotify = app.getCommandLineOptionValue(NOTIFY_PRIVACY_EXPIRATION[SHORT_OPTION_INDEX],
-                                                                      Integer.class);
-            app.findNewExpiredAndNotifyAhead(admin, daysAheadToNotify, emailService);
+          try {
+            if (app.isCommandLineFlagSet(NOTIFY_PRIVACY_EXPIRATION[SHORT_OPTION_INDEX]))
+            {
+              Integer daysAheadToNotify = app.getCommandLineOptionValue(NOTIFY_PRIVACY_EXPIRATION[SHORT_OPTION_INDEX],
+                                                                        Integer.class);
+              app.findNewExpiredAndNotifyAhead(admin, daysAheadToNotify, emailService);
+            }
+            else if (app.isCommandLineFlagSet(NOTIFY_OF_PUBLICATIONS[SHORT_OPTION_INDEX]))
+            {
+              app.notifyOfPublications(admin, emailService);
+            }
+            else if (app.isCommandLineFlagSet(EXPIRE_PRIVACY[SHORT_OPTION_INDEX]))
+            {
+              app.expireScreenDataSharingLevels(admin, emailService);
+            }
+            else if (app.isCommandLineFlagSet(ADJUST_DATA_PRIVACY_EXPIRATION_DATE_BASED_ON_ACTIVITY[SHORT_OPTION_INDEX]))
+            {
+              Integer ageToExpireFromActivityDateInDays =
+                app.getCommandLineOptionValue(ADJUST_DATA_PRIVACY_EXPIRATION_DATE_BASED_ON_ACTIVITY[SHORT_OPTION_INDEX], Integer.class);
+              app.adjustDataPrivacyExpirationByActivities(admin, ageToExpireFromActivityDateInDays, emailService);
+            }
+            else {
+              app.showHelpAndExit("No action specified (expire, notify of privacy expirations, notify of publications, or adjust)?");
+            }
           }
-          else if (app.isCommandLineFlagSet(NOTIFY_OF_PUBLICATIONS[SHORT_OPTION_INDEX]))
-          {
-            app.notifyOfPublications(admin, emailService);
+          catch (OperationRestrictedException e) {
+            InternetAddress address = app.getEmail(admin);
+            StringWriter out = new StringWriter();
+            e.printStackTrace(new PrintWriter(out));
+            emailService.send("Warn: Could not complete expiration service operation", 
+                            "Exception: " + e + "\n " + out.toString(), 
+                            address
+                            ,new InternetAddress[] { address }, null);
+            throw e;
           }
-          else if (app.isCommandLineFlagSet(EXPIRE_PRIVACY[SHORT_OPTION_INDEX]))
-          {
-            app.expireScreenDataSharingLevels(admin, emailService);
-          }
-          else if (app.isCommandLineFlagSet(ADJUST_DATA_PRIVACY_EXPIRATION_DATE_BASED_ON_ACTIVITY[SHORT_OPTION_INDEX]))
-          {
-            Integer ageToExpireFromActivityDateInDays =
-              app.getCommandLineOptionValue(ADJUST_DATA_PRIVACY_EXPIRATION_DATE_BASED_ON_ACTIVITY[SHORT_OPTION_INDEX], Integer.class);
-            app.adjustDataPrivacyExpirationByActivities(admin, ageToExpireFromActivityDateInDays, emailService);
-          }
-          else {
-            app.showHelpAndExit("No action specified (expire, notify of privacy expirations, notify of publications, or adjust)?");
-          }
+          
           if (app.isCommandLineFlagSet(TEST_ONLY[SHORT_OPTION_INDEX])) {
             throw new DAOTransactionRollbackException("Rollback, testing only");
           }
@@ -234,6 +252,8 @@ public class ScreenPrivacyExpirationUpdater extends AdminEmailApplication
         }
       }
     });
+    log.info("==== finished ScreenPrivacyExpirationUpdater ======");
+
   }
   
   private void notifyOfPublications(AdministratorUser admin,

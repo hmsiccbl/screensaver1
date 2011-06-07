@@ -18,7 +18,7 @@ import edu.harvard.med.screensaver.ui.arch.view.EntityViewer;
 
 public abstract class TupleBasedEntitySearchResults<E extends Entity<K>,K extends Serializable> extends EntitySearchResults<E,Tuple<K>,K>
 {
-  private GenericEntityDAO _dao;
+  protected GenericEntityDAO _dao;
   private Class<E> _rootEntityClass;
 
   /**
@@ -29,9 +29,9 @@ public abstract class TupleBasedEntitySearchResults<E extends Entity<K>,K extend
 
   public TupleBasedEntitySearchResults(Class<E> rootEntityClass,
                                        GenericEntityDAO dao,
-                                       EntityViewer<E> wellViewer)
+                                       EntityViewer<E> entityViewer)
   {
-    super(wellViewer);
+    super(entityViewer);
     _dao = dao;
     _rootEntityClass = rootEntityClass;
   }

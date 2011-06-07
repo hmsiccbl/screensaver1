@@ -131,6 +131,8 @@ public class ConfirmedPositivesStudyCreator extends AdminEmailApplication
     app.processOptions(/* acceptDatabaseOptions= */true,
                        /* acceptAdminUserOptions= */true);
 
+    log.info("==== Running ConfirmedPositivesStudyCreator: " + app.toString() + "======");
+
     final GenericEntityDAO dao = (GenericEntityDAO) app.getSpringBean("genericEntityDao");
     final ScreenResultReporter report = (ScreenResultReporter) app.getSpringBean("screenResultReporter");
     final ScreenResultsDAO screenResultsDao = (ScreenResultsDAO) app.getSpringBean("screenResultsDao");
@@ -185,8 +187,6 @@ public class ConfirmedPositivesStudyCreator extends AdminEmailApplication
             }
           }
 
-          ////////
-          // create study section
           int count = app.createStudy(admin, studyFacilityId, title, summary,
                                       dao, report);
           study = dao.findEntityByProperty(Screen.class, Screen.facilityId.getPropertyName(), studyFacilityId);
@@ -212,6 +212,8 @@ public class ConfirmedPositivesStudyCreator extends AdminEmailApplication
         }
       }
     });
+    log.info("==== finished ConfirmedPositivesStudyCreator ======");
+
   }
 
   //  private Screen _study = null;

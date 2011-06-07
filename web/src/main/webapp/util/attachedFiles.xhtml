@@ -48,6 +48,13 @@
               action="#{attachedFiles.downloadAttachedFile}"
               styleClass="dataText" />
           </t:column>
+          <t:column>
+            <f:facet name="header">
+              <t:outputText value="File Date" />
+            </f:facet>
+            <t:outputText value="#{element.fileDate}"
+              converter="#{dateConverter}" />
+          </t:column>
         </ui:define>
         <ui:define name="addProperties">
           <t:panelGrid columns="2"
@@ -64,6 +71,10 @@
                 </t:selectOneMenu>
               </ui:define>
             </ss:property>
+            <ss:property id="newAttachedFileDate" type="Date"
+              label="File Date"
+              value="#{attachedFiles.newAttachedFileDate}"
+              adminOnly="true" />
             <ss:property id="uploadAttachedFile"
               label="Option #1: Upload File" adminOnly="true">
               <ui:define name="editableData">

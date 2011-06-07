@@ -283,19 +283,7 @@ public class CommandLineApplication
         }
       }
 
-      StringBuilder s = new StringBuilder();
-      for (Option option : (Collection<Option>) _options.getOptions()) {
-        if (_cmdLine.hasOption(option.getOpt())) {
-          if (s.length() > 0) {
-            s.append(", ");
-          }
-          s.append(option.getLongOpt());
-          if (option.hasArg()) {
-            s.append("=").append(_cmdLine.getOptionValue(option.getOpt()));
-          }
-        }
-      }
-      log.info("command line options: " + s.toString());
+      log.info(toString());
     }
     catch (ParseException e) {
       showHelpAndExit(e.getMessage());
@@ -305,6 +293,24 @@ public class CommandLineApplication
       showHelpAndExit(null);
     }
 
+  }
+
+
+  public String toString()
+  {
+    StringBuilder s = new StringBuilder();
+    for (Option option : (Collection<Option>) _options.getOptions()) {
+      if (_cmdLine.hasOption(option.getOpt())) {
+        if (s.length() > 0) {
+          s.append(", ");
+        }
+        s.append(option.getLongOpt());
+        if (option.hasArg()) {
+          s.append("=").append(_cmdLine.getOptionValue(option.getOpt()));
+        }
+      }
+    }
+    return "command line options: " + s.toString();
   }
 
 

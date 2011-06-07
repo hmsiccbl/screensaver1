@@ -26,7 +26,7 @@
     styleClass="inputText selectMenu" converter="#{converter}"
     displayValueOnly="#{empty displayValueOnly ? false : displayValueOnly}"
     displayValueOnlyStyleClass="dataText"
-    onclick="#{submitOnChange ? 'javascript:submit()' : ''}"
+    onchange="#{submitOnChange ? 'javascript:submit()' : ''}"
     immediate="#{submitOnChange}">
     <f:selectItems value="#{selectItems}" />
   </t:selectOneMenu>

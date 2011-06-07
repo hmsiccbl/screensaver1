@@ -80,7 +80,7 @@ public class CherryPickRequestSearchResults extends EntityBasedEntitySearchResul
     setTitle("Cherry Pick Requests");
     EntityDataFetcher<CherryPickRequest,Integer> dataFetcher =
       (EntityDataFetcher<CherryPickRequest,Integer>) new EntityDataFetcher<CherryPickRequest,Integer>(CherryPickRequest.class, _dao);
-    initialize(new InMemoryEntityDataModel<CherryPickRequest,Integer>(dataFetcher));
+    initialize(new InMemoryEntityDataModel<CherryPickRequest,Integer,CherryPickRequest>(dataFetcher));
 
     // default to descending sort order on cherry pick request number
     getColumnManager().setSortAscending(false);
@@ -99,7 +99,7 @@ public class CherryPickRequestSearchResults extends EntityBasedEntitySearchResul
   public void searchForScreen(final Screen screen)
   {
     setTitle("Cherry Pick Requests for screen " + screen.getFacilityId());
-    initialize(new InMemoryEntityDataModel<CherryPickRequest,Integer>(new EntityDataFetcher<CherryPickRequest,Integer>(CherryPickRequest.class, _dao) {
+    initialize(new InMemoryEntityDataModel<CherryPickRequest,Integer,CherryPickRequest>(new EntityDataFetcher<CherryPickRequest,Integer>(CherryPickRequest.class, _dao) {
       @Override
       public void addDomainRestrictions(HqlBuilder hql)
       {

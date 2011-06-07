@@ -30,6 +30,7 @@ import edu.harvard.med.screensaver.ui.arch.datatable.Criterion.Operator;
 import edu.harvard.med.screensaver.ui.arch.datatable.column.TableColumn;
 import edu.harvard.med.screensaver.ui.arch.view.AbstractBackingBean;
 import edu.harvard.med.screensaver.ui.arch.view.aspects.UICommand;
+import edu.harvard.med.screensaver.ui.attachedFiles.AttachedFileSearchResults;
 import edu.harvard.med.screensaver.ui.cherrypickrequests.CherryPickRequestSearchResults;
 import edu.harvard.med.screensaver.ui.libraries.LibraryCopyPlateSearchResults;
 import edu.harvard.med.screensaver.ui.libraries.LibraryCopySearchResults;
@@ -46,12 +47,7 @@ import edu.harvard.med.screensaver.ui.users.UserViewer;
 
 public class Menu extends AbstractBackingBean
 {
-
-  // static data members
-
   private static Logger log = Logger.getLogger(Menu.class);
-
-  // instance data members
 
   private GenericEntityDAO _dao;
   private LibrariesDAO _librariesDao;
@@ -69,10 +65,7 @@ public class Menu extends AbstractBackingBean
   private UserViewer _userViewer;
   private WellSearchResults _wellsBrowser;
   private LibraryDetailViewer _libraryDetailViewer;
-
-
-
-  // public methods
+  private AttachedFileSearchResults _attachedFilesBrowser;
 
   /**
    * @motivation for CGLIB2
@@ -96,7 +89,8 @@ public class Menu extends AbstractBackingBean
               ScreenDetailViewer screenDetailViewer,
               UserViewer userViewer,
               LibraryDetailViewer libraryDetailViewer,
-              WellSearchResults wellsBrowser)
+              WellSearchResults wellsBrowser,
+              AttachedFileSearchResults attachedFilesBrowser)
   {
     _dao = dao;
     _librariesDao = librariesDao;
@@ -112,12 +106,10 @@ public class Menu extends AbstractBackingBean
     _activitiesBrowser = activitiesBrowser;
     _screenDetailViewer = screenDetailViewer;
     _userViewer = userViewer;
-    
     _libraryDetailViewer = libraryDetailViewer;
     _wellsBrowser = wellsBrowser;
+    _attachedFilesBrowser = attachedFilesBrowser;
   }
-
-  // JSF application methods
 
   @UICommand
   public String viewMain()
@@ -311,6 +303,21 @@ public class Menu extends AbstractBackingBean
       _activitiesBrowser.searchActivitiesForUser(user);
     }
     return BROWSE_ACTIVITIES;
+  }
+
+  @UICommand
+  public String browseAttachedFiles()
+  {
+    _attachedFilesBrowser.searchAll();
+    return BROWSE_ATTACHED_FILES;
+  }
+
+  @UICommand
+  public String browseLettersOfSupport()
+  {
+    _attachedFilesBrowser.searchForTypes(_attachedFilesBrowser.getLetterOfSupportAttachedFileTypes(),
+                                         "Letters of Support");
+    return BROWSE_ATTACHED_FILES;
   }
 
   @UICommand

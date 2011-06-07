@@ -211,7 +211,7 @@ public class LibraryCopyPlateSearchResults extends EntityBasedEntitySearchResult
 
   private void initialize(EntityDataFetcher<Plate,Integer> plateDataFetcher)
   {
-    initialize(new InMemoryEntityDataModel<Plate,Integer>(plateDataFetcher) {
+    initialize(new InMemoryEntityDataModel<Plate,Integer,Plate>(plateDataFetcher) {
       private Predicate<TableColumn<Plate,?>> isScreeningStatisticsColumnWithCriteria = new Predicate<TableColumn<Plate,?>>() {
         @Override
         public boolean apply(TableColumn<Plate,?> column)
@@ -393,7 +393,7 @@ public class LibraryCopyPlateSearchResults extends EntityBasedEntitySearchResult
     Iterables.getLast(columns).setVisible(_mode == Mode.ALL);
 
     columns.add(new IntegerEntityColumn<Plate>(Plate.stockPlate.toProperty("plateNumber"),
-                                               "Stock Plate",
+                                               "Maps to Library Plate",
                                                "The stock plate to which this master stock plate maps",
                                                TableColumn.UNGROUPED) {
       @Override
@@ -405,7 +405,7 @@ public class LibraryCopyPlateSearchResults extends EntityBasedEntitySearchResult
     Iterables.getLast(columns).setVisible(false);
 
     columns.add(new EnumEntityColumn<Plate,Quadrant>(Plate.quadrant,
-                                                     "Stock Plate Quadrant",
+                                                     "Maps To Library Plate Quadrant",
                                                      "The quadrant of the stock plate to which this master stock plate maps",
                                                      TableColumn.UNGROUPED,
                                                      Quadrant.values()) {

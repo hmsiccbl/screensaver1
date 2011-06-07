@@ -11,4 +11,5 @@ public class NoOpStudyImageProvider implements StudyImageProvider<Entity>
   {
     return null;
   }
+
 }

@@ -77,7 +77,7 @@ public class EntityUpdateSearchResults<AE extends AuditedAbstractEntity<K>, K ex
         DataFetcherUtil.addDomainRestrictions(hql, getRootAlias(), Sets.newHashSet(Iterables.transform(_auditedEntity.getUpdateActivities(), Entity.ToEntityId)));
       }
       };
-    initialize(new InMemoryEntityDataModel<AdministrativeActivity,Integer>(dataFetcher));
+    initialize(new InMemoryEntityDataModel<AdministrativeActivity,Integer,AdministrativeActivity>(dataFetcher));
     getColumnManager().setSortColumnName("Date");
     getColumnManager().setSortDirection(SortDirection.DESCENDING);
   }

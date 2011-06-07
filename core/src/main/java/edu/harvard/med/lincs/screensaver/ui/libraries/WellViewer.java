@@ -21,6 +21,7 @@ import edu.harvard.med.screensaver.model.libraries.Well;
 import edu.harvard.med.screensaver.policy.EntityViewPolicy;
 import edu.harvard.med.screensaver.service.screenresult.ScreenResultReporter;
 import edu.harvard.med.screensaver.ui.arch.util.AttachedFiles;
+import edu.harvard.med.screensaver.ui.arch.util.servlet.ImageProviderServlet;
 import edu.harvard.med.screensaver.ui.libraries.AnnotationSearchResults;
 import edu.harvard.med.screensaver.ui.libraries.LibraryViewer;
 import edu.harvard.med.screensaver.ui.libraries.WellSearchResults;
@@ -32,7 +33,6 @@ public class WellViewer extends edu.harvard.med.screensaver.ui.libraries.WellVie
 
   private AttachedFiles _attachedFiles;
   private StudyImageProvider _ambitImageProvider; // for [#2417] NOTE: this is a LINCS-only feature
-  
   /**
    * @motivation for CGLIB2
    */

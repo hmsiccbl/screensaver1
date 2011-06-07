@@ -37,6 +37,7 @@
   <bean id="structureImageProvider"
         class="edu.harvard.med.iccbl.screensaver.io.libraries.smallmolecule.PlateWellStructureImageProvider">
     <constructor-arg value="http://localhost:8080/" />
+    <constructor-arg ref="imageProviderServlet" />
   </bean>
 
   <bean class="org.springframework.beans.factory.config.CustomScopeConfigurer">

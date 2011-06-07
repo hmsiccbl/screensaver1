@@ -11,7 +11,7 @@
 
   <ui:define name="body">
     <t:outputText id="welcomeMessage"
-      value="Welcome to #{appInfo.applicationProperties.map['screensaver.ui.application_name']} , #{menu.screensaverUser.fullNameFirstLast}!"
+      value="Welcome to #{appInfo.applicationProperties.map['screensaver.ui.application_name']}, #{menu.screensaverUser.fullNameFirstLast}!"
       styleClass="title" />
 
     <div id="ie_detection_message"
@@ -24,7 +24,7 @@
           </script></div>
 
     <t:div id="screenerWelcomeMessage"
-      rendered="#{appInfo.applicationProperties.map['screensaver.ui.facility_name'] == 'LINCS' &amp;&amp; !menu.readAdmin}">
+      rendered="#{appInfo.applicationProperties.map['screensaver.ui.facility_name'] != 'LINCS' &amp;&amp; !menu.readAdmin}">
       <ul>
         <li>Use "Browse Libraries" to view the set of small
           molecule and RNAi libraries available for use at the screening

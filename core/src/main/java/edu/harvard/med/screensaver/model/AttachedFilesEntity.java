@@ -14,18 +14,22 @@ import java.io.InputStream;
 import java.io.Serializable;
 import java.util.Set;
 
+import org.joda.time.LocalDate;
 
-public interface AttachedFilesEntity<K extends Serializable> extends Entity<K>
+
+public interface AttachedFilesEntity<A extends AttachedFileType,K extends Serializable> extends Entity<K>
 {
 
   Set<AttachedFile> getAttachedFiles();
 
   AttachedFile createAttachedFile(String filename,
-                                  AttachedFileType fileType,
+                                  A fileType,
+                                  LocalDate fileDate,
                                   String fileContents) throws IOException;
 
   AttachedFile createAttachedFile(String filename,
-                                  AttachedFileType fileType,
+                                  A fileType,
+                                  LocalDate fileDate,
                                   InputStream fileContents) throws IOException;
 
   void removeAttachedFile(AttachedFile attachedFile);

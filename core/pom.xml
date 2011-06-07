@@ -6,12 +6,12 @@
   <parent> 
     <artifactId>screensaver</artifactId> 
     <groupId>edu.harvard.med</groupId> 
-    <version>2.3.2</version> 
+    <version>2.3.3</version> 
   </parent> 
 
   <groupId>edu.harvard.med</groupId>
   <artifactId>screensaver-core</artifactId>
-  <version>2.3.2</version>
+  <version>2.3.3</version>
   <name>Screensaver Core</name>
 
   <packaging>jar</packaging>
@@ -50,6 +50,7 @@
       </plugin>
 
       <plugin>
+        <!-- execute with #mvn hibernate3:hbm2ddl -->
         <groupId>org.codehaus.mojo</groupId>
         <artifactId>hibernate3-maven-plugin</artifactId>
         <version>2.2</version>
@@ -72,7 +73,7 @@
           </components>
           <componentProperties>
             <persistenceunit>screensaverPersistenceUnit</persistenceunit>
-            <outputfilename>screensaver_schema.ddl</outputfilename>
+            <outputfilename>screensaver_schema.sql</outputfilename>
             <drop>false</drop> <!-- TODO: repeat for the drop schema -->
             <create>true</create>
             <export>false</export>

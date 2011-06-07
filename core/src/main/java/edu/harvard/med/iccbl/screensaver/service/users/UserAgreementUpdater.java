@@ -26,7 +26,6 @@ import org.springframework.transaction.annotation.Transactional;
 import edu.harvard.med.iccbl.screensaver.policy.DataSharingLevelMapper;
 import edu.harvard.med.screensaver.db.GenericEntityDAO;
 import edu.harvard.med.screensaver.model.AdministrativeActivity;
-import edu.harvard.med.screensaver.model.AttachedFileType;
 import edu.harvard.med.screensaver.model.BusinessRuleViolationException;
 import edu.harvard.med.screensaver.model.users.AdministratorUser;
 import edu.harvard.med.screensaver.model.users.ChecklistItem;
@@ -34,6 +33,7 @@ import edu.harvard.med.screensaver.model.users.ChecklistItemEvent;
 import edu.harvard.med.screensaver.model.users.ScreeningRoomUser;
 import edu.harvard.med.screensaver.model.users.ScreensaverUser;
 import edu.harvard.med.screensaver.model.users.ScreensaverUserRole;
+import edu.harvard.med.screensaver.model.users.UserAttachedFileType;
 import edu.harvard.med.screensaver.service.OperationRestrictedException;
 import edu.harvard.med.screensaver.util.Pair;
 
@@ -219,7 +219,7 @@ public class UserAgreementUpdater
       throw new BusinessRuleViolationException("cannot update the user agreement of a user that already has an active user agreement");
     }
 
-    AttachedFileType userAgreementAttachedFileType = _dao.findEntityByProperty(AttachedFileType.class, "value", USER_AGREEMENT_ATTACHED_FILE_TYPE);
+    UserAttachedFileType userAgreementAttachedFileType = _dao.findEntityByProperty(UserAttachedFileType.class, "value", USER_AGREEMENT_ATTACHED_FILE_TYPE);
     if (userAgreementAttachedFileType == null) {
       throw new BusinessRuleViolationException("attached file type '" + USER_AGREEMENT_ATTACHED_FILE_TYPE + "' does not exist");
     }
@@ -244,6 +244,7 @@ public class UserAgreementUpdater
 
     user.createAttachedFile(userAgreementFileName,
                             userAgreementAttachedFileType,
+                            null,
                             userAgreementFileContents);
     return user;
   }

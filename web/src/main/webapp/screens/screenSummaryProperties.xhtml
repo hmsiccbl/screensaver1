@@ -38,16 +38,22 @@
 		</ui:define>
 	</ss:property>
 
-  <ss:property id="projectId" label="Project ID" 
-    description="The project ID shared by this screen" value="#{screen.projectId}"
-    editable="#{editable}" >
+  <ss:property id="projectId" label="Project ID"
+    description="The project ID shared by this screen"
+    value="#{screen.projectId}" editable="#{editable}">
     <ui:define name="data">
-      <t:commandLink id="projectIdLink"
-        action="#{screenViewer.browseProjectScreens}" styleClass="entityLink">
-        <f:param name="projectId" value="#{screenDetailViewer.entity.projectId}" />
-        <t:outputText id="projectIdLinkValue"
-          value="#{screenDetailViewer.entity.projectId}" />
-      </t:commandLink>
+      <t:panelGrid columns="2" width="100%">
+        <t:commandLink id="projectIdLink"
+          action="#{screenViewer.browseProjectScreens}"
+          styleClass="entityLink">
+          <f:param name="projectId" value="#{screen.projectId}" />
+          <t:outputText id="projectIdLinkValue"
+            value="#{screen.projectId}" />
+        </t:commandLink>
+        <ui:insert name="projectExtraInfo">
+          <t:div/>
+        </ui:insert>
+      </t:panelGrid>
     </ui:define>
   </ss:property>
 

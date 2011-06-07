@@ -137,7 +137,7 @@ public class ReagentQCAttachmentImporter extends CommandLineApplication
         for (SmallMoleculeReagent reagent : reagents)
         {
           try {
-            AttachedFile attachedFile1 = reagent.createAttachedFile(file.getName(), attachedFileType, new FileInputStream(fileName));
+            AttachedFile attachedFile1 = reagent.createAttachedFile(file.getName(), attachedFileType, null, new FileInputStream(fileName));
             dao.saveOrUpdateEntity(attachedFile1);
             dao.saveOrUpdateEntity(reagent);
           }

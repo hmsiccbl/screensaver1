@@ -13,22 +13,24 @@ import java.math.BigDecimal;
 import java.math.RoundingMode;
 import java.util.List;
 
-import org.apache.log4j.Logger;
-import org.joda.time.LocalDate;
 import com.google.common.base.Joiner;
 import com.google.common.collect.Iterables;
 import com.google.common.collect.Lists;
+import org.apache.log4j.Logger;
+import org.joda.time.LocalDate;
 
 import edu.harvard.med.screensaver.db.GenericEntityDAO;
 import edu.harvard.med.screensaver.db.LibrariesDAO;
 import edu.harvard.med.screensaver.db.datafetcher.EntityDataFetcher;
 import edu.harvard.med.screensaver.db.hqlbuilder.HqlBuilder;
 import edu.harvard.med.screensaver.model.Activity;
+import edu.harvard.med.screensaver.model.MolarConcentration;
 import edu.harvard.med.screensaver.model.Volume;
 import edu.harvard.med.screensaver.model.libraries.Copy;
 import edu.harvard.med.screensaver.model.libraries.CopyUsageType;
 import edu.harvard.med.screensaver.model.libraries.Library;
 import edu.harvard.med.screensaver.model.libraries.LibraryType;
+import edu.harvard.med.screensaver.model.libraries.Plate;
 import edu.harvard.med.screensaver.model.libraries.PlateStatus;
 import edu.harvard.med.screensaver.model.libraries.VolumeStatistics;
 import edu.harvard.med.screensaver.model.meta.PropertyPath;
@@ -44,6 +46,7 @@ import edu.harvard.med.screensaver.ui.arch.datatable.column.VolumeColumn;
 import edu.harvard.med.screensaver.ui.arch.datatable.column.entity.DateEntityColumn;
 import edu.harvard.med.screensaver.ui.arch.datatable.column.entity.EnumEntityColumn;
 import edu.harvard.med.screensaver.ui.arch.datatable.column.entity.IntegerEntityColumn;
+import edu.harvard.med.screensaver.ui.arch.datatable.column.entity.MolarConcentrationEntityColumn;
 import edu.harvard.med.screensaver.ui.arch.datatable.column.entity.TextEntityColumn;
 import edu.harvard.med.screensaver.ui.arch.datatable.model.InMemoryEntityDataModel;
 import edu.harvard.med.screensaver.ui.arch.searchresults.EntityBasedEntitySearchResults;
@@ -125,7 +128,7 @@ public class LibraryCopySearchResults extends EntityBasedEntitySearchResults<Cop
 
   private void initialize(EntityDataFetcher<Copy,Integer> copyDataFetcher)
   {
-    initialize(new InMemoryEntityDataModel<Copy,Integer>(copyDataFetcher) {
+    initialize(new InMemoryEntityDataModel<Copy,Integer,Copy>(copyDataFetcher) {
       @Override
       public void fetch(List<? extends TableColumn<Copy,?>> columns)
       {
@@ -265,6 +268,27 @@ public class LibraryCopySearchResults extends EntityBasedEntitySearchResults<Cop
       public PlateStatus getCellValue(Copy copy)
       {
         return copy.getPrimaryPlateStatus();
+      }
+    });
+    
+    columns.add(new FixedDecimalColumn<Copy>("Primary Plate Concentration (mg/ml)",
+                                                       "The most common concentration (mg/ml) for plates of this copy",
+                                                       TableColumn.UNGROUPED) {
+      @Override
+      public BigDecimal getCellValue(Copy copy)
+      {
+        return copy.getPrimaryPlateMgMlConcentration();
+      }
+    });
+        
+    columns.add(new MolarConcentrationEntityColumn<Copy>(PropertyPath.from(Copy.class).toProperty("primaryPlateMolarConcentration"),
+                                                       "Primary Plate Concentration (molar)",
+                                                       "The most common concentration (mg/ml) for plates of this copy",
+                                                       TableColumn.UNGROUPED) {
+      @Override
+      public MolarConcentration getCellValue(Copy copy)
+      {
+        return copy.getPrimaryPlateMolarConcentration();
       }
     });
     

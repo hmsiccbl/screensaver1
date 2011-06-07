@@ -1,0 +1,42 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+<html xmlns="http://www.w3.org/1999/xhtml"
+  xmlns:ui="http://java.sun.com/jsf/facelets"
+  xmlns:h="http://java.sun.com/jsf/html"
+  xmlns:f="http://java.sun.com/jsf/core"
+  xmlns:t="http://myfaces.apache.org/tomahawk"
+  xmlns:s="http://myfaces.apache.org/sandbox"
+  xmlns:ss="http://screensaver.med.harvard.edu/ui">
+
+
+
+<ui:composition template="/main/template.xhtml">
+  <!-- ui:param name="pageHelpURL" value="screens/attachedFilesBrowserHelp.jsf" /-->
+  <ui:param name="pageTitle" value="#{attachedFilesBrowser.title}" />
+
+  <ui:define name="body">
+
+    <ss:searchResult searchResults="#{attachedFilesBrowser}">
+      <ui:define name="searchResultFooter">
+        <t:panelGrid styleClass="commandPanel" columns="1">
+          <t:commandButton
+            action="#{attachedFilesBrowser.addLetterOfSupportForNewLabHead}"
+            id="addLabHeadCommand"
+            value="Add Letter of Support for new Lab Head..."
+            rendered="#{menu.screensaverUser.isUserInRoleOfNameMap['labHeadsAdmin']}"
+            styleClass="command" />
+          <t:commandButton
+            action="#{attachedFilesBrowser.addLetterOfSupportForNewScreeningRoomUser}"
+            id="addScreeningRoomUserCommand"
+            value="Add Letter of Support for new Screener..."
+            rendered="#{menu.screensaverUser.isUserInRoleOfNameMap['usersAdmin']}"
+            styleClass="command" />
+        </t:panelGrid>
+      </ui:define>
+    </ss:searchResult>
+
+  </ui:define>
+</ui:composition>
+
+</html>
+

@@ -79,15 +79,23 @@ public class MasterStockPlateMappingLoader extends CommandLineApplication
       Integer stockPlateNumber = Integer.valueOf(fields[1]);
       Quadrant quadrant = Quadrant.valueOf(fields[2]);
       Set<Plate> copyPlatesForPlateNumber = Sets.newHashSet(dao.findEntitiesByProperty(Plate.class, "plateNumber", masterStockPlateNumber));
+      int copiesUpdated = 0;
       for (Plate masterStockPlate : copyPlatesForPlateNumber) {
-        if (masterStockPlate.getCopy().getUsageType() != CopyUsageType.MASTER_STOCK_PLATES) {
-          throw new IllegalArgumentException("plate " + masterStockPlateNumber +
-            " is not a master stock plate, according to its usage type");
+        log.debug("for plate: " + masterStockPlateNumber + ", found copy: " + masterStockPlate.getCopy().getName() + ", usage type: " + masterStockPlate.getCopy().getUsageType() );
+        if (masterStockPlate.getCopy().getUsageType() == CopyUsageType.MASTER_STOCK_PLATES) {
+          masterStockPlate.setStockPlateMapping(new StockPlateMapping(stockPlateNumber, quadrant));
+          log.info("updated plate " + masterStockPlate.getPlateNumber() + " copy " + masterStockPlate.getCopy().getName() +
+            " with " + masterStockPlate.getStockPlateMapping());
+          ++nPlatesUpdated;
+          ++copiesUpdated;
         }
-        masterStockPlate.setStockPlateMapping(new StockPlateMapping(stockPlateNumber, quadrant));
-        log.info("updated plate " + masterStockPlate.getPlateNumber() + " copy " + masterStockPlate.getCopy().getName() +
-          " with " + masterStockPlate.getStockPlateMapping());
-        ++nPlatesUpdated;
+      }
+      if(copiesUpdated == 0) {
+        throw new IllegalArgumentException("plate " + masterStockPlateNumber +
+          " has no master stock plate copies, according to the copy usage types found");
+      }else if(copiesUpdated > 1) {
+        throw new IllegalArgumentException("Plate: " + masterStockPlateNumber + 
+          " has more than the allowed (1) master stock plate copies - redesignate one of the copies and retry."); 
       }
       ++nPlateNumbersUpdated;
     }

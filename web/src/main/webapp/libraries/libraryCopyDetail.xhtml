@@ -106,6 +106,19 @@
         editable="false" rendered="#{!entity.transient}" />
     </ss:propertyGroup>
     
+    <ss:propertyGroup label="Plate Concentrations">
+      <ss:property id="mgMlConcentration" label="Concentration (mg/mL)"
+        type="List"
+        description="The mg/mL concentrations of reagents  on the  plates"
+        value="#{libraryCopyViewer.plateAggregateFields.mgMlConcentrations}"
+        editable="false" rendered="#{!entity.transient}" />
+      <ss:property id="molarConcentration" label="Concentration (molar)"
+        type="List"
+        description="The molar concentrations of reagents  on the  plates"
+        value="#{libraryCopyViewer.plateAggregateFields.molarConcentrations}"
+        editable="false" rendered="#{!entity.transient}" />
+    </ss:propertyGroup>
+    
     <ss:property id="copyComments" label="Comments" type="Textarea"
       value="#{libraryCopyDetail.entity.comments}"
       editable="#{libraryCopyDetail.editMode}" editWidth="80"

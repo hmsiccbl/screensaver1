@@ -14,6 +14,7 @@ import java.io.StringReader;
 
 import junit.framework.TestSuite;
 import org.hibernate.lob.ReaderInputStream;
+import org.joda.time.LocalDate;
 
 import edu.harvard.med.screensaver.model.libraries.Reagent;
 import edu.harvard.med.screensaver.model.libraries.ReagentAttachedFileType;
@@ -39,10 +40,10 @@ public class AttachedFileTest extends AbstractEntityInstanceTest<AttachedFile>
   {
     schemaUtil.truncateTables();
     Screen screen = dataFactory.newInstance(Screen.class);
-    AttachedFileType attachedFileType = new ScreenAttachedFileType("Application");
+    ScreenAttachedFileType attachedFileType = new ScreenAttachedFileType("Application");
     genericEntityDao.persistEntity(attachedFileType);
-    screen.createAttachedFile("filename1", attachedFileType, new ReaderInputStream(new StringReader("file contents 1")));
-    screen.createAttachedFile("filename2", attachedFileType, "file contents 2");
+    screen.createAttachedFile("filename1", attachedFileType, new LocalDate(), new ReaderInputStream(new StringReader("file contents 1")));
+    screen.createAttachedFile("filename2", attachedFileType, new LocalDate(), "file contents 2");
     screen = genericEntityDao.mergeEntity(screen);
 
     screen = genericEntityDao.reloadEntity(screen, true, Screen.attachedFiles.to(AttachedFile.screen));
@@ -55,10 +56,10 @@ public class AttachedFileTest extends AbstractEntityInstanceTest<AttachedFile>
   {
     schemaUtil.truncateTables();
     ScreeningRoomUser user = dataFactory.newInstance(ScreeningRoomUser.class);
-    AttachedFileType attachedFileType = new UserAttachedFileType("Application");
+    UserAttachedFileType attachedFileType = new UserAttachedFileType("Application");
     genericEntityDao.persistEntity(attachedFileType);
-    user.createAttachedFile("filename1", attachedFileType, new ReaderInputStream(new StringReader("file contents 1")));
-    user.createAttachedFile("filename2", attachedFileType, "file contents 2");
+    user.createAttachedFile("filename1", attachedFileType, new LocalDate(), new ReaderInputStream(new StringReader("file contents 1")));
+    user.createAttachedFile("filename2", attachedFileType, new LocalDate(), "file contents 2");
     user = genericEntityDao.mergeEntity(user);
 
     user = genericEntityDao.reloadEntity(user, true, ScreeningRoomUser.attachedFiles.to(AttachedFile.screeningRoomUser));
@@ -71,10 +72,10 @@ public class AttachedFileTest extends AbstractEntityInstanceTest<AttachedFile>
   {
     schemaUtil.truncateTables();
     Reagent reagent = dataFactory.newInstance(SmallMoleculeReagent.class);
-    AttachedFileType attachedFileType = new ReagentAttachedFileType("Application");
+    ReagentAttachedFileType attachedFileType = new ReagentAttachedFileType("Application");
     genericEntityDao.saveOrUpdateEntity(attachedFileType);
-    AttachedFile attachedFile1 = reagent.createAttachedFile("filename1", attachedFileType, new ReaderInputStream(new StringReader("file contents 1")));
-    AttachedFile attachedFile2 = reagent.createAttachedFile("filename2", attachedFileType, "file contents 2");
+    AttachedFile attachedFile1 = reagent.createAttachedFile("filename1", attachedFileType, new LocalDate(), new ReaderInputStream(new StringReader("file contents 1")));
+    AttachedFile attachedFile2 = reagent.createAttachedFile("filename2", attachedFileType, new LocalDate(), "file contents 2");
     genericEntityDao.saveOrUpdateEntity(reagent.getLibraryContentsVersion().getLibrary());
 
     reagent = genericEntityDao.reloadEntity(reagent);

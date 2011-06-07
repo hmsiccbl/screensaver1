@@ -12,6 +12,7 @@ package edu.harvard.med.screensaver.ui.libraries;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.Serializable;
+import java.net.URL;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
@@ -225,6 +226,10 @@ public class WellViewer extends SearchResultContextEntityViewerBackingBean<Well,
 
   private void initializeAnnotationValuesTable(Well well)
   {
+    if (true) {
+      _annotationNameValueTable = new ArrayList<SimpleCell>();
+      return;
+    }
     List<AnnotationValue> annotationValues = new ArrayList<AnnotationValue>();
     if (_versionedReagent != null) {
       getDao().needReadOnly(_versionedReagent, Reagent.annotationValues);
@@ -393,8 +398,9 @@ public class WellViewer extends SearchResultContextEntityViewerBackingBean<Well,
 
   public String getCompoundImageUrl()
   {
-    if (!isAllowedAccessToSmallMoleculeReagent()) return null; //TODO: is there a RTE to throw? - sde4
-    return "" + _structureImageProvider.getImageUrl((SmallMoleculeReagent) getVersionedReagent());
+    if (!isAllowedAccessToSmallMoleculeReagent()) return null;
+    URL url = _structureImageProvider.getImageUrl((SmallMoleculeReagent) getVersionedReagent());
+    return url == null ? null : url.toString();
   }
 
   public String getCompoundMolecularFormula()
@@ -466,7 +472,7 @@ public class WellViewer extends SearchResultContextEntityViewerBackingBean<Well,
 
     private String getStyleClass(ConfirmedPositiveValue value)
     {
-      String style = "";
+      String style = "confirmationReportInconclusiveOrNoData";
       if (value != null) {
         switch (value) {
           case CONFIRMED_POSITIVE:
@@ -474,12 +480,6 @@ public class WellViewer extends SearchResultContextEntityViewerBackingBean<Well,
             break;
           case FALSE_POSITIVE:
             style = "confirmationReportFalsePositive";
-            break;
-          case INCONCLUSIVE:
-            style = "confirmationReportInconclusive";
-            break;
-          default:
-            style = "confirmationReportNoData";
             break;
         }
       }
@@ -494,17 +494,19 @@ public class WellViewer extends SearchResultContextEntityViewerBackingBean<Well,
 
   public ConfirmationReportTableModel getConfirmationReport()
   {
-    if (_versionedReagent == null || !(_versionedReagent instanceof SilencingReagent)
-      || !_versionedReagent.getWell().getLibrary().isPool()) {
-      return new ConfirmationReportTableModel();
-    }
-    if (_confirmationReportTableModel == null) { //TODO: will this report become too stale if a user session lasts too long?
-      ConfirmationReport report = _screenResultReporter.getDuplexReconfirmationReport((SilencingReagent) _versionedReagent);
-      if (report.getDuplexReagents().isEmpty()) { // this will occur if there are no confirmation results.  the UI should still show the duplex wells
-        report.setDuplexReagents(((SilencingReagent) _versionedReagent).getDuplexSilencingReagents());
+    if (_confirmationReportTableModel == null) {
+      if (_versionedReagent == null || !(_versionedReagent instanceof SilencingReagent)
+        || !_versionedReagent.getWell().getLibrary().isPool()) {
+        _confirmationReportTableModel = new ConfirmationReportTableModel();
       }
+      if (_confirmationReportTableModel == null) { //TODO: will this report become too stale if a user session lasts too long?
+        ConfirmationReport report = _screenResultReporter.getDuplexReconfirmationReport((SilencingReagent) _versionedReagent);
+        if (report.getDuplexReagents().isEmpty()) { // this will occur if there are no confirmation results.  the UI should still show the duplex wells
+          report.setDuplexReagents(((SilencingReagent) _versionedReagent).getDuplexSilencingReagents());
+        }
 
-      _confirmationReportTableModel = new ConfirmationReportTableModel(report);
+        _confirmationReportTableModel = new ConfirmationReportTableModel(report);
+      }
     }
     return _confirmationReportTableModel;
   }

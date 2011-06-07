@@ -173,7 +173,7 @@ public class SmallMoleculeLibraryContentsParser extends LibraryContentsParser<Sm
         getPublicationInfoProvider().getPubmedInfo(publication);
       }
       catch (EutilsException e) {
-        throw new IOException("Publication info lookup failure", e);
+        throw new IOException("Publication info lookup failure: pubmed id: " + pubmedId + ", well: " + well.getWellKey(), e);
       }
       // TODO: have to do this because otherwise only the first publication gets added; 
       // I'm guessing because hibernate doesn't know to create all the items in the collection and it just compresses it down to one? - sde4

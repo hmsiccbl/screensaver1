@@ -136,7 +136,7 @@ hr {
   border-width: 2px;
   border-style: solid;
   border-color: #dddddd;
-  /*	width: 100%;*/
+  /*  width: 100%;*/
 }
 
 .searchResultsNavPanelStatus {
@@ -181,7 +181,7 @@ a.heatMapValue:link,a.heatMapValue:visited {
   vertical-align: bottom;
 }
 
-.dataText,.inputText,.label,.inverseLabel,.propertyValue,.propertyLabel,.dataHeader
+.dataText,.inputText,.label,.inverseLabel,.propertyValue,.subduedPropertyValue,.propertyLabel,.subduedLabel,.dataHeader
   {
   font-size: small;
 }
@@ -259,9 +259,17 @@ a.heatMapValue:link,a.heatMapValue:visited {
   width: 1px;
 }
 
-.propertyLabelColumn,.propertyLabel {
+.propertyLabelColumn,.propertyLabel, .subduedLabel {
   font-weight: bold;
   background-color: #dddddd;
+}
+
+.subduedLabel {
+  color: gray;  
+}
+
+.subduedPropertyValue {
+  color: graytext;
 }
 
 .propertyLabelColumn {
@@ -371,7 +379,7 @@ a.heatMapValue:link,a.heatMapValue:visited {
 
 .menuAndContent {
   /* using fixed table layout prevents horiz scrollbar to appear on IE when content column width is at minimum */
-  /*	table-layout: fixed;*/
+  /*  table-layout: fixed;*/
   
 }
 
@@ -580,10 +588,6 @@ a.menuItem:hover,a.menuItemActive:hover,a.submenuItem:hover,a.submenuItemActive:
   background-color: red;
 }
 
-.confirmationReportInconclusive {
-  background-color: white;
-}
-
-.confirmationReportNoData {
+.confirmationReportInconclusiveOrNoData {
   background-color: white;
 }

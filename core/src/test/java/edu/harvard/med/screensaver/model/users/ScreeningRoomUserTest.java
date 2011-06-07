@@ -9,7 +9,6 @@
 
 package edu.harvard.med.screensaver.model.users;
 
-import java.beans.IntrospectionException;
 import java.io.IOException;
 import java.util.Arrays;
 import java.util.HashSet;
@@ -31,7 +30,6 @@ import edu.harvard.med.screensaver.model.BusinessRuleViolationException;
 import edu.harvard.med.screensaver.model.DataModelViolationException;
 import edu.harvard.med.screensaver.model.screens.ProjectPhase;
 import edu.harvard.med.screensaver.model.screens.Screen;
-import edu.harvard.med.screensaver.model.screens.ScreenAttachedFileType;
 import edu.harvard.med.screensaver.model.screens.ScreenType;
 import edu.harvard.med.screensaver.model.screens.StudyType;
 import edu.harvard.med.screensaver.util.CryptoUtils;
@@ -351,9 +349,9 @@ public class ScreeningRoomUserTest extends AbstractEntityInstanceTest<ScreeningR
       public void runTransaction() {
         ScreeningRoomUser user = genericEntityDao.findEntityByProperty(ScreeningRoomUser.class, "lastName", "Head", false);
         try {
-          ScreenAttachedFileType attachedFileType = new ScreenAttachedFileType("Screener Correspondence");
+          UserAttachedFileType attachedFileType = new UserAttachedFileType("Screener Correspondence");
           genericEntityDao.persistEntity(attachedFileType);
-          user.createAttachedFile("file1.txt", attachedFileType, "file1 contents");
+          user.createAttachedFile("file1.txt", attachedFileType, new LocalDate(), "file1 contents");
         }
         catch (IOException e) {
           throw new DAOTransactionRollbackException(e);

@@ -9,6 +9,7 @@
 
 package edu.harvard.med.screensaver.model.libraries;
 
+import java.math.BigDecimal;
 import java.util.Map;
 import java.util.SortedSet;
 
@@ -38,11 +39,13 @@ import org.joda.time.LocalDate;
 import com.google.common.base.Function;
 import com.google.common.collect.Maps;
 
+import edu.harvard.med.screensaver.ScreensaverConstants;
 import edu.harvard.med.screensaver.model.AbstractEntityVisitor;
 import edu.harvard.med.screensaver.model.AdministrativeActivity;
 import edu.harvard.med.screensaver.model.AuditedAbstractEntity;
 import edu.harvard.med.screensaver.model.DataModelViolationException;
 import edu.harvard.med.screensaver.model.DuplicateEntityException;
+import edu.harvard.med.screensaver.model.MolarConcentration;
 import edu.harvard.med.screensaver.model.annotations.ContainedEntity;
 import edu.harvard.med.screensaver.model.annotations.Derived;
 import edu.harvard.med.screensaver.model.annotations.ToMany;
@@ -92,6 +95,8 @@ public class Copy extends AuditedAbstractEntity<Integer> implements Comparable<C
   private VolumeStatistics _volumeStatistics;
   private Integer _platesAvailable;
   private Integer _plateLocationsCount;
+  private BigDecimal _primaryPlateMgMlConcentration;
+  private MolarConcentration _primaryPlateMolarConcentration;
 
   @Override
   public Object acceptVisitor(AbstractEntityVisitor visitor)
@@ -346,6 +351,31 @@ public class Copy extends AuditedAbstractEntity<Integer> implements Comparable<C
   public void setPrimaryPlateStatus(PlateStatus primaryPlateStatus)
   {
     _primaryPlateStatus = primaryPlateStatus;
+  }
+
+  @Column(precision = ScreensaverConstants.MG_ML_CONCENTRATION_PRECISION, scale = ScreensaverConstants.MG_ML_CONCENTRATION_SCALE)
+  @Derived
+  public BigDecimal getPrimaryPlateMgMlConcentration()
+  {
+    return _primaryPlateMgMlConcentration;
+  }
+
+  public void setPrimaryPlateMgMlConcentration(BigDecimal value)
+  {
+    _primaryPlateMgMlConcentration = value;
+  }
+  
+  @Column(precision = ScreensaverConstants.MOLAR_CONCENTRATION_PRECISION, scale = ScreensaverConstants.MOLAR_CONCENTRATION_SCALE)
+  @org.hibernate.annotations.Type(type = "edu.harvard.med.screensaver.db.usertypes.MolarConcentrationType")
+  @Derived
+  public MolarConcentration getPrimaryPlateMolarConcentration()
+  {
+    return _primaryPlateMolarConcentration;
+  }
+
+  public void setPrimaryPlateMolarConcentration(MolarConcentration value)
+  {
+    _primaryPlateMolarConcentration = value;
   }
 
   @Transient

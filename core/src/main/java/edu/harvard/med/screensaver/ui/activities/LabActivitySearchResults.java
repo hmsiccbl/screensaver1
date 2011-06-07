@@ -80,7 +80,7 @@ public class LabActivitySearchResults extends ActivitySearchResults<LabActivity>
   public void searchLabActivitiesForScreen(final Screen screen)
   {
     setTitle("Lab Activities for screen " + screen.getFacilityId());
-    initialize(new InMemoryEntityDataModel<LabActivity,Integer>(new EntityDataFetcher<LabActivity,Integer>(LabActivity.class, _dao) {
+    initialize(new InMemoryEntityDataModel<LabActivity,Integer,LabActivity>(new EntityDataFetcher<LabActivity,Integer>(LabActivity.class, _dao) {
       @Override
       public void addDomainRestrictions(HqlBuilder hql)
       {

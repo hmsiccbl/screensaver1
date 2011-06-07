@@ -437,7 +437,7 @@
       <!-- note: access to contents beneath this directory will be controlled by CellHTS2ReportAuthorizationFilter -->
       <url-pattern>/cellHTS2/*</url-pattern>
     </web-resource-collection>
-
+    
     <auth-constraint>
       <role-name>screensaverUser</role-name>
     </auth-constraint>
@@ -504,6 +504,22 @@
 
     <auth-constraint>
       <role-name>usersAdmin</role-name>
+    </auth-constraint>
+
+    <user-data-constraint>
+      <transport-guarantee>NONE</transport-guarantee>
+      <!--  TODO: transport-guarantee>CONFIDENTIAL</transport-guarantee -->
+    </user-data-constraint>
+  </security-constraint>
+
+  <security-constraint>
+    <web-resource-collection>
+      <web-resource-name>readEverythingAdmin</web-resource-name>
+      <url-pattern>/attachedFiles/*</url-pattern>
+    </web-resource-collection>
+
+    <auth-constraint>
+      <role-name>readEverythingAdmin</role-name>
     </auth-constraint>
 
     <user-data-constraint>

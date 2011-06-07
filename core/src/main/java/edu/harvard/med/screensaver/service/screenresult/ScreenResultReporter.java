@@ -17,6 +17,10 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
+import com.google.common.collect.Lists;
+import com.google.common.collect.Maps;
+import com.google.common.collect.Ordering;
+import com.google.common.collect.Sets;
 import org.apache.log4j.Logger;
 import org.hibernate.CacheMode;
 import org.hibernate.Query;
@@ -24,10 +28,6 @@ import org.hibernate.ScrollMode;
 import org.hibernate.ScrollableResults;
 import org.hibernate.Session;
 import org.springframework.transaction.annotation.Transactional;
-import com.google.common.collect.Lists;
-import com.google.common.collect.Maps;
-import com.google.common.collect.Ordering;
-import com.google.common.collect.Sets;
 
 import edu.harvard.med.screensaver.db.AbstractDAO;
 import edu.harvard.med.screensaver.db.GenericEntityDAO;
@@ -46,7 +46,6 @@ import edu.harvard.med.screensaver.model.screenresults.AssayWell;
 import edu.harvard.med.screensaver.model.screenresults.ConfirmedPositiveValue;
 import edu.harvard.med.screensaver.model.screenresults.DataColumn;
 import edu.harvard.med.screensaver.model.screenresults.DataType;
-import edu.harvard.med.screensaver.model.screenresults.ResultValue;
 import edu.harvard.med.screensaver.model.screenresults.ScreenResult;
 import edu.harvard.med.screensaver.model.screens.ProjectPhase;
 import edu.harvard.med.screensaver.model.screens.Screen;
@@ -268,7 +267,6 @@ public class ScreenResultReporter
                                                                            admin.getEmail(),
                                                                            true,
                                                                            null);
-//    _dao.mergeEntity(labHead);
     study = new Screen(admin,
                        studyName,
                        labHead,
@@ -284,7 +282,6 @@ public class ScreenResultReporter
     AnnotationType positivesCountAnnotType = study.createAnnotationType(positiveCountAnnotationName,
                                                                         positiveCountAnnotationDescription,
                                                                         true);
-//    study = _dao.mergeEntity(study);
     AnnotationType overallCountAnnotType = study.createAnnotationType(overallCountAnnotationName,
                                                                       overallCountAnnotationDesc,
                                                                       true);
@@ -361,42 +358,23 @@ public class ScreenResultReporter
             }
     });
 
+    log.info("begin assigning values to the study");
+    int overallCount = 0;
     Map<Integer,Long> overallMap = Maps.newHashMap();
     while (sr.next()) {
       Object[] row = sr.get();
-      overallMap.put((Integer) row[0], (Long) row[1]);
-    }
-
-    log.info("3. get the Reagents");
-    sr = _dao.runScrollQuery(new edu.harvard.med.screensaver.db.ScrollQuery() {
-      public ScrollableResults execute(Session session)
-            {
-              HqlBuilder builder = new HqlBuilder();
-              builder.select("r").distinctProjectionValues().
-                from(AssayWell.class, "aw").
-                from("aw", AssayWell.libraryWell, "w", JoinType.INNER).
-                from("w", Well.library, "l", JoinType.INNER).
-                from("w", Well.latestReleasedReagent, "r", JoinType.INNER).
-                where("l", "screenType", Operator.EQUAL, screenType).
-                where("w", "libraryWellType", Operator.EQUAL, LibraryWellType.EXPERIMENTAL);
-              log.debug("hql: " + builder.toHql());
-              return builder.toQuery(session, true).setCacheMode(CacheMode.IGNORE).
-                scroll(ScrollMode.FORWARD_ONLY);
-            }
-    });
-
-    log.info("4. build the Study: positives: " + positivesMap.size() + ", reagents: " + overallMap.size());
-    int count = 0;
-    while (sr.next()) {
-      Reagent r = (Reagent) sr.get()[0];
-
+      Integer r_id = (Integer) row[0];
+      Long count = (Long) row[1];
+      Reagent r = _dao.findEntityById(Reagent.class, r_id,true);
+      // note: for memory performance, we're side-stepping the AnnotationType.createAnnotationValue() method
       AnnotationValue av = new AnnotationValue(overallAnnotationType,
                                                r,
                                                null,
-                                               (double) overallMap.get(r.getReagentId()).intValue());
+                                               (double) count);
       _dao.persistEntity(av);
-      Long positiveCount = positivesMap.get(r.getReagentId());
+      Long positiveCount = positivesMap.get(r_id);
       if (positiveCount != null) {
+        // note: for memory performance, we're side-stepping the AnnotationType.createAnnotationValue() method
         av = new AnnotationValue(positiveAnnotationType,
                                  r, null,
                                  (double) positiveCount.intValue());
@@ -408,17 +386,18 @@ public class ScreenResultReporter
         _dao.flush();
         _dao.clear();
       }
-      if (count % 10000 == 0) {
-        log.info("" + count + " reagents processed");
+      if (++overallCount % 10000 == 0) {
+        log.info("" + overallCount + " reagents processed");
       }
     }
-
+    
     log.info("save the study");
-    _dao.mergeEntity(study);
+    // unnecessary since study is already persisted, and the reagents will be linked by the populateStudyReagentLinkTable - sde4
+    // _dao.mergeEntity(study);
     _dao.flush();
     log.info("populateStudyReagentLinkTable");
     int reagentCount = populateStudyReagentLinkTable(study.getScreenId());
-    log.info("done: positives: " + positivesMap.size() + ", reagents: " + overallMap.size());
+    log.info("done: positives: " + positivesMap.size() + ", reagents: " + overallCount);
     return reagentCount;
   }
 
@@ -526,6 +505,7 @@ public class ScreenResultReporter
         }.compare(o1.getVendorId(), o2.getVendorId());
       }
     });
+
     public List<Screen> getScreens() {
       return screenOrdering.sortedCopy(_results.keySet());
     }
@@ -604,18 +584,17 @@ public class ScreenResultReporter
       public List<?> execute(Session session)
       {
         HqlBuilder builder = new HqlBuilder();
-        // TODO: we will want to create an AssayWell.isConfirmedPositive value and query off that
-        builder.select("dr").select("s").select("rv", "confirmedPositiveValue").
+        builder.select("dr").select("s").select("aw", "confirmedPositiveValue").
           from(SilencingReagent.class, "pr").
           from("pr", SilencingReagent.duplexWells, "dw").
           from("dw", Well.latestReleasedReagent, "dr").
-          from("dw", Well.resultValues, "rv").
-          from("rv", ResultValue.DataColumn, "dc").
-          from("dc", DataColumn.ScreenResult, "sr").
+          from(AssayWell.class, "aw").
+          from("aw", DataColumn.ScreenResult, "sr").
           from("sr", ScreenResult.screen, "s").
-          where("dc", "dataType", Operator.EQUAL, DataType.CONFIRMED_POSITIVE_INDICATOR).
+          where("aw", "libraryWell", Operator.EQUAL, "dr", "well").
+          whereIn("aw", "confirmedPositiveValue", Sets.newHashSet(ConfirmedPositiveValue.CONFIRMED_POSITIVE,
+                                                                  ConfirmedPositiveValue.FALSE_POSITIVE)).
           where("pr", Operator.EQUAL, poolReagent);
-
         return builder.toQuery(session, true).list();
       }
     });

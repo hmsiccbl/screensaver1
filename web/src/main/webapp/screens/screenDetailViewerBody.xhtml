@@ -72,6 +72,19 @@ TODO:
             value="#{screenDetailViewer.leadScreener.selectItems}" />
         </t:selectOneMenu>
       </ui:define>
+      <ui:define name="projectExtraInfo">
+        <t:dataTable id="associatedScreensTable"
+          value="#{screenDetailViewer.associatedScreensDataModel}"
+          var="assocScreen" styleClass="standardTable">
+          <t:column>
+            <ss:entityLink entity="#{assocScreen}" property="facilityId"
+              viewer="#{screenViewer}" />
+          </t:column>
+          <t:column>
+            <h:outputText value="- #{assocScreen.projectPhase}" />
+          </t:column>
+        </t:dataTable>
+      </ui:define>
     </ss:screenSummaryProperties>
 
     <ss:property id="collaborators" label="Collaborators"

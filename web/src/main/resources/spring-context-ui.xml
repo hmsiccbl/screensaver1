@@ -181,7 +181,9 @@
     id="menu"
     parent="uiBean"
     scope="session"
+    autowire="constructor"
     class="edu.harvard.med.screensaver.ui.Menu">
+    <!-- 
     <constructor-arg ref="genericEntityDao" />
     <constructor-arg ref="librariesDao" />
     <constructor-arg ref="screenGenerator" />
@@ -198,6 +200,7 @@
     <constructor-arg ref="userViewer" />
     <constructor-arg ref="libraryDetailViewer" />
     <constructor-arg ref="wellsBrowser" />
+     -->
     <aop:scoped-proxy/>
   </bean>
 
@@ -981,6 +984,15 @@
     <constructor-arg ref="wellsBrowser" />
     <aop:scoped-proxy/>
   </bean>
+  
+  <bean
+    id="attachedFilesBrowser"
+    parent="uiBean"
+    scope="session"
+    autowire="constructor"
+    class="edu.harvard.med.screensaver.ui.attachedFiles.AttachedFileSearchResults">
+    <aop:scoped-proxy/>
+  </bean>
     
   <!-- converters -->
 
@@ -1050,7 +1062,6 @@
   <bean id="screensaverUserConverter" class="edu.harvard.med.screensaver.ui.arch.util.converter.ScreensaverUserConverter">
     <constructor-arg ref="genericEntityDao"/>
   </bean>
-  
   
 
   <!-- Development/Debug related beans -->

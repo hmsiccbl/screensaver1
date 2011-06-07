@@ -17,14 +17,14 @@ import java.util.Set;
 
 import javax.annotation.Resource;
 
-import org.apache.log4j.Logger;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.transaction.annotation.Transactional;
 import com.google.common.base.Function;
 import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.Iterables;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Sets;
+import org.apache.log4j.Logger;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.transaction.annotation.Transactional;
 
 import edu.harvard.med.iccbl.screensaver.io.screens.ConfirmedPositivesStudyCreator;
 import edu.harvard.med.iccbl.screensaver.io.screens.ScreenPositivesCountStudyCreator;
@@ -653,16 +653,15 @@ public class ScreenResultReporterTest extends AbstractSpringPersistenceTest
     assertTrue(report.getResults().get(_screenRnai3).containsKey(_duplexReagents.get(1)));
     assertTrue(report.getResults().get(_screenRnai4).containsKey(_duplexReagents.get(3)));
     assertTrue(report.getResults().get(_screenRnai5).containsKey(_duplexReagents.get(3)));
-    assertEquals(report.getResults().get(_screenRnai0).get(_duplexReagents.get(0)), ConfirmedPositiveValue.CONFIRMED_POSITIVE);
-    assertEquals(report.getResults().get(_screenRnai1).get(_duplexReagents.get(0)), ConfirmedPositiveValue.CONFIRMED_POSITIVE);
-    assertEquals(report.getResults().get(_screenRnai3).get(_duplexReagents.get(1)), ConfirmedPositiveValue.FALSE_POSITIVE);
-    assertEquals(report.getResults().get(_screenRnai4).get(_duplexReagents.get(2)), ConfirmedPositiveValue.INCONCLUSIVE);
-    assertEquals(report.getResults().get(_screenRnai4).get(_duplexReagents.get(0)), ConfirmedPositiveValue.CONFIRMED_POSITIVE);
-    assertEquals(report.getResults().get(_screenRnai4).get(_duplexReagents.get(1)), ConfirmedPositiveValue.CONFIRMED_POSITIVE);
-    assertEquals(report.getResults().get(_screenRnai4).get(_duplexReagents.get(3)), ConfirmedPositiveValue.CONFIRMED_POSITIVE);
+    assertEquals(ConfirmedPositiveValue.CONFIRMED_POSITIVE, report.getResults().get(_screenRnai0).get(_duplexReagents.get(0)));
+    assertEquals(ConfirmedPositiveValue.CONFIRMED_POSITIVE, report.getResults().get(_screenRnai1).get(_duplexReagents.get(0)));
+    assertEquals(ConfirmedPositiveValue.FALSE_POSITIVE, report.getResults().get(_screenRnai3).get(_duplexReagents.get(1)));
+    assertNull(/* ConfirmedPositiveValue.INCONCLUSIVE, */report.getResults().get(_screenRnai4).get(_duplexReagents.get(2)));
+    assertEquals(ConfirmedPositiveValue.CONFIRMED_POSITIVE, report.getResults().get(_screenRnai4).get(_duplexReagents.get(0)));
+    assertEquals(ConfirmedPositiveValue.CONFIRMED_POSITIVE, report.getResults().get(_screenRnai4).get(_duplexReagents.get(1)));
+    assertEquals(ConfirmedPositiveValue.CONFIRMED_POSITIVE, report.getResults().get(_screenRnai4).get(_duplexReagents.get(3)));
     // for 5, just an arbitrary check...
-    assertEquals(report.getResults().get(_screenRnai5).get(_duplexReagents.get(3)), ConfirmedPositiveValue.CONFIRMED_POSITIVE);
-
+    assertEquals(ConfirmedPositiveValue.CONFIRMED_POSITIVE, report.getResults().get(_screenRnai5).get(_duplexReagents.get(3)));
   }
 
   @Transactional

@@ -61,7 +61,6 @@ public class TupleDataFetcher<E extends AbstractEntity,K> extends PropertyPathDa
   }
 
   @Override
-  @SuppressWarnings("unchecked")
   public Map<K,Tuple<K>> fetchData(Set<K> keys)
   {
     if (log.isDebugEnabled()) {

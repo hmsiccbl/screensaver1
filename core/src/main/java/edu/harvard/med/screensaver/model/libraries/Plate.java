@@ -43,6 +43,7 @@ import edu.harvard.med.screensaver.model.AbstractEntityVisitor;
 import edu.harvard.med.screensaver.model.AdministrativeActivity;
 import edu.harvard.med.screensaver.model.AuditedAbstractEntity;
 import edu.harvard.med.screensaver.model.MolarConcentration;
+import edu.harvard.med.screensaver.model.MolarUnit;
 import edu.harvard.med.screensaver.model.Volume;
 import edu.harvard.med.screensaver.model.annotations.ContainedEntity;
 import edu.harvard.med.screensaver.model.annotations.ToMany;
@@ -85,6 +86,19 @@ public class Plate extends AuditedAbstractEntity<Integer> implements Comparable<
     public PlateStatus apply(Plate p)
     {
       return p.getStatus();
+    }
+  };
+  public static final Function<Plate,BigDecimal> ToMgMlConcentration = new Function<Plate,BigDecimal>() {
+    public BigDecimal apply(Plate p)
+    {
+      return p.getMgMlConcentration() == null ? BigDecimal.ZERO : p.getMgMlConcentration();
+    }
+  };
+  public static final Function<Plate,MolarConcentration> ToMolarConcentration = new Function<Plate,MolarConcentration>() {
+    public MolarConcentration apply(Plate p)
+    {
+      return p.getMolarConcentration();
+      //return p.getMolarConcentration() == null ? MolarConcentration.MOLAR_ZERO : p.getMolarConcentration();
     }
   };
 

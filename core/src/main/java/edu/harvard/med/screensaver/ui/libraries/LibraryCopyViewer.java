@@ -9,6 +9,7 @@
 
 package edu.harvard.med.screensaver.ui.libraries;
 
+import java.math.BigDecimal;
 import java.util.List;
 import java.util.SortedSet;
 
@@ -17,6 +18,7 @@ import org.apache.commons.lang.StringEscapeUtils;
 import org.apache.log4j.Logger;
 
 import edu.harvard.med.screensaver.db.GenericEntityDAO;
+import edu.harvard.med.screensaver.model.MolarConcentration;
 import edu.harvard.med.screensaver.model.Volume;
 import edu.harvard.med.screensaver.model.libraries.Copy;
 import edu.harvard.med.screensaver.model.libraries.Plate;
@@ -125,6 +127,8 @@ public class LibraryCopyViewer extends SearchResultContextEntityViewerBackingBea
   {
     private SortedSet<String> _locations = Sets.newTreeSet();
     private SortedSet<Volume> _volumes = Sets.newTreeSet();
+    private SortedSet<BigDecimal> _mgMlConcentrations = Sets.newTreeSet();
+    private SortedSet<MolarConcentration> _molarConcentrations = Sets.newTreeSet();
     private SortedSet<PlateStatus> _secondaryStatuses = Sets.newTreeSet();
     private SortedSet<PlateType> _types = Sets.newTreeSet();
 
@@ -136,6 +140,12 @@ public class LibraryCopyViewer extends SearchResultContextEntityViewerBackingBea
         }
         if (plate.getWellVolume() != null) {
           _volumes.add(plate.getWellVolume());
+        }
+        if(plate.getMgMlConcentration() != null) {
+          _mgMlConcentrations.add(plate.getMgMlConcentration());
+        }
+        if(plate.getMolarConcentration() != null) {
+          _molarConcentrations.add(plate.getMolarConcentration());
         }
         _secondaryStatuses.add(plate.getStatus());
         if (plate.getPlateType() != null) {
@@ -153,6 +163,16 @@ public class LibraryCopyViewer extends SearchResultContextEntityViewerBackingBea
     public SortedSet<Volume> getVolumes()
     {
       return _volumes;
+    }
+    
+    public SortedSet<BigDecimal> getMgMlConcentrations()
+    {
+      return _mgMlConcentrations;
+    }
+    
+    public SortedSet<MolarConcentration> getMolarConcentrations()
+    {
+      return _molarConcentrations;
     }
 
     public SortedSet<PlateStatus> getSecondaryStatuses()

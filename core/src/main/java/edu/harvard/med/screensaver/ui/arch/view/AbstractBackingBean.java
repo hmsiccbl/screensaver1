@@ -372,7 +372,10 @@ public abstract class AbstractBackingBean implements ScreensaverConstants
    * Report the provided application error message to the user. An application
    * error is one that a developer would not be concerned about, and that
    * occurred due to so-called "user error".
+   * 
+   * @deprecated use {@link #showMessage(String)} instead
    */
+  @Deprecated
   protected void reportApplicationError(String errorMessage)
   {
     showMessage("applicationError", errorMessage);

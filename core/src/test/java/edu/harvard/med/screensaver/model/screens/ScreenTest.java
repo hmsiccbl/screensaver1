@@ -273,7 +273,7 @@ public class ScreenTest extends AbstractEntityInstanceTest<Screen>
     final Screen screen = MakeDummyEntities.makeDummyScreen(1);
     ScreenAttachedFileType attachedFileType = new ScreenAttachedFileType("Screener Correspondence");
     genericEntityDao.persistEntity(attachedFileType);
-    screen.createAttachedFile("file1.txt", attachedFileType, "file1 contents");
+    screen.createAttachedFile("file1.txt", attachedFileType, new LocalDate(), "file1 contents");
     genericEntityDao.persistEntity(screen);
     genericEntityDao.doInTransaction(new DAOTransaction() {
       public void runTransaction() {

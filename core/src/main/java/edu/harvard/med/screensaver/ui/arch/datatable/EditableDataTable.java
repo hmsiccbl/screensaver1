@@ -42,11 +42,6 @@ public abstract class EditableDataTable<R> extends DataTable<R>
     super();
   }
 
-  EditableDataTable(ScreensaverUserRole editingRole)
-  {
-    _editingRole = editingRole;
-  }
-
   @Override
   public void initialize(DataTableModel<R> dataTableModel,
                          List<? extends TableColumn<R,?>> columns,
@@ -79,6 +74,7 @@ public abstract class EditableDataTable<R> extends DataTable<R>
   public void setEditingRole(ScreensaverUserRole editingRole)
   {
     _editingRole = editingRole;
+    _hasEditableColumns = null; // force re-calc
   }
 
   public boolean isEditable()

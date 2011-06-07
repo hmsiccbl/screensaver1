@@ -9,9 +9,15 @@
 
 package edu.harvard.med.screensaver.ui.arch.util.servlet;
 
+import java.awt.Graphics;
+import java.awt.Image;
+import java.awt.Toolkit;
+import java.awt.image.BufferedImage;
+import java.io.BufferedOutputStream;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
+import java.net.URL;
 
 import javax.servlet.Servlet;
 import javax.servlet.ServletException;
@@ -21,6 +27,9 @@ import javax.servlet.http.HttpServletResponse;
 
 import org.apache.commons.io.IOUtils;
 import org.apache.log4j.Logger;
+
+import com.sun.image.codec.jpeg.JPEGCodec;
+import com.sun.image.codec.jpeg.JPEGImageEncoder;
 
 import edu.harvard.med.screensaver.ScreensaverConstants;
 import edu.harvard.med.screensaver.ui.ApplicationInfo;
@@ -132,7 +141,15 @@ public class ImageProviderServlet extends HttpServlet
       if (log.isDebugEnabled()) {
         log.debug("retrieve the image: " + file.getAbsolutePath());
       }
-
+      if(!file.exists()) {
+        log.warn("image file not found: " + file);
+        BufferedImage image  = new BufferedImage(1, 1, BufferedImage.TYPE_INT_ARGB );
+        BufferedOutputStream bos=new BufferedOutputStream(resp.getOutputStream()); 
+        JPEGImageEncoder encoder= JPEGCodec.createJPEGEncoder(bos);
+        encoder.encode(image);
+        return;
+      }
+      
       // note, allow IOException to be thrown if not found. (will print to the log)
       resp.getOutputStream().write(IOUtils.toByteArray(new FileInputStream(file)));
     }
@@ -141,4 +158,21 @@ public class ImageProviderServlet extends HttpServlet
     }
   }
 
+  // TODO: add the ImageProviderServlet (as a spring-bean) to beans that serve images to enable performing this check - sde4
+  public boolean canFindImage(URL url)
+  {
+      String baseUrl = _appInfo.getApplicationProperties().getProperty("screensaver.images.base_url");
+      String relativePath = url.toString().substring(baseUrl.length());
+      File file = new File(_imagesFileSystemPath, relativePath);
+      if (!file.isAbsolute())
+      {
+        // if path is relative, bypass this check, since those paths are used during testing
+        return true;
+      }
+      if(! file.exists()) {
+        log.info("can't find the image at the url: " + url + ", mapped to the file: " + file);
+        return false;
+      }
+      return true;
+  }
 }

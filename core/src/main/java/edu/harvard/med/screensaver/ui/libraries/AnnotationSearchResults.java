@@ -58,7 +58,7 @@ public class AnnotationSearchResults extends EntityBasedEntitySearchResults<Anno
   {
     EntityDataFetcher<AnnotationValue,Integer> dataFetcher =
       (EntityDataFetcher<AnnotationValue,Integer>) new EntityDataFetcher<AnnotationValue,Integer>(AnnotationValue.class, _dao);
-    initialize(new InMemoryEntityDataModel<AnnotationValue,Integer>(dataFetcher));
+    initialize(new InMemoryEntityDataModel<AnnotationValue,Integer,AnnotationValue>(dataFetcher));
 
     getColumnManager().setSortAscending(false);
   }
@@ -213,7 +213,7 @@ public class AnnotationSearchResults extends EntityBasedEntitySearchResults<Anno
       initialize();
     }
     else {
-      initialize(new InMemoryEntityDataModel<AnnotationValue,Integer>(new EntityDataFetcher<AnnotationValue,Integer>(AnnotationValue.class, _dao)
+      initialize(new InMemoryEntityDataModel<AnnotationValue,Integer,AnnotationValue>(new EntityDataFetcher<AnnotationValue,Integer>(AnnotationValue.class, _dao)
         {
           @Override
           public void addDomainRestrictions(HqlBuilder hql)
