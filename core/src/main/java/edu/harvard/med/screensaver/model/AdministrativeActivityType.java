@@ -48,6 +48,10 @@ public enum AdministrativeActivityType implements VocabularyTerm
    * activity type will usually provide information about the corresponding real-world entity.
    */
   COMMENT("Comment", ScreensaverUserRole.READ_EVERYTHING_ADMIN),
+  /**
+   * For recording manual overrides of lab cherry pick source copies.
+   */
+  LAB_CHERRY_PICK_SOURCE_COPY_OVERRIDE("Lab Cherry Pick Source Copy Override", ScreensaverUserRole.CHERRY_PICK_REQUESTS_ADMIN),
   ;
 
   public Predicate<AdministrativeActivity> isValuePredicate()

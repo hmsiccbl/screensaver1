@@ -6,12 +6,12 @@
   <parent> 
     <artifactId>screensaver</artifactId> 
     <groupId>edu.harvard.med</groupId> 
-    <version>2.3.3</version> 
+    <version>2.3.4</version> 
   </parent> 
 
   <groupId>edu.harvard.med</groupId>
   <artifactId>screensaver-core</artifactId>
-  <version>2.3.3</version>
+  <version>2.3.4</version>
   <name>Screensaver Core</name>
 
   <packaging>jar</packaging>
@@ -27,6 +27,9 @@
 
     <plugins>
 
+      <!-- by building the core module's test jar directly into the core/target/ dir, the web module's tests will find their class dependencies without having to first run the "install" phase, which doesn't get run at all if you're just running through the "package" phase, causing the web test-compile phase to fail -->
+      <!-- note that to run junit tests on the web module, you will still need to run the "test" phase (or greater) on the core module, so that the core test jar is generated -->
+      <!-- see http://stackoverflow.com/questions/1725476/maven-test-dependency-in-multi-module-project#2532486 -->
        <plugin>
          <groupId>org.apache.maven.plugins</groupId>
          <artifactId>maven-jar-plugin</artifactId>
@@ -35,15 +38,24 @@
              <goals>
                <goal>test-jar</goal>
              </goals>
+             <phase>test-compile</phase>
            </execution>
          </executions>
+         <configuration>
+           <outputDirectory>${basedir}/target</outputDirectory>
+         </configuration>
       </plugin>
 
       <plugin>
         <groupId>org.apache.maven.plugins</groupId>
         <artifactId>maven-surefire-plugin</artifactId>
         <configuration>
+         <goal>test</goal>
+         <includes>
+          <include>**/CollectionUtilsTest.java</include>
+         </includes>
           <excludes>
+            <exclude>*</exclude>
             <exclude>**/EntityPropertyTest.java</exclude>
           </excludes>
         </configuration>

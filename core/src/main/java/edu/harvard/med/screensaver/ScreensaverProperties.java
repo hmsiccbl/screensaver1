@@ -64,8 +64,8 @@ public class ScreensaverProperties implements ScreensaverConstants
     String propFileName =
       System.getProperty(ScreensaverConstants.SCREENSAVER_PROPERTIES_FILE_PROPERTY_NAME);
     InputStream screensaverPropertiesInputStream = null;
-    if (propFileName != null) {
-      log.info("loading screensaver properties from file location " + propFileName);
+    if (!StringUtils.isEmpty(propFileName)) {
+      log.info("loading screensaver properties from file location: " + propFileName);
       screensaverPropertiesInputStream = new FileInputStream(new File(propFileName));
     }
     else {

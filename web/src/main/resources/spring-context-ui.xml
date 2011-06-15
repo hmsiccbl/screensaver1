@@ -113,7 +113,8 @@
 
   <bean
     id="messages"
-    class="edu.harvard.med.screensaver.ui.arch.util.Messages">
+    class="edu.harvard.med.screensaver.ui.arch.util.Messages"
+    scope="session">
     <property name="messageSource">
       <bean
         class="org.springframework.context.support.ReloadableResourceBundleMessageSource">
@@ -123,6 +124,7 @@
           value="classpath:messages" />
       </bean>
     </property>
+    <aop:scoped-proxy/>
     <!--  TODO property name="locale" value=""/-->
   </bean>
 
@@ -734,6 +736,7 @@
     <constructor-arg ref="cherryPickRequestViewer" />
     <constructor-arg ref="cherryPickRequestDetailViewer" />
     <constructor-arg ref="cherryPickRequestsBrowser" />
+    <constructor-arg ref="labCherryPicksBrowser" />
     <constructor-arg ref="activityViewer" />
     <constructor-arg ref="genericEntityDao" />
     <constructor-arg ref="librariesDao" />
@@ -743,6 +746,15 @@
     <constructor-arg ref="cherryPickRequestPlateMapper" />
     <constructor-arg ref="cherryPickRequestPlateMapFilesBuilder" />
     <constructor-arg ref="screeningDuplicator" />
+    <aop:scoped-proxy/>
+  </bean>
+  
+  <bean
+    id="labCherryPicksBrowser"
+    parent="uiBean"
+    scope="session"
+    autowire="constructor"
+    class="edu.harvard.med.screensaver.ui.cherrypickrequests.LabCherryPicksSearchResult">
     <aop:scoped-proxy/>
   </bean>
 

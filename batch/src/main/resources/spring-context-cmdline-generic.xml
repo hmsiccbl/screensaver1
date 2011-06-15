@@ -20,17 +20,15 @@
 <beans>
 
   <bean
-    id="commandLineArgumentsDatabaseSettingsResolver"
-    class="edu.harvard.med.screensaver.db.CommandLineArgumentsDatabaseConnectionSettingsResolver" />
-
-  <bean
     id="screensaverProperties"
     class="edu.harvard.med.screensaver.ScreensaverProperties"
     scope="singleton">
     <constructor-arg value="/screensaver.properties" />
     <constructor-arg>
       <list>
-        <ref bean="commandLineArgumentsDatabaseSettingsResolver"/>
+        <bean
+          id="commandLineArgumentsDatabaseSettingsResolver"
+          class="edu.harvard.med.screensaver.db.CommandLineArgumentsDatabaseConnectionSettingsResolver" />
         <bean class="edu.harvard.med.screensaver.db.SystemPropertiesDatabaseConnectionSettingsResolver"/>
         <bean class="edu.harvard.med.screensaver.db.EnvironmentVariablesDatabaseConnectionSettingsResolver"/>
         <bean class="edu.harvard.med.screensaver.db.ScreensaverPropertiesDatabaseConnectionSettingsResolver"/>

@@ -28,11 +28,11 @@
 
         <t:outputText value="Cherry picks have not yet been specified."
           styleClass="label"
-          rendered="#{cherryPickRequestViewer.screenerCherryPickCount == 0}" />
+          rendered="#{cherryPickRequestViewer.screenerCherryPicksSearchResult.rowCount == 0}" />
 
         <t:panelGrid id="addCherryPicksAndHelpPanels" columns="2"
           columnClasses="column"
-          rendered="#{cherryPickRequestViewer.screenerCherryPickCount == 0}">
+          rendered="#{cherryPickRequestViewer.screenerCherryPicksSearchResult.rowCount == 0}">
           <t:panelGrid id="addCherryPicksPanel" columns="1">
             <t:outputLabel for="cherryPicksInput"
               value="Specify cherry picks as plate/well pairs:"
@@ -56,7 +56,7 @@
         </t:panelGrid>
 
         <t:panelGrid id="viewScreenerCherryPicks" columns="1"
-          rendered="#{cherryPickRequestViewer.screenerCherryPickCount > 0}">
+          rendered="#{cherryPickRequestViewer.screenerCherryPicksSearchResult.rowCount > 0}">
 
           <t:panelGroup id="screenerCherryPicksCommandPanel"
             styleClass="commandPanel"
@@ -75,7 +75,7 @@
 
   <!-- note: screenerCherryPickSearchResult must outside of above form, since searchResult has its own form -->
   <t:div
-    rendered="#{! cherryPickRequestViewer.isPanelCollapsedMap['screenerCherryPicks'] &amp;&amp; cherryPickRequestViewer.screenerCherryPickCount > 0}">
+    rendered="#{! cherryPickRequestViewer.isPanelCollapsedMap['screenerCherryPicks'] &amp;&amp; cherryPickRequestViewer.screenerCherryPicksSearchResult.rowCount > 0}">
     <ss:searchResult
       searchResults="#{cherryPickRequestViewer.screenerCherryPicksSearchResult}" />
   </t:div>
@@ -91,16 +91,16 @@
           <t:outputText
             value="Cherry picks have not yet been specified"
             styleClass="label"
-            rendered="#{cherryPickRequestViewer.labCherryPickCount == 0}" />
+            rendered="#{cherryPickRequestViewer.labCherryPicksSearchResult.rowCount == 0}" />
 
           <t:panelGroup id="labCherryPicksCommandPanel"
             styleClass="commandPanel"
-            rendered="#{cherryPickRequestViewer.labCherryPickCount > 0}">
+            rendered="#{cherryPickRequestViewer.labCherryPicksSearchResult.rowCount > 0}">
             <t:commandButton id="viewCherryPickRequestWellVolumes"
               value="View Well Volumes"
               rendered="#{cherryPickRequestViewer.screensaverUser.isUserInRoleOfNameMap['librariesAdmin']}"
               action="#{cherryPickRequestViewer.viewCherryPickRequestWellVolumes}"
-              disabled="#{cherryPickRequestViewer.screenerCherryPickCount == 0}"
+              disabled="#{cherryPickRequestViewer.screenerCherryPicksSearchResult.rowCount == 0}"
               styleClass="command"
               title="View the available reagent volumes for the cherry picks on the cherry pick copy plates" />
             <t:commandButton
@@ -114,7 +114,7 @@
             <t:commandButton id="allocateCherryPicks"
               value="Reserve reagent"
               action="#{cherryPickRequestViewer.allocateCherryPicks}"
-              disabled="#{cherryPickRequestViewer.screenerCherryPickCount == 0 || cherryPickRequestViewer.entity.allocated}"
+              disabled="#{cherryPickRequestViewer.screenerCherryPicksSearchResult.rowCount == 0 || cherryPickRequestViewer.entity.allocated}"
               styleClass="command"
               title="Reserve reagent for the cherry picks from the cherry pick copy plates" />
             <t:commandButton id="deallocateCherryPicks"
@@ -144,9 +144,23 @@
 
   <!-- note: labCherryPickSearchResult must outside of above form, since searchResult has its own form -->
   <t:div
-    rendered="#{! cherryPickRequestViewer.isPanelCollapsedMap['labCherryPicks'] &amp;&amp; cherryPickRequestViewer.labCherryPickCount > 0}">
+    rendered="#{! cherryPickRequestViewer.isPanelCollapsedMap['labCherryPicks'] &amp;&amp; cherryPickRequestViewer.labCherryPicksSearchResult.rowCount > 0}">
     <ss:searchResult
-      searchResults="#{cherryPickRequestViewer.labCherryPicksSearchResult}" />
+      searchResults="#{cherryPickRequestViewer.labCherryPicksSearchResult}">
+      <ui:define name="searchResultFooter">
+        <t:panelGrid rendered="#{searchResults.editMode}" columns="1">
+          <t:outputLabel for="updateActivityComments"
+            value="Comments for source copy updates:"
+            styleClass="label"
+            title="Comments associated with the lab cherry pick source copy updates" />
+          <t:inputTextarea id="updateActivityComments"
+            rows="3" cols="80"
+            value="#{searchResults.labCherryPickSourceCopyUpdateComments}"
+            styleClass="inputText" />
+        </t:panelGrid>
+      </ui:define>
+
+    </ss:searchResult>
   </t:div>
 
 

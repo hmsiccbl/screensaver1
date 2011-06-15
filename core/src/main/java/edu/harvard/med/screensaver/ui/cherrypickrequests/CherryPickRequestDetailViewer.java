@@ -176,16 +176,6 @@ public class CherryPickRequestDetailViewer extends EditableEntityViewerBackingBe
     return _volumeApprovedBy;
   }
 
-  public int getScreenerCherryPickCount()
-  {
-    return getEntity().getScreenerCherryPicks().size();
-  }
-
-  public int getLabCherryPickCount()
-  {
-    return getEntity().getLabCherryPicks().size();
-  }
-
   public int getActiveCherryPickPlatesCount()
   {
     return getEntity().getActiveCherryPickAssayPlates().size();

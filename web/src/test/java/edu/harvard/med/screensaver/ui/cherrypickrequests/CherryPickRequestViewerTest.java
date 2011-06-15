@@ -9,6 +9,7 @@
 
 package edu.harvard.med.screensaver.ui.cherrypickrequests;
 
+import java.util.Iterator;
 import java.util.List;
 
 import com.google.common.base.Joiner;
@@ -22,6 +23,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import edu.harvard.med.screensaver.ScreensaverConstants;
 import edu.harvard.med.screensaver.db.DAOTransaction;
 import edu.harvard.med.screensaver.db.UsersDAO;
+import edu.harvard.med.screensaver.model.AdministrativeActivityType;
 import edu.harvard.med.screensaver.model.MakeDummyEntities;
 import edu.harvard.med.screensaver.model.Volume;
 import edu.harvard.med.screensaver.model.cherrypicks.CherryPickAssayPlate;
@@ -32,6 +34,7 @@ import edu.harvard.med.screensaver.model.libraries.Library;
 import edu.harvard.med.screensaver.model.libraries.Plate;
 import edu.harvard.med.screensaver.model.libraries.PlateStatus;
 import edu.harvard.med.screensaver.model.libraries.Well;
+import edu.harvard.med.screensaver.model.libraries.WellVolumeAdjustment;
 import edu.harvard.med.screensaver.model.screens.CherryPickScreening;
 import edu.harvard.med.screensaver.model.screens.Screen;
 import edu.harvard.med.screensaver.model.screens.ScreenType;
@@ -39,6 +42,7 @@ import edu.harvard.med.screensaver.model.users.LabHead;
 import edu.harvard.med.screensaver.model.users.ScreeningRoomUser;
 import edu.harvard.med.screensaver.service.libraries.PlateUpdater;
 import edu.harvard.med.screensaver.ui.activities.LabActivityViewer;
+import edu.harvard.med.screensaver.ui.arch.datatable.column.entity.TextEntityColumn;
 import edu.harvard.med.screensaver.ui.arch.view.AbstractBackingBeanTest;
 
 public class CherryPickRequestViewerTest extends AbstractBackingBeanTest
@@ -209,6 +213,14 @@ public class CherryPickRequestViewerTest extends AbstractBackingBeanTest
 
   private void initializeAssayPlates()
   {
+    initializeLabCherryPicks();
+    cherryPickRequestViewer.plateMapCherryPicks();
+    CherryPickRequest cpr = genericEntityDao.reloadEntity(_cpr, true, CherryPickRequest.cherryPickAssayPlates);
+    assertEquals(1, cpr.getCherryPickAssayPlates().size());
+  }
+
+  protected void initializeLabCherryPicks()
+  {
     String input = Joiner.on("\n").appendTo(new StringBuilder(), Iterables.transform(_library.getWells(), Well.ToEntityId)).toString();
     log.info("cherry picks: " + input);
     cherryPickRequestViewer.viewEntity(_cpr);
@@ -220,9 +232,60 @@ public class CherryPickRequestViewerTest extends AbstractBackingBeanTest
     cpr = genericEntityDao.reloadEntity(_cpr, true, CherryPickRequest.labCherryPicks);
     assertEquals(384, cpr.getLabCherryPicks().size());
     assertEquals(0, cpr.getNumberUnfulfilledLabCherryPicks());
-    cherryPickRequestViewer.plateMapCherryPicks();
-    cpr = genericEntityDao.reloadEntity(_cpr, true, CherryPickRequest.cherryPickAssayPlates);
-    assertEquals(1, cpr.getCherryPickAssayPlates().size());
   }
   
+
+  public void testEditLabCherryPickSourceCopy()
+  {
+    initializeLabCherryPicks();
+
+    _library.createCopy(_admin, CopyUsageType.CHERRY_PICK_SOURCE_PLATES, "B").findPlate(1000).withWellVolume(new Volume(500));
+    _library.createCopy(_admin, CopyUsageType.LIBRARY_SCREENING_PLATES, "C").findPlate(1000).withWellVolume(new Volume(1000));
+    _library = genericEntityDao.mergeEntity(_library);
+
+    Iterator<LabCherryPick> iter = cherryPickRequestViewer.getEntity().getLabCherryPicks().iterator();
+    LabCherryPick lcp1 = iter.next();
+    LabCherryPick lcp2 = iter.next();
+    
+
+    cherryPickRequestViewer.getLabCherryPicksSearchResult().edit();
+    assertEquals("A", genericEntityDao.reloadEntity(lcp1, true, LabCherryPick.wellVolumeAdjustments.to(WellVolumeAdjustment.copy)).getSourceCopy().getName());
+    ((TextEntityColumn<LabCherryPick>) cherryPickRequestViewer.getLabCherryPicksSearchResult().getColumnManager().getColumn("Source Copy")).setCellValue(lcp1, "B");
+    cherryPickRequestViewer.getLabCherryPicksSearchResult().setLabCherryPickSourceCopyUpdateComments("update1");
+    cherryPickRequestViewer.getLabCherryPicksSearchResult().save();
+    assertEquals("B", genericEntityDao.reloadEntity(lcp1, true, LabCherryPick.wellVolumeAdjustments.to(WellVolumeAdjustment.copy)).getSourceCopy().getName());
+    CherryPickRequest cpr = genericEntityDao.reloadEntity(cherryPickRequestViewer.getEntity(), true, CherryPickRequest.updateActivities.castToSubtype(CherryPickRequest.class));
+    assertEquals("updated source copy for lab cherry pick(s): " + lcp1.getSourceWell().getWellKey() + " from A to B",
+                 cpr.getUpdateActivitiesOfType(AdministrativeActivityType.LAB_CHERRY_PICK_SOURCE_COPY_OVERRIDE).last().getComments());
+    assertEquals("update1", cpr.getUpdateActivitiesOfType(AdministrativeActivityType.COMMENT).last().getComments());
+
+    cherryPickRequestViewer.getLabCherryPicksSearchResult().edit();
+    ((TextEntityColumn<LabCherryPick>) cherryPickRequestViewer.getLabCherryPicksSearchResult().getColumnManager().getColumn("Source Copy")).setCellValue(lcp1, null);
+    cherryPickRequestViewer.getLabCherryPicksSearchResult().setLabCherryPickSourceCopyUpdateComments("update2");
+    cherryPickRequestViewer.getLabCherryPicksSearchResult().save();
+    assertFalse(genericEntityDao.reloadEntity(lcp1, true, LabCherryPick.wellVolumeAdjustments.to(WellVolumeAdjustment.copy)).isAllocated());
+    cpr = genericEntityDao.reloadEntity(cherryPickRequestViewer.getEntity(), true, CherryPickRequest.updateActivities.castToSubtype(CherryPickRequest.class));
+    assertEquals("updated source copy for lab cherry pick(s): " + lcp1.getSourceWell().getWellKey() + " from B to <none>",
+                 cpr.getUpdateActivitiesOfType(AdministrativeActivityType.LAB_CHERRY_PICK_SOURCE_COPY_OVERRIDE).last().getComments());
+    assertEquals("update2", cpr.getUpdateActivitiesOfType(AdministrativeActivityType.COMMENT).last().getComments());
+
+    cherryPickRequestViewer.getLabCherryPicksSearchResult().edit();
+    ((TextEntityColumn<LabCherryPick>) cherryPickRequestViewer.getLabCherryPicksSearchResult().getColumnManager().getColumn("Source Copy")).setCellValue(lcp1, "A");
+    ((TextEntityColumn<LabCherryPick>) cherryPickRequestViewer.getLabCherryPicksSearchResult().getColumnManager().getColumn("Source Copy")).setCellValue(lcp2, "B");
+    cherryPickRequestViewer.getLabCherryPicksSearchResult().setLabCherryPickSourceCopyUpdateComments("update3");
+    cherryPickRequestViewer.getLabCherryPicksSearchResult().save();
+    assertEquals("A", genericEntityDao.reloadEntity(lcp1, true, LabCherryPick.wellVolumeAdjustments.to(WellVolumeAdjustment.copy)).getSourceCopy().getName());
+    assertEquals("B", genericEntityDao.reloadEntity(lcp2, true, LabCherryPick.wellVolumeAdjustments.to(WellVolumeAdjustment.copy)).getSourceCopy().getName());
+    cpr = genericEntityDao.reloadEntity(cherryPickRequestViewer.getEntity(), true, CherryPickRequest.updateActivities.castToSubtype(CherryPickRequest.class));
+    assertEquals("updated source copy for lab cherry pick(s): " + lcp1.getSourceWell().getWellKey() + " from <none> to A, " +
+      lcp2.getSourceWell().getWellKey() + " from A to B",
+                 cpr.getUpdateActivitiesOfType(AdministrativeActivityType.LAB_CHERRY_PICK_SOURCE_COPY_OVERRIDE).last().getComments());
+    assertEquals("update3", cpr.getUpdateActivitiesOfType(AdministrativeActivityType.COMMENT).last().getComments());
+
+    cherryPickRequestViewer.getMessages().getQueuedMessages().clear();
+    cherryPickRequestViewer.getLabCherryPicksSearchResult().edit();
+    ((TextEntityColumn<LabCherryPick>) cherryPickRequestViewer.getLabCherryPicksSearchResult().getColumnManager().getColumn("Source Copy")).setCellValue(lcp1, "D");
+    cherryPickRequestViewer.getLabCherryPicksSearchResult().save();
+    assertEquals("No copy D for plate 1000", cherryPickRequestViewer.getMessages().getQueuedMessages().get(0).getSecond().getSummary());
+  }
 }

@@ -205,7 +205,7 @@ public class ScreenDetailViewer extends AbstractStudyDetailViewer<Screen>
 
     _publicationAttachedFileType = getDao().findEntityByProperty(AttachedFileType.class, "value", Publication.PUBLICATION_ATTACHED_FILE_TYPE_VALUE);
     if (_publicationAttachedFileType == null) {
-      throw new NoSuchEntityException(AttachedFileType.class, "value", Publication.PUBLICATION_ATTACHED_FILE_TYPE_VALUE);
+      throw NoSuchEntityException.forProperty(AttachedFileType.class, "value", Publication.PUBLICATION_ATTACHED_FILE_TYPE_VALUE);
     }
   }
   

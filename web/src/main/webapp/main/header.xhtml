@@ -26,8 +26,10 @@
 		</t:panelGroup>
 	</h:form>
 
-	<h:messages id="allMessages" globalOnly="false" showDetail="true"
-		styleClass="errorMessage" />
+  <t:dataList id="allMessages" var="msg"
+    value="#{messages.messagesAndDequeue}" layout="unorderedList">
+    <t:outputText value="#{msg.summary}" styleClass="errorMessage" />
+  </t:dataList>
 
 </ui:composition>
 

@@ -16,7 +16,7 @@
       <h:form id="titleForm">
         <t:commandLink id="menuTitle" action="#{menu.viewMain}"
           value="#{menu.applicationName}" styleClass="menuItem title"
-          title="Go to the Screensaver main page" />
+          title="Go to the #{menu.applicationName} main page" />
       </h:form>
 
       <t:div rendered="#{menu.authenticatedUser}">

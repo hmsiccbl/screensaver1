@@ -112,6 +112,9 @@ public class WellSearchResults extends TupleBasedEntitySearchResults<Well,String
   private static final String OTHER_ANNOTATION_TYPES_COLUMN_GROUP = "Study Annotations (Other Studies)";
   private static final String OUR_ANNOTATION_TYPES_COLUMN_GROUP = "Study Annotations";
 
+  private static String COLUMN_REAGENT_ID = "Vendor Reagent ID";
+
+
   protected static final Function<DataColumn,Triple<DataColumn,String,String>> DataColumnToMetaDataColumn =
     new Function<DataColumn,Triple<DataColumn,String,String>>() {
       @Override
@@ -361,7 +364,7 @@ public class WellSearchResults extends TupleBasedEntitySearchResults<Well,String
     initialize(dataFetcher);
 
     getColumnManager().getColumn("Reagent Vendor").setVisible(true);
-    getColumnManager().getColumn("Reagent ID").setVisible(true);
+    getColumnManager().getColumn(COLUMN_REAGENT_ID).setVisible(true);
     // show columns for this screenResult's data columns
     for (AnnotationType at : study.getAnnotationTypes()) {
       getColumnManager().getColumn(WellSearchResults.makeColumnName(at, _study.getFacilityId())).setVisible(true);
@@ -382,7 +385,7 @@ public class WellSearchResults extends TupleBasedEntitySearchResults<Well,String
       };
     initialize(dataFetcher);
     getColumnManager().getColumn("Reagent Vendor").setVisible(true);
-    getColumnManager().getColumn("Reagent ID").setVisible(true);
+    getColumnManager().getColumn(COLUMN_REAGENT_ID).setVisible(true);
 
     // TODO: should report # of reagent identifiers not found
   }
@@ -658,7 +661,7 @@ public class WellSearchResults extends TupleBasedEntitySearchResults<Well,String
       "The vendor of the reagent in this well.",
       WELL_COLUMNS_GROUP));
     columns.add(new TextTupleColumn<Well,String>(relPath.to(Reagent.vendorIdentifier),
-      "Reagent ID",
+      COLUMN_REAGENT_ID,
       "The vendor-assigned identifier for the reagent in this well.",
       WELL_COLUMNS_GROUP));
     columns.add(new IntegerTupleColumn<Well,String>(relPath.to(Reagent.libraryContentsVersion).toProperty("versionNumber"),

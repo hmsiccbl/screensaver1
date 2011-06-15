@@ -14,6 +14,7 @@ import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
+import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Set;
@@ -21,9 +22,11 @@ import java.util.SortedSet;
 import java.util.TreeSet;
 
 import com.google.common.base.Function;
+import com.google.common.base.Joiner;
 import com.google.common.collect.HashMultimap;
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.Iterables;
+import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
 import com.google.common.collect.Multimap;
 import com.google.common.collect.Sets;
@@ -37,6 +40,8 @@ import edu.harvard.med.screensaver.db.CherryPickRequestDAO;
 import edu.harvard.med.screensaver.db.EntityInflator;
 import edu.harvard.med.screensaver.db.GenericEntityDAO;
 import edu.harvard.med.screensaver.db.LibrariesDAO;
+import edu.harvard.med.screensaver.db.NoSuchEntityException;
+import edu.harvard.med.screensaver.model.AdministrativeActivityType;
 import edu.harvard.med.screensaver.model.BusinessRuleViolationException;
 import edu.harvard.med.screensaver.model.DataModelViolationException;
 import edu.harvard.med.screensaver.model.Volume;
@@ -46,8 +51,11 @@ import edu.harvard.med.screensaver.model.cherrypicks.CherryPickRequest;
 import edu.harvard.med.screensaver.model.cherrypicks.LabCherryPick;
 import edu.harvard.med.screensaver.model.libraries.Copy;
 import edu.harvard.med.screensaver.model.libraries.CopyUsageType;
+import edu.harvard.med.screensaver.model.libraries.Plate;
 import edu.harvard.med.screensaver.model.libraries.Well;
+import edu.harvard.med.screensaver.model.users.AdministratorUser;
 import edu.harvard.med.screensaver.policy.CherryPickPlateSourceWellMinimumVolumePolicy;
+import edu.harvard.med.screensaver.util.NullSafeUtils;
 import edu.harvard.med.screensaver.util.PowerSet;
 
 /**
@@ -364,5 +372,56 @@ public class CherryPickRequestAllocator
       _dao.persistEntity(newAssayPlate);
     }
     return unfullfilable;
+  }
+
+  /**
+   * Updates the specified {@link LabCherryPick LabCherryPicks} with the specified source copies, allowing for arbitrary
+   * (e.g., user-specified) allocations of LabCherryPicks. Remaining volume checks are <i>not</i> made on the new source
+   * copy wells, so it possible to overallocate from a well using this feature
+   * 
+   * @param lcpSourceCopies a Map, with LabCherryPicks as keys, and source copy names as values. Accepts
+   *          LabCherryPicks that either allocated or not. If the source copy
+   *          name is null, the associated LabCherryPick will be deallocated, if it is already allocated.
+   * @param admin
+   * @motivation manual override of lab cherry pick source copies, to correct the record of what source copy wells were
+   *             actually picked by the lab
+   */
+  @Transactional
+  public void allocate(Map<LabCherryPick,String> lcpSourceCopies,
+                       CherryPickRequest cpr,
+                       AdministratorUser admin,
+                       String updateComments)
+  {
+    cpr = _dao.reloadEntity(cpr);
+    admin = _dao.reloadEntity(admin);
+    List<String> msgs = Lists.newArrayList();
+    for (LabCherryPick lcp : lcpSourceCopies.keySet()) {
+      lcp = _dao.reloadEntity(lcp);
+      String newSourceCopyName = lcpSourceCopies.get(lcp);
+      String oldSourceCopyName = lcp.getSourceCopy() == null ? null : lcp.getSourceCopy().getName();
+      if (!NullSafeUtils.nullSafeEquals(oldSourceCopyName, newSourceCopyName)) {
+        if (lcp.isAllocated()) {
+          lcp.setAllocated(null);
+        }
+        if (newSourceCopyName != null) {
+          Plate newSourceCopyPlate = _librariesDao.findPlate(lcp.getSourceWell().getPlateNumber(), newSourceCopyName);
+          if (newSourceCopyPlate == null) {
+            throw NoSuchEntityException.forProperties(Plate.class,
+                                                      ImmutableMap.<String,Object>of("plate", lcp.getSourceWell().getPlateNumber(),
+                                                                                     "copy", newSourceCopyName));
+          }
+          lcp.setAllocated(newSourceCopyPlate.getCopy());
+        }
+        String msg = lcp.getSourceWell().getWellKey() +
+          " from " + NullSafeUtils.toString(oldSourceCopyName, "<none>") +
+          " to " + NullSafeUtils.toString(newSourceCopyName, "<none>");
+        log.info(msg);
+        msgs.add(msg);
+      }
+    }
+    cpr.createUpdateActivity(AdministrativeActivityType.LAB_CHERRY_PICK_SOURCE_COPY_OVERRIDE,
+                             admin,
+                             "updated source copy for lab cherry pick(s): " + Joiner.on(", ").join(msgs));
+    cpr.createComment(admin, updateComments);
   }
 }

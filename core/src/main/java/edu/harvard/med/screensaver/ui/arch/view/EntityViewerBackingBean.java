@@ -94,7 +94,7 @@ public abstract class EntityViewerBackingBean<E extends Entity<?>> extends Abstr
     }
     entity = _dao.reloadEntity(entityIn, true);
     if (entity == null) { 
-     throw new NoSuchEntityException(entityIn.getClass(), entityIn.getEntityId()); 
+      throw NoSuchEntityException.forEntityId(entityIn.getClass(), entityIn.getEntityId());
     }
 
     // TODO: implement as aspect

@@ -23,6 +23,7 @@ import com.google.common.collect.Lists;
 import com.google.common.collect.Sets;
 import org.apache.commons.cli.OptionBuilder;
 import org.apache.commons.cli.ParseException;
+import org.apache.commons.lang.StringUtils;
 import org.apache.log4j.Logger;
 import org.joda.time.format.DateTimeFormat;
 import org.joda.time.format.DateTimeFormatter;
@@ -103,6 +104,12 @@ public class AdminEmailApplication extends CommandLineApplication
     throws MessagingException
   {
     try {
+      log.info("admin email for: " + user + ", " + user.getEmail() );
+      if(StringUtils.isEmpty(user.getEmail()))
+      {
+        log.error("Email address for the admin user is null! user: " + user.getFullNameFirstLast() + ", " + user );
+        return null;
+      }
       return new InternetAddress(user.getEmail());
     }
     catch (AddressException e) {

@@ -11,6 +11,7 @@ package edu.harvard.med.screensaver.service;
 
 import edu.harvard.med.screensaver.model.AbstractEntity;
 
+// TODO: redundant with NoSuchEntityException
 public class EntityNotFoundException extends Exception
 {
   private static final long serialVersionUID = 1L;

@@ -166,8 +166,15 @@
          value="#{wellViewer.versionedReagent.pubchemCids}"
          linkPrefix="#{wellViewer.pubchemCidUrlPrefix}" >
        </ss:property>
-       
-       <ss:property id="chembankIds" label="ChemBank IDs" 
+
+      <ss:property id="chemblIds" label="ChEMBL IDs" type="ListOfLinks"
+        rendered="#{wellViewer.allowedAccessToSmallMoleculeReagent}"
+        description="The ChEMBL IDs for the compound"
+        value="#{wellViewer.versionedReagent.chemblIds}"
+        linkPrefix="#{wellViewer.chemblIdUrlPrefix}">
+      </ss:property>
+
+      <ss:property id="chembankIds" label="ChemBank IDs" 
          type="ListOfLinks" rendered="#{wellViewer.allowedAccessToSmallMoleculeReagent}"
          description="The ChemBank IDs for the compound" 
          value="#{wellViewer.versionedReagent.chembankIds}"

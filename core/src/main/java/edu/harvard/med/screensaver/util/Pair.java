@@ -10,7 +10,8 @@
 package edu.harvard.med.screensaver.util;
 
 import java.util.Comparator;
-import java.util.HashMap;
+
+import com.google.common.base.Function;
 
 /**
  * A 2-tuple.
@@ -19,7 +20,27 @@ import java.util.HashMap;
  */
 public class Pair<F,S>
 {
+  public static final <F1,S1> Function<Pair<F1,S1>,F1> toFirst()
+  {
+    return new Function<Pair<F1,S1>,F1>() {
+      public F1 apply(Pair<F1,S1> p)
+      {
+        return p.getFirst();
+      }
+    };
+  }
 
+  public static final <F1,S1> Function<Pair<F1,S1>,S1> toSecond() 
+  {
+    return new Function<Pair<F1,S1>,S1>()
+    { 
+      public S1 apply(Pair<F1,S1> p)
+      {
+        return p.getSecond(); 
+      }
+    };
+  }
+    
   private F _first;
   private S _second;
   

@@ -19,7 +19,7 @@
     <t:commandButton id="showAdminWarnings"
       value="Show Cherry Pick Warnings"
       action="#{cherryPickRequestDetailViewer.showAdminWarnings}"
-      rendered="#{cherryPickRequestDetailViewer.readAdmin &amp;&amp; cherryPickRequestDetailViewer.screenerCherryPickCount > 0}"
+      rendered="#{cherryPickRequestDetailViewer.readAdmin &amp;&amp; cherryPickRequestViewer.screenerCherryPicksSearchResult.rowCount > 0}"
       styleClass="command"
       description="Show administrative warnings for screener cherry picks" />
   </ui:define>
@@ -140,12 +140,12 @@
       label="# Screener cherry picks"
       rendered="#{!!!cherryPickRequestDetailViewer.editMode}"
       description="The number of screener cherry picks"
-      value="#{cherryPickRequestDetailViewer.screenerCherryPickCount}" />
+      value="#{cherryPickRequestViewer.screenerCherryPicksSearchResult.rowCount}" />
 
     <ss:property id="labCherryPickCount" label="# Lab cherry picks"
       rendered="#{!!!cherryPickRequestDetailViewer.editMode}"
       description="The number of lab cherry picks"
-      value="#{cherryPickRequestDetailViewer.labCherryPickCount}" />
+      value="#{cherryPickRequestViewer.labCherryPicksSearchResult.rowCount}" />
 
     <ss:propertyGroup label="Work Status" columns="6"
       columnClasses="propertyLabelColumn,column,propertyLabelColumn,column,propertyLabelColumn,column"

@@ -220,7 +220,7 @@ public class PlateBatchUpdater
     if (plate == null) {
       Library library = librariesDao.findLibraryWithPlate(plateNumber);
       if (library == null) {
-        throw new NoSuchEntityException(Library.class, "plateNumber", plateNumber);
+        throw NoSuchEntityException.forProperty(Library.class, "plateNumber", plateNumber);
       }
       Copy copy = library.createCopy(recordedBy, copyUsageType, copyName);
       log.info("created new copy " + copyName + " for library " + library.getLibraryName());
