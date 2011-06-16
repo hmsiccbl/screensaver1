@@ -51,11 +51,7 @@
         <artifactId>maven-surefire-plugin</artifactId>
         <configuration>
          <goal>test</goal>
-         <includes>
-          <include>**/CollectionUtilsTest.java</include>
-         </includes>
           <excludes>
-            <exclude>*</exclude>
             <exclude>**/EntityPropertyTest.java</exclude>
           </excludes>
         </configuration>
