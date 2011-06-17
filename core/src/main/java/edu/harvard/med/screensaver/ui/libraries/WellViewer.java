@@ -226,10 +226,6 @@ public class WellViewer extends SearchResultContextEntityViewerBackingBean<Well,
 
   private void initializeAnnotationValuesTable(Well well)
   {
-    if (true) {
-      _annotationNameValueTable = new ArrayList<SimpleCell>();
-      return;
-    }
     List<AnnotationValue> annotationValues = new ArrayList<AnnotationValue>();
     if (_versionedReagent != null) {
       getDao().needReadOnly(_versionedReagent, Reagent.annotationValues);
