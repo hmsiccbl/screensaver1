@@ -6,12 +6,12 @@
   <parent> 
     <artifactId>screensaver</artifactId> 
     <groupId>edu.harvard.med</groupId> 
-    <version>6019</version> 
+    <version>2011-06-20</version> 
   </parent> 
 
   <groupId>edu.harvard.med</groupId>
   <artifactId>screensaver-core</artifactId>
-  <version>6019</version>
+  <version>2011-06-20</version>
   <name>Screensaver Core</name>
 
   <packaging>jar</packaging>

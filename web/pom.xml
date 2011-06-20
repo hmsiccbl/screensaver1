@@ -2,14 +2,14 @@
   <modelVersion>4.0.0</modelVersion>
   <parent>
     <artifactId>screensaver</artifactId>
-    <version>6019</version>
+    <version>2011-06-20</version>
     <groupId>edu.harvard.med</groupId>
     <relativePath>../pom.xml</relativePath>
   </parent>
   
   <groupId>edu.harvard.med</groupId>
   <artifactId>screensaver-web</artifactId>
-  <version>6019</version>
+  <version>2011-06-20</version>
   <name>Screensaver Web</name>
   <description>Screensaver web application</description>
 
@@ -127,7 +127,7 @@
    	<!-- dependency>
   		<groupId>edu.harvard.med</groupId>
   		<artifactId>screensaver-core</artifactId>
-  		<version>6019</version>
+  		<version>2011-06-20</version>
       <scope>test</scope>
       <type>test-jar</type>
   	</dependency-->
@@ -135,7 +135,7 @@
   	<dependency>
   		<groupId>edu.harvard.med</groupId>
   		<artifactId>screensaver-core</artifactId>
-  		<version>6019</version>
+  		<version>2011-06-20</version>
   	</dependency>
   </dependencies>
 </project>
