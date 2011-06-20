@@ -2,14 +2,14 @@
   <modelVersion>4.0.0</modelVersion>
   <parent>
     <artifactId>screensaver</artifactId>
-    <version>2.3.4</version>
+    <version>6019</version>
     <groupId>edu.harvard.med</groupId>
     <relativePath>../pom.xml</relativePath>
   </parent>
   
   <groupId>edu.harvard.med</groupId>
   <artifactId>screensaver-web</artifactId>
-  <version>2.3.4</version>
+  <version>6019</version>
   <name>Screensaver Web</name>
   <description>Screensaver web application</description>
 
@@ -124,18 +124,18 @@
   <dependencies>
 
     <!-- web module test code depends upon test classes in core module -->
-   	<dependency>
+   	<!-- dependency>
   		<groupId>edu.harvard.med</groupId>
   		<artifactId>screensaver-core</artifactId>
-  		<version>2.3.4</version>
+  		<version>6019</version>
       <scope>test</scope>
       <type>test-jar</type>
-  	</dependency>
+  	</dependency-->
 
   	<dependency>
   		<groupId>edu.harvard.med</groupId>
   		<artifactId>screensaver-core</artifactId>
-  		<version>2.3.4</version>
+  		<version>6019</version>
   	</dependency>
   </dependencies>
 </project>
