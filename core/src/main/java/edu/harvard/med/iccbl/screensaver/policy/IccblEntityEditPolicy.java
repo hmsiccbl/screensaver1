@@ -37,8 +37,6 @@ import edu.harvard.med.screensaver.model.screenresults.DataColumn;
 import edu.harvard.med.screensaver.model.screenresults.ResultValue;
 import edu.harvard.med.screensaver.model.screenresults.ScreenResult;
 import edu.harvard.med.screensaver.model.screens.AbaseTestset;
-import edu.harvard.med.screensaver.model.screens.BillingInformation;
-import edu.harvard.med.screensaver.model.screens.BillingItem;
 import edu.harvard.med.screensaver.model.screens.CherryPickScreening;
 import edu.harvard.med.screensaver.model.screens.EquipmentUsed;
 import edu.harvard.med.screensaver.model.screens.FundingSupport;
@@ -86,259 +84,259 @@ public class IccblEntityEditPolicy implements EntityEditPolicy
   }
 
   @Override
-  public boolean visit(AbaseTestset entity)
+  public Boolean visit(AbaseTestset entity)
   {
     return visit(entity.getScreen());
   }
 
   @Override
-  public boolean visit(AdministratorUser administratorUser)
+  public Boolean visit(AdministratorUser administratorUser)
   {
     return false;
   }
 
   @Override
-  public boolean visit(AdministrativeActivity administrativeActivity)
+  public Boolean visit(AdministrativeActivity administrativeActivity)
   {
     return getScreensaverUser().isUserInRole(administrativeActivity.getType().getEditableByRole());
   }
 
   @Override
-  public boolean visit(AnnotationType annotation)
+  public Boolean visit(AnnotationType annotation)
   {
     return false;
   }
 
   @Override
-  public boolean visit(AnnotationValue annotationValue)
+  public Boolean visit(AnnotationValue annotationValue)
   {
     return false;
   }
 
   @Override
-  public boolean visit(AssayPlate assayPlate)
+  public Boolean visit(AssayPlate assayPlate)
   {
     return false;
   }
 
   @Override
-  public boolean visit(AssayWell assayWell)
+  public Boolean visit(AssayWell assayWell)
   {
     return false;
   }
 
   @Override
-  public boolean visit(AttachedFile entity)
+  public Boolean visit(AttachedFile entity)
   {
     return false;
   }
 
   @Override
-  public boolean visit(AttachedFileType attachedFileType)
+  public Boolean visit(AttachedFileType attachedFileType)
   {
     return false;
   }
 
-  @Override
-  public boolean visit(BillingInformation entity)
-  {
-    return getScreensaverUser().isUserInRole(ScreensaverUserRole.BILLING_ADMIN);
-  }
+  //  @Override
+  //  public Boolean visit(BillingInformation entity)
+  //  {
+  //    return getScreensaverUser().isUserInRole(ScreensaverUserRole.BILLING_ADMIN);
+  //  }
+  //
+  //  @Override
+  //  public Boolean visit(BillingItem entity)
+  //  {
+  //    return getScreensaverUser().isUserInRole(ScreensaverUserRole.BILLING_ADMIN);
+  //  }
 
   @Override
-  public boolean visit(BillingItem entity)
-  {
-    return getScreensaverUser().isUserInRole(ScreensaverUserRole.BILLING_ADMIN);
-  }
-
-  @Override
-  public boolean visit(ChecklistItemEvent entity)
+  public Boolean visit(ChecklistItemEvent entity)
   {
     return getScreensaverUser().isUserInRole(ScreensaverUserRole.USER_CHECKLIST_ITEMS_ADMIN);
   }
 
   @Override
-  public boolean visit(ChecklistItem entity)
+  public Boolean visit(ChecklistItem entity)
   {
     return false;
   }
 
   @Override
-  public boolean visit(CherryPickAssayPlate entity)
+  public Boolean visit(CherryPickAssayPlate entity)
   {
     return false;
   }
 
   @Override
-  public boolean visit(CherryPickLiquidTransfer entity)
+  public Boolean visit(CherryPickLiquidTransfer entity)
   {
     return getScreensaverUser().isUserInRole(ScreensaverUserRole.CHERRY_PICK_REQUESTS_ADMIN);
   }
 
   @Override
-  public boolean visit(SmallMoleculeReagent entity)
+  public Boolean visit(SmallMoleculeReagent entity)
   {
     return false;
   }
 
   @Override
-  public boolean visit(SmallMoleculeCherryPickRequest entity)
+  public Boolean visit(SmallMoleculeCherryPickRequest entity)
   {
     return getScreensaverUser().isUserInRole(ScreensaverUserRole.CHERRY_PICK_REQUESTS_ADMIN);
   }
 
   @Override
-  public boolean visit(Copy entity)
+  public Boolean visit(Copy entity)
   {
     return getScreensaverUser().isUserInRole(ScreensaverUserRole.LIBRARY_COPIES_ADMIN);
   }
 
   @Override
-  public boolean visit(Plate entity)
+  public Boolean visit(Plate entity)
   {
     return visit(entity.getCopy());
   }
 
   @Override
-  public boolean visit(PlateLocation entity)
+  public Boolean visit(PlateLocation entity)
   {
     return false;
   }
 
   @Override
-  public boolean visit(EquipmentUsed entity)
+  public Boolean visit(EquipmentUsed entity)
   {
     return false;
   }
 
   @Override
-  public boolean visit(FundingSupport fundingSupport)
+  public Boolean visit(FundingSupport fundingSupport)
   {
     return false;
   }
 
   @Override
-  public boolean visit(Gene entity)
+  public Boolean visit(Gene entity)
   {
     return false;
   }
 
   @Override
-  public boolean visit(LabAffiliation entity)
+  public Boolean visit(LabAffiliation entity)
   {
     return getScreensaverUser().isUserInRole(ScreensaverUserRole.LAB_HEADS_ADMIN);
   }
 
   @Override
-  public boolean visit(LabCherryPick entity)
+  public Boolean visit(LabCherryPick entity)
   {
     return false;
   }
 
   @Override
-  public boolean visit(LabHead labHead)
+  public Boolean visit(LabHead labHead)
   {
     return getScreensaverUser().isUserInRole(ScreensaverUserRole.LAB_HEADS_ADMIN);
   }
 
   @Override
-  public boolean visit(Library entity)
+  public Boolean visit(Library entity)
   {
     return getScreensaverUser().isUserInRole(ScreensaverUserRole.LIBRARIES_ADMIN);
   }
 
   @Override
-  public boolean visit(LibraryContentsVersion libraryContentsVersion)
+  public Boolean visit(LibraryContentsVersion libraryContentsVersion)
   {
     return visit(libraryContentsVersion.getLibrary());
   }
 
   @Override
-  public boolean visit(LibraryScreening entity)
+  public Boolean visit(LibraryScreening entity)
   {
     return visit(entity.getScreen());
   }
 
   @Override
-  public boolean visit(NaturalProductReagent entity)
+  public Boolean visit(NaturalProductReagent entity)
   {
     return false;
   }
 
   @Override
-  public boolean visit(Publication entity)
+  public Boolean visit(Publication entity)
   {
     return false;
   }
 
   @Override
-  public boolean visit(ResultValue entity)
+  public Boolean visit(ResultValue entity)
   {
     return false;
   }
 
   @Override
-  public boolean visit(DataColumn entity)
+  public Boolean visit(DataColumn entity)
   {
     return visit(entity.getScreenResult());
   }
 
   @Override
-  public boolean visit(RNAiCherryPickRequest entity)
+  public Boolean visit(RNAiCherryPickRequest entity)
   {
     return getScreensaverUser().isUserInRole(ScreensaverUserRole.CHERRY_PICK_REQUESTS_ADMIN);
   }
 
   @Override
-  public boolean visit(CherryPickScreening entity)
+  public Boolean visit(CherryPickScreening entity)
   {
     return visit(entity.getScreen());
   }
 
   @Override
-  public boolean visit(Screen screen)
+  public Boolean visit(Screen screen)
   {
     return getScreensaverUser().isUserInRole(ScreensaverUserRole.SCREENS_ADMIN);
   }
 
   @Override
-  public boolean visit(ScreenResult screenResult)
+  public Boolean visit(ScreenResult screenResult)
   {
     return getScreensaverUser().isUserInRole(ScreensaverUserRole.SCREEN_RESULTS_ADMIN);
   }
 
   @Override
-  public boolean visit(ScreenerCherryPick entity)
+  public Boolean visit(ScreenerCherryPick entity)
   {
     return false;
   }
 
   @Override
-  public boolean visit(ScreeningRoomUser screeningRoomUser)
+  public Boolean visit(ScreeningRoomUser screeningRoomUser)
   {
     return getScreensaverUser().isUserInRole(ScreensaverUserRole.USERS_ADMIN);
   }
 
   @Override
-  public boolean visit(SilencingReagent entity)
+  public Boolean visit(SilencingReagent entity)
   {
     return false;
   }
 
   @Override
-  public boolean visit(Study study)
+  public Boolean visit(Study study)
   {
     return getScreensaverUser().isUserInRole(ScreensaverUserRole.SCREENS_ADMIN);
   }
 
   @Override
-  public boolean visit(Well entity)
+  public Boolean visit(Well entity)
   {
     return false;
   }
 
   @Override
-  public boolean visit(WellVolumeCorrectionActivity entity)
+  public Boolean visit(WellVolumeCorrectionActivity entity)
   {
     return getScreensaverUser().isUserInRole(ScreensaverUserRole.LIBRARIES_ADMIN);
   }

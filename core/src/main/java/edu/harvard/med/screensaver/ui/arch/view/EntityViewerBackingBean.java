@@ -107,7 +107,7 @@ public abstract class EntityViewerBackingBean<E extends Entity<?>> extends Abstr
     initializeEntity(entity);
     initializeViewer(entity);
     // note: we don't store the entity unless initializeViewer() returns successfully; otherwise, we might expose an entity that should be restricted
-    _entity = entity;
+    _entity = (E) entity.restrict();
   }
   
   public Class<E> getEntityClass()

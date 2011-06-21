@@ -78,11 +78,13 @@ public class SmallMoleculeReagent extends Reagent
   private String _vendorBatchId;
   private Integer _facilityBatchId;
   private Integer _saltFormId;
+  private boolean _isRestrictedStructure;
 
   /**
    * @motivation for hibernate and proxy/concrete subclass constructors
    */
-  protected SmallMoleculeReagent() {}
+  protected SmallMoleculeReagent()
+  {}
 
   SmallMoleculeReagent(ReagentVendorIdentifier rvi,
                        Well well, 
@@ -401,5 +403,16 @@ public class SmallMoleculeReagent extends Reagent
   {
     _saltFormId = saltFormId;
     return this;
+  }
+
+  @Column(name = "is_restricted_structure", nullable = false)
+  public boolean isRestrictedStructure()
+  {
+    return _isRestrictedStructure;
+  }
+
+  private void setRestrictedStructure(Boolean isRestrictedStructure)
+  {
+    _isRestrictedStructure = isRestrictedStructure;
   }
 }

@@ -14,11 +14,11 @@ import java.net.URL;
 import org.apache.log4j.Logger;
 
 import edu.harvard.med.lincs.screensaver.LincsScreensaverConstants;
+import edu.harvard.med.screensaver.io.libraries.smallmolecule.StructureImageProvider;
 import edu.harvard.med.screensaver.model.libraries.SmallMoleculeReagent;
-import edu.harvard.med.screensaver.ui.arch.images.ImageProvider;
 import edu.harvard.med.screensaver.ui.arch.util.servlet.ImageProviderServlet;
 
-public abstract class SmallMoleculeReagentFacilitySaltIdGenericImageProvider implements ImageProvider<SmallMoleculeReagent>
+public abstract class SmallMoleculeReagentFacilitySaltIdGenericImageProvider implements StructureImageProvider
 {
   private static final String IMAGE_FILE_EXTENSION = ".png";
 
@@ -41,10 +41,6 @@ public abstract class SmallMoleculeReagentFacilitySaltIdGenericImageProvider imp
       if (reagent == null) {
         return null;
       }
-      if (reagent.isRestricted()) {
-        return null;
-      }
-
       String name = reagent.getWell().getFacilityId() + LincsScreensaverConstants.FACILITY_ID_SEPARATOR + reagent.getSaltFormId();
       if (name.equals(LincsScreensaverConstants.FACILITY_ID_SEPARATOR)) {
         return null;

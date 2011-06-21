@@ -15,6 +15,8 @@ import java.io.Serializable;
 import java.util.Iterator;
 import java.util.List;
 
+import com.google.common.collect.Lists;
+
 import edu.harvard.med.screensaver.db.datafetcher.DataFetcher;
 import edu.harvard.med.screensaver.db.datafetcher.EntityDataFetcher;
 import edu.harvard.med.screensaver.db.datafetcher.PropertyPathDataFetcher;
@@ -51,19 +53,19 @@ public class InMemoryEntityDataModel<E extends Entity<K>,K extends Serializable,
     List<PropertyPath<E>> propertyPaths = FetchPaths.getPropertyPaths(columns);
     _dataFetcher.setPropertiesToFetch(propertyPaths);
     super.fetch(columns);
+    List<R> unfilteredUnrestrictedData = Lists.newArrayList();
     for (Iterator<R> iter = _unfilteredData.iterator(); iter.hasNext();) {
       R row = iter.next();
-      if (isRestricted(row)) {
-        iter.remove();
+      if (row instanceof Entity) {
+        R entity = (R) ((Entity) row).restrict();
+        if (entity != null) {
+          unfilteredUnrestrictedData.add(entity);
+        }
+      }
+      else {
+        unfilteredUnrestrictedData.add(row);
       }
     }
-  }
-
-  protected boolean isRestricted(R row)
-  {
-    if (row instanceof Entity) {
-      return (((Entity<K>) row).isRestricted());
-    }
-    return false;
+    _unfilteredData = unfilteredUnrestrictedData;
   }
 }

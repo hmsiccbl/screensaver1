@@ -12,6 +12,7 @@ package edu.harvard.med.screensaver.policy;
 import edu.harvard.med.screensaver.model.AdministrativeActivity;
 import edu.harvard.med.screensaver.model.AttachedFile;
 import edu.harvard.med.screensaver.model.AttachedFileType;
+import edu.harvard.med.screensaver.model.Entity;
 import edu.harvard.med.screensaver.model.cherrypicks.CherryPickAssayPlate;
 import edu.harvard.med.screensaver.model.cherrypicks.CherryPickLiquidTransfer;
 import edu.harvard.med.screensaver.model.cherrypicks.LabCherryPick;
@@ -37,8 +38,6 @@ import edu.harvard.med.screensaver.model.screenresults.DataColumn;
 import edu.harvard.med.screensaver.model.screenresults.ResultValue;
 import edu.harvard.med.screensaver.model.screenresults.ScreenResult;
 import edu.harvard.med.screensaver.model.screens.AbaseTestset;
-import edu.harvard.med.screensaver.model.screens.BillingInformation;
-import edu.harvard.med.screensaver.model.screens.BillingItem;
 import edu.harvard.med.screensaver.model.screens.CherryPickScreening;
 import edu.harvard.med.screensaver.model.screens.EquipmentUsed;
 import edu.harvard.med.screensaver.model.screens.FundingSupport;
@@ -56,264 +55,252 @@ import edu.harvard.med.screensaver.model.users.ScreeningRoomUser;
 /**
  * A {@link EntityViewPolicy} that allows any user to view any entity in the system.
  */
-public class DefaultEntityViewPolicy implements EntityViewPolicy
+public class DefaultEntityViewPolicy implements EntityViewPolicy<Entity>
 {
   @Override
-  public boolean visit(AbaseTestset entity)
+  public Entity visit(AbaseTestset entity)
   {
-    return true;
+    return entity;
   }
 
   @Override
-  public boolean visit(AdministrativeActivity administrativeActivity)
+  public Entity visit(AdministrativeActivity entity)
   {
-    return true;
+    return entity;
   }
 
   @Override
-  public boolean visit(AnnotationType annotation)
+  public Entity visit(AnnotationType entity)
   {
-    return true;
+    return entity;
   }
 
   @Override
-  public boolean visit(AnnotationValue annotationValue)
+  public Entity visit(AnnotationValue entity)
   {
-    return true;
+    return entity;
   }
 
   @Override
-  public boolean visit(AssayPlate assayPlate)
+  public Entity visit(AssayPlate entity)
   {
-    return true;
+    return entity;
   }
 
   @Override
-  public boolean visit(AssayWell assayWell)
+  public Entity visit(AssayWell entity)
   {
-    return true;
+    return entity;
   }
 
   @Override
-  public boolean visit(AttachedFile entity)
+  public Entity visit(AttachedFile entity)
   {
-    return true;
+    return entity;
   }
 
   @Override
-  public boolean visit(AttachedFileType entity)
+  public Entity visit(AttachedFileType entity)
   {
-    return true;
+    return entity;
   }
 
   @Override
-  public boolean visit(BillingInformation entity)
+  public Entity visit(ChecklistItemEvent entity)
   {
-    return true;
+    return entity;
   }
 
   @Override
-  public boolean visit(BillingItem entity)
+  public Entity visit(ChecklistItem entity)
   {
-    return true;
+    return entity;
   }
 
   @Override
-  public boolean visit(ChecklistItemEvent entity)
+  public Entity visit(LabCherryPick entity)
   {
-    return true;
+    return entity;
   }
 
   @Override
-  public boolean visit(ChecklistItem entity)
+  public Entity visit(ScreenerCherryPick entity)
   {
-    return true;
+    return entity;
   }
 
   @Override
-  public boolean visit(LabCherryPick entity)
+  public Entity visit(SmallMoleculeReagent entity)
   {
-    return true;
+    return entity;
   }
 
   @Override
-  public boolean visit(ScreenerCherryPick entity)
+  public Entity visit(Copy entity)
   {
-    return true;
+    return entity;
   }
 
   @Override
-  public boolean visit(SmallMoleculeReagent entity)
+  public Entity visit(Plate entity)
   {
-    return true;
+    return entity;
   }
 
   @Override
-  public boolean visit(Copy entity)
+  public Entity visit(PlateLocation entity)
   {
-    return true;
+    return entity;
   }
 
   @Override
-  public boolean visit(Plate entity)
+  public Entity visit(EquipmentUsed entity)
   {
-    return true;
+    return entity;
   }
 
   @Override
-  public boolean visit(PlateLocation entity)
+  public Entity visit(Gene entity)
   {
-    return true;
+    return entity;
   }
 
   @Override
-  public boolean visit(EquipmentUsed entity)
+  public Entity visit(LabAffiliation entity)
   {
-    return true;
+    return entity;
   }
 
   @Override
-  public boolean visit(Gene entity)
+  public Entity visit(Library entity)
   {
-    return true;
+    return entity;
   }
 
   @Override
-  public boolean visit(LabAffiliation entity)
+  public Entity visit(LibraryContentsVersion entity)
   {
-    return true;
+    return entity;
   }
 
   @Override
-  public boolean visit(Library entity)
+  public Entity visit(Publication entity)
   {
-    return true;
+    return entity;
   }
 
   @Override
-  public boolean visit(LibraryContentsVersion libraryContentsVersion)
+  public Entity visit(ResultValue entity)
   {
-    return true;
+    return entity;
   }
 
   @Override
-  public boolean visit(Publication entity)
+  public Entity visit(DataColumn entity)
   {
-    return true;
+    return entity;
   }
 
   @Override
-  public boolean visit(ResultValue entity)
+  public Entity visit(Screen entity)
   {
-    return true;
+    return entity;
   }
 
   @Override
-  public boolean visit(DataColumn entity)
+  public Entity visit(ScreenResult entity)
   {
-    return true;
+    return entity;
   }
 
   @Override
-  public boolean visit(Screen screen)
+  public Entity visit(SilencingReagent entity)
   {
-    return true;
+    return entity;
   }
 
   @Override
-  public boolean visit(ScreenResult screenResult)
+  public Entity visit(Well entity)
   {
-    return true;
+    return entity;
   }
 
   @Override
-  public boolean visit(SilencingReagent entity)
+  public Entity visit(CherryPickAssayPlate entity)
   {
-    return true;
+    return entity;
   }
 
   @Override
-  public boolean visit(Well entity)
+  public Entity visit(CherryPickLiquidTransfer entity)
   {
-    return true;
+    return entity;
   }
 
   @Override
-  public boolean visit(CherryPickAssayPlate entity)
+  public Entity visit(SmallMoleculeCherryPickRequest entity)
   {
-    return true;
+    return entity;
   }
 
   @Override
-  public boolean visit(CherryPickLiquidTransfer entity)
+  public Entity visit(LibraryScreening entity)
   {
-    return true;
+    return entity;
   }
 
   @Override
-  public boolean visit(SmallMoleculeCherryPickRequest entity)
+  public Entity visit(RNAiCherryPickRequest entity)
   {
-    return true;
+    return entity;
   }
 
   @Override
-  public boolean visit(LibraryScreening entity)
+  public Entity visit(CherryPickScreening entity)
   {
-    return true;
+    return entity;
   }
 
   @Override
-  public boolean visit(RNAiCherryPickRequest entity)
+  public Entity visit(AdministratorUser entity)
   {
-    return true;
+    return entity;
   }
 
   @Override
-  public boolean visit(CherryPickScreening entity)
+  public Entity visit(ScreeningRoomUser entity)
   {
-    return true;
+    return entity;
   }
 
   @Override
-  public boolean visit(AdministratorUser administratorUser)
+  public Entity visit(WellVolumeCorrectionActivity entity)
   {
-    return true;
+    return entity;
   }
 
   @Override
-  public boolean visit(ScreeningRoomUser screeningRoomUser)
+  public Entity visit(Study entity)
   {
-    return true;
+    return entity;
   }
 
   @Override
-  public boolean visit(WellVolumeCorrectionActivity entity)
+  public Entity visit(LabHead entity)
   {
-    return true;
+    return entity;
   }
 
   @Override
-  public boolean visit(Study study)
+  public Entity visit(NaturalProductReagent entity)
   {
-    return true;
+    return entity;
   }
 
   @Override
-  public boolean visit(LabHead labHead)
+  public Entity visit(FundingSupport entity)
   {
-    return true;
-  }
-
-  @Override
-  public boolean visit(NaturalProductReagent entity)
-  {
-    return true;
-  }
-
-  @Override
-  public boolean visit(FundingSupport fundingSupport)
-  {
-    return true;
+    return entity;
   }
 
   @Override
@@ -324,12 +311,6 @@ public class DefaultEntityViewPolicy implements EntityViewPolicy
 
   @Override
   public boolean isAllowedAccessToScreenActivity(Screen screen)
-  {
-    return true;
-  }
-
-  @Override
-  public boolean isAllowedAccessToSilencingReagentSequence(SilencingReagent reagent)
   {
     return true;
   }

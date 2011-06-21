@@ -25,6 +25,7 @@ import javax.faces.model.DataModel;
 import javax.faces.model.ListDataModel;
 
 import com.google.common.collect.ImmutableSet;
+import com.google.common.collect.Iterables;
 import com.google.common.collect.Lists;
 import org.apache.log4j.Logger;
 
@@ -88,7 +89,7 @@ public class WellViewer extends SearchResultContextEntityViewerBackingBean<Well,
 
   private DataModel _otherWellsDataModel;
   private DataModel _duplexWellsDataModel;
-  private Reagent _versionedReagent;
+  private Reagent _versionedRestrictedReagent;
 
   private boolean _isAnnotationSearchResultsInitialized = false;
   private ConfirmationReportTableModel _confirmationReportTableModel;
@@ -132,11 +133,6 @@ public class WellViewer extends SearchResultContextEntityViewerBackingBean<Well,
     getIsPanelCollapsedMap().put("duplexWells", Boolean.TRUE);
     getIsPanelCollapsedMap().put("annotations", Boolean.TRUE);
     getIsPanelCollapsedMap().put("studyHeaders", Boolean.TRUE);
-  }
-
-  public Reagent getVersionedReagent()
-  {
-    return _versionedReagent;
   }
 
   /**
@@ -184,12 +180,12 @@ public class WellViewer extends SearchResultContextEntityViewerBackingBean<Well,
   public DataModel getOtherWellsDataModel()
   {
     if (_otherWellsDataModel == null) {
-      if (_versionedReagent != null) {
-        Set<Reagent> reagents = _librariesDao.findReagents(_versionedReagent.getVendorId(), true /*
+      if (_versionedRestrictedReagent != null) {
+        Set<Reagent> reagents = _librariesDao.findReagents(_versionedRestrictedReagent.getVendorId(), true /*
                                                                                                   * Reagent.well.to(Well.
                                                                                                   * library)
                                                                                                   */);
-        reagents.remove(_versionedReagent);
+        reagents.remove(_versionedRestrictedReagent);
         _otherWellsDataModel = new ListDataModel(Lists.newArrayList(reagents));
       }
       else {
@@ -209,11 +205,6 @@ public class WellViewer extends SearchResultContextEntityViewerBackingBean<Well,
     return _annotationSearchResults;
   }
 
-  public DataModel getAnnotationTableModel()
-  {
-    return new ListDataModel(Lists.newArrayList(_versionedReagent.getAnnotationValues().values()));
-  }
-
   public DataModel getAnnotationNameValueTable()
   {
     return new ListDataModel(_annotationNameValueTable);
@@ -227,9 +218,9 @@ public class WellViewer extends SearchResultContextEntityViewerBackingBean<Well,
   private void initializeAnnotationValuesTable(Well well)
   {
     List<AnnotationValue> annotationValues = new ArrayList<AnnotationValue>();
-    if (_versionedReagent != null) {
-      getDao().needReadOnly(_versionedReagent, Reagent.annotationValues);
-      annotationValues.addAll(_versionedReagent.getAnnotationValues().values());
+    if (_versionedRestrictedReagent != null) {
+      Reagent reagent = (Reagent) getDao().reloadEntity(_versionedRestrictedReagent, true, Reagent.annotationValues).restrict();
+      annotationValues.addAll(reagent.getAnnotationValues().values());
       for (Iterator iterator = annotationValues.iterator(); iterator.hasNext();) {
         AnnotationValue annotationValue = (AnnotationValue) iterator.next();
         if (annotationValue.isRestricted()) {
@@ -296,25 +287,26 @@ public class WellViewer extends SearchResultContextEntityViewerBackingBean<Well,
   {
     getDao().needReadOnly(well, Well.library);
     getDao().needReadOnly(well, Well.deprecationActivity);
-    _versionedReagent = _libraryContentsVersionRef.value() == null ? well.getLatestReleasedReagent()
+    Reagent versionedReagent = _libraryContentsVersionRef.value() == null ? well.getLatestReleasedReagent()
       : well.getReagents().get(_libraryContentsVersionRef.value());
     if (well.getLibrary().getReagentType().equals(SilencingReagent.class)) {
-      getDao().needReadOnly((SilencingReagent) _versionedReagent, SilencingReagent.vendorGene.to(Gene.genbankAccessionNumbers));
-      getDao().needReadOnly((SilencingReagent) _versionedReagent, SilencingReagent.vendorGene.to(Gene.entrezgeneSymbols));
-      getDao().needReadOnly((SilencingReagent) _versionedReagent, SilencingReagent.facilityGene.to(Gene.genbankAccessionNumbers));
-      getDao().needReadOnly((SilencingReagent) _versionedReagent, SilencingReagent.facilityGene.to(Gene.entrezgeneSymbols));
-      getDao().needReadOnly((SilencingReagent) _versionedReagent, SilencingReagent.duplexWells.to(Well.library));
+      getDao().needReadOnly((SilencingReagent) versionedReagent, SilencingReagent.vendorGene.to(Gene.genbankAccessionNumbers));
+      getDao().needReadOnly((SilencingReagent) versionedReagent, SilencingReagent.vendorGene.to(Gene.entrezgeneSymbols));
+      getDao().needReadOnly((SilencingReagent) versionedReagent, SilencingReagent.facilityGene.to(Gene.genbankAccessionNumbers));
+      getDao().needReadOnly((SilencingReagent) versionedReagent, SilencingReagent.facilityGene.to(Gene.entrezgeneSymbols));
+      getDao().needReadOnly((SilencingReagent) versionedReagent, SilencingReagent.duplexWells.to(Well.library));
     }
     if (well.getLibrary().getReagentType().equals(SmallMoleculeReagent.class)) {
-      getDao().needReadOnly((SmallMoleculeReagent) _versionedReagent, SmallMoleculeReagent.compoundNames);
-      getDao().needReadOnly((SmallMoleculeReagent) _versionedReagent, SmallMoleculeReagent.pubchemCids);
-      getDao().needReadOnly((SmallMoleculeReagent) _versionedReagent, SmallMoleculeReagent.chembankIds);
-      getDao().needReadOnly((SmallMoleculeReagent) _versionedReagent, SmallMoleculeReagent.chemblIds);
-      getDao().needReadOnly((SmallMoleculeReagent) _versionedReagent, SmallMoleculeReagent.molfileList);
+      getDao().needReadOnly((SmallMoleculeReagent) versionedReagent, SmallMoleculeReagent.compoundNames);
+      getDao().needReadOnly((SmallMoleculeReagent) versionedReagent, SmallMoleculeReagent.pubchemCids);
+      getDao().needReadOnly((SmallMoleculeReagent) versionedReagent, SmallMoleculeReagent.chembankIds);
+      getDao().needReadOnly((SmallMoleculeReagent) versionedReagent, SmallMoleculeReagent.chemblIds);
+      getDao().needReadOnly((SmallMoleculeReagent) versionedReagent, SmallMoleculeReagent.molfileList);
     }
-    getDao().needReadOnly(_versionedReagent, Reagent.libraryContentsVersion);
-    getDao().needReadOnly(_versionedReagent, Reagent.publications);
+    getDao().needReadOnly(versionedReagent, Reagent.libraryContentsVersion);
+    getDao().needReadOnly(versionedReagent, Reagent.publications);
 		_isAnnotationSearchResultsInitialized = false;
+    _versionedRestrictedReagent = (Reagent) versionedReagent.restrict();
   }
 
   @Override
@@ -327,38 +319,9 @@ public class WellViewer extends SearchResultContextEntityViewerBackingBean<Well,
     _confirmationReportTableModel = null;
   }
 
-  public boolean isAllowedAccessToSilencingReagentSequence() 
+  public Reagent getRestrictedReagent()
   {
-    if (isAllowedAccessToSilencingReagent()) {
-      return _entityViewPolicy.
-        isAllowedAccessToSilencingReagentSequence((SilencingReagent) getEntity().getLatestReleasedReagent());
-    }
-    return false;
-  }
-
-  public boolean isAllowedAccessToSilencingReagent()
-  {
-    if (isUnrestrictedReagent()
-      && getEntity().<Reagent>getLatestReleasedReagent() instanceof SilencingReagent) {
-      return true;
-    }
-    return false;
-  }
-
-  public boolean isAllowedAccessToSmallMoleculeReagent()
-  {
-    if (isUnrestrictedReagent()
-      && getEntity().<Reagent>getLatestReleasedReagent() instanceof SmallMoleculeReagent) {
-      return true;
-    }
-    return false;
-  }
-  
-  public boolean isUnrestrictedReagent()
-  {
-    Well well = getEntity();
-    return well != null && well.getLatestReleasedReagent() != null
-      && !well.getLatestReleasedReagent().isRestricted();
+    return _versionedRestrictedReagent;
   }
 
   @Override
@@ -394,23 +357,21 @@ public class WellViewer extends SearchResultContextEntityViewerBackingBean<Well,
 
   public String getCompoundImageUrl()
   {
-    if (!isAllowedAccessToSmallMoleculeReagent()) return null;
-    URL url = _structureImageProvider.getImageUrl((SmallMoleculeReagent) getVersionedReagent());
+    URL url = _structureImageProvider.getImageUrl((SmallMoleculeReagent) getRestrictedReagent());
     return url == null ? null : url.toString();
   }
 
   public String getCompoundMolecularFormula()
   {
-    if (!isAllowedAccessToSmallMoleculeReagent()) return null; //TODO: is there a RTE to throw? - sde4
-    return ((SmallMoleculeReagent) getVersionedReagent()).getMolecularFormula() == null ?
-      "" : ((SmallMoleculeReagent) getVersionedReagent()).getMolecularFormula().toHtml();
+    return ((SmallMoleculeReagent) getRestrictedReagent()).getMolecularFormula() == null ?
+      "" : ((SmallMoleculeReagent) getRestrictedReagent()).getMolecularFormula().toHtml();
   }
 
   public DataModel getPublicationsDataModel()
   {
-    if (getVersionedReagent() == null) return null;
+    if (_versionedRestrictedReagent == null) return null;
 
-    ArrayList<Publication> publications = new ArrayList<Publication>(getVersionedReagent().getPublications());
+    ArrayList<Publication> publications = new ArrayList<Publication>(getRestrictedReagent().getPublications());
     Collections.sort(publications,
                      new Comparator<Publication>() {
                        public int compare(Publication p1, Publication p2)
@@ -439,7 +400,7 @@ public class WellViewer extends SearchResultContextEntityViewerBackingBean<Well,
 
       List<SilencingReagent> duplexReagents = Lists.newArrayList();
       for (SilencingReagent dr : _report.getDuplexReagents()) {
-        duplexReagents.add(getDao().reloadEntity(dr, true, SilencingReagent.well.castToSubtype(SilencingReagent.class)));
+        duplexReagents.add((SilencingReagent) getDao().reloadEntity(dr, true, SilencingReagent.well.castToSubtype(SilencingReagent.class)).restrict());
       }
       _columnDataModel = new ListDataModel(duplexReagents);
     }
@@ -490,15 +451,17 @@ public class WellViewer extends SearchResultContextEntityViewerBackingBean<Well,
 
   public ConfirmationReportTableModel getConfirmationReport()
   {
+    Reagent reagent = getRestrictedReagent();
     if (_confirmationReportTableModel == null) {
-      if (_versionedReagent == null || !(_versionedReagent instanceof SilencingReagent)
-        || !_versionedReagent.getWell().getLibrary().isPool()) {
+      if (reagent == null || !(reagent instanceof SilencingReagent)
+        || !reagent.getWell().getLibrary().isPool()) {
         _confirmationReportTableModel = new ConfirmationReportTableModel();
       }
       if (_confirmationReportTableModel == null) { //TODO: will this report become too stale if a user session lasts too long?
-        ConfirmationReport report = _screenResultReporter.getDuplexReconfirmationReport((SilencingReagent) _versionedReagent);
+        ConfirmationReport report = _screenResultReporter.getDuplexReconfirmationReport((SilencingReagent) reagent);
         if (report.getDuplexReagents().isEmpty()) { // this will occur if there are no confirmation results.  the UI should still show the duplex wells
-          report.setDuplexReagents(((SilencingReagent) _versionedReagent).getDuplexSilencingReagents());
+          report.setDuplexReagents(Lists.newArrayList(Iterables.transform(((SilencingReagent) reagent).getDuplexSilencingReagents(),
+                                                                          SilencingReagent.<SilencingReagent>ToRestricted())));
         }
 
         _confirmationReportTableModel = new ConfirmationReportTableModel(report);
@@ -506,14 +469,4 @@ public class WellViewer extends SearchResultContextEntityViewerBackingBean<Well,
     }
     return _confirmationReportTableModel;
   }
-
-  public SmallMoleculeReagent getSmallMoleculeReagent()
-  {
-    if (isAllowedAccessToSmallMoleculeReagent()) {
-      return (SmallMoleculeReagent) _versionedReagent;
-    }
-    return null;
-  }
-
-
 }

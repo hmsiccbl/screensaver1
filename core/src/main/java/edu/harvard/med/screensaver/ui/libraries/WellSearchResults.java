@@ -78,6 +78,7 @@ import edu.harvard.med.screensaver.ui.arch.datatable.column.TableColumn;
 import edu.harvard.med.screensaver.ui.arch.datatable.column.TableColumnManager;
 import edu.harvard.med.screensaver.ui.arch.datatable.column.entity.BooleanTupleColumn;
 import edu.harvard.med.screensaver.ui.arch.datatable.column.entity.EnumTupleColumn;
+import edu.harvard.med.screensaver.ui.arch.datatable.column.entity.HasFetchPaths;
 import edu.harvard.med.screensaver.ui.arch.datatable.column.entity.ImageTupleColumn;
 import edu.harvard.med.screensaver.ui.arch.datatable.column.entity.IntegerSetTupleColumn;
 import edu.harvard.med.screensaver.ui.arch.datatable.column.entity.IntegerTupleColumn;
@@ -133,6 +134,54 @@ public class WellSearchResults extends TupleBasedEntitySearchResults<Well,String
         }
     };
 
+  /**
+   * @motivation respect EntityViewPolicy logic for restricting structure-related properties on SmallMoleculeReagent,
+   *             using only the tuple returned from the database query (and not the full entity)
+   */
+  private abstract class TuplePropertySmallMoleculeReagent extends SmallMoleculeReagent
+  {
+    private final PropertyPath<Well> _restrictedStructurePropertyPath;
+    private final Tuple<String> _tuple;
+
+    private TuplePropertySmallMoleculeReagent(PropertyPath<Well> restrictedStructurePropertyPath,
+                                              Tuple<String> tuple)
+    {
+      _restrictedStructurePropertyPath = restrictedStructurePropertyPath;
+      _tuple = tuple;
+      setEntityViewPolicy(WellSearchResults.this._entityViewPolicy);
+    }
+
+    public boolean isRestrictedStructure()
+    {
+      Boolean isStructureRestricted = (Boolean) _tuple.getProperty(TupleDataFetcher.makePropertyKey(_restrictedStructurePropertyPath));
+      return isStructureRestricted != null && isStructureRestricted;
+    }
+  }
+
+  /**
+   * @motivation respect EntityViewPolicy logic for restricting sequence-related properties on SilencingReagent, using
+   *             only the tuple returned from the database query (and not the full entity)
+   */
+  private abstract class TuplePropertySilencingReagent extends SilencingReagent
+  {
+    private final PropertyPath<Well> _restrictedSequencePropertyPath;
+    private final Tuple<String> _tuple;
+
+    private TuplePropertySilencingReagent(PropertyPath<Well> restrictedSequencePropertyPath,
+                                          Tuple<String> tuple)
+    {
+      _restrictedSequencePropertyPath = restrictedSequencePropertyPath;
+      _tuple = tuple;
+      setEntityViewPolicy(WellSearchResults.this._entityViewPolicy);
+    }
+
+    public boolean isRestrictedSequence()
+    {
+      Boolean isSequenceRestricted = (Boolean) _tuple.getProperty(TupleDataFetcher.makePropertyKey(_restrictedSequencePropertyPath));
+      return isSequenceRestricted != null && isSequenceRestricted;
+    }
+  }
+
   private enum WellSearchResultMode {
     ALL_WELLS,
     SET_OF_WELLS,
@@ -144,7 +193,7 @@ public class WellSearchResults extends TupleBasedEntitySearchResults<Well,String
 
   private GenericEntityDAO _dao;
   private LibrariesDAO _librariesDao;
-  private EntityViewPolicy _entityViewPolicy;
+  private EntityViewPolicy<Entity> _entityViewPolicy;
   private LibraryViewer _libraryViewer;
   protected StructureImageProvider _structureImageProvider;
   private LibraryContentsVersionReference _libraryContentsVersionRef;
@@ -416,13 +465,13 @@ public class WellSearchResults extends TupleBasedEntitySearchResults<Well,String
       buildWellPropertyColumns(columns);
       buildReagentPropertyColumns(columns);
       buildSilencingReagentPropertyColumns(columns);
-    }else{
+    }
+    else {
       buildWellPropertyColumns(columns);
       buildReagentPropertyColumns(columns);
       buildCompoundPropertyColumns(columns);
       buildSilencingReagentPropertyColumns(columns);
     }
-
 
     // Split the column list so that we can put the other data columns after the annotations 
     // (see: [#2266] command to auto-select data headers for positives from mutual positives screens,
@@ -482,6 +531,7 @@ public class WellSearchResults extends TupleBasedEntitySearchResults<Well,String
                                                     SILENCING_REAGENT_COLUMNS_GROUP));
     columns.get(columns.size() - 1).setVisible(false);
 
+    final PropertyPath<Well> restrictedSequencePropertyPath = relPath.toProperty("restrictedSequence");
     columns.add(new TextTupleColumn<Well,String>(
       relPath.toProperty("sequence"),
       "Sequence",
@@ -490,15 +540,19 @@ public class WellSearchResults extends TupleBasedEntitySearchResults<Well,String
       @Override
       public String getCellValue(Tuple<String> tuple)
       {
-        // TODO: 'null' works, but this is not safe if policy view implementation changes! 
-        if (!_entityViewPolicy.isAllowedAccessToSilencingReagentSequence(null)) {
-          return null;
-        }
-        return super.getCellValue(tuple);
+        final String sequence = super.getCellValue(tuple);
+        return ((SilencingReagent) new TuplePropertySilencingReagent(restrictedSequencePropertyPath, tuple)
+        {
+          @Override
+          public String getSequence()
+          {
+            return sequence;
+          }
+        }.restrict()).getSequence();
       }
-
     });
     columns.get(columns.size() - 1).setVisible(false);
+    ((TextTupleColumn<Well,String>) Iterables.getLast(columns)).addRelationshipPath(restrictedSequencePropertyPath);
 
     columns.add(new TextTupleColumn<Well,String>(
       relPath.to(SilencingReagent.facilityGene).toProperty("speciesName"),
@@ -532,21 +586,20 @@ public class WellSearchResults extends TupleBasedEntitySearchResults<Well,String
 
     final PropertyPath<Well> reagentIdPropertyPath = relPath.toProperty("id");
     if (_isLINCS) {
-      columns.add(new TextTupleColumn<Well,String>(reagentIdPropertyPath,
-                                                    "Facility-Salt-Batch-ID",
-                                                      "the full Facility ID - SALT",
-                                                      COMPOUND_COLUMNS_GROUP) {
+      final PropertyPath<Well> wellFacilityIdPropertyPath = PropertyPath.from(Well.class).toProperty("facilityId");
+      final PropertyPath<Well> saltFormIdPropertyPath = relPath.toProperty("saltFormId");
+
+      columns.add(new TextTupleColumn<Well,String>(relPath.toProperty("facilityBatchId"),
+                                                   "Facility-Salt-Batch-ID",
+                                                   "the full Facility ID - SALT",
+                                                   COMPOUND_COLUMNS_GROUP) {
         @Override
         public String getCellValue(Tuple<String> tuple)
         {
-          Integer reagentId = (Integer) tuple.getProperty(TupleDataFetcher.makePropertyKey(reagentIdPropertyPath));
-          if (reagentId != null) {
-            SmallMoleculeReagent smallMoleculeReagent = _dao.findEntityById(SmallMoleculeReagent.class, reagentId, true, Reagent.well.castToSubtype(SmallMoleculeReagent.class));
-            return smallMoleculeReagent.getWell().getFacilityId() + LincsScreensaverConstants.FACILITY_ID_SEPARATOR
-                + smallMoleculeReagent.getSaltFormId() + LincsScreensaverConstants.FACILITY_ID_SEPARATOR +
-              smallMoleculeReagent.getFacilityBatchId();
-          }
-          return null;
+          String wellFacilityId = (String) tuple.getProperty(TupleDataFetcher.makePropertyKey(wellFacilityIdPropertyPath));
+          String saltFormId = (String) tuple.getProperty(TupleDataFetcher.makePropertyKey(saltFormIdPropertyPath));
+          return wellFacilityId + LincsScreensaverConstants.FACILITY_ID_SEPARATOR + saltFormId +
+            LincsScreensaverConstants.FACILITY_ID_SEPARATOR + super.getCellValue(tuple);
         }
   
         @Override
@@ -562,20 +615,20 @@ public class WellSearchResults extends TupleBasedEntitySearchResults<Well,String
         }
   
       });;
+      ((TextTupleColumn) Iterables.getLast(columns)).addRelationshipPath(wellFacilityIdPropertyPath);
+      ((TextTupleColumn) Iterables.getLast(columns)).addRelationshipPath(saltFormIdPropertyPath);
       columns.get(columns.size() - 1).setVisible(true);
   
-      //NOTE: This is a LINCS-only feature
       columns.add(new TextTupleColumn<Well,String>(relPath.toProperty("vendorBatchId"),
                                                    "Vendor Batch Id",
                                                    "Vendor assigned batch Id",
                                                    COMPOUND_COLUMNS_GROUP));
       columns.get(columns.size() - 1).setVisible(false);
   
-      //NOTE: This is a LINCS-only feature
       columns.add(new TextTupleColumn<Well,String>(reagentIdPropertyPath,
-                                                      "Primary Compound Name",
-                                                      "The primary compound name",
-                                                      COMPOUND_COLUMNS_GROUP) {
+                                                   "Primary Compound Name",
+                                                   "The primary compound name",
+                                                   COMPOUND_COLUMNS_GROUP) {
         @Override
         public String getCellValue(Tuple<String> tuple)
         {
@@ -591,8 +644,8 @@ public class WellSearchResults extends TupleBasedEntitySearchResults<Well,String
       columns.get(columns.size() - 1).setVisible(true);
     }
 
-      
-    
+    final PropertyPath<Well> restrictedStructurePropertyPath = relPath.toProperty("restrictedStructure");
+
     columns.add(new ImageTupleColumn<Well,String>(reagentIdPropertyPath,
                                                   "Compound Structure Image",
                                                   "The structure image for the compound in the well",
@@ -613,18 +666,48 @@ public class WellSearchResults extends TupleBasedEntitySearchResults<Well,String
         return null;
       }
     });
-    columns.get(columns.size() - 1).setVisible(false);
+    ((HasFetchPaths) Iterables.getLast(columns)).addRelationshipPath(restrictedStructurePropertyPath);
+    Iterables.getLast(columns).setVisible(false);
 
     columns.add(new TextTupleColumn<Well,String>(relPath.toProperty("smiles"),
                                                  "Compound SMILES",
                                                  "The SMILES for the compound in the well",
-                                                 COMPOUND_COLUMNS_GROUP));
+                                                 COMPOUND_COLUMNS_GROUP) {
+      @Override
+      public String getCellValue(final Tuple<String> tuple)
+      {
+        final String value = super.getCellValue(tuple);
+        return ((SmallMoleculeReagent) new TuplePropertySmallMoleculeReagent(restrictedStructurePropertyPath, tuple) {
+          @Override
+          public String getSmiles()
+          {
+            return value;
+          }
+        }.restrict()).getSmiles();
+      }
+    });
+    ((TextTupleColumn) Iterables.getLast(columns)).addRelationshipPath(restrictedStructurePropertyPath);
+
     columns.get(columns.size() - 1).setVisible(false);
 
     columns.add(new TextTupleColumn<Well,String>(relPath.toProperty("inchi"),
-      "Compound InChi",
-      "The InChi for the compound in the well",
-      COMPOUND_COLUMNS_GROUP));
+                                                 "Compound InChi",
+                                                 "The InChi for the compound in the well",
+                                                 COMPOUND_COLUMNS_GROUP) {
+      @Override
+      public String getCellValue(Tuple<String> tuple)
+      {
+        final String value = super.getCellValue(tuple);
+        return ((SmallMoleculeReagent) new TuplePropertySmallMoleculeReagent(restrictedStructurePropertyPath, tuple) {
+          @Override
+          public String getInchi()
+          {
+            return value;
+          }
+        }.restrict()).getInchi();
+      }
+    });
+    ((TextTupleColumn) Iterables.getLast(columns)).addRelationshipPath(restrictedStructurePropertyPath);
     columns.get(columns.size() - 1).setVisible(false);
 
     columns.add(new TextSetTupleColumn<Well,String>(relPath.to(SmallMoleculeReagent.compoundNames),
@@ -658,12 +741,12 @@ public class WellSearchResults extends TupleBasedEntitySearchResults<Well,String
 
     columns.add(new TextTupleColumn<Well,String>(relPath.to(Reagent.vendorName),
                                                  "Reagent Vendor",
-      "The vendor of the reagent in this well.",
-      WELL_COLUMNS_GROUP));
+                                                 "The vendor of the reagent in this well.",
+                                                 WELL_COLUMNS_GROUP));
     columns.add(new TextTupleColumn<Well,String>(relPath.to(Reagent.vendorIdentifier),
-      COLUMN_REAGENT_ID,
-      "The vendor-assigned identifier for the reagent in this well.",
-      WELL_COLUMNS_GROUP));
+                                                 COLUMN_REAGENT_ID,
+                                                 "The vendor-assigned identifier for the reagent in this well.",
+                                                 WELL_COLUMNS_GROUP));
     columns.add(new IntegerTupleColumn<Well,String>(relPath.to(Reagent.libraryContentsVersion).toProperty("versionNumber"),
                                                     "Library Contents Version",
                                                     "The reagent's library contents version",
@@ -816,7 +899,7 @@ public class WellSearchResults extends TupleBasedEntitySearchResults<Well,String
                                                                                         tuple.getKey());
           }
           else {
-            assert _entityViewPolicy.visit(dataColumn);;
+            assert _entityViewPolicy.visit(dataColumn) != null;
             return false;
           }
         }

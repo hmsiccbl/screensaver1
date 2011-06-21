@@ -24,10 +24,22 @@
 
   <import resource="spring-context-web-default.xml"/>
   
+  <bean
+    id="entityViewPolicy"
+    class="edu.harvard.med.lincs.screensaver.policy.LincsEntityViewPolicy"
+    scope="session">
+    <constructor-arg ref="currentScreensaverUser"/>
+    <aop:scoped-proxy />
+  </bean>
+  
   <bean id="structureImageProvider"
-        class="edu.harvard.med.lincs.screensaver.io.libraries.smallmolecule.SmallMoleculeReagentFacilitySaltIdStructureImageProvider">
-    <constructor-arg value="#{screensaverProperties.map['screensaver.images.base_url']}/compound-images-by-facility-salt-id/" />
-    <constructor-arg ref="imageProviderServlet" />
+        class="edu.harvard.med.iccbl.screensaver.io.libraries.smallmolecule.RestrictedStructureImageProviderDecorator">
+    <constructor-arg>
+      <bean class="edu.harvard.med.lincs.screensaver.io.libraries.smallmolecule.SmallMoleculeReagentFacilitySaltIdStructureImageProvider">
+        <constructor-arg value="#{screensaverProperties.map['screensaver.images.base_url']}/compound-images-by-facility-salt-id/" />
+        <constructor-arg ref="imageProviderServlet" />
+      </bean>
+    </constructor-arg>
   </bean>
   
   <bean id="studyImageProvider"

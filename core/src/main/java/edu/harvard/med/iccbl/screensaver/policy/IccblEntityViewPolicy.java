@@ -24,62 +24,39 @@ import edu.harvard.med.screensaver.db.Query;
 import edu.harvard.med.screensaver.db.hqlbuilder.HqlBuilder;
 import edu.harvard.med.screensaver.db.hqlbuilder.JoinType;
 import edu.harvard.med.screensaver.model.AdministrativeActivity;
-import edu.harvard.med.screensaver.model.AttachedFile;
-import edu.harvard.med.screensaver.model.AttachedFileType;
-import edu.harvard.med.screensaver.model.cherrypicks.CherryPickAssayPlate;
 import edu.harvard.med.screensaver.model.cherrypicks.CherryPickLiquidTransfer;
 import edu.harvard.med.screensaver.model.cherrypicks.CherryPickRequest;
-import edu.harvard.med.screensaver.model.cherrypicks.LabCherryPick;
 import edu.harvard.med.screensaver.model.cherrypicks.RNAiCherryPickRequest;
-import edu.harvard.med.screensaver.model.cherrypicks.ScreenerCherryPick;
 import edu.harvard.med.screensaver.model.cherrypicks.SmallMoleculeCherryPickRequest;
-import edu.harvard.med.screensaver.model.libraries.Copy;
-import edu.harvard.med.screensaver.model.libraries.Gene;
 import edu.harvard.med.screensaver.model.libraries.Library;
-import edu.harvard.med.screensaver.model.libraries.LibraryContentsVersion;
-import edu.harvard.med.screensaver.model.libraries.NaturalProductReagent;
-import edu.harvard.med.screensaver.model.libraries.Plate;
-import edu.harvard.med.screensaver.model.libraries.PlateLocation;
 import edu.harvard.med.screensaver.model.libraries.SilencingReagent;
 import edu.harvard.med.screensaver.model.libraries.SmallMoleculeReagent;
-import edu.harvard.med.screensaver.model.libraries.Well;
-import edu.harvard.med.screensaver.model.libraries.WellVolumeCorrectionActivity;
 import edu.harvard.med.screensaver.model.screenresults.AnnotationType;
 import edu.harvard.med.screensaver.model.screenresults.AnnotationValue;
-import edu.harvard.med.screensaver.model.screenresults.AssayPlate;
 import edu.harvard.med.screensaver.model.screenresults.AssayWell;
 import edu.harvard.med.screensaver.model.screenresults.DataColumn;
 import edu.harvard.med.screensaver.model.screenresults.ResultValue;
 import edu.harvard.med.screensaver.model.screenresults.ScreenResult;
-import edu.harvard.med.screensaver.model.screens.AbaseTestset;
-import edu.harvard.med.screensaver.model.screens.BillingInformation;
-import edu.harvard.med.screensaver.model.screens.BillingItem;
 import edu.harvard.med.screensaver.model.screens.CherryPickScreening;
-import edu.harvard.med.screensaver.model.screens.EquipmentUsed;
-import edu.harvard.med.screensaver.model.screens.FundingSupport;
 import edu.harvard.med.screensaver.model.screens.LabActivity;
 import edu.harvard.med.screensaver.model.screens.LibraryScreening;
-import edu.harvard.med.screensaver.model.screens.Publication;
 import edu.harvard.med.screensaver.model.screens.Screen;
 import edu.harvard.med.screensaver.model.screens.ScreenDataSharingLevel;
 import edu.harvard.med.screensaver.model.screens.ScreenType;
 import edu.harvard.med.screensaver.model.screens.Study;
 import edu.harvard.med.screensaver.model.users.AdministratorUser;
-import edu.harvard.med.screensaver.model.users.ChecklistItem;
-import edu.harvard.med.screensaver.model.users.ChecklistItemEvent;
-import edu.harvard.med.screensaver.model.users.LabAffiliation;
 import edu.harvard.med.screensaver.model.users.LabHead;
 import edu.harvard.med.screensaver.model.users.ScreeningRoomUser;
 import edu.harvard.med.screensaver.model.users.ScreensaverUser;
 import edu.harvard.med.screensaver.model.users.ScreensaverUserRole;
-import edu.harvard.med.screensaver.policy.EntityViewPolicy;
+import edu.harvard.med.screensaver.policy.DefaultEntityViewPolicy;
 import edu.harvard.med.screensaver.ui.CurrentScreensaverUser;
 import edu.harvard.med.screensaver.ui.arch.datatable.Criterion.Operator;
 
 /**
  * An EntityViewPolicy implementation for ICCB-Longwood that is used by the production web application. 
  */
-public class IccblEntityViewPolicy implements EntityViewPolicy
+public class IccblEntityViewPolicy extends DefaultEntityViewPolicy
 {
   public static final String MARCUS_LIBRARY_SCREEN_FUNDING_SUPPORT_NAME = "Marcus Library Screen";
   public static final String GRAY_LIBRARY_SCREEN_FUNDING_SUPPORT_NAME = "Gray Library Screen";
@@ -100,7 +77,7 @@ public class IccblEntityViewPolicy implements EntityViewPolicy
   protected IccblEntityViewPolicy() {}
 
   public IccblEntityViewPolicy(CurrentScreensaverUser user,
-                             GenericEntityDAO dao) 
+                               GenericEntityDAO dao)
   {
     _currentScreensaverUser = user;
     _dao = dao;
@@ -110,7 +87,7 @@ public class IccblEntityViewPolicy implements EntityViewPolicy
    * @motivation for unit tests
    */
   public IccblEntityViewPolicy(ScreensaverUser user,
-                             GenericEntityDAO dao) 
+                               GenericEntityDAO dao)
   {
     _screensaverUser = user;
     _dao = dao;
@@ -124,133 +101,27 @@ public class IccblEntityViewPolicy implements EntityViewPolicy
     return _screensaverUser;
   }
 
-  public boolean visit(AbaseTestset entity)
+  public AdministrativeActivity visit(AdministrativeActivity entity)
   {
-    return true;
+    return getScreensaverUser().getScreensaverUserRoles().contains(ScreensaverUserRole.READ_EVERYTHING_ADMIN) ? entity : null;
   }
 
-  public boolean visit(AdministrativeActivity administrativeActivity)
+  public AnnotationType visit(AnnotationType entity)
   {
-    return getScreensaverUser().getScreensaverUserRoles().contains(ScreensaverUserRole.READ_EVERYTHING_ADMIN);
+    return visit((Study) entity.getStudy()) == null ? null : entity;
   }
 
-  public boolean visit(AnnotationType annotation)
+  public AnnotationValue visit(AnnotationValue entity)
   {
-    return visit((Study) annotation.getStudy());
+    return visit(entity.getAnnotationType()) == null ? null : entity;
   }
 
-  public boolean visit(AnnotationValue annotationValue)
+  public CherryPickLiquidTransfer visit(CherryPickLiquidTransfer entity)
   {
-    return visit(annotationValue.getAnnotationType());
+    return visit((LabActivity) entity) == null ? null : entity;
   }
 
-  public boolean visit(AssayPlate assayPlate)
-  {
-    return true;
-  }
-
-  public boolean visit(AssayWell assayWell)
-  {
-    return true;
-  }
-
-  public boolean visit(AttachedFile entity)
-  {
-    return true;
-  }
-
-  public boolean visit(AttachedFileType entity)
-  {
-    return true;
-  }
-
-  public boolean visit(BillingInformation entity)
-  {
-    return true;
-  }
-
-  public boolean visit(BillingItem entity)
-  {
-    return true;
-  }
-
-  public boolean visit(ChecklistItemEvent entity)
-  {
-    return true;
-  }
-
-  public boolean visit(ChecklistItem entity)
-  {
-    return true;
-  }
-
-  public boolean visit(ScreenerCherryPick entity)
-  {
-    return true;
-  }
-
-  public boolean visit(LabCherryPick entity)
-  {
-    return true;
-  }
-
-  public boolean visit(CherryPickAssayPlate entity)
-  {
-    return true;
-  }
-
-  public boolean visit(CherryPickLiquidTransfer entity)
-  {
-    return visit((LabActivity) entity);
-  }
-
-  public boolean visit(SmallMoleculeReagent entity)
-  {
-    return true;
-  }
-
-  public boolean visit(NaturalProductReagent entity)
-  {
-    return true;
-  }
-
-  public boolean visit(Copy entity)
-  {
-    return true;
-  }
-
-  public boolean visit(Plate entity)
-  {
-    return true;
-  }
-
-  @Override
-  public boolean visit(PlateLocation entity)
-  {
-    return true;
-  }
-
-  public boolean visit(EquipmentUsed entity)
-  {
-    return true;
-  }
-
-  public boolean visit(FundingSupport fundingSupport) 
-  {
-    return true;
-  }
-
-  public boolean visit(Gene entity)
-  {
-    return true;
-  }
-
-  public boolean visit(LabAffiliation entity)
-  {
-    return true;
-  }
-
-  public boolean visit(Library entity)
+  public Library visit(Library entity)
   {
     ScreeningRoomUser owner = entity.getOwner();
     ScreensaverUser user = getScreensaverUser();
@@ -261,29 +132,20 @@ public class IccblEntityViewPolicy implements EntityViewPolicy
     
     //if owner == null : not a validation library 
     //TODO add || isLabheadLibraryOwner(owner) , however this gives currently "No session" error.
-    return owner == null || owner.equals(user) || user.getScreensaverUserRoles().contains(ScreensaverUserRole.LIBRARIES_ADMIN);
+    return owner == null || owner.equals(user) || user.getScreensaverUserRoles().contains(ScreensaverUserRole.LIBRARIES_ADMIN)
+      ? entity : null;
   }
     
-  public boolean visit(LibraryContentsVersion libraryContentsVersion)
-  {
-    return true;
-  }
-
-  public boolean visit(Publication entity)
-  {
-    return true;
-  }
-
-  public boolean visit(ResultValue entity)
+  public ResultValue visit(ResultValue entity)
   {
     // exceptions for SM positive RVs, allowing a subset of RVs to be visible, even if screen result is not visible
     if (isAllowedAccessToResultValueDueToMutualPositive(entity.isPositive(),
                                                      entity.getDataColumn().getScreenResult().getScreen(),
                                                      entity.getWell().getWellId())) {
-      return true;
+      return entity;
     }
 
-    return visit(entity.getDataColumn().getScreenResult());
+    return visit(entity.getDataColumn().getScreenResult()) == null ? null : entity;
   }
 
   @Override
@@ -301,12 +163,12 @@ public class IccblEntityViewPolicy implements EntityViewPolicy
     return false;
   }
 
-  public boolean visit(DataColumn entity)
+  public DataColumn visit(DataColumn entity)
   {
     if (isAllowedAccessToDataColumnDueToMutualPositives(entity)) {
-      return true;
+      return entity;
     }
-    return visit(entity.getScreenResult());
+    return visit(entity.getScreenResult()) == null ? null : entity;
   }
 
   @Override
@@ -315,7 +177,7 @@ public class IccblEntityViewPolicy implements EntityViewPolicy
     // allow DataColumn containing mutual positives to be visible, even if the parent screen result is not visible
     // note: currently, we show all positives DataColumns from a given screen to be visible if any *one* of its positives DataColumns 
     // have a mutual positive; we could make this even more strict by restricting the positives DataColumns that have no mutual positives
-    if (!!!visit(entity.getScreenResult())) {
+    if (visit(entity.getScreenResult()) == null) {
       if (entity.isPositiveIndicator()) {
         Screen othersScreen = entity.getScreenResult().getScreen();
         if (othersScreen.getScreenType().equals(ScreenType.SMALL_MOLECULE)) {
@@ -333,45 +195,45 @@ public class IccblEntityViewPolicy implements EntityViewPolicy
     return false;
   }
 
-  public boolean visit(Study study)
+  public Study visit(Study entity)
   {
-    return visit((Screen) study);
+    return visit((Screen) entity);
   }
 
-  public boolean visit(Screen screen)
+  public Screen visit(Screen screen)
   {
     ScreensaverUser user = getScreensaverUser();
     if (user.getScreensaverUserRoles().contains(ScreensaverUserRole.MARCUS_ADMIN)) {
-      return findScreensForFundingSupport(MARCUS_LIBRARY_SCREEN_FUNDING_SUPPORT_NAME).contains(screen);
+      return findScreensForFundingSupport(MARCUS_LIBRARY_SCREEN_FUNDING_SUPPORT_NAME).contains(screen) ? screen : null;
     }
     if (user.getScreensaverUserRoles().contains(ScreensaverUserRole.GRAY_ADMIN)) {
-      return findScreensForFundingSupport(GRAY_LIBRARY_SCREEN_FUNDING_SUPPORT_NAME).contains(screen);
+      return findScreensForFundingSupport(GRAY_LIBRARY_SCREEN_FUNDING_SUPPORT_NAME).contains(screen) ? screen : null;
     }
     if (user.getScreensaverUserRoles().contains(ScreensaverUserRole.READ_EVERYTHING_ADMIN) ||
       user.getScreensaverUserRoles().contains(ScreensaverUserRole.SCREENS_ADMIN)) {
-      return true;
+      return screen;
     }
     if (findMyScreens().contains(screen)) {
       log.debug("screen " + screen.getFacilityId() + " is visible: \"my screen\"");
-      return true;
+      return screen;
     }
     if (findPublicScreens().contains(screen)) {
       log.debug("screen " + screen.getFacilityId() + " is visible: \"public\"");
-      return true;
+      return screen;
     }
     if (screen.getScreenType().equals(ScreenType.SMALL_MOLECULE)) {
       boolean isOthersVisibleScreen = findOthersVisibleSmallMoleculeScreens().contains(screen);
       if (isOthersVisibleScreen) {
         log.debug("screen is " + screen.getFacilityId() + " visible: \"small molecule screen shared by others\"");
       }
-      return isOthersVisibleScreen;
+      return isOthersVisibleScreen ? screen : null;
     }
     if (screen.getScreenType().equals(ScreenType.RNAI) &&
       user.getScreensaverUserRoles().contains(ScreensaverUserRole.RNAI_SCREENS)) {
       log.debug("screen " + screen.getFacilityId() + " is visible: \"rnai screen for rnai screener\"");
-      return true;
+      return screen;
     }
-    return false;
+    return null;
   }
 
   private Set<Screen> findOthersVisibleSmallMoleculeScreens()
@@ -535,76 +397,85 @@ public class IccblEntityViewPolicy implements EntityViewPolicy
     return _screensForFundingSupport.get(fundingSupportName);
   }
 
-  public boolean visit(ScreenResult screenResult)
+  public ScreenResult visit(ScreenResult entity)
   {
-    return isAllowedAccessToScreenDetails(screenResult.getScreen());
+    return isAllowedAccessToScreenDetails(entity.getScreen()) ? entity : null;
   }
 
-  public boolean visit(ScreeningRoomUser screeningRoomUser)
+  public ScreeningRoomUser visit(ScreeningRoomUser entity)
   {
     ScreensaverUser loggedInUser = getScreensaverUser();
     if (loggedInUser.getScreensaverUserRoles().contains(ScreensaverUserRole.READ_EVERYTHING_ADMIN)) {
-      return true;
+      return entity;
     }
-    if (loggedInUser.equals(screeningRoomUser)) {
-      return true;
+    if (loggedInUser.equals(entity)) {
+      return entity;
     }
     if (loggedInUser instanceof ScreeningRoomUser) {
-      return ((ScreeningRoomUser) loggedInUser).getAssociatedUsers().contains(screeningRoomUser);
+      return ((ScreeningRoomUser) loggedInUser).getAssociatedUsers().contains(entity) ? entity : null;
     }
-    return false;
+    return null;
   }
 
-  public boolean visit(LabHead labHead)
+  public LabHead visit(LabHead entity)
   {
-    return visit((ScreeningRoomUser) labHead);
+    return visit((ScreeningRoomUser) entity) == null ? null : entity;
   }
 
-  public boolean visit(AdministratorUser administratorUser)
+  public AdministratorUser visit(AdministratorUser entity)
   {
     ScreensaverUser loggedInUser = getScreensaverUser();
     if (loggedInUser.getScreensaverUserRoles().contains(ScreensaverUserRole.READ_EVERYTHING_ADMIN)) {
-      return true;
+      return entity;
     }
-    if (loggedInUser.equals(administratorUser)) {
-      return true;
+    if (loggedInUser.equals(entity)) {
+      return entity;
     }
-    return false;
+    return null;
   }
 
-  public boolean visit(SilencingReagent entity)
+  public SilencingReagent visit(SilencingReagent entity)
   {
-    return true;
+    if (!!!getScreensaverUser().isUserInRole(ScreensaverUserRole.READ_EVERYTHING_ADMIN) && entity.isRestrictedSequence()) {
+      SequenceRestrictedSilencingReagent sequenceRestrictedSilencingReagent = new SequenceRestrictedSilencingReagent(entity);
+      if (log.isDebugEnabled()) {
+        log.debug("returning sequence-restricted silencing reagent: " + sequenceRestrictedSilencingReagent);
+      }
+      return sequenceRestrictedSilencingReagent;
+    }
+    return entity;
   }
 
-  public boolean visit(Well entity)
+  public SmallMoleculeReagent visit(SmallMoleculeReagent entity)
   {
-    return true;
+    if (!!!getScreensaverUser().isUserInRole(ScreensaverUserRole.READ_EVERYTHING_ADMIN) && entity.isRestrictedStructure()) {
+      StructureRestrictedSmallMoleculeReagent structureRestrictedSmallMoleculeReagent = new StructureRestrictedSmallMoleculeReagent(entity);
+      if (log.isDebugEnabled()) {
+        log.debug("returning structure-restricted small molecule reagent: " + structureRestrictedSmallMoleculeReagent);
+      }
+      return structureRestrictedSmallMoleculeReagent;
+    }
+    return entity;
   }
 
-  public boolean visit(SmallMoleculeCherryPickRequest entity)
+  public SmallMoleculeCherryPickRequest visit(SmallMoleculeCherryPickRequest entity)
   {
-    return visit((CherryPickRequest) entity);
+    return (SmallMoleculeCherryPickRequest) visit((CherryPickRequest) entity);
   }
 
-  public boolean visit(RNAiCherryPickRequest entity)
+  public RNAiCherryPickRequest visit(RNAiCherryPickRequest entity)
   {
-    return visit((CherryPickRequest) entity);
+    return (RNAiCherryPickRequest) visit((CherryPickRequest) entity);
   }
 
-  public boolean visit(LibraryScreening entity)
+  public LibraryScreening visit(LibraryScreening entity)
   {
-    return visit((LabActivity) entity);
+    return (LibraryScreening) visit((LabActivity) entity);
   }
 
-  public boolean visit(CherryPickScreening entity)
+  public CherryPickScreening visit(CherryPickScreening entity)
   {
-    return visit((LabActivity) entity);
-  }
-
-  public boolean visit(WellVolumeCorrectionActivity entity)
-  {
-    return true;
+    return (CherryPickScreening) visit((LabActivity) entity);
   }
 
   /**
@@ -613,7 +484,7 @@ public class IccblEntityViewPolicy implements EntityViewPolicy
    */
   public boolean isAllowedAccessToScreenDetails(Screen screen)
   {
-    if (!!!visit(screen)) {
+    if (visit(screen) == null) {
       return false;
     }
     return isReadEverythingAdmin() ||
@@ -630,28 +501,21 @@ public class IccblEntityViewPolicy implements EntityViewPolicy
    */
   public boolean isAllowedAccessToScreenActivity(Screen screen)
   {
-    if (!!!visit(screen)) {
+    if (visit(screen) == null) {
       return false;
     }
     return isReadEverythingAdmin() || 
     findMyScreens().contains(screen);
   }
 
-  public boolean isAllowedAccessToSilencingReagentSequence(SilencingReagent reagent)
+  private CherryPickRequest visit(CherryPickRequest entity)
   {
-    if (!!!visit(reagent)) {
-      return false;
-    }
-    return isReadEverythingAdmin();
+    return isAllowedAccessToScreenActivity(entity.getScreen()) ? entity : null;
   }
 
-  private boolean visit(CherryPickRequest entity) {
-    return isAllowedAccessToScreenActivity(entity.getScreen());
-  }
-
-  private boolean visit(LabActivity entity)
+  private LabActivity visit(LabActivity entity)
   {
-    return isAllowedAccessToScreenActivity(entity.getScreen());
+    return isAllowedAccessToScreenActivity(entity.getScreen()) ? entity : null;
   }
 
   private boolean isReadEverythingAdmin()

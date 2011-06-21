@@ -34,8 +34,6 @@ import edu.harvard.med.screensaver.model.screenresults.DataColumn;
 import edu.harvard.med.screensaver.model.screenresults.ResultValue;
 import edu.harvard.med.screensaver.model.screenresults.ScreenResult;
 import edu.harvard.med.screensaver.model.screens.AbaseTestset;
-import edu.harvard.med.screensaver.model.screens.BillingInformation;
-import edu.harvard.med.screensaver.model.screens.BillingItem;
 import edu.harvard.med.screensaver.model.screens.CherryPickScreening;
 import edu.harvard.med.screensaver.model.screens.EquipmentUsed;
 import edu.harvard.med.screensaver.model.screens.FundingSupport;
@@ -63,49 +61,91 @@ import edu.harvard.med.screensaver.model.users.ScreeningRoomUser;
  * @author <a mailto="andrew_tolopko@hms.harvard.edu">Andrew Tolopko</a>
  * @author <a mailto="john_sullivan@hms.harvard.edu">John Sullivan</a>
  */
-public interface AbstractEntityVisitor
+public interface AbstractEntityVisitor<R>
 {
-  public boolean visit(AbaseTestset entity);
-  public boolean visit(AdministratorUser administratorUser);
-  public boolean visit(AdministrativeActivity administrativeActivity);
-  public boolean visit(AnnotationType annotation);
-  public boolean visit(AnnotationValue annotationValue);
-  public boolean visit(AssayPlate assayPlate);
-  public boolean visit(AssayWell assayWell);
-  public boolean visit(AttachedFile entity);
-  public boolean visit(AttachedFileType attachedFileType);
-  public boolean visit(BillingInformation entity);
-  public boolean visit(BillingItem entity);
-  public boolean visit(ChecklistItemEvent entity);
-  public boolean visit(ChecklistItem entity);
-  public boolean visit(CherryPickAssayPlate entity);
-  public boolean visit(CherryPickLiquidTransfer entity);
-  public boolean visit(SmallMoleculeReagent entity);
-  public boolean visit(SmallMoleculeCherryPickRequest entity);
-  public boolean visit(Copy entity);
-  public boolean visit(Plate entity);
-  public boolean visit(PlateLocation entity);
-  public boolean visit(EquipmentUsed entity);
-  public boolean visit(FundingSupport fundingSupport);
-  public boolean visit(Gene entity);
-  public boolean visit(LabAffiliation entity);
-  public boolean visit(LabCherryPick entity);
-  public boolean visit(LabHead labHead);
-  public boolean visit(Library entity);
-  public boolean visit(LibraryContentsVersion libraryContentsVersion);
-  public boolean visit(LibraryScreening entity);
-  public boolean visit(NaturalProductReagent entity);
-  public boolean visit(Publication entity);
-  public boolean visit(ResultValue entity);
-  public boolean visit(DataColumn entity);
-  public boolean visit(RNAiCherryPickRequest entity);
-  public boolean visit(CherryPickScreening entity);
-  public boolean visit(Screen screen);
-  public boolean visit(ScreenResult screenResult);
-  public boolean visit(ScreenerCherryPick entity);
-  public boolean visit(ScreeningRoomUser screeningRoomUser);
-  public boolean visit(SilencingReagent entity);
-  public boolean visit(Study study);
-  public boolean visit(Well entity);
-  public boolean visit(WellVolumeCorrectionActivity entity);
+  R visit(AbaseTestset entity);
+
+  R visit(AdministratorUser administratorUser);
+
+  R visit(AdministrativeActivity administrativeActivity);
+
+  R visit(AnnotationType annotation);
+
+  R visit(AnnotationValue annotationValue);
+
+  R visit(AssayPlate assayPlate);
+
+  R visit(AssayWell assayWell);
+
+  R visit(AttachedFile entity);
+
+  R visit(AttachedFileType attachedFileType);
+
+  //  R visit(BillingInformation entity);
+
+  //  R visit(BillingItem entity);
+
+  R visit(ChecklistItemEvent entity);
+
+  R visit(ChecklistItem entity);
+
+  R visit(CherryPickAssayPlate entity);
+
+  R visit(CherryPickLiquidTransfer entity);
+
+  R visit(SmallMoleculeReagent entity);
+
+  R visit(SmallMoleculeCherryPickRequest entity);
+
+  R visit(Copy entity);
+
+  R visit(Plate entity);
+
+  R visit(PlateLocation entity);
+
+  R visit(EquipmentUsed entity);
+
+  R visit(FundingSupport fundingSupport);
+
+  R visit(Gene entity);
+
+  R visit(LabAffiliation entity);
+
+  R visit(LabCherryPick entity);
+
+  R visit(LabHead labHead);
+
+  R visit(Library entity);
+
+  R visit(LibraryContentsVersion libraryContentsVersion);
+
+  R visit(LibraryScreening entity);
+
+  R visit(NaturalProductReagent entity);
+
+  R visit(Publication entity);
+
+  R visit(ResultValue entity);
+
+  R visit(DataColumn entity);
+
+  R visit(RNAiCherryPickRequest entity);
+
+  R visit(CherryPickScreening entity);
+
+  R visit(Screen screen);
+
+  R visit(ScreenResult screenResult);
+
+  R visit(ScreenerCherryPick entity);
+
+  R visit(ScreeningRoomUser screeningRoomUser);
+
+  R visit(SilencingReagent entity);
+
+  R visit(Study study);
+
+  R visit(Well entity);
+
+  R visit(WellVolumeCorrectionActivity entity);
 }

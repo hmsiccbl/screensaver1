@@ -10,7 +10,6 @@
 package edu.harvard.med.screensaver.policy;
 
 import edu.harvard.med.screensaver.model.AbstractEntityVisitor;
-import edu.harvard.med.screensaver.model.libraries.SilencingReagent;
 import edu.harvard.med.screensaver.model.screenresults.DataColumn;
 import edu.harvard.med.screensaver.model.screens.Screen;
 
@@ -19,7 +18,7 @@ import edu.harvard.med.screensaver.model.screens.Screen;
  * entity instance should be accessible (viewable) by the current user.  
  * @see EntityEditPolicy
  */
-public interface EntityViewPolicy extends AbstractEntityVisitor
+public interface EntityViewPolicy<R> extends AbstractEntityVisitor<R>
 {
   /**
    * @deprecated This is a hack, but helps to keep data access logic in single,
@@ -43,16 +42,6 @@ public interface EntityViewPolicy extends AbstractEntityVisitor
    *             in a manner consistent with the rest of our EntityViewPolicy.
    */
   boolean isAllowedAccessToScreenActivity(Screen screen);
-
-  /**
-   * @deprecated This is a hack, but helps to keep data access logic in single,
-   *             central location. Should separate out properties that need
-   *             additional protection into a related entity, in order to use
-   *             the AbstractEntityVisitor to control access to these properties
-   *             in a manner consistent with the rest of our EntityViewPolicy.
-   */
-  @Deprecated()
-  public boolean isAllowedAccessToSilencingReagentSequence(SilencingReagent reagent);
 
   boolean isAllowedAccessToDataColumnDueToMutualPositives(DataColumn dataColumn);
 

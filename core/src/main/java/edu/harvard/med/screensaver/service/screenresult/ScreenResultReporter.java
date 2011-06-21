@@ -600,7 +600,7 @@ public class ScreenResultReporter
     });
     List<Triple<SilencingReagent,Screen,ConfirmedPositiveValue>> result = Lists.newArrayList();
     for (Object[] row : rows) {
-      result.add(new Triple<SilencingReagent,Screen,ConfirmedPositiveValue>((SilencingReagent) row[0],
+      result.add(new Triple<SilencingReagent,Screen,ConfirmedPositiveValue>((SilencingReagent) ((SilencingReagent) row[0]).restrict(),
                                                                             (Screen) row[1],
                                                                             (ConfirmedPositiveValue) row[2]));
     }

@@ -127,12 +127,6 @@ public class LibraryPlate extends NonPersistentEntity<Integer> implements Compar
   }
 
   @Override
-  public boolean isRestricted()
-  {
-    return false;
-  }
-
-  @Override
   public int compareTo(LibraryPlate other)
   {
     return getEntityId().compareTo(other.getEntityId());

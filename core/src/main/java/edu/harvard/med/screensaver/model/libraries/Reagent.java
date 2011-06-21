@@ -91,7 +91,6 @@ public abstract class Reagent extends AbstractEntity<Integer> implements Compara
   private Set<Publication> _publications = Sets.newHashSet();
   private Set<AttachedFile> _attachedFiles = new HashSet<AttachedFile>();
 
-
   /**
    * @motivation for hibernate and proxy/concrete subclass constructors
    */
@@ -324,5 +323,4 @@ public abstract class Reagent extends AbstractEntity<Integer> implements Compara
   {
     _attachedFiles = attachedFiles;
   }
-
 }

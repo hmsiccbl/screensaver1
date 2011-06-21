@@ -18,6 +18,7 @@ import java.util.Map;
 import javax.persistence.Embeddable;
 import javax.persistence.Transient;
 
+import com.google.common.base.Function;
 import org.apache.commons.beanutils.PropertyUtils;
 import org.apache.log4j.Logger;
 import org.hibernate.proxy.HibernateProxyHelper;
@@ -59,10 +60,21 @@ public abstract class AbstractEntity<K extends Serializable> implements Entity<K
 
   private static Logger log = Logger.getLogger(AbstractEntity.class);
   
-  private EntityViewPolicy _entityViewPolicy;
+  private EntityViewPolicy<Entity> _entityViewPolicy;
   private K _entityId;
   private Integer _hashCode;
   private boolean _needsUpdate;
+
+  public static <E extends Entity> Function<E,E> ToRestricted()
+  {
+    return new Function<E,E>() {
+      @Override
+      public E apply(E from)
+      {
+        return (E) from.restrict();
+      }
+    };
+  }
 
   protected void traceEvent(String event)
   {
@@ -190,13 +202,12 @@ public abstract class AbstractEntity<K extends Serializable> implements Entity<K
   }
 
   /**
-   * Get whether this entity is restricted, based upon the data access policy
-   * that was provided (if any). This is a passive data access policy
-   * enforcement mechanism, in that it is up to the service and/or UI layers to
-   * check for and determine how to handle restricted entities. A
-   * restricted entity is one whose data should not be made visible to the current
-   * user.
+   * Get whether this entity is fully restricted, based upon the {@link EntityViewPolicy} that was provided (if any). A
+   * restricted entity is one whose data should not be made visible to the current user. Note that this is a passive
+   * data access policy enforcement mechanism, in that it is up to the service and/or UI layers to check for and
+   * determine how to handle restricted entities.
    * 
+   * @see #restrict()
    * @see EntityViewPolicyInjectorPostLoadEventListener
    * @throws UnsupportedOperationException if entityViewPolicy not set
    */
@@ -206,14 +217,36 @@ public abstract class AbstractEntity<K extends Serializable> implements Entity<K
     if (_entityViewPolicy == null) {
       throw new UnsupportedOperationException("entityViewPolicy not set");
     }
-    Boolean isAllowed = (Boolean) acceptVisitor(_entityViewPolicy);
-    return isAllowed == null ? true : !isAllowed;
+    return acceptVisitor(_entityViewPolicy) == null;
+  }
+
+  /**
+   * Get a partially-restricted version of this entity, based upon the {@link EntityViewPolicy} that was provided (if
+   * any). A partially-restricted entity is one that may have a subset of properties that should not be visible to the
+   * current user. Note that this is a passive data access policy enforcement mechanism, in that it is up to the service
+   * and/or UI layers to check for and determine how to handle restricted entities.
+   * 
+   * @return if entity has partial restrictions on its properties, a new instance of this entity will be returned; if a
+   *         new instance is returned it will not be persistence-managed instance; null will be returned if
+   *         {@link #isRestricted()} return true; the same instance (<code>this</code>) may be returned if the entity is
+   *         fully unrestricted, but this is not guaranteed
+   * @see #isRestricted()
+   * @see EntityViewPolicyInjectorPostLoadEventListener
+   * @throws UnsupportedOperationException if entityViewPolicy not set
+   */
+  @Transient
+  public Entity<K> restrict()
+  {
+    if (_entityViewPolicy == null) {
+      throw new UnsupportedOperationException("entityViewPolicy not set");
+    }
+    return acceptVisitor(_entityViewPolicy);
   }
 
   /**
    * @see EntityViewPolicyInjectorPostLoadEventListener
    */
-  public void setEntityViewPolicy(EntityViewPolicy entityViewPolicy)
+  public void setEntityViewPolicy(EntityViewPolicy<Entity> entityViewPolicy)
   {
     _entityViewPolicy = entityViewPolicy;
   }

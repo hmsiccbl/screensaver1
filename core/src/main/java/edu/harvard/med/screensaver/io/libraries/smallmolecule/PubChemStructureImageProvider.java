@@ -15,9 +15,8 @@ import java.net.URL;
 import org.apache.log4j.Logger;
 
 import edu.harvard.med.screensaver.model.libraries.SmallMoleculeReagent;
-import edu.harvard.med.screensaver.ui.arch.util.servlet.ImageProviderServlet;
 
-public class PubChemStructureImageProvider implements StructureImageProvider<SmallMoleculeReagent>
+public class PubChemStructureImageProvider implements StructureImageProvider
 {
   private static Logger log = Logger.getLogger(PubChemStructureImageProvider.class);
   

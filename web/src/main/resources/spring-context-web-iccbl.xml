@@ -69,9 +69,13 @@
   </bean>
  
   <bean id="structureImageProvider"
-        class="edu.harvard.med.iccbl.screensaver.io.libraries.smallmolecule.PlateWellStructureImageProvider">
-    <constructor-arg value="#{screensaverProperties.map['screensaver.images.base_url']}/structure-images/" />
-    <constructor-arg ref="imageProviderServlet" />
+        class="edu.harvard.med.iccbl.screensaver.io.libraries.smallmolecule.RestrictedStructureImageProviderDecorator">
+    <constructor-arg>
+      <bean class="edu.harvard.med.iccbl.screensaver.io.libraries.smallmolecule.PlateWellStructureImageProvider">
+        <constructor-arg value="#{screensaverProperties.map['screensaver.images.base_url']}/structure-images/" />
+        <constructor-arg ref="imageProviderServlet" />
+      </bean>
+    </constructor-arg>
   </bean>
   
   <bean

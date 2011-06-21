@@ -21,7 +21,6 @@ import edu.harvard.med.screensaver.model.libraries.Well;
 import edu.harvard.med.screensaver.policy.EntityViewPolicy;
 import edu.harvard.med.screensaver.service.screenresult.ScreenResultReporter;
 import edu.harvard.med.screensaver.ui.arch.util.AttachedFiles;
-import edu.harvard.med.screensaver.ui.arch.util.servlet.ImageProviderServlet;
 import edu.harvard.med.screensaver.ui.libraries.AnnotationSearchResults;
 import edu.harvard.med.screensaver.ui.libraries.LibraryViewer;
 import edu.harvard.med.screensaver.ui.libraries.WellSearchResults;
@@ -100,10 +99,7 @@ public class WellViewer extends edu.harvard.med.screensaver.ui.libraries.WellVie
    */
   public String getSmallMoleculeFacilityBatchId()
   {
-    if (isAllowedAccessToSmallMoleculeReagent()) {
-      return String.format("%03d", getSmallMoleculeReagent().getFacilityBatchId());
-    }
-    return "";
+    return String.format("%03d", ((SmallMoleculeReagent) getRestrictedReagent()).getFacilityBatchId());
   }
 
   /**
@@ -113,10 +109,7 @@ public class WellViewer extends edu.harvard.med.screensaver.ui.libraries.WellVie
    */
   public String getSmallMoleculeSaltFormId()
   {
-    if (isAllowedAccessToSmallMoleculeReagent()) {
-      return String.format("%03d", getSmallMoleculeReagent().getSaltFormId());
-    }
-    return "";
+    return String.format("%03d", ((SmallMoleculeReagent) getRestrictedReagent()).getSaltFormId());
   }
 
   /**
@@ -126,18 +119,14 @@ public class WellViewer extends edu.harvard.med.screensaver.ui.libraries.WellVie
    */
   public String getSmallMoleculeVendorBatchId()
   {
-    if (isAllowedAccessToSmallMoleculeReagent()) {
-      return getSmallMoleculeReagent().getVendorBatchId();
-    }
-    return "";
+    return ((SmallMoleculeReagent) getRestrictedReagent()).getVendorBatchId();
   }
 
   public String getAmbitImageImageUrl()
   {
-    if (!isAllowedAccessToSmallMoleculeReagent()) return null;
     if (_ambitImageProvider == null) return null;
 
-    URL url = _ambitImageProvider.getImageUrl((SmallMoleculeReagent) getVersionedReagent());
+    URL url = _ambitImageProvider.getImageUrl((SmallMoleculeReagent) getRestrictedReagent());
     return url == null ? null : url.toString();
   }
 

@@ -23,7 +23,7 @@ import edu.harvard.med.screensaver.ui.arch.util.servlet.ImageProviderServlet;
 /**
  * @author <a mailto="andrew_tolopko@hms.harvard.edu">Andrew Tolopko</a>
  */
-public class PlateWellStructureImageProvider implements StructureImageProvider<SmallMoleculeReagent>
+public class PlateWellStructureImageProvider implements StructureImageProvider
 {
   private static final String IMAGE_FILE_EXTENSION = ".png";
 
@@ -42,9 +42,6 @@ public class PlateWellStructureImageProvider implements StructureImageProvider<S
   {
     try {
       if (reagent == null) {
-        return null;
-      }
-      if (reagent.isRestricted()) {
         return null;
       }
       WellKey wellKey = reagent.getWell().getWellKey();

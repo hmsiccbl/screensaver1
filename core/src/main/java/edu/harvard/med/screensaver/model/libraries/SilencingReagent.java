@@ -65,6 +65,7 @@ public class SilencingReagent extends Reagent
   private Gene _vendorGene;
   private Gene _facilityGene;
   private Set<Well> _duplexWells = Sets.newHashSet();
+  private boolean _isRestrictedSequence;
 
   /**
    * Construct an uninitialized <code>SilencingReagent</code>.
@@ -215,5 +216,25 @@ public class SilencingReagent extends Reagent
     Iterable<SilencingReagent> reagents = Iterables.transform(getDuplexWells(), wellToReagentTransformer);
     reagents = Iterables.filter(reagents, Predicates.notNull());
     return ImmutableSet.copyOf(reagents);
+  }
+
+  @Column(name = "is_restricted_sequence", nullable = false)
+  public boolean isRestrictedSequence()
+  {
+    return _isRestrictedSequence;
+  }
+
+  private void setRestrictedSequence(boolean isRestrictedSequence)
+  {
+    _isRestrictedSequence = isRestrictedSequence;
+  }
+
+  public SilencingReagent withRestrictedSequence(boolean isRestrictedSequence)
+  {
+    if (!!!isTransient()) {
+      throw new DataModelViolationException("immutable property cannot be changed after entity is persisted");
+    }
+    setRestrictedSequence(isRestrictedSequence);
+    return this;
   }
 }

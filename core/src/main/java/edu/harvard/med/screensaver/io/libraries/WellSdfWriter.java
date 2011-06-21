@@ -40,6 +40,9 @@ public class WellSdfWriter extends PrintWriter
     if (smallMoleculeReagent == null || smallMoleculeReagent.isRestricted()) {
       smallMoleculeReagent = SmallMoleculeReagent.NullSmallMoleculeReagent;
     }
+    else {
+      smallMoleculeReagent = (SmallMoleculeReagent) smallMoleculeReagent.restrict();
+    }
     if (smallMoleculeReagent.getMolfile() != null) {
       println(smallMoleculeReagent.getMolfile());
     }

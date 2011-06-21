@@ -16,6 +16,6 @@ import edu.harvard.med.screensaver.model.AbstractEntityVisitor;
  * entity instance can be edited by the current user.  
  * @see EntityViewPolicy
  */
-public interface EntityEditPolicy extends AbstractEntityVisitor
+public interface EntityEditPolicy extends AbstractEntityVisitor<Boolean>
 {
 }

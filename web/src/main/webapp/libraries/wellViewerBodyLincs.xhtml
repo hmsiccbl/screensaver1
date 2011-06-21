@@ -16,7 +16,7 @@
    columnClasses="propertyLabelColumn,column title" styleClass="layoutPanel">
    <t:outputText>Compound</t:outputText>
    <t:outputText id="compoundName1"
-    value="#{wellViewer.versionedReagent.primaryCompoundName}" />
+    value="#{wellViewer.restrictedReagent.primaryCompoundName}" />
   </t:panelGrid>
   <t:panelGrid id="wellInfoPropertiesPanel" columns="2"
    columnClasses="propertyLabelColumn,column" styleClass="layoutPanel">
@@ -27,25 +27,21 @@
    </ss:property>
 
    <ss:property id="saltFormId" label="Salt Form ID" type="Text"
-    rendered="#{wellViewer.allowedAccessToSmallMoleculeReagent}"
     description="The facility specific Salt Form ID"
     value="#{wellViewer.smallMoleculeSaltFormId}">
    </ss:property>
 
    <ss:property id="facilityBatchId" label="Facility Batch" type="Text"
-    rendered="#{wellViewer.allowedAccessToSmallMoleculeReagent}"
     description="The facility specific batch ID"
     value="#{wellViewer.smallMoleculeFacilityBatchId}">
    </ss:property>
 
    <ss:property id="vendorReagentId" label="Vendor Assigned ID" type="Text"
-    rendered="#{! empty wellViewer.versionedReagent}"
     description="The vendor-assigned reagent identifier provided (e.g., catalog number; reorder number)"
-    value="#{wellViewer.versionedReagent.vendorId}">
+    value="#{wellViewer.restrictedReagent.vendorId}">
    </ss:property>
 
    <ss:property id="vendorBatchId" label="Vendor Batch" type="Text"
-    rendered="#{wellViewer.allowedAccessToSmallMoleculeReagent}"
     description="The vendor specific batch ID"
     value="#{wellViewer.smallMoleculeVendorBatchId}">
    </ss:property>
@@ -63,56 +59,56 @@
    </ss:property>
 
    <ss:property id="libraryContentsVersion" label="Library Contents Version"
-    type="Text" rendered="#{wellViewer.unrestrictedReagent}"
+    type="Text" rendered="#{!empty wellViewer.restrictedReagent}"
     description="The reagent's library contents version"
-    value="#{wellViewer.versionedReagent.libraryContentsVersion.versionNumber}">
+    value="#{wellViewer.restrictedReagent.libraryContentsVersion.versionNumber}">
    </ss:property>
 
    <ss:property id="sequence" label="Sequence" type="Text"
-    rendered="#{wellViewer.allowedAccessToSilencingReagentSequence}"
+    rendered="#{wellViewer.entity.library.reagentType.simpleName == 'SilencingReagent' &amp;&amp; !empty wellViewer.restrictedReagent}"
     description="The nucleotide sequence of the silencing reagent"
-    value="#{wellViewer.versionedReagent.sequence}">
+    value="#{wellViewer.restrictedReagent.sequence}">
    </ss:property>
 
    <ss:property id="geneName" label="Gene Name" type="Text"
-    rendered="#{wellViewer.allowedAccessToSilencingReagent}"
+    rendered="#{wellViewer.entity.library.reagentType.simpleName == 'SilencingReagent' &amp;&amp; !empty wellViewer.restrictedReagent}"
     description="The name of the gene, as labelled in EntrezGene"
-    value="#{wellViewer.versionedReagent.facilityGene.geneName}">
+    value="#{wellViewer.restrictedReagent.facilityGene.geneName}">
    </ss:property>
 
    <ss:property id="entrezGeneId" label="EntrezGene ID" type="Link"
-    rendered="#{wellViewer.allowedAccessToSilencingReagent}"
+    rendered="#{wellViewer.entity.library.reagentType.simpleName == 'SilencingReagent' &amp;&amp; !empty wellViewer.restrictedReagent}"
     description="The EntrezGene ID, a.k.a. Locus ID"
-    value="#{wellViewer.versionedReagent.facilityGene.entrezgeneId}"
-    linkValue="#{wellViewer.entrezgeneIdUrlPrefix}#{wellViewer.versionedReagent.facilityGene.entrezgeneId}">
+    value="#{wellViewer.restrictedReagent.facilityGene.entrezgeneId}"
+    linkValue="#{wellViewer.entrezgeneIdUrlPrefix}#{wellViewer.restrictedReagent.facilityGene.entrezgeneId}">
    </ss:property>
 
    <ss:property id="entrezGeneSymbols" label="EntrezGene Symbol" type="List"
-    rendered="#{wellViewer.allowedAccessToSilencingReagent}"
+    rendered="#{wellViewer.entity.library.reagentType.simpleName == 'SilencingReagent' &amp;&amp; !empty wellViewer.restrictedReagent}"
     description="The EntrezGene Gene Symbols"
-    value="#{wellViewer.versionedReagent.facilityGene.entrezgeneSymbols}">
+    value="#{wellViewer.restrictedReagent.facilityGene.entrezgeneSymbols}">
    </ss:property>
 
    <ss:property id="genBankAccessionNumbers" label="GenBank Accession Numbers"
-    type="ListOfLinks" rendered="#{wellViewer.allowedAccessToSilencingReagent}"
+    type="ListOfLinks" rendered="#{wellViewer.entity.library.reagentType.simpleName == 'SilencingReagent' &amp;&amp; !empty wellViewer.restrictedReagent}"
     description="The GenBank Accession Numbers for the gene"
-    value="#{wellViewer.versionedReagent.facilityGene.genbankAccessionNumbers}"
+    value="#{wellViewer.restrictedReagent.facilityGene.genbankAccessionNumbers}"
     linkPrefix="#{wellViewer.genbankAccessionNumberUrlPrefix}">
    </ss:property>
 
    <ss:property id="speciesName" label="Species Name" type="Text"
-    rendered="#{wellViewer.allowedAccessToSilencingReagent}"
+    rendered="#{wellViewer.entity.library.reagentType.simpleName == 'SilencingReagent' &amp;&amp; !empty wellViewer.restrictedReagent}"
     description="The species this gene is found in"
-    value="#{wellViewer.versionedReagent.facilityGene.speciesName}">
+    value="#{wellViewer.restrictedReagent.facilityGene.speciesName}">
    </ss:property>
 
    <!-- Small Molecule Reagent stuff -->
    <ss:property id="compoundImage" label="Structure"
     description="A 2D structure image of the compound"
-    rendered="#{wellViewer.allowedAccessToSmallMoleculeReagent}">
+    rendered="#{wellViewer.entity.library.reagentType.simpleName == 'SmallMoleculeReagent' &amp;&amp; !empty wellViewer.restrictedReagent}">
     <ui:define name="data">
      <t:graphicImage url="#{wellViewer.compoundImageUrl}"
-      rendered="#{wellViewer.allowedAccessToSmallMoleculeReagent &amp;&amp; ! empty wellViewer.compoundImageUrl}"
+      rendered="#{! empty wellViewer.compoundImageUrl}"
       style="float: left;">
      </t:graphicImage>
     </ui:define>
@@ -120,70 +116,70 @@
 
    <!-- NOTE: for [#2417] this is a LINCS-only feature -->
    <ss:property id="ambitStudyImage" label="Ambit Images"
-    rendered="#{wellViewer.allowedAccessToSmallMoleculeReagent &amp;&amp; ! empty wellViewer.ambitImageImageUrl}"
+    rendered="#{wellViewer.entity.library.reagentType.simpleName == 'SmallMoleculeReagent' &amp;&amp; ! empty wellViewer.restrictedReagent}"
     description="Ambit study image"
     >
     <ui:define name="data">
      <t:graphicImage url="#{wellViewer.ambitImageImageUrl}" height="200"
       onclick="window.open('#{wellViewer.ambitImageImageUrl}','image','height=600,width=800');"
-      rendered="#{wellViewer.allowedAccessToSmallMoleculeReagent &amp;&amp; ! empty wellViewer.ambitImageImageUrl}"
+      rendered="#{wellViewer.entity.library.reagentType.simpleName == 'SmallMoleculeReagent' &amp;&amp; ! empty wellViewer.ambitImageImageUrl}"
       style="float: left;">
      </t:graphicImage>
      <t:outputText 
           value="data not available"
-          rendered="#{wellViewer.allowedAccessToSmallMoleculeReagent &amp;&amp; empty wellViewer.ambitImageImageUrl}"
+          rendered="#{empty wellViewer.ambitImageImageUrl}"
           styleClass="propertyValue dataText" 
           />
     </ui:define>
    </ss:property>
 
    <ss:property id="smiles" label="SMILES" type="Text"
-    rendered="#{wellViewer.allowedAccessToSmallMoleculeReagent}"
+    rendered="#{wellViewer.entity.library.reagentType.simpleName == 'SmallMoleculeReagent' &amp;&amp; ! empty wellViewer.restrictedReagent}"
     description="The SMILES string for the compound"
-    value="#{wellViewer.versionedReagent.smiles}">
+    value="#{wellViewer.restrictedReagent.smiles}">
    </ss:property>
 
    <ss:property id="inchi" label="InChi" type="Text"
-    rendered="#{wellViewer.allowedAccessToSmallMoleculeReagent}"
+    rendered="#{wellViewer.entity.library.reagentType.simpleName == 'SmallMoleculeReagent' &amp;&amp; ! empty wellViewer.restrictedReagent}"
     description="The InChI string for the compound"
-    value="#{wellViewer.versionedReagent.inchi}">
+    value="#{wellViewer.restrictedReagent.inchi}">
    </ss:property>
 
    <ss:property id="compoundNames" label="Compound Names" type="List"
-    rendered="#{wellViewer.allowedAccessToSmallMoleculeReagent}"
+    rendered="#{wellViewer.entity.library.reagentType.simpleName == 'SmallMoleculeReagent' &amp;&amp; ! empty wellViewer.restrictedReagent}"
     description="The various names the compound goes by"
-    value="#{wellViewer.versionedReagent.compoundNames}">
+    value="#{wellViewer.restrictedReagent.compoundNames}">
    </ss:property>
 
    <ss:property id="molecularMass" label="Molecular Mass" type="Text"
-    rendered="#{wellViewer.allowedAccessToSmallMoleculeReagent }"
+    rendered="#{wellViewer.entity.library.reagentType.simpleName == 'SmallMoleculeReagent' &amp;&amp; ! empty wellViewer.restrictedReagent }"
     description="The molecular mass for the compound" converter="#{molecularMassConverter}"
-    value="#{wellViewer.versionedReagent.molecularMass}">
+    value="#{wellViewer.restrictedReagent.molecularMass}">
    </ss:property>
 
    <ss:property id="molecularWeight" label="Molecular Weight" type="Text"
-    rendered="#{wellViewer.allowedAccessToSmallMoleculeReagent &amp;&amp; false}"
+    rendered="#{false &amp;&amp; wellViewer.entity.library.reagentType.simpleName == 'SmallMoleculeReagent' &amp;&amp; ! empty wellViewer.restrictedReagent}"
     description="The molecular weight for the compound"
-    value="#{wellViewer.versionedReagent.molecularWeight}">
+    value="#{wellViewer.restrictedReagent.molecularWeight}">
    </ss:property>
 
    <ss:property id="molecularFormula" label="Molecular Formula" type="Text"
-    rendered="#{wellViewer.allowedAccessToSmallMoleculeReagent}"
+    rendered="#{wellViewer.entity.library.reagentType.simpleName == 'SmallMoleculeReagent' &amp;&amp; ! empty wellViewer.restrictedReagent}"
     description="The molecular formula for the compound"
     value="#{wellViewer.compoundMolecularFormula}" escape="false">
    </ss:property>
 
    <ss:property id="pubchemCids" label="PubChem CIDs" type="ListOfLinks"
-    rendered="#{wellViewer.allowedAccessToSmallMoleculeReagent}"
+    rendered="#{wellViewer.entity.library.reagentType.simpleName == 'SmallMoleculeReagent' &amp;&amp; ! empty wellViewer.restrictedReagent}"
     description="The PubChem Compound Identifiers"
-    value="#{wellViewer.versionedReagent.pubchemCids}"
+    value="#{wellViewer.restrictedReagent.pubchemCids}"
     linkPrefix="#{wellViewer.pubchemCidUrlPrefix}">
    </ss:property>
 
    <ss:property id="chemblIds" label="ChEMBL IDs" type="ListOfLinks"
-    rendered="#{wellViewer.allowedAccessToSmallMoleculeReagent}"
+    rendered="#{wellViewer.entity.library.reagentType.simpleName == 'SmallMoleculeReagent' &amp;&amp; ! empty wellViewer.restrictedReagent}"
     description="The ChEMBL IDs for the compound"
-    value="#{wellViewer.versionedReagent.chemblIds}"
+    value="#{wellViewer.restrictedReagent.chemblIds}"
     linkPrefix="#{wellViewer.chemblIdUrlPrefix}">
    </ss:property>
 
@@ -238,7 +234,7 @@
 
  <t:panelGrid style="margin-top: 10px;">
   <t:panelGroup
-   rendered="#{wellViewer.allowedAccessToSmallMoleculeReagent &amp;&amp; !empty wellViewer.versionedReagent.molfile}">
+   rendered="#{! empty wellViewer.restrictedReagent &amp;&amp; !empty wellViewer.restrictedReagent.molfile}">
    <h:form id="wellContentsDownloadForm">
     <h:commandButton value="Download SD File"
      action="#{wellViewer.downloadSDFile}" styleClass="command"
@@ -268,7 +264,7 @@
          styleClass="layoutPanel" columns="1">
          <t:outputText value="Vendor Id" />
          <t:outputText
-          rendered="#{wellViewer.allowedAccessToSilencingReagentSequence}"
+          rendered="#{! empty wellViewer.restrictedReagent}"
           value="Sequence" />
          <t:outputText styleClass="label" value="Well" />
         </t:panelGrid>
@@ -293,8 +289,7 @@
        <f:facet name="header">
         <t:panelGrid columns="1" columnClasses="confirmationTableColumn">
          <t:outputText value="#{column.vendorId}" styleClass="label" />
-         <t:outputText value="#{column.sequence}" style="font-size: small;"
-          rendered="#{wellViewer.allowedAccessToSilencingReagentSequence}" />
+         <t:outputText value="#{column.sequence}" style="font-size: small;" />
          <t:commandLink id="confirmationReportWellLink"
           action="#{wellViewer.viewEntity}" styleClass="entityLink">
           <f:param name="entityId" value="#{column.well.entityId}" />
@@ -312,7 +307,7 @@
        styleClass="confirmationTableCell">
        <f:facet name="header">
         <t:div
-         style="min-height: #{wellViewer.allowedAccessToSilencingReagentSequence ? '5':'3'}em;"
+         style="min-height: #{! empty wellViewer.restrictedReagent ? '5':'3'}em;"
          styleClass="propertyLabelColumn">
          <t:popup>
           <f:facet name="popup">

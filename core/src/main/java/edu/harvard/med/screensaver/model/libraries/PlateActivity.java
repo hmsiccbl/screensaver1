@@ -41,6 +41,15 @@ public class PlateActivity extends NonPersistentEntity<Integer> implements Compa
     return _administrativeActivity.isRestricted();
   }
 
+  @Override
+  public PlateActivity restrict()
+  {
+    if (isRestricted()) {
+      return null;
+    }
+    return this;
+  }
+
     public Plate getPlate()
   {
     return _plate;

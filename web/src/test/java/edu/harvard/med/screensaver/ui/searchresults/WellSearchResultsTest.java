@@ -367,7 +367,7 @@ public class WellSearchResultsTest extends AbstractBackingBeanTest
     
     // tests the well-to-reagent relationship
     columnNameToExpectedValue.clear();
-    columnNameToExpectedValue.put("Reagent ID", "sm179");
+    columnNameToExpectedValue.put("Vendor Reagent ID", "sm179");
     doTestFilterOnColumns(wsr, columnNameToExpectedValue, 2);
 
     // tests the well-to-reagent-to-annotationValue relationship

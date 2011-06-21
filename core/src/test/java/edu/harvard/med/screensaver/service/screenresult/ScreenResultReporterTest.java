@@ -829,10 +829,10 @@ public class ScreenResultReporterTest extends AbstractSpringPersistenceTest
 
     //verify that the SM user can see it
     setCurrentUser(_smallMoleculeUser);
-    assertTrue("SM user should not be restricted from SM Study", entityViewPolicy.visit(smStudy));
+    assertNotNull("SM user should not be restricted from SM Study", entityViewPolicy.visit(smStudy));
 
     setCurrentUser(_rnaiUser);
-    assertFalse("rnai user should be restricted from SM Study", entityViewPolicy.visit(smStudy));
+    assertNull("rnai user should be restricted from SM Study", entityViewPolicy.visit(smStudy));
   }
 
   @Transactional

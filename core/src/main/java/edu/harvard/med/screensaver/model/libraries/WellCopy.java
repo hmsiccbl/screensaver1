@@ -108,4 +108,13 @@ public class WellCopy extends NonPersistentEntity<String> implements Comparable<
   {
     return _well.isRestricted() || _copy.isRestricted();
   }
+
+  @Override
+  public WellCopy restrict()
+  {
+    if (isRestricted()) {
+      return null;
+    }
+    return this;
+  }
 }

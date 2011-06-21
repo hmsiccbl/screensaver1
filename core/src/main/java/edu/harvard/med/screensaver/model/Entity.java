@@ -53,6 +53,8 @@ public interface Entity<K extends Serializable>
    */
   boolean isRestricted();
 
+  Entity<K> restrict();
+
   /**
    * Return the "real" class of this entity, even when the object is a proxy.
    * 
@@ -73,5 +75,5 @@ public interface Entity<K extends Serializable>
    *             currently only have the EntityViewPolicy visitor, which does
    *             not actually need to visit every subclass.
    */
-   Object acceptVisitor(AbstractEntityVisitor visitor);
+  <R> R acceptVisitor(AbstractEntityVisitor<R> visitor);
 }

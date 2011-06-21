@@ -188,4 +188,13 @@ public class WellVolume extends NonPersistentEntity<String> implements Comparabl
   {
     return getWell().isRestricted();
   }
+
+  @Override
+  public WellVolume restrict()
+  {
+    if (isRestricted()) {
+      return null;
+    }
+    return this;
+  }
 }

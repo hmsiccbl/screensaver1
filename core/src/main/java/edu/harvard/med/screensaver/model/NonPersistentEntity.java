@@ -41,9 +41,21 @@ public abstract class NonPersistentEntity<K extends Serializable> implements Ent
   }
 
   @Override
-  public Object acceptVisitor(AbstractEntityVisitor visitor)
+  public <R> R acceptVisitor(AbstractEntityVisitor<R> visitor)
   {
     return null;
+  }
+
+  @Override
+  public boolean isRestricted()
+  {
+    return false;
+  }
+
+  @Override
+  public Entity<K> restrict()
+  {
+    return this;
   }
 
   @Override

@@ -33,7 +33,7 @@ import edu.harvard.med.screensaver.util.CryptoUtils;
  * @author <a mailto="andrew_tolopko@hms.harvard.edu">Andrew Tolopko</a>
  * @see SmallMoleculeLibraryStructureImageGenerator
  */
-public class StaticHashedSmilesStructureImageProvider implements StructureImageProvider<SmallMoleculeReagent>
+public class StaticHashedSmilesStructureImageProvider implements StructureImageProvider
 {
   private static Logger log = Logger.getLogger(StaticHashedSmilesStructureImageProvider.class);
 
