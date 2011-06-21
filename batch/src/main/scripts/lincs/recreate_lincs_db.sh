@@ -73,16 +73,17 @@ psql -q -U $DB_USER $DB -f $DATA_DIRECTORY/lincs-users.sql -v ON_ERROR_STOP=1
 check_errs $? "lincs-users.sql fails"
 
 ## Create the library
-LIBRARY_1_SHORTNAME="LINCS-1"
-LIBRARY_2_SHORTNAME="LINCS-2"
-LIBRARY_3_SHORTNAME="LINCS-3"
-LIBRARY_4_SHORTNAME="LINCS-4"
-LIBRARY_5_SHORTNAME="LINCS-5"
+LIBRARY_1_SHORTNAME="R-LINCS-1"
+LIBRARY_2_SHORTNAME="R-Anti-mitotics1"
+LIBRARY_3_SHORTNAME="P-LINCS-1"
+LIBRARY_4_SHORTNAME="P-Anti-mitotics5"
+LIBRARY_5_SHORTNAME="P-Anti-mitotics6"
+LIBRARY_6_SHORTNAME="P-Mario-1"
 
 set -x 
 ./run.sh edu.harvard.med.screensaver.io.libraries.LibraryCreator \
--n "HMS LINCS BATCH 001" -s $LIBRARY_1_SHORTNAME \
--lt "Commercial" -st SMALL_MOLECULE -sp 1 -ep 1 -AE $ECOMMONS_ADMIN
+-n "HMS LINCS-1 BATCH 001" -s $LIBRARY_1_SHORTNAME \
+-lt "Commercial" -st SMALL_MOLECULE -sp 1 -ep 1 -AE $ECOMMONS_ADMIN 
 
 ./run.sh edu.harvard.med.screensaver.io.libraries.LibraryContentsLoader \
 --release-library-contents-version \
@@ -90,7 +91,7 @@ set -x
 -f $DATA_DIRECTORY/HMS_LINCS-1.sdf -AE $ECOMMONS_ADMIN
 
 ./run.sh edu.harvard.med.screensaver.io.libraries.LibraryCreator \
--n "HMS LINCS Anti-Mitotics" -s $LIBRARY_2_SHORTNAME \
+-n "LINCS Anti-mitotics-1" -s $LIBRARY_2_SHORTNAME \
 -lt "Commercial" -st SMALL_MOLECULE -sp 2 -ep 2 -AE $ECOMMONS_ADMIN
 
 ./run.sh edu.harvard.med.screensaver.io.libraries.LibraryContentsLoader \
@@ -99,8 +100,8 @@ set -x
 -f $DATA_DIRECTORY/HMS_LINCS-2.sdf -AE $ECOMMONS_ADMIN
 
 ./run.sh edu.harvard.med.screensaver.io.libraries.LibraryCreator \
--n "HMS LINCS Batch 001 Stock Plates" -s $LIBRARY_3_SHORTNAME -ps WELLS_96 \
--lt "Commercial" -st SMALL_MOLECULE -sp 3 -ep 4 -AE $ECOMMONS_ADMIN 
+-n "HMS LINCS-1 Batch 001 Stock Plates" -s $LIBRARY_3_SHORTNAME -ps WELLS_96 \
+-lt "Commercial" -st SMALL_MOLECULE -sp 3 -ep 4 -AE $ECOMMONS_ADMIN -ds 2011-05-20
 
 ./run.sh edu.harvard.med.screensaver.io.libraries.LibraryContentsLoader \
 --release-library-contents-version \
@@ -108,8 +109,8 @@ set -x
 -f $DATA_DIRECTORY/HMS_LINCS-3.sdf -AE $ECOMMONS_ADMIN
 
 ./run.sh edu.harvard.med.screensaver.io.libraries.LibraryCreator \
--n "HMS LINCS Plated 5 Anti-Mitotics" -s $LIBRARY_4_SHORTNAME \
--lt "Commercial" -st SMALL_MOLECULE -sp 5 -ep 5 -AE $ECOMMONS_ADMIN
+-n "LINCS Anti-mitotics Plate 5" -s $LIBRARY_4_SHORTNAME \
+-lt "Commercial" -st SMALL_MOLECULE -sp 5 -ep 5 -AE $ECOMMONS_ADMIN -ds 2010-06-01
 
 ./run.sh edu.harvard.med.screensaver.io.libraries.LibraryContentsLoader \
 --release-library-contents-version \
@@ -117,13 +118,27 @@ set -x
 -f $DATA_DIRECTORY/HMS_LINCS-4.sdf -AE $ECOMMONS_ADMIN
 
 ./run.sh edu.harvard.med.screensaver.io.libraries.LibraryCreator \
--n "HMS LINCS Plated 6 Anti-Mitotics" -s $LIBRARY_5_SHORTNAME \
--lt "Commercial" -st SMALL_MOLECULE -sp 6 -ep 6 -AE $ECOMMONS_ADMIN
+-n "LINCS Anti-mitotics Plate 6" -s $LIBRARY_5_SHORTNAME \
+-lt "Commercial" -st SMALL_MOLECULE -sp 6 -ep 6 -AE $ECOMMONS_ADMIN -ds 2010-11-01
 
 ./run.sh edu.harvard.med.screensaver.io.libraries.LibraryContentsLoader \
 --release-library-contents-version \
 -l $LIBRARY_5_SHORTNAME \
 -f $DATA_DIRECTORY/HMS_LINCS-5.sdf -AE $ECOMMONS_ADMIN
+
+./run.sh edu.harvard.med.screensaver.io.libraries.LibraryCreator \
+-n "P-Mario-1" -s $LIBRARY_6_SHORTNAME \
+-lt "Commercial" -st SMALL_MOLECULE -sp 7 -ep 7 -AE $ECOMMONS_ADMIN -ds 2011-05-27
+
+./run.sh edu.harvard.med.screensaver.io.libraries.LibraryContentsLoader \
+--release-library-contents-version \
+-l $LIBRARY_6_SHORTNAME \
+-f $DATA_DIRECTORY/HMS_LINCS-6.sdf -AE $ECOMMONS_ADMIN
+
+## Restrict reagents
+
+psql -q -U $DB_USER $DB -f $DATA_DIRECTORY/restrict_reagents.sql -v ON_ERROR_STOP=1
+check_errs $? "lincs-users.sql fails"
 
 ## Create the screens
 
@@ -750,6 +765,16 @@ LEAD_SCREENER_EMAIL="qingsong_liu@hms.harvard.edu"
 -t 'JNK-9L Ambit'  \
 -i 300030 \
 --summary "`cat $DATA_DIRECTORY/study/ambit_protocol.txt`"
+
+./run.sh edu.harvard.med.screensaver.io.screens.StudyCreator \
+-AE $ECOMMONS_ADMIN -annotationNamesInCol1  \
+-y SMALL_MOLECULE -yy IN_VITRO \
+-hf $LAB_HEAD_FIRST -hl $LAB_HEAD_LAST -he $LAB_HEAD_EMAIL -lf $LEAD_SCREENER_FIRST -ll $LEAD_SCREENER_LAST -le $LEAD_SCREENER_EMAIL \
+-keyByFacilityId \
+--replace -f $DATA_DIRECTORY/study/HMSL10068_PLX-4720_activx_sde.xls \
+-t 'PLX-4720 ActivX'  \
+-i 300031 \
+--summary "`cat $DATA_DIRECTORY/study/activx_protocol.txt`"
 
 ## Reagent QC Attachments
 ./run.sh edu.harvard.med.lincs.screensaver.io.libraries.ReagentQCAttachmentImporter \

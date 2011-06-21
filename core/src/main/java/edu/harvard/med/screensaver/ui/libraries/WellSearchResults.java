@@ -597,7 +597,7 @@ public class WellSearchResults extends TupleBasedEntitySearchResults<Well,String
         public String getCellValue(Tuple<String> tuple)
         {
           String wellFacilityId = (String) tuple.getProperty(TupleDataFetcher.makePropertyKey(wellFacilityIdPropertyPath));
-          String saltFormId = (String) tuple.getProperty(TupleDataFetcher.makePropertyKey(saltFormIdPropertyPath));
+          String saltFormId = "" + tuple.getProperty(TupleDataFetcher.makePropertyKey(saltFormIdPropertyPath));
           return wellFacilityId + LincsScreensaverConstants.FACILITY_ID_SEPARATOR + saltFormId +
             LincsScreensaverConstants.FACILITY_ID_SEPARATOR + super.getCellValue(tuple);
         }

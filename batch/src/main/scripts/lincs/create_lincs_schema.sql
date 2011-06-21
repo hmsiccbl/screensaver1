@@ -686,6 +686,7 @@
     );
 
     create table silencing_reagent (
+        is_restricted_sequence bool not null,
         sequence text,
         silencing_reagent_type text,
         reagent_id int4 not null,
@@ -736,6 +737,7 @@
         molecular_formula text,
         molecular_mass numeric(15, 9),
         molecular_weight numeric(15, 9),
+        is_restricted_structure bool not null,
         salt_form_id int4,
         smiles text,
         vendor_batch_id text,
