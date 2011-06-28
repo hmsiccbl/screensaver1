@@ -75,4 +75,18 @@
     <aop:scoped-proxy/>
   </bean>
   
+  <bean
+    id="currentScreensaverUser"
+    class="edu.harvard.med.screensaver.ui.WebCurrentScreensaverUser"
+    scope="session">
+    <property
+      name="dao"
+      ref="genericEntityDao" />
+    <property
+      name="allowGuestLogin"
+      value="true"
+    />
+    <aop:scoped-proxy />
+  </bean>  
+  
 </beans>

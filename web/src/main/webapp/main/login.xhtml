@@ -64,13 +64,21 @@
       <t:panelGrid columns="1">
         <t:commandButton id="loginCommand" value="Login"
           styleClass="command" />
+      </t:panelGrid>
+
+    </h:form>
+    <h:form id="cancelLoginForm">
+      <t:panelGrid columns="1">
+        <t:commandButton id="cancelLoginCommand" value="Cancel" 
+          action="#{menu.cancelLogin}"
+          rendered="#{menu.currentScreensaverUser.allowGuestLogin}"
+          styleClass="command" />
         <h:outputLink
           value="#{appInfo.applicationProperties.map['screensaver.ui.feedback_url']}"
           target="_blank" styleClass="smallLabel">
           <h:outputText value="Request account or login help" />
         </h:outputLink>
       </t:panelGrid>
-
     </h:form>
     
 	</ui:define>

@@ -22,7 +22,11 @@
         styleClass="label" />
       <t:panelGrid columns="1">
         <t:commandButton value="Try again" action="#{menu.viewMain}"
-          styleClass="command" />
+          styleClass="command" 
+          rendered="#{ menu.applicationProperties.map['screensaver.ui.facility_name'] != 'LINCS'}"/>
+        <t:commandButton value="Try again" action="#{menu.login}"
+          styleClass="command" 
+          rendered="#{ menu.applicationProperties.map['screensaver.ui.facility_name'] == 'LINCS'}"/>
         <h:outputLink value="#{appInfo.applicationProperties.map['screensaver.ui.feedback_url']}" target="_blank" styleClass="label">
           <h:outputText value="I am having trouble logging into Screensaver" />
         </h:outputLink>

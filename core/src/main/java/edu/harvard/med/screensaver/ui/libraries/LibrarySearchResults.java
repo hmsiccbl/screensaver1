@@ -73,6 +73,7 @@ public class LibrarySearchResults extends EntityBasedEntitySearchResults<Library
   private GenericEntityDAO _dao;
 
   private LibraryViewer _libraryViewer;
+  private WellSearchResults _wellsBrowser;
   
   /**
    * @motivation for CGLIB2
@@ -82,11 +83,13 @@ public class LibrarySearchResults extends EntityBasedEntitySearchResults<Library
   }
 
   public LibrarySearchResults(GenericEntityDAO dao,
-                              LibraryViewer libraryViewer)
+                              LibraryViewer libraryViewer,
+                              WellSearchResults wellsBrowser)
   {
     super(libraryViewer);
     _dao = dao;
     _libraryViewer = libraryViewer;
+    _wellsBrowser = wellsBrowser;
   }
 
   @Override
@@ -150,6 +153,34 @@ public class LibrarySearchResults extends EntityBasedEntitySearchResults<Library
         return library.getLibraryName();
       }
     });
+
+    // [#3105] create column linkable to wellsearchresults
+    if(getApplicationProperties().isLincsAppVersion())
+    {
+      IntegerEntityColumn column = new IntegerEntityColumn<Library>(
+        Library.startPlate,
+        "Experimental Well Count", 
+        "The number of experimental wells in the in the library", 
+        TableColumn.UNGROUPED) {
+        @Override
+        public Integer getCellValue(Library library)
+        {
+          return library.getExperimentalWellCount();
+        }
+        @Override
+        public boolean isCommandLink()
+        {
+          return true;
+        }
+        public Object cellAction(Library library) 
+        { 
+          _wellsBrowser.searchWellsForLibrary(library);
+          return BROWSE_WELLS;
+        }
+      };
+      columns.add(column);
+    }
+    
     columns.add(new TextEntityColumn<Library>(RelationshipPath.from(Library.class).toProperty("provider"),
                                               "Provider",
                                               "The vendor or source that provided the library",

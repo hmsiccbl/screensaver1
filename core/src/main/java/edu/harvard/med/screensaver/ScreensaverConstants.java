@@ -47,6 +47,7 @@ public interface ScreensaverConstants
   public static final String REDISPLAY_PAGE_ACTION_RESULT = null;
   public static final String VIEW_MAIN ="viewMain";
   public static final String VIEW_GOODBYE = "goodbye";
+  public static final String VIEW_LOGIN = "login";
   public static final String VIEW_HELP ="viewHelp";
   public static final String VIEW_NEWS ="viewNews";
   public static final String VIEW_DOWNLOADS ="viewDownloads";

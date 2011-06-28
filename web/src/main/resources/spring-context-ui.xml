@@ -283,8 +283,9 @@
     parent="uiBean"
     scope="session"
     class="edu.harvard.med.screensaver.ui.libraries.LibrarySearchResults">
-    <constructor-arg ref="libraryViewer" />
     <constructor-arg ref="genericEntityDao" />
+    <constructor-arg ref="libraryViewer" />
+    <constructor-arg ref="wellsBrowser" />
     <property
       name="rowsPerPageSelections">
       <list>

@@ -9,12 +9,16 @@
 
 package edu.harvard.med.screensaver.ui;
 
+import java.util.Map;
+
 import javax.faces.context.FacesContext;
 import javax.servlet.http.HttpSession;
 
+import org.apache.commons.lang.StringUtils;
 import org.apache.log4j.Logger;
 import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
+import com.google.common.collect.Maps;
 
 import edu.harvard.med.screensaver.db.DAOTransaction;
 import edu.harvard.med.screensaver.db.GenericEntityDAO;
@@ -22,8 +26,10 @@ import edu.harvard.med.screensaver.model.screens.Screen;
 import edu.harvard.med.screensaver.model.users.LabHead;
 import edu.harvard.med.screensaver.model.users.ScreeningRoomUser;
 import edu.harvard.med.screensaver.model.users.ScreensaverUser;
+import edu.harvard.med.screensaver.model.users.ScreensaverUserRole;
 import edu.harvard.med.screensaver.policy.EntityViewPolicy;
 import edu.harvard.med.screensaver.ui.arch.auth.ScreensaverLoginModule;
+import edu.harvard.med.screensaver.ui.arch.util.servlet.ScreensaverServletFilter;
 
 /**
  * Like {@link CurrentScreensaverUser}, maintains the current ScreensaverUser
@@ -48,12 +54,13 @@ public class WebCurrentScreensaverUser extends CurrentScreensaverUser
 
 
   private GenericEntityDAO _dao;
+  private boolean allowGuestLogin = false;
 
   public void setDao(GenericEntityDAO dao)
   {
     _dao = dao;
   }
-
+  
   @Override
   public ScreensaverUser getScreensaverUser()
   {
@@ -67,8 +74,22 @@ public class WebCurrentScreensaverUser extends CurrentScreensaverUser
           if (facesContext == null) {
             throw new IllegalStateException("cannot determine current screensaver user outside of JSF context");
           }
-          ScreensaverUser screensaverUser = findScreensaverUserForUsername(facesContext.getExternalContext().getRemoteUser());
-          setScreensaverUser(screensaverUser);
+          
+          Object temp = ((HttpSession)facesContext.getExternalContext().getSession(false)).getAttribute(ScreensaverServletFilter.LOGIN_PENDING);
+          Boolean pendingLogin = temp != null && (Boolean)temp;
+          String remoteUser = facesContext.getExternalContext().getRemoteUser();
+          if(isAllowGuestLogin() && StringUtils.isEmpty(remoteUser) && !pendingLogin) {
+            //remoteUser = "guest"; // for [#3107] Non-authenticated access for LINCS guest users
+            setScreensaverUserGuest(new GuestUser("Guest"));
+          }else {
+            ScreensaverUser screensaverUser = findScreensaverUserForUsername(remoteUser);
+            setScreensaverUser(screensaverUser);
+            if( pendingLogin ) {
+                 ((HttpSession)facesContext.getExternalContext().getSession(false)).setAttribute(ScreensaverServletFilter.LOGIN_PENDING,
+                                    Boolean.FALSE);
+            }
+          }
+          
         }
       });
       // Spring instantiates this object as a session-scoped bean, the first time a JSF page is requested for a newly logged-in user
@@ -76,7 +97,12 @@ public class WebCurrentScreensaverUser extends CurrentScreensaverUser
     }
     return super.getScreensaverUser();
   }
-
+       
+  private void setScreensaverUserGuest(ScreensaverUser user)
+  {
+    super.setScreensaverUser(user);
+  }
+  
   @Transactional(propagation = Propagation.MANDATORY)
   public void setScreensaverUser(final ScreensaverUser user)
   {
@@ -170,4 +196,58 @@ public class WebCurrentScreensaverUser extends CurrentScreensaverUser
     }
     return user;
   }
+  
+  public void setAllowGuestLogin(boolean allowGuestLogin)
+  {
+    this.allowGuestLogin = allowGuestLogin;
+  }
+
+  @Override
+  public boolean isAllowGuestLogin()
+  {
+    return allowGuestLogin;
+  }
+
+  /**
+    * for [#3107] Non-authenticated access for LINCS guest users
+    */
+  public class GuestUser extends ScreeningRoomUser
+  {
+    String name;
+    public GuestUser(String name)
+    {
+      this.name = name;
+    }
+    @Override
+    public String getFirstName()
+    {
+      return name;
+    }
+    @Override
+    public String getLastName()
+    {
+      return "";
+    }
+    @Override
+    public String getFullNameFirstLast()
+    {
+      return name;
+    }
+    @Override
+    public Map<String,Boolean> getIsUserInRoleOfNameMap()
+    {
+      Map<String,Boolean> roles = Maps.newHashMap();
+      roles.put(ScreensaverUserRole.SCREENSAVER_USER.getValue(), Boolean.TRUE);
+      roles.put(ScreensaverUserRole.SCREENS_ADMIN.getValue(), true);
+      return roles;
+    }
+    @Override
+    protected boolean validateRole(ScreensaverUserRole role)
+    {
+      return ScreensaverUserRole.SCREENSAVER_USER == role || ScreensaverUserRole.SCREENS_ADMIN == role;
+    }
+    
+    public Integer getEntityId() { return 0; }
+    public String getLoginId() {return name; }
+  };
 }

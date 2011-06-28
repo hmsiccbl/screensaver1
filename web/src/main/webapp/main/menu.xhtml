@@ -18,7 +18,6 @@
           value="#{menu.applicationName}" styleClass="menuItem title"
           title="Go to the #{menu.applicationName} main page" />
       </h:form>
-
       <t:div rendered="#{menu.authenticatedUser}">
 
         <t:htmlTag value="hr" />
@@ -34,10 +33,19 @@
                 value="#{menu.screensaverUser.fullNameFirstLast}"
                 title="The the logged in user (yes, you!)" />
             </t:commandLink>
-            <t:div />
-            <t:commandLink id="logout" action="#{menu.logout}"
-              value="Logout" styleClass="menuItem"
-              title="Click here to log out" />
+            <t:panelGrid columns="2" styleClass="layoutPanel">
+             <t:commandLink id="login" action="#{menu.login}"
+               value="Login" styleClass="menuItem"
+               title="Click here to log in"
+               rendered="#{menu.guest}"
+                />
+             <t:div />
+             <t:commandLink id="logout" action="#{menu.logout}"
+               value="Logout" styleClass="menuItem"
+               title="Click here to log out"
+               rendered="#{!menu.guest}" 
+               />
+              </t:panelGrid>
           </h:form>
         </t:panelGroup>
 

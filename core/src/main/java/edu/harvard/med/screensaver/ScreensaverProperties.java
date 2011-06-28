@@ -23,6 +23,7 @@ import com.google.common.collect.ImmutableList;
 import com.google.common.collect.Maps;
 import org.apache.log4j.Logger;
 
+import edu.harvard.med.lincs.screensaver.LincsScreensaverConstants;
 import edu.harvard.med.screensaver.db.DatabaseConnectionSettingsResolutionException;
 import edu.harvard.med.screensaver.db.DatabaseConnectionSettingsResolver;
 import edu.harvard.med.screensaver.db.NeedsScreensaverProperties;
@@ -225,5 +226,10 @@ public class ScreensaverProperties implements ScreensaverConstants
   public Properties getMap()
   {
     return _properties;
+  }
+  
+  public boolean isLincsAppVersion()
+  {
+        return LincsScreensaverConstants.FACILITY_NAME.equals(getProperty(FACILITY_NAME));
   }
 }

@@ -20,6 +20,16 @@
     <!-- Web app authentication method can be 'FORM' (Screensaver login web page) or 'BASIC' (browser dialog). BASIC mode is useful 
          during development, to avoid repeating the login step between Tomcat restarts. (inserted into web.xml via Maven filtering) -->
     <servlet.authentication.method>FORM</servlet.authentication.method>
+    <web.unauthenticated.url-pattern>/index.html</web.unauthenticated.url-pattern>
+    <web.authenticated.url-pattern><![CDATA[/main.jsf</url-pattern>
+    <url-pattern>/main/*</url-pattern>
+    <url-pattern>/util/*</url-pattern>
+    <url-pattern>/help/*</url-pattern>
+    <url-pattern>/libraries/*</url-pattern>
+    <url-pattern>/studies/*</url-pattern>
+    <url-pattern>/screens/*</url-pattern>
+    <url-pattern>/screens/screenresults/*</url-pattern>
+    <url-pattern>/help/*]]></web.authenticated.url-pattern>
   </properties>
   
   <packaging>war</packaging>  
@@ -90,6 +100,16 @@
       <properties>
         <!-- The top-level spring context file used to configure the web application (inserted into web.xml via Maven filtering) -->
         <web.application.context.file>spring-context-web-lincs.xml</web.application.context.file>
+        <web.unauthenticated.url-pattern><![CDATA[/main.jsf</url-pattern>
+            <url-pattern>/main/*</url-pattern>
+            <url-pattern>/util/*</url-pattern>
+            <url-pattern>/help/*</url-pattern>
+            <url-pattern>/libraries/*</url-pattern>
+            <url-pattern>/studies/*</url-pattern>
+            <url-pattern>/screens/*</url-pattern>
+            <url-pattern>/screens/screenresults/*</url-pattern>
+            <url-pattern>/help/*]]></web.unauthenticated.url-pattern>
+      <web.authenticated.url-pattern>/main/authenticatedPage.jsf</web.authenticated.url-pattern>
       </properties>
     </profile>
   	<profile>

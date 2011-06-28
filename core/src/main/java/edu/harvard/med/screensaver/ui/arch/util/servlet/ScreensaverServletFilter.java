@@ -35,6 +35,7 @@ public class ScreensaverServletFilter extends OncePerRequestFilter
 
   public static final String DEFAULT_SESSION_FACTORY_BEAN_NAME = "sessionFactory";
   public static final String CLOSE_HTTP_SESSION = "closeHttpSession";
+  public static final String LOGIN_PENDING = "LOGIN_PENDING";  // for [#3107] Non-authenticated access for LINCS guest users
   private static final String REPORT_EXCEPTION_URL = "/screensaver/main/reportException.jsf";
 
   private String sessionFactoryBeanName = DEFAULT_SESSION_FACTORY_BEAN_NAME;

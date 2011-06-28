@@ -400,6 +400,8 @@
       <url-pattern>/imageprovider/*</url-pattern>
       <!-- resources provided by Apache MyFaces and by Apache Tomahawk components -->
       <url-pattern>/faces/*</url-pattern>
+      
+      <url-pattern>${web.unauthenticated.url-pattern}</url-pattern>  
 
       <http-method>GET</http-method>
       <http-method>HEAD</http-method>
@@ -422,18 +424,13 @@
   <security-constraint>
     <web-resource-collection>
       <web-resource-name>authenticated users</web-resource-name>
-      <url-pattern>/main.jsf</url-pattern>
-      <url-pattern>/main/*</url-pattern>
-      <url-pattern>/util/*</url-pattern>
-      <url-pattern>/help/*</url-pattern>
-      <url-pattern>/libraries/*</url-pattern>
-      <url-pattern>/studies/*</url-pattern>
-      <url-pattern>/screens/*</url-pattern>
-      <url-pattern>/screens/screenresults/*</url-pattern>
+
+      <url-pattern>${web.authenticated.url-pattern}</url-pattern>  
+      
       <url-pattern>/cherryPickRequests/*</url-pattern>
       <url-pattern>/users/*</url-pattern>
       <url-pattern>/activities/*</url-pattern>
-      <url-pattern>/help/*</url-pattern>
+      
       <!-- note: access to contents beneath this directory will be controlled by CellHTS2ReportAuthorizationFilter -->
       <url-pattern>/cellHTS2/*</url-pattern>
     </web-resource-collection>
