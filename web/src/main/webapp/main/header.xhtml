@@ -26,8 +26,12 @@
 		</t:panelGroup>
 	</h:form>
 
-  <t:dataList id="allMessages" var="msg"
-    value="#{messages.messagesAndDequeue}" layout="unorderedList">
+  <!-- for JSF messages -->
+  <h:messages id="jsfMessages" globalOnly="false" showDetail="true"
+    styleClass="errorMessage" />
+  <!--  for application messages -->
+  <t:dataList id="applicationMessages" var="msg"
+    value="#{messages.messagesAndDequeue}" layout="unorderedList" rendered="#{! empty messages.queuedMessages}">
     <t:outputText value="#{msg.summary}" styleClass="errorMessage" />
   </t:dataList>
 
