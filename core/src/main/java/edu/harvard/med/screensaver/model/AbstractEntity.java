@@ -214,10 +214,7 @@ public abstract class AbstractEntity<K extends Serializable> implements Entity<K
   @Transient
   public boolean isRestricted()
   {
-    if (_entityViewPolicy == null) {
-      throw new UnsupportedOperationException("entityViewPolicy not set");
-    }
-    return acceptVisitor(_entityViewPolicy) == null;
+    return restrict() == null;
   }
 
   /**
@@ -237,6 +234,10 @@ public abstract class AbstractEntity<K extends Serializable> implements Entity<K
   @Transient
   public Entity<K> restrict()
   {
+    if (isTransient()) {
+      // new entities will not have a entityViewPolicy injected yet, and it should not be restricted in any case, if the user created it 
+      return this;
+    }
     if (_entityViewPolicy == null) {
       throw new UnsupportedOperationException("entityViewPolicy not set");
     }
