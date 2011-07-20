@@ -20,6 +20,7 @@ import java.util.Set;
 import java.util.SortedSet;
 
 import com.google.common.base.Function;
+import com.google.common.base.Joiner;
 import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.Iterables;
 import com.google.common.collect.Lists;
@@ -90,6 +91,7 @@ import edu.harvard.med.screensaver.ui.arch.searchresults.SearchResults;
 import edu.harvard.med.screensaver.ui.arch.searchresults.TupleBasedEntitySearchResults;
 import edu.harvard.med.screensaver.ui.arch.util.ValueReference;
 import edu.harvard.med.screensaver.ui.screenresults.MetaDataType;
+import edu.harvard.med.screensaver.util.NullSafeUtils;
 import edu.harvard.med.screensaver.util.Triple;
 
 /**
@@ -112,6 +114,8 @@ public abstract class WellSearchResults extends TupleBasedEntitySearchResults<We
   private static final String OUR_ANNOTATION_TYPES_COLUMN_GROUP = "Study Annotations";
 
   private static String COLUMN_REAGENT_ID = "Vendor Reagent ID";
+
+  private static Joiner fsbColumnValueJoiner = Joiner.on(LincsScreensaverConstants.FACILITY_ID_SEPARATOR);
 
 
   protected static final Function<DataColumn,Triple<DataColumn,String,String>> DataColumnToMetaDataColumn =
@@ -621,13 +625,17 @@ public abstract class WellSearchResults extends TupleBasedEntitySearchResults<We
                                                    "Facility-Salt-Batch-ID",
                                                    "the full Facility ID - SALT",
                                                    COMPOUND_COLUMNS_GROUP) {
+        
         @Override
         public String getCellValue(Tuple<String> tuple)
         {
-          String wellFacilityId = (String) tuple.getProperty(TupleDataFetcher.makePropertyKey(wellFacilityIdPropertyPath));
-          String saltFormId = "" + tuple.getProperty(TupleDataFetcher.makePropertyKey(saltFormIdPropertyPath));
-          return wellFacilityId + LincsScreensaverConstants.FACILITY_ID_SEPARATOR + saltFormId +
-            LincsScreensaverConstants.FACILITY_ID_SEPARATOR + super.getCellValue(tuple);
+          Object facilityBatchIdValue = tuple.getProperty(TupleDataFetcher.makePropertyKey(getPropertyPath()));
+          if (facilityBatchIdValue != null) {
+            return fsbColumnValueJoiner.join(NullSafeUtils.toString(tuple.getProperty(TupleDataFetcher.makePropertyKey(wellFacilityIdPropertyPath)), "?"),
+                                  NullSafeUtils.toString(tuple.getProperty(TupleDataFetcher.makePropertyKey(saltFormIdPropertyPath)), "?"),
+                                  facilityBatchIdValue);
+          }
+          return null;
         }
   
         @Override

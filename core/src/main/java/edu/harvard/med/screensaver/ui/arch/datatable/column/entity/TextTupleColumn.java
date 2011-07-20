@@ -53,6 +53,6 @@ public class TextTupleColumn<E extends AbstractEntity,K> extends TextColumn<Tupl
   @Override
   public String getCellValue(Tuple<K> tuple)
   {
-    return "" + tuple.getProperty(_propertyKey);
+    return (String) tuple.getProperty(_propertyKey);
   }
 }
