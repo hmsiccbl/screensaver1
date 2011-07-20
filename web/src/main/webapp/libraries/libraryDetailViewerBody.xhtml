@@ -90,7 +90,7 @@
       </ui:define>
     </ss:property>
 
-    <ss:property id="libraryTypeLabel" label="Library Type"
+    <ss:property id="libraryTypeLabel" label="Library Type" type="Vocabulary"
         rendered="#{appInfo.applicationProperties.facility != 'LINCS'}"
 				description="The type of library, e.g., 'Commercial', 'Known Bioactives', 'siRNA', etc."
         value="#{libraryDetailViewer.entity.libraryType}"
