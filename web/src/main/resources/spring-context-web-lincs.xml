@@ -32,6 +32,14 @@
     <aop:scoped-proxy />
   </bean>
   
+  <bean
+    id="entityEditPolicy"
+    class="edu.harvard.med.lincs.screensaver.policy.LincsEntityEditPolicy"
+    scope="session">
+    <constructor-arg ref="currentScreensaverUser"/>
+    <aop:scoped-proxy />
+  </bean>
+    
   <bean id="structureImageProvider"
         class="edu.harvard.med.iccbl.screensaver.io.libraries.smallmolecule.RestrictedStructureImageProviderDecorator">
     <constructor-arg>
@@ -46,6 +54,109 @@
         class="edu.harvard.med.lincs.screensaver.io.screens.StudyFacilityIdStudyImageProvider">
     <constructor-arg value="#{screensaverProperties.map['screensaver.images.base_url']}/screen-images-by-facility-id/" />
     <constructor-arg ref="imageProviderServlet" />
+  </bean>
+
+  <bean
+    id="wellsBrowser"
+    parent="uiBean"
+    scope="session"
+    class="edu.harvard.med.lincs.screensaver.ui.libraries.LincsWellSearchResults">
+    <constructor-arg ref="genericEntityDao" />
+    <constructor-arg ref="librariesDao" />
+    <constructor-arg ref="entityViewPolicy" />
+    <constructor-arg ref="libraryViewer" />
+    <constructor-arg ref="wellViewer" />
+    <constructor-arg ref="structureImageProvider" />
+    <constructor-arg ref="libraryContentsVersionRef" />
+    <constructor-arg>
+      <list>
+          <bean class="edu.harvard.med.screensaver.ui.arch.searchresults.DataExporterAdapter">
+            <constructor-arg ref="wellsSdfDataExporterForUi" />
+            <constructor-arg><bean class="edu.harvard.med.screensaver.db.datafetcher.TupleToKeyFunction" /></constructor-arg>
+          </bean>
+      </list>
+    </constructor-arg>
+    <property name="reagentsBrowser" ref="reagentsBrowser"/>
+    <property
+      name="rowsPerPageSelections">
+      <list>
+        <value>12</value>
+        <value>24</value>
+        <value>48</value>
+        <value>96</value>
+        <value>384</value>
+      </list>
+    </property>
+    <property name="defaultRowsPerPage" value="24" /> 
+    <aop:scoped-proxy/>
+  </bean>
+  
+  <bean
+    id="reagentsBrowser"
+    parent="uiBean"
+    scope="session"
+    class="edu.harvard.med.lincs.screensaver.ui.libraries.LincsWellSearchResults">
+    <constructor-arg ref="genericEntityDao" />
+    <constructor-arg ref="librariesDao" />
+    <constructor-arg ref="entityViewPolicy" />
+    <constructor-arg ref="libraryViewer" />
+    <constructor-arg ref="wellViewer" />
+    <constructor-arg ref="structureImageProvider" />
+    <constructor-arg ref="libraryContentsVersionRef" />
+    <constructor-arg>
+      <list>
+          <bean class="edu.harvard.med.screensaver.ui.arch.searchresults.DataExporterAdapter">
+            <constructor-arg ref="wellsSdfDataExporterForUi" />
+            <constructor-arg><bean class="edu.harvard.med.screensaver.db.datafetcher.TupleToKeyFunction" /></constructor-arg>
+          </bean>
+      </list>
+    </constructor-arg>
+    <property
+      name="rowsPerPageSelections">
+      <list>
+        <value>12</value>
+        <value>24</value>
+        <value>48</value>
+        <value>96</value>
+        <value>384</value>
+      </list>
+    </property>
+    <property name="defaultRowsPerPage" value="24" /> 
+    <aop:scoped-proxy/>
+  </bean>
+
+  <bean
+    id="wellSearchResultsNested"
+    parent="uiBean"
+    scope="prototype"
+    class="edu.harvard.med.lincs.screensaver.ui.libraries.LincsWellSearchResults">
+    <constructor-arg ref="genericEntityDao" />
+    <constructor-arg ref="librariesDao" />
+    <constructor-arg ref="entityViewPolicy" />
+    <constructor-arg ref="libraryViewer" />
+    <constructor-arg ref="wellViewer" />
+    <constructor-arg ref="structureImageProvider" />
+    <constructor-arg ref="libraryContentsVersionRef" />
+    <constructor-arg>
+      <list>
+          <bean class="edu.harvard.med.screensaver.ui.arch.searchresults.DataExporterAdapter">
+            <constructor-arg ref="wellsSdfDataExporterForUi" />
+            <constructor-arg><bean class="edu.harvard.med.screensaver.db.datafetcher.TupleToKeyFunction" /></constructor-arg>
+          </bean>
+      </list>
+    </constructor-arg>
+    <property
+      name="rowsPerPageSelections">
+      <list>
+        <value>12</value>
+        <value>24</value>
+        <value>48</value>
+        <value>96</value>
+        <value>384</value>
+      </list>
+    </property>
+    <property name="defaultRowsPerPage" value="24" /> 
+    <property name="nested" value="true" /> 
   </bean>
 
   <bean
@@ -74,19 +185,5 @@
     <constructor-arg ref="attachedFiles" />
     <aop:scoped-proxy/>
   </bean>
-  
-  <bean
-    id="currentScreensaverUser"
-    class="edu.harvard.med.screensaver.ui.WebCurrentScreensaverUser"
-    scope="session">
-    <property
-      name="dao"
-      ref="genericEntityDao" />
-    <property
-      name="allowGuestLogin"
-      value="true"
-    />
-    <aop:scoped-proxy />
-  </bean>  
   
 </beans>

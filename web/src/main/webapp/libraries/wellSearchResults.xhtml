@@ -10,11 +10,21 @@
 
 <ui:composition template="/main/template.xhtml">
 
-	<ui:param name="pageTitle" value="Well Search Results" />
+  <ui:param name="pageTitle" value="#{wellsBrowser.title}" />
 	<ui:param name="pageHelpURL" value="libraries/wellSearchResultsHelp.jsf" />
 
-    <ui:define name="body">
-	    <ui:include src="wellSearchResultsBody.xhtml" />
+  <ui:define name="searchResultHeader">
+    <h:form>
+      <t:panelGroup id="wellSearchResultsCmdPanel" styleClass="commandPanel"
+        rendered="#{appInfo.applicationProperties.facility == 'LINCS' &amp;&amp; !(searchResults.nested || searchResults.entityView)}">
+        <t:commandButton id="viewUniqueReagentsCommand" value="Browse Unique Reagents..." action="browseReagents" title="List matching reagents from only the first HMS LINCS batch entered for each reagent"/>
+      </t:panelGroup>
+    </h:form>        
+  </ui:define>        
+
+  <ui:define name="body">
+    <ui:include src="wellSearchResultsBody.xhtml">
+    </ui:include>
 	</ui:define>
 
 </ui:composition>

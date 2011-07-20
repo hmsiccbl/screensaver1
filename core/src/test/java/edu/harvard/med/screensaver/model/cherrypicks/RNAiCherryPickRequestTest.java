@@ -20,7 +20,6 @@ import edu.harvard.med.iccbl.screensaver.policy.cherrypicks.RNAiCherryPickReques
 import edu.harvard.med.screensaver.db.DAOTransaction;
 import edu.harvard.med.screensaver.db.LibrariesDAO;
 import edu.harvard.med.screensaver.model.DuplicateEntityException;
-import edu.harvard.med.screensaver.model.MakeDummyEntities;
 import edu.harvard.med.screensaver.model.libraries.Library;
 import edu.harvard.med.screensaver.model.libraries.PlateSize;
 import edu.harvard.med.screensaver.model.libraries.Well;
@@ -29,7 +28,7 @@ import edu.harvard.med.screensaver.model.libraries.WellName;
 import edu.harvard.med.screensaver.model.screens.Screen;
 import edu.harvard.med.screensaver.model.screens.ScreenType;
 import edu.harvard.med.screensaver.model.users.AdministratorUser;
-import edu.harvard.med.screensaver.service.cherrypicks.CherryPickRequestAllocatorTest;
+import edu.harvard.med.screensaver.test.MakeDummyEntities;
 
 public class RNAiCherryPickRequestTest extends CherryPickRequestTest<RNAiCherryPickRequest>
 {
@@ -92,7 +91,7 @@ public class RNAiCherryPickRequestTest extends CherryPickRequestTest<RNAiCherryP
       {
         Screen screen = MakeDummyEntities.makeDummyScreen(1, ScreenType.RNAI);
         RNAiCherryPickRequest cherryPickRequest = (RNAiCherryPickRequest) screen.createCherryPickRequest((AdministratorUser) screen.getCreatedBy());
-        Library duplexLibrary = CherryPickRequestAllocatorTest.makeRNAiDuplexLibrary("Duplexes Library", 50001, 50007, PlateSize.WELLS_384);
+        Library duplexLibrary = MakeDummyEntities.makeRNAiDuplexLibrary("Duplexes Library", 50001, 50007, PlateSize.WELLS_384);
         genericEntityDao.saveOrUpdateEntity(duplexLibrary);
 
         for (int plateOrdinal = 0; plateOrdinal < 6; ++plateOrdinal) {
@@ -120,7 +119,7 @@ public class RNAiCherryPickRequestTest extends CherryPickRequestTest<RNAiCherryP
     try {
       Screen screen = MakeDummyEntities.makeDummyScreen(1, ScreenType.RNAI);
       RNAiCherryPickRequest cherryPickRequest = (RNAiCherryPickRequest) screen.createCherryPickRequest((AdministratorUser) screen.getCreatedBy());
-      Library library = CherryPickRequestAllocatorTest.makeRNAiDuplexLibrary("Duplexes Library", 50001, 50007, PlateSize.WELLS_384);
+      Library library = MakeDummyEntities.makeRNAiDuplexLibrary("Duplexes Library", 50001, 50007, PlateSize.WELLS_384);
       Well well = library.getWells().iterator().next();
       cherryPickRequest.createScreenerCherryPick(well);
       cherryPickRequest.createScreenerCherryPick(well);

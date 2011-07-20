@@ -18,9 +18,13 @@
         <t:outputText value=" - #{pageTitle}"
           rendered="#{! empty pageTitle}" />
       </t:htmlTag>
+
+      <ui:include src="/util/google-analytics-script.xhtml" />
+
     </t:documentHead>
 
     <t:documentBody>
+
       <t:panelGrid id="menuAndBodyPanel" columns="2"
         styleClass="menuAndContent"
         columnClasses="menuColumn,contentColumn">

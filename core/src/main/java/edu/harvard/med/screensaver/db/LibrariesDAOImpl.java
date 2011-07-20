@@ -17,6 +17,10 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.TreeSet;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
+
+import javax.persistence.TypedQuery;
 
 import com.google.common.base.Function;
 import com.google.common.base.Functions;
@@ -57,13 +61,14 @@ import edu.harvard.med.screensaver.model.screens.LibraryScreening;
 import edu.harvard.med.screensaver.model.screens.ScreenType;
 import edu.harvard.med.screensaver.ui.arch.datatable.Criterion.Operator;
 import edu.harvard.med.screensaver.util.Pair;
+import edu.harvard.med.screensaver.util.StringUtils;
 
 public class LibrariesDAOImpl extends AbstractDAO implements LibrariesDAO
 {
   // static members
 
   private static Logger log = Logger.getLogger(LibrariesDAOImpl.class);
-
+  public static final Pattern FACILITY_SALT_BATCH_PATTERN = Pattern.compile("([^-]+)[-]([^-]*)[-]([^-]*)");
 
   // instance data members
 
@@ -103,7 +108,9 @@ public class LibrariesDAOImpl extends AbstractDAO implements LibrariesDAO
       where("lrr", Operator.EQUAL, "r");
     }
     hql.select("r");
-    log.debug(hql.toString());
+    if (log.isDebugEnabled()) {
+      log.debug(hql.toString());
+    }
     List<Reagent> reagents = _dao.runQuery(new Query<Reagent>() {
       public List<Reagent> execute(Session session)
       {
@@ -127,7 +134,9 @@ public class LibrariesDAOImpl extends AbstractDAO implements LibrariesDAO
       where("lrr", Operator.EQUAL, "r");
     }
     hql.select("r");
-    log.info(hql.toString());
+    if (log.isDebugEnabled()) {
+      log.debug(hql.toString());
+    }
     List<SmallMoleculeReagent> reagents = _dao.runQuery(new Query<SmallMoleculeReagent>() {
       public List<SmallMoleculeReagent> execute(Session session)
       {
@@ -645,6 +654,7 @@ public class LibrariesDAOImpl extends AbstractDAO implements LibrariesDAO
       plate.getVolumeStatistics().setAverageRemaining(toPlateVolume(avgRemainingVolumeLiters));
     }
   }
+  
   /**
    * NOTE: LINCS-only feature
    * Find Wells containing Small Molecule Reagents where one of the compound names matches the compoundSearchName,
@@ -653,21 +663,36 @@ public class LibrariesDAOImpl extends AbstractDAO implements LibrariesDAO
    * @param compoundSearchName
    * @return
    */
+  @SuppressWarnings("unchecked")
+  @Override
+  public Set<WellKey> findWellKeysForCompoundNameList(final Collection<String> nameList)
+  {
+    Set<WellKey> keys = Sets.newHashSet();
+    for(String name:nameList)
+    {
+      keys.addAll(findWellKeysForCompoundName(name));
+    }
+    return keys;
+  }
+  
   @Override
   public Set<WellKey> findWellKeysForCompoundName(final String compoundSearchName)
   {
+    if (log.isDebugEnabled()) {
+      log.debug("findWellKeysForCompoundName: " + compoundSearchName);
+    }
     List<SmallMoleculeReagent> reagents = null;
 
-    if (compoundSearchName == null) {
-      final HqlBuilder hql = new HqlBuilder();
-      hql.from(SmallMoleculeReagent.class, "r").
-            from("r", SmallMoleculeReagent.well, "w", JoinType.LEFT_FETCH);
-      hql.select("r");
+    if (StringUtils.isEmpty(compoundSearchName)) {  // then return all
       reagents = _dao.runQuery(new Query<SmallMoleculeReagent>() {
         public List<SmallMoleculeReagent> execute(Session session)
-            {
-              return hql.toQuery(session, true).list();
-            }
+        {
+          HqlBuilder hql = new HqlBuilder();
+          hql.from(SmallMoleculeReagent.class, "r").
+            from("r", SmallMoleculeReagent.well, "w", JoinType.LEFT_FETCH);
+          hql.select("r");
+          return hql.toQuery(session, true).list();
+        }
       });
     }
     else {
@@ -686,7 +711,6 @@ public class LibrariesDAOImpl extends AbstractDAO implements LibrariesDAO
         }
       });
       Set<Integer> reagent_ids = Sets.newHashSet((List<Integer>) result[0]);
-      log.info("reagent ids found: " + reagent_ids);
       final HqlBuilder hql = new HqlBuilder();
       hql.from(SmallMoleculeReagent.class, "r").
             from("r", SmallMoleculeReagent.well, "w", JoinType.LEFT_FETCH).
@@ -699,7 +723,7 @@ public class LibrariesDAOImpl extends AbstractDAO implements LibrariesDAO
             }
       });
     }
-    
+
     Set<WellKey> wellKeys = Sets.newHashSet(Lists.transform(reagents, new Function<SmallMoleculeReagent,WellKey>() {
       @Override
       public WellKey apply(SmallMoleculeReagent from)
@@ -708,5 +732,140 @@ public class LibrariesDAOImpl extends AbstractDAO implements LibrariesDAO
       }
     }));
     return wellKeys;
+  } 
+   
+   
+   /**
+   * NOTE: LINCS-only feature
+   * Find Wells containing Small Molecule Reagents where one of the compound names matches the compoundSearchName,
+   * case insensitive, greedy match.
+   * 
+   * @param compoundSearchName
+   * @return
+   */
+  @Override
+  public Set<WellKey> findWellKeysForReagentVendorIDList(final Collection<String> facilityVendorIdInputList)
+  {
+    Set<WellKey> keys = Sets.newHashSet();
+    for(String nameFacilityVendorIDInput:facilityVendorIdInputList)
+    {
+      keys.addAll(findWellKeysForReagentVendorID(nameFacilityVendorIDInput));
+    }
+    return keys;
+  }
+
+//  public Set<WellKey> findWellKeysForReagentVendorID(final String facilityVendorId)
+//  {
+//    log.debug("findWellKeysForReagentVendorID: " + facilityVendorId);
+//    if (facilityVendorId == null) return null; 
+//    //    //TODO: will need a dual table query if -salt-batch id are specified (i.e. "HMSL10097-101-4")
+//    //    Matcher matcher = FACILITY_SALT_BATCH_PATTERN.matcher(facilityVendorId);
+//    //    String tempS = null;
+//    //    Integer tempI = null;
+//    //    if (matcher.matches()) {
+//    //      tempS = matcher.group(2);
+//    //      String temp = matcher.group(3);
+//    //      tempI = Integer.parseInt(temp);
+//    //    }
+//    //    final String saltId = tempS;
+//    //    final Integer batchId = tempI;
+//    List<Reagent> reagents = runQuery(new Query<Reagent>() {
+//      public List<Reagent> execute(Session session)
+//        {
+//          HqlBuilder builder = new HqlBuilder();
+//          builder.from(Reagent.class, "r");
+//          builder.from("r", Reagent.well, "w", JoinType.INNER);
+//          builder.select("r").distinctProjectionValues();
+//          Disjunction orClause = builder.disjunction();
+//          //          if(batchId != null) {
+//          //            Conjunction andClause = builder.conjunction();
+//          //            andClause.add(builder.simplePredicate("r.facilityBatchId", Operator.EQUAL, batchId));
+//          //            andClause.add(builder.simplePredicate("w.facilityId", Operator.TEXT_CONTAINS, facilityVendorId));
+//          //            orClause.add(andClause);
+//          //          }
+//          //          if(saltId != null) {
+//          //            
+//          //          }
+//          orClause.add(builder.simplePredicate("w.facilityId", Operator.TEXT_CONTAINS, facilityVendorId));
+//          orClause.add(builder.simplePredicate("r." + Reagent.vendorIdentifier.getPropertyName(), Operator.TEXT_CONTAINS, facilityVendorId));
+//          builder.where(orClause);
+//          log.info("Hql: " + builder.toHql());
+//          return builder.toQuery(session, true).list();
+//        }
+//    });
+//
+//    Set<WellKey> wellKeys = Sets.newHashSet(Lists.transform(reagents, new Function<Reagent,WellKey>() {
+//      @Override
+//      public WellKey apply(Reagent from)
+//      {
+//        return from.getWell().getWellKey();
+//      }
+//    }));
+//    return wellKeys;
+//    
+//  }  
+  
+  public Set<WellKey> findWellKeysForReagentVendorID(final String facilityVendorId)
+  {
+    if (log.isDebugEnabled()) {
+      log.debug("findWellKeysForReagentVendorID: " + facilityVendorId);
+    }
+    if (facilityVendorId == null) return null; 
+
+    String sql =
+        "select w.plate_number, w.well_name " +
+        "from well w " +
+        "join reagent r on(w.latest_released_reagent_id=r.reagent_id) " +
+        "join small_molecule_reagent smr using(reagent_id) " +
+        "where strpos(w.facility_id || '-' || smr.salt_form_id || '-' || r.facility_batch_id, :searchString ) > 0" +
+        " or r.vendor_identifier like :searchString2";
+    if (log.isDebugEnabled()) {
+      log.info("sql: " + sql);
+    }
+    javax.persistence.Query query = getEntityManager().createNativeQuery(sql);
+    
+    query.setParameter("searchString", facilityVendorId);
+    query.setParameter("searchString2", "%" + facilityVendorId + "%");
+    
+    List<Object[]> wellIds = query.getResultList();
+    
+    Set<WellKey> keys = Sets.newHashSet();
+    
+    for(Object[] id: wellIds) {
+      keys.add( new WellKey((Integer)id[0], (String)id[1]));
+    }
+    return keys;
+  }
+  
+  @Override
+  public Well findCanonicalReagentWell(String facilityId,
+                                       Integer saltId,
+                                       Integer facilityBatchId)
+  {
+    String q = "select w from Well w join w.library l join w.latestReleasedReagent r where w.facilityId = :facilityId and r.facilityBatchId = :facilityBatchId and l.shortName like 'R-%'";
+    if (saltId != null) {
+      q += " and r.saltFormId = :saltId";
+    }
+    TypedQuery<Well> query = getEntityManager().createQuery(q, Well.class);
+    query.setParameter("facilityId", facilityId);
+    query.setParameter("facilityBatchId", 1);
+    if (saltId != null) {
+      query.setParameter("saltId", saltId);
+    }
+    if (facilityBatchId != null) {
+      query.setParameter("facilityBatchId", facilityBatchId);
+    }
+
+    //return query.getSingleResult();
+    query.setMaxResults(2);
+    List<Well> result = query.getResultList();
+    if (result.size() == 0) {
+      log.warn("no canonical reagent well found for facility ID " + facilityId);
+      return null;
+    }
+    if (result.size() > 1) {
+      log.warn("more than one canonical reagent well found for facility ID " + facilityId);
+    }
+    return result.get(0);
   }
 }

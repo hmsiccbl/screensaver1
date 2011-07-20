@@ -228,8 +228,22 @@ public class ScreensaverProperties implements ScreensaverConstants
     return _properties;
   }
   
+  public String getFacility()
+  {
+    return getProperty(FACILITY_NAME);
+  }
+
+  /**
+   * @deprecated use {@link #getFacility()}
+   */
+  @Deprecated
   public boolean isLincsAppVersion()
   {
-        return LincsScreensaverConstants.FACILITY_NAME.equals(getProperty(FACILITY_NAME));
+    return LincsScreensaverConstants.FACILITY_NAME.equals(getProperty(FACILITY_NAME));
+  }
+
+  public boolean isAllowGuestLogin()
+  {
+    return getBooleanProperty("screensaver.ui.feature.allow_guest_access");
   }
 }

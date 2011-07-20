@@ -11,11 +11,13 @@
 <ui:component>
 
 	<f:subview rendered="#{empty rendered ? true : rendered}">
+  
+    <t:panelGrid id="headerPanel" columns="1"
+      columnClasses="searchPanelColumn">
 
-    <t:panelGrid id="searchAndColumnsPanel" columns="1"
-      columnClasses="searchPanelColumn,searchPanelColumn">
+        <ui:insert name="searchResultHeader" />
 
-      <h:form id="searchForm">
+        <h:form id="searchForm">
         <t:collapsiblePanel
           value="#{searchResults.isPanelCollapsedMap['search']}"
           var="isCollapsed">

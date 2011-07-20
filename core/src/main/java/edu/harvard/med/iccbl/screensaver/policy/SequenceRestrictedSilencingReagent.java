@@ -7,6 +7,8 @@ import java.util.Set;
 
 import org.joda.time.LocalDate;
 
+import com.google.common.collect.Sets;
+
 import edu.harvard.med.screensaver.model.AbstractEntity;
 import edu.harvard.med.screensaver.model.AttachedFile;
 import edu.harvard.med.screensaver.model.Entity;

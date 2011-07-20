@@ -38,7 +38,6 @@ import edu.harvard.med.screensaver.model.AbstractEntityInstanceTest;
 import edu.harvard.med.screensaver.model.AdministrativeActivity;
 import edu.harvard.med.screensaver.model.AttachedFile;
 import edu.harvard.med.screensaver.model.BusinessRuleViolationException;
-import edu.harvard.med.screensaver.model.MakeDummyEntities;
 import edu.harvard.med.screensaver.model.Volume;
 import edu.harvard.med.screensaver.model.VolumeUnit;
 import edu.harvard.med.screensaver.model.cherrypicks.CherryPickAssayPlate;
@@ -59,6 +58,7 @@ import edu.harvard.med.screensaver.service.cherrypicks.CherryPickRequestAllocato
 import edu.harvard.med.screensaver.service.cherrypicks.CherryPickRequestCherryPicksAdder;
 import edu.harvard.med.screensaver.service.cherrypicks.CherryPickRequestPlateMapper;
 import edu.harvard.med.screensaver.service.screens.ScreenDerivedPropertiesUpdater;
+import edu.harvard.med.screensaver.test.MakeDummyEntities;
 
 public class ScreenTest extends AbstractEntityInstanceTest<Screen>
 {

@@ -1,4 +1,6 @@
-// $HeadURL$
+// $HeadURL:
+// http://seanderickson1@forge.abcd.harvard.edu/svn/screensaver/branches/lincs/ui-cleanup/core/src/main/java/edu/harvard/med/screensaver/io/screens/ScreenCreator.java
+// $
 // $Id$
 //
 // Copyright © 2006, 2010 by the President and Fellows of Harvard College.
@@ -11,9 +13,7 @@ package edu.harvard.med.screensaver.io.screens;
 
 import java.util.ArrayList;
 import java.util.EnumSet;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 
 import org.apache.commons.cli.OptionBuilder;
 import org.apache.commons.cli.ParseException;
@@ -22,8 +22,8 @@ import org.apache.log4j.Logger;
 import edu.harvard.med.screensaver.db.DAOTransaction;
 import edu.harvard.med.screensaver.db.DAOTransactionRollbackException;
 import edu.harvard.med.screensaver.db.GenericEntityDAO;
+import edu.harvard.med.screensaver.db.UsersDAO;
 import edu.harvard.med.screensaver.io.CommandLineApplication;
-import edu.harvard.med.screensaver.model.DuplicateEntityException;
 import edu.harvard.med.screensaver.model.screens.Screen;
 import edu.harvard.med.screensaver.model.screens.ScreenDataSharingLevel;
 import edu.harvard.med.screensaver.model.screens.ScreenType;
@@ -34,13 +34,12 @@ import edu.harvard.med.screensaver.util.StringUtils;
 
 /**
  * Command-line application that creates a new screen in the database.
- *
+ * 
  * @author <a mailto="andrew_tolopko@hms.harvard.edu">Andrew Tolopko</a>
  */
 public class ScreenCreator
 {
   private static Logger log = Logger.getLogger(ScreenCreator.class);
-
 
   @SuppressWarnings("static-access")
   public static void main(String[] args) throws ParseException
@@ -56,7 +55,8 @@ public class ScreenCreator
     app.addCommandLineOption(OptionBuilder.hasArg().isRequired().withArgName("email").withLongOpt("lab-head-email").create("he"));
 
     List<String> desc = new ArrayList<String>();
-    for(ScreenType t: EnumSet.allOf(ScreenType.class) ) desc.add(t.name());
+    for (ScreenType t : EnumSet.allOf(ScreenType.class))
+      desc.add(t.name());
     app.addCommandLineOption(OptionBuilder.hasArg().isRequired().withArgName("screen type").withLongOpt("screen-type").withDescription(StringUtils.makeListString(desc, ", ")).create("st"));
     app.addCommandLineOption(OptionBuilder.hasArg().isRequired().withArgName("summary").withLongOpt("summary").create("s"));
     app.addCommandLineOption(OptionBuilder.hasArg().isRequired().withArgName("title").withLongOpt("title").create("t"));
@@ -66,7 +66,20 @@ public class ScreenCreator
 
     app.processOptions(/* acceptDatabaseOptions= */false, /* acceptAdminUserOptions= */true);
 
+    try {
+      execute(app);
+    }
+    catch (Exception e) {
+      log.error("Failed to create the screen", e);
+      System.exit(1);
+    }
+
+  }
+
+  private static void execute(final CommandLineApplication app)
+  {
     final GenericEntityDAO dao = (GenericEntityDAO) app.getSpringBean("genericEntityDao");
+    final UsersDAO usersDAO = (UsersDAO) app.getSpringBean("usersDao");
     final ScreenGenerator screenGenerator = (ScreenGenerator) app.getSpringBean("screenGenerator");
     final String facilityId = app.getCommandLineOptionValue("i");
 
@@ -74,13 +87,12 @@ public class ScreenCreator
     Screen screen = dao.findEntityByProperty(Screen.class, "facilityId", facilityId);
     if (screen != null) {
       if (!replace) {
-        log.error("screen " + facilityId + " already exists (use --replace flag to delete existing screen first)");
-        return;
+        throw new RuntimeException("screen " + facilityId + " already exists (use --replace flag to delete existing screen first)");
       }
       dao.deleteEntity(screen);
       log.error("deleted existing screen " + facilityId);
     }
-    
+
     dao.doInTransaction(new DAOTransaction() {
       @Override
       public void runTransaction()
@@ -94,9 +106,15 @@ public class ScreenCreator
           String lhe = app.getCommandLineOptionValue("he");
 
           ScreenType screenType = app.getCommandLineOptionEnumValue("st", ScreenType.class);
-          LabHead labHead = findSRU(LabHead.class, dao, lhfn, lhln, lhe);
-          ScreeningRoomUser screener = findSRU(ScreeningRoomUser.class, dao, lsfn, lsln, lse);
-          
+          LabHead labHead = usersDAO.findSRU(LabHead.class, lhfn, lhln, lhe);
+          if(labHead == null) {
+                throw new RuntimeException("could not find existing user for " + lhfn + " " + lhln + ", " + lhe);
+          }
+          ScreeningRoomUser screener = usersDAO.findSRU(ScreeningRoomUser.class, lsfn, lsln, lse);
+          if(screener == null) {
+                throw new RuntimeException("could not find existing user for " + lsfn + " " + lsln + ", " + lse);
+          }
+
           Screen screen = screenGenerator.createPrimaryScreen(app.findAdministratorUser(),
                                                               screener,
                                                               screenType);
@@ -109,35 +127,15 @@ public class ScreenCreator
             screen.setPublishableProtocol(app.getCommandLineOptionValue("p"));
           }
           dao.persistEntity(screen);
-          
-        }catch (Exception e) {
+
+        }
+        catch (Exception e) {
           throw new DAOTransactionRollbackException(e);
         }
       }
     });
-    
+
     log.info("Screen created");
-          
   }
 
-  private static <UT extends ScreeningRoomUser> UT findSRU(Class<UT> userClass,
-                                                    GenericEntityDAO dao,
-                                                    String firstName,
-                                                    String lastName,
-                                                    String email)
-  {
-    Map<String,Object> props = new HashMap<String,Object>();
-    props.put("firstName", firstName);
-    props.put("lastName", lastName);
-    props.put("email", email);
-    List<UT> users = dao.findEntitiesByProperties(userClass, props);
-    if (users.size() > 1) {
-      throw new DuplicateEntityException(users.get(0));
-    }
-    if (users.size() == 1) {
-      log.info("found existing user " + users.get(0) + " for " + firstName + " " + lastName + ", " + email);
-      return users.get(0);
-    }
-    throw new RuntimeException("could not find existing user for " + firstName + " " + lastName + ", " + email);
-  }
 }

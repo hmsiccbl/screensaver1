@@ -250,7 +250,9 @@
     parent="uiBean"
     scope="session"
     class="edu.harvard.med.screensaver.ui.libraries.ReagentFinder">
-    <constructor-arg ref="wellsBrowser" />
+    <constructor-arg ref="genericEntityDao" />
+    <constructor-arg ref="librariesDao" />
+    <constructor-arg ref="wellsBrowser"/>
     <aop:scoped-proxy/>
   </bean>
 
@@ -262,7 +264,6 @@
     <constructor-arg ref="genericEntityDao" />
     <constructor-arg ref="librariesDao" />
     <constructor-arg ref="wellsBrowser" />
-    <constructor-arg ref="wellViewer" />
     <constructor-arg ref="wellCopyVolumesBrowser" />
     <aop:scoped-proxy/>
   </bean>
@@ -377,7 +378,7 @@
     id="wellsBrowser"
     parent="uiBean"
     scope="session"
-    class="edu.harvard.med.screensaver.ui.libraries.WellSearchResults">
+    class="edu.harvard.med.screensaver.ui.libraries.DefaultWellSearchResults">
     <constructor-arg ref="genericEntityDao" />
     <constructor-arg ref="librariesDao" />
     <constructor-arg ref="entityViewPolicy" />
@@ -405,6 +406,40 @@
     </property>
     <property name="defaultRowsPerPage" value="24" /> 
     <aop:scoped-proxy/>
+  </bean>
+  
+  <bean
+    id="wellSearchResultsNested"
+    parent="uiBean"
+    scope="prototype"
+    class="edu.harvard.med.screensaver.ui.libraries.DefaultWellSearchResults">
+    <constructor-arg ref="genericEntityDao" />
+    <constructor-arg ref="librariesDao" />
+    <constructor-arg ref="entityViewPolicy" />
+    <constructor-arg ref="libraryViewer" />
+    <constructor-arg ref="wellViewer" />
+    <constructor-arg ref="structureImageProvider" />
+    <constructor-arg ref="libraryContentsVersionRef" />
+    <constructor-arg>
+      <list>
+          <bean class="edu.harvard.med.screensaver.ui.arch.searchresults.DataExporterAdapter">
+            <constructor-arg ref="wellsSdfDataExporterForUi" />
+            <constructor-arg><bean class="edu.harvard.med.screensaver.db.datafetcher.TupleToKeyFunction" /></constructor-arg>
+          </bean>
+      </list>
+    </constructor-arg>
+    <property
+      name="rowsPerPageSelections">
+      <list>
+        <value>12</value>
+        <value>24</value>
+        <value>48</value>
+        <value>96</value>
+        <value>384</value>
+      </list>
+    </property>
+    <property name="defaultRowsPerPage" value="24" /> 
+    <property name="nested" value="true" /> 
   </bean>
 
   <bean
@@ -454,10 +489,10 @@
   <bean
     id="wellViewer"
     parent="uiBean"
-    scope="session"
+    scope="prototype"
     class="edu.harvard.med.screensaver.ui.libraries.WellViewer">
     <constructor-arg ref="wellViewer" />
-    <constructor-arg ref="wellsBrowser" />
+    <constructor-arg ref="wellsBrowser" /> <!-- TODO: this is only correct when this bean is injected into wellsBrowser (and not when injnected into wellSearchResultsNested), but since it's never used anyway, should be okay -->
     <constructor-arg ref="genericEntityDao" />
     <constructor-arg ref="librariesDao" />
     <constructor-arg ref="entityViewPolicy" />
@@ -468,7 +503,6 @@
     <constructor-arg ref="libraryContentsVersionRef" />
     <constructor-arg ref="annotationsBrowser" />
     <constructor-arg ref="screenResultReporter" />
-    <aop:scoped-proxy/>
   </bean>
 
   <bean
@@ -557,9 +591,11 @@
         class="edu.harvard.med.screensaver.ui.screens.AnnotationTypesTable"
         parent="uiBean" />
     </constructor-arg>
-    <constructor-arg ref="wellsBrowser" />
+    <constructor-arg ref="wellSearchResultsNested" />
     <!-- LINCS -->
+    <constructor-arg ref="annotationsBrowser" />
     <constructor-arg ref="studyImageProvider"/>
+    <constructor-arg ref="attachedFiles" />
     <aop:scoped-proxy/>
   </bean>
 
@@ -601,7 +637,7 @@
     <constructor-arg ref="screensBrowser" />
     <constructor-arg ref="genericEntityDao" />
     <constructor-arg ref="screenDetailViewer" />
-    <constructor-arg ref="wellsBrowser" />
+    <constructor-arg ref="wellSearchResultsNested" />
     <constructor-arg ref="screenResultViewer" />
     <constructor-arg ref="heatMapViewer" />
     <constructor-arg ref="cellHTS2Runner" />
@@ -663,7 +699,7 @@
         class="edu.harvard.med.screensaver.ui.screenresults.ScreenResultDataColumnsTables"
         parent="uiBean" />
     </constructor-arg>
-    <constructor-arg ref="wellsBrowser" />
+    <constructor-arg ref="wellSearchResultsNested" />
     <aop:scoped-proxy />
   </bean>
 
@@ -965,13 +1001,16 @@
   <bean
     id="annotationsBrowser"
     parent="uiBean"
-    scope="session"
+    scope="prototype"
     class="edu.harvard.med.screensaver.ui.libraries.AnnotationSearchResults">
     <constructor-arg ref="annotationViewer" />
     <constructor-arg ref="studyViewer" />
+    <constructor-arg ref="wellViewer" />
     <constructor-arg ref="entityViewPolicy" />
     <constructor-arg ref="genericEntityDao" />
-    <aop:scoped-proxy/>
+    <constructor-arg ref="librariesDao" />
+    <property name="nested" value="true"/>
+    <!-- aop:scoped-proxy/-->
   </bean>
 
   <bean
@@ -984,17 +1023,6 @@
     <constructor-arg ref="genericEntityDao" />
     <constructor-arg ref="entityViewPolicy" />
     <constructor-arg ref="studyViewer" />
-    <aop:scoped-proxy/>
-  </bean>
-  
-  <bean
-    id="wellCompoundNameFinder"
-    parent="uiBean"
-    scope="session"
-    class="edu.harvard.med.screensaver.ui.libraries.WellByCompoundNameFinder">
-    <constructor-arg ref="genericEntityDao" />
-    <constructor-arg ref="librariesDao" />
-    <constructor-arg ref="wellsBrowser" />
     <aop:scoped-proxy/>
   </bean>
   

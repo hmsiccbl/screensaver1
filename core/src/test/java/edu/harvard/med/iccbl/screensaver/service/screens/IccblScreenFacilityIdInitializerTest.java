@@ -11,13 +11,13 @@ package edu.harvard.med.iccbl.screensaver.service.screens;
 
 import org.springframework.beans.factory.annotation.Autowired;
 
-import edu.harvard.med.screensaver.AbstractSpringPersistenceTest;
 import edu.harvard.med.screensaver.db.ScreenDAO;
 import edu.harvard.med.screensaver.model.screens.ProjectPhase;
 import edu.harvard.med.screensaver.model.screens.Screen;
 import edu.harvard.med.screensaver.model.screens.ScreenType;
 import edu.harvard.med.screensaver.model.screens.StudyType;
 import edu.harvard.med.screensaver.model.users.LabHead;
+import edu.harvard.med.screensaver.test.AbstractSpringPersistenceTest;
 
 public class IccblScreenFacilityIdInitializerTest extends AbstractSpringPersistenceTest
 {

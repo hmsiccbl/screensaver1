@@ -10,7 +10,7 @@
 package edu.harvard.med.screensaver.util.eutils;
 
 import junit.framework.TestCase;
-import edu.harvard.med.screensaver.AbstractSpringTest;
+
 import edu.harvard.med.screensaver.model.screens.Publication;
 
 /**

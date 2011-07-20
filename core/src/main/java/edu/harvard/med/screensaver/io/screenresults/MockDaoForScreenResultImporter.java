@@ -17,10 +17,10 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
-import org.apache.log4j.Logger;
-import org.hibernate.ScrollableResults;
 import com.google.common.collect.Maps;
 import com.google.common.collect.Sets;
+import org.apache.log4j.Logger;
+import org.hibernate.ScrollableResults;
 
 import edu.harvard.med.screensaver.db.DAOTransaction;
 import edu.harvard.med.screensaver.db.GenericEntityDAO;
@@ -497,15 +497,33 @@ public class MockDaoForScreenResultImporter implements GenericEntityDAO, ScreenR
                                                 Integer batchId,
                                                 boolean latestReleasedVersionsOnly)
   {
-    // TODO Auto-generated method stub
-    return null;
+    return Sets.newHashSet();
   }
 
   @Override
-  public Set<WellKey> findWellKeysForCompoundName(String compoundSearchName)
+  public Set<WellKey> findWellKeysForCompoundNameList(Collection<String> compoundSearchName)
   {
-    // TODO Auto-generated method stub
-    return null;
+    return Sets.newHashSet();
+  }
+
+  @Override
+  public Set<WellKey> findWellKeysForReagentVendorIDList(Collection<String> facilityVendorIdInputList)
+  {
+    return Sets.newHashSet();
   }
   
+  @Override
+  public Set<WellKey> findWellKeysForCompoundName(final String compoundSearchName)
+  {
+    return Sets.newHashSet();
+  }
+
+  @Override
+  public Well findCanonicalReagentWell(String facilityId,
+                                       Integer saltId,
+                                       Integer facilityBatchId)
+  {
+    return null;
+  }
+
 }

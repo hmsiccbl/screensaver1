@@ -12,10 +12,11 @@
 
 	<ss:searchResult searchResults="#{wellsBrowser}">
 		<ui:define name="entityViewer">
-			<ui:include src="#{appInfo.applicationProperties.map['screensaver.ui.facility_name'] == 'LINCS' ? 'wellViewerBodyLincs.xhtml' : 'wellViewerBody.xhtml'}">
+			<ui:include src="#{appInfo.applicationProperties.facility == 'LINCS' ? 'wellViewerBodyLincs.xhtml' : 'wellViewerBody.xhtml'}">
         <ui:param name="wellViewerSpecialMessage" value="#{wellViewer.specialMessage}" />
-			</ui:include>
+ 			</ui:include>
 		</ui:define>
+    
 	</ss:searchResult>
 
 </ui:composition>

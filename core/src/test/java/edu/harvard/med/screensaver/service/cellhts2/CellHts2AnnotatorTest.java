@@ -13,18 +13,18 @@ import org.apache.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.test.annotation.IfProfileValue;
 
-import edu.harvard.med.screensaver.AbstractSpringPersistenceTest;
 import edu.harvard.med.screensaver.analysis.cellhts2.CellHTS2;
 import edu.harvard.med.screensaver.analysis.cellhts2.NormalizePlatesMethod;
 import edu.harvard.med.screensaver.analysis.cellhts2.NormalizePlatesNegControls;
 import edu.harvard.med.screensaver.analysis.cellhts2.NormalizePlatesScale;
 import edu.harvard.med.screensaver.analysis.cellhts2.RMethod;
 import edu.harvard.med.screensaver.db.DAOTransaction;
-import edu.harvard.med.screensaver.model.MakeDummyEntities;
 import edu.harvard.med.screensaver.model.libraries.Library;
 import edu.harvard.med.screensaver.model.screenresults.ScreenResult;
 import edu.harvard.med.screensaver.model.screens.Screen;
 import edu.harvard.med.screensaver.model.screens.ScreenType;
+import edu.harvard.med.screensaver.test.AbstractSpringPersistenceTest;
+import edu.harvard.med.screensaver.test.MakeDummyEntities;
 
 @IfProfileValue(name = "screensaver.ui.feature.cellHTS2", value = "true")
 public class CellHts2AnnotatorTest extends AbstractSpringPersistenceTest

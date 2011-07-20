@@ -7,7 +7,7 @@
 // at Harvard Medical School. This software is distributed under the terms of
 // the GNU General Public License.
 
-package edu.harvard.med.screensaver.model;
+package edu.harvard.med.screensaver.test;
 
 import java.math.BigDecimal;
 import java.util.ArrayList;
@@ -20,7 +20,12 @@ import com.google.common.collect.Sets;
 import org.apache.log4j.Logger;
 import org.joda.time.LocalDate;
 
+import edu.harvard.med.screensaver.model.AdministrativeActivity;
+import edu.harvard.med.screensaver.model.AdministrativeActivityType;
+import edu.harvard.med.screensaver.model.Volume;
+import edu.harvard.med.screensaver.model.cherrypicks.RNAiCherryPickRequest;
 import edu.harvard.med.screensaver.model.libraries.Library;
+import edu.harvard.med.screensaver.model.libraries.LibraryContentsVersion;
 import edu.harvard.med.screensaver.model.libraries.LibraryType;
 import edu.harvard.med.screensaver.model.libraries.LibraryWellType;
 import edu.harvard.med.screensaver.model.libraries.MolecularFormula;
@@ -32,6 +37,7 @@ import edu.harvard.med.screensaver.model.libraries.SilencingReagentType;
 import edu.harvard.med.screensaver.model.libraries.SmallMoleculeReagent;
 import edu.harvard.med.screensaver.model.libraries.Well;
 import edu.harvard.med.screensaver.model.libraries.WellKey;
+import edu.harvard.med.screensaver.model.libraries.WellName;
 import edu.harvard.med.screensaver.model.screenresults.AnnotationType;
 import edu.harvard.med.screensaver.model.screenresults.AssayWell;
 import edu.harvard.med.screensaver.model.screenresults.DataColumn;
@@ -260,5 +266,55 @@ public class MakeDummyEntities
     return makeDummyScreen(Integer.toString(i));
   }
 
+  public static Library makeRNAiDuplexLibrary(String name, int startPlate, int endPlate, PlateSize plateSize)
+  {
+    AdministratorUser adminUser = new AdministratorUser(name, "Admin");
+    Library library = new Library(adminUser, name, name, ScreenType.RNAI, LibraryType.COMMERCIAL, startPlate, endPlate, PlateSize.WELLS_384);
+    LibraryContentsVersion contentsVersion = library.createContentsVersion(adminUser);
+    NEXT_PLATE: for (int plateNumber = startPlate; plateNumber <= endPlate; plateNumber++) {
+      int wellsToCreateOnPlate = plateSize.getWellCount();
+      for (int iRow = 0; iRow < plateSize.getRows(); iRow++) {
+        for (int iCol = 0; iCol < plateSize.getColumns(); iCol++) {
+          makeRNAiWell(library, plateNumber, new WellName(iRow, iCol));
+          if (--wellsToCreateOnPlate <= 0) {
+            continue NEXT_PLATE;
+          }
+        }
+      }
+    }
+    contentsVersion.release(new AdministrativeActivity((AdministratorUser) contentsVersion.getLoadingActivity().getPerformedBy(), new LocalDate(), AdministrativeActivityType.LIBRARY_CONTENTS_VERSION_RELEASE));
+    return library;
+  }
+
+  public static RNAiCherryPickRequest createRNAiCherryPickRequest(int screenFacilityId, Volume volume)
+  {
+    Screen screen = MakeDummyEntities.makeDummyScreen(screenFacilityId, ScreenType.RNAI);
+    // Note: if we use screen.getLeadScreener() as requestor, Hibernate complains!
+    ScreeningRoomUser cherryPickRequestor =
+      MakeDummyEntities.makeDummyUser(screen.getFacilityId(), "Cherry", "Picker");
+    RNAiCherryPickRequest cherryPickRequest = (RNAiCherryPickRequest)
+      screen.createCherryPickRequest((AdministratorUser) screen.getCreatedBy(), cherryPickRequestor, new LocalDate());
+    cherryPickRequest.setTransferVolumePerWellApproved(volume);
+    return cherryPickRequest;
+  }
+
+  public static Well makeRNAiWell(Library library, int plateNumber, WellName wellName)
+  {
+    Well well = makeRNAiWell(library, plateNumber, wellName, new ReagentVendorIdentifier("vendor", "" + plateNumber + wellName), "ATCG");
+    well.<SilencingReagent>getPendingReagent().getFacilityGene().withEntrezgeneId(new WellKey(plateNumber, wellName).hashCode()).withEntrezgeneSymbol("entrezGeneSymbol" +
+      wellName).withSpeciesName("Human");
+    return well;
+  }
+
+  private static Well makeRNAiWell(Library library,
+                                   int plateNumber,
+                                   WellName wellName,
+                                   ReagentVendorIdentifier rvi,
+                                   String sequence)
+  {
+    Well well1 = library.createWell(new WellKey(plateNumber, wellName), LibraryWellType.EXPERIMENTAL);
+    well1.createSilencingReagent(rvi, SilencingReagentType.SIRNA, sequence);
+    return well1;
+  }
 }
 

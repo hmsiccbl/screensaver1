@@ -86,8 +86,6 @@ import edu.harvard.med.screensaver.ui.arch.datatable.column.entity.MolarConcentr
 import edu.harvard.med.screensaver.ui.arch.datatable.column.entity.RealTupleColumn;
 import edu.harvard.med.screensaver.ui.arch.datatable.column.entity.TextSetTupleColumn;
 import edu.harvard.med.screensaver.ui.arch.datatable.column.entity.TextTupleColumn;
-import edu.harvard.med.screensaver.ui.arch.datatable.model.DataTableModel;
-import edu.harvard.med.screensaver.ui.arch.datatable.model.VirtualPagingEntityDataModel;
 import edu.harvard.med.screensaver.ui.arch.searchresults.SearchResults;
 import edu.harvard.med.screensaver.ui.arch.searchresults.TupleBasedEntitySearchResults;
 import edu.harvard.med.screensaver.ui.arch.util.ValueReference;
@@ -100,7 +98,7 @@ import edu.harvard.med.screensaver.util.Triple;
  * @author <a mailto="john_sullivan@hms.harvard.edu">John Sullivan</a>
  * @author <a mailto="andrew_tolopko@hms.harvard.edu">Andrew Tolopko</a>
  */
-public class WellSearchResults extends TupleBasedEntitySearchResults<Well,String>
+public abstract class WellSearchResults extends TupleBasedEntitySearchResults<Well,String>
 {
   private static final Logger log = Logger.getLogger(WellSearchResults.class);
 
@@ -182,13 +180,14 @@ public class WellSearchResults extends TupleBasedEntitySearchResults<Well,String
     }
   }
 
-  private enum WellSearchResultMode {
+  protected enum WellSearchResultMode {
     ALL_WELLS,
     SET_OF_WELLS,
     SCREEN_RESULT_WELLS,
     LIBRARY_WELLS,
     STUDY_REAGENT_WELLS,
     SET_OF_REAGENT_WELLS,
+    SET_OF_CANONICAL_REAGENT_WELLS,
   };
 
   private GenericEntityDAO _dao;
@@ -204,7 +203,9 @@ public class WellSearchResults extends TupleBasedEntitySearchResults<Well,String
   private Study _study;
   
   /** flag to indicate that this instantiation of WSR is for the LINCS project **/
-  private boolean _isLINCS = false;
+  // TODO: refactor code so that all LINCS-related code is placed into LincsWellSearchResults
+  private Boolean _isLINCS;
+
 
 
   public class RowsToFetchReference implements ValueReference<Integer>
@@ -306,6 +307,11 @@ public class WellSearchResults extends TupleBasedEntitySearchResults<Well,String
     };
     initialize(dataFetcher);
 
+    if (isLINCS()) {
+      getColumnManager().getColumn("Library Well Type").setVisible(true);
+      ((Criterion<LibraryWellType>) getColumnManager().getColumn("Library Well Type").resetCriteria()).setOperatorAndValue(Operator.EQUAL, LibraryWellType.EXPERIMENTAL);
+    }
+
     // start with search panel closed
     setTableFilterMode(false);
   }
@@ -365,19 +371,25 @@ public class WellSearchResults extends TupleBasedEntitySearchResults<Well,String
           column.setVisible(true);
         }
       }
+      
+      if (isLINCS()) {
+        getColumnManager().getColumn("Compound Names").setVisible(true);
+        ((Criterion<LibraryWellType>) getColumnManager().getColumn("Compound Names").resetCriteria()).setOperator(Operator.NOT_EMPTY);
+      }      
 
       // start with search panel closed
       setTableFilterMode(false);
     }
   }
 
-  public void searchWells(Set<WellKey> wellKeys)
+  public void searchWells(Set<WellKey> wellKeys, String title)
   {
+    setTitle(title);
     setMode(WellSearchResultMode.SET_OF_WELLS);
+    _screenTypes = _librariesDao.findScreenTypesForWells(wellKeys);
     final Set<String> wellKeyStrings = new HashSet<String>(wellKeys.size());
     for (WellKey wellKey : wellKeys) {
       wellKeyStrings.add(wellKey.toString());
-      _screenTypes = _librariesDao.findScreenTypesForWells(wellKeys);
     }
     TupleDataFetcher<Well,String> dataFetcher =
       new TupleDataFetcher<Well,String>(Well.class, _dao) {
@@ -414,13 +426,18 @@ public class WellSearchResults extends TupleBasedEntitySearchResults<Well,String
 
     getColumnManager().getColumn("Reagent Vendor").setVisible(true);
     getColumnManager().getColumn(COLUMN_REAGENT_ID).setVisible(true);
+    showAnnotationTypesForStudy(study);
+  }
+
+  public void showAnnotationTypesForStudy(final Study study)
+  {
     // show columns for this screenResult's data columns
     for (AnnotationType at : study.getAnnotationTypes()) {
-      getColumnManager().getColumn(WellSearchResults.makeColumnName(at, _study.getFacilityId())).setVisible(true);
+      getColumnManager().getColumn(WellSearchResults.makeColumnName(at, study.getFacilityId())).setVisible(true);
     }
   }
 
-  public void searchReagents(final Set<String> reagentIds)
+  public void searchReagentsByVendorIdentifier(final Set<String> reagentIds)
   {
     setMode(WellSearchResultMode.SET_OF_REAGENT_WELLS);
     _screenTypes = _librariesDao.findScreenTypesForReagents(reagentIds);
@@ -439,7 +456,24 @@ public class WellSearchResults extends TupleBasedEntitySearchResults<Well,String
     // TODO: should report # of reagent identifiers not found
   }
 
-  private void setMode(WellSearchResultMode mode)
+  public void searchAllReagents()
+  {
+    setMode(WellSearchResultMode.LIBRARY_WELLS);
+    setTitle("Browse Reagent Wells");
+    TupleDataFetcher<Well,String> dataFetcher =
+      new TupleDataFetcher<Well,String>(Well.class, _dao) {
+        @Override
+        public void addDomainRestrictions(HqlBuilder hql)
+        {
+          hql.from(getRootAlias(), Well.reagents, "r").where("r", "vendorId.vendorIdentifier", Operator.NOT_EMPTY, null);
+        }
+      };
+    initialize(dataFetcher);
+    getColumnManager().getColumn("Reagent Vendor").setVisible(true);
+    getColumnManager().getColumn(COLUMN_REAGENT_ID).setVisible(true);
+  }
+
+  protected void setMode(WellSearchResultMode mode)
   {
     _mode = mode;
     _study = null;
@@ -448,19 +482,13 @@ public class WellSearchResults extends TupleBasedEntitySearchResults<Well,String
     _screenTypes = Sets.newHashSet(ScreenType.values());
   }
 
-  private void initialize(DataFetcher<Tuple<String>,String,PropertyPath<Well>> dataFetcher)
-  {    
-    _isLINCS = LincsScreensaverConstants.FACILITY_NAME.equals(getApplicationProperties().getProperty(FACILITY_NAME));
-    DataTableModel<Tuple<String>> dataModel =
-      new VirtualPagingEntityDataModel<String,Well,Tuple<String>>(dataFetcher, new RowsToFetchReference());
-    initialize(dataModel);
-  }
+  protected abstract void initialize(DataFetcher<Tuple<String>,String,PropertyPath<Well>> dataFetcher);
 
   @Override
   protected List<? extends TableColumn<Tuple<String>,?>> buildColumns()
   {
     List<TableColumn<Tuple<String>,?>> columns = Lists.newArrayList();
-    if (_isLINCS) {
+    if (isLINCS()) {
       buildCompoundPropertyColumns(columns);
       buildWellPropertyColumns(columns);
       buildReagentPropertyColumns(columns);
@@ -585,7 +613,7 @@ public class WellSearchResults extends TupleBasedEntitySearchResults<Well,String
     RelationshipPath<Well> relPath = getWellToReagentRelationshipPath();
 
     final PropertyPath<Well> reagentIdPropertyPath = relPath.toProperty("id");
-    if (_isLINCS) {
+    if (isLINCS()) {
       final PropertyPath<Well> wellFacilityIdPropertyPath = PropertyPath.from(Well.class).toProperty("facilityId");
       final PropertyPath<Well> saltFormIdPropertyPath = relPath.toProperty("saltFormId");
 
@@ -714,7 +742,7 @@ public class WellSearchResults extends TupleBasedEntitySearchResults<Well,String
                                                     "Compound Names",
                                                     "The names of the compound in the well",
                                                     COMPOUND_COLUMNS_GROUP));
-    columns.get(columns.size() - 1).setVisible(_isLINCS ? true : false);
+    columns.get(columns.size() - 1).setVisible(isLINCS() ? true : false);
 
     columns.add(new IntegerSetTupleColumn<Well,String>(relPath.to(SmallMoleculeReagent.pubchemCids),
       "PubChem CIDs",
@@ -777,7 +805,6 @@ public class WellSearchResults extends TupleBasedEntitySearchResults<Well,String
         return viewSelectedEntity();
       }
     });
-    if(_isLINCS) columns.get(columns.size() - 1).setVisible(false);
 
     columns.add(new TextTupleColumn<Well,String>(Well.library.toProperty("libraryName"),
       "Library",
@@ -808,7 +835,7 @@ public class WellSearchResults extends TupleBasedEntitySearchResults<Well,String
                                                             "The library screen type",
                                                             WELL_COLUMNS_GROUP,
                                                             ScreenType.values()));
-    if(_isLINCS) columns.get(columns.size() - 1).setVisible(false);
+    if (isLINCS()) columns.get(columns.size() - 1).setVisible(false);
 
     
     columns.add(new EnumTupleColumn<Well,String,LibraryWellType>(RelationshipPath.from(Well.class).toProperty("libraryWellType"),
@@ -816,12 +843,25 @@ public class WellSearchResults extends TupleBasedEntitySearchResults<Well,String
                                                                  "The type of well, e.g., 'Experimental', 'Control', 'Empty', etc.",
                                                                  WELL_COLUMNS_GROUP,
                                                                  LibraryWellType.values()));
-    if(_isLINCS) columns.get(columns.size() - 1).setVisible(false);
+    if (isLINCS()) columns.get(columns.size() - 1).setVisible(false);
 
     columns.add(new TextTupleColumn<Well,String>(RelationshipPath.from(Well.class).toProperty("facilityId"),
       "Facility ID",
       "An alternate identifier assigned by the facility to identify this well",
-      WELL_COLUMNS_GROUP));
+                                                 WELL_COLUMNS_GROUP)
+      {
+        @Override
+        public boolean isCommandLink()
+        {
+          return isLINCS() && _mode == WellSearchResultMode.SET_OF_CANONICAL_REAGENT_WELLS;
+        }
+
+        @Override
+        public Object cellAction(Tuple<String> row)
+        {
+          return viewSelectedEntity();
+        }
+      });
     columns.get(columns.size() - 1).setVisible(false);
 
     columns.add(new BooleanTupleColumn<Well,String>(RelationshipPath.from(Well.class).toProperty("deprecated"),
@@ -835,6 +875,12 @@ public class WellSearchResults extends TupleBasedEntitySearchResults<Well,String
                                                  "Why the well has been deprecated",
                                                  WELL_COLUMNS_GROUP));
     columns.get(columns.size() - 1).setVisible(false);
+
+    columns.add(new MolarConcentrationTupleColumn<Well,String>(RelationshipPath.from(Well.class).toProperty("molarConcentration"),
+                                                               "Molar Concentration",
+                                                               "The molar concentration",
+                                                               WELL_COLUMNS_GROUP));
+    Iterables.getLast(columns).setVisible(isLINCS());
   }
 
   private void buildDataColumns(List<TableColumn<Tuple<String>,?>> columns, List<DataColumn> dataColumns)
@@ -928,7 +974,7 @@ public class WellSearchResults extends TupleBasedEntitySearchResults<Well,String
                                                                           "The type of assay well control",
                                                                           ASSAY_DESCRIPTORS_COLUMNS_GROUP,
                                                                           AssayWellControlType.values()));
-        if (_isLINCS) {
+        if (isLINCS()) {
           final LibraryScreening libraryScreening = getLibraryScreening();
           if (libraryScreening != null && _mode == WellSearchResultMode.SCREEN_RESULT_WELLS) {
 
@@ -939,10 +985,7 @@ public class WellSearchResults extends TupleBasedEntitySearchResults<Well,String
               @Override
               public Volume getCellValue(Tuple<String> tuple)
               {
-                if (libraryScreening != null) {
-                  return libraryScreening.getAssayWellVolume();
-                }
-                return null;
+                return libraryScreening.getAssayWellVolume();
               }
 
               @Override
@@ -961,10 +1004,7 @@ public class WellSearchResults extends TupleBasedEntitySearchResults<Well,String
               @Override
               public Volume getCellValue(Tuple<String> tuple)
               {
-                if (libraryScreening != null) {
-                  return libraryScreening.getVolumeTransferredPerWell();
-                }
-                return null;
+                return libraryScreening.getVolumeTransferredPerWell();
               }
 
               @Override
@@ -982,11 +1022,7 @@ public class WellSearchResults extends TupleBasedEntitySearchResults<Well,String
               @Override
               public Volume getCellValue(Tuple<String> tuple)
               {
-                if (libraryScreening != null)
-                {
-                  return libraryScreening.getVolumeTransferredPerWell().add(libraryScreening.getAssayWellVolume());
-                }
-                return null;
+                return libraryScreening.getVolumeTransferredPerWell().add(libraryScreening.getAssayWellVolume());
               }
 
               @Override
@@ -1004,18 +1040,16 @@ public class WellSearchResults extends TupleBasedEntitySearchResults<Well,String
               @Override
               public MolarConcentration getCellValue(Tuple<String> tuple)
               {
-                if (libraryScreening != null) { // TODO: don't show if well.type != experimental
-                  MolarConcentration libraryWellConcentration = super.getCellValue(tuple);
-                  Volume volumeXferred = libraryScreening.getVolumeTransferredPerWell();
-                  if (libraryWellConcentration == null || volumeXferred == null ||
-                    libraryScreening.getAssayWellVolume() == null) return null;
-                  Volume finalAssayVolume = volumeXferred.add(libraryScreening.getAssayWellVolume());
-                  BigDecimal dilutionFactor = volumeXferred.getValue().divide(finalAssayVolume.getValue(), 4, RoundingMode.HALF_EVEN);
-                  return MolarConcentration.makeConcentration(libraryWellConcentration.getValue().multiply(dilutionFactor).toPlainString(),
-                                                              libraryWellConcentration.getUnits(),
-                                                              RoundingMode.HALF_UP);
-                }
-                return null;
+                // TODO: don't show if well.type != experimental
+                MolarConcentration libraryWellConcentration = super.getCellValue(tuple);
+                Volume volumeXferred = libraryScreening.getVolumeTransferredPerWell();
+                if (libraryWellConcentration == null || volumeXferred == null ||
+                  libraryScreening.getAssayWellVolume() == null) return null;
+                Volume finalAssayVolume = volumeXferred.add(libraryScreening.getAssayWellVolume());
+                BigDecimal dilutionFactor = volumeXferred.getValue().divide(finalAssayVolume.getValue(), 4, RoundingMode.HALF_EVEN);
+                return MolarConcentration.makeConcentration(libraryWellConcentration.getValue().multiply(dilutionFactor).toPlainString(),
+                                                            libraryWellConcentration.getUnits(),
+                                                            RoundingMode.HALF_UP);
               }
 
               @Override
@@ -1188,8 +1222,22 @@ public class WellSearchResults extends TupleBasedEntitySearchResults<Well,String
     return columnDescription.toString();
   }
 
+  protected void setLINCS(boolean isLINCS)
+  {
+    _isLINCS = isLINCS;
+  }
+
+  protected boolean isLINCS()
+  {
+    if (_isLINCS == null) {
+      _isLINCS = LincsScreensaverConstants.FACILITY_NAME.equals(getApplicationProperties().getFacility());
+    }
+    return _isLINCS;
+  }
+
   private boolean accessSpecificLibraryContentsVersion()
   {
     return _mode == WellSearchResultMode.LIBRARY_WELLS && _libraryContentsVersionRef.value() != null;
   }
 }
+

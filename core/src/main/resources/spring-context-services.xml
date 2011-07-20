@@ -73,6 +73,7 @@
     class="edu.harvard.med.screensaver.io.screens.StudyAnnotationParser"
     scope="prototype">
     <constructor-arg ref="genericEntityDao"/>
+    <constructor-arg ref="librariesDao"/>
   </bean>
 
   <bean

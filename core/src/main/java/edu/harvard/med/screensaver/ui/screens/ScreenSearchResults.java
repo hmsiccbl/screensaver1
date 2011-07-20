@@ -22,6 +22,7 @@ import com.google.common.collect.Sets;
 import org.joda.time.DateTime;
 import org.joda.time.LocalDate;
 
+import edu.harvard.med.lincs.screensaver.LincsScreensaverConstants;
 import edu.harvard.med.screensaver.db.GenericEntityDAO;
 import edu.harvard.med.screensaver.db.datafetcher.DataFetcherUtil;
 import edu.harvard.med.screensaver.db.datafetcher.EntityDataFetcher;
@@ -282,30 +283,33 @@ public class ScreenSearchResults extends EntityBasedEntitySearchResults<Screen,I
     columns.get(columns.size() - 1).setAdministrative(true);
     columns.get(columns.size() - 1).setVisible(false);
 
-    columns.add(new EnumEntityColumn<Screen,ScreenStatus>(Screen.statusItems.toProperty("status"),
-      "Status", "The current status of the screen, e.g., 'Completed', 'Ongoing', 'Pending', etc.",
-      TableColumn.UNGROUPED,
-      ScreenStatus.values()) {
-      @Override
-      public ScreenStatus getCellValue(Screen screen)
-      {
-        SortedSet<StatusItem> statusItems = screen.getStatusItems();
-        return statusItems.isEmpty() ? null : statusItems.last().getStatus();
-      }
-    });
-    columns.get(columns.size() - 1).setAdministrative(true);
+    if (!!!LincsScreensaverConstants.FACILITY_NAME.equals(getApplicationProperties().getFacility())) {
+      columns.add(new EnumEntityColumn<Screen,ScreenStatus>(Screen.statusItems.toProperty("status"),
+                                                            "Status", "The current status of the screen, e.g., 'Completed', 'Ongoing', 'Pending', etc.",
+                                                            TableColumn.UNGROUPED,
+                                                            ScreenStatus.values()) {
+        @Override
+        public ScreenStatus getCellValue(Screen screen)
+        {
+          SortedSet<StatusItem> statusItems = screen.getStatusItems();
+          return statusItems.isEmpty() ? null : statusItems.last().getStatus();
+        }
+      });
+      columns.get(columns.size() - 1).setAdministrative(true);
 
-    columns.add(new DateEntityColumn<Screen>(
-      Screen.statusItems.toProperty("statusDate"),
-      "Status Date", "The date of the most recent change of status for the screen",
-      TableColumn.UNGROUPED) {
-      @Override
-      protected LocalDate getDate(Screen screen) {
-        SortedSet<StatusItem> statusItems = screen.getStatusItems();
-        return statusItems.isEmpty() ? null : statusItems.last().getStatusDate();
-      }
-    });
-    columns.get(columns.size() - 1).setAdministrative(true);
+      columns.add(new DateEntityColumn<Screen>(
+                                               Screen.statusItems.toProperty("statusDate"),
+                                               "Status Date", "The date of the most recent change of status for the screen",
+                                               TableColumn.UNGROUPED) {
+        @Override
+        protected LocalDate getDate(Screen screen)
+        {
+          SortedSet<StatusItem> statusItems = screen.getStatusItems();
+          return statusItems.isEmpty() ? null : statusItems.last().getStatusDate();
+        }
+      });
+      columns.get(columns.size() - 1).setAdministrative(true);
+    }
 
     // TODO: should make this a vocab list, but need support for list-of-vocab column type
     columns.add(new TextSetEntityColumn<Screen>(
@@ -391,29 +395,39 @@ public class ScreenSearchResults extends EntityBasedEntitySearchResults<Screen,I
       @Override
       public ScreenType getCellValue(Screen screen) { return screen.getScreenType(); }
     });
-    columns.add(new EnumEntityColumn<Screen,ProjectPhase>(RelationshipPath.from(Screen.class).toProperty("projectPhase"),
-      "Project Phase", "'Primary','Counter', or 'Follow-Up'", TableColumn.UNGROUPED, ProjectPhase.values()) {
-      @Override
-      public ProjectPhase getCellValue(Screen screen) { return screen.getProjectPhase();}
-    });
-    columns.add(new TextEntityColumn<Screen>(RelationshipPath.from(Screen.class).toProperty("projectId"),
-      "Project ID", "The project ID of the screen", TableColumn.UNGROUPED) {
-      @Override
-      public String getCellValue(Screen screen) { return screen.getProjectId(); }
 
-      @Override
-      public boolean isCommandLink()
-      {
-        return true;
-      }
+    if (!!!LincsScreensaverConstants.FACILITY_NAME.equals(getApplicationProperties().getFacility())) {
+      columns.add(new EnumEntityColumn<Screen,ProjectPhase>(RelationshipPath.from(Screen.class).toProperty("projectPhase"),
+                                                            "Project Phase", "'Primary','Counter', or 'Follow-Up'", TableColumn.UNGROUPED, ProjectPhase.values()) {
+        @Override
+        public ProjectPhase getCellValue(Screen screen)
+        {
+          return screen.getProjectPhase();
+        }
+      });
+      columns.add(new TextEntityColumn<Screen>(RelationshipPath.from(Screen.class).toProperty("projectId"),
+                                               "Project ID", "The project ID of the screen", TableColumn.UNGROUPED) {
+        @Override
+        public String getCellValue(Screen screen)
+        {
+          return screen.getProjectId();
+        }
 
-      @Override
-      public Object cellAction(Screen screen)
-      {
-        searchScreensForProject(screen.getProjectId());
-        return BROWSE_SCREENS;
-      }
-    });
+        @Override
+        public boolean isCommandLink()
+        {
+          return true;
+        }
+
+        @Override
+        public Object cellAction(Screen screen)
+        {
+          searchScreensForProject(screen.getProjectId());
+          return BROWSE_SCREENS;
+        }
+      });
+    }
+
     columns.add(new TextEntityColumn<Screen>(RelationshipPath.from(Screen.class).toProperty("title"),
       "Title", "The title of the screen", TableColumn.UNGROUPED) {
       @Override
@@ -445,17 +459,30 @@ public class ScreenSearchResults extends EntityBasedEntitySearchResults<Screen,I
       public ScreeningRoomUser getUser(Screen screen) { return screen.getLeadScreener(); }
     });
 
-    columns.add(new DateTimeEntityColumn<Screen>(Screen.thisEntity.toProperty("dateCreated"),
-                                                 isNonScreenSearchResults ? "Date Screen Recorded" : "Date Recorded",
-                                                 "The date the screen was first recorded in the Screensaver",
-                                                 TableColumn.UNGROUPED) {
-      @Override
-      protected DateTime getDateTime(Screen screen)
-      {
-        return screen.getDateCreated();
-      }
-    });
-
+    if (!!!LincsScreensaverConstants.FACILITY_NAME.equals(getApplicationProperties().getFacility())) {
+      columns.add(new DateTimeEntityColumn<Screen>(Screen.thisEntity.toProperty("dateCreated"),
+                                                   isNonScreenSearchResults ? "Date Screen Recorded" : "Date Recorded",
+                                                   "The date the screen was first recorded in the Screensaver",
+                                                   TableColumn.UNGROUPED) {
+        @Override
+        protected DateTime getDateTime(Screen screen)
+        {
+          return screen.getDateCreated();
+        }
+      });
+    }
+    else {
+      columns.add(new DateEntityColumn<Screen>(Screen.thisEntity.toProperty("dateCreated"),
+        "Date Data Received",
+        "The date the screen was first recorded in the Screensaver",
+        TableColumn.UNGROUPED) {
+        @Override
+        protected LocalDate getDate(Screen screen)
+        {
+          return screen.getDateCreated().toLocalDate();
+        }
+      });
+    }
     return columns;
   }
 }

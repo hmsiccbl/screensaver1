@@ -21,10 +21,10 @@ import org.rosuda.REngine.Rserve.RConnection;
 import org.rosuda.REngine.Rserve.RserveException;
 import org.springframework.test.annotation.IfProfileValue;
 
-import edu.harvard.med.screensaver.AbstractSpringTest;
 import edu.harvard.med.screensaver.model.screenresults.DataColumn;
 import edu.harvard.med.screensaver.model.screenresults.ResultValue;
 import edu.harvard.med.screensaver.model.screenresults.ScreenResult;
+import edu.harvard.med.screensaver.test.AbstractSpringTest;
 
 @IfProfileValue(name = "screensaver.ui.feature.cellHTS2", value = "true")
 public class CellHTS2Test extends AbstractSpringTest

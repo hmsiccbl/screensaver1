@@ -20,12 +20,11 @@ import java.math.BigDecimal;
 import java.util.List;
 import java.util.Set;
 
+import com.google.common.collect.Sets;
 import org.apache.log4j.Logger;
 import org.joda.time.LocalDate;
 import org.springframework.beans.factory.annotation.Autowired;
-import com.google.common.collect.Sets;
 
-import edu.harvard.med.screensaver.AbstractSpringPersistenceTest;
 import edu.harvard.med.screensaver.db.DAOTransaction;
 import edu.harvard.med.screensaver.db.GenericEntityDAO;
 import edu.harvard.med.screensaver.db.LibrariesDAO;
@@ -58,6 +57,7 @@ import edu.harvard.med.screensaver.model.users.ScreensaverUserRole;
 import edu.harvard.med.screensaver.service.libraries.LibraryContentsLoader;
 import edu.harvard.med.screensaver.service.libraries.LibraryContentsVersionManager;
 import edu.harvard.med.screensaver.service.libraries.LibraryCreatorTest;
+import edu.harvard.med.screensaver.test.AbstractSpringPersistenceTest;
 
 /**
  * Check the test {@link LibraryCreatorTest} as there is overlap between these tests.

@@ -14,7 +14,7 @@ import java.beans.IntrospectionException;
 import junit.framework.TestSuite;
 
 import edu.harvard.med.screensaver.model.AbstractEntityInstanceTest;
-import edu.harvard.med.screensaver.model.TestDataFactory;
+import edu.harvard.med.screensaver.test.TestDataFactory;
 
 public class AnnotationValueTest extends AbstractEntityInstanceTest<AnnotationValue>
 {

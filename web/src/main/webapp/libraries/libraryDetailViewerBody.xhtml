@@ -41,7 +41,6 @@
         styleClass="command" title="Add a copy to the Library" />
   </ui:define>
   
-
   <ui:define name="propertiesContent">
   	<ss:property id="libraryName" label="Library Name"
 			description="The full name of the library"
@@ -56,6 +55,7 @@
 			editWidth="60" />
 
     <ss:property id="libraryProvider" label="Provider"
+      rendered="#{appInfo.applicationProperties.facility != 'LINCS' || appInfo.screensaverUser.isUserInRoleOfNameMap['lincsCollaborator']}"
       description="The name of the library provider"
       value="#{libraryDetailViewer.entity.provider}"
       editable="#{libraryDetailViewer.editMode}" />
@@ -90,23 +90,16 @@
       </ui:define>
     </ss:property>
 
-    <t:outputText id="libraryTypeLabel" value="Library Type"
-				title="The type of library, e.g., 'Commercial', 'Known Bioactives', 'siRNA', etc."
-				escape="false" styleClass="label" />
-		<t:panelGroup rendered="#{!libraryDetailViewer.editMode}">
-			<t:outputText id="libraryTypeOutput" escape="false"
-				value="#{libraryDetailViewer.entity.libraryType}"
-				converter="#{libraryTypeConverter}" styleClass="propertyValue" />
-		</t:panelGroup>
-		<t:panelGroup rendered="#{libraryDetailViewer.editMode}">
-			<t:selectOneMenu id="libraryType" styleClass="inputText selectMenu"
-				required="true" value="#{libraryDetailViewer.entity.libraryType}"
-				converter="#{libraryTypeConverter}">
-				<f:selectItems value="#{libraryDetailViewer.libraryTypeSelectItems}" />
-			</t:selectOneMenu>
-		</t:panelGroup>
+    <ss:property id="libraryTypeLabel" label="Library Type"
+        rendered="#{appInfo.applicationProperties.facility != 'LINCS'}"
+				description="The type of library, e.g., 'Commercial', 'Known Bioactives', 'siRNA', etc."
+        value="#{libraryDetailViewer.entity.libraryType}"
+        converter="#{libraryTypeConverter}"
+        selectItems="#{libraryDetailViewer.libraryTypeSelectItems}"
+        editable="#{libraryDetailViewer.editMode}"/>
 
     <ss:property id="isPool" label="Is Pool" type="Boolean"
+      rendered="#{appInfo.applicationProperties.facility != 'LINCS'}"
       description="Whether wells contains pools of reagents or single reagents"
       value="#{libraryDetailViewer.entity.pool}"
       editable="#{libraryDetailViewer.editMode}" />
@@ -132,6 +125,14 @@
       type="Date" value="#{libraryDetailViewer.entity.dateScreenable}"
       adminOnly="true"
       editable="false" />
+
+    <!-- NOTE: this is the same property as found in entityViewerDetails, however, there it is admin-only.  LINCS-only,  for [#3110]  -->
+    <ss:property id="dateDataReceived" label="Date Data Received"
+      description="The date the data was received"
+      value="#{entity.dateCreated}" 
+      type="Date"
+      rendered="#{appInfo.applicationProperties.facility == 'LINCS' }" 
+      />      
 
     <ss:entityComments id="libraryComments"
       comments="#{libraryDetailViewer.comments}"
@@ -165,39 +166,23 @@
     </ss:propertyGroup>
 
     <ss:property id="description" label="Description"
-			description="A description of the library"
+      description="A description of the library"
+      rendered="#{appInfo.applicationProperties.facility != 'LINCS' || appInfo.screensaverUser.isUserInRoleOfNameMap['lincsCollaborator']}"
 			value="#{libraryDetailViewer.entity.description}"
 			editable="#{libraryDetailViewer.editMode}" type="Textarea"
 			editWidth="80" editHeight="3" />
-			
-		<t:outputText id="ownerLabel" value="Owner"
-				title="When set, only owner can see library. (optional)"
-				escape="false" styleClass="label" />
-		<t:panelGroup rendered="#{!libraryDetailViewer.editMode}">
-			<t:outputText id="ownerOutput" escape="false"
-				value="#{libraryDetailViewer.entity.owner.fullNameLastFirst}"
-				converter="#{ownerConverter}" styleClass="propertyValue" />
-		</t:panelGroup>
-		<t:panelGroup rendered="#{libraryDetailViewer.editMode}">
-		   	<t:selectOneMenu id="owner"
-          		value="#{libraryDetailViewer.owner.value}"
-          		styleClass="inputText selectMenu">
-				<f:selectItems value="#{libraryDetailViewer.owner.selectItems}" />          		
-        	</t:selectOneMenu>
-		</t:panelGroup>			
+
+    <ss:property id="owner" label="Owner"
+      description="The user that owns the library, if applicable"
+      rendered="#{appInfo.applicationProperties.facility != 'LINCS' || appInfo.screensaverUser.isUserInRoleOfNameMap['lincsCollaborator']}"
+      value="#{libraryDetailViewer.owner.value}" type="Vocabulary"
+      selectItems="#{libraryDetailViewer.owner.selectItems}" />
 
     <ss:property id="experimentalWellCount"
       label="# Experimental Wells"
       description="The number of wells in the library with well type 'Experimental'"
       value="#{libraryDetailViewer.entity.experimentalWellCount}" />
       
-    <ss:property id="qualityControlInformation" label="Quality Control Information"
-      description="Information on quality control tests (i.e. Liquid chromatography-mass spectrometry)"
-      value="#{libraryDetailViewer.entity.qualityControlInformation}"
-      rendered="#{appInfo.applicationProperties.map['screensaver.ui.facility_name'] == 'LINCS'}"
-      editable="#{libraryDetailViewer.editMode}" type="Textarea"
-      editWidth="80" editHeight="3" />      
-
   </ui:define>
 
 </ui:composition>

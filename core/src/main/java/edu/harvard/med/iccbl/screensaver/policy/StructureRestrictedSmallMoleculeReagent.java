@@ -9,6 +9,8 @@ import java.util.Set;
 
 import org.joda.time.LocalDate;
 
+import com.google.common.collect.Sets;
+
 import edu.harvard.med.screensaver.model.AbstractEntity;
 import edu.harvard.med.screensaver.model.AbstractEntityVisitor;
 import edu.harvard.med.screensaver.model.AttachedFile;
@@ -47,7 +49,7 @@ public class StructureRestrictedSmallMoleculeReagent extends SmallMoleculeReagen
   @Override
   public String getSmiles()
   {
-    if (delegate.isRestrictedStructure()) {
+    if (delegate.isRestrictedStructure()) { 
       return null;
     }
     return delegate.getSmiles();
@@ -174,18 +176,6 @@ public class StructureRestrictedSmallMoleculeReagent extends SmallMoleculeReagen
   public Integer getSaltFormId()
   {
     return delegate.getSaltFormId();
-  }
-
-  @Override
-  public SmallMoleculeReagent forVendorBatchId(String vendorBatchId)
-  {
-    return delegate.forVendorBatchId(vendorBatchId);
-  }
-
-  @Override
-  public SmallMoleculeReagent forFacilityBatchId(Integer facilityBatchId)
-  {
-    return delegate.forFacilityBatchId(facilityBatchId);
   }
 
   @Override

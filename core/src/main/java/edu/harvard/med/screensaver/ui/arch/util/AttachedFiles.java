@@ -1,8 +1,10 @@
-// $HeadURL$
+// $HeadURL:
+// http://seanderickson1@forge.abcd.harvard.edu/svn/screensaver/branches/lincs/ui-cleanup/core/src/main/java/edu/harvard/med/screensaver/ui/arch/util/AttachedFiles.java
+// $
 // $Id$
 //
 // Copyright © 2006, 2010 by the President and Fellows of Harvard College.
-// 
+//
 // Screensaver is an open-source project developed by the ICCB-L and NSRB labs
 // at Harvard Medical School. This software is distributed under the terms of
 // the GNU General Public License.
@@ -21,9 +23,11 @@ import javax.faces.context.FacesContext;
 import javax.faces.model.DataModel;
 import javax.faces.model.ListDataModel;
 
+import com.google.common.base.Function;
 import com.google.common.base.Predicate;
 import com.google.common.base.Predicates;
 import com.google.common.collect.Iterables;
+import com.google.common.collect.Iterators;
 import com.google.common.collect.Lists;
 import org.apache.myfaces.custom.fileupload.UploadedFile;
 import org.joda.time.LocalDate;
@@ -51,15 +55,15 @@ public class AttachedFiles extends AbstractBackingBean
   private UploadedFile _uploadedAttachedFileContents;
   private String _newAttachedFileContents;
   private Predicate<AttachedFile> _attachedFileFilter = Predicates.alwaysTrue();
-  
+
   protected AttachedFiles()
   {}
-  
+
   public AttachedFiles(GenericEntityDAO dao)
   {
     _dao = dao;
   }
-  
+
   protected GenericEntityDAO getDao()
   {
     return _dao;
@@ -77,9 +81,9 @@ public class AttachedFiles extends AbstractBackingBean
 
   public void setAttachedFileTypes(SortedSet<AttachedFileType> attachedFileTypes)
   {
-    _attachedFileTypes = attachedFileTypes; 
+    _attachedFileTypes = attachedFileTypes;
   }
-  
+
   public void setAttachedFilesFilter(Predicate<AttachedFile> predicate)
   {
     _attachedFileFilter = predicate;
@@ -93,7 +97,7 @@ public class AttachedFiles extends AbstractBackingBean
     _newAttachedFileDate = null;
     _uploadedAttachedFileContents = null;
   }
-                   
+
   public String getNewAttachedFileName()
   {
     return _newAttachedFileName;
@@ -156,7 +160,17 @@ public class AttachedFiles extends AbstractBackingBean
     if (_entity == null) {
       return new ListDataModel();
     }
-    List<AttachedFile> attachedFiles = Lists.newArrayList(Iterables.filter(_entity.getAttachedFiles(), _attachedFileFilter));
+    List<AttachedFile> attachedFilesUnfiltered = Lists.newArrayList(Iterables.filter(_entity.getAttachedFiles(), _attachedFileFilter));
+    List<AttachedFile> attachedFiles =
+      Lists.newArrayList(Iterators.transform(attachedFilesUnfiltered.iterator(),
+                                             new Function<AttachedFile,AttachedFile>() {
+
+                                               @Override
+                                               public AttachedFile apply(AttachedFile from)
+                                              {
+                                                return (AttachedFile) from.restrict();
+                                              }
+                                             }));
     Collections.sort(attachedFiles);
     return new ListDataModel(attachedFiles);
   }
@@ -222,7 +236,6 @@ public class AttachedFiles extends AbstractBackingBean
     return REDISPLAY_PAGE_ACTION_RESULT;
   }
 
-
   @UICommand
   @Transactional
   public String downloadAttachedFile() throws IOException, SQLException
@@ -234,7 +247,7 @@ public class AttachedFiles extends AbstractBackingBean
   public static String doDownloadAttachedFile(final AttachedFile attachedFileIn,
                                               final FacesContext facesContext,
                                               final GenericEntityDAO dao)
-  throws IOException, SQLException
+    throws IOException, SQLException
   {
     if (attachedFileIn != null) {
       dao.doInTransaction(new DAOTransaction() {

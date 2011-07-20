@@ -3,9 +3,11 @@ package edu.harvard.med.lincs.screensaver.ui.libraries;
 import java.net.URL;
 import java.util.SortedSet;
 
+import com.google.common.base.Predicate;
 import com.google.common.collect.Sets;
 import org.apache.log4j.Logger;
 
+import edu.harvard.med.screensaver.ScreensaverConstants;
 import edu.harvard.med.screensaver.db.GenericEntityDAO;
 import edu.harvard.med.screensaver.db.LibrariesDAO;
 import edu.harvard.med.screensaver.io.libraries.WellsSdfDataExporter;
@@ -31,7 +33,7 @@ public class WellViewer extends edu.harvard.med.screensaver.ui.libraries.WellVie
   private static final Logger log = Logger.getLogger(WellViewer.class);
 
   private AttachedFiles _attachedFiles;
-  private StudyImageProvider _ambitImageProvider; // for [#2417] NOTE: this is a LINCS-only feature
+  private StudyImageProvider _studyImageProvider; // for [#2417] NOTE: this is a LINCS-only feature
   /**
    * @motivation for CGLIB2
    */
@@ -49,7 +51,7 @@ public class WellViewer extends edu.harvard.med.screensaver.ui.libraries.WellVie
                     LibraryContentsVersionReference libraryContentsVersionRef,
                     AnnotationSearchResults annotationSearchResults,
                     ScreenResultReporter screenResultReporter,
-                    StudyImageProvider ambitImageProvider,
+                    StudyImageProvider studyImageProvider,
                     AttachedFiles attachedFiles)
   {
     super(thisProxy,
@@ -65,7 +67,7 @@ public class WellViewer extends edu.harvard.med.screensaver.ui.libraries.WellVie
           annotationSearchResults,
           screenResultReporter);
     _attachedFiles = attachedFiles;
-    _ambitImageProvider = ambitImageProvider;
+    _studyImageProvider = studyImageProvider;
     getIsPanelCollapsedMap().put("annotations", Boolean.FALSE);
   }
 
@@ -83,13 +85,23 @@ public class WellViewer extends edu.harvard.med.screensaver.ui.libraries.WellVie
 
   private void initalizeAttachedFiles(Reagent reagent)
   {
-    getDao().needReadOnly(reagent, Reagent.attachedFiles);
-    getDao().needReadOnly(reagent, Reagent.attachedFiles.to(AttachedFile.fileType));
-    SortedSet<AttachedFileType> attachedFileTypes =
-      Sets.<AttachedFileType>newTreeSet(getDao().findAllEntitiesOfType(ReagentAttachedFileType.class, true));
     _attachedFiles.reset();
-    _attachedFiles.setAttachedFileTypes(attachedFileTypes);
-    _attachedFiles.setAttachedFilesEntity(reagent);
+    if (reagent != null) {
+      getDao().needReadOnly(reagent, Reagent.attachedFiles);
+      getDao().needReadOnly(reagent, Reagent.attachedFiles.to(AttachedFile.fileType));
+      SortedSet<AttachedFileType> attachedFileTypes =
+        Sets.<AttachedFileType>newTreeSet(getDao().findAllEntitiesOfType(ReagentAttachedFileType.class, true));
+      _attachedFiles.setAttachedFileTypes(attachedFileTypes);
+      _attachedFiles.setAttachedFilesEntity((Reagent) reagent.restrict());
+
+      _attachedFiles.setAttachedFilesFilter(new Predicate<AttachedFile>() {
+        @Override
+        public boolean apply(AttachedFile input)
+        {
+          return !!! input.getFileType().getValue().equals(ScreensaverConstants.STUDY_FILE_TYPE);
+        }
+      });
+    }
   }
 
   /**
@@ -99,17 +111,21 @@ public class WellViewer extends edu.harvard.med.screensaver.ui.libraries.WellVie
    */
   public String getSmallMoleculeFacilityBatchId()
   {
-    return String.format("%03d", ((SmallMoleculeReagent) getRestrictedReagent()).getFacilityBatchId());
+    return getRestrictedReagent() == null ? null
+      : String.format("%03d", ((SmallMoleculeReagent) getRestrictedReagent()).getFacilityBatchId());
   }
 
   /**
    * NOTE: this is a LINCS-only feature
    * 
-   * @return formatted (to 3 digits) Facility Batch Identifier from the SmallMoleculeReagent
+   * @return formatted (to 3 digits) Facility BgetRestrictedReagent() == null ? null : atch Identifier from the
+   *         SmallMoleculeReagent
    */
   public String getSmallMoleculeSaltFormId()
   {
-    return String.format("%03d", ((SmallMoleculeReagent) getRestrictedReagent()).getSaltFormId());
+
+    return getRestrictedReagent() == null ? null
+      : String.format("%03d", ((SmallMoleculeReagent) getRestrictedReagent()).getSaltFormId());
   }
 
   /**
@@ -119,14 +135,14 @@ public class WellViewer extends edu.harvard.med.screensaver.ui.libraries.WellVie
    */
   public String getSmallMoleculeVendorBatchId()
   {
-    return ((SmallMoleculeReagent) getRestrictedReagent()).getVendorBatchId();
+    return getRestrictedReagent() == null ? null : ((SmallMoleculeReagent) getRestrictedReagent()).getVendorBatchId();
   }
 
-  public String getAmbitImageImageUrl()
+  public String getStudyImageUrl()
   {
-    if (_ambitImageProvider == null) return null;
+    if (_studyImageProvider == null) return null;
 
-    URL url = _ambitImageProvider.getImageUrl((SmallMoleculeReagent) getRestrictedReagent());
+    URL url = _studyImageProvider.getImageUrl((SmallMoleculeReagent) getRestrictedReagent());
     return url == null ? null : url.toString();
   }
 

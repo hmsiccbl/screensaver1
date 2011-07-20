@@ -23,12 +23,9 @@ import org.joda.time.LocalDate;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.dao.DataIntegrityViolationException;
 
-import edu.harvard.med.screensaver.AbstractSpringPersistenceTest;
 import edu.harvard.med.screensaver.model.AdministrativeActivity;
 import edu.harvard.med.screensaver.model.AdministrativeActivityType;
 import edu.harvard.med.screensaver.model.BusinessRuleViolationException;
-import edu.harvard.med.screensaver.model.MakeDummyEntities;
-import edu.harvard.med.screensaver.model.TestDataFactory.PostCreateHook;
 import edu.harvard.med.screensaver.model.Volume;
 import edu.harvard.med.screensaver.model.VolumeUnit;
 import edu.harvard.med.screensaver.model.cherrypicks.LabCherryPick;
@@ -58,9 +55,11 @@ import edu.harvard.med.screensaver.model.screens.Screen;
 import edu.harvard.med.screensaver.model.screens.ScreenType;
 import edu.harvard.med.screensaver.model.users.AdministratorUser;
 import edu.harvard.med.screensaver.model.users.ScreeningRoomUser;
-import edu.harvard.med.screensaver.service.cherrypicks.CherryPickRequestAllocatorTest;
 import edu.harvard.med.screensaver.service.libraries.LibraryCreator;
 import edu.harvard.med.screensaver.service.libraries.LibraryScreeningDerivedPropertiesUpdater;
+import edu.harvard.med.screensaver.test.AbstractSpringPersistenceTest;
+import edu.harvard.med.screensaver.test.MakeDummyEntities;
+import edu.harvard.med.screensaver.test.TestDataFactory.PostCreateHook;
 
 
 /**
@@ -109,7 +108,7 @@ public class LibrariesDAOTest extends AbstractSpringPersistenceTest
   {
     genericEntityDao.doInTransaction(new DAOTransaction() {
       public void runTransaction() {
-        Library library = CherryPickRequestAllocatorTest.makeRNAiDuplexLibrary("library", 1, 2, PlateSize.WELLS_384);
+        Library library = MakeDummyEntities.makeRNAiDuplexLibrary("library", 1, 2, PlateSize.WELLS_384);
         Copy copyC = library.createCopy((AdministratorUser) library.getCreatedBy(), CopyUsageType.CHERRY_PICK_SOURCE_PLATES, "C");
         copyC.findPlate(1).withWellVolume(new Volume(10)).withStatus(PlateStatus.AVAILABLE);
         copyC.findPlate(2).withWellVolume(new Volume(100)).withStatus(PlateStatus.AVAILABLE); // should be ignored
@@ -142,7 +141,7 @@ public class LibrariesDAOTest extends AbstractSpringPersistenceTest
         wellVolumeAdjustments.add(wellVolumeCorrectionActivity.createWellVolumeAdjustment(copyF, wellB02, new Volume(-1)));
         genericEntityDao.saveOrUpdateEntity(wellVolumeCorrectionActivity);
 
-        RNAiCherryPickRequest cherryPickRequest = CherryPickRequestAllocatorTest.createRNAiCherryPickRequest(1, new Volume(2));
+        RNAiCherryPickRequest cherryPickRequest = MakeDummyEntities.createRNAiCherryPickRequest(1, new Volume(2));
         ScreenerCherryPick dummyScreenerCherryPick = cherryPickRequest.createScreenerCherryPick(wellA01);
         LabCherryPick labCherryPick1 = dummyScreenerCherryPick.createLabCherryPick(wellA01);
         labCherryPick1.setAllocated(copyE);
@@ -710,6 +709,8 @@ public class LibrariesDAOTest extends AbstractSpringPersistenceTest
         genericEntityDao.persistEntity(library);
       }
     });
+
+    Set<Library> inLibraries = Sets.newHashSet(genericEntityDao.findAllEntitiesOfType(Library.class));
 
     Set<WellKey> wellKeys = librariesDao.findWellKeysForCompoundName("xyz");
     assertFalse(wellKeys.isEmpty());

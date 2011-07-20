@@ -4,7 +4,7 @@
   <modelVersion>4.0.0</modelVersion>
   <groupId>edu.harvard.med</groupId>
   <artifactId>screensaver</artifactId>
-  <version>2011-06-20</version>
+  <version>2011-07-19</version>
   <packaging>pom</packaging>
   <name>Screensaver HTS LIMS</name>
 
@@ -53,8 +53,31 @@
     <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
     <env>dev</env>
     <facility>generic</facility>
+    <org.springframework.version>3.0.5.RELEASE</org.springframework.version>
+    <hibernate-core.version>3.6.2.Final</hibernate-core.version>
+    <hibernate-entity-manager-version>3.6.0.Final</hibernate-entity-manager-version>
   </properties>
   
+  <repositories>
+    <repository>
+      <id>com.springsource.repository.bundles.release</id>
+      <name>EBR Spring Release Repository</name>
+      <url>http://repository.springsource.com/maven/bundles/release</url>
+    </repository>
+
+    <repository>
+      <id>com.springsource.repository.bundles.external</id>
+      <name>EBR External Release Repository</name>
+      <url>http://repository.springsource.com/maven/bundles/external</url>
+    </repository>
+
+    <repository>
+      <id>JBoss</id>
+      <name>JBoss repository</name>
+      <url>https://repository.jboss.org/nexus/content/groups/public</url>
+    </repository>
+  </repositories>
+
   <!--
           Top level dependency management: specify versions for dependencies that may be included in child projects
    -->
@@ -65,7 +88,6 @@
         <groupId>junit</groupId>
         <artifactId>junit</artifactId>
         <version>3.8.1</version>
-        <scope>test</scope>
       </dependency>
 
       <dependency>
@@ -82,19 +104,105 @@
           Top level dependencies: place items here needed by all child projects.
    -->
   <dependencies>
+  
+    <!-- "0_" prefix allows this to be found in classpath before hibernate-core*.jar -->
+    <!-- NOTE: this file must be added to the local repository with: 
+         mvn install:install-file -DgroupId=edu.harvard.med.iccbl -DartifactId=hibernate-core-patch -Dversion=3.6.2.Final-patch -Dpackaging=jar -Dfile=target/0_hibernate-core-patch-3.6.2.Final-patch.jar
+    -->
+    <dependency>
+      <groupId>edu.harvard.med.iccbl</groupId>
+      <artifactId>0_hibernate-core-patch</artifactId>
+      <version>${hibernate-core.version}</version>
+    </dependency>
+
+    <dependency>
+      <groupId>org.hibernate</groupId>
+      <artifactId>hibernate-core</artifactId>
+      <version>${hibernate-core.version}</version>
+    </dependency>
+
+    <dependency>
+      <groupId>org.hibernate</groupId>
+      <artifactId>hibernate-entitymanager</artifactId>
+      <version>${hibernate-entity-manager-version}</version>
+    </dependency>
+
+    <dependency>
+      <groupId>commons-dbcp</groupId>
+      <artifactId>commons-dbcp</artifactId>
+      <version>1.2.2</version>
+    </dependency>
+
+    <dependency>
+      <groupId>org.slf4j</groupId>
+      <artifactId>slf4j-log4j12</artifactId>
+      <version>1.6.1</version>
+    </dependency>
+
+    <dependency>
+      <groupId>org.springframework</groupId>
+      <artifactId>spring-core</artifactId>
+      <version>${org.springframework.version}</version>
+    </dependency>
+
+    <dependency>
+      <groupId>org.springframework</groupId>
+      <artifactId>spring-beans</artifactId>
+      <version>${org.springframework.version}</version>
+    </dependency>
+
+    <dependency>
+      <groupId>org.springframework</groupId>
+      <artifactId>spring-context</artifactId>
+      <version>${org.springframework.version}</version>
+    </dependency>
+
+    <dependency>
+      <groupId>org.springframework</groupId>
+      <artifactId>spring-orm</artifactId>
+      <version>${org.springframework.version}</version>
+    </dependency>
+
+    <dependency>
+      <groupId>org.springframework</groupId>
+      <artifactId>spring-context-support</artifactId>
+      <version>${org.springframework.version}</version>
+    </dependency>
+  
+    <dependency>
+      <groupId>org.springframework</groupId>
+      <artifactId>spring-tx</artifactId>
+      <version>${org.springframework.version}</version>
+    </dependency>
+
+    <dependency>
+      <groupId>org.springframework</groupId>
+      <artifactId>spring-aop</artifactId>
+      <version>${org.springframework.version}</version>
+    </dependency>
+
+    <dependency>
+      <groupId>org.aspectj</groupId>
+      <artifactId>aspectjrt</artifactId>
+      <version>1.5.4</version>
+      <scope>compile</scope>
+    </dependency>
+
+    <dependency>
+      <groupId>postgresql</groupId>
+      <artifactId>postgresql</artifactId>
+      <version>8.4-702.jdbc4</version>
+      <type>jar</type>
+    </dependency>
+
     <dependency>
       <groupId>junit</groupId>
       <artifactId>junit</artifactId>
       <version>3.8.1</version>
-      <scope>test</scope>
+        <!-- need to have in compile scope, now that we have some unit test-related classes under src/main -->
+        <!-- <scope>test</scope> -->
     </dependency>
-    <!-- Because this is a web app, we also have a dependency on the servlet api. -->
-    <dependency>
-      <groupId>javax.servlet</groupId>
-      <artifactId>servlet-api</artifactId>
-      <version>2.3</version>
-      <scope>provided</scope>
-    </dependency>
+
   </dependencies>
   
   
@@ -131,6 +239,7 @@
   
   <modules>
     <module>core</module>
+    <module>test</module>
     <module>web</module>
     <module>batch</module>
 <!--    <module>screensaver-cellhts</module>-->

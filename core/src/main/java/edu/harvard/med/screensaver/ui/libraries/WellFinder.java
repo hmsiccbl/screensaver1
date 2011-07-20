@@ -9,6 +9,7 @@
 
 package edu.harvard.med.screensaver.ui.libraries;
 
+import com.google.common.base.Joiner;
 import org.apache.log4j.Logger;
 
 import edu.harvard.med.screensaver.db.GenericEntityDAO;
@@ -31,7 +32,6 @@ public class WellFinder extends AbstractBackingBean
   private GenericEntityDAO _dao;
   private LibrariesDAO _librariesDao;
   private WellSearchResults _wellsBrowser;
-  private WellViewer _wellViewer;
   private WellCopyVolumeSearchResults _wellCopyVolumesBrowser;
 
   private String _plateWellList;
@@ -46,13 +46,11 @@ public class WellFinder extends AbstractBackingBean
   public WellFinder(GenericEntityDAO dao,
                     LibrariesDAO librariesDao,
                     WellSearchResults wellsBrowser,
-                    WellViewer wellViewer,
                     WellCopyVolumeSearchResults wellCopyVolumesBrowser)
   {
     _dao = dao;
     _librariesDao = librariesDao;
     _wellsBrowser = wellsBrowser;
-    _wellViewer = wellViewer;
     _wellCopyVolumesBrowser = wellCopyVolumesBrowser;
   }
 
@@ -74,7 +72,9 @@ public class WellFinder extends AbstractBackingBean
     for (Pair<Integer,String> error : parseResult.getErrors()) {
       showMessage("libraries.plateWellListParseError", error.getSecond());
     }
-    _wellsBrowser.searchWells(parseResult.getParsedWellKeys());
+    getCurrentScreensaverUser().logActivity("searching for wells: " +
+                                            Joiner.on(", ").join(parseResult.getParsedWellKeys()));
+    _wellsBrowser.searchWells(parseResult.getParsedWellKeys(), "Well Search Results");
     if (_wellsBrowser.getRowCount() == 1) {
       _wellsBrowser.getRowsPerPageSelector().setSelection(1);
     }

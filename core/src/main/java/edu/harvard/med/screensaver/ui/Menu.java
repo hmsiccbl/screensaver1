@@ -10,11 +10,9 @@
 package edu.harvard.med.screensaver.ui;
 
 
-import javax.servlet.http.HttpSession;
-
 import org.apache.log4j.Logger;
+import org.springframework.transaction.annotation.Transactional;
 
-import edu.harvard.med.screensaver.db.DAOTransaction;
 import edu.harvard.med.screensaver.db.GenericEntityDAO;
 import edu.harvard.med.screensaver.db.LibrariesDAO;
 import edu.harvard.med.screensaver.model.libraries.Library;
@@ -31,7 +29,6 @@ import edu.harvard.med.screensaver.ui.activities.ActivitySearchResults;
 import edu.harvard.med.screensaver.ui.arch.datatable.Criterion;
 import edu.harvard.med.screensaver.ui.arch.datatable.Criterion.Operator;
 import edu.harvard.med.screensaver.ui.arch.datatable.column.TableColumn;
-import edu.harvard.med.screensaver.ui.arch.util.servlet.ScreensaverServletFilter;
 import edu.harvard.med.screensaver.ui.arch.view.AbstractBackingBean;
 import edu.harvard.med.screensaver.ui.arch.view.aspects.UICommand;
 import edu.harvard.med.screensaver.ui.attachedFiles.AttachedFileSearchResults;
@@ -118,16 +115,7 @@ public class Menu extends AbstractBackingBean
   @UICommand
   public String viewMain()
   {
-
-    if(getCurrentScreensaverUser().isAllowGuestLogin())  // for [#3107] Non-authenticated access for LINCS guest users
-    {
-      Boolean pendingLogin = (Boolean) getHttpSession().getAttribute(ScreensaverServletFilter.LOGIN_PENDING);
-      if( pendingLogin != null && pendingLogin.equals(Boolean.TRUE) ) {
-        return VIEW_LOGIN;
-      }
-    }
     return VIEW_MAIN;
-
   }
 
   @UICommand
@@ -153,34 +141,23 @@ public class Menu extends AbstractBackingBean
   {
     log.info("logout for session "  + getHttpSession().getId());
     closeHttpSession();
-    if(getCurrentScreensaverUser().isAllowGuestLogin())  // for [#3107] Non-authenticated access for LINCS guest users
+    if(getApplicationProperties().isAllowGuestLogin())  // for [#3107] Non-authenticated access for LINCS guest users
       return VIEW_MAIN;  // only show the "logout" option if not guest user
     else;
       return VIEW_GOODBYE;
   }
 
   @UICommand
-   // for [#3107] Non-authenticated access for LINCS guest users
+  @Transactional
   public String login()
   {
-    getHttpSession().setAttribute(ScreensaverServletFilter.LOGIN_PENDING,
-                                  Boolean.TRUE);
-    _dao.doInTransaction(new DAOTransaction() {
-      @Override
-      public void runTransaction()
-      {
-        getCurrentScreensaverUser().setScreensaverUser(null);
-        _dao.flush();
-        _dao.clear();
-      }
-    });
+    getHttpSession().invalidate();
     return VIEW_LOGIN;
   }
   
   @UICommand
   public String cancelLogin()
   {
-    getHttpSession().setAttribute(ScreensaverServletFilter.LOGIN_PENDING, Boolean.FALSE);
     return VIEW_MAIN;
   }
   

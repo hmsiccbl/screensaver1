@@ -13,6 +13,8 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Iterator;
 import java.util.List;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 import com.google.common.base.Function;
 import com.google.common.collect.Lists;
@@ -137,4 +139,36 @@ public class StringUtils
                                                          }
                                                         );
   }
+
+  /**
+   * Tokenize the input word list by grouping on words, and words delineated by quotes.<br/>
+   * I.e. 'word1 word2 "word 3"' becomes ['word1', 'word2', '"word 3"']<br/>
+   * <br/>
+   * Uses the following regex to group and split:<br/>
+   * "('.*?'|\".*?\"|[^\\s,;]+)"<br/>
+   * <br/>
+   * <b>Note:</b> Quote characters are left in place and should be removed from the tokens if desired.
+   * 
+   * </p>
+   * Courtesy of http://stackoverflow.com/questions/366202/regex-for-splitting-a-string-using-space-when-not-surrounded-by-single-or-double
+   * 
+   * @param quotedWordList list of words, or quoted word phrases that will be treated as one token.
+   * @return the list of tokens
+   */
+  public static List<String> tokenizeQuotedWordList(String quotedWordList)
+  {
+    // Group on words, and words delineated by quotes; 
+    // courtesy of http://stackoverflow.com/questions/366202/regex-for-splitting-a-string-using-space-when-not-surrounded-by-single-or-double
+    // ( this works also [^\W"']+|"([^"]*)"|'([^']*)'  )
+    // pattern: ('.*?'|\".*?\"|[^\\s,;]+)  - try for single or double quoted strings or for NOT [whitespace comma semicolon] 
+    Pattern quotedWordPattern = Pattern.compile("('.*?'|\".*?\"|[^\\s,;]+)");
+    Matcher matcher = quotedWordPattern.matcher(quotedWordList);
+    List<String> list = Lists.newArrayList();
+    while (matcher.find()) {
+      list.add(matcher.group());
+    }
+    return list;
+  }
+  
+   
 }

@@ -20,6 +20,7 @@ import org.apache.log4j.Logger;
 
 import edu.harvard.med.screensaver.model.AbstractEntity;
 import edu.harvard.med.screensaver.model.SemanticIDAbstractEntity;
+import edu.harvard.med.screensaver.test.model.meta.ModelIntrospectionUtil;
 
 /**
  * Tests some basic stuff, mostly about the identifier, in the ClassMetadata:

@@ -58,10 +58,6 @@ public class CurrentScreensaverUser
   {
     return _user.toString();
   }
-  
-  public boolean isAllowGuestLogin()
-  {
-    return false;
-  }
+
 }
 

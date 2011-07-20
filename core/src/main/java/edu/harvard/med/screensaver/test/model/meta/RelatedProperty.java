@@ -7,7 +7,7 @@
 // at Harvard Medical School. This software is distributed under the terms of
 // the GNU General Public License.
 
-package edu.harvard.med.screensaver.model.meta;
+package edu.harvard.med.screensaver.test.model.meta;
 
 import java.beans.BeanInfo;
 import java.beans.IntrospectionException;
@@ -24,7 +24,6 @@ import org.apache.log4j.Logger;
 import edu.harvard.med.screensaver.model.AbstractEntity;
 import edu.harvard.med.screensaver.model.annotations.ToMany;
 import edu.harvard.med.screensaver.model.annotations.ToOne;
-import edu.harvard.med.screensaver.model.entitytesters.ModelIntrospectionUtil;
 import edu.harvard.med.screensaver.util.StringUtils;
 
 public class RelatedProperty

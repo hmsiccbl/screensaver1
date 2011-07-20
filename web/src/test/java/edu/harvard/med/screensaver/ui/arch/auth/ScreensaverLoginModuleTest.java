@@ -30,13 +30,13 @@ import edu.harvard.med.authentication.AuthenticationRequestException;
 import edu.harvard.med.authentication.AuthenticationResponseException;
 import edu.harvard.med.authentication.AuthenticationResult;
 import edu.harvard.med.authentication.Credentials;
-import edu.harvard.med.screensaver.AbstractSpringTest;
 import edu.harvard.med.screensaver.db.DAOTransaction;
 import edu.harvard.med.screensaver.db.GenericEntityDAO;
 import edu.harvard.med.screensaver.db.SchemaUtil;
 import edu.harvard.med.screensaver.model.users.ScreeningRoomUser;
 import edu.harvard.med.screensaver.model.users.ScreensaverUser;
 import edu.harvard.med.screensaver.model.users.ScreensaverUserRole;
+import edu.harvard.med.screensaver.test.AbstractSpringTest;
 
 @ContextConfiguration(locations = { "/spring-context-test-security.xml", "/spring-context-authentication.xml" }, inheritLocations = false)
 public class ScreensaverLoginModuleTest extends AbstractSpringTest

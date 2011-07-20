@@ -23,7 +23,7 @@
         and was visibleOnUserRole="developer" - how to do this? and do we want this? sde4 -->
 
 
-  <ss:property id="studyFacilityId" label="Study Facility ID"
+  <ss:property id="studyFacilityId" label="Study ID"
     description="The unique identifier for the study"
     value="#{study.facilityId}" editable="false">
     <ui:define name="data">
@@ -70,7 +70,21 @@
         styleClass="propertyValue dataText" />
     </ui:define>
   </ss:property>
-
+ 
+  <ss:property id="studySpecificReagentStudiedFacilityId" label="Compound Studied"
+    description="The facility ID of the compound studied"
+    editable="false"
+    rendered="#{! empty studyViewer.wellStudiedLabel}">
+    <ui:define name="data">
+      <ss:entityLink entity="#{study.wellStudied}" 
+        viewer="#{wellViewer}" >
+        <ui:define name="linkValue">
+          <t:outputText value="#{studyViewer.wellStudiedLabel}"/>
+        </ui:define>
+      </ss:entityLink>
+    </ui:define>
+  </ss:property>  
+    
 </ui:composition>
 
 </html>

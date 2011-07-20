@@ -9,9 +9,9 @@
 
 package edu.harvard.med.screensaver.service.cherrypicks;
 
-import edu.harvard.med.screensaver.AbstractSpringTest;
-
 import org.apache.log4j.Logger;
+
+import edu.harvard.med.screensaver.test.AbstractSpringTest;
 
 public class CherryPickRequestPlateMapFilesBuilderTest extends AbstractSpringTest
 {

@@ -16,7 +16,6 @@ import java.util.regex.Pattern;
 import org.apache.commons.lang.StringUtils;
 import org.apache.log4j.Logger;
 import com.google.common.base.Joiner;
-import com.google.common.collect.Lists;
 
 import edu.harvard.med.screensaver.util.Pair;
 
@@ -34,26 +33,17 @@ public class LibraryCopyPlateListParser
     }
     plateCopyList = plateCopyList.trim();
 
-    // Group on words, and words delineated by quotes; 
-    // courtesy of http://stackoverflow.com/questions/366202/regex-for-splitting-a-string-using-space-when-not-surrounded-by-single-or-double
-    // ( this works also [^\W"']+|"([^"]*)"|'([^']*)'  )
-    // pattern: ('.*?'|\".*?\"|[^\\s,;]+)  - try for single or double quoted strings or for NOT [whitespace comma semicolon] 
-    Pattern quotedWordPattern = Pattern.compile("('.*?'|\".*?\"|[^\\s,;]+)");
-    Pattern numbersPattern = Pattern.compile("(^\\d+)([^\\-]*)$"); // modified, re [#2728] do not require whitespace or punctuation between plate and copy name
+    Pattern numberCopyPattern = Pattern.compile("(^\\d+)([^\\-]*)$"); // modified, re [#2728] do not require whitespace or punctuation between plate and copy name
     Pattern numberRangePattern = Pattern.compile("^(\\d+)[-]+(\\d+)$"); // note [-]+ allows more than one dash
     // TODO: there may be other error patterns
     Pattern errorRangePattern = Pattern.compile("^(\\d+)[-]+$");
 
-    Matcher matcher = quotedWordPattern.matcher(plateCopyList);
-    List<String> list = Lists.newArrayList();
-    while (matcher.find()) {
-      list.add(matcher.group());
-    }
+    List<String> list = edu.harvard.med.screensaver.util.StringUtils.tokenizeQuotedWordList(plateCopyList);
 
     if (log.isDebugEnabled()) log.debug("parsed terms: " + Joiner.on(",").join(list));
     for (String s : list) {
-      if (numbersPattern.matcher(s).matches()) {
-        Matcher m = numbersPattern.matcher(s);
+      if (numberCopyPattern.matcher(s).matches()) {
+        Matcher m = numberCopyPattern.matcher(s);
         if (m.matches()) { // here, allow the plate-copy to be concatenated, as in "111A"
           result.addPlate(Integer.parseInt(m.group(1)));
           String temp = m.group(2);
@@ -71,7 +61,7 @@ public class LibraryCopyPlateListParser
         }
         else {/** nop **/
         }
-      }else { // copyMatcher.matches()
+      }else { // implied: if the other patterns don't match, then this is the "copyMatcher"
         if (errorRangePattern.matcher(s).matches()) {
           result.addError("unparseable range: " + s);
         }else{

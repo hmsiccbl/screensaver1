@@ -12,7 +12,9 @@ package edu.harvard.med.screensaver.ui.screens;
 import java.util.List;
 
 import com.google.common.collect.Lists;
+import org.joda.time.LocalDate;
 
+import edu.harvard.med.lincs.screensaver.LincsScreensaverConstants;
 import edu.harvard.med.screensaver.db.GenericEntityDAO;
 import edu.harvard.med.screensaver.db.datafetcher.EntityDataFetcher;
 import edu.harvard.med.screensaver.db.hqlbuilder.HqlBuilder;
@@ -25,6 +27,7 @@ import edu.harvard.med.screensaver.model.users.ScreeningRoomUser;
 import edu.harvard.med.screensaver.model.users.ScreensaverUserRole;
 import edu.harvard.med.screensaver.ui.arch.datatable.Criterion.Operator;
 import edu.harvard.med.screensaver.ui.arch.datatable.column.TableColumn;
+import edu.harvard.med.screensaver.ui.arch.datatable.column.entity.DateEntityColumn;
 import edu.harvard.med.screensaver.ui.arch.datatable.column.entity.EnumEntityColumn;
 import edu.harvard.med.screensaver.ui.arch.datatable.column.entity.TextEntityColumn;
 import edu.harvard.med.screensaver.ui.arch.datatable.column.entity.UserNameColumn;
@@ -92,7 +95,7 @@ public class StudySearchResults extends EntityBasedEntitySearchResults<Screen,In
   {
     List<TableColumn<Screen,?>> columns = Lists.newArrayList();
     columns.add(new TextEntityColumn<Screen>(Screen.facilityId,
-                                             "Study Facility ID", "The facility-assigned study identifier", TableColumn.UNGROUPED) {
+                                             "Study ID", "The facility-assigned study identifier", TableColumn.UNGROUPED) {
       @Override
       public String getCellValue(Screen study)
       {
@@ -120,17 +123,37 @@ public class StudySearchResults extends EntityBasedEntitySearchResults<Screen,In
       @Override
       public ScreeningRoomUser getUser(Screen study) { return study.getLeadScreener(); }
     });
-    columns.add(new EnumEntityColumn<Screen,StudyType>(Screen.thisEntity.toProperty("studyType"),
-      "Study Type", "'" + StudyType.IN_SILICO + "'' or '" + StudyType.IN_VITRO +"'",
-      TableColumn.UNGROUPED, StudyType.values()) {
-      @Override
-      public StudyType getCellValue(Screen study) { return study.getStudyType(); }
-    });
+
+    if (!!!LincsScreensaverConstants.FACILITY_NAME.equals(getApplicationProperties().getFacility())) {
+      columns.add(new EnumEntityColumn<Screen,StudyType>(Screen.thisEntity.toProperty("studyType"),
+                                                         "Study Type", "'" + StudyType.IN_SILICO + "'' or '" +
+                                                           StudyType.IN_VITRO + "'",
+                                                         TableColumn.UNGROUPED, StudyType.values()) {
+        @Override
+        public StudyType getCellValue(Screen study)
+        {
+          return study.getStudyType();
+        }
+      });
+    }
     columns.add(new EnumEntityColumn<Screen,ScreenType>(Screen.thisEntity.toProperty("screenType"),
       "Library Screen Type", "'RNAi' or 'Small Molecule'", TableColumn.UNGROUPED, ScreenType.values()) {
       @Override
       public ScreenType getCellValue(Screen study) { return study.getScreenType(); }
     });
+
+    if (LincsScreensaverConstants.FACILITY_NAME.equals(getApplicationProperties().getFacility())) {
+      columns.add(new DateEntityColumn<Screen>(Screen.thisEntity.toProperty("dateCreated"),
+                                               "Date Data Received",
+                                               "The date the data was received",
+                                               TableColumn.UNGROUPED) {
+        @Override
+        protected LocalDate getDate(Screen screen)
+        {
+          return screen.getDateCreated().toLocalDate();
+        }
+      });
+    }    
 
 //  TableColumnManager<Screen> columnManager = getColumnManager();
 //  columnManager.addCompoundSortColumns(columnManager.getColumn("Lab Head"),

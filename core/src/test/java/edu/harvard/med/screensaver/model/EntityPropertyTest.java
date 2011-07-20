@@ -18,12 +18,14 @@ import java.util.Collection;
 
 import org.apache.log4j.Logger;
 
-import edu.harvard.med.screensaver.AbstractSpringPersistenceTest;
 import edu.harvard.med.screensaver.db.DAOTransaction;
 import edu.harvard.med.screensaver.model.annotations.ElementCollection;
 import edu.harvard.med.screensaver.model.annotations.ToMany;
-import edu.harvard.med.screensaver.model.entitytesters.ModelIntrospectionUtil;
-import edu.harvard.med.screensaver.model.meta.RelatedProperty;
+import edu.harvard.med.screensaver.test.AbstractSpringPersistenceTest;
+import edu.harvard.med.screensaver.test.model.meta.DomainModelDefinitionException;
+import edu.harvard.med.screensaver.test.model.meta.ExistenceRequirement;
+import edu.harvard.med.screensaver.test.model.meta.ModelIntrospectionUtil;
+import edu.harvard.med.screensaver.test.model.meta.RelatedProperty;
 import edu.harvard.med.screensaver.util.StringUtils;
 
 public class EntityPropertyTest<E extends AbstractEntity> extends AbstractSpringPersistenceTest

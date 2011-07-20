@@ -24,9 +24,9 @@ import javax.faces.model.SelectItem;
 import com.google.common.collect.Sets;
 
 import edu.harvard.med.screensaver.ui.arch.datatable.Criterion.Operator;
-import edu.harvard.med.screensaver.ui.arch.util.converter.MolarConcentrationConverter;
 import edu.harvard.med.screensaver.ui.arch.util.converter.DateTimeConverter;
 import edu.harvard.med.screensaver.ui.arch.util.converter.LocalDateConverter;
+import edu.harvard.med.screensaver.ui.arch.util.converter.MolarConcentrationConverter;
 import edu.harvard.med.screensaver.ui.arch.util.converter.NoOpStringConverter;
 import edu.harvard.med.screensaver.ui.arch.util.converter.VolumeConverter;
 
@@ -35,7 +35,7 @@ public enum ColumnType {
   TEXT(false,
        new NoOpStringConverter(),
        Operator.ALL_OPERATORS,
-       Operator.TEXT_STARTS_WITH),
+       Operator.TEXT_CONTAINS),
   INTEGER(true,
           new IntegerConverter(),
           Operator.COMPARABLE_OPERATORS,

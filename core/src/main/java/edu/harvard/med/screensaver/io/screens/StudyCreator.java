@@ -17,12 +17,12 @@ import java.util.List;
 import java.util.Map;
 
 import org.apache.commons.cli.OptionBuilder;
-import org.apache.commons.cli.ParseException;
 import org.apache.log4j.Logger;
 
 import edu.harvard.med.screensaver.db.DAOTransaction;
 import edu.harvard.med.screensaver.db.DAOTransactionRollbackException;
 import edu.harvard.med.screensaver.db.GenericEntityDAO;
+import edu.harvard.med.screensaver.db.UsersDAO;
 import edu.harvard.med.screensaver.io.CommandLineApplication;
 import edu.harvard.med.screensaver.io.screens.StudyAnnotationParser.KEY_COLUMN;
 import edu.harvard.med.screensaver.io.workbook2.Workbook;
@@ -35,21 +35,19 @@ import edu.harvard.med.screensaver.model.screens.StudyType;
 import edu.harvard.med.screensaver.model.users.LabAffiliation;
 import edu.harvard.med.screensaver.model.users.LabHead;
 import edu.harvard.med.screensaver.model.users.ScreeningRoomUser;
-import edu.harvard.med.screensaver.service.screens.ScreenGenerator;
 import edu.harvard.med.screensaver.util.StringUtils;
 
 /**
  * Command-line application that creates a new screen in the database.
- *
+ * 
  * @author <a mailto="andrew_tolopko@hms.harvard.edu">Andrew Tolopko</a>
  */
 public class StudyCreator
 {
   private static Logger log = Logger.getLogger(StudyCreator.class);
 
-
   @SuppressWarnings("static-access")
-  public static void main(String[] args) throws ParseException
+  public static void main(String[] args)
   {
     final CommandLineApplication app = new CommandLineApplication(args);
 
@@ -62,10 +60,12 @@ public class StudyCreator
     app.addCommandLineOption(OptionBuilder.hasArg().isRequired().withArgName("email").withLongOpt("lab-head-email").create("he"));
 
     List<String> desc = new ArrayList<String>();
-    for(ScreenType t: EnumSet.allOf(ScreenType.class) ) desc.add(t.name());
+    for (ScreenType t : EnumSet.allOf(ScreenType.class))
+      desc.add(t.name());
     app.addCommandLineOption(OptionBuilder.hasArg().isRequired().withArgName("screen type").withLongOpt("screen-type").withDescription(StringUtils.makeListString(desc, ", ")).create("y"));
     desc.clear();
-    for(StudyType t: EnumSet.allOf(StudyType.class) ) desc.add(t.name());
+    for (StudyType t : EnumSet.allOf(StudyType.class))
+      desc.add(t.name());
     app.addCommandLineOption(OptionBuilder.hasArg().isRequired().withArgName("study type").withLongOpt("study-type").withDescription(StringUtils.makeListString(desc, ", ")).create("yy"));
     app.addCommandLineOption(OptionBuilder.hasArg().isRequired().withArgName("summary").withLongOpt("summary").create("s"));
     app.addCommandLineOption(OptionBuilder.hasArg().isRequired().withArgName("title").withLongOpt("title").create("t"));
@@ -81,10 +81,26 @@ public class StudyCreator
                              .withDescription("default value is to key by reagent vendor id").create("keyByCompoundName"));
     app.addCommandLineOption(OptionBuilder.withDescription("optional: pivot the input col/rows so that the AT names are in Col1, and the AT well_id/rvi's are in Row1").withLongOpt("annotation-names-in-col1").create("annotationNamesInCol1"));
     app.addCommandLineOption(OptionBuilder.hasArg().withArgName("file").withLongOpt("data-file").create("f"));
-    
+
+    app.addCommandLineOption(OptionBuilder.withArgName("parseLincsSpecificFacilityID")
+                             .withLongOpt("parseLincsSpecificFacilityID").create("parseLincsSpecificFacilityID"));
+
     app.processOptions(/* acceptDatabaseOptions= */true, /* acceptAdminUserOptions= */true);
 
+    try {
+      execute(app);
+    }
+    catch (Exception e) {
+      log.error("Failed to create the study", e);
+      System.exit(1);
+    }
+
+  }
+
+  private static void execute(final CommandLineApplication app)
+  {
     final GenericEntityDAO dao = (GenericEntityDAO) app.getSpringBean("genericEntityDao");
+    final UsersDAO usersDAO = (UsersDAO) app.getSpringBean("usersDao");
     final String facilityId = app.getCommandLineOptionValue("i");
 
     boolean replace = app.isCommandLineFlagSet("r");
@@ -97,7 +113,7 @@ public class StudyCreator
       dao.deleteEntity(screen);
       log.error("deleted existing screen " + facilityId);
     }
-    
+
     dao.doInTransaction(new DAOTransaction() {
       @Override
       public void runTransaction()
@@ -112,24 +128,31 @@ public class StudyCreator
           StudyType studyType = app.getCommandLineOptionEnumValue("yy", StudyType.class);
           ScreenType screenType = app.getCommandLineOptionEnumValue("y", ScreenType.class);
 
-          LabHead labHead = findSRU(LabHead.class, dao, lhfn, lhln, lhe);
-          ScreeningRoomUser leadScreener = findSRU(ScreeningRoomUser.class, dao, lsfn, lsln, lse);
-          //          LabHead labHead = (LabHead) findOrCreateScreeningRoomUser(dao, lhfn, lhln, lhe, true, null);
-          //          ScreeningRoomUser leadScreener = findOrCreateScreeningRoomUser(dao, lsfn, lsln, lse, false, null);
+          LabHead labHead = usersDAO.findSRU(LabHead.class, lhfn, lhln, lhe);
+          if(labHead == null) {
+                throw new RuntimeException("could not find existing user for " + lhfn + " " + lhln + ", " + lhe);
+          }
+          ScreeningRoomUser leadScreener = usersDAO.findSRU(ScreeningRoomUser.class, lsfn, lsln, lse);
+          if(leadScreener == null) {
+                throw new RuntimeException("could not find existing user for " + lsfn + " " + lsln + ", " + lse);
+          }
           if (leadScreener.getLab().getLabHead() == null) {
             leadScreener.setLab(labHead.getLab());
             log.info("set lab head for lead screener");
           }
           Screen screen = new Screen(app.findAdministratorUser(), facilityId, leadScreener, labHead, screenType, studyType, ProjectPhase.ANNOTATION, app.getCommandLineOptionValue("t"));
-          screen.setDataSharingLevel(ScreenDataSharingLevel.SHARED); 
+          screen.setDataSharingLevel(ScreenDataSharingLevel.SHARED);
           screen.setSummary(app.getCommandLineOptionValue("s"));
           if (app.isCommandLineFlagSet("p")) {
             screen.setPublishableProtocol(app.getCommandLineOptionValue("p"));
           }
+          boolean parseLincsSpecificFacilityID = app.isCommandLineFlagSet("parseLincsSpecificFacilityID");
 
           // import
-          
-          boolean keyByWellId = false; boolean keyByFacilityId = false; boolean keyByCompoundName = false;
+
+          boolean keyByWellId = false;
+          boolean keyByFacilityId = false;
+          boolean keyByCompoundName = false;
           if (app.isCommandLineFlagSet("keyByWellId")) keyByWellId = true;
           if (app.isCommandLineFlagSet("keyByFacilityId")) keyByFacilityId = true;
           if (app.isCommandLineFlagSet("keyByCompoundName")) keyByCompoundName = true;
@@ -141,53 +164,31 @@ public class StudyCreator
           if (keyByFacilityId) keyColumn = KEY_COLUMN.FACILITY_ID;
           if (keyByCompoundName) keyColumn = KEY_COLUMN.COMPOUND_NAME;
           boolean annotationNamesInCol1 = app.isCommandLineFlagSet("annotationNamesInCol1");
-          
+
           File screenResultFile = null;
           if (app.isCommandLineFlagSet("f")) {
             screenResultFile = app.getCommandLineOptionValue("f", File.class);
             if (!screenResultFile.exists()) throw new IllegalArgumentException("File does not exist: " +
               screenResultFile.getAbsolutePath());
-              StudyAnnotationParser parser = (StudyAnnotationParser) app.getSpringBean("studyAnnotationParser");
-              parser.parse(screen, new Workbook(screenResultFile), keyColumn, annotationNamesInCol1);
-              dao.persistEntity(screen);
+            StudyAnnotationParser parser = (StudyAnnotationParser) app.getSpringBean("studyAnnotationParser");
+            parser.parse(screen, new Workbook(screenResultFile), keyColumn, annotationNamesInCol1, parseLincsSpecificFacilityID);
+            dao.persistEntity(screen);
           }
           else {
             log.info("no file specified for import");
             screenResultFile = null;
           }
-        }catch (Exception e) {
+        }
+        catch (Exception e) {
           throw new DAOTransactionRollbackException(e);
         }
       }
     });
-    
     log.info("study created");
-          
   }
 
-   public static <UT extends ScreeningRoomUser> UT findSRU(Class<UT> userClass,
-                                                    GenericEntityDAO dao,
-                                                    String firstName,
-                                                    String lastName,
-                                                    String email)
-  {
-    Map<String,Object> props = new HashMap<String,Object>();
-    props.put("firstName", firstName);
-    props.put("lastName", lastName);
-    props.put("email", email);
-    List<UT> users = dao.findEntitiesByProperties(userClass, props);
-    if (users.size() > 1) {
-      throw new DuplicateEntityException(users.get(0));
-    }
-    if (users.size() == 1) {
-      log.info("found existing user " + users.get(0) + " for " + firstName + " " + lastName + ", " + email);
-      return users.get(0);
-    }
-    throw new RuntimeException("could not find existing user for " + firstName + " " + lastName + ", " + email);
-  }
-  
   /**
-   *  @deprecated use findSRU instead; put the burden of creating the users if they do not exist, on the client code. 
+   * @deprecated use findSRU instead; put the burden of creating the users if they do not exist, on the client code.
    */
   public static ScreeningRoomUser findOrCreateScreeningRoomUser(final GenericEntityDAO dao,
                                                                 final String firstName,
@@ -232,6 +233,6 @@ public class StudyCreator
       }
     });
     return _value[0];
-  }  
-  
+  }
+
 }

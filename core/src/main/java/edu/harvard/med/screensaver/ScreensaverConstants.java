@@ -52,6 +52,7 @@ public interface ScreensaverConstants
   public static final String VIEW_NEWS ="viewNews";
   public static final String VIEW_DOWNLOADS ="viewDownloads";
   public static final String FIND_REAGENTS = "findReagents";
+  public static final String BROWSE_REAGENTS = "browseReagents";
   public static final String FIND_WELLS = "findWells";
   public static final String FIND_WELL_VOLUMES = "findWellVolumes";
   public static final String BROWSE_LIBRARIES = "browseLibraries";
@@ -127,5 +128,6 @@ public interface ScreensaverConstants
   public static final String DEFAULT_BATCH_STUDY_ID_POSITIVE_COUNT_SM = "200001";
   public static final String DEFAULT_BATCH_STUDY_ID_POSITIVE_COUNT_RNAI = "200002";
   public static final String DEFAULT_BATCH_STUDY_ID_CONFIRMATION_SUMMARY = "200003";
+  public static final String STUDY_FILE_TYPE = "Study-File";
 
 }

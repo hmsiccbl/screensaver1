@@ -1,4 +1,6 @@
-// $HeadURL$
+// $HeadURL:
+// http://seanderickson1@forge.abcd.harvard.edu/svn/screensaver/branches/lincs/ui-cleanup/core/src/main/java/edu/harvard/med/screensaver/io/screens/StudyAnnotationParser.java
+// $
 // $Id$
 //
 // Copyright © 2006, 2010 by the President and Fellows of Harvard College.
@@ -13,6 +15,9 @@ import java.util.Collection;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 import org.apache.commons.lang.StringUtils;
 import org.apache.log4j.Logger;
@@ -20,13 +25,18 @@ import org.springframework.transaction.annotation.Transactional;
 import com.google.common.base.Function;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
+import com.google.common.collect.Sets;
 
+import edu.harvard.med.iccbl.screensaver.IccblScreensaverConstants;
+import edu.harvard.med.lincs.screensaver.LincsScreensaverConstants;
 import edu.harvard.med.screensaver.db.GenericEntityDAO;
+import edu.harvard.med.screensaver.db.LibrariesDAO;
 import edu.harvard.med.screensaver.io.UnrecoverableParseException;
 import edu.harvard.med.screensaver.io.workbook2.Cell;
 import edu.harvard.med.screensaver.io.workbook2.Row;
 import edu.harvard.med.screensaver.io.workbook2.Workbook;
 import edu.harvard.med.screensaver.io.workbook2.Worksheet;
+import edu.harvard.med.screensaver.model.libraries.Library;
 import edu.harvard.med.screensaver.model.libraries.Reagent;
 import edu.harvard.med.screensaver.model.libraries.ReagentVendorIdentifier;
 import edu.harvard.med.screensaver.model.libraries.SmallMoleculeReagent;
@@ -34,15 +44,18 @@ import edu.harvard.med.screensaver.model.libraries.Well;
 import edu.harvard.med.screensaver.model.libraries.WellKey;
 import edu.harvard.med.screensaver.model.screenresults.AnnotationType;
 import edu.harvard.med.screensaver.model.screens.Screen;
+import edu.harvard.med.screensaver.ui.libraries.LibrarySearchResults;
 
 public class StudyAnnotationParser
 {
   private static Logger log = Logger.getLogger(StudyAnnotationParser.class);
-  private static final String UNKNOWN_ERROR = "unknown error";
+
   public static final String REGEX_SCRATCH_WORKSHEET_PATTERN = "^\\~.*";
+  public static final Pattern FACILITY_SALT_BATCH_PATTERN = Pattern.compile("([^-]+)[-]([^-]+)[-]([^-]+)");
 
   private GenericEntityDAO _dao;
-  
+  private LibrariesDAO _librariesDao;
+
   public static enum KEY_COLUMN {
     RVI,
     WELL_ID,
@@ -51,23 +64,28 @@ public class StudyAnnotationParser
   };
 
   /** @motivation for CGLIB2 */
-  protected StudyAnnotationParser() {}
-    
+  protected StudyAnnotationParser()
+  {}
 
-  public StudyAnnotationParser(GenericEntityDAO dao)
+  public StudyAnnotationParser(GenericEntityDAO dao, 
+                               LibrariesDAO librariesDao)
   {
     _dao = dao;
+    _librariesDao = librariesDao;
   }
 
   /**
-   * 
    * @param study
+   * @param parseLincsSpecificFacilityID
    * @param workbookIn
    * @param keyByWellId true to key by wellID, false to key by ReagentVendorIdentifier
    */
-  @Transactional(readOnly=true)
+  @Transactional(readOnly = true)
   public void parse(Screen study,
-                    Workbook workbook, KEY_COLUMN keyColumn, boolean annotationTypeNamesInCol1)
+                    Workbook workbook,
+                    KEY_COLUMN keyColumn,
+                    boolean annotationTypeNamesInCol1,
+                    boolean parseLincsSpecificFacilityID)
   {
     if (workbook.getWorkbook() == null) throw new UnrecoverableParseException("Workbook not located: " + workbook.getName());
     try {
@@ -78,7 +96,7 @@ public class StudyAnnotationParser
       else
         parseAnnotationNamesInRow1(workbook, study);
 
-      parseAnnotationValues(workbook, study, keyColumn, !annotationTypeNamesInCol1);
+      parseAnnotationValues(workbook, study, keyColumn, !annotationTypeNamesInCol1, parseLincsSpecificFacilityID);
     }
     catch (Exception e) {
       throw new UnrecoverableParseException(e);
@@ -100,7 +118,7 @@ public class StudyAnnotationParser
 
     Row annotationNames = sheet.getRow(0);
     for (int i = 0; i < annotationNames.getColumns(); i++) {
-        new AnnotationType(study,
+      new AnnotationType(study,
                            sheet.getCell(i, 0, true).getString(),
                            sheet.getCell(i, 1, true).getString(),
                            i,
@@ -126,8 +144,11 @@ public class StudyAnnotationParser
     }
   }
 
-  
-  private void parseAnnotationValues(Workbook workbook, Screen study, KEY_COLUMN keyColumn, boolean reagentKeysInCol1)
+  private void parseAnnotationValues(Workbook workbook,
+                                     Screen study,
+                                     KEY_COLUMN keyColumn,
+                                     boolean reagentKeysInCol1,
+                                     boolean parseLincsSpecificFacilityID)
   {
     List<AnnotationType> annotationTypes = Lists.newArrayList(study.getAnnotationTypes());
 
@@ -143,10 +164,10 @@ public class StudyAnnotationParser
         continue;
       }
       if (reagentKeysInCol1) {
-        annotation_count += parseAnnotationValuesWithReagentKeysInCol1(study, keyColumn, annotationTypes, sheet);
+        annotation_count += parseAnnotationValuesWithReagentKeysInCol1(study, keyColumn, annotationTypes, sheet, parseLincsSpecificFacilityID);
       }
       else {
-        annotation_count += parseAnnotationValuesWithReagentKeysInRow1(study, keyColumn, annotationTypes, sheet);
+        annotation_count += parseAnnotationValuesWithReagentKeysInRow1(study, keyColumn, annotationTypes, sheet, parseLincsSpecificFacilityID);
       }
     }
     log.info("created " + annotationTypes.size() + " annotation types.");
@@ -162,59 +183,134 @@ public class StudyAnnotationParser
 
   /**
    * annotation values in rows, well_id's/RVI's in col1 (traditional)
+   * 
+   * @param parseLincsSpecificFacilityID
    */
   private int parseAnnotationValuesWithReagentKeysInCol1(Screen study,
                                                          KEY_COLUMN keyColumn,
-                              List<AnnotationType> annotationTypes,
-                              Worksheet sheet) throws UnrecoverableParseException
+                                                         List<AnnotationType> annotationTypes,
+                                                         Worksheet sheet, boolean parseLincsSpecificFacilityID) throws UnrecoverableParseException
   {
     int annotation_count = 0;
+    int sheetAnnotationCount = study.getAnnotationTypes().size();
+
+    int i = 0;
     for (Row row : sheet) {
       Cell cell = row.getCell(0);
-      String key = cell.getString();
-      if (StringUtils.isEmpty(key)) {
+      String originalKey = cell.getString();
+      String key = originalKey;
+      if (StringUtils.isEmpty(originalKey)) {
         log.warn("Key in cell: " + cell + " is empty, skip the rest of the sheet: " + sheet);
         break;
       }
+
+      if (parseLincsSpecificFacilityID && KEY_COLUMN.FACILITY_ID == keyColumn) {
+        Well wellStudied = getWellStudied(originalKey);
+        
+        if (wellStudied == null) {
+          throw new IllegalArgumentException("No canonical reagent well found for the input key: " + originalKey);
+        }
+        key = wellStudied.getFacilityId();
+
+        if (i == 0) {
+          study.setWellStudied(wellStudied);
+        } else {
+          study.setWellStudied(null);
+        }
+      }
+      
       Collection<Reagent> reagents = null;
       try {
         reagents = getReagents(keyColumn, key);
       }
       catch (UnrecoverableParseException e) {
-        throw new UnrecoverableParseException("WellKey in cell: " + row.getCell(0) + " is invalid.",e);
+        throw new UnrecoverableParseException("WellKey in cell: " + row.getCell(0) + " is invalid.", e);
       }
 
       for (Reagent reagent : reagents) {
         _dao.needReadOnly(reagent, Reagent.annotationValues);
         study.addReagent(reagent);
-        for (int iAnnot = 0; iAnnot < study.getAnnotationTypes().size(); ++iAnnot) {
+        for (int iAnnot = 0; iAnnot < sheetAnnotationCount; ++iAnnot) {
           int iCol = iAnnot + 1;
           AnnotationType annotationType = annotationTypes.get(iAnnot);
           annotationType.createAnnotationValue(reagent, row.getCell(iCol).getString());
           annotation_count++;
         }
       }
+       i++;
     }
     return annotation_count;
   }
 
+  private Well getWellStudied(String originalKey) throws IllegalArgumentException
+  {
+    Well wellStudied;
+    Matcher matcher = FACILITY_SALT_BATCH_PATTERN.matcher(originalKey);
+    if (matcher.matches()) {
+      String facilityId = matcher.group(1);
+      log.info("Found facility id: " + facilityId + " in the key: " + originalKey);
+      Integer saltId = null;
+      try {
+        saltId = Integer.parseInt(matcher.group(2));
+      }
+      catch (NumberFormatException e) {
+        throw new IllegalArgumentException("Salt ID must be an integer: " + originalKey);
+      }
+      Integer batchId = null;
+      try {
+        batchId = Integer.parseInt(matcher.group(3));
+      }
+      catch (NumberFormatException e) {
+        throw new IllegalArgumentException("Batch ID must be an integer: " + originalKey);
+      }
+
+      wellStudied = _librariesDao.findCanonicalReagentWell(facilityId, saltId, batchId);
+    }
+    else {
+      log.info("no specific key identified for: " + originalKey);
+      wellStudied = _librariesDao.findCanonicalReagentWell(originalKey, null, null);
+    }
+    return wellStudied;
+  }
+
   /**
    * annotation values in columns, well_id's/RVI's in column1, by rows
+   * 
+   * @param parseLincsSpecificFacilityID
    */
   private int parseAnnotationValuesWithReagentKeysInRow1(Screen study,
                                                          KEY_COLUMN keyColumn,
-                              List<AnnotationType> annotationTypes,
-                              Worksheet sheet) throws UnrecoverableParseException
+                                                         List<AnnotationType> annotationTypes,
+                                                         Worksheet sheet, boolean parseLincsSpecificFacilityID) throws UnrecoverableParseException
   {
     int annotation_count = 0;
+    int sheetAnnotationCount = study.getAnnotationTypes().size();
+
     for (int i = 0; i < sheet.getColumns(); i++) {
       Cell cell = sheet.getCell(i, 0, true);
-      String key = cell.getString();
+      String originalKey = cell.getString();
+      String key = originalKey;
       if (StringUtils.isEmpty(key)) {
         log.warn("Key in cell: " + cell + " is empty, skip the rest of the sheet: " + sheet);
         break;
       }
-      Collection<Reagent> reagents;
+
+      if (parseLincsSpecificFacilityID && KEY_COLUMN.FACILITY_ID == keyColumn) {
+        Well wellStudied = getWellStudied(originalKey);
+        
+        if (wellStudied == null) {
+          throw new IllegalArgumentException("No canonical reagent well found for the input key: " + originalKey);
+        }
+        key = wellStudied.getFacilityId();
+
+        if (i == 0) {
+          study.setWellStudied(wellStudied);
+        } else {
+          study.setWellStudied(null);
+        }
+      }
+
+      Collection<Reagent> reagents = null;
       try {
         reagents = getReagents(keyColumn, key);
       }
@@ -225,7 +321,7 @@ public class StudyAnnotationParser
       for (Reagent reagent : reagents) {
         _dao.needReadOnly(reagent, Reagent.annotationValues);
         study.addReagent(reagent);
-        for (int iAnnot = 0; iAnnot < study.getAnnotationTypes().size(); ++iAnnot) {
+        for (int iAnnot = 0; iAnnot < sheetAnnotationCount; ++iAnnot) {
           int iRow = iAnnot + 1;
           AnnotationType annotationType = annotationTypes.get(iAnnot);
           annotationType.createAnnotationValue(reagent, sheet.getCell(i, iRow).getString());
@@ -266,10 +362,10 @@ public class StudyAnnotationParser
         }
         reagents = well.getReagents().values();
         break;
-      case COMPOUND_NAME:  // SM only
-        reagents.addAll(_dao.findEntitiesByHql(SmallMoleculeReagent.class, 
-                                   "from SmallMoleculeReagent where ? in elements (compoundNames)",
-                                   key));
+      case COMPOUND_NAME: // SM only
+        reagents.addAll(_dao.findEntitiesByHql(SmallMoleculeReagent.class,
+                                               "from SmallMoleculeReagent where ? in elements (compoundNames)",
+                                               key));
 
         break;
       default:
@@ -281,4 +377,5 @@ public class StudyAnnotationParser
     }
     return reagents;
   }
+  
 }

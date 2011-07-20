@@ -22,15 +22,15 @@ import org.apache.log4j.Logger;
 import org.joda.time.DateTime;
 import org.springframework.beans.factory.annotation.Autowired;
 
-import edu.harvard.med.screensaver.AbstractSpringPersistenceTest;
 import edu.harvard.med.screensaver.db.EntityInflator;
 import edu.harvard.med.screensaver.model.entitytesters.IdentifierAccessorModifiersTester;
 import edu.harvard.med.screensaver.model.entitytesters.IdentifierMetadataTester;
 import edu.harvard.med.screensaver.model.entitytesters.IsVersionedTester;
-import edu.harvard.med.screensaver.model.entitytesters.ModelIntrospectionUtil;
 import edu.harvard.med.screensaver.model.entitytesters.VersionAccessorsTester;
 import edu.harvard.med.screensaver.model.users.AdministratorUser;
 import edu.harvard.med.screensaver.model.users.ScreensaverUser;
+import edu.harvard.med.screensaver.test.AbstractSpringPersistenceTest;
+import edu.harvard.med.screensaver.test.model.meta.ModelIntrospectionUtil;
 
 public abstract class AbstractEntityInstanceTest<E extends AbstractEntity> extends AbstractSpringPersistenceTest
 {

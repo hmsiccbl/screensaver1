@@ -11,12 +11,12 @@
     <file>
       <source>src/main/scripts/lincs/run.sh</source>
       <outputDirectory>/</outputDirectory>
-      <fileMode>0755</fileMode>
+      <fileMode>0775</fileMode>
     </file>
     <file>
       <source>src/main/scripts/lincs/recreate_lincs_db.sh</source>
       <outputDirectory>/</outputDirectory>
-      <fileMode>0755</fileMode>
+      <fileMode>0775</fileMode>
     </file>
     <file>
       <source>src/main/resources/log4j.properties.lincs</source>

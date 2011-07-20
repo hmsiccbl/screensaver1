@@ -1,4 +1,6 @@
-// $HeadURL$
+// $HeadURL:
+// http://seanderickson1@forge.abcd.harvard.edu/svn/screensaver/branches/lincs/ui-cleanup/core/src/main/java/edu/harvard/med/screensaver/ui/screens/StudyViewer.java
+// $
 // $Id$
 //
 // Copyright © 2006, 2010 by the President and Fellows of Harvard College.
@@ -11,20 +13,31 @@ package edu.harvard.med.screensaver.ui.screens;
 
 import java.net.URL;
 import java.util.ArrayList;
+import java.util.SortedSet;
 
+import com.google.common.base.Predicate;
+import com.google.common.collect.Sets;
 import org.apache.log4j.Logger;
 
+import edu.harvard.med.lincs.screensaver.LincsScreensaverConstants;
 import edu.harvard.med.screensaver.ScreensaverConstants;
 import edu.harvard.med.screensaver.db.GenericEntityDAO;
 import edu.harvard.med.screensaver.io.screens.StudyImageProvider;
+import edu.harvard.med.screensaver.model.AttachedFile;
+import edu.harvard.med.screensaver.model.AttachedFileType;
+import edu.harvard.med.screensaver.model.libraries.Reagent;
+import edu.harvard.med.screensaver.model.libraries.ReagentAttachedFileType;
+import edu.harvard.med.screensaver.model.libraries.SmallMoleculeReagent;
+import edu.harvard.med.screensaver.model.libraries.Well;
 import edu.harvard.med.screensaver.model.screenresults.AnnotationType;
 import edu.harvard.med.screensaver.model.screens.Screen;
 import edu.harvard.med.screensaver.model.screens.Study;
 import edu.harvard.med.screensaver.model.users.LabHead;
 import edu.harvard.med.screensaver.ui.arch.searchresults.EntitySearchResults;
+import edu.harvard.med.screensaver.ui.arch.util.AttachedFiles;
 import edu.harvard.med.screensaver.ui.arch.view.SearchResultContextEntityViewerBackingBean;
+import edu.harvard.med.screensaver.ui.libraries.AnnotationSearchResults;
 import edu.harvard.med.screensaver.ui.libraries.WellSearchResults;
-
 
 public class StudyViewer<E extends Study> extends SearchResultContextEntityViewerBackingBean<E,E>
 {
@@ -32,24 +45,27 @@ public class StudyViewer<E extends Study> extends SearchResultContextEntityViewe
 
   private StudyDetailViewer _studyDetailViewer;
   private AnnotationTypesTable _annotationTypesTable;
-  private WellSearchResults _wellsBrowser;
+  private WellSearchResults _wellSearchResults;
+  private WellSearchResults _reagentsBrowser;
   private StudyImageProvider _studyImageProvider; // LINCS-only feature
-
+  private AnnotationSearchResults _annotationSearchResults;
+  private AttachedFiles _wellStudiedAttachedFiles;
 
   /**
    * @motivation for CGLIB2
    */
   protected StudyViewer()
-  {
-  }
+  {}
 
   public StudyViewer(StudyViewer thisProxy,
                      StudyDetailViewer studyDetailViewer,
                      StudySearchResults studiesBrowser,
                      GenericEntityDAO dao,
                      AnnotationTypesTable annotationTypesTable,
-                     WellSearchResults wellsBrowser,
-                     StudyImageProvider studyImageProvider)
+                     WellSearchResults wellSearchResults,
+                     AnnotationSearchResults annotationSearchResults,
+                     StudyImageProvider studyImageProvider,
+                     AttachedFiles wellStudiedAttachedFiles)
   {
     super(thisProxy,
           (Class<E>) Study.class,
@@ -59,8 +75,10 @@ public class StudyViewer<E extends Study> extends SearchResultContextEntityViewe
           (EntitySearchResults<E,E,?>) studiesBrowser);
     _studyDetailViewer = studyDetailViewer;
     _annotationTypesTable = annotationTypesTable;
-    _wellsBrowser = wellsBrowser;
+    _wellSearchResults = wellSearchResults;
     _studyImageProvider = studyImageProvider;
+    _annotationSearchResults = annotationSearchResults;
+    _wellStudiedAttachedFiles = wellStudiedAttachedFiles;
 
     getIsPanelCollapsedMap().put("reagentsData", false);
   }
@@ -81,14 +99,19 @@ public class StudyViewer<E extends Study> extends SearchResultContextEntityViewe
           dao,
           (EntitySearchResults<E,E,?>) studiesBrowser);
     _annotationTypesTable = annotationTypesTable;
-    _wellsBrowser = wellSearchResults;
+    _wellSearchResults = wellSearchResults;
 
     getIsPanelCollapsedMap().put("reagentsData", false);
   }
 
-  public WellSearchResults getWellsBrowser()
+  public WellSearchResults getWellSearchResults()
   {
-    return _wellsBrowser;
+    return _wellSearchResults;
+  }
+
+  public AnnotationSearchResults getAnnotationSearchResults()
+  {
+    return _annotationSearchResults;
   }
 
   public AnnotationTypesTable getAnnotationTypesTable()
@@ -119,9 +142,64 @@ public class StudyViewer<E extends Study> extends SearchResultContextEntityViewe
   {
     if (study.isStudyOnly()) {
       _annotationTypesTable.initialize(new ArrayList<AnnotationType>(study.getAnnotationTypes()));
-      _wellsBrowser.searchReagentsForStudy(study);
+      if (!!!LincsScreensaverConstants.FACILITY_NAME.equals(getApplicationProperties().getFacility())) {
+        _wellSearchResults.searchReagentsForStudy(study);
+      }
+      else if (LincsScreensaverConstants.FACILITY_NAME.equals(getApplicationProperties().getFacility())) {
+        //        _reagentsBrowser.searchCanonicalReagentsOfWellsBrowser(_wellsBrowser);
+        //        _reagentsBrowser.showAnnotationTypesForStudy(study);
+        _annotationSearchResults.setStudyViewerMode();
+        _annotationSearchResults.searchForCanonicalAnnotations((Screen)study);
+      }
       _studyDetailViewer.setEntity(study);
+
+      if (((Screen) study).getWellStudied() != null) {
+        initalizeAttachedFiles(((Screen) study).getWellStudied().getLatestReleasedReagent());
+      }
+      else {
+        initalizeAttachedFiles(null);
+      }
     }
   }
-}
 
+  private void initalizeAttachedFiles(Reagent reagent)
+  {
+    _wellStudiedAttachedFiles.reset();
+    if (reagent != null) {
+      getDao().needReadOnly(reagent, Reagent.attachedFiles);
+      getDao().needReadOnly(reagent, Reagent.attachedFiles.to(AttachedFile.fileType));
+      SortedSet<AttachedFileType> attachedFileTypes =
+        Sets.<AttachedFileType>newTreeSet(getDao().findAllEntitiesOfType(ReagentAttachedFileType.class, true));
+      _wellStudiedAttachedFiles.setAttachedFileTypes(attachedFileTypes);
+      _wellStudiedAttachedFiles.setAttachedFilesEntity((Reagent) reagent.restrict());
+      
+      _wellStudiedAttachedFiles.setAttachedFilesFilter(new Predicate<AttachedFile> () {
+        @Override
+        public boolean apply(AttachedFile input)
+        {
+          return input.getFileType().getValue().equals(ScreensaverConstants.STUDY_FILE_TYPE);
+        }
+      });
+    }
+  }
+
+  public AttachedFiles getWellStudiedAttachedFiles()
+  {
+    return _wellStudiedAttachedFiles;
+  }
+
+  public String getWellStudiedLabel()
+  {
+    Well well = ((Screen) getEntity()).getWellStudied();
+    if (well == null) return null;
+    if (!!!LincsScreensaverConstants.FACILITY_NAME.equals(getApplicationProperties().getFacility())) {
+      return well.getWellKey().toString();
+    }
+    else {
+      if (!(well.getLatestReleasedReagent() instanceof SmallMoleculeReagent)) return null;
+      return well.getFacilityId() + "-" + ((SmallMoleculeReagent) well.getLatestReleasedReagent()).getSaltFormId() + "-" +
+        well.getLatestReleasedReagent().getFacilityBatchId();
+    }
+  }
+
+}

@@ -2,7 +2,7 @@
 // $Id: $
 //
 // Copyright © 2010 by the President and Fellows of Harvard College.
-// 
+//
 // Screensaver is an open-source project developed by the ICCB-L and NSRB labs
 // at Harvard Medical School. This software is distributed under the terms of
 // the GNU General Public License.
@@ -28,9 +28,14 @@ import edu.harvard.med.screensaver.model.AttachedFile;
 import edu.harvard.med.screensaver.model.libraries.ReagentAttachedFileType;
 import edu.harvard.med.screensaver.model.libraries.SmallMoleculeReagent;
 
-public class ReagentQCAttachmentImporter extends CommandLineApplication
+/**
+ * LINCS-only import attachments for reagents
+ * 
+ * @author sde4
+ */
+public class ReagentAttachmentImporter extends CommandLineApplication
 {
-  private static Logger log = Logger.getLogger(ReagentQCAttachmentImporter.class);
+  private static Logger log = Logger.getLogger(ReagentAttachmentImporter.class);
 
   public static final int SHORT_OPTION_INDEX = 0;
   public static final int ARG_INDEX = 1;
@@ -45,13 +50,13 @@ public class ReagentQCAttachmentImporter extends CommandLineApplication
   public static final String[] OPTION_INPUT_BATCH_ID = { "bid", "batch-id", "batch-id",
     "batch id of the reagent to import the attachement for" };
 
-  public static final Set attachmentTypes = Sets.newHashSet(new String[] { "QC-NMR", "QC-LCMS", "QC-HPLC" });
+  public static final Set attachmentTypes = Sets.newHashSet(new String[] { "QC-NMR", "QC-LCMS", "QC-HPLC", "Data-File" });
 
   public static final String[] OPTION_INPUT_QC_ATTACMENT_TYPE = { "type", "qc-type", "qc-type",
     "QC attachement type, one of: " + attachmentTypes };
 
   @SuppressWarnings("static-access")
-  public ReagentQCAttachmentImporter(String[] cmdLineArgs)
+  public ReagentAttachmentImporter(String[] cmdLineArgs)
   {
     super(cmdLineArgs);
 
@@ -93,24 +98,23 @@ public class ReagentQCAttachmentImporter extends CommandLineApplication
   }
 
   @SuppressWarnings("static-access")
-  public static void main(String[] args) throws ParseException, IOException
+  public static void main(String[] args) 
   {
-    final ReagentQCAttachmentImporter app = new ReagentQCAttachmentImporter(args);
+    final ReagentAttachmentImporter app = new ReagentAttachmentImporter(args);
 
     app.processOptions(/* acceptDatabaseOptions= */false, /* acceptAdminUserOptions= */false);
 
-    final String fileName = app.getCommandLineOptionValue(OPTION_INPUT_FILE[SHORT_OPTION_INDEX]);
-    final String facilityId = app.getCommandLineOptionValue(OPTION_INPUT_FACILITY_ID[SHORT_OPTION_INDEX]);
-    final Integer saltId = app.getCommandLineOptionValue(OPTION_INPUT_SALT_ID[SHORT_OPTION_INDEX], Integer.class);
-    final Integer batchId = app.getCommandLineOptionValue(OPTION_INPUT_BATCH_ID[SHORT_OPTION_INDEX], Integer.class);
-    final String attachmentType = app.getCommandLineOptionValue(OPTION_INPUT_QC_ATTACMENT_TYPE[SHORT_OPTION_INDEX], String.class);
-
-    final File file = new File(fileName);
-    if (!file.exists()) {
-      log.error("file does not exist: " + fileName);
+    try {
+      execute(app);
+    }
+    catch (Exception e) {
+      log.error("application exception", e);
       System.exit(1);
     }
+  }
 
+  private static void execute(final ReagentAttachmentImporter app)
+  {
     final GenericEntityDAO dao = (GenericEntityDAO) app.getSpringBean("genericEntityDao");
     final LibrariesDAO librariesDao = (LibrariesDAO) app.getSpringBean("librariesDao");
 
@@ -119,6 +123,17 @@ public class ReagentQCAttachmentImporter extends CommandLineApplication
       @Override
       public void runTransaction()
       {
+        String fileName = app.getCommandLineOptionValue(OPTION_INPUT_FILE[SHORT_OPTION_INDEX]);
+        String facilityId = app.getCommandLineOptionValue(OPTION_INPUT_FACILITY_ID[SHORT_OPTION_INDEX]);
+        Integer saltId = app.getCommandLineOptionValue(OPTION_INPUT_SALT_ID[SHORT_OPTION_INDEX], Integer.class);
+        Integer batchId = app.getCommandLineOptionValue(OPTION_INPUT_BATCH_ID[SHORT_OPTION_INDEX], Integer.class);
+        String attachmentType = app.getCommandLineOptionValue(OPTION_INPUT_QC_ATTACMENT_TYPE[SHORT_OPTION_INDEX], String.class);
+
+        File file = new File(fileName);
+        if (!file.exists()) {
+          log.error("file does not exist: " + fileName);
+          System.exit(1);
+        }
         Set<SmallMoleculeReagent> reagents = librariesDao.findReagents(facilityId, saltId, batchId, true);
 
         if (reagents.isEmpty()) {
@@ -148,10 +163,10 @@ public class ReagentQCAttachmentImporter extends CommandLineApplication
 
         log.info("saved attachment for reagent(s): ");
         for (SmallMoleculeReagent reagent : reagents) {
-          log.info("\t" + reagent.getWell().getFacilityId() + "-" + reagent.getSaltFormId() + "-" + reagent.getFacilityBatchId());
+          log.info("\tattached to:" + reagent.getWell().getWellKey() + ": " + reagent.getWell().getFacilityId() + "-" +
+            reagent.getSaltFormId() + "-" + reagent.getFacilityBatchId());
         }
       }
     });
-
   }
 }

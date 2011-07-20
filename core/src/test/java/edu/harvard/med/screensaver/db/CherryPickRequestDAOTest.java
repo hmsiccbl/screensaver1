@@ -19,10 +19,8 @@ import org.apache.log4j.Logger;
 import org.joda.time.LocalDate;
 import org.springframework.beans.factory.annotation.Autowired;
 
-import edu.harvard.med.screensaver.AbstractSpringPersistenceTest;
 import edu.harvard.med.screensaver.model.AdministrativeActivity;
 import edu.harvard.med.screensaver.model.AdministrativeActivityType;
-import edu.harvard.med.screensaver.model.MakeDummyEntities;
 import edu.harvard.med.screensaver.model.cherrypicks.CherryPickRequest;
 import edu.harvard.med.screensaver.model.cherrypicks.LabCherryPick;
 import edu.harvard.med.screensaver.model.cherrypicks.ScreenerCherryPick;
@@ -40,7 +38,8 @@ import edu.harvard.med.screensaver.model.screens.Screen;
 import edu.harvard.med.screensaver.model.screens.ScreenType;
 import edu.harvard.med.screensaver.model.screens.StudyType;
 import edu.harvard.med.screensaver.model.users.AdministratorUser;
-import edu.harvard.med.screensaver.service.cherrypicks.CherryPickRequestAllocatorTest;
+import edu.harvard.med.screensaver.test.AbstractSpringPersistenceTest;
+import edu.harvard.med.screensaver.test.MakeDummyEntities;
 
 
 /**
@@ -261,10 +260,10 @@ public class CherryPickRequestDAOTest extends AbstractSpringPersistenceTest
                                       2,
                                       PlateSize.WELLS_384);
     poolLibrary.createContentsVersion(adminUser2);
-    Well poolWell1 = CherryPickRequestAllocatorTest.makeRNAiWell(poolLibrary, 1, new WellName("A01"));
+    Well poolWell1 = MakeDummyEntities.makeRNAiWell(poolLibrary, 1, new WellName("A01"));
     Iterator<Well> duplexWellsIter = duplexLibrary.getWells().iterator();
     poolWell1.<SilencingReagent>getPendingReagent().withDuplexWell(duplexWellsIter.next());
-    Well poolWell2 = CherryPickRequestAllocatorTest.makeRNAiWell(poolLibrary, 2, new WellName("P24"));
+    Well poolWell2 = MakeDummyEntities.makeRNAiWell(poolLibrary, 2, new WellName("P24"));
     poolWell2.<SilencingReagent>getPendingReagent().withDuplexWell(duplexWellsIter.next());
     poolLibrary.getLatestContentsVersion().release(new AdministrativeActivity(adminUser2, new LocalDate(), AdministrativeActivityType.LIBRARY_CONTENTS_VERSION_RELEASE));
     genericEntityDao.saveOrUpdateEntity(poolLibrary);

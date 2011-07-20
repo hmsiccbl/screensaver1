@@ -9,13 +9,12 @@
 
 package edu.harvard.med.screensaver.model.users;
 
-import edu.harvard.med.screensaver.AbstractSpringPersistenceTest;
-import edu.harvard.med.screensaver.db.DAOTransaction;
-import edu.harvard.med.screensaver.model.DataModelViolationException;
-
 import com.google.common.collect.ImmutableSortedSet;
 import com.google.common.collect.Sets;
 
+import edu.harvard.med.screensaver.db.DAOTransaction;
+import edu.harvard.med.screensaver.model.DataModelViolationException;
+import edu.harvard.med.screensaver.test.AbstractSpringPersistenceTest;
 
 /**
  * @author <a mailto="andrew_tolopko@hms.harvard.edu">Andrew Tolopko</a>

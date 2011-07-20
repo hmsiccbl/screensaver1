@@ -43,7 +43,7 @@ TODO:
 
   <ss:property id="studyType" label="Study Type"
     value="#{studyDetailViewer.entity.studyType}"
-    rendered="true"
+    rendered="#{appInfo.applicationProperties.facility != 'LINCS'}"
     adminOnly="false" editable="#{studyDetailViewer.editMode}"
     description="'In Vitro' or 'In Silico'" type="Text"
     editWidth="80" editHeight="3" />
@@ -92,7 +92,7 @@ TODO:
     
   <ss:property id="url" label="Home Page"
     value="#{studyDetailViewer.entity.url}"
-    rendered="true"
+    rendered="#{appInfo.applicationProperties.facility != 'LINCS'}"
     editable="#{studyDetailViewer.editMode}"
     description="A URL for the home page of the study" type="Text"
     editWidth="80" editHeight="6" />
@@ -220,6 +220,17 @@ TODO:
     editable="#{studyDetailViewer.editMode}"
     description="Administrative comments" type="Textarea"
     editWidth="80" editHeight="3" />
+    
+  <ss:attachedFiles attachedFiles="#{studyViewer.wellStudiedAttachedFiles}"
+   adminOnly="false" entityTypeName="reagent" rendered="#{! empty studyViewer.wellStudiedLabel}" />
+
+  <!-- NOTE: this is the same property as found in entityViewerDetails, however, there it is admin-only.  LINCS-only,  for [#3110]  -->
+  <ss:property id="dateDataReceived" label="Date Data Received"
+    description="The date the data was received"
+    value="#{entity.dateCreated}" 
+    type="Date"
+    rendered="#{appInfo.applicationProperties.facility == 'LINCS' }" 
+    />      
 
   </ui:define>
 

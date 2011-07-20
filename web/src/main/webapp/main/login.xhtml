@@ -47,12 +47,13 @@
       </t:div>
 
       <t:div styleClass="smallLabel" rendered="#{appInfo.applicationProperties.map['screensaver.ui.facility_name'] == 'LINCS'}">
-        Confidentiality Agreement: The information in this database is confidential and is to be shared only among members of the HMS LINCS community. 
-        By logging into this database, I am agreeing to hold in confidence all information that I learn, download, or print until the information is publicly available.
+        Confidentiality Agreement:  Some compound structures in this database are confidential and to be shared only among members of the HMS LINCS community.  
+        Those which are not confidential are publicly available without logging in as an HMS LINCS user. 
+        By logging into this database, I am agreeing to hold in confidence all restricted structure information until it is publicly available.
         <br />
         <br/>
-        Please note that this repository is a work in progress. The user interface and types/formats of data stored in this repository are continuously being improved. 
-        Please bring comments about this repository to HMS LINCS Informatics Group meetings and LINCS Data Working Group meetings, 
+        Please note that this database is a work in progress. The user interface and types/formats of data stored in this database are continuously being improved. 
+        Please bring comments about this database to HMS LINCS Informatics Group meetings and LINCS Data Working Group meetings, 
         or email them to Andrew Tolopko, Sean Erickson, Dave Wrobel, or Caroline Shamu.  Contact us at<t:outputText value="  " />
         <h:outputLink
           value="#{appInfo.applicationProperties.map['screensaver.ui.feedback_url']}"
@@ -71,7 +72,7 @@
       <t:panelGrid columns="1">
         <t:commandButton id="cancelLoginCommand" value="Cancel" 
           action="#{menu.cancelLogin}"
-          rendered="#{menu.currentScreensaverUser.allowGuestLogin}"
+          rendered="#{menu.applicationProperties.allowGuestLogin}"
           styleClass="command" />
         <h:outputLink
           value="#{appInfo.applicationProperties.map['screensaver.ui.feedback_url']}"

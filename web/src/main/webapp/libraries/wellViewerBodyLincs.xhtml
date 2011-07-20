@@ -114,20 +114,18 @@
     </ui:define>
    </ss:property>
 
-   <!-- NOTE: for [#2417] this is a LINCS-only feature -->
-   <ss:property id="ambitStudyImage" label="Ambit Images"
+   <ss:property id="studyImage" label="Study Images"
     rendered="#{wellViewer.entity.library.reagentType.simpleName == 'SmallMoleculeReagent' &amp;&amp; ! empty wellViewer.restrictedReagent}"
-    description="Ambit study image"
-    >
+    description="Image summarizing study result">
     <ui:define name="data">
-     <t:graphicImage url="#{wellViewer.ambitImageImageUrl}" height="200"
-      onclick="window.open('#{wellViewer.ambitImageImageUrl}','image','height=600,width=800');"
-      rendered="#{wellViewer.entity.library.reagentType.simpleName == 'SmallMoleculeReagent' &amp;&amp; ! empty wellViewer.ambitImageImageUrl}"
+     <t:graphicImage url="#{wellViewer.studyImageUrl}" height="200"
+      onclick="window.open('#{wellViewer.studyImageUrl}','image','height=600,width=800');"
+      rendered="#{wellViewer.entity.library.reagentType.simpleName == 'SmallMoleculeReagent' &amp;&amp; ! empty wellViewer.studyImageUrl}"
       style="float: left;">
      </t:graphicImage>
      <t:outputText 
           value="data not available"
-          rendered="#{empty wellViewer.ambitImageImageUrl}"
+          rendered="#{empty wellViewer.studyImageUrl}"
           styleClass="propertyValue dataText" 
           />
     </ui:define>

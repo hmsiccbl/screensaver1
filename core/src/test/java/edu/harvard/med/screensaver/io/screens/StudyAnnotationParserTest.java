@@ -1,4 +1,6 @@
-// $HeadURL$
+// $HeadURL:
+// http://seanderickson1@forge.abcd.harvard.edu/svn/screensaver/branches/lincs/ui-cleanup/core/src/test/java/edu/harvard/med/screensaver/io/screens/StudyAnnotationParserTest.java
+// $
 // $Id$
 //
 // Copyright © 2006, 2010 by the President and Fellows of Harvard College.
@@ -15,11 +17,9 @@ import java.util.TreeSet;
 import org.apache.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
 
-import edu.harvard.med.screensaver.AbstractSpringPersistenceTest;
 import edu.harvard.med.screensaver.db.EntityInflator;
 import edu.harvard.med.screensaver.io.UnrecoverableParseException;
 import edu.harvard.med.screensaver.io.workbook2.Workbook;
-import edu.harvard.med.screensaver.model.MakeDummyEntities;
 import edu.harvard.med.screensaver.model.libraries.Library;
 import edu.harvard.med.screensaver.model.libraries.Reagent;
 import edu.harvard.med.screensaver.model.libraries.SmallMoleculeReagent;
@@ -27,6 +27,8 @@ import edu.harvard.med.screensaver.model.screenresults.AnnotationType;
 import edu.harvard.med.screensaver.model.screenresults.AnnotationValue;
 import edu.harvard.med.screensaver.model.screens.Screen;
 import edu.harvard.med.screensaver.model.screens.ScreenType;
+import edu.harvard.med.screensaver.test.AbstractSpringPersistenceTest;
+import edu.harvard.med.screensaver.test.MakeDummyEntities;
 
 public class StudyAnnotationParserTest extends AbstractSpringPersistenceTest
 {
@@ -50,7 +52,7 @@ public class StudyAnnotationParserTest extends AbstractSpringPersistenceTest
     studyAnnotationParser.parse(study,
                                 new Workbook(workbookLocation, getClass().getClassLoader().getResourceAsStream(workbookLocation)),
                                 StudyAnnotationParser.KEY_COLUMN.RVI,
-                                false);
+                                false, false);
     doTest(study);
   }
 
@@ -64,7 +66,7 @@ public class StudyAnnotationParserTest extends AbstractSpringPersistenceTest
     studyAnnotationParser.parse(study,
                                 new Workbook(workbookLocation, getClass().getClassLoader().getResourceAsStream(workbookLocation)),
                                 StudyAnnotationParser.KEY_COLUMN.WELL_ID,
-                                false);
+                                false, false);
     doTest(study);
   }
 
@@ -78,7 +80,7 @@ public class StudyAnnotationParserTest extends AbstractSpringPersistenceTest
     studyAnnotationParser.parse(study,
                                 new Workbook(workbookLocation, getClass().getClassLoader().getResourceAsStream(workbookLocation)),
                                 StudyAnnotationParser.KEY_COLUMN.COMPOUND_NAME,
-                                true);
+                                true, false);
     genericEntityDao.persistEntity(study);
     doSMCompoundTest(study);
   }
@@ -93,7 +95,7 @@ public class StudyAnnotationParserTest extends AbstractSpringPersistenceTest
     studyAnnotationParser.parse(study,
                                 new Workbook(workbookLocation, getClass().getClassLoader().getResourceAsStream(workbookLocation)),
                                 StudyAnnotationParser.KEY_COLUMN.WELL_ID,
-                                true);
+                                true, false);
     doTest(study);
   }
 
@@ -105,23 +107,22 @@ public class StudyAnnotationParserTest extends AbstractSpringPersistenceTest
       { "a", "c", "b" }
     };
 
-
-//    Library library = MakeDummyEntities.makeDummyLibrary(1, ScreenType.RNAI, 1);
+    //    Library library = MakeDummyEntities.makeDummyLibrary(1, ScreenType.RNAI, 1);
     //    genericEntityDao.persistEntity(library);
-    
+
     //Screen study = MakeDummyEntities.makeDummyScreen(1, library.getScreenType());
     //studyAnnotationParser.parse(study, getClass().getClassLoader().getResourceAsStream(WORKBOOK_FILE));
     assertEquals("annotation type count", expectedData.length, study.getAnnotationTypes().size());
     assertEquals("reagent count", compoundNames.length, study.getReagents().size());
-    
+
     study = new EntityInflator<Screen>(genericEntityDao, study, true).
       need(Screen.annotationTypes).
       need(Screen.annotationTypes.to(AnnotationType.annotationValues)).
       need(Screen.reagents).inflate();
 
-    AnnotationType numericAnnotationType = study.getAnnotationTypes().first(); 
+    AnnotationType numericAnnotationType = study.getAnnotationTypes().first();
     AnnotationType textAnnotationType = study.getAnnotationTypes().last();
-    
+
     assertTrue(numericAnnotationType.isNumeric());
     assertFalse(textAnnotationType.isNumeric());
     assertEquals("NumericAnnotation", numericAnnotationType.getName());
@@ -130,10 +131,10 @@ public class StudyAnnotationParserTest extends AbstractSpringPersistenceTest
     assertEquals("text annotation", textAnnotationType.getDescription());
     assertEquals(3, numericAnnotationType.getAnnotationValues().size());
     assertEquals(3, textAnnotationType.getAnnotationValues().size());
-    
+
     Map<Reagent,AnnotationValue> numericAnnotationValues = study.getAnnotationTypes().first().getAnnotationValues();
     Map<Reagent,AnnotationValue> textAnnotationValues = study.getAnnotationTypes().last().getAnnotationValues();
-    
+
     int i = 0;
     for (Reagent reagent : new TreeSet<Reagent>(study.getReagents())) {
       SmallMoleculeReagent smr = new EntityInflator<SmallMoleculeReagent>(genericEntityDao, (SmallMoleculeReagent) reagent, true).
@@ -161,10 +162,10 @@ public class StudyAnnotationParserTest extends AbstractSpringPersistenceTest
 
     assertEquals("annotation type count", expectedData.length, study.getAnnotationTypes().size());
     assertEquals("reagent count", rvIds.length, study.getReagents().size());
-    
-    AnnotationType numericAnnotationType = study.getAnnotationTypes().first(); 
+
+    AnnotationType numericAnnotationType = study.getAnnotationTypes().first();
     AnnotationType textAnnotationType = study.getAnnotationTypes().last();
-    
+
     assertTrue(numericAnnotationType.isNumeric());
     assertFalse(textAnnotationType.isNumeric());
     assertEquals("NumericAnnotation", numericAnnotationType.getName());
@@ -173,10 +174,10 @@ public class StudyAnnotationParserTest extends AbstractSpringPersistenceTest
     assertEquals("text annotation", textAnnotationType.getDescription());
     assertEquals(3, numericAnnotationType.getAnnotationValues().size());
     assertEquals(3, textAnnotationType.getAnnotationValues().size());
-    
+
     Map<Reagent,AnnotationValue> numericAnnotationValues = study.getAnnotationTypes().first().getAnnotationValues();
     Map<Reagent,AnnotationValue> textAnnotationValues = study.getAnnotationTypes().last().getAnnotationValues();
-    
+
     int i = 0;
     for (Reagent reagent : new TreeSet<Reagent>(study.getReagents())) {
       assertEquals(rvIds[i], reagent.getVendorId().toString());

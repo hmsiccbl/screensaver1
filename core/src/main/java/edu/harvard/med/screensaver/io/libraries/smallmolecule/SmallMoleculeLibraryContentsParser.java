@@ -116,6 +116,7 @@ public class SmallMoleculeLibraryContentsParser extends LibraryContentsParser<Sm
       log.warn("Concentration for well " + key + " changed from " + well.getMolarConcentration() + " to " +
         sdRecordData.getConcentration());
       well.setMolarConcentration(sdRecordData.getConcentration());
+      // TODO: mg_ml_concentration, ticket [#2920]
     }
     SmallMoleculeReagent reagent = null;
     if (sdRecordData.getLibraryWellType() == LibraryWellType.EXPERIMENTAL) {

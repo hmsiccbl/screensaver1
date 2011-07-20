@@ -143,23 +143,25 @@ public class TupleDataFetcher<E extends AbstractEntity,K> extends PropertyPathDa
     assert propertyPaths.size() >= 1;
     RelationshipPath<E> relPath = propertyPaths.get(0).getAncestryPath();
 
-    // is possible, eliminate the root entity from the query, saving a join operation.
+    // if possible, eliminate the root entity from the query, saving a join operation.
     // this can only occur if the property to be retrieved is from an entity that is directly related to the root entity via a to-one relationship
-    Iterator<String> inversePathIter = relPath.inversePathIterator();
-    if (inversePathIter.hasNext()) {
-      String inverseEntityName = inversePathIter.next();
-      if (inverseEntityName != null) {
-        // select tuple ID property from the second entity, rather than the root entity
-        path2Alias.put(relPath, getRootAlias());
-        assert relPath.entityClassIterator().hasNext();
-        hql.from(relPath.entityClassIterator().next(), getRootAlias());
-        rootEntityIdPropertyName = inverseEntityName + "." + rootEntityIdPropertyName;
+    if (!!!keys.isEmpty()) { // cannot apply this optimization if we're asked to fetch all data, since eliminating the root entity can break the expectations of addDomainRestrictions() implementations, which is called below 
+      Iterator<String> inversePathIter = relPath.inversePathIterator();
+      if (inversePathIter.hasNext()) {
+        String inverseEntityName = inversePathIter.next();
+        if (inverseEntityName != null) {
+          // select tuple ID property from the second entity, rather than the root entity
+          path2Alias.put(relPath, getRootAlias());
+          assert relPath.entityClassIterator().hasNext();
+          hql.from(relPath.entityClassIterator().next(), getRootAlias());
+          rootEntityIdPropertyName = inverseEntityName + "." + rootEntityIdPropertyName;
 
-        // explicitly add restriction from rootEntity->relatedEntity, since this restriction would otherwise be lost
-        Iterator<PropertyNameAndValue> restrictionIterator = relPath.restrictionIterator();
-        PropertyNameAndValue restriction = restrictionIterator.hasNext() ? restrictionIterator.next() : null;
-        if (restriction != null) {
-          hql.where(getRootAlias(), restriction.getName(), Operator.EQUAL, restriction.getValue());
+          // explicitly add restriction from rootEntity->relatedEntity, since this restriction would otherwise be lost
+          Iterator<PropertyNameAndValue> restrictionIterator = relPath.restrictionIterator();
+          PropertyNameAndValue restriction = restrictionIterator.hasNext() ? restrictionIterator.next() : null;
+          if (restriction != null) {
+            hql.where(getRootAlias(), restriction.getName(), Operator.EQUAL, restriction.getValue());
+          }
         }
       }
     }

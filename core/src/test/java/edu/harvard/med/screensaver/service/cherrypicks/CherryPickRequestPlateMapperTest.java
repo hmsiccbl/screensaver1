@@ -24,7 +24,6 @@ import com.google.common.collect.Sets;
 import org.apache.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
 
-import edu.harvard.med.screensaver.AbstractSpringPersistenceTest;
 import edu.harvard.med.screensaver.db.DAOTransaction;
 import edu.harvard.med.screensaver.db.LibrariesDAO;
 import edu.harvard.med.screensaver.model.BusinessRuleViolationException;
@@ -44,6 +43,8 @@ import edu.harvard.med.screensaver.model.libraries.PlateStatus;
 import edu.harvard.med.screensaver.model.libraries.WellKey;
 import edu.harvard.med.screensaver.model.libraries.WellName;
 import edu.harvard.med.screensaver.model.users.AdministratorUser;
+import edu.harvard.med.screensaver.test.AbstractSpringPersistenceTest;
+import edu.harvard.med.screensaver.test.MakeDummyEntities;
 
 public class CherryPickRequestPlateMapperTest extends AbstractSpringPersistenceTest
 {
@@ -113,7 +114,7 @@ public class CherryPickRequestPlateMapperTest extends AbstractSpringPersistenceT
     genericEntityDao.doInTransaction(new DAOTransaction()
     {
       public void runTransaction() {
-        Library duplexLibrary = CherryPickRequestAllocatorTest.makeRNAiDuplexLibrary("Duplexes library", 1, 6, PlateSize.WELLS_384);
+        Library duplexLibrary = MakeDummyEntities.makeRNAiDuplexLibrary("Duplexes library", 1, 6, PlateSize.WELLS_384);
         makeLibraryCopy(duplexLibrary, "C", 10);
         makeLibraryCopy(duplexLibrary, "D", 10);
         genericEntityDao.persistEntity(duplexLibrary);
@@ -124,7 +125,7 @@ public class CherryPickRequestPlateMapperTest extends AbstractSpringPersistenceT
         // we need to allocate from multiple copies to test that sets of picks from
         // different copies are kept together on same cherry pick plate
         {
-          CherryPickRequest earlierCherryPickRequest = CherryPickRequestAllocatorTest.createRNAiCherryPickRequest(1, new Volume(10));
+          CherryPickRequest earlierCherryPickRequest = MakeDummyEntities.createRNAiCherryPickRequest(1, new Volume(10));
           ScreenerCherryPick dummyScreenerCherryPick = earlierCherryPickRequest.createScreenerCherryPick(
             librariesDao.findWell(new WellKey(1, "A01")));
           // these cherry picks will force subsequent picks from the same well to be allocated from copy D
@@ -147,7 +148,7 @@ public class CherryPickRequestPlateMapperTest extends AbstractSpringPersistenceT
           genericEntityDao.flush(); // needed to make sure above allocations are in the database; allocate(), below, will query db (not just session) for existing well volume reservations
         }
 
-        CherryPickRequest cherryPickRequest = CherryPickRequestAllocatorTest.createRNAiCherryPickRequest(2, new Volume(10));
+        CherryPickRequest cherryPickRequest = MakeDummyEntities.createRNAiCherryPickRequest(2, new Volume(10));
         cherryPickRequest.setKeepSourcePlateCherryPicksTogether(keepSourcePlateCherryPicksTogether);
         ScreenerCherryPick dummyScreenerCherryPick = cherryPickRequest.createScreenerCherryPick(
           librariesDao.findWell(new WellKey(1, "A01")));
@@ -191,12 +192,12 @@ public class CherryPickRequestPlateMapperTest extends AbstractSpringPersistenceT
     genericEntityDao.doInTransaction(new DAOTransaction()
     {
       public void runTransaction() {
-        Library duplexLibrary = CherryPickRequestAllocatorTest.makeRNAiDuplexLibrary("Duplexes library", 1, 1, PlateSize.WELLS_384);
+        Library duplexLibrary = MakeDummyEntities.makeRNAiDuplexLibrary("Duplexes library", 1, 1, PlateSize.WELLS_384);
         makeLibraryCopy(duplexLibrary, "C", 10);
         genericEntityDao.saveOrUpdateEntity(duplexLibrary);
         genericEntityDao.flush(); // needed since cprAllocator.allocate() calls reload for each well, which must be in db (not just session)
 
-        CherryPickRequest cherryPickRequest = CherryPickRequestAllocatorTest.createRNAiCherryPickRequest(1, new Volume(10));
+        CherryPickRequest cherryPickRequest = MakeDummyEntities.createRNAiCherryPickRequest(1, new Volume(10));
         ScreenerCherryPick dummyScreenerCherryPick = cherryPickRequest.createScreenerCherryPick(
           librariesDao.findWell(new WellKey(1, "A01")));
         cherryPickRequest.setRandomizedAssayPlateLayout(false);
@@ -230,12 +231,12 @@ public class CherryPickRequestPlateMapperTest extends AbstractSpringPersistenceT
     genericEntityDao.doInTransaction(new DAOTransaction()
     {
       public void runTransaction() {
-        Library library = CherryPickRequestAllocatorTest.makeRNAiDuplexLibrary("library", 1, 2, PlateSize.WELLS_384);
+        Library library = MakeDummyEntities.makeRNAiDuplexLibrary("library", 1, 2, PlateSize.WELLS_384);
         makeLibraryCopy(library, "C", 10);
         genericEntityDao.saveOrUpdateEntity(library);
         genericEntityDao.flush(); // needed since cprAllocator.allocate() calls reload for each well, which must be in db (not just session)
 
-        CherryPickRequest cherryPickRequest = CherryPickRequestAllocatorTest.createRNAiCherryPickRequest(1, new Volume(10));
+        CherryPickRequest cherryPickRequest = MakeDummyEntities.createRNAiCherryPickRequest(1, new Volume(10));
         ScreenerCherryPick dummyScreenerCherryPick1 = cherryPickRequest.createScreenerCherryPick(librariesDao.findWell(new WellKey(1, "A01")));
         ScreenerCherryPick dummyScreenerCherryPick2 = cherryPickRequest.createScreenerCherryPick(librariesDao.findWell(new WellKey(2, "A01")));
         cherryPickRequest.setRandomizedAssayPlateLayout(true);
@@ -280,12 +281,12 @@ public class CherryPickRequestPlateMapperTest extends AbstractSpringPersistenceT
     genericEntityDao.doInTransaction(new DAOTransaction()
     {
       public void runTransaction() {
-        Library library = CherryPickRequestAllocatorTest.makeRNAiDuplexLibrary("library", 1, 1, PlateSize.WELLS_384);
+        Library library = MakeDummyEntities.makeRNAiDuplexLibrary("library", 1, 1, PlateSize.WELLS_384);
         makeLibraryCopy(library, "C", 10);
         genericEntityDao.saveOrUpdateEntity(library);
         genericEntityDao.flush(); // needed since cprAllocator.allocate() calls reload for each well, which must be in db (not just session)
 
-        RNAiCherryPickRequest cherryPickRequest = CherryPickRequestAllocatorTest.createRNAiCherryPickRequest(1, new Volume(10));
+        RNAiCherryPickRequest cherryPickRequest = MakeDummyEntities.createRNAiCherryPickRequest(1, new Volume(10));
         ScreenerCherryPick dummyScreenerCherryPick = cherryPickRequest.createScreenerCherryPick(librariesDao.findWell(new WellKey(1, "A01")));
         cherryPickRequest.setRandomizedAssayPlateLayout(true);
         Set<Integer> emptyColumns = Sets.newHashSet();
@@ -348,12 +349,12 @@ public class CherryPickRequestPlateMapperTest extends AbstractSpringPersistenceT
     genericEntityDao.doInTransaction(new DAOTransaction()
     {
       public void runTransaction() {
-        Library library = CherryPickRequestAllocatorTest.makeRNAiDuplexLibrary("library", 1, 1, PlateSize.WELLS_384);
+        Library library = MakeDummyEntities.makeRNAiDuplexLibrary("library", 1, 1, PlateSize.WELLS_384);
         makeLibraryCopy(library, "C", 10);
         genericEntityDao.saveOrUpdateEntity(library);
         genericEntityDao.flush(); // needed since cprAllocator.allocate() calls reload for each well, which must be in db (not just session)
 
-        RNAiCherryPickRequest cherryPickRequest = CherryPickRequestAllocatorTest.createRNAiCherryPickRequest(1, new Volume(10));
+        RNAiCherryPickRequest cherryPickRequest = MakeDummyEntities.createRNAiCherryPickRequest(1, new Volume(10));
         ScreenerCherryPick dummyScreenerCherryPick = cherryPickRequest.createScreenerCherryPick(librariesDao.findWell(new WellKey(1, "A01")));
         cherryPickRequest.addEmptyWellsOnAssayPlate(makeEmptyWellsFromColumnsAndRows(Arrays.asList(2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21), null, library));
         addLabCherryPicks(dummyScreenerCherryPick, 1, "A01", "A01"); // create 1 cherry pick

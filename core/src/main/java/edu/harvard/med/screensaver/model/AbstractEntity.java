@@ -281,7 +281,17 @@ public abstract class AbstractEntity<K extends Serializable> implements Entity<K
   // EntityViewPolicyInjectorPostLoadEventListener for example
   protected boolean isHibernateCaller()
   {
-    return getCallingClassName().startsWith("org.hibernate.");
+    // TODO: HACK: fix this awful hack!
+    for (int i = 1; i <= 6; i++) {
+      String callingClass = Reflection.getCallerClass(i).getName();
+      if (log.isDebugEnabled()) {
+        log.debug("caller " + i + ": " + callingClass);
+      }
+      if (callingClass.startsWith("org.hibernate.")) {
+        return true;
+      }
+    }
+    return false;
   }
 
   @SuppressWarnings("unchecked")
@@ -334,21 +344,5 @@ public abstract class AbstractEntity<K extends Serializable> implements Entity<K
 
     return !(Collection.class.isAssignableFrom(property.getPropertyType()) ||
       Map.class.isAssignableFrom(property.getPropertyType()) || AbstractEntity.class.isAssignableFrom(property.getPropertyType()));
-  }
-
-  /**
-   * Return the name of the calling class of the caller of the method of the
-   * caller of this method that is calling this method. Specifically, we intend
-   * the caller of this method to be {@link #isHibernateCaller()} or
-   * {@link #isTestCaller()}, and the caller of that method to be an entity
-   * method that is trying to determine <i>its</i> caller.
-   * 
-   * @return the name of the calling class of the caller of the method of the
-   *         caller of this method that is calling this method
-   */
-  private String getCallingClassName()
-  {
-    // TODO: try to do this with a java.* class
-    return Reflection.getCallerClass(4).getName();
   }
 }

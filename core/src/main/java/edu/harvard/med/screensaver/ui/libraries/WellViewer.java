@@ -289,24 +289,28 @@ public class WellViewer extends SearchResultContextEntityViewerBackingBean<Well,
     getDao().needReadOnly(well, Well.deprecationActivity);
     Reagent versionedReagent = _libraryContentsVersionRef.value() == null ? well.getLatestReleasedReagent()
       : well.getReagents().get(_libraryContentsVersionRef.value());
-    if (well.getLibrary().getReagentType().equals(SilencingReagent.class)) {
-      getDao().needReadOnly((SilencingReagent) versionedReagent, SilencingReagent.vendorGene.to(Gene.genbankAccessionNumbers));
-      getDao().needReadOnly((SilencingReagent) versionedReagent, SilencingReagent.vendorGene.to(Gene.entrezgeneSymbols));
-      getDao().needReadOnly((SilencingReagent) versionedReagent, SilencingReagent.facilityGene.to(Gene.genbankAccessionNumbers));
-      getDao().needReadOnly((SilencingReagent) versionedReagent, SilencingReagent.facilityGene.to(Gene.entrezgeneSymbols));
-      getDao().needReadOnly((SilencingReagent) versionedReagent, SilencingReagent.duplexWells.to(Well.library));
+    if (versionedReagent != null) {
+      if (well.getLibrary().getReagentType().equals(SilencingReagent.class)) {
+        getDao().needReadOnly((SilencingReagent) versionedReagent, SilencingReagent.vendorGene.to(Gene.genbankAccessionNumbers));
+        getDao().needReadOnly((SilencingReagent) versionedReagent, SilencingReagent.vendorGene.to(Gene.entrezgeneSymbols));
+        getDao().needReadOnly((SilencingReagent) versionedReagent, SilencingReagent.facilityGene.to(Gene.genbankAccessionNumbers));
+        getDao().needReadOnly((SilencingReagent) versionedReagent, SilencingReagent.facilityGene.to(Gene.entrezgeneSymbols));
+        getDao().needReadOnly((SilencingReagent) versionedReagent, SilencingReagent.duplexWells.to(Well.library));
+      }
+      if (well.getLibrary().getReagentType().equals(SmallMoleculeReagent.class)) {
+        getDao().needReadOnly((SmallMoleculeReagent) versionedReagent, SmallMoleculeReagent.compoundNames);
+        getDao().needReadOnly((SmallMoleculeReagent) versionedReagent, SmallMoleculeReagent.pubchemCids);
+        getDao().needReadOnly((SmallMoleculeReagent) versionedReagent, SmallMoleculeReagent.chembankIds);
+        getDao().needReadOnly((SmallMoleculeReagent) versionedReagent, SmallMoleculeReagent.chemblIds);
+        getDao().needReadOnly((SmallMoleculeReagent) versionedReagent, SmallMoleculeReagent.molfileList);
+      }
+      getDao().needReadOnly(versionedReagent, Reagent.libraryContentsVersion);
+      getDao().needReadOnly(versionedReagent, Reagent.publications);
+      _versionedRestrictedReagent = (Reagent) versionedReagent.restrict();
     }
-    if (well.getLibrary().getReagentType().equals(SmallMoleculeReagent.class)) {
-      getDao().needReadOnly((SmallMoleculeReagent) versionedReagent, SmallMoleculeReagent.compoundNames);
-      getDao().needReadOnly((SmallMoleculeReagent) versionedReagent, SmallMoleculeReagent.pubchemCids);
-      getDao().needReadOnly((SmallMoleculeReagent) versionedReagent, SmallMoleculeReagent.chembankIds);
-      getDao().needReadOnly((SmallMoleculeReagent) versionedReagent, SmallMoleculeReagent.chemblIds);
-      getDao().needReadOnly((SmallMoleculeReagent) versionedReagent, SmallMoleculeReagent.molfileList);
+    else {
+      _versionedRestrictedReagent = null;
     }
-    getDao().needReadOnly(versionedReagent, Reagent.libraryContentsVersion);
-    getDao().needReadOnly(versionedReagent, Reagent.publications);
-		_isAnnotationSearchResultsInitialized = false;
-    _versionedRestrictedReagent = (Reagent) versionedReagent.restrict();
   }
 
   @Override

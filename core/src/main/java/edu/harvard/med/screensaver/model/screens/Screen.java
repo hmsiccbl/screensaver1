@@ -74,6 +74,7 @@ import edu.harvard.med.screensaver.model.libraries.Library;
 import edu.harvard.med.screensaver.model.libraries.LibraryPlate;
 import edu.harvard.med.screensaver.model.libraries.Plate;
 import edu.harvard.med.screensaver.model.libraries.Reagent;
+import edu.harvard.med.screensaver.model.libraries.Well;
 import edu.harvard.med.screensaver.model.meta.Cardinality;
 import edu.harvard.med.screensaver.model.meta.PropertyPath;
 import edu.harvard.med.screensaver.model.meta.RelationshipPath;
@@ -154,6 +155,7 @@ public class Screen extends Study implements AttachedFilesEntity<ScreenAttachedF
   private Set<Reagent> _reagents = new HashSet<Reagent>();
   private StudyType _studyType;
   private boolean _isDownloadable = true;
+  private Well wellStudied;
 
   // generic screen
 
@@ -1975,6 +1977,24 @@ public class Screen extends Study implements AttachedFilesEntity<ScreenAttachedF
   public void setPubchemAssayId(Integer pubchemAssayId)
   {
     _pubchemAssayId = pubchemAssayId;
+  }
+
+  /**
+   * Specify the specific compound studied, if applicable
+   * for [#3155] Create a linkable field for "compound studied" on the study
+   */
+  public void setWellStudied(Well wellStudied)
+  {
+    this.wellStudied = wellStudied;
+  }
+
+  @ManyToOne(fetch=FetchType.LAZY)
+  @JoinColumn(name="wellStudiedId", nullable=true, updatable=true)
+  @org.hibernate.annotations.ForeignKey(name="fk_screen_to_well_studied")
+  @org.hibernate.annotations.LazyToOne(value=org.hibernate.annotations.LazyToOneOption.PROXY)
+  public Well getWellStudied()
+  {
+    return wellStudied;
   }
 
 }

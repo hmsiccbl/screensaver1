@@ -29,11 +29,9 @@ import org.springframework.transaction.annotation.Transactional;
 import edu.harvard.med.iccbl.screensaver.io.screens.ConfirmedPositivesStudyCreator;
 import edu.harvard.med.iccbl.screensaver.io.screens.ScreenPositivesCountStudyCreator;
 import edu.harvard.med.iccbl.screensaver.policy.IccblEntityViewPolicy;
-import edu.harvard.med.screensaver.AbstractSpringPersistenceTest;
 import edu.harvard.med.screensaver.ScreensaverConstants;
 import edu.harvard.med.screensaver.db.EntityInflator;
 import edu.harvard.med.screensaver.io.screens.StudyCreator;
-import edu.harvard.med.screensaver.model.MakeDummyEntities;
 import edu.harvard.med.screensaver.model.libraries.Library;
 import edu.harvard.med.screensaver.model.libraries.LibraryWellType;
 import edu.harvard.med.screensaver.model.libraries.Reagent;
@@ -62,6 +60,8 @@ import edu.harvard.med.screensaver.model.users.ScreensaverUserRole;
 import edu.harvard.med.screensaver.policy.EntityViewPolicy;
 import edu.harvard.med.screensaver.service.libraries.LibraryContentsVersionManager;
 import edu.harvard.med.screensaver.service.screenresult.ScreenResultReporter.ConfirmationReport;
+import edu.harvard.med.screensaver.test.AbstractSpringPersistenceTest;
+import edu.harvard.med.screensaver.test.MakeDummyEntities;
 
 public class ScreenResultReporterTest extends AbstractSpringPersistenceTest
 {

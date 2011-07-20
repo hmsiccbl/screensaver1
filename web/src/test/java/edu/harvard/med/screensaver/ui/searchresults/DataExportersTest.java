@@ -34,14 +34,12 @@ import org.apache.commons.cli.OptionBuilder;
 import org.apache.commons.io.IOUtils;
 import org.apache.log4j.Logger;
 
-import edu.harvard.med.screensaver.AbstractSpringPersistenceTest;
 import edu.harvard.med.screensaver.db.GenericEntityDAO;
 import edu.harvard.med.screensaver.db.SortDirection;
 import edu.harvard.med.screensaver.db.datafetcher.Tuple;
 import edu.harvard.med.screensaver.db.datafetcher.TupleDataFetcher;
 import edu.harvard.med.screensaver.io.CommandLineApplication;
 import edu.harvard.med.screensaver.io.DataExporter;
-import edu.harvard.med.screensaver.model.MakeDummyEntities;
 import edu.harvard.med.screensaver.model.libraries.Library;
 import edu.harvard.med.screensaver.model.libraries.LibraryWellType;
 import edu.harvard.med.screensaver.model.libraries.Reagent;
@@ -53,6 +51,8 @@ import edu.harvard.med.screensaver.model.screenresults.ScreenResult;
 import edu.harvard.med.screensaver.model.screens.Screen;
 import edu.harvard.med.screensaver.model.screens.ScreenType;
 import edu.harvard.med.screensaver.policy.DefaultEntityViewPolicy;
+import edu.harvard.med.screensaver.test.AbstractSpringPersistenceTest;
+import edu.harvard.med.screensaver.test.MakeDummyEntities;
 import edu.harvard.med.screensaver.ui.arch.datatable.Criterion;
 import edu.harvard.med.screensaver.ui.arch.datatable.Criterion.Operator;
 import edu.harvard.med.screensaver.ui.arch.datatable.DataTableModelType;
@@ -68,6 +68,7 @@ import edu.harvard.med.screensaver.ui.arch.datatable.column.entity.TextTupleColu
 import edu.harvard.med.screensaver.ui.arch.datatable.model.DataTableModel;
 import edu.harvard.med.screensaver.ui.arch.searchresults.CsvDataExporter;
 import edu.harvard.med.screensaver.ui.arch.searchresults.ExcelWorkbookDataExporter;
+import edu.harvard.med.screensaver.ui.libraries.DefaultWellSearchResults;
 import edu.harvard.med.screensaver.ui.libraries.WellSearchResults;
 
 public class DataExportersTest extends AbstractSpringPersistenceTest
@@ -249,11 +250,11 @@ public class DataExportersTest extends AbstractSpringPersistenceTest
     app.addCommandLineOption(OptionBuilder.isRequired().hasArg().withArgName("output workbook file").create("f"));
     app.processOptions(true, false);
     GenericEntityDAO dao = (GenericEntityDAO) app.getSpringBean("genericEntityDao");
-    WellSearchResults searchResults = new WellSearchResults(dao,
-                                                            null,
-                                                            new DefaultEntityViewPolicy(),
-                                                            null, null, null, null,
-                                                            Lists.<DataExporter<Tuple<String>>>newArrayList(new ExcelWorkbookDataExporter<Tuple<String>>("wells")));
+    WellSearchResults searchResults = new DefaultWellSearchResults(dao,
+                                                                   null,
+                                                                   new DefaultEntityViewPolicy(),
+                                                                   null, null, null, null,
+                                                                   Lists.<DataExporter<Tuple<String>>>newArrayList(new ExcelWorkbookDataExporter<Tuple<String>>("wells")));
     ScreenResult screenResult = dao.findEntityByProperty(Screen.class, Screen.facilityId.getPropertyName(), 974, true, Screen.screenResult.to(ScreenResult.dataColumns)).getScreenResult();
     searchResults.searchWellsForScreenResult(screenResult);
     searchResults.getRowCount(); // force initial data fetch

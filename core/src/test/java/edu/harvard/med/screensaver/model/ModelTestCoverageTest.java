@@ -17,7 +17,7 @@ import javax.persistence.metamodel.ManagedType;
 
 import org.springframework.beans.factory.annotation.Autowired;
 
-import edu.harvard.med.screensaver.AbstractSpringTest;
+import edu.harvard.med.screensaver.test.AbstractSpringTest;
 
 /**
  * Tests that all entity classes have corresponding unit test classes.

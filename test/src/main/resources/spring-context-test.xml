@@ -74,7 +74,7 @@
   <import resource="spring-context-persistence.xml"/>
   <import resource="spring-context-services.xml"/>
   
-  <bean id="dataFactory" class="edu.harvard.med.screensaver.model.TestDataFactory">
+  <bean id="dataFactory" class="edu.harvard.med.screensaver.test.TestDataFactory">
     <constructor-arg ref="genericEntityDao" />
     <constructor-arg ref="entityManagerFactory" />
   </bean>

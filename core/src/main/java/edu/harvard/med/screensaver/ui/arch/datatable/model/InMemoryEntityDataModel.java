@@ -19,7 +19,6 @@ import com.google.common.collect.Lists;
 
 import edu.harvard.med.screensaver.db.datafetcher.DataFetcher;
 import edu.harvard.med.screensaver.db.datafetcher.EntityDataFetcher;
-import edu.harvard.med.screensaver.db.datafetcher.PropertyPathDataFetcher;
 import edu.harvard.med.screensaver.model.Entity;
 import edu.harvard.med.screensaver.model.meta.PropertyPath;
 import edu.harvard.med.screensaver.policy.EntityViewPolicy;
@@ -41,7 +40,7 @@ public class InMemoryEntityDataModel<E extends Entity<K>,K extends Serializable,
 {
   private DataFetcher<R,K,PropertyPath<E>> _dataFetcher;
 
-  public InMemoryEntityDataModel(PropertyPathDataFetcher<R,E,K> dataFetcher)
+  public InMemoryEntityDataModel(DataFetcher<R,K,PropertyPath<E>> dataFetcher)
   {
     super(dataFetcher);
     _dataFetcher = dataFetcher;

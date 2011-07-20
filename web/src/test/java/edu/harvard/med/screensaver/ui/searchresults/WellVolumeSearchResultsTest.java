@@ -41,7 +41,7 @@ import edu.harvard.med.screensaver.model.libraries.WellKey;
 import edu.harvard.med.screensaver.model.libraries.WellVolume;
 import edu.harvard.med.screensaver.model.libraries.WellVolumeAdjustment;
 import edu.harvard.med.screensaver.model.users.AdministratorUser;
-import edu.harvard.med.screensaver.service.cherrypicks.CherryPickRequestAllocatorTest;
+import edu.harvard.med.screensaver.test.MakeDummyEntities;
 import edu.harvard.med.screensaver.ui.arch.datatable.column.TableColumn;
 import edu.harvard.med.screensaver.ui.arch.view.AbstractBackingBeanTest;
 import edu.harvard.med.screensaver.ui.libraries.WellCopyVolumeSearchResults;
@@ -181,7 +181,7 @@ public class WellVolumeSearchResultsTest extends AbstractBackingBeanTest
           else if (column.getName().equals("Consumed Volume")) {
             // this tests aggregation of WVAs
             assertEquals("row " + j + ", " + expectedKey  + ":Consumed Volume",
-                         new Volume(30).subtract(_expectedRemainingWellVolume.get(expectedKey)),
+                         new Volume(30).subtract((Volume) _expectedRemainingWellVolume.get(expectedKey)),
                          (Volume) cellValue);
             ++columnsTested;
           }
@@ -218,7 +218,7 @@ public class WellVolumeSearchResultsTest extends AbstractBackingBeanTest
   {
     genericEntityDao.doInTransaction(new DAOTransaction() {
       public void runTransaction() {
-        _library = CherryPickRequestAllocatorTest.makeRNAiDuplexLibrary("library", 1, 2, PlateSize.WELLS_384);
+        _library = MakeDummyEntities.makeRNAiDuplexLibrary("library", 1, 2, PlateSize.WELLS_384);
         Copy copyC = _library.createCopy((AdministratorUser) _library.getCreatedBy(), CopyUsageType.CHERRY_PICK_SOURCE_PLATES, "C");
         Copy copyD = _library.createCopy((AdministratorUser) _library.getCreatedBy(), CopyUsageType.CHERRY_PICK_SOURCE_PLATES, "D");
         copyC.findPlate(1).setWellVolume(new Volume(10));
@@ -233,10 +233,10 @@ public class WellVolumeSearchResultsTest extends AbstractBackingBeanTest
         Well plate2WellA01 = genericEntityDao.findEntityById(Well.class, "00002:A01");
         Well plate2WellB01 = genericEntityDao.findEntityById(Well.class, "00002:B01");
 
-        _cherryPickRequest = CherryPickRequestAllocatorTest.createRNAiCherryPickRequest(1, new Volume(3));
+        _cherryPickRequest = MakeDummyEntities.createRNAiCherryPickRequest(1, new Volume(3));
         ScreenerCherryPick dummyScreenerCherryPick = _cherryPickRequest.createScreenerCherryPick(plate1WellA01);
         // note: 2 LCPs for the same well (which have to be in 2 separate CPRs) to test aggregation of 2 LCPs in the same well
-        CherryPickRequest cherryPickRequest2 = CherryPickRequestAllocatorTest.createRNAiCherryPickRequest(2, new Volume(3));
+        CherryPickRequest cherryPickRequest2 = MakeDummyEntities.createRNAiCherryPickRequest(2, new Volume(3));
         ScreenerCherryPick dummyScreenerCherryPick2 = cherryPickRequest2.createScreenerCherryPick(plate1WellA01);
         dummyScreenerCherryPick.createLabCherryPick(plate1WellA01).setAllocated(copyC);
         dummyScreenerCherryPick2.createLabCherryPick(plate1WellA01).setAllocated(copyD);
@@ -271,7 +271,7 @@ public class WellVolumeSearchResultsTest extends AbstractBackingBeanTest
               expectedRemainingWellVolume = expectedRemainingWellVolume.add(expectedRemainingWellCopyVolume);
             }
             else {
-              expectedRemainingWellVolume = expectedRemainingWellVolume.add(_expectedRemainingWellCopyVolume.get(wellCopy));
+              expectedRemainingWellVolume = expectedRemainingWellVolume.add((Volume) _expectedRemainingWellCopyVolume.get(wellCopy));
             }
           }
           _expectedRemainingWellVolume.put(well.getWellKey(), expectedRemainingWellVolume);

@@ -20,7 +20,6 @@ import org.hibernate.Session;
 import org.joda.time.LocalDate;
 import org.springframework.beans.factory.annotation.Autowired;
 
-import edu.harvard.med.screensaver.AbstractSpringPersistenceTest;
 import edu.harvard.med.screensaver.db.DAOTransaction;
 import edu.harvard.med.screensaver.db.Query;
 import edu.harvard.med.screensaver.db.hqlbuilder.HqlBuilder;
@@ -38,6 +37,7 @@ import edu.harvard.med.screensaver.model.libraries.PlateSize;
 import edu.harvard.med.screensaver.model.libraries.PlateStatus;
 import edu.harvard.med.screensaver.model.screens.ScreenType;
 import edu.harvard.med.screensaver.model.users.AdministratorUser;
+import edu.harvard.med.screensaver.test.AbstractSpringPersistenceTest;
 import edu.harvard.med.screensaver.ui.arch.datatable.Criterion.Operator;
 
 public class PlateUpdaterTest extends AbstractSpringPersistenceTest
@@ -128,6 +128,7 @@ public class PlateUpdaterTest extends AbstractSpringPersistenceTest
         assertEquals(genericEntityDao.reloadEntity(admin2), activity.getPerformedBy());
         assertEquals(genericEntityDao.reloadEntity(_admin), activity.getCreatedBy());
         assertEquals("Status changed from 'Available' to 'Not available'", activity.getComments());
+
         assertEquals(new LocalDate(2010, 1, 3), activity.getDateOfActivity());
         assertEquals("original plate status update activity maintained", new LocalDate(2010, 1, 2), updatedPlate.getPlatedActivity().getDateOfActivity());
       }

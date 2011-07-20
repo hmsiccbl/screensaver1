@@ -35,15 +35,15 @@
             </t:commandLink>
             <t:panelGrid columns="2" styleClass="layoutPanel">
              <t:commandLink id="login" action="#{menu.login}"
-               value="Login" styleClass="menuItem"
+               value="#{menu.applicationProperties.lincsAppVersion?'HMS LINCS ':''}Login" styleClass="menuItem"
                title="Click here to log in"
-               rendered="#{menu.guest}"
+               rendered="#{appInfo.screensaverUser.isUserInRoleOfNameMap['guest']}"
                 />
              <t:div />
              <t:commandLink id="logout" action="#{menu.logout}"
                value="Logout" styleClass="menuItem"
                title="Click here to log out"
-               rendered="#{!menu.guest}" 
+               rendered="#{!appInfo.screensaverUser.isUserInRoleOfNameMap['guest']}" 
                />
               </t:panelGrid>
           </h:form>
@@ -56,11 +56,17 @@
             <t:outputText styleClass="menuSectionHeader"
               value="Browse..." />
 
-            <t:commandLink action="#{wellCompoundNameFinder.findWells}"
+            <t:commandLink action="#{reagentFinder.browseReagents}"
               styleClass="menuItem" accesskey="R"
-              title="Browse all available library reagents"
-              rendered="#{menu.readAdmin &amp;&amp; menu.applicationProperties.map['screensaver.ui.facility_name'] == 'LINCS'}">
+              title="Browse all unique HMS LINCS pertubagen reagents"
+              rendered="#{menu.applicationProperties.map['screensaver.ui.facility_name'] == 'LINCS'}">
             R<u>e</u>agents</t:commandLink>
+
+            <t:commandLink action="#{reagentFinder.browseReagentWells}"
+              styleClass="menuItem"
+              title="Browse all wells containing HMS LINCS pertubagen reagents"
+              rendered="#{menu.applicationProperties.map['screensaver.ui.facility_name'] == 'LINCS'}">
+            Reagent Wells</t:commandLink>
 
             <t:panelGrid columns="2" styleClass="layoutPanel"
               onmouseover="javascript:document.getElementById('librariesSubmenu').style.visibility='visible'"
@@ -121,7 +127,7 @@
             <t:commandLink action="#{menu.browseMyScreens}"
               styleClass="menuItem" accesskey="M"
               title="Browse the screens that you headed, led or collaborated on"
-              rendered="#{menu.screener}">
+              rendered="#{menu.screener &amp;&amp; !menu.applicationProperties.lincsAppVersion}">
               <u>M</u>y Screens</t:commandLink>
 
             <t:commandLink action="#{menu.browseStudies}"
@@ -132,7 +138,7 @@
             <t:panelGrid columns="2" styleClass="layoutPanel"
               onmouseover="javascript:document.getElementById('cprsSubmenu').style.visibility='visible'"
               onmouseout="javascript:document.getElementById('cprsSubmenu').style.visibility='hidden'"
-              rendered="#{menu.screener || menu.readAdmin}">
+              rendered="#{(menu.screener || menu.readAdmin) &amp;&amp; !menu.applicationProperties.lincsAppVersion}">
               <t:commandLink action="#{menu.browseCherryPickRequests}"
                 styleClass="menuItem" accesskey="q"
                 title="Browse the cherry pick requests currently available and accessible to you">
@@ -154,7 +160,8 @@
 
             <t:commandLink styleClass="menuItem"
               action="#{menu.browseLabActivities}" accesskey="A"
-              title="Browse the lab activities currently available and accessible to you">
+              title="Browse the lab activities currently available and accessible to you"
+              rendered="#{!menu.applicationProperties.lincsAppVersion}">
             Lab <u>A</u>ctivities</t:commandLink>
 
             <t:commandLink action="#{menu.browseScreeners}"
@@ -164,7 +171,7 @@
             </t:commandLink>
 
             <t:commandLink action="#{menu.browseAssociates}"
-              styleClass="menuItem" rendered="#{menu.screener}"
+              styleClass="menuItem" rendered="#{menu.screener &amp;&amp; !menu.applicationProperties.lincsAppVersion}"
               accesskey="y"
               title="Browse my associates (lab members, screen collaborators, etc.)">
             M<u>y</u> Associates
@@ -196,22 +203,24 @@
         <t:htmlTag value="hr" />
 
         <t:outputText styleClass="menuSectionHeader"
-          value="Find Wells by..." />
-        <h:form id="findWellByCompoundNameForm"
-          title="Find the information for a small molecule reagent by the compound name ">
-          <t:panelGrid columns="2">
-            <t:outputLabel for="compoundNameInput" value="Compound Name"
-              styleClass="menuItem" />
-            <t:outputText value="" />
-            <t:inputText id="compoundNameInput"
-              value="#{wellCompoundNameFinder.compoundSearchName}"
-              styleClass="inputText" size="10" />
+          value="Find&amp;nbsp;#{menu.applicationProperties.facility == 'LINCS' ? 'Reagents' : 'Wells'}&amp;nbsp;by..."
+          escape="false"/> 
+        <h:form id="findWellsByNameFacilityVendorIDForm"
+          title="Find the information for a small molecule reagent by the compound name, facility ID, or vendor ID">
+          <t:panelGrid columns="1" styleClass="layoutPanel">
+          Compound Name, Facility or Vendor ID
+            <t:panelGroup styleClass="layoutPanel">
+            <t:inputTextarea id="nameFacilityVendorIDInput"
+              value="#{reagentFinder.nameFacilityVendorIDInput}"
+              styleClass="inputText" cols="12" rows="1" />
             <t:commandButton
-              action="#{wellCompoundNameFinder.findWells}"
+              action="#{reagentFinder.findWellsByNameFacilityVendorID}"
               id="findWellByCompoundNameCommand" value="Go"
               image="/images/arrow-next.png" />
+           </t:panelGroup>
           </t:panelGrid>
         </h:form>
+
         <h:form>
           <t:panelGrid columns="1" styleClass="layoutPanel">
             Plate/Well ID
@@ -232,10 +241,11 @@
             Multiple Plate/<u>W</u>ell IDs</t:commandLink>
             <t:commandLink action="#{menu.findReagents}"
               value="Multiple Reagent IDs" styleClass="menuItem"
-              title="Look up one or more reagents by vendor-assigned reagent identifiers" />
+              title="Look up one or more reagents by vendor-assigned reagent identifiers"
+              rendered="#{!menu.applicationProperties.lincsAppVersion}" />
             <t:commandLink action="#{menu.browseWells}"
               value="Other criteria" styleClass="menuItem"
-              title="Look up one or more library wells matching criteria "
+              title="#{menu.applicationProperties.lincsAppVersion ? 'Search for one or more reagents using specific criteria' : 'Search for one or more library wells using specific criteria'}"
               rendered="#{menu.screener || menu.readAdmin}" />
           </t:panelGrid>
         </h:form>
@@ -285,7 +295,8 @@
         </h:form>
 
         <h:form id="findCherryPickRequestForm"
-          title="Look up a cherry pick request by cherry pick request number">
+          title="Look up a cherry pick request by cherry pick request number"
+          rendered="#{!menu.applicationProperties.lincsAppVersion}">
           <t:panelGrid columns="2"
             rendered="#{menu.screener || menu.readAdmin}">
             <t:outputLabel id="cherryPickRequestNumberLabel"
@@ -336,14 +347,14 @@
         <h:form id="entityCreationForm" title="Entity creation commands">
           <t:outputText styleClass="menuSectionHeader"
             value="Add new..."
-            rendered="#{menu.screensaverUser.isUserInRoleOfNameMap['librariesAdmin'] ||
+            rendered="#{(menu.screensaverUser.isUserInRoleOfNameMap['librariesAdmin'] ||
             menu.screensaverUser.isUserInRoleOfNameMap['screensAdmin'] ||
             menu.screensaverUser.isUserInRoleOfNameMap['usersAdmin'] ||
-            menu.screensaverUser.isUserInRoleOfNameMap['labHeadsAdmin']}" />
-          <t:panelGrid columns="1" rendered="#{menu.readAdmin}">
+            menu.screensaverUser.isUserInRoleOfNameMap['labHeadsAdmin']) &amp;&amp; !menu.applicationProperties.lincsAppVersion}" />
+          <t:panelGrid columns="1" rendered="#{menu.readAdmin &amp;&amp; !menu.applicationProperties.lincsAppVersion}">
             <t:commandButton action="#{menu.addLibrary}"
               id="addLibraryCommand" value="Library"
-              rendered="#{menu.screensaverUser.isUserInRoleOfNameMap['librariesAdmin']}"
+              rendered="#{menu.screensaverUser.isUserInRoleOfNameMap['librariesAdmin'] }"
               styleClass="command" />
             <t:commandButton action="#{menu.addScreen}"
               id="addScreenCommand" value="Screen"

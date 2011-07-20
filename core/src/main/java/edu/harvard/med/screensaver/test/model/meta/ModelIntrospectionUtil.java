@@ -7,7 +7,7 @@
 // at Harvard Medical School. This software is distributed under the terms of
 // the GNU General Public License.
 
-package edu.harvard.med.screensaver.model.entitytesters;
+package edu.harvard.med.screensaver.test.model.meta;
 
 import java.beans.PropertyDescriptor;
 import java.lang.annotation.Annotation;
@@ -26,8 +26,6 @@ import org.apache.log4j.Logger;
 import org.hibernate.annotations.Immutable;
 
 import edu.harvard.med.screensaver.model.AbstractEntity;
-import edu.harvard.med.screensaver.model.DomainModelDefinitionException;
-import edu.harvard.med.screensaver.model.ExistenceRequirement;
 import edu.harvard.med.screensaver.model.SemanticIDAbstractEntity;
 import edu.harvard.med.screensaver.model.annotations.Column;
 import edu.harvard.med.screensaver.model.annotations.ContainedEntity;
@@ -35,7 +33,6 @@ import edu.harvard.med.screensaver.model.annotations.Derived;
 import edu.harvard.med.screensaver.model.annotations.ElementCollection;
 import edu.harvard.med.screensaver.model.annotations.ToMany;
 import edu.harvard.med.screensaver.model.annotations.ToOne;
-import edu.harvard.med.screensaver.model.meta.RelatedProperty;
 import edu.harvard.med.screensaver.util.DevelopmentException;
 import edu.harvard.med.screensaver.util.StringUtils;
 

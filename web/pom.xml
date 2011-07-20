@@ -2,14 +2,14 @@
   <modelVersion>4.0.0</modelVersion>
   <parent>
     <artifactId>screensaver</artifactId>
-    <version>2011-06-20</version>
+    <version>2011-07-19</version>
     <groupId>edu.harvard.med</groupId>
     <relativePath>../pom.xml</relativePath>
   </parent>
   
   <groupId>edu.harvard.med</groupId>
   <artifactId>screensaver-web</artifactId>
-  <version>2011-06-20</version>
+  <version>2011-07-19</version>
   <name>Screensaver Web</name>
   <description>Screensaver web application</description>
 
@@ -44,12 +44,12 @@
     </resources>
     
     <plugins>
-
       <plugin>
         <groupId>org.apache.maven.plugins</groupId>
         <artifactId>maven-surefire-plugin</artifactId>
+        
         <configuration>
-         <goal>test</goal>
+          <goal>test</goal>
           <excludes>
             <exclude>**/EntityPropertyTest.java</exclude>
           </excludes>
@@ -100,6 +100,8 @@
       <properties>
         <!-- The top-level spring context file used to configure the web application (inserted into web.xml via Maven filtering) -->
         <web.application.context.file>spring-context-web-lincs.xml</web.application.context.file>
+        <!-- if allowing guest access, then specify pages that guests can access here.  
+                NOTE: also specify screensaver.ui.feature.allow_guest_access=TRUE property in screensaver.properties -->
         <web.unauthenticated.url-pattern><![CDATA[/main.jsf</url-pattern>
             <url-pattern>/main/*</url-pattern>
             <url-pattern>/util/*</url-pattern>
@@ -122,6 +124,23 @@
       </activation>
       <build>
         <finalName>${project.artifactId}-${facility}-${project.version}-SNAPSHOT</finalName>
+        <plugins>
+          <plugin>
+            <groupId>org.zeroturnaround</groupId>
+            <artifactId>jrebel-maven-plugin</artifactId>
+            <configuration>
+            </configuration>
+            <executions>
+              <execution>
+                <id>generate-rebel-xml</id>
+                <phase>process-resources</phase>
+                <goals>
+                  <goal>generate</goal>
+                </goals>
+              </execution>
+            </executions>
+          </plugin>
+        </plugins>
       </build>
       <properties>
   			<servlet.authentication.method>BASIC</servlet.authentication.method>
@@ -143,19 +162,26 @@
   
   <dependencies>
 
-    <!-- web module test code depends upon test classes in core module -->
-   	<!-- dependency>
-  		<groupId>edu.harvard.med</groupId>
-  		<artifactId>screensaver-core</artifactId>
-  		<version>2011-06-20</version>
-      <scope>test</scope>
-      <type>test-jar</type>
-  	</dependency-->
-
   	<dependency>
   		<groupId>edu.harvard.med</groupId>
   		<artifactId>screensaver-core</artifactId>
-  		<version>2011-06-20</version>
+  		<version>2011-07-19</version>
   	</dependency>
+
+    <dependency>
+      <groupId>edu.harvard.med</groupId>
+      <artifactId>screensaver-test</artifactId>
+      <version>2011-07-19</version>
+      <scope>test</scope>
+    </dependency>
+
+    <!-- Because this is a web app, we also have a dependency on the servlet api. -->
+    <dependency>
+      <groupId>javax.servlet</groupId>
+      <artifactId>servlet-api</artifactId>
+      <version>2.3</version>
+      <scope>provided</scope>
+    </dependency>
+
   </dependencies>
 </project>

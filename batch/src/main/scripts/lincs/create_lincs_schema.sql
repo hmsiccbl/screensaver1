@@ -358,7 +358,6 @@
         plate_size text not null,
         is_pool bool not null,
         provider text,
-        quality_control_information text,
         screen_type text not null,
         screening_status text not null,
         short_name text not null unique,
@@ -465,6 +464,8 @@
 
     create table reagent (
         reagent_id int4 not null,
+        facility_batch_id int4,
+        vendor_batch_id text,
         vendor_identifier text,
         vendor_name text,
         library_contents_version_id int4 not null,
@@ -557,6 +558,7 @@
         lab_head_id int4,
         lead_screener_id int4,
         pin_transfer_admin_activity_id int4,
+        well_studied_id text,
         primary key (screen_id)
     );
 
@@ -732,7 +734,6 @@
     );
 
     create table small_molecule_reagent (
-        facility_batch_id int4,
         inchi text,
         molecular_formula text,
         molecular_mass numeric(15, 9),
@@ -740,7 +741,6 @@
         is_restricted_structure bool not null,
         salt_form_id int4,
         smiles text,
-        vendor_batch_id text,
         reagent_id int4 not null,
         primary key (reagent_id)
     );
@@ -1247,6 +1247,11 @@
         add constraint fk_screen_to_lab_head 
         foreign key (lab_head_id) 
         references lab_head;
+
+    alter table screen 
+        add constraint fk_screen_to_well_studied 
+        foreign key (well_studied_id) 
+        references well;
 
     alter table screen 
         add constraint fk_screen_to_lead_screener 

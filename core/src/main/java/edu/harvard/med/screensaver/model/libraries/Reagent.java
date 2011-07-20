@@ -90,6 +90,8 @@ public abstract class Reagent extends AbstractEntity<Integer> implements Compara
   private Set<Screen> _studies = new HashSet<Screen>();
   private Set<Publication> _publications = Sets.newHashSet();
   private Set<AttachedFile> _attachedFiles = new HashSet<AttachedFile>();
+  private String _vendorBatchId;
+  private Integer _facilityBatchId;
 
   /**
    * @motivation for hibernate and proxy/concrete subclass constructors
@@ -323,4 +325,48 @@ public abstract class Reagent extends AbstractEntity<Integer> implements Compara
   {
     _attachedFiles = attachedFiles;
   }
+
+  @org.hibernate.annotations.Type(type = "text")
+  @edu.harvard.med.screensaver.model.annotations.Column(hasNonconventionalSetterMethod = true)
+  // we don't want to include this LINCS-only property in the constructor
+  public String getVendorBatchId()
+  {
+    return _vendorBatchId;
+  }
+
+  @edu.harvard.med.screensaver.model.annotations.Column(hasNonconventionalSetterMethod = true)
+  // we don't want to include this LINCS-only property in the constructor
+  public Integer getFacilityBatchId()
+  {
+    return _facilityBatchId;
+  }
+
+  /**
+   * @motivation for hibernate
+   */
+  private void setVendorBatchId(String vendorBatchId)
+  {
+    _vendorBatchId = vendorBatchId;
+  }
+
+  public Reagent forVendorBatchId(String vendorBatchId)
+  {
+    _vendorBatchId = vendorBatchId;
+    return this;
+  }
+
+  /**
+   * @motivation for hibernate
+   */
+  private void setFacilityBatchId(Integer facilityBatchId)
+  {
+    _facilityBatchId = facilityBatchId;
+  }
+
+  public Reagent forFacilityBatchId(Integer facilityBatchId)
+  {
+    _facilityBatchId = facilityBatchId;
+    return this;
+  }
+  
 }

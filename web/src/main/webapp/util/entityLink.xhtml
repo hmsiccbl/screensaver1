@@ -19,8 +19,10 @@
   <t:commandLink id="#{id}Link" action="#{viewer.viewEntity}"
     styleClass="entityLink #{styleClass}">
     <f:param name="entityId" value="#{entity.entityId}" />
-    <t:outputText id="#{id}LinkValue"
-      value="#{empty property ? entity.entityId : entity[property]}" />
+    <ui:insert name="linkValue">
+      <t:outputText id="#{id}LinkValue"
+        value="#{empty property ? entity.entityId : entity[property]}" />
+   </ui:insert>
   </t:commandLink>
 
 </ui:composition>

@@ -96,14 +96,17 @@ public interface LibrariesDAO
   public Set<Integer> queryForPlateIds(LibraryCopyPlateListParserResult parserResult);
 
   /**
-   * NOTE: LINCS-only feature
-   * Find Wells containing Small Molecule Reagents where one of the compound names matches the compoundSearchName,
-   * case insensitive, greedy match.
+   * Find Wells containing Reagents where the items in the list match either the reagent's compound names 
+   * (using case insensitive, greedy match); or the facility id, or a vendor reagent id matches the items.
    * 
-   * @param compoundSearchName
+   * @param nameFacilityVendorIDInputList
    * @return
    */
-  public Set<WellKey> findWellKeysForCompoundName(String compoundSearchName);
+  public Set<WellKey> findWellKeysForCompoundNameList(Collection<String> compoundNameList);
+
+  public Set<WellKey> findWellKeysForCompoundName(final String compoundSearchName);
+
+  public Set<WellKey> findWellKeysForReagentVendorIDList(Collection<String> facilityVendorIdInputList);
 
   public void calculatePlateScreeningStatistics(Collection<Plate> plates);
 
@@ -113,4 +116,8 @@ public interface LibrariesDAO
   
   public void calculateCopyScreeningStatistics(Collection<Copy> copies);
 
+  public Well findCanonicalReagentWell(String facilityId,
+                                       Integer saltId,
+                                       Integer facilityBatchId);
+  
 }

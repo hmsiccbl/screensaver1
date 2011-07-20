@@ -11,7 +11,6 @@ package edu.harvard.med.screensaver.service.libraries;
 
 import org.springframework.beans.factory.annotation.Autowired;
 
-import edu.harvard.med.screensaver.AbstractSpringPersistenceTest;
 import edu.harvard.med.screensaver.db.DAOTransaction;
 import edu.harvard.med.screensaver.db.LibrariesDAO;
 import edu.harvard.med.screensaver.model.libraries.Library;
@@ -23,6 +22,7 @@ import edu.harvard.med.screensaver.model.screens.ScreenType;
 import edu.harvard.med.screensaver.model.users.AdministratorUser;
 import edu.harvard.med.screensaver.model.users.ScreensaverUserRole;
 import edu.harvard.med.screensaver.service.OperationRestrictedException;
+import edu.harvard.med.screensaver.test.AbstractSpringPersistenceTest;
 
 public class LibraryContentsVersionManagerTest extends AbstractSpringPersistenceTest
 {

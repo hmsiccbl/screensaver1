@@ -108,9 +108,11 @@ public class LibraryContentsLoader
       for (ParseError error : e.getErrors()) {
         log.error(error.toString(), e);
       }
+      System.exit(1);
     }
     catch (Exception e) {
       log.error("application exception", e);
+      System.exit(1);
     }
   }
 }

@@ -24,11 +24,11 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSession;
 
+import com.google.common.collect.Maps;
 import org.apache.log4j.Logger;
 import org.springframework.mock.web.MockHttpServletRequest;
 import org.springframework.mock.web.MockHttpServletResponse;
 import org.springframework.mock.web.MockHttpSession;
-import com.google.common.collect.Maps;
 
 import edu.harvard.med.screensaver.ScreensaverConstants;
 import edu.harvard.med.screensaver.ScreensaverProperties;
@@ -36,7 +36,6 @@ import edu.harvard.med.screensaver.model.users.ScreeningRoomUser;
 import edu.harvard.med.screensaver.model.users.ScreensaverUser;
 import edu.harvard.med.screensaver.model.users.ScreensaverUserRole;
 import edu.harvard.med.screensaver.ui.CurrentScreensaverUser;
-import edu.harvard.med.screensaver.ui.WebCurrentScreensaverUser;
 import edu.harvard.med.screensaver.ui.arch.util.Messages;
 import edu.harvard.med.screensaver.ui.arch.util.servlet.ScreensaverServletFilter;
 
@@ -150,29 +149,13 @@ public abstract class AbstractBackingBean implements ScreensaverConstants
     return getScreensaverUser() instanceof ScreeningRoomUser;
   }
 
-  // TODO: consider moving to the Login Bean
   public boolean isAuthenticatedUser()
   {
-    boolean result =  getExternalContext().getUserPrincipal() != null;
-    if(!result && getCurrentScreensaverUser().isAllowGuestLogin()) // for [#3107] Non-authenticated access for LINCS guest users
-    {
-      Boolean loginPending = (Boolean)
-        getHttpSession().getAttribute(ScreensaverServletFilter.LOGIN_PENDING);
-      result = (loginPending == null || loginPending.equals(Boolean.FALSE));
-    }
-    Boolean pendingSessionCloseRequest = (Boolean)
-      getHttpSession().getAttribute(ScreensaverServletFilter.CLOSE_HTTP_SESSION);
-    result = result && (pendingSessionCloseRequest == null || pendingSessionCloseRequest.equals(Boolean.FALSE));
-    return result;
+    boolean isAuthenticatedUser = getScreensaverUser() != null;
+    boolean pendingSessionCloseRequest = Boolean.FALSE.equals(getHttpSession().getAttribute(ScreensaverServletFilter.CLOSE_HTTP_SESSION));
+    return isAuthenticatedUser && !pendingSessionCloseRequest;
   }
   
-   // for [#3107] Non-authenticated access for LINCS guest users
-  public boolean isGuest()
-  {
-    return getScreensaverUser() != null && getScreensaverUser() instanceof WebCurrentScreensaverUser.GuestUser;
-  }
-
-
   /**
    * Returns the ScreensaverUser entity representing the user that is logged in
    * to the current HTTP session.
@@ -419,7 +402,8 @@ public abstract class AbstractBackingBean implements ScreensaverConstants
    */
   protected boolean isUserInRole(ScreensaverUserRole role)
   {
-    return getCurrentScreensaverUser().getScreensaverUser().isUserInRole(role);
+    return getCurrentScreensaverUser().getScreensaverUser() != null &&
+      getCurrentScreensaverUser().getScreensaverUser().isUserInRole(role);
   }
 
   private UIComponent doFindComponent(UIComponent container, String componentId)

@@ -39,6 +39,7 @@
 	</ss:property>
 
   <ss:property id="projectId" label="Project ID"
+    rendered="#{appInfo.applicationProperties.facility != 'LINCS'}"
     description="The project ID shared by this screen"
     value="#{screen.projectId}" editable="#{editable}">
     <ui:define name="data">
@@ -58,6 +59,7 @@
   </ss:property>
 
   <ss:property id="projectPhase" label="Project Phase"
+    rendered="#{appInfo.applicationProperties.facility != 'LINCS'}"
     description="'Primary','Counter', or 'Follow-Up'" value="#{screen.projectPhase}"
     editable="#{editable}"
     converter="#{projectPhaseConverter}">
@@ -102,6 +104,14 @@
 				value="A screen for compounds that..." styleClass="dataText" />
 		</ui:define>
 	</ss:property>
+ 
+  <!-- NOTE: this is the same property as found in entityViewerDetails, however, there it is admin-only.  LINCS-only,  for [#3110]  -->
+  <ss:property id="dateDataReceived" label="Date Data Received"
+    description="The date the data was received"
+    value="#{entity.dateCreated}" 
+    type="Date"
+    rendered="#{appInfo.applicationProperties.facility == 'LINCS' }" 
+    />      
 
 </ui:composition>
 

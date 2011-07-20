@@ -75,8 +75,6 @@ public class SmallMoleculeReagent extends Reagent
   private Set<Integer> _pubchemCids = Sets.newHashSet();
   private Set<Integer> _chembankIds = Sets.newHashSet();
   private Set<Integer> _chemblIds = Sets.newHashSet();
-  private String _vendorBatchId;
-  private Integer _facilityBatchId;
   private Integer _saltFormId;
   private boolean _isRestrictedStructure;
 
@@ -340,56 +338,6 @@ public class SmallMoleculeReagent extends Reagent
     _chemblIds = chemblIds;
   }
 
-  @org.hibernate.annotations.Type(type = "text")
-  @edu.harvard.med.screensaver.model.annotations.Column(hasNonconventionalSetterMethod = true)
-  // we don't want to include this LINCS-only property in the constructor
-  public String getVendorBatchId()
-  {
-    return _vendorBatchId;
-  }
-
-  @edu.harvard.med.screensaver.model.annotations.Column(hasNonconventionalSetterMethod = true)
-  // we don't want to include this LINCS-only property in the constructor
-  public Integer getFacilityBatchId()
-  {
-    return _facilityBatchId;
-  }
-
-  @edu.harvard.med.screensaver.model.annotations.Column(hasNonconventionalSetterMethod = true)
-  // we don't want to include this LINCS-only property in the constructor
-  public Integer getSaltFormId()
-  {
-    return _saltFormId;
-  }
-
-  /**
-   * @motivation for hibernate
-   */
-  private void setVendorBatchId(String vendorBatchId)
-  {
-    _vendorBatchId = vendorBatchId;
-  }
-
-  public SmallMoleculeReagent forVendorBatchId(String vendorBatchId)
-  {
-    _vendorBatchId = vendorBatchId;
-    return this;
-  }
-
-  /**
-   * @motivation for hibernate
-   */
-  private void setFacilityBatchId(Integer facilityBatchId)
-  {
-    _facilityBatchId = facilityBatchId;
-  }
-
-  public SmallMoleculeReagent forFacilityBatchId(Integer facilityBatchId)
-  {
-    _facilityBatchId = facilityBatchId;
-    return this;
-  }
-
   /**
    * @motivation for hibernate
    */
@@ -403,6 +351,13 @@ public class SmallMoleculeReagent extends Reagent
   {
     _saltFormId = saltFormId;
     return this;
+  }
+
+  @edu.harvard.med.screensaver.model.annotations.Column(hasNonconventionalSetterMethod = true)
+  // we don't want to include this LINCS-only property in the constructor
+  public Integer getSaltFormId()
+  {
+    return _saltFormId;
   }
 
   @Column(name = "is_restricted_structure", nullable = false)

@@ -46,7 +46,13 @@
             <t:commandLink id="downloadAttachedFileCommandLink"
               value="#{element.filename}"
               action="#{attachedFiles.downloadAttachedFile}"
-              styleClass="dataText" />
+              styleClass="dataText" 
+              rendered="#{! element.restricted}"
+              />
+            <t:outputText  id="attachedFileCommandName"
+              value="#{element.filename}"
+              rendered="#{element.restricted}"
+              />
           </t:column>
           <t:column>
             <f:facet name="header">

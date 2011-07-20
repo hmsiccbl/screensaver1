@@ -1,4 +1,6 @@
-// $HeadURL$
+// $HeadURL:
+// http://seanderickson1@forge.abcd.harvard.edu/svn/screensaver/branches/lincs/ui-cleanup/core/src/main/java/edu/harvard/med/screensaver/io/screenresults/ScreenResultImporter.java
+// $
 // $Id$
 //
 // Copyright © 2006, 2010 by the President and Fellows of Harvard College.
@@ -56,9 +58,8 @@ public class ScreenResultImporter extends CommandLineApplication
 
   protected static final String SCREEN_RESULT_IMPORTER_SPRING_CONFIGURATION = "spring-context-screen-result-parser-app.xml";
 
-
   @SuppressWarnings("static-access")
-  public static void main(String[] args) throws FileNotFoundException
+  public static void main(String[] args) 
   {
     ScreenResultImporter app = new ScreenResultImporter(args);
     app.addCommandLineOption(OptionBuilder.hasArg()
@@ -109,91 +110,85 @@ public class ScreenResultImporter extends CommandLineApplication
                              .create(DELETE_EXISTING[SHORT_OPTION]));
 
     File inputFile = null;
+    app.processOptions(/* acceptDatabaseOptions= */true,
+                       /* acceptAdminUserOptions= */true);
     try {
-      app.processOptions(/* acceptDatabaseOptions= */true,
-                         /* acceptAdminUserOptions= */true);
-      GenericEntityDAO dao = (GenericEntityDAO) app.getSpringBean("genericEntityDao");
-
-      // if parse-only mode is requested, use a spring configuration that does not have a database dependency
-      if (!app.isCommandLineFlagSet(IMPORT_OPTION[SHORT_OPTION])) {
-        app.setSpringConfigurationResource(SCREEN_RESULT_IMPORTER_SPRING_CONFIGURATION);
-      }
-
-      inputFile = app.getCommandLineOptionValue(INPUT_FILE_OPTION[SHORT_OPTION],
-                                                           File.class);
-
-      IntRange plateNumberRange = null;
-      if (app.isCommandLineFlagSet(PLATE_NUMBER_START_OPTION[SHORT_OPTION]) &&
-        app.isCommandLineFlagSet(PLATE_NUMBER_END_OPTION[SHORT_OPTION])) {
-        plateNumberRange = 
-          new IntRange(app.getCommandLineOptionValue(PLATE_NUMBER_START_OPTION[SHORT_OPTION], Integer.class),
-                       app.getCommandLineOptionValue(PLATE_NUMBER_END_OPTION[SHORT_OPTION], Integer.class));
-        log.info("will parse/load plates " + plateNumberRange);
-      }
-      final IntRange finalPlateNumberRange = plateNumberRange;
-
-      String screenFacilityId = app.getCommandLineOptionValue(SCREEN_OPTION[SHORT_OPTION]);
-      Screen screen = dao.findEntityByProperty(Screen.class, Screen.facilityId.getPropertyName(), screenFacilityId);
-      if (screen == null) {
-        throw new EntityNotFoundException(Screen.class, screenFacilityId);
-      }
-      
-      Workbook workbook = new Workbook(inputFile);
-
-      try {
-        ScreenResultLoader screenResultLoader = (ScreenResultLoader) app.getSpringBean("screenResultLoader");
-        
-        screenResultLoader.setIgnoreDuplicateErrors(app.isCommandLineFlagSet(IGNORE_DUPLICATE_ERRORS_OPTION[SHORT_OPTION]));
-        
-        boolean incrementalFlush = true;
-        if(app.isCommandLineFlagSet(INCREMENTAL_FLUSH_OPTION[SHORT_OPTION])){
-          log.info("get incrementalFlush value");
-          incrementalFlush = app.getCommandLineOptionValue(INCREMENTAL_FLUSH_OPTION[SHORT_OPTION],Boolean.class);
+      execute(app);
+    }
+    catch (ParseErrorsException e) {
+      if (!e.getErrors().isEmpty()) {
+        for (ParseError pe : e.getErrors()) {
+          log.error("" + pe);
         }
-        
-        log.info("incrementalFlush: " + incrementalFlush);
+        log.error("" + e.getErrors().size() + " errors found.");
+      }
+      System.exit(1);
+    }
+    catch (Exception e) {
+      log.error("Failed to create the screen", e);
+      System.exit(1);
+    }
 
-        AdministratorUser admin = app.findAdministratorUser();
-        deleteIfNecessary(app, screen, admin);
-        String comments = 
-          app.getCommandLineOptionValue(COMMENTS[SHORT_OPTION]);
-        screenResultLoader.parseAndLoad(screen,
-                                        workbook,
-                                        admin,
-                                        comments,
-                                        finalPlateNumberRange,
-                                        incrementalFlush);
-        System.exit(0);
-      }
-      catch (ParseErrorsException e) {
-        if (!e.getErrors().isEmpty()) { 
-          for(ParseError pe: e.getErrors()) {
-            log.error("" + pe);
-          }
-          log.error("" + e.getErrors().size() + " errors found.");
-        }
-      }    
-      catch (Exception e) {
-        log.error("application error: " + e.getMessage());
-        e.printStackTrace();
-      }
+  }
+
+  private static void execute(ScreenResultImporter app) throws EntityNotFoundException, FileNotFoundException, ParseException, ParseErrorsException
+  {
+    File inputFile;
+    GenericEntityDAO dao = (GenericEntityDAO) app.getSpringBean("genericEntityDao");
+
+    // if parse-only mode is requested, use a spring configuration that does not have a database dependency
+    if (!app.isCommandLineFlagSet(IMPORT_OPTION[SHORT_OPTION])) {
+      app.setSpringConfigurationResource(SCREEN_RESULT_IMPORTER_SPRING_CONFIGURATION);
     }
-    catch (FileNotFoundException e) {
-      String msg = "Screen result file not found: " + inputFile;
-      log.error(msg);
+
+    inputFile = app.getCommandLineOptionValue(INPUT_FILE_OPTION[SHORT_OPTION],
+                                                         File.class);
+
+    IntRange plateNumberRange = null;
+    if (app.isCommandLineFlagSet(PLATE_NUMBER_START_OPTION[SHORT_OPTION]) &&
+      app.isCommandLineFlagSet(PLATE_NUMBER_END_OPTION[SHORT_OPTION])) {
+      plateNumberRange =
+        new IntRange(app.getCommandLineOptionValue(PLATE_NUMBER_START_OPTION[SHORT_OPTION], Integer.class),
+                     app.getCommandLineOptionValue(PLATE_NUMBER_END_OPTION[SHORT_OPTION], Integer.class));
+      log.info("will parse/load plates " + plateNumberRange);
     }
-    catch (EntityNotFoundException e) {
-      log.error(e.getMessage());
+    final IntRange finalPlateNumberRange = plateNumberRange;
+
+    String screenFacilityId = app.getCommandLineOptionValue(SCREEN_OPTION[SHORT_OPTION]);
+    Screen screen = dao.findEntityByProperty(Screen.class, Screen.facilityId.getPropertyName(), screenFacilityId);
+    if (screen == null) {
+      throw new EntityNotFoundException(Screen.class, screenFacilityId);
     }
-    // if here, then error
-    System.exit(1);
+
+    Workbook workbook = new Workbook(inputFile);
+    ScreenResultLoader screenResultLoader = (ScreenResultLoader) app.getSpringBean("screenResultLoader");
+    screenResultLoader.setIgnoreDuplicateErrors(app.isCommandLineFlagSet(IGNORE_DUPLICATE_ERRORS_OPTION[SHORT_OPTION]));
+
+    boolean incrementalFlush = true;
+    if (app.isCommandLineFlagSet(INCREMENTAL_FLUSH_OPTION[SHORT_OPTION])) {
+      log.info("get incrementalFlush value");
+      incrementalFlush = app.getCommandLineOptionValue(INCREMENTAL_FLUSH_OPTION[SHORT_OPTION], Boolean.class);
+    }
+
+    log.info("incrementalFlush: " + incrementalFlush);
+
+    AdministratorUser admin = app.findAdministratorUser();
+    deleteIfNecessary(app, screen, admin);
+    String comments =
+      app.getCommandLineOptionValue(COMMENTS[SHORT_OPTION]);
+    screenResultLoader.parseAndLoad(screen,
+                                    workbook,
+                                    admin,
+                                    comments,
+                                    finalPlateNumberRange,
+                                    incrementalFlush);
   }
 
   private static void deleteIfNecessary(ScreenResultImporter app, Screen screen, AdministratorUser admin)
     throws ParseException
   {
     boolean deleteExisting = app.isCommandLineFlagSet(DELETE_EXISTING[SHORT_OPTION]);
-    if  (deleteExisting && screen.getScreenResult() != null) {
+    if (deleteExisting && screen.getScreenResult() != null) {
       ScreenResultDeleter screenResultDeleter = (ScreenResultDeleter) app.getSpringBean("screenResultDeleter");
       screenResultDeleter.deleteScreenResult(screen.getScreenResult(), admin);
     }
@@ -208,7 +203,8 @@ public class ScreenResultImporter extends CommandLineApplication
     }
     log.info("cleaning directory " + dir);
     Iterator<File> iterator = org.apache.commons.io.FileUtils.iterateFiles(dir,
-                                                                           new String[] {ERROR_ANNOTATED_WORKBOOK_FILE_EXTENSION, ".out"},
+                                                                           new String[] {
+                                                                             ERROR_ANNOTATED_WORKBOOK_FILE_EXTENSION, ".out" },
                                                                            false);
     while (iterator.hasNext()) {
       File fileToDelete = (File) iterator.next();
@@ -217,4 +213,3 @@ public class ScreenResultImporter extends CommandLineApplication
     }
   }
 }
-

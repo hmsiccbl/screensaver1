@@ -21,6 +21,7 @@ import javax.persistence.metamodel.SingularAttribute;
 import org.apache.log4j.Logger;
 
 import edu.harvard.med.screensaver.model.AbstractEntity;
+import edu.harvard.med.screensaver.test.model.meta.ModelIntrospectionUtil;
 
 /**
  * Tests that the identifier getter method is public, the identifier getter method is private,

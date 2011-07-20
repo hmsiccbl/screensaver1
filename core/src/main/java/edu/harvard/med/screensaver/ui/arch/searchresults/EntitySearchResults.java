@@ -131,44 +131,54 @@ public abstract class EntitySearchResults<E extends Entity<K>,R,K extends Serial
 
   protected UISelectOneBean<Integer> buildRowsPerPageSelector()
   {
-    if (isNested() || getEntityViewer() == null) {
-      return super.buildRowsPerPageSelector();
-    }
-    // note: we need a special "single" (1) selection item, for viewing the
-    // entity in its full viewer page
-    if (getRowsPerPageSelections().get(0) != 1) {
-      List<Integer> rowsPerPageSelections = Lists.newArrayList(getRowsPerPageSelections());
-      rowsPerPageSelections.add(0, 1);
-      setRowsPerPageSelections(rowsPerPageSelections);
-    }
-    UISelectOneBean<Integer> rowsPerPageSelector = new UISelectOneBean<Integer>(getRowsPerPageSelections(),
-                                                                                getDefaultRowsPerPage()) {
-      @Override
-      public String makeLabel(Integer value)
+    UISelectOneBean<Integer> rowsPerPageSelector;
+    if (getEntityViewer() == null) {
+      rowsPerPageSelector = super.buildRowsPerPageSelector();
+      _rowsPerPageSelectorObserver = new Observer()
       {
-        if (value.equals(1)) {
-          return "Single";
+        @Override
+        public void update(Observable o, Object arg)
+        {
         }
-        else {
-          return super.makeLabel(value);
-        }
+      };
+    }
+    else {
+      // note: we need a special "single" (1) selection item, for viewing the
+      // entity in its full viewer page
+      if (getRowsPerPageSelections().get(0) != 1) {
+        List<Integer> rowsPerPageSelections = Lists.newArrayList(getRowsPerPageSelections());
+        rowsPerPageSelections.add(0, 1);
+        setRowsPerPageSelections(rowsPerPageSelections);
       }
-    };
-
-    _rowsPerPageSelectorObserver = new Observer() {
-      public void update(Observable obs, Object o)
-      {
-        if (((Integer) o) == 1) {
-          int firstRow = 0;
-          if (getDataTableUIComponent() != null) {
-            firstRow = getDataTableUIComponent().getFirst();
+      rowsPerPageSelector = new UISelectOneBean<Integer>(getRowsPerPageSelections(), getDefaultRowsPerPage()) {
+        @Override
+        public String makeLabel(Integer value)
+        {
+          if (value.equals(1)) {
+            return "Single";
           }
-          log.debug("entering 'entity view' mode; setting data table row to first row on page:" + firstRow);
-          getDataTableModel().setRowIndex(firstRow);
-          viewSelectedEntity();
+          else {
+            return super.makeLabel(value);
+          }
         }
-      }
-    };
+      };
+
+      _rowsPerPageSelectorObserver = new Observer() {
+        public void update(Observable obs, Object o)
+        {
+          if (((Integer) o) == 1) {
+            int firstRow = 0;
+            if (getDataTableUIComponent() != null) {
+              firstRow = getDataTableUIComponent().getFirst();
+            }
+            log.debug("entering 'entity view' mode; setting data table row to first row on page:" + firstRow);
+            getDataTableModel().setRowIndex(firstRow);
+            viewSelectedEntity();
+          }
+        }
+      };
+    }
+
     rowsPerPageSelector.addObserver(_rowsPerPageSelectorObserver);
 
     return rowsPerPageSelector;
@@ -205,7 +215,7 @@ public abstract class EntitySearchResults<E extends Entity<K>,R,K extends Serial
 
   public boolean isEntityView()
   {
-    if (isNested() || getEntityViewer() == null) {
+    if (getEntityViewer() == null) {
       return false;
     }
     return getRowsPerPage() == 1 && getRowCount() > 0;

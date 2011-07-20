@@ -21,6 +21,7 @@ import com.google.common.collect.Sets;
 import org.apache.log4j.Logger;
 import org.joda.time.LocalDate;
 
+import edu.harvard.med.lincs.screensaver.LincsScreensaverConstants;
 import edu.harvard.med.screensaver.db.GenericEntityDAO;
 import edu.harvard.med.screensaver.db.SortDirection;
 import edu.harvard.med.screensaver.db.datafetcher.EntityDataFetcher;
@@ -42,6 +43,7 @@ import edu.harvard.med.screensaver.ui.arch.datatable.Criterion.Operator;
 import edu.harvard.med.screensaver.ui.arch.datatable.column.DateColumn;
 import edu.harvard.med.screensaver.ui.arch.datatable.column.TableColumn;
 import edu.harvard.med.screensaver.ui.arch.datatable.column.entity.BooleanEntityColumn;
+import edu.harvard.med.screensaver.ui.arch.datatable.column.entity.DateEntityColumn;
 import edu.harvard.med.screensaver.ui.arch.datatable.column.entity.EnumEntityColumn;
 import edu.harvard.med.screensaver.ui.arch.datatable.column.entity.IntegerEntityColumn;
 import edu.harvard.med.screensaver.ui.arch.datatable.column.entity.TextEntityColumn;
@@ -146,7 +148,7 @@ public class LibrarySearchResults extends EntityBasedEntitySearchResults<Library
       public Object cellAction(Library library) { return viewSelectedEntity(); }
     });
     columns.add(new TextEntityColumn<Library>(RelationshipPath.from(Library.class).toProperty("libraryName"),
-      "Library Name", "The full name of the library", TableColumn.UNGROUPED) {
+                                              "Library Name", "The full name of the library", TableColumn.UNGROUPED) {
       @Override
       public String getCellValue(Library library)
       {
@@ -154,52 +156,54 @@ public class LibrarySearchResults extends EntityBasedEntitySearchResults<Library
       }
     });
 
-    // [#3105] create column linkable to wellsearchresults
-    if(getApplicationProperties().isLincsAppVersion())
-    {
-      IntegerEntityColumn column = new IntegerEntityColumn<Library>(
-        Library.startPlate,
-        "Experimental Well Count", 
-        "The number of experimental wells in the in the library", 
-        TableColumn.UNGROUPED) {
-        @Override
-        public Integer getCellValue(Library library)
-        {
-          return library.getExperimentalWellCount();
-        }
-        @Override
-        public boolean isCommandLink()
-        {
-          return true;
-        }
-        public Object cellAction(Library library) 
-        { 
-          _wellsBrowser.searchWellsForLibrary(library);
-          return BROWSE_WELLS;
-        }
-      };
-      columns.add(column);
-    }
-    
-    columns.add(new TextEntityColumn<Library>(RelationshipPath.from(Library.class).toProperty("provider"),
-                                              "Provider",
-                                              "The vendor or source that provided the library",
-                                              TableColumn.UNGROUPED) {
+    IntegerEntityColumn column = new IntegerEntityColumn<Library>(Library.startPlate,
+                                                                  "Experimental Well Count",
+                                                                  "The number of experimental wells in the library (click link to browse experimental wells)",
+                                                                  TableColumn.UNGROUPED) {
       @Override
-      public String getCellValue(Library library)
+      public Integer getCellValue(Library library)
       {
-        return library.getProvider();
+        return library.getExperimentalWellCount();
       }
-    });
+
+      @Override
+      public boolean isCommandLink()
+      {
+        return true;
+      }
+
+      public Object cellAction(Library library)
+      {
+        _wellsBrowser.searchWellsForLibrary(library);
+        return BROWSE_WELLS;
+      }
+    };
+    columns.add(column);
+    
+    if (!!!LincsScreensaverConstants.FACILITY_NAME.equals(getApplicationProperties().getFacility()) ||
+      !!!getScreensaverUser().isUserInRole(ScreensaverUserRole.GUEST)) {
+      columns.add(new TextEntityColumn<Library>(RelationshipPath.from(Library.class).toProperty("provider"),
+                                                "Provider",
+                                                "The vendor or source that provided the library",
+                                                TableColumn.UNGROUPED) {
+        @Override
+        public String getCellValue(Library library)
+        {
+          return library.getProvider();
+        }
+      });
+    }
+
     columns.add(new EnumEntityColumn<Library,ScreenType>(RelationshipPath.from(Library.class).toProperty("screenType"),
-      "Screen Type", "'RNAi' or 'Small Molecule'",
-      TableColumn.UNGROUPED, ScreenType.values()) {
+                                                         "Screen Type", "'RNAi' or 'Small Molecule'",
+                                                         TableColumn.UNGROUPED, ScreenType.values()) {
       @Override
       public ScreenType getCellValue(Library library)
       {
         return library.getScreenType();
       }
     });
+
     columns.add(new EnumEntityColumn<Library,Solvent>(RelationshipPath.from(Library.class).toProperty("solvent"),
                                                       "Solvent",
                                                       "Solvent used in the library wells",
@@ -212,25 +216,29 @@ public class LibrarySearchResults extends EntityBasedEntitySearchResults<Library
       }
     });
     Iterables.getLast(columns).setVisible(false);
-    columns.add(new EnumEntityColumn<Library,LibraryType>(RelationshipPath.from(Library.class).toProperty("libraryType"),
-      "Library Type", "The type of library, e.g., 'Commercial', 'Known Bioactives', 'siRNA', etc.",
-      TableColumn.UNGROUPED, LibraryType.values()) {
-      @Override
-      public LibraryType getCellValue(Library library)
-      {
-        return library.getLibraryType();
-      }
-    });
-    columns.add(new BooleanEntityColumn<Library>(RelationshipPath.from(Library.class).toProperty("pool"),
-      "Is Pool", 
-      "Whether wells contains pools of reagents or single reagents",
-      TableColumn.UNGROUPED) {
-      @Override
-      public Boolean getCellValue(Library library)
-      {
-        return library.isPool();
-      }
-    });
+
+    if (!!!LincsScreensaverConstants.FACILITY_NAME.equals(getApplicationProperties().getFacility())) {
+      columns.add(new EnumEntityColumn<Library,LibraryType>(RelationshipPath.from(Library.class).toProperty("libraryType"),
+                                                            "Library Type", "The type of library, e.g., 'Commercial', 'Known Bioactives', 'siRNA', etc.",
+                                                            TableColumn.UNGROUPED, LibraryType.values()) {
+        @Override
+        public LibraryType getCellValue(Library library)
+        {
+          return library.getLibraryType();
+        }
+      });
+
+      columns.add(new BooleanEntityColumn<Library>(RelationshipPath.from(Library.class).toProperty("pool"),
+                                                   "Is Pool",
+                                                   "Whether wells contains pools of reagents or single reagents",
+                                                   TableColumn.UNGROUPED) {
+        @Override
+        public Boolean getCellValue(Library library)
+        {
+          return library.isPool();
+        }
+      });
+    }
     columns.add(new IntegerEntityColumn<Library>(
       Library.startPlate,
       "Start Plate", 
@@ -242,9 +250,11 @@ public class LibrarySearchResults extends EntityBasedEntitySearchResults<Library
         return library.getStartPlate();
       }
     });
-    columns.add(new IntegerEntityColumn<Library>(
-                                                 Library.endPlate,
-      "End Plate", "The plate number for the last plate in the library", TableColumn.UNGROUPED) {
+
+    columns.add(new IntegerEntityColumn<Library>(Library.endPlate,
+                                                 "End Plate",
+                                                 "The plate number for the last plate in the library",
+                                                 TableColumn.UNGROUPED) {
       @Override
       public Integer getCellValue(Library library)
       {
@@ -252,23 +262,26 @@ public class LibrarySearchResults extends EntityBasedEntitySearchResults<Library
       }
     });
 
-    columns.add(new TextSetEntityColumn<Library>(Library.copies.toProperty("name"),
-                                                 "Copies",
-                                                 "The copies that have been made of this library",
-                                                 TableColumn.UNGROUPED) {
-      @Override
-      public Set<String> getCellValue(Library library)
-      {
-        if (library == null) {
-          return null;
+    if (!!!LincsScreensaverConstants.FACILITY_NAME.equals(getApplicationProperties().getFacility())) {
+      columns.add(new TextSetEntityColumn<Library>(Library.copies.toProperty("name"),
+                                                   "Copies",
+                                                   "The copies that have been made of this library",
+                                                   TableColumn.UNGROUPED) {
+        @Override
+        public Set<String> getCellValue(Library library)
+        {
+          if (library == null) {
+            return null;
+          }
+          return Sets.newTreeSet(Iterables.transform(library.getCopies(), Copy.ToName));
         }
-        return Sets.newTreeSet(Iterables.transform(library.getCopies(), Copy.ToName));
-      }
-    });
-    columns.get(columns.size() - 1).setAdministrative(true);
+      });
+      columns.get(columns.size() - 1).setAdministrative(true);
+    }
 
     columns.add(new EnumEntityColumn<Library,LibraryScreeningStatus>(RelationshipPath.from(Library.class).toProperty("screeningStatus"),
-                                                                     "Screening Status", "Screening status for the library, e.g., 'Allowed','Not Allowed', 'Not Yet Plated', etc.",
+                                                                     "Screening Status",
+                                                                     "Screening status for the library, e.g., 'Allowed', 'Not Allowed', 'Not Yet Plated', etc.",
                                                                      TableColumn.UNGROUPED,
                                                                      LibraryScreeningStatus.values()) {
       @Override
@@ -288,6 +301,19 @@ public class LibrarySearchResults extends EntityBasedEntitySearchResults<Library
         return library.getDateScreenable();
       }
     });
+    
+    if (LincsScreensaverConstants.FACILITY_NAME.equals(getApplicationProperties().getFacility())) {
+      columns.add(new DateEntityColumn<Library>(RelationshipPath.from(Library.class).toProperty("dateCreated"),
+                                                "Date Data Received",
+                                                "The date the data was received",
+                                                TableColumn.UNGROUPED) {
+        @Override
+        protected LocalDate getDate(Library library)
+        {
+          return library.getDateCreated().toLocalDate();
+        }
+      });
+    }
 
 //    TableColumnManager<Library> columnManager = getColumnManager();
 //    columnManager.addCompoundSortColumns(columnManager.getColumn("Screen Type"),

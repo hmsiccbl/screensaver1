@@ -17,8 +17,6 @@ import com.google.common.collect.Iterables;
 import org.apache.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
 
-import edu.harvard.med.screensaver.AbstractSpringPersistenceTest;
-import edu.harvard.med.screensaver.model.MakeDummyEntities;
 import edu.harvard.med.screensaver.model.libraries.Library;
 import edu.harvard.med.screensaver.model.libraries.Well;
 import edu.harvard.med.screensaver.model.screenresults.AnnotationType;
@@ -27,6 +25,8 @@ import edu.harvard.med.screensaver.model.screens.Screen;
 import edu.harvard.med.screensaver.model.screens.ScreenType;
 import edu.harvard.med.screensaver.model.screens.StudyType;
 import edu.harvard.med.screensaver.model.users.LabHead;
+import edu.harvard.med.screensaver.test.AbstractSpringPersistenceTest;
+import edu.harvard.med.screensaver.test.MakeDummyEntities;
 
 
 /**
@@ -52,6 +52,7 @@ public class ScreenDAOTest extends AbstractSpringPersistenceTest
 
     genericEntityDao.doInTransaction(new DAOTransaction()
     {
+
       public void runTransaction()
       {
         screenDao.deleteStudy(genericEntityDao.findEntityByProperty(Screen.class, Screen.facilityId.getPropertyName(), "1"));

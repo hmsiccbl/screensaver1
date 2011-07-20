@@ -12,12 +12,12 @@ package edu.harvard.med.screensaver.model.users;
 import java.security.Principal;
 import java.util.Set;
 
+import com.google.common.base.Function;
+import com.google.common.collect.Sets;
+
 import edu.harvard.med.screensaver.model.VocabularyTerm;
 import edu.harvard.med.screensaver.model.VocabularyUserType;
 import edu.harvard.med.screensaver.model.libraries.LibraryScreeningStatus;
-
-import com.google.common.base.Function;
-import com.google.common.collect.Sets;
 
 
 /**
@@ -43,6 +43,8 @@ public enum ScreensaverUserRole implements VocabularyTerm, Principal
   // 1) accounts to be activated and deactivated
   // 2) guest accounts to be created (i.e., with no other roles) 
   SCREENSAVER_USER("screensaverUser", "Screensaver User Login", "Basic role for users, admins, and guests that have login privileges to Screensaver.  The person may or may not be a user of the screening facility."),
+  GUEST("guest", "Guest", "User that does not have an explicit account in the system and can only view public data"),
+  LINCS_COLLABORATOR("lincsCollaborator", "LINCS Collaborator", "User may view all LINCS data, including restricted data"),
 
   READ_EVERYTHING_ADMIN("readEverythingAdmin", "Read Everything Administrator", "Administrators that can view and search over data of all categories, except screen billing information."),
   
@@ -60,7 +62,7 @@ public enum ScreensaverUserRole implements VocabularyTerm, Principal
 
   MARCUS_ADMIN("marcusAdmin", "Marcus Screens Administrator", READ_EVERYTHING_ADMIN, "Administrators that have access to Marcus library-related screens (only)."),
   GRAY_ADMIN("grayAdmin", "Gray Screens Administrator", READ_EVERYTHING_ADMIN, "Administrators that have access to Gray library-related screens (only)."),
-
+  
   SM_DSL_LEVEL3_SHARED_SCREENS("smDsl3SharedScreens", "Small Molecule Screens Level 3", "Small molecule screeners that can view shared small molecule screens."),
   SM_DSL_LEVEL2_MUTUAL_POSITIVES("smDsl2MutualPositives", "Small Molecule Screens Level 2", SM_DSL_LEVEL3_SHARED_SCREENS, "Small molecule screeners that can view each others' screen result \"positives\" data, with associated screen summary information."),
   SM_DSL_LEVEL1_MUTUAL_SCREENS("smDsl1MutualScreens", "Small Molecule Screens Level 1", SM_DSL_LEVEL2_MUTUAL_POSITIVES, "Small molecule screeners that can view each others' screen information and screen result data."),
@@ -68,7 +70,7 @@ public enum ScreensaverUserRole implements VocabularyTerm, Principal
   RNAI_SCREENS("rnaiScreens", "RNAi Screens", "RNAi screeners that view RNAi screens."),
 
   // note: developers do not automatically get admin roles (other than readEverythingAdmin), allowing developers to restrict themselves from mutating data in production environments
-  DEVELOPER("developer", "Developer", READ_EVERYTHING_ADMIN, "Special users that have permission to invoke development-related functionality and view low-level system information.")
+  DEVELOPER("developer", "Developer", READ_EVERYTHING_ADMIN, "Special users that have permission to invoke development-related functionality and view low-level system information."),
   ;
 
   // static inner class

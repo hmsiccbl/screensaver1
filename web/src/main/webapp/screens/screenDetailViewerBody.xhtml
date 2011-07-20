@@ -88,7 +88,8 @@ TODO:
     </ss:screenSummaryProperties>
 
     <ss:property id="collaborators" label="Collaborators"
-      description="Other users involved in carrying out the screen">
+      description="Other users involved in carrying out the screen"
+      rendered="#{appInfo.applicationProperties.facility != 'LINCS'}">
       <ui:define name="data">
         <ss:collectionTable id="collaboratorsTable"
           editable="#{screenDetailViewer.editMode}"
@@ -319,7 +320,7 @@ TODO:
     <ss:property id="totalPlatedLabCherryPicksCount"
       label="Total Plated Cherry Picks"
       value="#{screenDetailViewer.entity.totalPlatedLabCherryPicks}"
-      rendered="#{screenDetailViewer.allowedAccessToScreenDetails &amp;&amp; !screenDetailViewer.editMode}"
+      rendered="#{screenDetailViewer.allowedAccessToScreenDetails &amp;&amp; !screenDetailViewer.editMode &amp;&amp; appInfo.applicationProperties.facility != 'LINCS'}"
       description="The number of lab cherry picks that have been plated to date, for all cherry pick requests" />
       
     <ss:property id="keywords"
@@ -499,7 +500,7 @@ TODO:
 
   <ui:define name="tablesContent">
     <ss:property id="statusItems" label="Status Items"
-      rendered="#{screenDetailViewer.allowedAccessToScreenActivity}"
+      rendered="#{screenDetailViewer.allowedAccessToScreenActivity &amp;&amp; appInfo.applicationProperties.facility != 'LINCS'}"
       description="A record of the status of the screen, such as when it was accepted, and whether it is ongoing, completed or dropped">
       <ui:define name="data">
         <ss:collectionTable id="statusItemsTable"
@@ -548,7 +549,7 @@ TODO:
     </ss:property>
 
     <ss:property id="labActivities" label="Lab Activities Summary"
-      rendered="#{screenDetailViewer.allowedAccessToScreenActivity &amp;&amp; !screenDetailViewer.editMode}"
+      rendered="#{screenDetailViewer.allowedAccessToScreenActivity &amp;&amp; !screenDetailViewer.editMode &amp;&amp; appInfo.applicationProperties.facility != 'LINCS'}"
       description="Activities carried out in the lab (e.g., screening a library, creating an assay plate, etc.)">
       <ui:define name="data">
         <t:panelGrid columns="2"
@@ -583,7 +584,7 @@ TODO:
     </ss:property>
 
     <ss:property id="cherryPickRequests" label="Recent Cherry Pick Requests"
-      rendered="#{screenDetailViewer.allowedAccessToScreenActivity &amp;&amp; !screenDetailViewer.editMode}"
+      rendered="#{screenDetailViewer.allowedAccessToScreenActivity &amp;&amp; !screenDetailViewer.editMode &amp;&amp; appInfo.applicationProperties.facility != 'LINCS'}"
       description="The cherry pick requests for this screen">
       <ui:define name="data">
         <t:panelGrid columns="1">

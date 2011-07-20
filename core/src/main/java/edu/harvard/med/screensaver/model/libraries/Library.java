@@ -133,7 +133,6 @@ public class Library extends AuditedAbstractEntity<Integer>
   private Integer _experimentalWellCount = new Integer(0);	
   private SortedSet<LibraryContentsVersion> _contentsVersions = Sets.newTreeSet();
   private LibraryContentsVersion _latestReleasedContentsVersion;	
-  private String _qualityControlInformation;  
 
 
   // public constructor
@@ -811,20 +810,5 @@ public class Library extends AuditedAbstractEntity<Integer>
                                          assayPlates));
     }
     return libraryPlates;
-  }
-
-  /**
-   * LINCS feature
-   * NOTE: this will be used to store LCMS information ("Liquid chromatography-mass spectrometry")
-   */
-  public void setQualityControlInformation(String qualityControlInformation)
-  {
-    _qualityControlInformation = qualityControlInformation;
-  }
-
-  @org.hibernate.annotations.Type(type = "text")
-  public String getQualityControlInformation()
-  {
-    return _qualityControlInformation;
   }
 }

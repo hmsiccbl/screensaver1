@@ -39,7 +39,6 @@ import edu.harvard.med.screensaver.db.Query;
 import edu.harvard.med.screensaver.db.SortDirection;
 import edu.harvard.med.screensaver.db.datafetcher.Tuple;
 import edu.harvard.med.screensaver.db.datafetcher.TupleDataFetcher;
-import edu.harvard.med.screensaver.model.MakeDummyEntities;
 import edu.harvard.med.screensaver.model.libraries.Library;
 import edu.harvard.med.screensaver.model.libraries.MolecularFormula;
 import edu.harvard.med.screensaver.model.libraries.SmallMoleculeReagent;
@@ -53,6 +52,7 @@ import edu.harvard.med.screensaver.model.screens.Screen;
 import edu.harvard.med.screensaver.model.screens.ScreenType;
 import edu.harvard.med.screensaver.model.screens.Study;
 import edu.harvard.med.screensaver.model.users.AdministratorUser;
+import edu.harvard.med.screensaver.test.MakeDummyEntities;
 import edu.harvard.med.screensaver.ui.arch.datatable.Criterion;
 import edu.harvard.med.screensaver.ui.arch.datatable.Criterion.Operator;
 import edu.harvard.med.screensaver.ui.arch.datatable.column.TableColumn;
@@ -201,7 +201,7 @@ public class WellSearchResultsTest extends AbstractBackingBeanTest
   public void testEntitySet()
   {
     WellSearchResults wsr = wellsBrowser;
-    wsr.searchWells(_bigWellKeys);
+    wsr.searchWells(_bigWellKeys, "title");
     setOrderBy(wsr);
     DataTableModel model = wsr.getDataTableModel();
     verifySearchResult(wsr, model, _bigWellKeys);
@@ -246,7 +246,7 @@ public class WellSearchResultsTest extends AbstractBackingBeanTest
                            columns);
 
     SortedSet<WellKey> expectedWellKeys = _bigWellKeys.headSet(new WellKey("01001:A01"));
-    wsr.searchWells(expectedWellKeys);
+    wsr.searchWells(expectedWellKeys, "title");
     verifyScreenResultData(wsr,
                            expectedWellKeys,
                            columns);

@@ -114,7 +114,8 @@
   
   <bean
     id="usersDao"
-    class="edu.harvard.med.screensaver.db.UsersDAO">
+    class="edu.harvard.med.screensaver.db.UsersDAOImpl">
+    <constructor-arg ref="genericEntityDao" />
   </bean>
 
   <bean

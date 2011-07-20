@@ -247,14 +247,17 @@ public class HqlBuilder
 
   public SimplePredicate simplePredicate(String lhs, Operator operator, Object value)
   {
-    SimplePredicate simplePredicate = new SimplePredicate(this, lhs, operator, value);
-    return simplePredicate;
+    return new SimplePredicate(this, lhs, operator, value);
+  }
+
+  public SimplePredicate simplePredicate(String lhs, String property, Operator operator, Object value)
+  {
+    return new SimplePredicate(this, makeRef(lhs, property), operator, value);
   }
 
   public SimplePredicate simplePredicate(String lhs, String rhs, Operator operator)
   {
-    SimplePredicate simplePredicate = new SimplePredicate(this, lhs, rhs, operator);
-    return simplePredicate;
+    return new SimplePredicate(this, lhs, rhs, operator);
   }
 
   public HqlBuilder orderBy(String alias, String property)

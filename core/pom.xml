@@ -3,15 +3,15 @@
   xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
   xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
   <modelVersion>4.0.0</modelVersion>
-  <parent> 
-    <artifactId>screensaver</artifactId> 
-    <groupId>edu.harvard.med</groupId> 
-    <version>2011-06-20</version> 
-  </parent> 
+  <parent>
+    <artifactId>screensaver</artifactId>
+    <groupId>edu.harvard.med</groupId>
+    <version>2011-07-19</version>
+  </parent>
 
   <groupId>edu.harvard.med</groupId>
   <artifactId>screensaver-core</artifactId>
-  <version>2011-06-20</version>
+  <version>2011-07-19</version>
   <name>Screensaver Core</name>
 
   <packaging>jar</packaging>
@@ -27,34 +27,29 @@
 
     <plugins>
 
-      <!-- by building the core module's test jar directly into the core/target/ dir, the web module's tests will find their class dependencies without having to first run the "install" phase, which doesn't get run at all if you're just running through the "package" phase, causing the web test-compile phase to fail -->
-      <!-- note that to run junit tests on the web module, you will still need to run the "test" phase (or greater) on the core module, so that the core test jar is generated -->
-      <!-- see http://stackoverflow.com/questions/1725476/maven-test-dependency-in-multi-module-project#2532486 -->
-       <plugin>
-         <groupId>org.apache.maven.plugins</groupId>
-         <artifactId>maven-jar-plugin</artifactId>
-         <executions>
-           <execution>
-             <goals>
-               <goal>test-jar</goal>
-             </goals>
-             <phase>test-compile</phase>
-           </execution>
-         </executions>
-         <configuration>
-           <outputDirectory>${basedir}/target</outputDirectory>
-         </configuration>
-      </plugin>
-
       <plugin>
         <groupId>org.apache.maven.plugins</groupId>
         <artifactId>maven-surefire-plugin</artifactId>
         <configuration>
-         <goal>test</goal>
+          <goal>test</goal>
           <excludes>
             <exclude>**/EntityPropertyTest.java</exclude>
           </excludes>
         </configuration>
+      </plugin>
+
+      <plugin>
+        <groupId>org.zeroturnaround</groupId>
+        <artifactId>jrebel-maven-plugin</artifactId>
+        <executions>
+          <execution>
+            <id>generate-rebel-xml</id>
+            <phase>process-resources</phase>
+            <goals>
+              <goal>generate</goal>
+            </goals>
+          </execution>
+        </executions>
       </plugin>
 
       <plugin>
@@ -64,9 +59,7 @@
         <version>2.2</version>
         <executions>
           <execution>
-          <!-- 
-            <phase>package</phase>
-             -->
+            <!-- <phase>package</phase> -->
             <goals>
               <goal>hbm2ddl</goal>
             </goals>
@@ -89,6 +82,15 @@
           </componentProperties>
         </configuration>
         <dependencies>
+
+<!-- 
+          <dependency>
+            <groupId>edu.harvard.med</groupId>
+            <artifactId>screensaver-test</artifactId>
+            <version>2011-07-19</version>
+            <scope>test</scope>
+          </dependency>
+-->
           <!-- NOTE: the hibernate dependencies have to be included here or the process will complain with exceptions like: org.hibernate.MappingException: 
             Could not determine type for: java.util.Set -->
           <dependency>
@@ -96,12 +98,8 @@
             <artifactId>hibernate-core</artifactId>
             <version>${hibernate-core.version}</version>
           </dependency>
-          <!-- 
-          <dependency>
-            <groupId>org.hibernate</groupId>
-            <artifactId>hibernate-validator</artifactId>
-            <version>${hibernate-validator-version}</version>
-          </dependency>  -->
+          <!-- <dependency> <groupId>org.hibernate</groupId> <artifactId>hibernate-validator</artifactId> <version>${hibernate-validator-version}</version> 
+            </dependency> -->
           <dependency>
             <groupId>org.hibernate</groupId>
             <artifactId>hibernate-entitymanager</artifactId>
@@ -113,106 +111,7 @@
     </plugins>
   </build>
 
-  <properties>
-    <org.springframework.version>3.0.5.RELEASE</org.springframework.version>
-    <hibernate-core.version>3.6.2.Final</hibernate-core.version>
-    <!--hibernate-validator-version>4.1.0.Final</hibernate-validator-version-->
-    <hibernate-entity-manager-version>3.6.0.Final</hibernate-entity-manager-version>
-  </properties>
-
-  <repositories>
-    <repository>
-      <id>com.springsource.repository.bundles.release</id>
-      <name>EBR Spring Release Repository</name>
-      <url>http://repository.springsource.com/maven/bundles/release</url>
-    </repository>
-
-    <repository>
-      <id>com.springsource.repository.bundles.external</id>
-      <name>EBR External Release Repository</name>
-      <url>http://repository.springsource.com/maven/bundles/external</url>
-    </repository>
-
-    <repository>
-      <id>JBoss</id>
-      <name>JBoss repository</name>
-      <url>https://repository.jboss.org/nexus/content/groups/public</url>
-    </repository>
-  </repositories>
-
   <dependencies>
-
-    <!-- "0_" prefix allows this to be found in classpath before hibernate-core*.jar -->
-    <!-- NOTE: this file must be added to the local repository with: 
-         mvn install:install-file -DgroupId=edu.harvard.med.iccbl -DartifactId=hibernate-core-patch -Dversion=3.6.2.Final-patch -Dpackaging=jar -Dfile=target/0_hibernate-core-patch-3.6.2.Final-patch.jar
-    -->
-    <dependency>
-      <groupId>edu.harvard.med.iccbl</groupId>
-      <artifactId>0_hibernate-core-patch</artifactId>
-      <version>${hibernate-core.version}</version>
-    </dependency>
-
-    <dependency>
-      <groupId>org.hibernate</groupId>
-      <artifactId>hibernate-core</artifactId>
-      <version>${hibernate-core.version}</version>
-    </dependency>
-
-<!-- 
-    <dependency>
-      <groupId>org.hibernate</groupId>
-      <artifactId>hibernate-validator</artifactId>
-      <version>${hibernate-validator-version}</version>
-    </dependency>
- -->
-    <dependency>
-      <groupId>org.hibernate</groupId>
-      <artifactId>hibernate-entitymanager</artifactId>
-      <version>${hibernate-entity-manager-version}</version>
-    </dependency>
-
-    <dependency>
-      <groupId>commons-dbcp</groupId>
-      <artifactId>commons-dbcp</artifactId>
-      <version>1.2.2</version>
-    </dependency>
-
-    <dependency>
-      <groupId>org.slf4j</groupId>
-      <artifactId>slf4j-log4j12</artifactId>
-      <version>1.6.1</version>
-    </dependency>
-
-    <!-- Spring -->
-    <dependency>
-      <groupId>org.springframework</groupId>
-      <artifactId>spring-core</artifactId>
-      <version>${org.springframework.version}</version>
-    </dependency>
-
-    <dependency>
-      <groupId>org.springframework</groupId>
-      <artifactId>spring-beans</artifactId>
-      <version>${org.springframework.version}</version>
-    </dependency>
-
-    <dependency>
-      <groupId>org.springframework</groupId>
-      <artifactId>spring-context</artifactId>
-      <version>${org.springframework.version}</version>
-    </dependency>
-
-    <dependency>
-      <groupId>org.springframework</groupId>
-      <artifactId>spring-orm</artifactId>
-      <version>${org.springframework.version}</version>
-    </dependency>
-
-    <dependency>
-      <groupId>org.springframework</groupId>
-      <artifactId>spring-context-support</artifactId>
-      <version>${org.springframework.version}</version>
-    </dependency>
 
     <dependency>
       <groupId>org.springframework</groupId>
@@ -220,43 +119,14 @@
       <version>${org.springframework.version}</version>
     </dependency>
 
-<!-- 
+    <!-- Because this is a web app, we also have a dependency on the servlet api. -->
+    <!-- TODO: after all web-related code is relocated to web module, this dependency can be removed -->
     <dependency>
-      <groupId>org.springframework</groupId>
-      <artifactId>spring-webmvc</artifactId>
-      <version>${org.springframework.version}</version>
+      <groupId>javax.servlet</groupId>
+      <artifactId>servlet-api</artifactId>
+      <version>2.3</version>
+      <scope>provided</scope>
     </dependency>
- -->
- 
-    <dependency>
-      <groupId>org.springframework</groupId>
-      <artifactId>spring-tx</artifactId>
-      <version>${org.springframework.version}</version>
-    </dependency>
-
-    <dependency>
-      <groupId>org.springframework</groupId>
-      <artifactId>spring-aop</artifactId>
-      <version>${org.springframework.version}</version>
-    </dependency>
-
-    <dependency>
-      <groupId>postgresql</groupId>
-      <artifactId>postgresql</artifactId>
-      <version>8.4-702.jdbc4</version>
-      <type>jar</type>
-    </dependency>
-
-    <dependency>
-      <groupId>org.springframework</groupId>
-      <artifactId>spring-test</artifactId>
-      <version>${org.springframework.version}</version>
-      <type>jar</type>
-      <!-- TODO: should be test scope, but AbstractBackingBean currently has a dependency -->
-      <!-- <scope>test</scope>  -->
-    </dependency>
-
-    <!-- new dependencies, merging ss -->
 
     <dependency>
       <groupId>net.sourceforge.jexcelapi</groupId>
@@ -324,13 +194,6 @@
       <artifactId>commons-math</artifactId>
       <version>1.2</version>
       <type>jar</type>
-      <scope>compile</scope>
-    </dependency>
-
-    <dependency>
-      <groupId>org.aspectj</groupId>
-      <artifactId>aspectjrt</artifactId>
-      <version>1.5.4</version>
       <scope>compile</scope>
     </dependency>
 
@@ -437,9 +300,8 @@
       <scope>compile</scope>
     </dependency>
 
-   <dependency>
-      <!-- NOTE: this file must be added to the local repository 
-        (dependency in AbstractBackingBean, on org.apache.myfaces.custom.util.ComponentUtils.findComponentById)
+    <dependency>
+      <!-- NOTE: this file must be added to the local repository (dependency in AbstractBackingBean, on org.apache.myfaces.custom.util.ComponentUtils.findComponentById) 
         use: mvn install:install-file -Dfile=tomahawk-sandbox-1.1.7-SNAPSHOT.jar -DgroupId=org.apache.myfaces.tomahawk -DartifactId=tomahawk-sandbox 
         -Dversion=1.1.7 -Dpackaging=jar -DgeneratePom=true -->
       <groupId>org.apache.myfaces.tomahawk</groupId>
@@ -467,6 +329,15 @@
     </dependency>
 
     <dependency>
+      <groupId>org.springframework</groupId>
+      <artifactId>spring-test</artifactId>
+      <version>${org.springframework.version}</version>
+      <type>jar</type>
+      <!-- TODO: should be test scope, but AbstractBackingBean currently has a dependency -->
+      <scope>compile</scope>
+    </dependency>
+
+    <dependency>
       <!-- NOTE: this file must be added to the local repository with mvn install:install-file -Dfile=annotations.jar -DgroupId=util.findbugs 
         -DartifactId=annotations -Dversion=3480 -Dpackaging=jar -DgeneratePom=true -->
       <groupId>util.findbugs</groupId>
@@ -477,10 +348,16 @@
     </dependency>
 
     <dependency>
-      <!-- Note: this file must be added to the local repository with mvn install:install-file -Dfile=joda-time-hibernate-1.2.recompiled.jar -
-      DgroupId=joda-time -DartifactId=joda-time-hibernate-recompiled -Dversion=1.2 -Dpackaging=jar -DgeneratePom=true 
-      Note: joda-time-hibernate must be compiled with a compatible hibernate library to work (3.6?).
-       -->
+      <groupId>edu.harvard.med</groupId>
+      <artifactId>screensaver-test</artifactId>
+      <version>2011-07-19</version>
+      <scope>test</scope>
+    </dependency>
+
+    <dependency>
+      <!-- Note: this file must be added to the local repository with mvn install:install-file -Dfile=joda-time-hibernate-1.2.recompiled.jar 
+        - DgroupId=joda-time -DartifactId=joda-time-hibernate-recompiled -Dversion=1.2 -Dpackaging=jar -DgeneratePom=true Note: joda-time-hibernate 
+        must be compiled with a compatible hibernate library to work (3.6?). -->
       <groupId>joda-time</groupId>
       <artifactId>joda-time-hibernate-recompiled</artifactId>
       <version>1.2</version>
@@ -488,6 +365,5 @@
     </dependency>
 
   </dependencies>
-
 
 </project>

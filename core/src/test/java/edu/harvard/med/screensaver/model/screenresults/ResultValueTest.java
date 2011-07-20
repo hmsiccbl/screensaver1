@@ -12,9 +12,9 @@ package edu.harvard.med.screensaver.model.screenresults;
 import junit.framework.TestSuite;
 
 import edu.harvard.med.screensaver.model.AbstractEntityInstanceTest;
-import edu.harvard.med.screensaver.model.TestDataFactory.Builder;
-import edu.harvard.med.screensaver.model.TestDataFactory.ParentedEntityBuilder;
-import edu.harvard.med.screensaver.model.TestDataFactory.PreCreateHook;
+import edu.harvard.med.screensaver.test.TestDataFactory.Builder;
+import edu.harvard.med.screensaver.test.TestDataFactory.ParentedEntityBuilder;
+import edu.harvard.med.screensaver.test.TestDataFactory.PreCreateHook;
 
 public class ResultValueTest extends AbstractEntityInstanceTest<ResultValue>
 {

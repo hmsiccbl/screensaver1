@@ -16,7 +16,7 @@ import org.rosuda.REngine.Rserve.RConnection;
 import org.rosuda.REngine.Rserve.RserveException;
 import org.springframework.test.annotation.IfProfileValue;
 
-import edu.harvard.med.screensaver.AbstractSpringTest;
+import edu.harvard.med.screensaver.test.AbstractSpringTest;
 
 @IfProfileValue(name = "screensaver.ui.feature.cellHTS2", value = "true")
 public class RserveExtensionsTest extends AbstractSpringTest

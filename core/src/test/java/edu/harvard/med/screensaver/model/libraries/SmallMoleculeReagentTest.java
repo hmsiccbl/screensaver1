@@ -20,11 +20,11 @@ import edu.harvard.med.screensaver.db.LibrariesDAO;
 import edu.harvard.med.screensaver.model.AbstractEntityInstanceTest;
 import edu.harvard.med.screensaver.model.AdministrativeActivity;
 import edu.harvard.med.screensaver.model.AdministrativeActivityType;
-import edu.harvard.med.screensaver.model.TestDataFactory.PostCreateHook;
 import edu.harvard.med.screensaver.model.screens.ScreenType;
 import edu.harvard.med.screensaver.model.users.AdministratorUser;
 import edu.harvard.med.screensaver.model.users.ScreensaverUserRole;
 import edu.harvard.med.screensaver.service.libraries.LibraryContentsVersionManager;
+import edu.harvard.med.screensaver.test.TestDataFactory.PostCreateHook;
 
 public class SmallMoleculeReagentTest extends AbstractEntityInstanceTest<SmallMoleculeReagent>
 {
@@ -129,7 +129,8 @@ public class SmallMoleculeReagentTest extends AbstractEntityInstanceTest<SmallMo
       public void postCreate(String callStack, SmallMoleculeReagent smr)
       {
         if (callStack.endsWith(getName())) {
-          smr.forFacilityBatchId(1).forSaltFormId(2).forVendorBatchId("batchId");
+            //          smr.forFacilityBatchId(1).forSaltFormId(2).forVendorBatchId("batchId");
+          smr.forSaltFormId(2).forFacilityBatchId(1).forVendorBatchId("batchId");
         }
       }
     });
