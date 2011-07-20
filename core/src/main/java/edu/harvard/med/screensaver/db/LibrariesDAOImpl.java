@@ -817,7 +817,7 @@ public class LibrariesDAOImpl extends AbstractDAO implements LibrariesDAO
         "from well w " +
         "join reagent r on(w.latest_released_reagent_id=r.reagent_id) " +
         "join small_molecule_reagent smr using(reagent_id) " +
-        "where strpos(w.facility_id || '-' || smr.salt_form_id || '-' || r.facility_batch_id, :searchString ) > 0" +
+        "where strpos(w.facility_id || '-' || coalesce(''||smr.salt_form_id,'') || '-' || coalesce(''||r.facility_batch_id,''), :searchString ) > 0" +
         " or r.vendor_identifier like :searchString2";
     if (log.isDebugEnabled()) {
       log.info("sql: " + sql);
