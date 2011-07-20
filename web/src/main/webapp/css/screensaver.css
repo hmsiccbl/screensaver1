@@ -492,12 +492,6 @@ a.menuItem:hover,a.menuItemActive:hover,a.submenuItem:hover,a.submenuItemActive:
   
 }
 
-.newsItem {
-  color: white;
-  size: larg;
-  font-weight: bold;
-}
-
 .example {
   font-family: monospace;
   background-color: #eeeeee;
