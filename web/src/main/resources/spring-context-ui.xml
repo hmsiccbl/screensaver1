@@ -489,7 +489,7 @@
   <bean
     id="wellViewer"
     parent="uiBean"
-    scope="prototype"
+    scope="session"
     class="edu.harvard.med.screensaver.ui.libraries.WellViewer">
     <constructor-arg ref="wellViewer" />
     <constructor-arg ref="wellsBrowser" /> <!-- TODO: this is only correct when this bean is injected into wellsBrowser (and not when injnected into wellSearchResultsNested), but since it's never used anyway, should be okay -->
@@ -503,6 +503,7 @@
     <constructor-arg ref="libraryContentsVersionRef" />
     <constructor-arg ref="annotationsBrowser" />
     <constructor-arg ref="screenResultReporter" />
+    <aop:scoped-proxy/>
   </bean>
 
   <bean
