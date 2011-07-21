@@ -618,10 +618,10 @@ public abstract class WellSearchResults extends TupleBasedEntitySearchResults<We
 
     final PropertyPath<Well> reagentIdPropertyPath = relPath.toProperty("id");
     if (isLINCS()) {
-      final PropertyPath<Well> wellFacilityIdPropertyPath = PropertyPath.from(Well.class).toProperty("facilityId");
+      final PropertyPath<Well> wellFacilityIdPropertyPath = PropertyPath.from(Well.class).toProperty("facilityId");  
       final PropertyPath<Well> saltFormIdPropertyPath = relPath.toProperty("saltFormId");
 
-      columns.add(new TextTupleColumn<Well,String>(relPath.toProperty("facilityBatchId"),
+      columns.add(new TextTupleColumn<Well,String>(relPath.toProperty("facilityBatchId"),  // TODO - this should be "facilityID", not "facilityBatchID"!
                                                    "Facility-Salt-Batch-ID",
                                                    "the full Facility ID - SALT",
                                                    COMPOUND_COLUMNS_GROUP) {
@@ -629,7 +629,7 @@ public abstract class WellSearchResults extends TupleBasedEntitySearchResults<We
         @Override
         public String getCellValue(Tuple<String> tuple)
         {
-          Object facilityBatchIdValue = tuple.getProperty(TupleDataFetcher.makePropertyKey(getPropertyPath()));
+          Object facilityBatchIdValue = tuple.getProperty(TupleDataFetcher.makePropertyKey(getPropertyPath()));  // TODO - this should be "facilityID", not "facilityBatchID"!
           if (facilityBatchIdValue != null) {
             return fsbColumnValueJoiner.join(NullSafeUtils.toString(tuple.getProperty(TupleDataFetcher.makePropertyKey(wellFacilityIdPropertyPath)), "?"),
                                   NullSafeUtils.toString(tuple.getProperty(TupleDataFetcher.makePropertyKey(saltFormIdPropertyPath)), "?"),
