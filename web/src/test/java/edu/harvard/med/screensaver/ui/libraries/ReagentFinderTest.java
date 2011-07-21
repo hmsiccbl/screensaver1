@@ -52,12 +52,16 @@ public class ReagentFinderTest extends AbstractBackingBeanTest
         for(Well well:_library1.getWells()) {
           if(well.getWellId().equals("01000:A03"))
           {
-            well.setFacilityId("HMSL100005-002-01");
-           log.info("setting: " + well + "," + well.getFacilityId());
+            well.setFacilityId("HMSL100005");  
+            ((SmallMoleculeReagent)well.getLatestReleasedReagent()).forSaltFormId(2);
+            ((SmallMoleculeReagent)well.getLatestReleasedReagent()).forFacilityBatchId(1);
+            log.info("setting: " + well + "," + well.getFacilityId());
            }
           if(well.getWellId().equals("01000:A04"))
           {
-            well.setFacilityId("HMSL100015-002-01");
+            well.setFacilityId("HMSL100015");
+            ((SmallMoleculeReagent)well.getLatestReleasedReagent()).forSaltFormId(15);
+            ((SmallMoleculeReagent)well.getLatestReleasedReagent()).forFacilityBatchId(1);
             log.info("setting: " + well + "," + well.getFacilityId());
           }
         }
@@ -67,13 +71,17 @@ public class ReagentFinderTest extends AbstractBackingBeanTest
         for(Well well:_library2.getWells()) {
           if(well.getWellId().equals("02000:A03"))
           {
-            well.setFacilityId("HMSL100005-001-01"); 
+            well.setFacilityId("HMSL100005"); 
+            ((SmallMoleculeReagent)well.getLatestReleasedReagent()).forSaltFormId(1);
+            ((SmallMoleculeReagent)well.getLatestReleasedReagent()).forFacilityBatchId(1);
             log.info("setting: " + well + "," + well.getFacilityId());
           }
           if(well.getWellId().equals("02000:A04"))
           {
-            well.setFacilityId("HMSL100015-001-01");
+            well.setFacilityId("HMSL100015");
             ((SmallMoleculeReagent)well.getLatestReleasedReagent()).getCompoundNames().add("xyzcompound");
+            ((SmallMoleculeReagent)well.getLatestReleasedReagent()).forSaltFormId(1);
+            ((SmallMoleculeReagent)well.getLatestReleasedReagent()).forFacilityBatchId(1);
             log.info("setting: " + well + "," + well.getFacilityId());
           }
         }
@@ -93,7 +101,7 @@ public class ReagentFinderTest extends AbstractBackingBeanTest
   
   public void testFindReagentsByNameFacilityVendorID() 
   {
-    reagentFinder.setNameFacilityVendorIDInput("100005-002\n100015-001");
+    reagentFinder.setNameFacilityVendorIDInput("100005-002\n100015-1-001");
     reagentFinder.findWellsByNameFacilityVendorID();
     wellsBrowser.getRowCount();
     assertEquals(Sets.newHashSet("01000:A03", "02000:A04"),

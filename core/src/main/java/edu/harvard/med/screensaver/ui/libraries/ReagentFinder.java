@@ -14,6 +14,8 @@ import java.io.IOException;
 import java.io.StringReader;
 import java.util.Set;
 import java.util.SortedSet;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 import com.google.common.base.Joiner;
 import com.google.common.collect.ImmutableSet;
@@ -32,6 +34,7 @@ import edu.harvard.med.screensaver.util.StringUtils;
 public class ReagentFinder extends AbstractBackingBean
 {
   private static final Logger log = Logger.getLogger(ReagentFinder.class);
+  public static final Pattern FACILITY_SALT_BATCH_PATTERN = Pattern.compile("([^-]+)[-]([^-]+)[-]*([^-]*)");
 
   private GenericEntityDAO _dao;
   private LibrariesDAO _librariesDao;
@@ -148,12 +151,33 @@ public class ReagentFinder extends AbstractBackingBean
     if (StringUtils.isEmpty(_nameFacilityVendorIDInput)) {
       return ImmutableSet.of("");
     }
+    
     Set<String> values = Sets.newHashSet();
     for (String value : StringUtils.tokenizeQuotedWordList(_nameFacilityVendorIDInput)) {
       value = value.replaceAll("\"|'+", ""); // remove quote characters left in by the tokenizer
       value = value.trim();
       if (StringUtils.isEmpty(value)) {
         continue;
+      }
+      // remove zero padding if salt - batch id were entered
+      Matcher matcher = FACILITY_SALT_BATCH_PATTERN.matcher(value);
+      if(matcher.matches())
+      {
+        String temp = matcher.group(1);
+        try {
+          Integer id = Integer.parseInt(matcher.group(2));
+          temp += "-" + id;
+          // the second id is optional
+          if(! StringUtils.isEmpty(matcher.group(3))) {
+            id = Integer.parseInt(matcher.group(3));
+            temp += "-" + id;
+          }
+          log.info("search string: " + value + ", formatted: " + temp);
+          value = temp;
+        }
+        catch (NumberFormatException e) {
+          log.info("input string parse error for the facility-salt-batch pattern: " + FACILITY_SALT_BATCH_PATTERN + ", \"" + value + "\"", e);
+        }
       }
       values.add(value);
     }

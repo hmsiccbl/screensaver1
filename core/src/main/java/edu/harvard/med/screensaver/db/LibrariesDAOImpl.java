@@ -68,7 +68,6 @@ public class LibrariesDAOImpl extends AbstractDAO implements LibrariesDAO
   // static members
 
   private static Logger log = Logger.getLogger(LibrariesDAOImpl.class);
-  public static final Pattern FACILITY_SALT_BATCH_PATTERN = Pattern.compile("([^-]+)[-]([^-]*)[-]([^-]*)");
 
   // instance data members
 
