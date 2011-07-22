@@ -1,4 +1,6 @@
-// $HeadURL: http://forge.abcd.harvard.edu/svn/screensaver/branches/iccbl/2.2.2-dev/src/edu/harvard/med/screensaver/ui/users/ScreenerFinder.java $
+// $HeadURL:
+// http://forge.abcd.harvard.edu/svn/screensaver/branches/iccbl/2.2.2-dev/src/edu/harvard/med/screensaver/ui/users/ScreenerFinder.java
+// $
 // $Id: ScreenerFinder.java 4689 2010-09-24 18:40:57Z atolopko $
 //
 // Copyright © 2006, 2010 by the President and Fellows of Harvard College.
@@ -9,9 +11,13 @@
 
 package edu.harvard.med.screensaver.ui.libraries;
 
+import java.util.List;
 import java.util.Set;
 
 import org.apache.log4j.Logger;
+
+import com.google.common.base.Joiner;
+import com.google.common.collect.Sets;
 
 import edu.harvard.med.screensaver.db.GenericEntityDAO;
 import edu.harvard.med.screensaver.db.LibrariesDAO;
@@ -36,8 +42,7 @@ public class LibraryCopyPlateFinder extends AbstractBackingBean
    * @motivation for CGLIB2
    */
   protected LibraryCopyPlateFinder()
-  {
-  }
+  {}
 
   public LibraryCopyPlateFinder(GenericEntityDAO dao,
                                 LibrariesDAO librariesDao,
@@ -51,25 +56,32 @@ public class LibraryCopyPlateFinder extends AbstractBackingBean
   @UICommand
   public String findPlates()
   {
-    LibraryCopyPlateListParserResult result = LibraryCopyPlateListParser.parsePlateCopies(_plateCopyInput);
+    List<LibraryCopyPlateListParserResult> results = LibraryCopyPlateListParser.parsePlateCopiesSublists(_plateCopyInput);
     resetSearchFields();
-    if (result.hasErrors()) {
-      for (String error : result.getErrors()) {
-        showMessage("libraries.invalidCopyPlateInput", error);
+    for (LibraryCopyPlateListParserResult result : results) {
+      if (result.hasErrors()) {
+        for (String error : result.getErrors()) {
+          showMessage("libraries.invalidCopyPlateInput", error);
+        }
+        return REDISPLAY_PAGE_ACTION_RESULT;
       }
-      return REDISPLAY_PAGE_ACTION_RESULT;
     }
 
-    Set<Integer> plateIds = _librariesDao.queryForPlateIds(result);
+    Set<Integer> plateIds = Sets.newHashSet();
+
+    for (LibraryCopyPlateListParserResult result : results) {
+      plateIds.addAll(_librariesDao.queryForPlateIds(result));
+    }
     if (plateIds.isEmpty()) {
-      showMessage("libraries.noCopyPlatesFoundForSearch", result.print());
+      showMessage("libraries.noCopyPlatesFoundForSearch", results);
     }
 
     if (log.isDebugEnabled()) {
       log.debug("plate ids found: " + plateIds);
     }
 
-    _libraryCopyPlatesBrowser.searchForPlates(result.print(), plateIds);
+    Joiner joiner = Joiner.on("; ");
+    _libraryCopyPlatesBrowser.searchForPlates(joiner.join(results), plateIds);
 
     return BROWSE_LIBRARY_COPY_PLATES;
   }
@@ -89,4 +101,3 @@ public class LibraryCopyPlateFinder extends AbstractBackingBean
     _plateCopyInput = plateCopyInput;
   }
 }
-

@@ -19,7 +19,7 @@ import com.google.common.collect.Sets;
 
 import edu.harvard.med.screensaver.util.Pair;
 
-public class LibraryCopyPlateListParserResult 
+public class LibraryCopyPlateListParserResult
 {
   private static final long serialVersionUID = 1L;
   private static Logger log = Logger.getLogger(LibraryCopyPlateListParserResult.class);
@@ -127,6 +127,19 @@ public class LibraryCopyPlateListParserResult
 
   public String toString()
   {
-    return "LibraryCopyPlateListParserResult: " + print();
+    return print();
+  }
+  
+  @Override
+  public int hashCode()
+  {
+    return toString().hashCode();
+  }
+  
+  @Override
+  public boolean equals(Object obj)
+  {
+    if(obj == null || ! (obj instanceof LibraryCopyPlateListParserResult) ) return false;
+    return toString().equals(((LibraryCopyPlateListParserResult)obj).toString());
   }
 }

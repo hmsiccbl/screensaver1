@@ -1,4 +1,6 @@
-// $HeadURL$
+// $HeadURL:
+// http://seanderickson1@forge.abcd.harvard.edu/svn/screensaver/branches/serickson/3014/core/src/main/java/edu/harvard/med/screensaver/io/libraries/LibraryCopyPlateListParser.java
+// $
 // $Id$
 //
 // Copyright © 2006, 2010 by the President and Fellows of Harvard College.
@@ -16,12 +18,23 @@ import java.util.regex.Pattern;
 import org.apache.commons.lang.StringUtils;
 import org.apache.log4j.Logger;
 import com.google.common.base.Joiner;
+import com.google.common.collect.Lists;
 
 import edu.harvard.med.screensaver.util.Pair;
 
 public class LibraryCopyPlateListParser
 {
   private static Logger log = Logger.getLogger(LibraryCopyPlateListParser.class);
+
+  public static List<LibraryCopyPlateListParserResult> parsePlateCopiesSublists(String plateCopyLists)
+  {
+    List<LibraryCopyPlateListParserResult> results = Lists.newArrayList();
+    for (String plateCopyList : plateCopyLists.split("\\n")) {
+      results.add(parsePlateCopies(plateCopyList));
+    }
+    if (log.isDebugEnabled()) log.debug("results: " + results);
+    return results;
+  }
 
   public static LibraryCopyPlateListParserResult parsePlateCopies(String plateCopyList)
   {
@@ -61,10 +74,12 @@ public class LibraryCopyPlateListParser
         }
         else {/** nop **/
         }
-      }else { // implied: if the other patterns don't match, then this is the "copyMatcher"
+      }
+      else { // implied: if the other patterns don't match, then this is the "copyMatcher"
         if (errorRangePattern.matcher(s).matches()) {
           result.addError("unparseable range: " + s);
-        }else{
+        }
+        else {
           // Remove the quote chars that were left in by the top level matcher
           s = s.replaceAll("\"|'+", "");
           result.addCopy(s);
@@ -75,4 +90,3 @@ public class LibraryCopyPlateListParser
     return result;
   }
 }
-
