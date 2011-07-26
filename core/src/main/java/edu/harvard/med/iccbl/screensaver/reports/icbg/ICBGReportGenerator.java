@@ -9,18 +9,22 @@
 
 package edu.harvard.med.iccbl.screensaver.reports.icbg;
 
+import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
-import java.util.SortedSet;
 
+import jxl.read.biff.BiffException;
+import jxl.write.Label;
+import jxl.write.WritableSheet;
+import jxl.write.WritableWorkbook;
+import jxl.write.WriteException;
+import jxl.write.biff.RowsExceededException;
 import org.apache.log4j.Logger;
-import org.apache.poi.hssf.usermodel.HSSFRow;
-import org.apache.poi.hssf.usermodel.HSSFSheet;
-import org.apache.poi.hssf.usermodel.HSSFWorkbook;
 import org.springframework.context.support.ClassPathXmlApplicationContext;
 
 import edu.harvard.med.screensaver.db.DAOTransaction;
@@ -28,9 +32,8 @@ import edu.harvard.med.screensaver.db.GenericEntityDAO;
 import edu.harvard.med.screensaver.db.ScreenResultsDAO;
 import edu.harvard.med.screensaver.io.CommandLineApplication;
 import edu.harvard.med.screensaver.model.libraries.WellKey;
-import edu.harvard.med.screensaver.model.screenresults.DataType;
-import edu.harvard.med.screensaver.model.screenresults.ResultValue;
 import edu.harvard.med.screensaver.model.screenresults.DataColumn;
+import edu.harvard.med.screensaver.model.screenresults.ResultValue;
 import edu.harvard.med.screensaver.model.screenresults.ScreenResult;
 
 
@@ -51,13 +54,18 @@ public class ICBGReportGenerator
   
   
   // public static methods
-  
+
   /**
    * Generate the report.
    * 
    * @param args unused
+   * @throws IOException
+   * @throws WriteException
+   * @throws FileNotFoundException
+   * @throws RowsExceededException
+   * @throws BiffException
    */
-  public static void main(String[] args)
+  public static void main(String[] args) throws RowsExceededException, FileNotFoundException, WriteException, IOException, BiffException
   {
     ClassPathXmlApplicationContext context = new ClassPathXmlApplicationContext(new String[] { 
       CommandLineApplication.DEFAULT_SPRING_CONFIG,
@@ -65,22 +73,28 @@ public class ICBGReportGenerator
     GenericEntityDAO dao = (GenericEntityDAO) context.getBean("genericEntityDao");
     ScreenResultsDAO screenResultsDAO = (ScreenResultsDAO) context.getBean("screenResultsDao");
     ICCBLPlateWellToINBioLQMapper mapper = new ICCBLPlateWellToINBioLQMapper();
-    ICBGReportGenerator generator = new ICBGReportGenerator(
+    final ICBGReportGenerator generator = new ICBGReportGenerator(
       dao,
       screenResultsDAO,
       mapper,
       new AssayInfoProducer());
-    HSSFWorkbook report = generator.produceReport();
-    
-    log.info("writing report..");
-    try {
-      report.write(new FileOutputStream(REPORT_FILENAME));
-      log.info("report written.");
-    }
-    catch (Exception e) {
-      e.printStackTrace();
-      log.error("writing report generated error: " + e.getMessage());
-    }
+    dao.doInTransaction(new DAOTransaction() {
+      @Override
+      public void runTransaction()
+      {
+        try {
+          WritableWorkbook report = generator.produceReport();
+          log.info("writing report..");
+          report.write();
+          report.close();
+          log.info("report written.");
+        }
+        catch (Exception e) {
+          e.printStackTrace();
+          log.error(e.getMessage());
+        }
+      }
+    });
   }
   
   
@@ -90,11 +104,12 @@ public class ICBGReportGenerator
   private ScreenResultsDAO _screenResultsDAO;
   private ICCBLPlateWellToINBioLQMapper _mapper;
   private AssayInfoProducer _assayInfoProducer;
-  private HSSFWorkbook _report;
+  private WritableWorkbook _report;
   private int _currentBioactivityRow = 1;
   private int _currentProtocolRow = 1;
   private int _currentBioactivitySheetIndex = 1;
-  private HSSFSheet _currentBioactivitySheet;
+  private WritableSheet _currentBioactivitySheet;
+  private WritableSheet _protocolSheet;
   
   
   // public constructor and instance methods
@@ -111,7 +126,7 @@ public class ICBGReportGenerator
     _assayInfoProducer = assayInfoProducer;
   }
   
-  public HSSFWorkbook produceReport()
+  public WritableWorkbook produceReport() throws RowsExceededException, FileNotFoundException, WriteException, IOException
   {
     initializeReport();
     parseScreenResults();
@@ -121,71 +136,60 @@ public class ICBGReportGenerator
   
   // private instance methods
   
-  private void initializeReport()
+  private void initializeReport() throws FileNotFoundException, IOException, RowsExceededException, WriteException
   {
-    _report = new HSSFWorkbook();
-    HSSFSheet sheet;
-    HSSFRow row;
-    sheet = _report.createSheet("PROTOCOL");
-    row = sheet.createRow(0);
-    row.createCell((short) 0).setCellValue("PROTOCOL_ID");
-    row.createCell((short) 1).setCellValue("PROTOCOL_TYPE");
-    row.createCell((short) 2).setCellValue("PROTOCOL_DESCR");
-    row.createCell((short) 3).setCellValue("P_NOTE");
-    sheet = _report.createSheet("COMPOUND");
-    row = sheet.createRow(0);
-    row.createCell((short) 0).setCellValue("COMPOUND_ID");
-    row.createCell((short) 1).setCellValue("MATERIAL_ID");
-    row.createCell((short) 2).setCellValue("CL_EXTRA_1");
-    row.createCell((short) 3).setCellValue("MOLSTRUCTURE_FILE");
+    _report = jxl.Workbook.createWorkbook(new FileOutputStream(REPORT_FILENAME));
+    _protocolSheet = _report.createSheet("PROTOCOL", 0);
+    _protocolSheet.addCell(new Label(0, 0, "PROTOCOL_ID"));
+    _protocolSheet.addCell(new Label(1, 0, "PROTOCOL_TYPE"));
+    _protocolSheet.addCell(new Label(2, 0, "PROTOCOL_DESCR"));
+    _protocolSheet.addCell(new Label(3, 0, "P_NOTE"));
+    _protocolSheet = _report.createSheet("COMPOUND", 1);
+    _protocolSheet.addCell(new Label(0, 0, "COMPOUND_ID"));
+    _protocolSheet.addCell(new Label(1, 0, "MATERIAL_ID"));
+    _protocolSheet.addCell(new Label(2, 0, "CL_EXTRA_1"));
+    _protocolSheet.addCell(new Label(3, 0, "MOLSTRUCTURE_FILE"));
   }
   
-  private HSSFSheet createBioactivitySheet()
+  private WritableSheet createBioactivitySheet() throws RowsExceededException, WriteException
   {
-   HSSFSheet sheet;
-    HSSFRow row;
-    sheet = _report.createSheet("BIOACTIVITY" + _currentBioactivitySheetIndex);
-    row = sheet.createRow(0);
-    row.createCell((short) 0).setCellValue("MATERIAL_ID");
-    row.createCell((short) 1).setCellValue("PLATE_ID");
-    row.createCell((short) 2).setCellValue("WELL_ID");
-    row.createCell((short) 3).setCellValue("ASSAY_CATEGORY");
-    row.createCell((short) 4).setCellValue("ASSAY_NAME");
-    row.createCell((short) 5).setCellValue("ACTIVITY");
-    row.createCell((short) 6).setCellValue("UNITS");
-    row.createCell((short) 7).setCellValue("ASSAY_QUAL_RESULT");
-    row.createCell((short) 8).setCellValue("ASSAY_DATE");
-    row.createCell((short) 9).setCellValue("PROJECT_ID");
-    row.createCell((short) 10).setCellValue("DEPARTMENT_ID");
-    row.createCell((short) 11).setCellValue("CONCENTRATION");
-    row.createCell((short) 12).setCellValue("CONC_UNITS");
-    row.createCell((short) 13).setCellValue("ADMIN");
-    row.createCell((short) 14).setCellValue("INVESTIGATOR");
-    row.createCell((short) 15).setCellValue("NOTEBOOK");
-    row.createCell((short) 16).setCellValue("COMMENTS");
-    row.createCell((short) 17).setCellValue("EXTRA");
+    WritableSheet sheet = _report.createSheet("BIOACTIVITY" + _currentBioactivitySheetIndex, _currentBioactivitySheetIndex + 2);
+    sheet.addCell(new Label(0, 0, "MATERIAL_ID"));
+    sheet.addCell(new Label(1, 0, "PLATE_ID"));
+    sheet.addCell(new Label(2, 0, "WELL_ID"));
+    sheet.addCell(new Label(3, 0, "ASSAY_CATEGORY"));
+    sheet.addCell(new Label(4, 0, "ASSAY_NAME"));
+    sheet.addCell(new Label(5, 0, "ACTIVITY"));
+    sheet.addCell(new Label(6, 0, "UNITS"));
+    sheet.addCell(new Label(7, 0, "ASSAY_QUAL_RESULT"));
+    sheet.addCell(new Label(8, 0, "ASSAY_DATE"));
+    sheet.addCell(new Label(9, 0, "PROJECT_ID"));
+    sheet.addCell(new Label(10, 0, "DEPARTMENT_ID"));
+    sheet.addCell(new Label(11, 0, "CONCENTRATION"));
+    sheet.addCell(new Label(12, 0, "CONC_UNITS"));
+    sheet.addCell(new Label(13, 0, "ADMIN"));
+    sheet.addCell(new Label(14, 0, "INVESTIGATOR"));
+    sheet.addCell(new Label(15, 0, "NOTEBOOK"));
+    sheet.addCell(new Label(16, 0, "COMMENTS"));
+    sheet.addCell(new Label(17, 0, "EXTRA"));
    return sheet;
 }
   
-  private void parseScreenResults()
+  private void parseScreenResults() throws RowsExceededException, WriteException
   {
-    _dao.doInTransaction(new DAOTransaction () {
-      public void runTransaction() {
-        List<ScreenResult> screenResults = _dao.findAllEntitiesOfType(ScreenResult.class);
-        for (ScreenResult screenResult : screenResults) {
-          parseScreenResult(screenResult);
+    List<ScreenResult> screenResults = _dao.findAllEntitiesOfType(ScreenResult.class);
+    for (ScreenResult screenResult : screenResults) {
+      parseScreenResult(screenResult);
 	// DEBUG ONLY!
 /*
 	  if (_currentBioactivitySheetIndex > 1) {
 		break;
 	  }
 */
-        }
-      }
-    });
+    }
   }
   
-  private void parseScreenResult(ScreenResult screenResult)
+  private void parseScreenResult(ScreenResult screenResult) throws RowsExceededException, WriteException
   {
     log.info("processing screen result for screen " + screenResult.getScreen().getFacilityId());
     AssayInfo assayInfo = _assayInfoProducer.getAssayInfoForScreen(screenResult.getScreen());
@@ -196,14 +200,17 @@ public class ICBGReportGenerator
       printProtocolRow(assayInfo);  
     }
   }
-  
+
   /**
    * Print bioactivity rows for this screen result.
+   * 
    * @param assayInfo
    * @param screenResult
    * @return true iff bioactivity rows were printed
+   * @throws WriteException
+   * @throws RowsExceededException
    */
-  private boolean printBioactivityRows(AssayInfo assayInfo, ScreenResult screenResult)
+  private boolean printBioactivityRows(AssayInfo assayInfo, ScreenResult screenResult) throws RowsExceededException, WriteException
   {
     DataColumn scaledOrBooleanDataColumn =
       findRightmostIndicatingScaledOrBooleanDataColumn(screenResult);
@@ -264,7 +271,7 @@ public class ICBGReportGenerator
     AssayInfo assayInfo,
     WellKey wellKey,
     DataColumn scaledOrBooleanDataColumn,
-    ResultValue scaledOrBooleanRV)
+                                      ResultValue scaledOrBooleanRV) throws RowsExceededException, WriteException
   {
     String lq = _mapper.getLQForWellKey(wellKey);
     if (lq == null) { return false; }
@@ -272,22 +279,21 @@ public class ICBGReportGenerator
     String plateName = "P" + wellKey.getPlateNumber();
     String wellName = wellKey.getWellName();
     
-    HSSFSheet sheet = _currentBioactivitySheet;
-    HSSFRow row = sheet.createRow(_currentBioactivityRow);
+    WritableSheet sheet = _currentBioactivitySheet;
 
-    row.createCell((short) 0).setCellValue(lq);
-    row.createCell((short) 1).setCellValue(plateName);
-    row.createCell((short) 2).setCellValue(wellName);
-    row.createCell((short) 3).setCellValue(assayInfo.getAssayCategory());
-    row.createCell((short) 4).setCellValue(assayName);
+    sheet.addCell(new Label(0, _currentBioactivityRow, lq));
+    sheet.addCell(new Label(1, _currentBioactivityRow, plateName));
+    sheet.addCell(new Label(2, _currentBioactivityRow, wellName));
+    sheet.addCell(new Label(3, _currentBioactivityRow, assayInfo.getAssayCategory()));
+    sheet.addCell(new Label(4, _currentBioactivityRow, assayName));
     // note: cells 5 and 6 used to be used for "numerical assay indicator", which no longer exists
     if (scaledOrBooleanRV != null) {
       if (scaledOrBooleanDataColumn.isBooleanPositiveIndicator()) {
         if (scaledOrBooleanRV.getValue().equals("true")) {
-          row.createCell((short) 7).setCellValue("A");
+          sheet.addCell(new Label(7, 0, "A"));
         }
         else if (scaledOrBooleanRV.getValue().equals("false")) {
-          row.createCell((short) 7).setCellValue("I");          
+          sheet.addCell(new Label(7, 0, "I"));
         }
       }
       else if (scaledOrBooleanDataColumn.isPartitionPositiveIndicator()) {
@@ -297,26 +303,26 @@ public class ICBGReportGenerator
           partitionValue = "";
         }
         if (partitionValue.equals("2") || partitionValue.equals("3")) {
-          row.createCell((short) 7).setCellValue("A");
+          sheet.addCell(new Label(7, 0, "A"));
         }
         else if (partitionValue.equals("1")) {
-          row.createCell((short) 7).setCellValue("Q");
+          sheet.addCell(new Label(7, 0, "Q"));
         }
         else {
-          row.createCell((short) 7).setCellValue("I");
+          sheet.addCell(new Label(7, 0, "I"));
         }
       }
     }
-    row.createCell((short) 8).setCellValue(assayInfo.getAssayDate());
-    row.createCell((short) 9).setCellValue("ICBG-CLARDY");
-    row.createCell((short) 10).setCellValue("ICCBL");
-    //row.createCell((short) 11).setCellValue("CONCENTRATION");
-    //row.createCell((short) 12).setCellValue("CONC_UNITS");
-    row.createCell((short) 13).setCellValue(assayName + plateName + wellName);
-    row.createCell((short) 14).setCellValue(assayInfo.getInvestigator());
-    //row.createCell((short) 15).setCellValue("NOTEBOOK");
-    //row.createCell((short) 16).setCellValue("COMMENTS");
-    //row.createCell((short) 17).setCellValue("EXTRA");
+    sheet.addCell(new Label(8, _currentBioactivityRow, assayInfo.getAssayDate()));
+    sheet.addCell(new Label(9, 0, "ICBG-CLARDY"));
+    sheet.addCell(new Label(10, 0, "ICCBL"));
+    //sheet.addCell(new Label(11, 0, "CONCENTRATION"));
+    //sheet.addCell(new Label(12, 0, "CONC_UNITS"));
+    sheet.addCell(new Label(13, _currentBioactivityRow, assayName + plateName + wellName));
+    sheet.addCell(new Label(14, _currentBioactivityRow, assayInfo.getInvestigator()));
+    //sheet.addCell(new Label(15, 0, "NOTEBOOK"));
+    //sheet.addCell(new Label(16, 0, "COMMENTS"));
+    //sheet.addCell(new Label(17, 0, "EXTRA"));
    	if (_currentBioactivityRow++ % MAX_ROWS_PER_SHEET == 0) {
 	  ++_currentBioactivitySheetIndex;
 	  _currentBioactivitySheet = createBioactivitySheet();
@@ -325,14 +331,12 @@ public class ICBGReportGenerator
 	return true;
   }
 
-  private void printProtocolRow(AssayInfo assayInfo)
+  private void printProtocolRow(AssayInfo assayInfo) throws RowsExceededException, WriteException
   {
-    HSSFSheet sheet = _report.getSheet("PROTOCOL");
-    HSSFRow row = sheet.createRow(_currentProtocolRow);
-    row.createCell((short) 0).setCellValue(assayInfo.getAssayName());
-    row.createCell((short) 1).setCellValue("B");
-    row.createCell((short) 2).setCellValue(assayInfo.getProtocolDescription());
-    row.createCell((short) 3).setCellValue(assayInfo.getPNote());
+    _protocolSheet.addCell(new Label(0, _currentProtocolRow, assayInfo.getAssayName()));
+    _protocolSheet.addCell(new Label(1, _currentProtocolRow, "B"));
+    _protocolSheet.addCell(new Label(2, _currentProtocolRow, assayInfo.getProtocolDescription()));
+    _protocolSheet.addCell(new Label(3, _currentProtocolRow, assayInfo.getPNote()));
     _currentProtocolRow++;
   }
 }

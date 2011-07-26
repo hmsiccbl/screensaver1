@@ -9,22 +9,20 @@
 
 package edu.harvard.med.iccbl.screensaver.reports.icbg;
 
-import java.io.BufferedInputStream;
 import java.io.File;
-import java.io.FileInputStream;
 import java.io.IOException;
-import java.io.InputStream;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
 
+import jxl.Cell;
+import jxl.NumberCell;
+import jxl.Sheet;
+import jxl.Workbook;
+import jxl.read.biff.BiffException;
+import jxl.read.biff.BlankCell;
 import org.apache.log4j.Logger;
-import org.apache.poi.hssf.usermodel.HSSFCell;
-import org.apache.poi.hssf.usermodel.HSSFRow;
-import org.apache.poi.hssf.usermodel.HSSFSheet;
-import org.apache.poi.hssf.usermodel.HSSFWorkbook;
-import org.apache.poi.poifs.filesystem.POIFSFileSystem;
 
 import edu.harvard.med.screensaver.model.libraries.Well;
 import edu.harvard.med.screensaver.model.libraries.WellKey;
@@ -47,14 +45,14 @@ public class ICCBLPlateWellToINBioLQMapper
   
   // instance fields
   
-  private HSSFSheet _mappingWorksheet;
+  private Sheet _mappingWorksheet;
   private Set<Integer> _mappedPlates = new HashSet<Integer>();
   private Map<WellKey,String> _wellKeyToLQMap = new HashMap<WellKey,String>();
   
   
   // public constructor and instance methods
   
-  public ICCBLPlateWellToINBioLQMapper()
+  public ICCBLPlateWellToINBioLQMapper() throws BiffException
   {
     initializeMappingWorksheet();
     populateWellKeyToLQMap();
@@ -73,15 +71,12 @@ public class ICCBLPlateWellToINBioLQMapper
   
   // private instance methods
   
-  private void initializeMappingWorksheet()
+  private void initializeMappingWorksheet() throws BiffException
   {
-    File mappingFile = new File(_mappingFilename);
     try {
-      InputStream inputStream = new FileInputStream(mappingFile);
-      POIFSFileSystem fileSystem =
-        new POIFSFileSystem(new BufferedInputStream(inputStream));
-      HSSFWorkbook workbook = new HSSFWorkbook(fileSystem);
-      _mappingWorksheet = workbook.getSheetAt(0);
+      File mappingFile = new File(_mappingFilename);
+      Workbook workbook = Workbook.getWorkbook(mappingFile);
+      _mappingWorksheet = workbook.getSheet(0);
     }
     catch (IOException e) {
       log.error("could not read workbook: " + e.getMessage());
@@ -90,23 +85,22 @@ public class ICCBLPlateWellToINBioLQMapper
   
   private void populateWellKeyToLQMap()
   {
-    int lastRowNum = _mappingWorksheet.getLastRowNum();
-    for (int i = 1; i <= lastRowNum; i++) {
-      HSSFRow row = _mappingWorksheet.getRow(i);
-
-      HSSFCell plateNumberCell = row.getCell((short) 0);
-      int plateNumber = (int) plateNumberCell.getNumericCellValue();
-      //int plateNumber = Integer.parseInt(plateNumberCell.getStringCellValue());
+    int lastRowNum = _mappingWorksheet.getRows();
+    for (int i = 1; i < lastRowNum; i++) {
+      NumberCell plateNumberCell = (NumberCell) _mappingWorksheet.getCell(0, i);
+      int plateNumber = new Double(plateNumberCell.getValue()).intValue();
       
-      HSSFCell wellNameCell = row.getCell((short) 1);
-      String wellName = wellNameCell.getStringCellValue();
+      Cell wellNameCell = _mappingWorksheet.getCell(1, i);
+      String wellName = wellNameCell.getContents();
       
       // NOTE skipping column 2 which is ss_code
       
-      HSSFCell lqCell = row.getCell((short) 3);
-      if (lqCell == null) { continue; }
+      Cell lqCell = _mappingWorksheet.getCell(3, i);
+      if (lqCell == null || lqCell instanceof BlankCell) {
+        continue;
+      }
       String lq;
-      lq = lqCell.getStringCellValue();
+      lq = lqCell.getContents();
       if (lq.equals("")) { continue; }
       //try {
       //  lq = String.valueOf((int) lqCell.getNumericCellValue());

@@ -9,11 +9,11 @@
 
 package edu.harvard.med.iccbl.screensaver.reports.icbg;
 
-import edu.harvard.med.screensaver.model.screens.Screen;
-import edu.harvard.med.screensaver.model.screens.StatusItem;
-
 import org.apache.log4j.Logger;
 import org.joda.time.LocalDate;
+
+import edu.harvard.med.screensaver.model.screens.Screen;
+import edu.harvard.med.screensaver.model.screens.StatusItem;
 
 
 /**
@@ -38,7 +38,7 @@ public class AssayInfoProducer
     assayCategoryText += screen.getSummary().toUpperCase();
     setAssayCategory(assayInfo, assayCategoryText);
 
-    LocalDate assayDate = null;
+    LocalDate assayDate = screen.getDateCreated().toLocalDate();
     for (StatusItem statusItem: screen.getStatusItems()) {
       LocalDate statusItemDate = statusItem.getStatusDate();
       if (assayDate == null || assayDate.compareTo(statusItemDate) < 0) {
