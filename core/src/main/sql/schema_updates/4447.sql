@@ -38,8 +38,7 @@ alter table screen_publication_link
     foreign key (screen_id) 
     references screen;
 
-update screen_publication_link set screen_id = (select screen_id from publication where screen_id is not null);
-update screen_publication_link set publication_id = (select publication_id from publication where screen_id is not null);
+insert into screen_publication_link (screen_id, publication_id) select screen_id, publication_id from publication; 
         
 alter table publication drop constraint fk_publication_to_screen;
 alter table publication drop column screen_id;
