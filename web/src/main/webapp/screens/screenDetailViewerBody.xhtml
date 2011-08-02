@@ -462,11 +462,11 @@ TODO:
       </ss:property>
 
       <ss:property id="pinTransferApprovalNull" type="text"
-        label="Pin Transfer Approval" adminOnly="true"
+        label="Pin Transfer / RNAi Transfection Approval" adminOnly="true"
         rendered="#{!screenDetailViewer.editMode &amp;&amp; screenDetailViewer.adminViewMode &amp;&amp; empty screenDetailViewer.entity.pinTransferApprovalActivity}"
         value="&lt;not yet approved&gt;" />
       <ss:propertyGroup id="pinTransferApproval"
-        label="Pin Transfer Approval" adminOnly="true"
+        label="Pin Transfer / RNAi Transfection  Approval" adminOnly="true"
         rendered="#{screenDetailViewer.editMode || (screenDetailViewer.adminViewMode &amp;&amp; !empty screenDetailViewer.entity.pinTransferApprovalActivity)}">
         <ss:property id="approvedBy" label="Approved By"
           description="The staff member that approved for this screen to have pin transfer to assay plates performed"
