@@ -10,6 +10,7 @@ log4j.appender.stdout.layout.ConversionPattern=%d{ABSOLUTE} %5p %c:%L - %m%n
 ### direct messages to file ###
 log4j.appender.file=org.apache.log4j.DailyRollingFileAppender
 log4j.appender.file.File=/groups/screensaver/batch/logs/screensaver.log
+log4j.appender.file.DatePattern='.'yyyy-MM-dd
 log4j.appender.file.layout=org.apache.log4j.PatternLayout
 log4j.appender.file.layout.ConversionPattern=%d{ISO8601} %5p %c{3}:%L - %m%n
 log4j.appender.file.append=false
@@ -17,12 +18,10 @@ log4j.appender.file.append=false
 ### Root logger
 
 log4j.rootLogger=info, file
-### direct log messages to stdout - will be email to the account of the cron user ###
 log4j.logger.edu=warn, stdout
 
 
 ### Screensaver application
-log4j.logger.edu=info,file
 log4j.logger.org.springframework.aop.framework.Cglib2AopProxy=error
 
 log4j.logger.org.hibernate=warn

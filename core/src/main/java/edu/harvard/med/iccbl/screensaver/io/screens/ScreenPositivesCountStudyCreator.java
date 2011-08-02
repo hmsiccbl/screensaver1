@@ -9,9 +9,10 @@
 // at Harvard Medical School. This software is distributed under the terms of
 // the GNU General Public License.
 
-
 package edu.harvard.med.iccbl.screensaver.io.screens;
 
+import javax.mail.MessagingException;
+import javax.mail.internet.AddressException;
 import javax.mail.internet.InternetAddress;
 
 import org.apache.commons.cli.OptionBuilder;
@@ -56,17 +57,17 @@ public class ScreenPositivesCountStudyCreator extends AdminEmailApplication
   public static final String DEFAULT_SM_STUDY_TITLE = "Reagent Counts for Small Molecule Screens";
   public static final String DEFAULT_SM_STUDY_SUMMARY =
     "Annotates each small molecule reagent with the number of times " +
-    "it has been screened, and the count of positive hits per reagent (library well) " +
-    "across all small molecule screens. This data is based on primary screening data " +
-    "only and the \"positive\" designations were determined by the " +
-    "investigator(s) responsible for each screen.";
+      "it has been screened, and the count of positive hits per reagent (library well) " +
+      "across all small molecule screens. This data is based on primary screening data " +
+      "only and the \"positive\" designations were determined by the " +
+      "investigator(s) responsible for each screen.";
   public static final String DEFAULT_RNAi_STUDY_TITLE = "Reagent Counts for RNAi Screens";
   public static final String DEFAULT_RNAi_STUDY_SUMMARY =
     "Annotates each RNAi reagent with the number of times it has " +
-    "been screened, and the count of positive hits per reagent (library well) across " +
-    "all RNAi Screens. This data is based on primary screening data only and the " +
-    "\"positive\" designations were determined by the investigator(s) " +
-    "responsible for each screen.";
+      "been screened, and the count of positive hits per reagent (library well) across " +
+      "all RNAi Screens. This data is based on primary screening data only and the " +
+      "\"positive\" designations were determined by the investigator(s) " +
+      "responsible for each screen.";
 
   public static final String DEFAULT_POSITIVES_ANNOTATION_NAME = "Screen Positives Count";
   public static final String DEFAULT_SM_POSITIVES_ANNOTATION_DESC = "Number of times scored as positive across all Small Molecule Screens";
@@ -79,17 +80,20 @@ public class ScreenPositivesCountStudyCreator extends AdminEmailApplication
   public ScreenPositivesCountStudyCreator(String[] cmdLineArgs)
   {
     super(cmdLineArgs);
- }
+  }
 
   private static Logger log = Logger.getLogger(ScreenPositivesCountStudyCreator.class);
 
   public static final String[] OPTION_STUDY_TITLE = { "title", "title", "study-title", "Title for the study" };
   public static final String[] OPTION_STUDY_SUMMARY = { "summary", "summary", "study-summary", "Summary for the study" };
-//  public static final String[] OPTION_ANNOTATION_NAME = { "annotation", "name", "annotation-name", "name for the annotation in the study" };
-//  public static final String[] OPTION_ANNOTATION_DESC = { "annotationdesc", "desc", "annotation-desc", "descriptive name of the annotation" };
-  public static final String[] OPTION_STUDY_NUMBER = { "number", "number", "study-number", "Study number (not required, recommended to use default values), (must be unique, unless specifying the \"replace\" option" };
-  public static final String[] OPTION_SCREEN_TYPE_SM = { "typesm", "", "screen-type-sm", "create the study for Small Molecule screens" };
-  public static final String[] OPTION_SCREEN_TYPE_RNAI = { "typernai", "", "screen-type-rnai", "create the study for RNAi screens" };
+  //  public static final String[] OPTION_ANNOTATION_NAME = { "annotation", "name", "annotation-name", "name for the annotation in the study" };
+  //  public static final String[] OPTION_ANNOTATION_DESC = { "annotationdesc", "desc", "annotation-desc", "descriptive name of the annotation" };
+  public static final String[] OPTION_STUDY_NUMBER = { "number", "number", "study-number",
+    "Study number (not required, recommended to use default values), (must be unique, unless specifying the \"replace\" option" };
+  public static final String[] OPTION_SCREEN_TYPE_SM = { "typesm", "", "screen-type-sm",
+    "create the study for Small Molecule screens" };
+  public static final String[] OPTION_SCREEN_TYPE_RNAI = { "typernai", "", "screen-type-rnai",
+    "create the study for RNAi screens" };
   public static final String[] OPTION_REPLACE = {
     "replace",
     "",
@@ -98,13 +102,12 @@ public class ScreenPositivesCountStudyCreator extends AdminEmailApplication
 
   public static final String[] TEST_ONLY = { "testonly", "", "test-only", "run the entire operation specified, then roll-back." };
 
-
   @SuppressWarnings("static-access")
-  public static void main(String[] args)
+  public static void main(String[] args) throws MessagingException
   {
     final ScreenPositivesCountStudyCreator app = new ScreenPositivesCountStudyCreator(args);
 
-    String [] option = OPTION_STUDY_TITLE;
+    String[] option = OPTION_STUDY_TITLE;
     app.addCommandLineOption(OptionBuilder.hasArg()
                                           .withArgName(option[ARG_INDEX])
                                           .withDescription(option[DESCRIPTION_INDEX])
@@ -139,28 +142,41 @@ public class ScreenPositivesCountStudyCreator extends AdminEmailApplication
                                           .withLongOpt(option[LONG_OPTION_INDEX])
                                           .create(option[SHORT_OPTION_INDEX]));
 
-
     app.addCommandLineOption(OptionBuilder.withDescription(TEST_ONLY[DESCRIPTION_INDEX])
                                           .withLongOpt(TEST_ONLY[LONG_OPTION_INDEX])
                                           .create(TEST_ONLY[SHORT_OPTION_INDEX]));
     app.processOptions(/* acceptDatabaseOptions= */true,
                        /* acceptAdminUserOptions= */true);
 
-   log.info("==== Running ScreenPositivesCountStudyCreator: " + app.toString() + "======");
-    
-    final GenericEntityDAO dao = (GenericEntityDAO) app.getSpringBean("genericEntityDao");
-    final ScreenResultReporter report = (ScreenResultReporter) app.getSpringBean("screenResultReporter");
-    final ScreenResultsDAO screenResultsDao = (ScreenResultsDAO) app.getSpringBean("screenResultsDao");
-    final ScreenDAO screenDao = (ScreenDAO) app.getSpringBean("screenDao");
+    log.info("==== Running ScreenPositivesCountStudyCreator: " + app.toString() + "======");
+
+    try {
+      app.execute();
+    }
+    catch (Exception e) {
+      String subject = "Execution failure for " + app.getClass().getName();
+      String msg = subject + "\n" + app.toString();
+      app.sendErrorMail(subject, msg, e);
+      System.exit(1);
+    }
+
+  }
+
+  private void execute()
+  {
+    final GenericEntityDAO dao = (GenericEntityDAO) getSpringBean("genericEntityDao");
+    final ScreenResultReporter report = (ScreenResultReporter) getSpringBean("screenResultReporter");
+    final ScreenResultsDAO screenResultsDao = (ScreenResultsDAO) getSpringBean("screenResultsDao");
+    final ScreenDAO screenDao = (ScreenDAO) getSpringBean("screenDao");
 
     //TODO: Move the transactional code out of this class and into service methods
     dao.doInTransaction(new DAOTransaction() {
       public void runTransaction()
       {
         try {
-          AdministratorUser admin = app.findAdministratorUser();
+          AdministratorUser admin = findAdministratorUser();
 
-          boolean replaceStudyIfExists = app.isCommandLineFlagSet(OPTION_REPLACE[SHORT_OPTION_INDEX]);
+          boolean replaceStudyIfExists = isCommandLineFlagSet(OPTION_REPLACE[SHORT_OPTION_INDEX]);
           String title = null;
           String summary = null;
           String annotationDesc = null;
@@ -168,11 +184,11 @@ public class ScreenPositivesCountStudyCreator extends AdminEmailApplication
 
           String studyFacilityId = null;
           ScreenType screenType = null;
-          if (app.isCommandLineFlagSet(OPTION_SCREEN_TYPE_SM[SHORT_OPTION_INDEX])) {
+          if (isCommandLineFlagSet(OPTION_SCREEN_TYPE_SM[SHORT_OPTION_INDEX])) {
             screenType = ScreenType.SMALL_MOLECULE;
             studyFacilityId = ScreensaverConstants.DEFAULT_BATCH_STUDY_ID_POSITIVE_COUNT_SM;
-            if (app.isCommandLineFlagSet(OPTION_STUDY_NUMBER[SHORT_OPTION_INDEX])) {
-              studyFacilityId = app.getCommandLineOptionValue(OPTION_STUDY_NUMBER[SHORT_OPTION_INDEX], String.class);
+            if (isCommandLineFlagSet(OPTION_STUDY_NUMBER[SHORT_OPTION_INDEX])) {
+              studyFacilityId = getCommandLineOptionValue(OPTION_STUDY_NUMBER[SHORT_OPTION_INDEX], String.class);
             }
             // todo: title = getMessages().getMessage("admin.studies.cross_screen_comparison_study.study_title");
             title = DEFAULT_SM_STUDY_TITLE;
@@ -180,15 +196,15 @@ public class ScreenPositivesCountStudyCreator extends AdminEmailApplication
             annotationDesc = DEFAULT_SM_POSITIVES_ANNOTATION_DESC;
             overallAnnotationDesc = DEFAULT_SM_OVERALL_ANNOTATION_DESC;
           }
-          if (app.isCommandLineFlagSet(OPTION_SCREEN_TYPE_RNAI[SHORT_OPTION_INDEX])) {
-            if(app.isCommandLineFlagSet(OPTION_SCREEN_TYPE_SM[SHORT_OPTION_INDEX])) {
-              app.showHelpAndExit("Must specify either the \"" + OPTION_SCREEN_TYPE_SM[SHORT_OPTION_INDEX] + "\" or the \"" +
+          if (isCommandLineFlagSet(OPTION_SCREEN_TYPE_RNAI[SHORT_OPTION_INDEX])) {
+            if (isCommandLineFlagSet(OPTION_SCREEN_TYPE_SM[SHORT_OPTION_INDEX])) {
+              showHelpAndExit("Must specify either the \"" + OPTION_SCREEN_TYPE_SM[SHORT_OPTION_INDEX] + "\" or the \"" +
                 OPTION_SCREEN_TYPE_RNAI[SHORT_OPTION_INDEX] + "\" Option");
             }
             screenType = ScreenType.RNAI;
             studyFacilityId = ScreensaverConstants.DEFAULT_BATCH_STUDY_ID_POSITIVE_COUNT_RNAI;
-            if (app.isCommandLineFlagSet(OPTION_STUDY_NUMBER[SHORT_OPTION_INDEX])) {
-              studyFacilityId = app.getCommandLineOptionValue(OPTION_STUDY_NUMBER[SHORT_OPTION_INDEX], String.class);
+            if (isCommandLineFlagSet(OPTION_STUDY_NUMBER[SHORT_OPTION_INDEX])) {
+              studyFacilityId = getCommandLineOptionValue(OPTION_STUDY_NUMBER[SHORT_OPTION_INDEX], String.class);
             }
             title = DEFAULT_RNAi_STUDY_TITLE;
             summary = DEFAULT_RNAi_STUDY_SUMMARY;
@@ -196,18 +212,15 @@ public class ScreenPositivesCountStudyCreator extends AdminEmailApplication
             overallAnnotationDesc = DEFAULT_RNAi_OVERALL_ANNOTATION_DESC;
           }
           if (screenType == null) {
-            app.showHelpAndExit("Must specify either the \"" + OPTION_SCREEN_TYPE_SM[SHORT_OPTION_INDEX] + "\" or the \"" +
+            showHelpAndExit("Must specify either the \"" + OPTION_SCREEN_TYPE_SM[SHORT_OPTION_INDEX] + "\" or the \"" +
               OPTION_SCREEN_TYPE_RNAI[SHORT_OPTION_INDEX] + "\" Option");
           }
 
-          //            if(app.isCommandLineFlagSet(OPTION_STUDY_NUMBER[SHORT_OPTION_INDEX])) {
-          //              app.getCommandLineOptionValue(OPTION_STUDY_NUMBER[SHORT_OPTION_INDEX], Integer.class);
-          //            }
-          if (app.isCommandLineFlagSet(OPTION_STUDY_TITLE[SHORT_OPTION_INDEX])) {
-            title = app.getCommandLineOptionValue(OPTION_STUDY_TITLE[SHORT_OPTION_INDEX]);
+          if (isCommandLineFlagSet(OPTION_STUDY_TITLE[SHORT_OPTION_INDEX])) {
+            title = getCommandLineOptionValue(OPTION_STUDY_TITLE[SHORT_OPTION_INDEX]);
           }
-          if (app.isCommandLineFlagSet(OPTION_STUDY_SUMMARY[SHORT_OPTION_INDEX])) {
-            summary = app.getCommandLineOptionValue(OPTION_STUDY_SUMMARY[SHORT_OPTION_INDEX]);
+          if (isCommandLineFlagSet(OPTION_STUDY_SUMMARY[SHORT_OPTION_INDEX])) {
+            summary = getCommandLineOptionValue(OPTION_STUDY_SUMMARY[SHORT_OPTION_INDEX]);
           }
 
           Screen study = dao.findEntityByProperty(Screen.class, Screen.facilityId.getPropertyName(), studyFacilityId);
@@ -244,27 +257,22 @@ public class ScreenPositivesCountStudyCreator extends AdminEmailApplication
                                                      overallAnnotationDesc,
                                                      screenType);
 
-          InternetAddress adminEmail = app.getEmail(admin);
-          String subject = "Study created: " + study.getTitle(); //app.getMessages().getMessage("Study generated");
+          String subject = "Study created: " + study.getTitle(); //getMessages().getMessage("Study generated");
+          if (isCommandLineFlagSet(TEST_ONLY[SHORT_OPTION_INDEX])) {
+            subject = "[TEST ONLY, no commits] " + subject;
+          }
           String msg = "Study: " + study.getFacilityId() + ", " + study.getTitle() + ": " + study.getSummary()
             + "\nCross-screen Reagents found: " + count;
-          log.info(msg);
-          EmailService emailService = app.getEmailServiceBasedOnCommandLineOption(admin);
-          emailService.send(subject,
-                            msg,
-                            adminEmail,
-                            new InternetAddress[] { adminEmail }, null);
-
-          if (app.isCommandLineFlagSet(TEST_ONLY[SHORT_OPTION_INDEX])) {
-            throw new DAOTransactionRollbackException("Rollback, testing only");
-          }
+          sendAdminEmails(subject, msg);
         }
-        catch (Exception e) {
+        catch (MessagingException e) {
           throw new DAOTransactionRollbackException(e);
+        }
+        if (isCommandLineFlagSet(TEST_ONLY[SHORT_OPTION_INDEX])) {
+          throw new DAOTransactionRollbackException("Rollback, testing only");
         }
       }
     });
     log.info("==== finished ScreenPositivesCountStudyCreator ======");
-
   }
 }

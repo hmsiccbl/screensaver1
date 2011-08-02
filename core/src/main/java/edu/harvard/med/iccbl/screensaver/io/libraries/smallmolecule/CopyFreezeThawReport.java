@@ -28,6 +28,8 @@ import jxl.write.biff.RowsExceededException;
 import org.apache.commons.cli.OptionBuilder;
 import org.apache.log4j.Logger;
 
+import com.google.common.collect.Lists;
+
 import edu.harvard.med.iccbl.screensaver.io.AdminEmailApplication;
 import edu.harvard.med.screensaver.db.GenericEntityDAO;
 import edu.harvard.med.screensaver.model.libraries.Copy;
@@ -70,7 +72,7 @@ public class CopyFreezeThawReport extends AdminEmailApplication
   public static final String[] TEST_ONLY = { "testonly", "", "test-only", "run the entire operation specified, then roll-back." };
 
   @SuppressWarnings("static-access")
-  public static void main(String[] args)
+  public static void main(String[] args) throws MessagingException
   {
     final CopyFreezeThawReport app = new CopyFreezeThawReport(args);
 
@@ -151,7 +153,7 @@ public class CopyFreezeThawReport extends AdminEmailApplication
       fos.close();
       log.info("finished exporting data to: " + file.getCanonicalPath());
 
-      InternetAddress adminEmail = app.getEmail(admin);
+      //      InternetAddress adminEmail = app.getEmail(admin);
       String subject = "Small Molecule Freeze Thaw Report";
       String msg = "Small Molecule Libraries Freeze Thaw report:\n"
         + "Found " + rowCount + " copies that match the criteria:\n" +
@@ -160,30 +162,22 @@ public class CopyFreezeThawReport extends AdminEmailApplication
             "- Libary Type != \"DOS\"\n" +
             "Please see the attached file for the full report.";
       log.info(msg);
-      EmailService emailService = app.getEmailServiceBasedOnCommandLineOption(admin);
-      Set<InternetAddress> toList = app.getExtraRecipients();
-      toList.add(adminEmail);
-      // TODO: have the emailservice take an inputstream
-      emailService.send(subject,
-                              msg,
-                              adminEmail,
-                              toList.toArray(new InternetAddress[] {}), null, file);
-
+      app.sendAdminEmails(subject, msg);
     }
     catch (IOException e) {
-      log.error("Error exporting", e);
+      app.sendErrorMail("CopyFreezeThawReport: Error exporting", app.toString(), e);
       System.exit(1); // error
     }
     catch (RowsExceededException e) {
-      log.error("too many rows to export as a workbook: " + e.getMessage());
+      app.sendErrorMail("CopyFreezeThawReport: too many rows to export as a workbook ", app.toString(), e);
       System.exit(1); // error
     }
     catch (WriteException e) {
-      log.error("Error exporting", e);
+      app.sendErrorMail("CopyFreezeThawReport: Error exporting", app.toString(), e);
       System.exit(1); // error
     }
     catch (MessagingException e) {
-      log.error("Error mailing", e);
+      app.sendErrorMail("CopyFreezeThawReport: Error mailing", app.toString(), e);
       System.exit(1); // error
     }
     log.info("==== Running CopyFreezeThawReport: " + app.toString() + "======");

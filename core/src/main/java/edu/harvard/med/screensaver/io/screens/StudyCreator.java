@@ -87,14 +87,7 @@ public class StudyCreator
 
     app.processOptions(/* acceptDatabaseOptions= */true, /* acceptAdminUserOptions= */true);
 
-    try {
-      execute(app);
-    }
-    catch (Exception e) {
-      log.error("Failed to create the study", e);
-      System.exit(1);
-    }
-
+    execute(app);
   }
 
   private static void execute(final CommandLineApplication app)

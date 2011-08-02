@@ -9,9 +9,9 @@
 // at Harvard Medical School. This software is distributed under the terms of
 // the GNU General Public License.
 
-
 package edu.harvard.med.iccbl.screensaver.io.screens;
 
+import javax.mail.MessagingException;
 import javax.mail.internet.InternetAddress;
 
 import org.apache.commons.cli.OptionBuilder;
@@ -78,13 +78,14 @@ public class ConfirmedPositivesStudyCreator extends AdminEmailApplication
   public ConfirmedPositivesStudyCreator(String[] cmdLineArgs)
   {
     super(cmdLineArgs);
- }
+  }
 
   private static Logger log = Logger.getLogger(ConfirmedPositivesStudyCreator.class);
 
   public static final String[] OPTION_STUDY_TITLE = { "title", "title", "study-title", "Title for the study" };
   public static final String[] OPTION_STUDY_SUMMARY = { "summary", "summary", "study-summary", "Summary for the study" };
-  public static final String[] OPTION_STUDY_NUMBER = { "number", "number", "study-number", "Study number (not required, recommended to use default values), (must be unique, unless specifying the \"replace\" option" };
+  public static final String[] OPTION_STUDY_NUMBER = { "number", "number", "study-number",
+    "Study number (not required, recommended to use default values), (must be unique, unless specifying the \"replace\" option" };
   public static final String[] OPTION_REPLACE = {
     "replace",
     "",
@@ -93,13 +94,12 @@ public class ConfirmedPositivesStudyCreator extends AdminEmailApplication
 
   public static final String[] TEST_ONLY = { "testonly", "", "test-only", "run the entire operation specified, then roll-back." };
 
-
   @SuppressWarnings("static-access")
   public static void main(String[] args)
   {
     final ConfirmedPositivesStudyCreator app = new ConfirmedPositivesStudyCreator(args);
 
-    String [] option = OPTION_STUDY_TITLE;
+    String[] option = OPTION_STUDY_TITLE;
     app.addCommandLineOption(OptionBuilder.hasArg()
                              .withArgName(option[ARG_INDEX])
                              .withDescription(option[DESCRIPTION_INDEX])
@@ -123,7 +123,6 @@ public class ConfirmedPositivesStudyCreator extends AdminEmailApplication
     app.addCommandLineOption(OptionBuilder.withDescription(option[DESCRIPTION_INDEX])
                              .withLongOpt(option[LONG_OPTION_INDEX])
                              .create(option[SHORT_OPTION_INDEX]));
-
 
     app.addCommandLineOption(OptionBuilder.withDescription(TEST_ONLY[DESCRIPTION_INDEX])
                              .withLongOpt(TEST_ONLY[LONG_OPTION_INDEX])
@@ -190,33 +189,26 @@ public class ConfirmedPositivesStudyCreator extends AdminEmailApplication
           int count = app.createStudy(admin, studyFacilityId, title, summary,
                                       dao, report);
           study = dao.findEntityByProperty(Screen.class, Screen.facilityId.getPropertyName(), studyFacilityId);
-          study = dao.findEntityByProperty(Screen.class, Screen.facilityId.getPropertyName(), studyFacilityId);
 
-          InternetAddress adminEmail = app.getEmail(admin);
           String subject = "Study created: \"" + study.getTitle() + "\""; //app.getMessages().getMessage("Study generated");
+          if (app.isCommandLineFlagSet(TEST_ONLY[SHORT_OPTION_INDEX])) {
+            subject = "[TEST ONLY, no commits] " + subject;
+          }
           String msg = "Study: " + study.getFacilityId() + "\n\"" + study.getTitle() + "\"\n" + study.getSummary()
             + "\n\nTotal count of Confirmed Positives considered in the study: " + count;
-          log.info(msg);
-          EmailService emailService = app.getEmailServiceBasedOnCommandLineOption(admin);
-          emailService.send(subject,
-                            msg,
-                            adminEmail,
-                            new InternetAddress[] { adminEmail }, null);
-
-          if (app.isCommandLineFlagSet(TEST_ONLY[SHORT_OPTION_INDEX])) {
-            throw new DAOTransactionRollbackException("Rollback, testing only");
-          }
+          app.sendAdminEmails(subject, msg);
         }
-        catch (Exception e) {
+        catch (MessagingException e) {
           throw new DAOTransactionRollbackException(e);
+        }
+        if (app.isCommandLineFlagSet(TEST_ONLY[SHORT_OPTION_INDEX])) {
+          throw new DAOTransactionRollbackException("Rollback, testing only");
         }
       }
     });
     log.info("==== finished ConfirmedPositivesStudyCreator ======");
 
   }
-
-  //  private Screen _study = null;
 
   /**
    * @return the count of confirmed positives considered in the study
@@ -257,8 +249,6 @@ public class ConfirmedPositivesStudyCreator extends AdminEmailApplication
 
     dao.persistEntity(study);
     dao.flush();
-    
-//    _study = study;
     return report.createSilencingReagentConfirmedPositiveSummary(study);
   }
 }

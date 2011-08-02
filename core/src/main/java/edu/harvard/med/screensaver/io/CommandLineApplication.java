@@ -1,4 +1,6 @@
-// $HeadURL$
+// $HeadURL:
+// http://seanderickson1@forge.abcd.harvard.edu/svn/screensaver/trunk/core/src/main/java/edu/harvard/med/screensaver/io/CommandLineApplication.java
+// $
 // $Id$
 //
 // Copyright © 2006, 2010 by the President and Fellows of Harvard College.
@@ -75,7 +77,6 @@ public class CommandLineApplication
 
   private Option _lastAccessOption;
 
-
   // public methods
 
   @SuppressWarnings("static-access")
@@ -88,7 +89,6 @@ public class CommandLineApplication
                        withDescription("print this help").
                        create("h"));
   }
-
 
   public Object getSpringBean(String springBeanName)
   {
@@ -112,7 +112,7 @@ public class CommandLineApplication
   /**
    * Override this method to specify a different spring configuration resource
    * file.
-   *
+   * 
    * @return the name of the spring configuration resource file (resource name
    *         relative to the classpath root).
    */
@@ -184,7 +184,8 @@ public class CommandLineApplication
         return (T) cstr.newInstance(value);
       }
       catch (Exception e) {
-        showHelpAndExit("could not parse option " + optionName + " with arg " + value + " as type " + ofType.getSimpleName() + ": " +
+        showHelpAndExit("could not parse option " + optionName + " with arg " + value + " as type " + ofType.getSimpleName() +
+          ": " +
           e);
       }
     }
@@ -295,7 +296,6 @@ public class CommandLineApplication
 
   }
 
-
   public String toString()
   {
     StringBuilder s = new StringBuilder();
@@ -312,7 +312,6 @@ public class CommandLineApplication
     }
     return "command line options: " + s.toString();
   }
-
 
   // private methods
 
@@ -388,33 +387,42 @@ public class CommandLineApplication
                          .create("AE"));
   }
 
+  private AdministratorUser _admin;
+
+  /**
+   * Find the admin user from the command line flag.  If not set, then throw an IllegalArgumentException
+   * @return AdministratorUser running the program
+   * @throws IllegalArgumentException
+   */
   public AdministratorUser findAdministratorUser()
   {
-    AdministratorUser admin;
-    String criterionMessage;
-    GenericEntityDAO dao = (GenericEntityDAO) getSpringBean("genericEntityDao");
-    if (isCommandLineFlagSet("-A")) {
-      Integer userId = getCommandLineOptionValue("-A", Integer.class);
-      admin = dao.findEntityById(AdministratorUser.class, userId);
-      criterionMessage = "User ID=" + userId;
+    if (_admin == null) {
+
+      String criterionMessage;
+      GenericEntityDAO dao = (GenericEntityDAO) getSpringBean("genericEntityDao");
+      if (isCommandLineFlagSet("-A")) {
+        Integer userId = getCommandLineOptionValue("-A", Integer.class);
+        _admin = dao.findEntityById(AdministratorUser.class, userId);
+        criterionMessage = "User ID=" + userId;
+      }
+      else if (isCommandLineFlagSet("-AL")) {
+        String loginId = getCommandLineOptionValue("-AL");
+        _admin = dao.findEntityByProperty(AdministratorUser.class, "loginId", loginId);
+        criterionMessage = "Login ID=" + loginId;
+      }
+      else if (isCommandLineFlagSet("-AE")) {
+        String ecommonsId = getCommandLineOptionValue("-AE");
+        _admin = dao.findEntityByProperty(AdministratorUser.class, "ECommonsId", ecommonsId);
+        criterionMessage = "eCommons ID=" + ecommonsId;
+      }
+      else {
+        throw new IllegalArgumentException("option --admin-id, --admin-login-id, or --user-ecommons-id (admin) must be speciifed");
+      }
+      if (_admin == null) {
+        throw new IllegalArgumentException("no administrator user found with " + criterionMessage);
+      }
     }
-    else if (isCommandLineFlagSet("-AL")) {
-      String loginId = getCommandLineOptionValue("-AL");
-      admin = dao.findEntityByProperty(AdministratorUser.class, "loginId", loginId);
-      criterionMessage = "Login ID=" + loginId;
-    }
-    else if (isCommandLineFlagSet("-AE")) {
-      String ecommonsId = getCommandLineOptionValue("-AE");
-      admin = dao.findEntityByProperty(AdministratorUser.class, "ECommonsId", ecommonsId);
-      criterionMessage = "eCommons ID=" + ecommonsId;
-    }
-    else {
-      throw new IllegalArgumentException("option --admin-id, --admin-login-id, or --user-ecommons-id (admin) must be speciifed");
-    }
-    if (admin == null) {
-      throw new IllegalArgumentException("no administrator user found with " + criterionMessage);
-    }
-    return admin;
+    return _admin;
   }
 
   public void setSpringConfigurationResource(String springConfigurationResource)
