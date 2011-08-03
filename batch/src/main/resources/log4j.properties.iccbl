@@ -18,8 +18,7 @@ log4j.appender.file.append=false
 ### Root logger
 
 log4j.rootLogger=info, file
-log4j.logger.edu=warn, stdout
-
+#log4j.logger.edu=stdout
 
 ### Screensaver application
 log4j.logger.org.springframework.aop.framework.Cglib2AopProxy=error
