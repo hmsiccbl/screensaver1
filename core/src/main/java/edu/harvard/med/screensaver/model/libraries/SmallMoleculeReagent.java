@@ -349,6 +349,7 @@ public class SmallMoleculeReagent extends Reagent
 
   public SmallMoleculeReagent forSaltFormId(Integer saltFormId)
   {
+    validateImmutablePropertyInitialization();
     _saltFormId = saltFormId;
     return this;
   }
@@ -369,5 +370,12 @@ public class SmallMoleculeReagent extends Reagent
   private void setRestrictedStructure(Boolean isRestrictedStructure)
   {
     _isRestrictedStructure = isRestrictedStructure;
+  }
+
+  public SmallMoleculeReagent forRestrictedStructure()
+  {
+    validateImmutablePropertyInitialization();
+    _isRestrictedStructure = true;
+    return this;
   }
 }

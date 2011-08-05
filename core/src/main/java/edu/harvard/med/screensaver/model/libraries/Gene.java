@@ -25,7 +25,6 @@ import org.hibernate.annotations.Immutable;
 
 import edu.harvard.med.screensaver.model.AbstractEntity;
 import edu.harvard.med.screensaver.model.AbstractEntityVisitor;
-import edu.harvard.med.screensaver.model.DataModelViolationException;
 import edu.harvard.med.screensaver.model.annotations.ContainedEntity;
 import edu.harvard.med.screensaver.model.meta.PropertyPath;
 import edu.harvard.med.screensaver.model.meta.RelationshipPath;
@@ -102,9 +101,7 @@ public class Gene extends AbstractEntity<Integer>
    */
   public Gene withEntrezgeneId(Integer entrezgeneId)
   {
-    if (!!!isTransient()) {
-      throw new DataModelViolationException("immutable property cannot be changed after entity is persisted");
-    }
+    validateImmutablePropertyInitialization();
     setEntrezgeneId(entrezgeneId);
     return this;
   }
@@ -130,9 +127,7 @@ public class Gene extends AbstractEntity<Integer>
    */
   public Gene withGeneName(String geneName)
   {
-    if (!!!isTransient()) {
-      throw new DataModelViolationException("immutable property cannot be changed after entity is persisted");
-    }
+    validateImmutablePropertyInitialization();
     setGeneName(geneName);
     return this;
   }
@@ -160,6 +155,7 @@ public class Gene extends AbstractEntity<Integer>
    */
   public Gene withEntrezgeneSymbol(String entrezgeneSymbol)
   {
+    validateImmutablePropertyInitialization();
     _entrezgeneSymbols.add(entrezgeneSymbol);
     return this;
   }
@@ -187,6 +183,7 @@ public class Gene extends AbstractEntity<Integer>
    */
   public Gene withGenbankAccessionNumber(String genbankAccessionNumber)
   {
+    validateImmutablePropertyInitialization();
     _genbankAccessionNumbers.add(genbankAccessionNumber);
     return this;
   }
@@ -211,9 +208,7 @@ public class Gene extends AbstractEntity<Integer>
    */
   public Gene withSpeciesName(String speciesName)
   {
-    if (!!!isTransient()) {
-      throw new DataModelViolationException("immutable property cannot be changed after entity is persisted");
-    }
+    validateImmutablePropertyInitialization();
     setSpeciesName(speciesName);
     return this;
   }

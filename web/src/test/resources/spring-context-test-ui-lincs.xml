@@ -1,0 +1,65 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<!--
+   $HeadURL: http://forge.abcd.harvard.edu/svn/screensaver/trunk/test/src/main/resources/spring-context-test-security.xml $
+   $Id: spring-context-test-security.xml 6226 2011-07-20 16:07:10Z atolopko $
+
+   Copyright © 2006, 2010 by the President and Fellows of Harvard College.
+   
+   Screensaver is an open-source project developed by the ICCB-L and NSRB labs
+   at Harvard Medical School. This software is distributed under the terms of
+   the GNU General Public License.
+-->
+
+<!-- A top-level, composite Spring context configuration file, intended for use with the 
+  Screensaver web application.  Allows a full Spring configuration to be referenced via a 
+  single file. -->
+
+<beans
+  xmlns="http://www.springframework.org/schema/beans"
+  xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+  xmlns:aop="http://www.springframework.org/schema/aop"
+  xsi:schemaLocation="http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans-2.0.xsd
+                      http://www.springframework.org/schema/aop http://www.springframework.org/schema/aop/spring-aop-2.0.xsd">
+                      
+
+  <import resource="spring-context-web-lincs.xml"/>
+
+  <bean
+    id="screensaverProperties"
+    class="edu.harvard.med.screensaver.ScreensaverProperties"
+    scope="singleton">
+    <constructor-arg value="/screensaver.properties.lincs" />
+    <constructor-arg>
+      <bean class="edu.harvard.med.screensaver.db.ScreensaverPropertiesDatabaseConnectionSettingsResolver" />
+    </constructor-arg>
+  </bean>
+
+  <bean
+    id="currentScreensaverUser"
+    class="edu.harvard.med.screensaver.ui.CurrentScreensaverUser"
+    scope="session">
+    <property name="screensaverUser">
+      <bean class="edu.harvard.med.screensaver.model.users.ScreeningRoomUser">
+        <constructor-arg index="0" value="First"/>
+        <constructor-arg index="1" value="Last"/>
+      </bean>
+    </property>
+  </bean>
+
+  <bean class="org.springframework.beans.factory.config.CustomScopeConfigurer">
+    <property name="scopes">
+        <map>
+            <entry key="session">
+                <bean class="edu.harvard.med.screensaver.ui.MockSessionScope"/>
+            </entry>
+        </map>
+    </property>
+  </bean>
+
+  <bean id="dataFactory" class="edu.harvard.med.screensaver.test.TestDataFactory">
+    <constructor-arg ref="genericEntityDao" />
+    <constructor-arg ref="entityManagerFactory" />
+  </bean>
+
+</beans>

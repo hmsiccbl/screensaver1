@@ -32,7 +32,6 @@ import org.hibernate.annotations.LazyCollection;
 import org.hibernate.annotations.LazyCollectionOption;
 
 import edu.harvard.med.screensaver.model.AbstractEntityVisitor;
-import edu.harvard.med.screensaver.model.DataModelViolationException;
 import edu.harvard.med.screensaver.model.annotations.ContainedEntity;
 import edu.harvard.med.screensaver.model.annotations.ToMany;
 import edu.harvard.med.screensaver.model.annotations.ToOne;
@@ -203,9 +202,7 @@ public class SilencingReagent extends Reagent
    */
   public SilencingReagent withDuplexWell(Well duplexWell)
   {
-    if (getReagentId() != null) {
-      throw new DataModelViolationException("cannot add duplex wells after silencing reagent is persisted");
-    }
+    validateImmutablePropertyInitialization();
     _duplexWells.add(duplexWell);
     return this;
   }
@@ -231,9 +228,7 @@ public class SilencingReagent extends Reagent
 
   public SilencingReagent withRestrictedSequence(boolean isRestrictedSequence)
   {
-    if (!!!isTransient()) {
-      throw new DataModelViolationException("immutable property cannot be changed after entity is persisted");
-    }
+    validateImmutablePropertyInitialization();
     setRestrictedSequence(isRestrictedSequence);
     return this;
   }

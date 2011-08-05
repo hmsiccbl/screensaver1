@@ -234,14 +234,14 @@ public abstract class AbstractEntity<K extends Serializable> implements Entity<K
   @Transient
   public Entity<K> restrict()
   {
+    if (_entityViewPolicy != null) {
+      return acceptVisitor(_entityViewPolicy);
+    }
     if (isTransient()) {
-      // new entities will not have a entityViewPolicy injected yet, and it should not be restricted in any case, if the user created it 
+      // new entities will not have a entityViewPolicy injected yet, and it should not be restricted in any case, since the current user must have created it 
       return this;
     }
-    if (_entityViewPolicy == null) {
-      throw new UnsupportedOperationException("entityViewPolicy not set");
-    }
-    return acceptVisitor(_entityViewPolicy);
+    throw new UnsupportedOperationException("entityViewPolicy not set");
   }
 
   /**
@@ -345,5 +345,12 @@ public abstract class AbstractEntity<K extends Serializable> implements Entity<K
 
     return !(Collection.class.isAssignableFrom(property.getPropertyType()) ||
       Map.class.isAssignableFrom(property.getPropertyType()) || AbstractEntity.class.isAssignableFrom(property.getPropertyType()));
+  }
+
+  protected void validateImmutablePropertyInitialization()
+  {
+    if (!!!isTransient()) {
+      throw new DataModelViolationException("immutable property cannot be changed after entity is persisted");
+    }
   }
 }

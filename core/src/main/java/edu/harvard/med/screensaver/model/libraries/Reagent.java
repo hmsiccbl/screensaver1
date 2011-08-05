@@ -351,6 +351,7 @@ public abstract class Reagent extends AbstractEntity<Integer> implements Compara
 
   public Reagent forVendorBatchId(String vendorBatchId)
   {
+    validateImmutablePropertyInitialization();
     _vendorBatchId = vendorBatchId;
     return this;
   }
@@ -365,6 +366,7 @@ public abstract class Reagent extends AbstractEntity<Integer> implements Compara
 
   public Reagent forFacilityBatchId(Integer facilityBatchId)
   {
+    validateImmutablePropertyInitialization();
     _facilityBatchId = facilityBatchId;
     return this;
   }
