@@ -9,6 +9,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.transaction.annotation.Transactional;
 
+import edu.harvard.med.lincs.screensaver.ui.libraries.WellViewer;
 import edu.harvard.med.screensaver.db.datafetcher.Tuple;
 import edu.harvard.med.screensaver.io.libraries.WellSdfWriter;
 import edu.harvard.med.screensaver.model.AdministrativeActivity;
@@ -38,6 +39,8 @@ public class RestrictedReagentsTest extends AbstractSpringPersistenceTest
   private CurrentScreensaverUser currentScreensaverUser;
   @Autowired
   private WellSearchResults wellsBrowser;
+  @Autowired
+  private WellViewer wellViewer;
 
   private SmallMoleculeReagent _restrictedSmr;
   private SmallMoleculeReagent _unrestrictedSmr;
@@ -191,7 +194,7 @@ public class RestrictedReagentsTest extends AbstractSpringPersistenceTest
     doTestSdfWriter(adminUser, _unrestrictedSmr, true);
   }
 
-  public void doTestSdfWriter(ScreensaverUser user, SmallMoleculeReagent smr, boolean isRestrictedPropertyVisible)
+  private void doTestSdfWriter(ScreensaverUser user, SmallMoleculeReagent smr, boolean isRestrictedPropertyVisible)
   {
     currentScreensaverUser.setScreensaverUser(user);
     Writer writer = new StringWriter();
@@ -206,7 +209,35 @@ public class RestrictedReagentsTest extends AbstractSpringPersistenceTest
 
   public void testWellViewer()
   {
-    fail("not implemented");
+    doTestWellViewer(guestUser, _restrictedSmr, false);
+    doTestWellViewer(guestUser, _unrestrictedSmr, true);
+    doTestWellViewer(adminUser, _restrictedSmr, true);
+    doTestWellViewer(adminUser, _unrestrictedSmr, true);
+  }
+
+  private void doTestWellViewer(ScreensaverUser user, SmallMoleculeReagent smr, boolean isRestrictedPropertyVisible)
+  {
+    currentScreensaverUser.setScreensaverUser(user);
+    wellViewer.viewEntity(smr.getWell());
+
+    SmallMoleculeReagent restrictedReagent = (SmallMoleculeReagent) wellViewer.getRestrictedReagent();
+
+    if (isRestrictedPropertyVisible) {
+      assertEquals(smr.getSmiles(), restrictedReagent.getSmiles());
+      assertEquals(smr.getInchi(), restrictedReagent.getInchi());
+      assertEquals(smr.getMolfile(), restrictedReagent.getMolfile());
+      assertEquals(smr.getMolecularFormula(), restrictedReagent.getMolecularFormula());
+      assertEquals(smr.getMolecularMass(), restrictedReagent.getMolecularMass());
+      assertEquals(smr.getMolecularWeight(), restrictedReagent.getMolecularWeight());
+    } 
+    else {
+      assertNull(restrictedReagent.getSmiles());
+      assertNull(restrictedReagent.getInchi());
+      assertNull(restrictedReagent.getMolfile());
+      assertNull(restrictedReagent.getMolecularFormula());
+      assertNull(restrictedReagent.getMolecularMass());
+      assertNull(restrictedReagent.getMolecularWeight());
+    }      
   }
 
   public void testDownloadAttachedFiles()
