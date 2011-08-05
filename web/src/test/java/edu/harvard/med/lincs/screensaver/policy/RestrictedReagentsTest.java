@@ -1,12 +1,16 @@
 
 package edu.harvard.med.lincs.screensaver.policy;
 
+import java.io.StringWriter;
+import java.io.Writer;
+
 import org.joda.time.LocalDate;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.transaction.annotation.Transactional;
 
 import edu.harvard.med.screensaver.db.datafetcher.Tuple;
+import edu.harvard.med.screensaver.io.libraries.WellSdfWriter;
 import edu.harvard.med.screensaver.model.AdministrativeActivity;
 import edu.harvard.med.screensaver.model.AdministrativeActivityType;
 import edu.harvard.med.screensaver.model.libraries.SilencingReagent;
@@ -181,7 +185,23 @@ public class RestrictedReagentsTest extends AbstractSpringPersistenceTest
 
   public void testSDFWriter()
   {
-    fail("not implemented");
+    doTestSdfWriter(guestUser, _restrictedSmr, false);
+    doTestSdfWriter(guestUser, _unrestrictedSmr, true);
+    doTestSdfWriter(adminUser, _restrictedSmr, true);
+    doTestSdfWriter(adminUser, _unrestrictedSmr, true);
+  }
+
+  public void doTestSdfWriter(ScreensaverUser user, SmallMoleculeReagent smr, boolean isRestrictedPropertyVisible)
+  {
+    currentScreensaverUser.setScreensaverUser(user);
+    Writer writer = new StringWriter();
+    new WellSdfWriter(writer).write(smr.getWell(), smr.getLibraryContentsVersion());
+    assertEquals(isRestrictedPropertyVisible, writer.toString().contains(smr.getSmiles()));
+    assertEquals(isRestrictedPropertyVisible, writer.toString().contains(smr.getMolfile()));
+    assertEquals(isRestrictedPropertyVisible, writer.toString().contains(smr.getInchi()));
+    assertEquals(isRestrictedPropertyVisible, writer.toString().contains(smr.getMolecularFormula().toString()));
+    assertEquals(isRestrictedPropertyVisible, writer.toString().contains(smr.getMolecularMass().toString()));
+    assertEquals(isRestrictedPropertyVisible, writer.toString().contains(smr.getMolecularWeight().toString()));
   }
 
   public void testWellViewer()
