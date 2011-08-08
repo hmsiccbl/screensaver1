@@ -34,6 +34,7 @@ import edu.harvard.med.screensaver.ui.arch.util.UISelectOneBean;
 import edu.harvard.med.screensaver.ui.arch.view.EntityViewer;
 import edu.harvard.med.screensaver.ui.arch.view.EntityViewerBackingBean;
 import edu.harvard.med.screensaver.ui.arch.view.aspects.UICommand;
+import edu.harvard.med.screensaver.util.NullSafeUtils;
 
 /**
  * SearchResults where each row represents an {@link Entity}. Provides "Summary" and "Entity" viewing modes, where
@@ -399,7 +400,9 @@ public abstract class EntitySearchResults<E extends Entity<K>,R,K extends Serial
     if (model.getModelType() == DataTableModelType.IN_MEMORY) { 
       List<R> data = (List<R>) model.getWrappedData();
       for (int i = 0; i < data.size(); i++) {
-        if (rowToEntity(data.get(i)).equals(entity)) {
+        R row = data.get(i);
+        E entityRow = rowToEntity(row);
+        if (NullSafeUtils.nullSafeEquals(entityRow, entity)) {
           return i;
         }
       }

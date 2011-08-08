@@ -219,8 +219,10 @@ public class RestrictedReagentsTest extends AbstractSpringPersistenceTest
   {
     currentScreensaverUser.setScreensaverUser(user);
     wellViewer.viewEntity(smr.getWell());
+    assertNotNull(wellViewer.getEntity());
 
     SmallMoleculeReagent restrictedReagent = (SmallMoleculeReagent) wellViewer.getRestrictedReagent();
+    assertNotNull(wellViewer.getRestrictedReagent());
 
     if (isRestrictedPropertyVisible) {
       assertEquals(smr.getSmiles(), restrictedReagent.getSmiles());
