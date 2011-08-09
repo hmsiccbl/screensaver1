@@ -131,6 +131,7 @@ public class AdminEmailApplication extends CommandLineApplication
     List<String> buf = Lists.newLinkedList();
     buf.add("User ID: " + user.getEntityId());
     buf.add("Login ID: " + user.getLoginId());
+    buf.add("eCommons ID: " + user.getECommonsId());
     buf.add("Name: " + user.getFullNameFirstLast());
     buf.add("Email: \"" + user.getEmail() + "\"");
     return buf;
@@ -196,7 +197,7 @@ public class AdminEmailApplication extends CommandLineApplication
                               null);
         }
         catch (AddressException e) {
-          failMessages.add("Address excption for user: " + printUser(user) + ", " + e.getMessage());
+          failMessages.add("Address exception for user: " + printUser(user) + ", " + e.getMessage());
         }
       }
     }
