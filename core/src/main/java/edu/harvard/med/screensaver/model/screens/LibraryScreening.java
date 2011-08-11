@@ -63,7 +63,7 @@ public class LibraryScreening extends Screening
   public static final RelationshipPath<LibraryScreening> assayPlatesScreened = RelationshipPath.from(LibraryScreening.class).to("assayPlatesScreened");
 
   public static final String ACTIVITY_TYPE_NAME = "Library Screening";
-  private static final String EXTERNAL_LIBRARY_SCREENING_ACTIVITY_TYPE_NAME = "External " + ACTIVITY_TYPE_NAME;
+  public static final String EXTERNAL_LIBRARY_SCREENING_ACTIVITY_TYPE_NAME = "External " + ACTIVITY_TYPE_NAME;
 
 
   private SortedSet<AssayPlate> _assayPlatesScreened = Sets.newTreeSet();

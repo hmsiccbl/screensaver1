@@ -309,13 +309,13 @@ public class Menu extends AbstractBackingBean
   }
 
   @UICommand
-  public String browseLabActivities()
+  public String browseUserActivities()
   {
     ScreensaverUser user = getScreensaverUser();
     if (user instanceof AdministratorUser &&
       (user.isUserInRole(ScreensaverUserRole.READ_EVERYTHING_ADMIN) ||
       user.isUserInRole(ScreensaverUserRole.CHERRY_PICK_REQUESTS_ADMIN))) {
-      _activitiesBrowser.searchAll();
+      _activitiesBrowser.searchAllUserActivities();
     }
     else {
       _activitiesBrowser.searchActivitiesForUser(user);

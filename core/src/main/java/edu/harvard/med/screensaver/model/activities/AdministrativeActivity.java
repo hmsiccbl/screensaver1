@@ -7,16 +7,15 @@
 // at Harvard Medical School. This software is distributed under the terms of
 // the GNU General Public License.
 
-package edu.harvard.med.screensaver.model;
+package edu.harvard.med.screensaver.model.activities;
 
 import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.PrimaryKeyJoinColumn;
-import javax.persistence.Transient;
 
-import com.google.common.base.Predicate;
 import org.joda.time.LocalDate;
 
+import edu.harvard.med.screensaver.model.AbstractEntityVisitor;
 import edu.harvard.med.screensaver.model.users.AdministratorUser;
 
 /**
@@ -31,39 +30,22 @@ import edu.harvard.med.screensaver.model.users.AdministratorUser;
 @PrimaryKeyJoinColumn(name="activityId")
 @org.hibernate.annotations.ForeignKey(name="fk_administrative_activity_to_activity")
 @org.hibernate.annotations.Proxy
-public class AdministrativeActivity extends Activity
+public class AdministrativeActivity extends TypedActivity<AdministrativeActivityType>
 {
   private static final long serialVersionUID = 1L;
+
   public static final AdministrativeActivity Null = new AdministrativeActivity();
 
-  public static Predicate<AdministrativeActivity> IsOfType(final AdministrativeActivityType type) 
-  {
-    return new Predicate<AdministrativeActivity>() {
-      @Override
-      public boolean apply(AdministrativeActivity a)
-      {
-        return a.getType() == type;
-      }
-    };
-  }
-
-  private AdministrativeActivityType _type;
-
-  @Override
-  @Transient
-  public String getActivityTypeName()
-  {
-    return getType().getValue();
-  }
-  
   @Override
   public Object acceptVisitor(AbstractEntityVisitor visitor)
   {
     return visitor.visit(this);
   }
 
-  @Column(name="administrativeActivityType", nullable=false, updatable=false)
-  @org.hibernate.annotations.Type(type="edu.harvard.med.screensaver.model.AdministrativeActivityType$UserType")
+  // HACK: we don't need AdminActivity.type to be updatable, but since ServiceActivity.type must be updatable, 
+  // and they share a parent class, we need to make them both updatable, lest our model tests report that public setter should not exist
+  @Column(name = "administrativeActivityType", nullable = false/* , updatable=false */)
+  @org.hibernate.annotations.Type(type = "edu.harvard.med.screensaver.model.activities.AdministrativeActivityType$UserType")
   public AdministrativeActivityType getType()
   {
     return _type;
@@ -90,7 +72,7 @@ public class AdministrativeActivity extends Activity
                                 LocalDate dateOfActivity,
                                 AdministrativeActivityType type)
   {
-    super(recordedBy, performedBy, dateOfActivity);
+    super(recordedBy, performedBy, dateOfActivity, type);
 
 //    // we normally do not get involved with maintaining bi-directional relationships in the
 //    // constructors, because normally we have a @ContainedEntity(containingEntityClass) that
@@ -104,8 +86,6 @@ public class AdministrativeActivity extends Activity
 //    // something like this so far, and maybe i should come back to it, but i think its perfectly
 //    // alright. -s
 //    performedBy.getActivitiesPerformed().add(this);
-
-    _type = type;
   }
 
   /**
@@ -113,9 +93,4 @@ public class AdministrativeActivity extends Activity
    * @motivation for hibernate and proxy/concrete subclass constructors
    */
   protected AdministrativeActivity() {}
-
-  private void setType(AdministrativeActivityType type)
-  {
-    _type = type;
-  }
 }

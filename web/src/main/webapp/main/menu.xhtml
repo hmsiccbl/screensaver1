@@ -159,10 +159,10 @@
             </t:panelGrid>
 
             <t:commandLink styleClass="menuItem"
-              action="#{menu.browseLabActivities}" accesskey="A"
-              title="Browse the lab activities currently available and accessible to you"
+              action="#{menu.browseUserActivities}" accesskey="A"
+              title="Browse all users' activities"
               rendered="#{!menu.applicationProperties.lincsAppVersion}">
-            Lab <u>A</u>ctivities</t:commandLink>
+            <u>A</u>ctivities</t:commandLink>
 
             <t:commandLink action="#{menu.browseScreeners}"
               styleClass="menuItem" rendered="#{menu.readAdmin}"

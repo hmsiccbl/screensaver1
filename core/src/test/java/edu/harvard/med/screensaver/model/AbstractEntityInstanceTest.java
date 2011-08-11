@@ -23,6 +23,9 @@ import org.joda.time.DateTime;
 import org.springframework.beans.factory.annotation.Autowired;
 
 import edu.harvard.med.screensaver.db.EntityInflator;
+import edu.harvard.med.screensaver.model.activities.Activity;
+import edu.harvard.med.screensaver.model.activities.AdministrativeActivity;
+import edu.harvard.med.screensaver.model.activities.AdministrativeActivityType;
 import edu.harvard.med.screensaver.model.entitytesters.IdentifierAccessorModifiersTester;
 import edu.harvard.med.screensaver.model.entitytesters.IdentifierMetadataTester;
 import edu.harvard.med.screensaver.model.entitytesters.IsVersionedTester;

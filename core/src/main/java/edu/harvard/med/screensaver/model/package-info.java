@@ -8,7 +8,7 @@
  * <li>{@link edu.harvard.med.screensaver.model.screens}
  * <li>{@link edu.harvard.med.screensaver.model.screenresults}
  * <li>{@link edu.harvard.med.screensaver.model.cherrypicks}
- * <li>{@link edu.harvard.med.screensaver.model.Activity} (activity entities are dispersed throughout multiple model packages)
+ * <li>{@link edu.harvard.med.screensaver.model.activities.Activity} (activity entities are dispersed throughout multiple model packages)
  * 
  * </ul>
  * 

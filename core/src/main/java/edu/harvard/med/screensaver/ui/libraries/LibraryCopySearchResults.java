@@ -23,14 +23,13 @@ import edu.harvard.med.screensaver.db.GenericEntityDAO;
 import edu.harvard.med.screensaver.db.LibrariesDAO;
 import edu.harvard.med.screensaver.db.datafetcher.EntityDataFetcher;
 import edu.harvard.med.screensaver.db.hqlbuilder.HqlBuilder;
-import edu.harvard.med.screensaver.model.Activity;
 import edu.harvard.med.screensaver.model.MolarConcentration;
 import edu.harvard.med.screensaver.model.Volume;
+import edu.harvard.med.screensaver.model.activities.Activity;
 import edu.harvard.med.screensaver.model.libraries.Copy;
 import edu.harvard.med.screensaver.model.libraries.CopyUsageType;
 import edu.harvard.med.screensaver.model.libraries.Library;
 import edu.harvard.med.screensaver.model.libraries.LibraryType;
-import edu.harvard.med.screensaver.model.libraries.Plate;
 import edu.harvard.med.screensaver.model.libraries.PlateStatus;
 import edu.harvard.med.screensaver.model.libraries.VolumeStatistics;
 import edu.harvard.med.screensaver.model.meta.PropertyPath;
@@ -55,7 +54,7 @@ import edu.harvard.med.screensaver.util.StringUtils;
 
 /**
  * A {@link SearchResults} for {@link Copy Copies}.
- * 
+* 
  * @author <a mailto="andrew_tolopko@hms.harvard.edu">Andrew Tolopko</a>
  */
 public class LibraryCopySearchResults extends EntityBasedEntitySearchResults<Copy,Integer>
@@ -68,7 +67,7 @@ public class LibraryCopySearchResults extends EntityBasedEntitySearchResults<Cop
   private LibrariesDAO _librariesDao;
   private LibraryCopyViewer _libraryCopyViewer;
   private LibraryViewer _libraryViewer;
-  private ActivitySearchResults<Activity> _activitesBrowser;
+  private ActivitySearchResults _activitesBrowser;
   private LibraryCopyPlateSearchResults _libraryCopyPlateSearchResults;
 
   /**
@@ -82,7 +81,7 @@ public class LibraryCopySearchResults extends EntityBasedEntitySearchResults<Cop
                                   LibrariesDAO librariesDao,
                                   LibraryCopyViewer libraryCopyViewer,
                                   LibraryViewer libraryViewer,
-                                  ActivitySearchResults<Activity> activitiesBrowser,
+                                  ActivitySearchResults activitiesBrowser,
                                   LibraryCopyPlateSearchResults libraryCopyPlateSearchResults)
   {
     super(libraryCopyViewer);

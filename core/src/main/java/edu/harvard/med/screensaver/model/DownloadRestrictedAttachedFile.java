@@ -6,6 +6,8 @@ import java.util.SortedSet;
 import org.joda.time.DateTime;
 import org.joda.time.LocalDate;
 
+import edu.harvard.med.screensaver.model.activities.AdministrativeActivity;
+import edu.harvard.med.screensaver.model.activities.AdministrativeActivityType;
 import edu.harvard.med.screensaver.model.libraries.Reagent;
 import edu.harvard.med.screensaver.model.screens.Screen;
 import edu.harvard.med.screensaver.model.users.ScreeningRoomUser;

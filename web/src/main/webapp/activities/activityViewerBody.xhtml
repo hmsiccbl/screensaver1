@@ -17,7 +17,20 @@
 
     <ss:property id="activityType" label="Activity Type"
       description="The activity type"
-      value="#{activityViewer.entity.activityTypeName}" />
+      value="#{activityViewer.entity.activityTypeName}"
+      editable="#{activityViewer.editMode &amp;&amp; activityViewer.entity.class.simpleName == 'ServiceActivity'}"
+      >
+      <ui:define name="editableData">
+        <t:selectOneMenu id="activityTypeEditable"
+          value="#{activityViewer.entity.type}"
+          required="true"
+          styleClass="inputText selectMenu"
+          converter="#{serviceActivityTypeConverter}">
+          <f:selectItems
+            value="#{activityViewer.serviceActivityTypeSelectItems}" />
+        </t:selectOneMenu>
+      </ui:define>
+    </ss:property>
 
     <ss:property id="dateOfActivity" label="Performed"
       description="The date the activity was performed in the lab"
@@ -25,16 +38,41 @@
       required="true" editable="#{activityViewer.editMode}" />
 
     <ss:property id="concentration" label="Concentration"
-      value="#{activityViewer.molarConcentrationValue}" type="MolarConcentration"
+      value="#{activityViewer.molarConcentrationValue}"
+      type="MolarConcentration"
       unitsSelector="#{activityViewer.molarConcentrationType}"
       description="Molar concentration"
       rendered="#{activityViewer.entity.class.simpleName == 'LibraryScreening' || activityViewer.entity.class.simpleName == 'CherryPickScreening'}"
       editable="#{activityViewer.editMode}" />
 
-    <ss:propertyGroup label="Screen">
-      <ss:screenSummaryProperties
-        screen="#{activityViewer.screen}" />
+    <ss:property id="servicedUser" label="User Serviced"
+      description="The person for which a service was performed"
+      value="#{activityViewer.entity.servicedUser}"
+      rendered="#{activityViewer.entity.class.simpleName == 'ServiceActivity'}">
+      <ui:define name="data">
+        <ss:user user="#{value}" />
+      </ui:define>
+      <!-- 
+      <ui:define name="editableData">
+        <t:selectOneMenu id="servicedUserEditable" value="#{value.value}"
+          styleClass="inputText selectMenu">
+          <f:selectItems value="#{value.selectItems}" />
+        </t:selectOneMenu>
+      </ui:define>
+       -->
+    </ss:property>
+
+    <ss:propertyGroup
+      label="#{activityViewer.entity.class.simpleName == 'ServiceActivity' ? 'Screen Serviced' : 'Screen'}"
+      rendered="#{!activityViewer.editMode}">
+      <ss:screenSummaryProperties screen="#{activityViewer.screen}" />
     </ss:propertyGroup>
+
+    <ss:property id="servicedScreen" type="Vocabulary" label="Screen Serviced"
+      rendered="#{activityViewer.editMode &amp;&amp; activityViewer.entity.class.simpleName == 'ServiceActivity'}"
+      editable="true"
+      value="#{activityViewer.servicedScreen.value}"
+      selectItems="#{activityViewer.servicedScreen.selectItems}" />
 
     <ss:property id="performedBy" label="Performed By"
       description="The person that is credited with performing the activity"
@@ -86,10 +124,10 @@
       rendered="#{activityViewer.entity.class.simpleName == 'LibraryScreening' &amp;&amp; !activityViewer.editMode}" />
 
     <ss:property id="numberOfReplicates" label="# Replicates Screened"
-      value="#{activityViewer.entity.numberOfReplicates}"
-      type="Integer"
+      value="#{activityViewer.entity.numberOfReplicates}" type="Integer"
       description="The number of replicates screened"
-      editable="#{activityViewer.editMode &amp;&amp; (activityViewer.entity.class.simpleName != 'LibraryScreening' || activityViewer.platesScreenedDataModel.rowCount == 0)}" editWidth="2"
+      editable="#{activityViewer.editMode &amp;&amp; (activityViewer.entity.class.simpleName != 'LibraryScreening' || activityViewer.platesScreenedDataModel.rowCount == 0)}"
+      editWidth="2"
       rendered="#{activityViewer.entity.class.simpleName == 'LibraryScreening' || activityViewer.entity.class.simpleName == 'CherryPickScreening'}" />
 
     <ss:property id="volumeTransferredPerWell"
@@ -101,10 +139,8 @@
       editable="#{activityViewer.editMode}" editWidth="6"
       rendered="#{activityViewer.entity.class.simpleName == 'LibraryScreening' || activityViewer.entity.class.simpleName == 'CherryPickScreening'}" />
 
-    <ss:property id="assayWellVolume"
-      label="Assay Well Volume"
-      value="#{activityViewer.assayWellVolumeValue}"
-      type="Volume"
+    <ss:property id="assayWellVolume" label="Assay Well Volume"
+      value="#{activityViewer.assayWellVolumeValue}" type="Volume"
       unitsSelector="#{activityViewer.assayWellVolumeType}"
       description="The final volume of the assay well"
       editable="#{activityViewer.editMode}" editWidth="6"
@@ -174,13 +210,11 @@
             <ui:define name="addProperties">
               <t:panelGrid columns="6">
                 <ss:property id="newPlateRangeScreenedStartPlate"
-                  label="Start Plate"
-                  type="Integer"
+                  label="Start Plate" type="Integer"
                   value="#{activityViewer.newPlateRangeScreenedStartPlate}"
                   editable="true" />
                 <ss:property id="newPlateRangeScreenedEndPlate"
-                  label="End Plate"
-                  type="Integer"
+                  label="End Plate" type="Integer"
                   value="#{activityViewer.newPlateRangeScreenedEndPlate}"
                   editable="true" />
                 <ss:property id="newPlateRangeScreenedCopy" label="Copy"

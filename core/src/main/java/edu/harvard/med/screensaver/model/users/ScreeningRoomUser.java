@@ -43,6 +43,8 @@ import edu.harvard.med.screensaver.model.AttachedFile;
 import edu.harvard.med.screensaver.model.AttachedFilesEntity;
 import edu.harvard.med.screensaver.model.BusinessRuleViolationException;
 import edu.harvard.med.screensaver.model.DataModelViolationException;
+import edu.harvard.med.screensaver.model.activities.Activity;
+import edu.harvard.med.screensaver.model.activities.ServiceActivity;
 import edu.harvard.med.screensaver.model.annotations.ToMany;
 import edu.harvard.med.screensaver.model.annotations.ToOne;
 import edu.harvard.med.screensaver.model.meta.Cardinality;
@@ -76,6 +78,7 @@ public class ScreeningRoomUser extends ScreensaverUser implements AttachedFilesE
   public static final RelationshipPath<ScreeningRoomUser> screensCollaborated = RelationshipPath.from(ScreeningRoomUser.class).to("screensCollaborated");
   public static final PropertyPath<ScreeningRoomUser> facilityUsageRoles = PropertyPath.from(ScreeningRoomUser.class).toCollectionOfValues("facilityUsageRoles");
   public static final RelationshipPath<ScreeningRoomUser> checklistItemEvents = RelationshipPath.from(ScreeningRoomUser.class).to("checklistItemEvents");
+  public static final RelationshipPath<ScreeningRoomUser> serviceActivities = RelationshipPath.from(ScreeningRoomUser.class).to("serviceActivities");
 
   public static final Function<ScreeningRoomUser,String> ToDisplayStringFunction = new Function<ScreeningRoomUser,String>() {
     public String apply(ScreeningRoomUser u)
@@ -103,6 +106,7 @@ public class ScreeningRoomUser extends ScreensaverUser implements AttachedFilesE
   private String _comsCrhbaPermitNumber;
   private String _comsCrhbaPermitPrincipalInvestigator;
   private ChecklistItemEvent _lastNotifiedSMUAChecklistItemEvent;
+  private SortedSet<ServiceActivity> _serviceActivities;
 
   private LabHead _labHead;
   protected transient Lab _lab;
@@ -638,5 +642,27 @@ public class ScreeningRoomUser extends ScreensaverUser implements AttachedFilesE
   public void setLastNotifiedSMUAChecklistItemEvent(ChecklistItemEvent lastExpiredSMUAChecklistItemEvent)
   {
     _lastNotifiedSMUAChecklistItemEvent = lastExpiredSMUAChecklistItemEvent;
+  }
+
+  @Transient
+  public SortedSet<Activity> getAssociatedActivities()
+  {
+    SortedSet<Activity> activities = Sets.newTreeSet();
+    activities.addAll(getActivitiesPerformed());
+    activities.addAll(getServiceActivities());
+    return activities;
+  }
+
+  @OneToMany(mappedBy = "servicedUser")
+  @edu.harvard.med.screensaver.model.annotations.ToMany(singularPropertyName = "serviceActivity")
+  @Sort(type = SortType.NATURAL)
+  public SortedSet<ServiceActivity> getServiceActivities()
+  {
+    return _serviceActivities;
+  }
+
+  private void setServiceActivities(SortedSet<ServiceActivity> serviceActivities)
+  {
+    _serviceActivities = serviceActivities;
   }
 }

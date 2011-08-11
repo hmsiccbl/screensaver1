@@ -67,7 +67,7 @@ import edu.harvard.med.screensaver.policy.EntityViewPolicy;
 import edu.harvard.med.screensaver.service.OperationRestrictedException;
 import edu.harvard.med.screensaver.service.screens.ScreenGenerator;
 import edu.harvard.med.screensaver.service.screens.ScreeningDuplicator;
-import edu.harvard.med.screensaver.ui.activities.LabActivityViewer;
+import edu.harvard.med.screensaver.ui.activities.ActivityViewer;
 import edu.harvard.med.screensaver.ui.arch.util.AttachedFiles;
 import edu.harvard.med.screensaver.ui.arch.util.UISelectOneBean;
 import edu.harvard.med.screensaver.ui.arch.util.UISelectOneEntityBean;
@@ -88,7 +88,7 @@ public class ScreenDetailViewer extends AbstractStudyDetailViewer<Screen>
   private ScreenDAO _screenDao;
   private EntityViewPolicy _entityViewPolicy;
   private ScreenViewer _screenViewer;
-  private LabActivityViewer _labActivityViewer;
+  private ActivityViewer _activityViewer;
   private CherryPickRequestDetailViewer _cherryPickRequestDetailViewer;
   private PublicationInfoProvider _publicationInfoProvider;
   private ScreeningDuplicator _screeningDuplicator;
@@ -134,7 +134,7 @@ public class ScreenDetailViewer extends AbstractStudyDetailViewer<Screen>
                             ScreenDAO screenDao,
                             UsersDAO usersDao,
                             EntityViewPolicy entityViewPolicy,
-                            LabActivityViewer labActivityViewer,
+                            ActivityViewer activityViewer,
                             CherryPickRequestDetailViewer cherryPickRequestDetailViewer,
                             PublicationInfoProvider publicationInfoProvider,
                             ScreeningDuplicator screeningDuplicator,
@@ -148,7 +148,7 @@ public class ScreenDetailViewer extends AbstractStudyDetailViewer<Screen>
     _screenDao = screenDao;
     _entityViewPolicy = entityViewPolicy;
     _screenViewer = screenViewer;
-    _labActivityViewer = labActivityViewer;
+    _activityViewer = activityViewer;
     _cherryPickRequestDetailViewer = cherryPickRequestDetailViewer;
     _publicationInfoProvider = publicationInfoProvider;
     _screeningDuplicator = screeningDuplicator;
@@ -704,7 +704,7 @@ public class ScreenDetailViewer extends AbstractStudyDetailViewer<Screen>
     Screening screening = _screeningDuplicator.addLibraryScreening(getEntity(),
                                                                    (AdministratorUser) getScreensaverUser());
     getDao().clear(); // detach new Activity, as it should only be persisted if user invokes "save" command 
-    return _labActivityViewer.editNewEntity(screening);
+    return _activityViewer.editNewEntity(screening);
   }
 
   @UICommand

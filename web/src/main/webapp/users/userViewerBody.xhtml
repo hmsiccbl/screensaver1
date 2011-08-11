@@ -23,6 +23,10 @@
 			id="addScreenCommand" value="Add Screen..."
 			rendered="#{userViewer.screensaverUser.isUserInRoleOfNameMap['screensAdmin'] &amp;&amp; !userViewer.editMode &amp;&amp; userViewer.screeningRoomUserViewMode}"
 			styleClass="command" />
+    <t:commandButton action="#{userViewer.addServiceActivity}"
+      id="addServiceActivityCommand" value="Add Service Activity..."
+      rendered="#{userViewer.editable &amp;&amp; !userViewer.editMode &amp;&amp; userViewer.screeningRoomUserViewMode}"
+      styleClass="command" />
     <t:commandButton action="updateUserAgreement"
       id="updateUserAgreement" value="Update User Agreement..."
       rendered="#{userAgreementUpdaterUi.enabled &amp;&amp; userViewer.editable &amp;&amp; !userViewer.editMode &amp;&amp; userViewer.screeningRoomUserViewMode}"
@@ -430,10 +434,45 @@
                 styleClass="command" />
             </ui:define>
           </ss:property>
+
         </t:panelGrid>
 			</ui:define>
 		</ss:collapsiblePanel>
     
+		<ss:collapsiblePanel id="userActivities" label="Activities Summary"
+			isCollapsed="#{userViewer.isPanelCollapsedMap['userActivities']}"
+			rendered="#{userViewer.screeningRoomUserViewMode &amp;&amp; (userViewer.readAdmin || userViewer.me) &amp;&amp; !userViewer.editMode &amp;&amp; appInfo.applicationProperties.facility != 'LINCS'}">
+      <ui:define name="content">
+          <t:panelGrid columns="2"
+            columnClasses="propertyLabelColumn,column"
+            styleClass="layoutPanel" style="width: 100%">
+            <ss:property id="activityCount" label="Activities">
+              <ui:define name="data">
+                <t:commandLink value="#{userViewer.userActivitiesCount}"
+                  action="#{userViewer.browseUserActivities}" />
+              </ui:define>
+            </ss:property>
+            <ss:propertyGroup label="Last Activity">
+              <t:outputText value="&lt;none&gt;" styleClass="dataText"
+                rendered="#{empty userViewer.lastUserActivity}" />
+              <ss:property id="lastUserActivityDate" label="Date"
+                value="#{userViewer.lastUserActivity.dateOfActivity}"
+                type="Date"
+                rendered="#{!empty userViewer.lastUserActivity}" />
+              <ss:property id="lastUserActivityType" label="Activity Type"
+                value="#{userViewer.lastUserActivity.activityTypeName}"
+                type="Text"
+                rendered="#{!empty userViewer.lastUserActivity}" />
+              <ss:property id="lastUserActivityPerformedBy"
+                label="Performed By"
+                value="#{userViewer.lastUserActivity.performedBy.fullNameLastFirst}"
+                type="Text"
+                rendered="#{!empty userViewer.lastUserActivity}" />
+            </ss:propertyGroup>
+          </t:panelGrid>
+      </ui:define>
+    </ss:collapsiblePanel>
+
 	</ui:define>
 
 </ui:composition>

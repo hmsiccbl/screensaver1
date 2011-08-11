@@ -9,6 +9,8 @@
 
 package edu.harvard.med.screensaver.model;
 
+import edu.harvard.med.screensaver.model.activities.AdministrativeActivity;
+import edu.harvard.med.screensaver.model.activities.ServiceActivity;
 import edu.harvard.med.screensaver.model.cherrypicks.CherryPickAssayPlate;
 import edu.harvard.med.screensaver.model.cherrypicks.CherryPickLiquidTransfer;
 import edu.harvard.med.screensaver.model.cherrypicks.LabCherryPick;
@@ -140,6 +142,8 @@ public interface AbstractEntityVisitor<R>
   R visit(ScreenerCherryPick entity);
 
   R visit(ScreeningRoomUser screeningRoomUser);
+
+  R visit(ServiceActivity serviceActivity);
 
   R visit(SilencingReagent entity);
 

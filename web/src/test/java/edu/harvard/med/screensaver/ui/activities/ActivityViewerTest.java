@@ -9,12 +9,21 @@
 
 package edu.harvard.med.screensaver.ui.activities;
 
+import java.util.List;
+
+import javax.faces.model.SelectItem;
+
 import com.google.common.collect.Iterables;
 import com.google.common.collect.Sets;
 import org.apache.log4j.Logger;
 import org.joda.time.LocalDate;
 import org.springframework.beans.factory.annotation.Autowired;
 
+import edu.harvard.med.screensaver.ScreensaverConstants;
+import edu.harvard.med.screensaver.db.EntityInflator;
+import edu.harvard.med.screensaver.model.activities.Activity;
+import edu.harvard.med.screensaver.model.activities.ServiceActivity;
+import edu.harvard.med.screensaver.model.activities.ServiceActivityType;
 import edu.harvard.med.screensaver.model.libraries.CopyUsageType;
 import edu.harvard.med.screensaver.model.libraries.Library;
 import edu.harvard.med.screensaver.model.screenresults.AssayPlate;
@@ -25,14 +34,15 @@ import edu.harvard.med.screensaver.model.users.LabHead;
 import edu.harvard.med.screensaver.model.users.ScreeningRoomUser;
 import edu.harvard.med.screensaver.model.users.ScreeningRoomUserClassification;
 import edu.harvard.med.screensaver.service.screens.ScreenGenerator;
+import edu.harvard.med.screensaver.ui.arch.searchresults.EntitySearchResults;
 import edu.harvard.med.screensaver.ui.arch.view.AbstractBackingBeanTest;
 import edu.harvard.med.screensaver.ui.screens.ScreenDetailViewer;
 import edu.harvard.med.screensaver.ui.screens.ScreenViewer;
+import edu.harvard.med.screensaver.ui.users.UserViewer;
 
-
-public class LabActivityViewerTest extends AbstractBackingBeanTest
+public class ActivityViewerTest extends AbstractBackingBeanTest
 {
-  private static Logger log = Logger.getLogger(LabActivityViewerTest.class);
+  private static Logger log = Logger.getLogger(ActivityViewerTest.class);
   
   @Autowired
   protected ScreenViewer screenViewer;
@@ -41,7 +51,9 @@ public class LabActivityViewerTest extends AbstractBackingBeanTest
   @Autowired
   protected ScreenGenerator screenGenerator;
   @Autowired
-  protected LabActivityViewer activityViewer;
+  protected ActivityViewer activityViewer;
+  @Autowired
+  protected UserViewer userViewer;
 
   private Screen _screen;
   private ScreeningRoomUser _screener;
@@ -76,6 +88,7 @@ public class LabActivityViewerTest extends AbstractBackingBeanTest
     _screen = screenGenerator.createPrimaryScreen(_admin, null, ScreenType.SMALL_MOLECULE);
     _screen.setFacilityId("1");
     _screen.setTitle("screen");
+    _screen.setLeadScreener(_screener);
     _libraryScreening = _screen.createLibraryScreening(_admin, _screener, new LocalDate());
     _screen = genericEntityDao.mergeEntity(_screen);
     _libraryScreening = (LibraryScreening) _screen.getLabActivities().first();
@@ -125,5 +138,45 @@ public class LabActivityViewerTest extends AbstractBackingBeanTest
     _libraryScreening = genericEntityDao.reloadEntity((LibraryScreening) activityViewer.getEntity(), true, LibraryScreening.assayPlatesScreened);
     assertEquals(Sets.newHashSet(2, 3, 4),
                  Sets.newHashSet(Iterables.transform(_libraryScreening.getAssayPlatesScreened(), AssayPlate.ToPlateNumber)));
+  }
+
+  public void testServiceActivity()
+  {
+    userViewer.viewEntity(_screener);
+    userViewer.addServiceActivity();
+    List<SelectItem> selectItems = activityViewer.getServicedScreen().getSelectItems();
+    assertEquals("", selectItems.get(0).getValue());
+    assertEquals("<none>", selectItems.get(0).getLabel());
+    assertEquals(_screen.getScreenId().toString(), selectItems.get(1).getValue());
+    assertEquals(_screen.getFacilityId() + ": " + _screen.getTitle(), selectItems.get(1).getLabel());
+    activityViewer.getServicedScreen().setValue(_screen.getScreenId().toString());
+    activityViewer.getEntity().setDateOfActivity(new LocalDate(2011, 1, 1));
+    ((ServiceActivity) activityViewer.getEntity()).setType(ServiceActivityType.MEDCHEM_CONSULT);
+    assertEquals(ScreensaverConstants.BROWSE_SCREENERS, activityViewer.save());
+    assertTrue(userViewer.getContextualSearchResults().isEntityView());
+    assertEquals(2, userViewer.getUserActivitiesCount());
+    ScreeningRoomUser screener2 = new EntityInflator<ScreeningRoomUser>(genericEntityDao, _screener, true).
+      need(ScreeningRoomUser.serviceActivities.to(Activity.performedBy)).
+      need(ScreeningRoomUser.serviceActivities.to(ServiceActivity.servicedUser)).
+      need(ScreeningRoomUser.serviceActivities.to(ServiceActivity.servicedScreen)).
+      inflate();
+    assertEquals(1, screener2.getServiceActivities().size());
+    ServiceActivity serviceActivity = screener2.getServiceActivities().first();
+    assertEquals(new LocalDate(2011, 1, 1), serviceActivity.getDateOfActivity());
+    assertEquals(_admin, serviceActivity.getPerformedBy());
+    assertEquals(_screener, serviceActivity.getServicedUser());
+    assertEquals(genericEntityDao.reloadEntity(_screen), serviceActivity.getServicedScreen());
+
+    assertEquals(ScreensaverConstants.BROWSE_ACTIVITIES, userViewer.browseUserActivities());
+    EntitySearchResults<Activity,Activity,?> activitiesBrowser = activityViewer.getContextualSearchResults();
+    assertEquals(2, activitiesBrowser.getRowCount());
+    activitiesBrowser.getDataTableModel().setRowIndex(1);
+    activitiesBrowser.getColumnManager().getVisibleColumnModel().setRowIndex(0);
+    assertEquals(ScreensaverConstants.REDISPLAY_PAGE_ACTION_RESULT, activitiesBrowser.cellAction());
+    assertEquals(serviceActivity, activityViewer.getEntity());
+    activityViewer.edit();
+    ((ServiceActivity) activityViewer.getEntity()).setType(ServiceActivityType.AUTOMATION);
+    assertEquals(ScreensaverConstants.BROWSE_ACTIVITIES, activityViewer.save());
+    assertEquals(ServiceActivityType.AUTOMATION, genericEntityDao.reloadEntity(serviceActivity).getType());
   }
 }

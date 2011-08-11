@@ -34,11 +34,11 @@ import edu.harvard.med.screensaver.db.LibrariesDAO;
 import edu.harvard.med.screensaver.db.datafetcher.DataFetcherUtil;
 import edu.harvard.med.screensaver.db.datafetcher.EntityDataFetcher;
 import edu.harvard.med.screensaver.db.hqlbuilder.HqlBuilder;
-import edu.harvard.med.screensaver.model.Activity;
-import edu.harvard.med.screensaver.model.AdministrativeActivity;
-import edu.harvard.med.screensaver.model.AdministrativeActivityType;
 import edu.harvard.med.screensaver.model.MolarConcentration;
 import edu.harvard.med.screensaver.model.Volume;
+import edu.harvard.med.screensaver.model.activities.Activity;
+import edu.harvard.med.screensaver.model.activities.AdministrativeActivity;
+import edu.harvard.med.screensaver.model.activities.AdministrativeActivityType;
 import edu.harvard.med.screensaver.model.libraries.Copy;
 import edu.harvard.med.screensaver.model.libraries.CopyUsageType;
 import edu.harvard.med.screensaver.model.libraries.Library;
@@ -101,7 +101,7 @@ public class LibraryCopyPlateSearchResults extends EntityBasedEntitySearchResult
   private LibrariesDAO _librariesDao;
   private LibraryViewer _libraryViewer;
   private LibraryCopyViewer _libraryCopyViewer;
-  private ActivitySearchResults<Activity> _activitiesBrowser;
+  private ActivitySearchResults _activitiesBrowser;
   private LibraryCopyPlateBatchEditor _libraryCopyPlateBatchEditor;
   private String _reviewMessage;
   private EntityUpdateSearchResults<Plate,Integer> _entityUpdateHistoryBrowser;
@@ -113,7 +113,7 @@ public class LibraryCopyPlateSearchResults extends EntityBasedEntitySearchResult
                                        LibrariesDAO librariesDao,
                                        LibraryViewer libraryViewer,
                                        LibraryCopyViewer libraryCopyViewer,
-                                       ActivitySearchResults<Activity> activitiesBrowser,
+                                       ActivitySearchResults activitiesBrowser,
                                        LibraryCopyPlateBatchEditor libraryCopyPlateBatchEditor)
   {
     _dao = dao;

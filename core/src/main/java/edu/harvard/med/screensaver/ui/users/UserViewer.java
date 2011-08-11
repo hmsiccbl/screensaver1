@@ -33,6 +33,7 @@ import com.google.common.collect.Multimap;
 import com.google.common.collect.Ordering;
 import com.google.common.collect.Sets;
 import org.apache.log4j.Logger;
+import org.joda.time.LocalDate;
 import org.springframework.transaction.annotation.Transactional;
 
 import edu.harvard.med.iccbl.screensaver.policy.DataSharingLevelMapper;
@@ -41,6 +42,8 @@ import edu.harvard.med.screensaver.db.GenericEntityDAO;
 import edu.harvard.med.screensaver.db.UsersDAO;
 import edu.harvard.med.screensaver.model.AttachedFile;
 import edu.harvard.med.screensaver.model.AttachedFileType;
+import edu.harvard.med.screensaver.model.activities.Activity;
+import edu.harvard.med.screensaver.model.activities.ServiceActivity;
 import edu.harvard.med.screensaver.model.screens.Screen;
 import edu.harvard.med.screensaver.model.screens.ScreenDataSharingLevel;
 import edu.harvard.med.screensaver.model.screens.ScreenType;
@@ -60,6 +63,8 @@ import edu.harvard.med.screensaver.model.users.ScreensaverUserRole;
 import edu.harvard.med.screensaver.model.users.UserAttachedFileType;
 import edu.harvard.med.screensaver.service.OperationRestrictedException;
 import edu.harvard.med.screensaver.service.screens.ScreenGenerator;
+import edu.harvard.med.screensaver.ui.activities.ActivitySearchResults;
+import edu.harvard.med.screensaver.ui.activities.ActivityViewer;
 import edu.harvard.med.screensaver.ui.arch.datatable.Criterion;
 import edu.harvard.med.screensaver.ui.arch.datatable.Criterion.Operator;
 import edu.harvard.med.screensaver.ui.arch.util.AttachedFiles;
@@ -121,6 +126,8 @@ public class UserViewer extends SearchResultContextEditableEntityViewerBackingBe
   private UISelectOneBean<FacilityUsageRole> _newFacilityUsageRole;
   private String _newPassword1;
   private String _newPassword2;
+  private ActivityViewer _activityViewer;
+  private ActivitySearchResults _activitiesBrowser;
 
 
   // constructors
@@ -134,6 +141,8 @@ public class UserViewer extends SearchResultContextEditableEntityViewerBackingBe
 
   public UserViewer(UserViewer userViewerProxy,
                     ScreenDetailViewer screenDetailViewer,
+                    ActivityViewer activityViewer,
+                    ActivitySearchResults activitiesBrowser,
                     GenericEntityDAO dao,
                     UsersDAO usersDao,
                     ScreenGenerator screenGenerator,
@@ -149,6 +158,8 @@ public class UserViewer extends SearchResultContextEditableEntityViewerBackingBe
           dao,
           userSearchResults);
     _screenDetailViewer = screenDetailViewer;
+    _activityViewer = activityViewer;
+    _activitiesBrowser = activitiesBrowser;
     _usersDao = usersDao;
     _screenGenerator = screenGenerator;
     _screensBrowser = screensBrowser;
@@ -159,6 +170,7 @@ public class UserViewer extends SearchResultContextEditableEntityViewerBackingBe
     getIsPanelCollapsedMap().put("smallMoleculeScreens", false);
     getIsPanelCollapsedMap().put("rnaiScreens", false);
     getIsPanelCollapsedMap().put("screens", false);
+    getIsPanelCollapsedMap().put("userActivities", false);
   }
 
   public boolean isManageAuthenticationCredentialsFeatureEnabled()
@@ -205,6 +217,8 @@ public class UserViewer extends SearchResultContextEditableEntityViewerBackingBe
   protected void initializeEntity(ScreeningRoomUser user)
   {
     getDao().need(user, ScreeningRoomUser.roles);
+    getDao().need(user, ScreensaverUser.activitiesPerformed.to(Activity.performedBy));
+    getDao().need(user, ScreeningRoomUser.serviceActivities.to(Activity.performedBy));
     // note: no cross-product problem with dual labMembers associations, since only one will have size > 0
     getDao().need(user, ScreeningRoomUser.LabHead.to(LabHead.labAffiliation));
     getDao().need(user, ScreeningRoomUser.LabHead.to(LabHead.labMembers));
@@ -730,6 +744,16 @@ public class UserViewer extends SearchResultContextEditableEntityViewerBackingBe
   }
 
   @UICommand
+  public String addServiceActivity()
+  {
+    return _activityViewer.editNewEntity(new ServiceActivity((AdministratorUser) getScreensaverUser(),
+                                                             (AdministratorUser) getScreensaverUser(),
+                                                             new LocalDate(),
+                                                             null,
+                                                             getEntity()));
+  }
+
+  @UICommand
   public String browseScreens()
   {
     return doBrowseScreens(null);
@@ -787,6 +811,26 @@ public class UserViewer extends SearchResultContextEditableEntityViewerBackingBe
     case SAVE_NEW: return getThisProxy().reload();
     default: return null;
     }
+  }
+  
+  public int getUserActivitiesCount()
+  {
+    return getEntity().getAssociatedActivities().size();
+  }
+
+  public Activity getLastUserActivity()
+  {
+    if (getEntity().getAssociatedActivities().isEmpty()) {
+      return null;
+    }
+    return getEntity().getAssociatedActivities().last();
+  }
+
+  @UICommand
+  public String browseUserActivities()
+  {
+    _activitiesBrowser.searchActivitiesForUser(getEntity());
+    return BROWSE_ACTIVITIES;
   }
 }
 

@@ -197,7 +197,7 @@
     <constructor-arg ref="libraryCopyPlatesBrowser" />
     <constructor-arg ref="screenersBrowser" />
     <constructor-arg ref="staffBrowser" />
-    <constructor-arg ref="labActivitiesBrowser" />
+    <constructor-arg ref="activitiesBrowser" />
     <constructor-arg ref="screenDetailViewer" />
     <constructor-arg ref="userViewer" />
     <constructor-arg ref="libraryDetailViewer" />
@@ -308,7 +308,7 @@
     <constructor-arg ref="librariesDao" />
     <constructor-arg ref="libraryViewer" />
     <constructor-arg ref="libraryCopyViewer" />
-    <constructor-arg ref="labActivitiesBrowser" />
+    <constructor-arg ref="activitiesBrowser" />
     <constructor-arg ref="libraryCopyPlateBatchEditor" />
     <property
       name="entityUpdateHistoryBrowser"
@@ -348,7 +348,7 @@
         <constructor-arg ref="librariesDao" />
         <constructor-arg ref="libraryCopyViewer" />
         <constructor-arg ref="libraryViewer" />
-        <constructor-arg ref="labActivitiesBrowser" />
+        <constructor-arg ref="activitiesBrowser" />
         <constructor-arg ref="libraryCopyPlatesBrowser" />
         <property name="nested" value="true" />
       </bean>
@@ -527,7 +527,7 @@
     <constructor-arg ref="librariesDao" />
     <constructor-arg ref="libraryCopyViewer" />
     <constructor-arg ref="libraryViewer" />
-    <constructor-arg ref="labActivitiesBrowser" />
+    <constructor-arg ref="activitiesBrowser" />
     <constructor-arg ref="libraryCopyPlatesBrowser" />    
     <aop:scoped-proxy/>
   </bean>
@@ -643,7 +643,7 @@
     <constructor-arg ref="heatMapViewer" />
     <constructor-arg ref="cellHTS2Runner" />
     <constructor-arg ref="screenResultImporter" />
-    <constructor-arg ref="labActivitiesBrowser" />
+    <constructor-arg ref="activitiesBrowser" />
     <constructor-arg ref="cherryPickRequestsBrowser" />
     <constructor-arg ref="librariesBrowser" />
     <constructor-arg ref="libraryPlatesBrowser" />
@@ -722,7 +722,7 @@
     <constructor-arg ref="genericEntityDao" />
     <constructor-arg ref="librariesDao" />
     <constructor-arg ref="libraryViewer" />
-    <constructor-arg ref="labActivitiesBrowser" />
+    <constructor-arg ref="activitiesBrowser" />
     <constructor-arg ref="libraryCopiesBrowser" />
     <aop:scoped-proxy/>
   </bean>
@@ -736,7 +736,7 @@
     <constructor-arg ref="librariesDao" />
     <constructor-arg ref="libraryViewer" />
     <constructor-arg ref="libraryCopyViewer" />
-    <constructor-arg ref="labActivitiesBrowser" />
+    <constructor-arg ref="activitiesBrowser" />
     <constructor-arg ref="libraryCopyPlateBatchEditor" />
     <property
       name="entityUpdateHistoryBrowser"
@@ -910,6 +910,8 @@
     class="edu.harvard.med.screensaver.ui.users.UserViewer">
     <constructor-arg ref="userViewer" />
     <constructor-arg ref="screenDetailViewer" />
+    <constructor-arg ref="activityViewer" />
+    <constructor-arg ref="activitiesBrowser" />
     <constructor-arg ref="genericEntityDao" />
     <constructor-arg ref="usersDao" />
     <constructor-arg ref="screenGenerator" />
@@ -940,10 +942,10 @@
   <!-- === activities backing beans === -->
 
   <bean
-    id="labActivitiesBrowser"
+    id="activitiesBrowser"
     parent="uiBean"
     scope="session"
-    class="edu.harvard.med.screensaver.ui.activities.LabActivitySearchResults">
+    class="edu.harvard.med.screensaver.ui.activities.ActivitySearchResults">
     <constructor-arg ref="activityViewer" />
     <constructor-arg ref="screenViewer" />
     <constructor-arg ref="cherryPickRequestViewer" />
@@ -957,13 +959,14 @@
     id="activityViewer"
     parent="uiBean"
     scope="session"
-    class="edu.harvard.med.screensaver.ui.activities.LabActivityViewer">
+    class="edu.harvard.med.screensaver.ui.activities.ActivityViewer">
     <constructor-arg ref="activityViewer" />
     <constructor-arg ref="genericEntityDao" />
     <constructor-arg ref="librariesDao" />
     <constructor-arg ref="screenDao" />
-    <constructor-arg ref="labActivitiesBrowser" />
+    <constructor-arg ref="activitiesBrowser" />
     <constructor-arg ref="screenViewer" />
+    <constructor-arg ref="userViewer" />
     <constructor-arg ref="cherryPickRequestViewer" />
     <constructor-arg ref="librariesBrowser" />
     <constructor-arg ref="screenDerivedPropertiesUpdater" />
@@ -1105,6 +1108,8 @@
     <constructor-arg ref="genericEntityDao"/>
   </bean>
   
+  <bean id="serviceActivityTypeConverter" class="edu.harvard.med.screensaver.ui.arch.util.converter.ServiceActivityTypeConverter" />
+
 
   <!-- Development/Debug related beans -->
 

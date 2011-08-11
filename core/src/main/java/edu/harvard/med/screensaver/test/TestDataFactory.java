@@ -35,13 +35,14 @@ import org.springframework.transaction.annotation.Transactional;
 import edu.harvard.med.screensaver.ScreensaverConstants;
 import edu.harvard.med.screensaver.db.GenericEntityDAO;
 import edu.harvard.med.screensaver.model.AbstractEntity;
-import edu.harvard.med.screensaver.model.Activity;
-import edu.harvard.med.screensaver.model.AdministrativeActivity;
-import edu.harvard.med.screensaver.model.AdministrativeActivityType;
 import edu.harvard.med.screensaver.model.AttachedFileType;
 import edu.harvard.med.screensaver.model.MolarConcentration;
 import edu.harvard.med.screensaver.model.Volume;
 import edu.harvard.med.screensaver.model.VolumeUnit;
+import edu.harvard.med.screensaver.model.activities.AdministrativeActivity;
+import edu.harvard.med.screensaver.model.activities.AdministrativeActivityType;
+import edu.harvard.med.screensaver.model.activities.ServiceActivityType;
+import edu.harvard.med.screensaver.model.activities.TypedActivity;
 import edu.harvard.med.screensaver.model.annotations.ContainedEntity;
 import edu.harvard.med.screensaver.model.cherrypicks.CherryPickAssayProtocolsFollowed;
 import edu.harvard.med.screensaver.model.cherrypicks.CherryPickFollowupResultsStatus;
@@ -435,11 +436,11 @@ public class TestDataFactory
         return TestDataFactory.this.newInstance(SmallMoleculeCherryPickRequest.class, callStack);
       }
     });
-    addBuilder(new AbstractBuilder<Activity>(Activity.class) {
+    addBuilder(new AbstractBuilder<TypedActivity>(TypedActivity.class) {
       @Override
-      public Activity newInstance(String callStack)
+      public TypedActivity newInstance(String callStack)
       {
-        return TestDataFactory.this.newInstance(LibraryScreening.class, callStack);
+        return TestDataFactory.this.newInstance(AdministrativeActivity.class, callStack);
       }
     });
     addBuilder(new AbstractBuilder<LabActivity>(LabActivity.class) {
@@ -830,6 +831,13 @@ public class TestDataFactory
       public PartitionedValue newInstance(String callStack)
       {
         return PartitionedValue.STRONG;
+      }
+    });
+    addBuilder(new AbstractBuilder<ServiceActivityType>(ServiceActivityType.class) {
+      @Override
+      public ServiceActivityType newInstance(String callStack)
+      {
+        return ServiceActivityType.INFORMATICS;
       }
     });
 

@@ -23,8 +23,8 @@ import org.springframework.beans.factory.annotation.Autowired;
 import edu.harvard.med.screensaver.ScreensaverConstants;
 import edu.harvard.med.screensaver.db.DAOTransaction;
 import edu.harvard.med.screensaver.db.UsersDAO;
-import edu.harvard.med.screensaver.model.AdministrativeActivityType;
 import edu.harvard.med.screensaver.model.Volume;
+import edu.harvard.med.screensaver.model.activities.AdministrativeActivityType;
 import edu.harvard.med.screensaver.model.cherrypicks.CherryPickAssayPlate;
 import edu.harvard.med.screensaver.model.cherrypicks.CherryPickRequest;
 import edu.harvard.med.screensaver.model.cherrypicks.LabCherryPick;
@@ -41,7 +41,7 @@ import edu.harvard.med.screensaver.model.users.LabHead;
 import edu.harvard.med.screensaver.model.users.ScreeningRoomUser;
 import edu.harvard.med.screensaver.service.libraries.PlateUpdater;
 import edu.harvard.med.screensaver.test.MakeDummyEntities;
-import edu.harvard.med.screensaver.ui.activities.LabActivityViewer;
+import edu.harvard.med.screensaver.ui.activities.ActivityViewer;
 import edu.harvard.med.screensaver.ui.arch.datatable.column.entity.TextEntityColumn;
 import edu.harvard.med.screensaver.ui.arch.view.AbstractBackingBeanTest;
 
@@ -54,7 +54,7 @@ public class CherryPickRequestViewerTest extends AbstractBackingBeanTest
   @Autowired
   protected CherryPickRequestViewer cherryPickRequestViewer;
   @Autowired
-  protected LabActivityViewer activityViewer;
+  protected ActivityViewer activityViewer;
   @Autowired
   protected PlateUpdater _plateUpdater;
 
@@ -277,8 +277,9 @@ public class CherryPickRequestViewerTest extends AbstractBackingBeanTest
     assertEquals("A", genericEntityDao.reloadEntity(lcp1, true, LabCherryPick.wellVolumeAdjustments.to(WellVolumeAdjustment.copy)).getSourceCopy().getName());
     assertEquals("B", genericEntityDao.reloadEntity(lcp2, true, LabCherryPick.wellVolumeAdjustments.to(WellVolumeAdjustment.copy)).getSourceCopy().getName());
     cpr = genericEntityDao.reloadEntity(cherryPickRequestViewer.getEntity(), true, CherryPickRequest.updateActivities.castToSubtype(CherryPickRequest.class));
+    // TODO: the ordering of the lab cherry pick comments is not deterministic; need to update assertion to account for this (sometimes fails)
     assertEquals("updated source copy for lab cherry pick(s): " + lcp1.getSourceWell().getWellKey() + " from <none> to A, " +
-      lcp2.getSourceWell().getWellKey() + " from A to B",
+                 lcp2.getSourceWell().getWellKey() + " from A to B",
                  cpr.getUpdateActivitiesOfType(AdministrativeActivityType.LAB_CHERRY_PICK_SOURCE_COPY_OVERRIDE).last().getComments());
     assertEquals("update3", cpr.getUpdateActivitiesOfType(AdministrativeActivityType.COMMENT).last().getComments());
 

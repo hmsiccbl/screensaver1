@@ -20,6 +20,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import edu.harvard.med.screensaver.ScreensaverConstants;
 import edu.harvard.med.screensaver.model.AttachedFile;
 import edu.harvard.med.screensaver.model.AttachedFileType;
+import edu.harvard.med.screensaver.model.activities.Activity;
 import edu.harvard.med.screensaver.model.screens.LibraryScreening;
 import edu.harvard.med.screensaver.model.screens.ProjectPhase;
 import edu.harvard.med.screensaver.model.screens.Screen;
@@ -32,7 +33,7 @@ import edu.harvard.med.screensaver.model.users.ScreeningRoomUser;
 import edu.harvard.med.screensaver.model.users.ScreeningRoomUserClassification;
 import edu.harvard.med.screensaver.model.users.ScreensaverUserRole;
 import edu.harvard.med.screensaver.service.screens.ScreenGenerator;
-import edu.harvard.med.screensaver.ui.activities.LabActivityViewer;
+import edu.harvard.med.screensaver.ui.activities.ActivityViewer;
 import edu.harvard.med.screensaver.ui.arch.view.AbstractBackingBeanTest;
 
 
@@ -47,7 +48,7 @@ public class ScreenViewerTest extends AbstractBackingBeanTest
   @Autowired
   protected ScreenGenerator screenGenerator;
   @Autowired
-  protected LabActivityViewer activityViewer;
+  protected ActivityViewer activityViewer;
 
   private Screen _screen;
   private ScreeningRoomUser _screener;

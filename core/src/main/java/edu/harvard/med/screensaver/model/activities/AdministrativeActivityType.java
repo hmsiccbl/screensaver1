@@ -7,10 +7,12 @@
 // at Harvard Medical School. This software is distributed under the terms of
 // the GNU General Public License.
 
-package edu.harvard.med.screensaver.model;
+package edu.harvard.med.screensaver.model.activities;
 
 import com.google.common.base.Predicate;
 
+import edu.harvard.med.screensaver.model.VocabularyTerm;
+import edu.harvard.med.screensaver.model.VocabularyUserType;
 import edu.harvard.med.screensaver.model.users.ScreensaverUserRole;
 
 /**

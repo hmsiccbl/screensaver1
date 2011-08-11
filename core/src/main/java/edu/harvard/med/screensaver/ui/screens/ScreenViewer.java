@@ -13,9 +13,9 @@ import org.apache.log4j.Logger;
 
 import edu.harvard.med.screensaver.ScreensaverConstants;
 import edu.harvard.med.screensaver.db.GenericEntityDAO;
-import edu.harvard.med.screensaver.model.Activity;
 import edu.harvard.med.screensaver.model.AttachedFile;
 import edu.harvard.med.screensaver.model.AuditedAbstractEntity;
+import edu.harvard.med.screensaver.model.activities.Activity;
 import edu.harvard.med.screensaver.model.cherrypicks.CherryPickRequest;
 import edu.harvard.med.screensaver.model.libraries.LibraryPlate;
 import edu.harvard.med.screensaver.model.screenresults.DataColumn;
@@ -26,7 +26,7 @@ import edu.harvard.med.screensaver.model.screens.ScreenType;
 import edu.harvard.med.screensaver.model.users.LabHead;
 import edu.harvard.med.screensaver.model.users.ScreeningRoomUser;
 import edu.harvard.med.screensaver.model.users.ScreensaverUserRole;
-import edu.harvard.med.screensaver.ui.activities.LabActivitySearchResults;
+import edu.harvard.med.screensaver.ui.activities.ActivitySearchResults;
 import edu.harvard.med.screensaver.ui.arch.datatable.Criterion.Operator;
 import edu.harvard.med.screensaver.ui.arch.datatable.column.TableColumn;
 import edu.harvard.med.screensaver.ui.arch.view.aspects.UICommand;
@@ -48,7 +48,7 @@ public class ScreenViewer extends StudyViewer<Screen>
   private CellHTS2Runner _cellHTS2Runner;
   private ScreenResultImporter _screenResultImporter;
   private ScreenDetailViewer _screenDetailViewer;
-  private LabActivitySearchResults _labActivitySearchResults;
+  private ActivitySearchResults _activitiesBrowser;
   private CherryPickRequestSearchResults _cherryPickRequestSearchResults;
   private LibrarySearchResults _librarySearchResults;
   private LibraryPlateSearchResults _libraryPlateSearchResults;
@@ -69,7 +69,7 @@ public class ScreenViewer extends StudyViewer<Screen>
                       HeatMapViewer heatMapViewer,
                       CellHTS2Runner cellHTS2Runner,
                       ScreenResultImporter screenResultImporter,
-                      LabActivitySearchResults labActivitiesBrowser,
+                      ActivitySearchResults activitiesBrowser,
                       CherryPickRequestSearchResults cprsBrowser,
                       LibrarySearchResults librarySearchResults,
                       LibraryPlateSearchResults libraryPlateSearchResults)
@@ -87,7 +87,7 @@ public class ScreenViewer extends StudyViewer<Screen>
     _heatMapViewer = heatMapViewer;
     _cellHTS2Runner = cellHTS2Runner;
     _screenResultImporter = screenResultImporter;
-    _labActivitySearchResults = labActivitiesBrowser;
+    _activitiesBrowser = activitiesBrowser;
     _cherryPickRequestSearchResults = cprsBrowser;
     _librarySearchResults = librarySearchResults;
     _libraryPlateSearchResults = libraryPlateSearchResults;
@@ -162,7 +162,7 @@ public class ScreenViewer extends StudyViewer<Screen>
   @UICommand
   public String browseLabActivities()
   {
-    _labActivitySearchResults.searchLabActivitiesForScreen(getEntity());
+    _activitiesBrowser.searchLabActivitiesForScreen(getEntity());
     return BROWSE_ACTIVITIES;
   }
 

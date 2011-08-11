@@ -12,10 +12,7 @@
 package edu.harvard.med.screensaver.io.libraries;
 
 import java.io.File;
-import java.io.FileInputStream;
-import java.io.FileNotFoundException;
 import java.io.IOException;
-import java.io.InputStream;
 import java.math.BigDecimal;
 import java.util.List;
 import java.util.Set;
@@ -24,16 +21,17 @@ import com.google.common.collect.Sets;
 import org.apache.log4j.Logger;
 import org.joda.time.LocalDate;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.core.io.ClassPathResource;
 
 import edu.harvard.med.screensaver.db.DAOTransaction;
 import edu.harvard.med.screensaver.db.GenericEntityDAO;
 import edu.harvard.med.screensaver.db.LibrariesDAO;
 import edu.harvard.med.screensaver.io.ParseError;
 import edu.harvard.med.screensaver.io.ParseErrorsException;
-import edu.harvard.med.screensaver.model.AdministrativeActivity;
-import edu.harvard.med.screensaver.model.AdministrativeActivityType;
 import edu.harvard.med.screensaver.model.MolarConcentration;
 import edu.harvard.med.screensaver.model.MolarUnit;
+import edu.harvard.med.screensaver.model.activities.AdministrativeActivity;
+import edu.harvard.med.screensaver.model.activities.AdministrativeActivityType;
 import edu.harvard.med.screensaver.model.libraries.Gene;
 import edu.harvard.med.screensaver.model.libraries.Library;
 import edu.harvard.med.screensaver.model.libraries.LibraryContentsVersion;
@@ -129,17 +127,9 @@ public class LibraryContentsLoaderTest extends AbstractSpringPersistenceTest
         otherLibrary.getLatestContentsVersion().release(new AdministrativeActivity(_admin, new LocalDate(), AdministrativeActivityType.LIBRARY_CONTENTS_VERSION_RELEASE));
         genericEntityDao.saveOrUpdateEntity(otherLibrary);
 
-        String filename = "clean_data_rnai.xls";
-        File file = new File(TEST_INPUT_FILE_DIR, filename);
-        InputStream stream = null;
         try {
-          stream = new FileInputStream(file);
-        }
-        catch (FileNotFoundException e) {
-          fail("file not found: " + filename);
-        }
-        try {
-          LibraryContentsVersion lcv = libraryContentsLoader.loadLibraryContents(library, _admin, "clean data rnai", stream);
+          LibraryContentsVersion lcv = libraryContentsLoader.loadLibraryContents(library, _admin, "clean data rnai",
+                                                                                 new ClassPathResource("/libraries/clean_data_rnai.xls").getInputStream());
           libraryContentsVersionManager.releaseLibraryContentsVersion(lcv, _admin);
         }
         catch (ParseErrorsException e) {
@@ -250,10 +240,8 @@ public class LibraryContentsLoaderTest extends AbstractSpringPersistenceTest
           libraryCreator.createLibrary(library);
           library = genericEntityDao.reloadEntity(library, false);
 
-          String filename = "dirty_data_rnai.xls";
-          File file = new File(TEST_INPUT_FILE_DIR, filename);
           try {
-            libraryContentsLoader.loadLibraryContents(library, _admin, "dirty data RNAi", new FileInputStream(file));
+            libraryContentsLoader.loadLibraryContents(library, _admin, "dirty data RNAi", new ClassPathResource("/libraries/dirty_data_rnai.xls").getInputStream());
             fail("no error exception found");
           }
           catch (ParseErrorsException e) {
@@ -310,17 +298,9 @@ public class LibraryContentsLoaderTest extends AbstractSpringPersistenceTest
         libraryCreator.createLibrary(library);
         library = genericEntityDao.reloadEntity(library, false);
 
-        String filename = "clean_rnai_duplex_50440_50443.xls";
-        File file = new File(TEST_INPUT_FILE_DIR, filename);
-        InputStream stream = null;
         try {
-          stream = new FileInputStream(file);
-        }
-        catch (FileNotFoundException e) {
-          fail("file not found: " + filename);
-        }
-        try {
-          LibraryContentsVersion lcv = libraryContentsLoader.loadLibraryContents(library, _admin, "clean data rnai with duplex", stream);
+          LibraryContentsVersion lcv = libraryContentsLoader.loadLibraryContents(library, _admin, "clean data rnai with duplex",
+                                                                                 new ClassPathResource("/libraries/clean_rnai_duplex_50440_50443.xls").getInputStream());
           libraryContentsVersionManager.releaseLibraryContentsVersion(lcv, _admin);
         }
         catch (ParseErrorsException e) {
@@ -329,7 +309,7 @@ public class LibraryContentsLoaderTest extends AbstractSpringPersistenceTest
         }
         catch (IOException e) {
           log.error(e);
-          fail("could not load the file: " + filename);
+          fail("could not load the file");
         }
 
         // now load the pool library that references the duplex library
@@ -346,17 +326,9 @@ public class LibraryContentsLoaderTest extends AbstractSpringPersistenceTest
         libraryCreator.createLibrary(library);
         library = genericEntityDao.reloadEntity(library, false);
 
-        filename = "clean_rnai_pool.xls";
-        file = new File(TEST_INPUT_FILE_DIR, filename);
-        stream = null;
         try {
-          stream = new FileInputStream(file);
-        }
-        catch (FileNotFoundException e) {
-          fail("file not found: " + filename);
-        }
-        try {
-          LibraryContentsVersion lcv = libraryContentsLoader.loadLibraryContents(library, _admin, "clean data rnai with duplex", stream);
+          LibraryContentsVersion lcv = libraryContentsLoader.loadLibraryContents(library, _admin, "clean data rnai with duplex",
+                                                                                 new ClassPathResource("/libraries/clean_rnai_pool.xls").getInputStream());
           libraryContentsVersionManager.releaseLibraryContentsVersion(lcv, _admin);
         }
         catch (ParseErrorsException e) {
@@ -365,7 +337,7 @@ public class LibraryContentsLoaderTest extends AbstractSpringPersistenceTest
         }
         catch (IOException e) {
           log.error(e);
-          fail("could not load the file: " + filename);
+          fail("could not load the file");
         }
 
         // find out if this vendorReagentId is on a silencing reagent for the following well
@@ -448,19 +420,9 @@ public class LibraryContentsLoaderTest extends AbstractSpringPersistenceTest
         libraryCreator.createLibrary(library);
         library = genericEntityDao.reloadEntity(library, false);
 
-        String filename = "clean_data_natural_product.xls";
-        File file = new File(TEST_INPUT_FILE_DIR, filename);
-        InputStream stream = null;
         try {
-          stream = new FileInputStream(file);
-        }
-        catch (FileNotFoundException e) {
-          log.warn("file not found: " + file);
-          fail("file not found: " + file);
-        }
-
-        try {
-          libraryContentsLoader.loadLibraryContents(library, _admin, "clean data natural product", stream);
+          libraryContentsLoader.loadLibraryContents(library, _admin, "clean data natural product",
+                                                    new ClassPathResource("/libraries/clean_data_natural_product.xls").getInputStream());
         }
         catch (ParseErrorsException e)
         {
@@ -469,7 +431,7 @@ public class LibraryContentsLoaderTest extends AbstractSpringPersistenceTest
         }
         catch (IOException e) {
           log.error(e);
-          fail("could not load the file: " + filename);
+          fail("could not load the file");
         }
       }
     });
@@ -505,20 +467,9 @@ public class LibraryContentsLoaderTest extends AbstractSpringPersistenceTest
         libraryCreator.createLibrary(library);
         library = genericEntityDao.reloadEntity(library, false);
 
-        String filename = "clean_data_small_molecule.sdf";
-        File file = new File(TEST_INPUT_FILE_DIR, filename);
-        InputStream stream = null;
         try {
-          stream = new FileInputStream(file);
-        }
-        catch (FileNotFoundException e) {
-          log.warn("file not found: " + file);
-          fail("file not found: " + file);
-        }
-        //libraryCreator.createLibrary(library);
-
-        try {
-          LibraryContentsVersion lcv = libraryContentsLoader.loadLibraryContents(library, _admin, "clean data small molecule", stream);
+          LibraryContentsVersion lcv = libraryContentsLoader.loadLibraryContents(library, _admin, "clean data small molecule",
+                                                                                 new ClassPathResource("/libraries/clean_data_small_molecule.sdf").getInputStream());
           libraryContentsVersionManager.releaseLibraryContentsVersion(lcv, _admin);
           log.info("added library definition for " + library);
         }
@@ -529,7 +480,7 @@ public class LibraryContentsLoaderTest extends AbstractSpringPersistenceTest
         }
         catch (IOException e) {
           log.error(e);
-          fail("could not load the file: " + filename);
+          fail("could not load the file");
         }
       }
     });
@@ -627,20 +578,9 @@ public class LibraryContentsLoaderTest extends AbstractSpringPersistenceTest
         libraryCreator.createLibrary(library);
         library = genericEntityDao.reloadEntity(library, false);
 
-        String filename = "clean_data_small_molecule_LINCS.sdf";
-        File file = new File(TEST_INPUT_FILE_DIR, filename);
-        InputStream stream = null;
         try {
-          stream = new FileInputStream(file);
-        }
-        catch (FileNotFoundException e) {
-          log.warn("file not found: " + file);
-          fail("file not found: " + file);
-        }
-        //libraryCreator.createLibrary(library);
-
-        try {
-          LibraryContentsVersion lcv = libraryContentsLoader.loadLibraryContents(library, _admin, "clean data small molecule", stream);
+          LibraryContentsVersion lcv = libraryContentsLoader.loadLibraryContents(library, _admin, "clean data small molecule",
+                                                                                 new ClassPathResource("/libraries/clean_data_small_molecule_LINCS.sdf").getInputStream());
           libraryContentsVersionManager.releaseLibraryContentsVersion(lcv, _admin);
           log.info("added library definition for " + library);
         }
@@ -651,7 +591,7 @@ public class LibraryContentsLoaderTest extends AbstractSpringPersistenceTest
         }
         catch (IOException e) {
           log.error(e);
-          fail("could not load the file: " + filename);
+          fail("could not load the file");
         }
       }
     });

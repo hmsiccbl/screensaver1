@@ -11,11 +11,15 @@
 
 package edu.harvard.med.screensaver.io.screens;
 
+import java.io.FileNotFoundException;
+import java.io.IOException;
 import java.util.Map;
 import java.util.TreeSet;
 
 import org.apache.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.core.io.ClassPathResource;
+import org.springframework.core.io.Resource;
 
 import edu.harvard.med.screensaver.db.EntityInflator;
 import edu.harvard.med.screensaver.io.UnrecoverableParseException;
@@ -32,68 +36,64 @@ import edu.harvard.med.screensaver.test.MakeDummyEntities;
 
 public class StudyAnnotationParserTest extends AbstractSpringPersistenceTest
 {
-  private static final String WORKBOOK_FILE_BY_RVI = "edu/harvard/med/screensaver/io/screens/test-study-by-rvi.xls";
-  private static final String WORKBOOK_FILE_BY_WELLKEY = "edu/harvard/med/screensaver/io/screens/test-study-by-wellkey.xls";
-  private static final String WORKBOOK_FILE_WITH_AT_IN_COL1_BY_WELLKEY = "edu/harvard/med/screensaver/io/screens/test-study-with-at-in-col1-by-wellkey.xls";
-  private static final String WORKBOOK_FILE_WITH_AT_IN_COL1_BY_COMPOUND_NAME = "edu/harvard/med/screensaver/io/screens/test-study-with-at-in-col1-by-compoundName.xls";
+  private Resource WORKBOOK_FILE_BY_RVI = new ClassPathResource("/screens/test-study-by-rvi.xls");
+  private Resource WORKBOOK_FILE_BY_WELLKEY = new ClassPathResource("/screens/test-study-by-wellkey.xls");
+  private Resource WORKBOOK_FILE_WITH_AT_IN_COL1_BY_WELLKEY = new ClassPathResource("/screens/test-study-with-at-in-col1-by-wellkey.xls");
+  private Resource WORKBOOK_FILE_WITH_AT_IN_COL1_BY_COMPOUND_NAME = new ClassPathResource("/screens/test-study-with-at-in-col1-by-compoundName.xls");
 
   private static Logger log = Logger.getLogger(StudyAnnotationParserTest.class);
 
   @Autowired
   protected StudyAnnotationParser studyAnnotationParser;
 
-  public void testStudyAnnotationParseByRvi() throws UnrecoverableParseException
+  public void testStudyAnnotationParseByRvi() throws UnrecoverableParseException, FileNotFoundException, IOException
   {
     Library library = MakeDummyEntities.makeDummyLibrary(1, ScreenType.RNAI, 1);
     genericEntityDao.persistEntity(library);
 
     Screen study = MakeDummyEntities.makeDummyScreen(1, library.getScreenType());
-    String workbookLocation = WORKBOOK_FILE_BY_RVI;
     studyAnnotationParser.parse(study,
-                                new Workbook(workbookLocation, getClass().getClassLoader().getResourceAsStream(workbookLocation)),
+                                new Workbook(WORKBOOK_FILE_BY_RVI.getFile()),
                                 StudyAnnotationParser.KEY_COLUMN.RVI,
                                 false, false);
     doTest(study);
   }
 
-  public void testStudyAnnotationParseByWellKey() throws UnrecoverableParseException
+  public void testStudyAnnotationParseByWellKey() throws UnrecoverableParseException, FileNotFoundException, IOException
   {
     Library library = MakeDummyEntities.makeDummyLibrary(1, ScreenType.RNAI, 1);
     genericEntityDao.persistEntity(library);
 
     Screen study = MakeDummyEntities.makeDummyScreen(2, library.getScreenType());
-    String workbookLocation = WORKBOOK_FILE_BY_WELLKEY;
     studyAnnotationParser.parse(study,
-                                new Workbook(workbookLocation, getClass().getClassLoader().getResourceAsStream(workbookLocation)),
+                                new Workbook(WORKBOOK_FILE_BY_WELLKEY.getFile()),
                                 StudyAnnotationParser.KEY_COLUMN.WELL_ID,
                                 false, false);
     doTest(study);
   }
 
-  public void testStudyAnnotationParseWithTypeInCol1ByCompoundName() throws UnrecoverableParseException
+  public void testStudyAnnotationParseWithTypeInCol1ByCompoundName() throws UnrecoverableParseException, FileNotFoundException, IOException
   {
     Library library = MakeDummyEntities.makeDummyLibrary(1, ScreenType.SMALL_MOLECULE, 1);
     genericEntityDao.persistEntity(library);
 
     Screen study = MakeDummyEntities.makeDummyScreen(3, library.getScreenType());
-    String workbookLocation = WORKBOOK_FILE_WITH_AT_IN_COL1_BY_COMPOUND_NAME;
     studyAnnotationParser.parse(study,
-                                new Workbook(workbookLocation, getClass().getClassLoader().getResourceAsStream(workbookLocation)),
+                                new Workbook(WORKBOOK_FILE_WITH_AT_IN_COL1_BY_COMPOUND_NAME.getFile()),
                                 StudyAnnotationParser.KEY_COLUMN.COMPOUND_NAME,
                                 true, false);
     genericEntityDao.persistEntity(study);
     doSMCompoundTest(study);
   }
 
-  public void testStudyAnnotationParseWithTypeInCol1ByWellKey() throws UnrecoverableParseException
+  public void testStudyAnnotationParseWithTypeInCol1ByWellKey() throws UnrecoverableParseException, FileNotFoundException, IOException
   {
     Library library = MakeDummyEntities.makeDummyLibrary(1, ScreenType.RNAI, 1);
     genericEntityDao.persistEntity(library);
 
     Screen study = MakeDummyEntities.makeDummyScreen(3, library.getScreenType());
-    String workbookLocation = WORKBOOK_FILE_WITH_AT_IN_COL1_BY_WELLKEY;
     studyAnnotationParser.parse(study,
-                                new Workbook(workbookLocation, getClass().getClassLoader().getResourceAsStream(workbookLocation)),
+                                new Workbook(WORKBOOK_FILE_WITH_AT_IN_COL1_BY_WELLKEY.getFile()),
                                 StudyAnnotationParser.KEY_COLUMN.WELL_ID,
                                 true, false);
     doTest(study);

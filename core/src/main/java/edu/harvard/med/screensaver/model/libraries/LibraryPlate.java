@@ -19,8 +19,8 @@ import com.google.common.collect.Iterables;
 import com.google.common.collect.Sets;
 import org.joda.time.LocalDate;
 
-import edu.harvard.med.screensaver.model.AdministrativeActivity;
 import edu.harvard.med.screensaver.model.NonPersistentEntity;
+import edu.harvard.med.screensaver.model.activities.AdministrativeActivity;
 import edu.harvard.med.screensaver.model.screenresults.AssayPlate;
 import edu.harvard.med.screensaver.model.screens.LibraryScreening;
 

@@ -22,7 +22,7 @@ import org.springframework.transaction.annotation.Transactional;
 import edu.harvard.med.screensaver.db.GenericEntityDAO;
 import edu.harvard.med.screensaver.db.LibrariesDAO;
 import edu.harvard.med.screensaver.db.datafetcher.SetBasedDataFetcher;
-import edu.harvard.med.screensaver.model.Activity;
+import edu.harvard.med.screensaver.model.activities.Activity;
 import edu.harvard.med.screensaver.model.libraries.Copy;
 import edu.harvard.med.screensaver.model.libraries.Library;
 import edu.harvard.med.screensaver.model.libraries.LibraryPlate;
@@ -49,7 +49,7 @@ public class LibraryPlateSearchResults extends EntityBasedEntitySearchResults<Li
   private LibrariesDAO _librariesDao;
   private LibraryViewer _libraryViewer;
 
-  private ActivitySearchResults<Activity> _activitesBrowser;
+  private ActivitySearchResults _activitesBrowser;
   private LibraryCopySearchResults _libraryCopiesBrowser;
 
 
@@ -58,7 +58,7 @@ public class LibraryPlateSearchResults extends EntityBasedEntitySearchResults<Li
   public LibraryPlateSearchResults(GenericEntityDAO dao,
                                    LibrariesDAO librariesDao,
                                    LibraryViewer libraryViewer,
-                                   ActivitySearchResults<Activity> activitiesBrowser,
+                                   ActivitySearchResults activitiesBrowser,
                                    LibraryCopySearchResults copiesBrowser)
   {
     _dao = dao;

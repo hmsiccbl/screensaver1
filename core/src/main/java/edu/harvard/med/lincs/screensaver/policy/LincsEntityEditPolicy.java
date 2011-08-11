@@ -9,9 +9,10 @@
 
 package edu.harvard.med.lincs.screensaver.policy;
 
-import edu.harvard.med.screensaver.model.AdministrativeActivity;
 import edu.harvard.med.screensaver.model.AttachedFile;
 import edu.harvard.med.screensaver.model.AttachedFileType;
+import edu.harvard.med.screensaver.model.activities.AdministrativeActivity;
+import edu.harvard.med.screensaver.model.activities.ServiceActivity;
 import edu.harvard.med.screensaver.model.cherrypicks.CherryPickAssayPlate;
 import edu.harvard.med.screensaver.model.cherrypicks.CherryPickLiquidTransfer;
 import edu.harvard.med.screensaver.model.cherrypicks.LabCherryPick;
@@ -332,4 +333,9 @@ public class LincsEntityEditPolicy implements EntityEditPolicy
     return false;
   }
 
+  @Override
+  public Boolean visit(ServiceActivity serviceActivity)
+  {
+    return false;
+  }
 }

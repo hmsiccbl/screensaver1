@@ -9,8 +9,8 @@
 
 package edu.harvard.med.screensaver.model.libraries;
 
-import edu.harvard.med.screensaver.model.AdministrativeActivity;
 import edu.harvard.med.screensaver.model.NonPersistentEntity;
+import edu.harvard.med.screensaver.model.activities.AdministrativeActivity;
 
 public class PlateActivity extends NonPersistentEntity<Integer> implements Comparable<PlateActivity>
 {

@@ -36,8 +36,8 @@ import edu.harvard.med.screensaver.db.datafetcher.NoOpDataFetcher;
 import edu.harvard.med.screensaver.db.hqlbuilder.HqlBuilder;
 import edu.harvard.med.screensaver.io.libraries.PlateWellListParser;
 import edu.harvard.med.screensaver.io.libraries.PlateWellListParserResult;
-import edu.harvard.med.screensaver.model.Activity;
 import edu.harvard.med.screensaver.model.Entity;
+import edu.harvard.med.screensaver.model.activities.Activity;
 import edu.harvard.med.screensaver.model.cherrypicks.CherryPickAssayPlate;
 import edu.harvard.med.screensaver.model.cherrypicks.CherryPickLiquidTransfer;
 import edu.harvard.med.screensaver.model.cherrypicks.CherryPickLiquidTransferStatus;
@@ -58,7 +58,7 @@ import edu.harvard.med.screensaver.service.cherrypicks.CherryPickRequestCherryPi
 import edu.harvard.med.screensaver.service.cherrypicks.CherryPickRequestPlateMapFilesBuilder;
 import edu.harvard.med.screensaver.service.cherrypicks.CherryPickRequestPlateMapper;
 import edu.harvard.med.screensaver.service.screens.ScreeningDuplicator;
-import edu.harvard.med.screensaver.ui.activities.LabActivityViewer;
+import edu.harvard.med.screensaver.ui.activities.ActivityViewer;
 import edu.harvard.med.screensaver.ui.arch.datatable.column.TableColumn;
 import edu.harvard.med.screensaver.ui.arch.datatable.column.entity.BooleanEntityColumn;
 import edu.harvard.med.screensaver.ui.arch.datatable.column.entity.IntegerEntityColumn;
@@ -97,7 +97,7 @@ public class CherryPickRequestViewer extends SearchResultContextEntityViewerBack
   private CherryPickRequestDetailViewer _cherryPickRequestDetailViewer;
   private LibrariesDAO _librariesDao;
   private WellCopyVolumeSearchResults _wellCopyVolumesBrowser;
-  private LabActivityViewer _labActivityViewer;
+  private ActivityViewer _activityViewer;
   private PlateWellListParser _plateWellListParser;
   private CherryPickRequestCherryPicksAdder _cherryPickRequestCherryPicksAdder;
   private CherryPickRequestAllocator _cherryPickRequestAllocator;
@@ -125,7 +125,7 @@ public class CherryPickRequestViewer extends SearchResultContextEntityViewerBack
                                  CherryPickRequestDetailViewer cherryPickRequestDetailViewer,
                                  EntitySearchResults<CherryPickRequest,CherryPickRequest,?> cherryPickRequestsBrowser,
                                  LabCherryPicksSearchResult labCherryPicksSearchResult,
-                                 LabActivityViewer labActivityViewer,
+                                 ActivityViewer activityViewer,
                                  GenericEntityDAO dao,
                                  LibrariesDAO librariesDao,
                                  WellCopyVolumeSearchResults wellCopyVolumesBrowser,
@@ -143,7 +143,7 @@ public class CherryPickRequestViewer extends SearchResultContextEntityViewerBack
           cherryPickRequestsBrowser);
     _cherryPickRequestDetailViewer = cherryPickRequestDetailViewer;
     _labCherryPicksSearchResult = labCherryPicksSearchResult;
-    _labActivityViewer = labActivityViewer;
+    _activityViewer = activityViewer;
     _librariesDao = librariesDao;
     _wellCopyVolumesBrowser = wellCopyVolumesBrowser;
     _cherryPickRequestCherryPicksAdder = cherryPickRequestCherryPicksAdder;
@@ -536,7 +536,7 @@ public class CherryPickRequestViewer extends SearchResultContextEntityViewerBack
     }
     _cherryPickRequestAllocator.deallocateAssayPlates(cplt.getCherryPickAssayPlates());
     getDao().clear(); // detach new Activity, as it should only be persisted if user invokes "save" command 
-    return _labActivityViewer.editNewEntity(cplt);
+    return _activityViewer.editNewEntity(cplt);
   }
 
   @UICommand
@@ -602,7 +602,7 @@ public class CherryPickRequestViewer extends SearchResultContextEntityViewerBack
       cplt.addCherryPickAssayPlate(plate);
     }
     getDao().clear(); // detach new Activity, as it should only be persisted if user invokes "save" command 
-    return _labActivityViewer.editNewEntity(cplt);
+    return _activityViewer.editNewEntity(cplt);
   }
 
   @UICommand
@@ -620,7 +620,7 @@ public class CherryPickRequestViewer extends SearchResultContextEntityViewerBack
       screening.addCherryPickAssayPlateScreened(getDao().reloadEntity(plate));
     }
     getDao().clear(); // detach new Activity, as it should only be persisted if user invokes "save" command 
-    return _labActivityViewer.editNewEntity(screening);
+    return _activityViewer.editNewEntity(screening);
   }
 
   @UICommand
@@ -638,7 +638,7 @@ public class CherryPickRequestViewer extends SearchResultContextEntityViewerBack
       cplt.addCherryPickAssayPlate(plate);
     }
     getDao().clear(); // detach new Activity, as it should only be persisted if user invokes "save" command 
-    return _labActivityViewer.editNewEntity(cplt);
+    return _activityViewer.editNewEntity(cplt);
   }
 
   @UICommand

@@ -11,8 +11,7 @@
 
 package edu.harvard.med.screensaver.db;
 
-import java.io.File;
-import java.io.FileNotFoundException;
+import java.io.IOException;
 import java.util.Date;
 import java.util.List;
 
@@ -21,11 +20,12 @@ import org.apache.log4j.Logger;
 import org.hibernate.Session;
 import org.joda.time.LocalDate;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.core.io.ClassPathResource;
 
 import edu.harvard.med.screensaver.io.ParseError;
 import edu.harvard.med.screensaver.io.ParseErrorsException;
 import edu.harvard.med.screensaver.io.workbook2.Workbook;
-import edu.harvard.med.screensaver.model.AdministrativeActivityType;
+import edu.harvard.med.screensaver.model.activities.AdministrativeActivityType;
 import edu.harvard.med.screensaver.model.libraries.CopyUsageType;
 import edu.harvard.med.screensaver.model.libraries.Library;
 import edu.harvard.med.screensaver.model.libraries.LibraryType;
@@ -64,10 +64,9 @@ public class ScreenResultLoaderAndDeleterTest extends AbstractSpringPersistenceT
   @Autowired
   protected ScreenDerivedPropertiesUpdater screenDerivedPropertiesUpdater;
 
-  public static final File TEST_INPUT_FILE_DIR = new File("src/test/java/edu/harvard/med/screensaver/io/screenresults");
   public static final String SCREEN_RESULT_115_TEST_WORKBOOK_FILE = "ScreenResultTest115.xls";
   public static final String TEST_SCREEN_FACILITY_ID = "115";
-  
+
   @Override
   protected void setUp() throws Exception
   {
@@ -102,7 +101,7 @@ public class ScreenResultLoaderAndDeleterTest extends AbstractSpringPersistenceT
                 else if (row == 7)
                   libraryWellType = LibraryWellType.EMPTY;
                 else if (row == 8)
-                  libraryWellType = LibraryWellType.EMPTY;
+                                  libraryWellType = LibraryWellType.EMPTY;
               }
               library.createWell(new WellKey(plateNumber, "" + (char) col + row), libraryWellType);
             }
@@ -114,28 +113,27 @@ public class ScreenResultLoaderAndDeleterTest extends AbstractSpringPersistenceT
       }
     });
   }
-  
+
   public void testScreenResultLoaderNoIncrementalFlush() throws Exception
   {
     doTest(false);
   }
-  
+
   public void testScreenResultLoaderIncrementalFlush() throws Exception
   {
     doTest(true);
   }
-  
-  private void doLoad(boolean incrementalFlush) throws FileNotFoundException
+
+  private void doLoad(boolean incrementalFlush) throws IOException
   {
     try {
-      File workbookFile = new File(TEST_INPUT_FILE_DIR,
-                                   SCREEN_RESULT_115_TEST_WORKBOOK_FILE);
       final AdministratorUser admin = new AdministratorUser("Admin", "User");
       genericEntityDao.saveOrUpdateEntity(admin);
 
       Screen screen = genericEntityDao.findEntityByProperty(Screen.class, Screen.facilityId.getPropertyName(), TEST_SCREEN_FACILITY_ID);
       screenResultLoader.parseAndLoad(screen,
-                                      new Workbook(workbookFile),
+                                      new Workbook(new ClassPathResource("/screenresults/" +
+                                        SCREEN_RESULT_115_TEST_WORKBOOK_FILE).getFile()),
                                       admin,
                                       "test comments",
                                       null,
@@ -153,7 +151,7 @@ public class ScreenResultLoaderAndDeleterTest extends AbstractSpringPersistenceT
   private void doTest(boolean incrementalFlush) throws Exception
   {
     Date now = new Date();
-    
+
     // add a LibraryScreening and AssayPlate
     genericEntityDao.doInTransaction(new DAOTransaction() {
       @Override
@@ -170,11 +168,11 @@ public class ScreenResultLoaderAndDeleterTest extends AbstractSpringPersistenceT
     doLoad(incrementalFlush);
     Screen screen = findScreen();
     ScreenResult screenResult = screen.getScreenResult();
-    
+
     assertTrue("Screen parse time is incorrect: " +
-               screenResult.getLastDataLoadingActivity() + ", should be after: " + now, 
+               screenResult.getLastDataLoadingActivity() + ", should be after: " + now,
                screenResult.getLastDataLoadingActivity().getDateCreated().getMillis() > now.getTime());
-    
+
     assertEquals("Loaded data for 3 plates [1..3].  test comments", screenResult.getLastDataLoadingActivity().getComments());
 
     List<DataColumn> loadedDataColumns = genericEntityDao.findEntitiesByProperty(DataColumn.class,
@@ -194,38 +192,39 @@ public class ScreenResultLoaderAndDeleterTest extends AbstractSpringPersistenceT
     assertEquals("Number of AssayWells: ", 960, assayWells.size());
     genericEntityDao.doInTransaction(new DAOTransaction()
     {
-      public void runTransaction() {
+      public void runTransaction()
+      {
         Screen screen = findScreen();
         ScreenResult screenResult = screen.getScreenResult();
         assertNotNull(screenResult);
         DataColumn col0 = screenResult.getDataColumnsList().get(0);
         col0.getWellKeyToResultValueMap().keySet().iterator();
-        ResultValue rv = col0.getWellKeyToResultValueMap().get(new WellKey(1,"A01"));
+        ResultValue rv = col0.getWellKeyToResultValueMap().get(new WellKey(1, "A01"));
         assertEquals(1071894.0, rv.getNumericValue().doubleValue(), 0.01);
         // this tests how Hibernate will make use of WellKey, initializing with a concatenated key string
         rv = col0.getWellKeyToResultValueMap().get(new WellKey("00001:A01"));
         assertEquals(1071894.0, rv.getNumericValue().doubleValue(), 0.01);
       }
     });
-    
+
     assertEquals(3, screen.getLibraryPlatesDataLoadedCount());
     assertEquals(3, screen.getLibraryPlatesDataAnalyzedCount());
     assertTrue(screen.getAssayPlatesDataLoaded().size() > 0);
     assertTrue(screen.getAssayPlatesDataLoaded().size() > screen.getAssayPlatesScreened().size()); // ensure that we're testing with sets of assay plates that have and do not have a library screening
     AdministratorUser admin = new AdministratorUser("joe", "deleter");
     genericEntityDao.saveOrUpdateEntity(admin);
-    screenResultDeleter.deleteScreenResult(screenResult, 
+    screenResultDeleter.deleteScreenResult(screenResult,
                                            admin);
     screen = findScreen();
     assertNull(screen.getScreenResult());
-    assertEquals(AdministrativeActivityType.SCREEN_RESULT_DATA_DELETION, 
+    assertEquals(AdministrativeActivityType.SCREEN_RESULT_DATA_DELETION,
                  screen.getUpdateActivities().last().getType());
     assertEquals(0, screen.getLibraryPlatesDataLoadedCount());
     assertEquals(0, screen.getLibraryPlatesDataAnalyzedCount());
     assertEquals("non-screened assay plates should have been deleted", 0, screen.getAssayPlatesDataLoaded().size());
     assertTrue("screened assay plates should not have been deleted", screen.getAssayPlatesScreened().size() > 0);
   }
-  
+
   public void testAssayPlateLoadingStatus() throws Exception
   {
     Screen screen;
@@ -262,7 +261,7 @@ public class ScreenResultLoaderAndDeleterTest extends AbstractSpringPersistenceT
     assertEquals("library plates data loaded", 3, screen.getLibraryPlatesDataLoadedCount());
     assertEquals(6, screen.getAssayPlatesDataLoaded().size());
 
-     // 3. sufficient assay plate replicates, with multiple attempts: only last attempt assay plates are updated
+    // 3. sufficient assay plate replicates, with multiple attempts: only last attempt assay plates are updated
     setUp();
     screen = findScreen();
     libraryScreening = screen.createLibraryScreening(dataFactory.newInstance(AdministratorUser.class),
@@ -321,11 +320,12 @@ public class ScreenResultLoaderAndDeleterTest extends AbstractSpringPersistenceT
   {
     return (Screen) genericEntityDao.runQuery(new Query()
     {
-      public List execute(Session s) {
-        Screen screen = genericEntityDao.findEntityByProperty(Screen.class, 
+      public List execute(Session s)
+      {
+        Screen screen = genericEntityDao.findEntityByProperty(Screen.class,
                                                               Screen.facilityId.getPropertyName(),
                                                               TEST_SCREEN_FACILITY_ID,
-                                                              true, 
+                                                              true,
                                                               Screen.assayPlates);
         genericEntityDao.needReadOnly(screen, Screen.updateActivities);
         genericEntityDao.needReadOnly(screen, Screen.labActivities);

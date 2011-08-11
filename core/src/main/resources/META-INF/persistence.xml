@@ -11,8 +11,9 @@
     
     <!-- mapping-file>queries.xml</mapping-file-->
 
-    <class>edu.harvard.med.screensaver.model.Activity</class>
-    <class>edu.harvard.med.screensaver.model.AdministrativeActivity</class>
+    <class>edu.harvard.med.screensaver.model.activities.Activity</class>
+    <class>edu.harvard.med.screensaver.model.activities.AdministrativeActivity</class>
+    <class>edu.harvard.med.screensaver.model.activities.ServiceActivity</class>
     <class>edu.harvard.med.screensaver.model.AttachedFile</class>
     <class>edu.harvard.med.screensaver.model.AttachedFileType</class>
 
