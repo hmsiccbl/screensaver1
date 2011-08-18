@@ -251,7 +251,11 @@ public class AdminEmailApplication extends CommandLineApplication
 
   public void sendAdminEmails(String subject, String msg) throws MessagingException
   {
-    sendAdminEmails(subject, msg, null);
+    sendAdminEmails(subject, msg, null, null);
+  }
+  public void sendAdminEmails(String subject, String msg, File attachedFile) throws MessagingException
+  {
+    sendAdminEmails(subject, msg, null, attachedFile);
   }
 
   /**
@@ -263,6 +267,10 @@ public class AdminEmailApplication extends CommandLineApplication
    * @throws MessagingException
    */
   public void sendAdminEmails(String subject, String msg, Collection<ScreensaverUser> adminUsers) throws MessagingException
+  {
+    sendAdminEmails(subject, msg, adminUsers, null);
+  }
+  public void sendAdminEmails(String subject, String msg, Collection<ScreensaverUser> adminUsers, File attachedFile) throws MessagingException
   {
     List<String> failMessages = Lists.newArrayList();
     Set<InternetAddress> adminRecipients = Sets.newHashSet();
@@ -295,11 +303,18 @@ public class AdminEmailApplication extends CommandLineApplication
 
     EmailService emailService = getEmailServiceBasedOnCommandLineOption();
 
-    emailService.send(subject,
-                        msg.toString(),
-                        getAdminEmail(),
-                        adminRecipients.toArray(new InternetAddress[] {}),
-                        (InternetAddress[]) null);
+    try {
+      emailService.send(subject,
+                          msg.toString(),
+                          getAdminEmail(),
+                          adminRecipients.toArray(new InternetAddress[] {}),
+                          (InternetAddress[]) null, attachedFile);
+    }
+    catch (IOException e) {
+      String errmsg = "Exception when trying to attach the file: " + attachedFile;
+      log.warn(errmsg, e);
+      failMessages.add(errmsg  + ", " + e.getMessage());
+    }
 
     if (!failMessages.isEmpty()) {
       sendFailMessages(subject, msg, failMessages);

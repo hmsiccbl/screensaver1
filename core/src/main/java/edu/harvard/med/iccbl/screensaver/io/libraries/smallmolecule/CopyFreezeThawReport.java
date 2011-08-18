@@ -153,7 +153,6 @@ public class CopyFreezeThawReport extends AdminEmailApplication
       fos.close();
       log.info("finished exporting data to: " + file.getCanonicalPath());
 
-      //      InternetAddress adminEmail = app.getEmail(admin);
       String subject = "Small Molecule Freeze Thaw Report";
       String msg = "Small Molecule Libraries Freeze Thaw report:\n"
         + "Found " + rowCount + " copies that match the criteria:\n" +
@@ -162,7 +161,8 @@ public class CopyFreezeThawReport extends AdminEmailApplication
             "- Libary Type != \"DOS\"\n" +
             "Please see the attached file for the full report.";
       log.info(msg);
-      app.sendAdminEmails(subject, msg);
+      app.sendAdminEmails(subject, msg, file);
+
     }
     catch (IOException e) {
       app.sendErrorMail("CopyFreezeThawReport: Error exporting", app.toString(), e);

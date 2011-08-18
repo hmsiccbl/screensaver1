@@ -54,7 +54,13 @@ public class LibraryCreator
                                .withDescription("a short name for identifying the library").create("s"));
       app.addCommandLineOption(OptionBuilder.hasArg().isRequired()
                                .withArgName("library type").withLongOpt("library-type")
-                               .withDescription(StringUtils.makeListString(Arrays.asList(LibraryType.values()), ", "))
+                               .withDescription(StringUtils.makeListString(Lists.transform(Lists.newArrayList(LibraryType.values()), new Function<LibraryType,String>() {
+                                 @Override
+                                 public String apply(LibraryType arg0)
+                                {
+                                  return arg0.name();
+                                }
+                               }), ", "))
                                .create("lt"));
       app.addCommandLineOption(OptionBuilder.hasArg().isRequired()
                                .withArgName("screen type").withLongOpt("screen-type")
@@ -94,7 +100,13 @@ public class LibraryCreator
       app.addCommandLineOption(
           OptionBuilder.hasArg()
           .withArgName("plate size")
-          .withDescription(StringUtils.makeListString(Arrays.asList(PlateSize.values()), ", "))
+          .withDescription(StringUtils.makeListString(Lists.transform(Lists.newArrayList(PlateSize.values()), new Function<PlateSize,String>() {
+                                 @Override
+                                 public String apply(PlateSize arg0)
+                                {
+                                  return arg0.name();
+                                }
+                               }), ", "))
             .withLongOpt("plate-size").create("ps"));
 
       app.processOptions(true, true);

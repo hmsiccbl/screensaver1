@@ -125,7 +125,7 @@ public class ScreenResultImporter extends CommandLineApplication
       System.exit(1);
     }
     catch (Exception e) {
-      log.error("Failed to create the screen", e);
+      log.error("Failed to create the screen result", e);
       System.exit(1);
     }
 
@@ -137,7 +137,7 @@ public class ScreenResultImporter extends CommandLineApplication
     GenericEntityDAO dao = (GenericEntityDAO) app.getSpringBean("genericEntityDao");
 
     // if parse-only mode is requested, use a spring configuration that does not have a database dependency
-    if (!app.isCommandLineFlagSet(IMPORT_OPTION[SHORT_OPTION])) {
+    if (!app.isCommandLineFlagSet(IMPORT_OPTION[SHORT_OPTION])) { // TODO: this is a bug, since cannot instantiate the spring-application-context after getting the genericEntityDao bean (or any bean) - sde4
       app.setSpringConfigurationResource(SCREEN_RESULT_IMPORTER_SPRING_CONFIGURATION);
     }
 
