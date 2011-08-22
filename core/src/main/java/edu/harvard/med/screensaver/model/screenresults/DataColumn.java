@@ -35,7 +35,6 @@ import javax.persistence.Version;
 import com.google.common.base.Predicate;
 import com.google.common.collect.Maps;
 import org.apache.log4j.Logger;
-import org.hibernate.annotations.OptimisticLock;
 
 import edu.harvard.med.screensaver.model.AbstractEntity;
 import edu.harvard.med.screensaver.model.AbstractEntityVisitor;
@@ -941,8 +940,10 @@ public class DataColumn extends AbstractEntity<Integer> implements MetaDataType,
    * @return a Collection of the result values for this data column
    * @motivation for hibernate
    */
-  @OneToMany(mappedBy = "dataColumn", cascade = { CascadeType.ALL })
-  @OptimisticLock(excluded=true)
+  // note: for performance/scalability reasons, we do not perform MERGE cascading; JPA/Hibernate 
+  // otherwise loads the result values during a cascaded merge operation, even if the resultValues collection has not
+  // been fetched/initialized (TODO: is this possibly due to our use of the Bag collection type?); see [#3210]
+  @OneToMany(mappedBy = "dataColumn", cascade = { CascadeType.PERSIST, CascadeType.REMOVE })
   public Collection<ResultValue> getResultValues()
   {
     return _resultValues;

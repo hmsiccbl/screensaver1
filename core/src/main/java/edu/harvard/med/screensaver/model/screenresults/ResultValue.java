@@ -274,10 +274,10 @@ public class ResultValue extends AbstractEntity<Integer>
    * Get the data column.
    * @return the data column
    */
-  @ManyToOne(cascade={}, fetch=FetchType.LAZY)
-  @JoinColumn(name="dataColumnId", nullable=false, updatable=false)
+  @ManyToOne(optional = false)
+  @JoinColumn(name = "dataColumnId")
   @org.hibernate.annotations.ForeignKey(name="fk_result_value_to_data_column")
-  @org.hibernate.annotations.LazyToOne(value=org.hibernate.annotations.LazyToOneOption.PROXY)
+  @org.hibernate.annotations.LazyToOne(value = org.hibernate.annotations.LazyToOneOption.PROXY)
   public DataColumn getDataColumn()
   {
     return _dataColumn;
