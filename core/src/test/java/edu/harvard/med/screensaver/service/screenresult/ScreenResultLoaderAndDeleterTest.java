@@ -9,7 +9,7 @@
 // at Harvard Medical School. This software is distributed under the terms of
 // the GNU General Public License.
 
-package edu.harvard.med.screensaver.db;
+package edu.harvard.med.screensaver.service.screenresult;
 
 import java.io.IOException;
 import java.util.Date;
@@ -22,6 +22,8 @@ import org.joda.time.LocalDate;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.io.ClassPathResource;
 
+import edu.harvard.med.screensaver.db.DAOTransaction;
+import edu.harvard.med.screensaver.db.Query;
 import edu.harvard.med.screensaver.io.ParseError;
 import edu.harvard.med.screensaver.io.ParseErrorsException;
 import edu.harvard.med.screensaver.io.workbook2.Workbook;
@@ -44,8 +46,6 @@ import edu.harvard.med.screensaver.model.screens.StudyType;
 import edu.harvard.med.screensaver.model.users.AdministratorUser;
 import edu.harvard.med.screensaver.model.users.ScreeningRoomUser;
 import edu.harvard.med.screensaver.service.libraries.LibraryCreator;
-import edu.harvard.med.screensaver.service.screenresult.ScreenResultDeleter;
-import edu.harvard.med.screensaver.service.screenresult.ScreenResultLoader;
 import edu.harvard.med.screensaver.service.screens.ScreenDerivedPropertiesUpdater;
 import edu.harvard.med.screensaver.test.AbstractSpringPersistenceTest;
 import edu.harvard.med.screensaver.test.MakeDummyEntities;
