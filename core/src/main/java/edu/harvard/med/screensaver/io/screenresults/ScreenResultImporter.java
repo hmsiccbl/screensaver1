@@ -109,7 +109,6 @@ public class ScreenResultImporter extends CommandLineApplication
                              .withLongOpt(DELETE_EXISTING[LONG_OPTION])
                              .create(DELETE_EXISTING[SHORT_OPTION]));
 
-    File inputFile = null;
     app.processOptions(/* acceptDatabaseOptions= */true,
                        /* acceptAdminUserOptions= */true);
     try {
