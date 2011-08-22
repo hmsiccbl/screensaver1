@@ -114,7 +114,6 @@ public class ScreenResult extends AuditedAbstractEntity<Integer>
   private SortedSet<DataColumn> _dataColumns = Sets.newTreeSet();
 
   private Integer _experimentalWellCount = 0; // can't be null
-  private String _comments;
 
 
   // public constructor
