@@ -403,13 +403,13 @@ public class ScreenResultReporterTest extends AbstractSpringPersistenceTest
     assertTrue(resultValue.isPositive());
     _binArray[4]++; // keep track of the count
 
-    _screenRnaiPool = genericEntityDao.mergeEntity(_screenRnaiPool);
-    _screenRnai0 = genericEntityDao.mergeEntity(_screenRnai0);
-    _screenRnai1 = genericEntityDao.mergeEntity(_screenRnai1);
-    _screenRnai2 = genericEntityDao.mergeEntity(_screenRnai2);
-    _screenRnai3 = genericEntityDao.mergeEntity(_screenRnai3);
-    _screenRnai4 = genericEntityDao.mergeEntity(_screenRnai4);
-    _screenRnai5 = genericEntityDao.mergeEntity(_screenRnai5);
+    genericEntityDao.persistEntity(_screenRnaiPool);
+    genericEntityDao.persistEntity(_screenRnai0);
+    genericEntityDao.persistEntity(_screenRnai1);
+    genericEntityDao.persistEntity(_screenRnai2);
+    genericEntityDao.persistEntity(_screenRnai3);
+    genericEntityDao.persistEntity(_screenRnai4);
+    genericEntityDao.persistEntity(_screenRnai5);
   }
 
   //TODO: migrated from ScreenResultDAOTest; integrate with the above ... -sde4
