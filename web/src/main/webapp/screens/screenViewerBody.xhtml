@@ -69,8 +69,8 @@
                 description="The date the current screen results were loaded into the database"
                 value="#{screenResultViewer.entity.lastDataLoadingActivity.dateCreated}" />
 
-              <ss:property id="librariessScreened"
-                rendered="#{appInfo.applicationProperties.facility != 'LINCS'}"
+              <ss:property id="librariesScreened"
+                rendered="#{screenViewer.entity.projectPhase != 'Follow Up Screen' &amp;&amp; appInfo.applicationProperties.facility != 'LINCS'}"
                 label="Libraries Screened"
                 description="The number of libraries that have been screened">
                 <ui:define name="data">
@@ -81,7 +81,7 @@
               </ss:property>
 
               <ss:property id="libraryPlatesScreened"
-                rendered="#{appInfo.applicationProperties.facility != 'LINCS'}"
+                rendered="#{screenViewer.entity.projectPhase != 'Follow Up Screen' &amp;&amp; appInfo.applicationProperties.facility != 'LINCS'}"
                 label="Library Plates Screened"
                 description="The number of library plates that have been screened">
                 <ui:define name="data">
@@ -96,7 +96,8 @@
 
               <ss:property id="libraryPlatesDataLoaded"
                 label="Library Plates Data Loaded"
-                description="The number of library plates that have raw data loaded into the system">
+                description="The number of library plates that have raw data loaded into the system"
+                rendered="#{screenViewer.entity.projectPhase != 'Follow Up Screen'}">
                 <ui:define name="data">
                   <t:commandLink id="browseLibraryPlatesDataLoaded"
                     value="#{screenViewer.entity.libraryPlatesDataLoadedCount}"
@@ -107,10 +108,11 @@
               <ss:property id="libraryPlatesDataAnalyzed"
                 label="Library Plates Analyzed"
                 value="#{screenViewer.entity.libraryPlatesDataAnalyzedCount}"
-                description="The number of library plates that have been analyzed for positives" />
+                description="The number of library plates that have been analyzed for positives" 
+                rendered="#{screenViewer.entity.projectPhase != 'Follow Up Screen'}" />
 
               <ss:property id="screenedExperimentalWellCount"
-                rendered="#{appInfo.applicationProperties.facility != 'LINCS'}"
+                rendered="#{screenViewer.entity.projectPhase != 'Follow Up Screen' &amp;&amp; appInfo.applicationProperties.facility != 'LINCS'}"
                 label="Experimental Wells Screened"
                 value="#{screenViewer.entity.screenedExperimentalWellCount} (#{screenViewer.entity.uniqueScreenedExperimentalWellCount} unique)"
                 description="The number of experimental library wells that have been screened, ignoring replicates">
@@ -122,7 +124,7 @@
                 value="#{screenResultViewer.entity.experimentalWellCount}" />
 
               <ss:property id="dataScreenedReplicateCount"
-                rendered="#{appInfo.applicationProperties.facility != 'LINCS'}"
+                rendered="#{screenViewer.entity.projectPhase != 'Follow Up Screen' &amp;&amp; appInfo.applicationProperties.facility != 'LINCS'}"
                 label="Replicates Screened"
                 description="The number of replicates that have been screened (min...max if replicate count varies across library plates)">
                 <ui:define name="data">
@@ -133,7 +135,7 @@
               </ss:property>
 
               <ss:property id="dataLoadedReplicateCount"
-                rendered="#{appInfo.applicationProperties.facility != 'LINCS'}"
+                rendered="#{screenViewer.entity.projectPhase != 'Follow Up Screen' &amp;&amp; appInfo.applicationProperties.facility != 'LINCS'}"
                 label="Replicates Data Loaded"
                 description="The number of replicates represented in the loaded screen result data (min...max if replicate count varies across library plates)">
                 <ui:define name="data">
@@ -145,7 +147,8 @@
 
               <ss:property id="assayReadoutTypes"
                 label="Assay Readout Types"
-                description="The assay readout types used">
+                description="The assay readout types used"
+                rendered="#{screenViewer.entity.projectPhase != 'Follow Up Screen'}">
                 <ui:define name="data">
                   <t:outputText id="assayReadoutTypes"
                     value="#{screenResultViewer.assayReadoutTypesText}"
