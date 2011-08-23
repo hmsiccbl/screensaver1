@@ -19,7 +19,9 @@ import java.util.Map;
 
 import javax.persistence.Embeddable;
 import javax.persistence.JoinColumn;
+import javax.persistence.ManyToOne;
 import javax.persistence.OneToMany;
+import javax.persistence.OneToOne;
 import javax.persistence.Transient;
 
 import org.apache.log4j.Logger;
@@ -236,14 +238,13 @@ public class ModelIntrospectionUtil
   {
     Method getter = propertyDescriptor.getReadMethod();
     javax.persistence.Column jpaColumn = getter.getAnnotation(javax.persistence.Column.class);
-    if (jpaColumn != null) {
-      return !jpaColumn.nullable();
-    }
     JoinColumn jpaJoinColumn = getter.getAnnotation(JoinColumn.class);
-    if (jpaJoinColumn != null) {
-      return !jpaJoinColumn.nullable();
-    }
-    return false;
+    ManyToOne manyToOne = getter.getAnnotation(ManyToOne.class);
+    OneToOne oneToOne = getter.getAnnotation(OneToOne.class);
+    return (jpaColumn != null && !jpaColumn.nullable()) ||
+      (jpaJoinColumn != null && !jpaJoinColumn.nullable()) ||
+      (manyToOne != null && !manyToOne.optional()) ||
+      (oneToOne != null && !oneToOne.optional());
   }
 
   public static boolean isTransientProperty(PropertyDescriptor propertyDescriptor)
