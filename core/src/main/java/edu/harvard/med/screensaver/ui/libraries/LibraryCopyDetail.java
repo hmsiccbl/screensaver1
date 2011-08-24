@@ -106,6 +106,7 @@ public class LibraryCopyDetail extends EditableEntityViewerBackingBean<Copy>
       case SAVE_EDIT:
         return _libraryCopyViewer.reload();
       case CANCEL_NEW:
+        return _libraryViewer.reload();
       case SAVE_NEW:
         return _libraryViewer.viewEntity(getDao().reloadEntity(getEntity(), true, Copy.library).getLibrary());
       default:
