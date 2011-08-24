@@ -105,16 +105,18 @@ public class PlateRange implements Iterable<Plate>
       warnings.add("Library status is " + library.getScreeningStatus().getValue());
     }
 
-    Predicate<Plate> plateStatusNotAvailable = new Predicate<Plate>() {
+    Predicate<Plate> plateStatusIsOtherThanAvailable = new Predicate<Plate>() {
       @Override
       public boolean apply(Plate p)
       {
         return p.getStatus() != PlateStatus.AVAILABLE;
       }
     };
-    Set<Plate> invalidPlates = Sets.newTreeSet(Iterables.filter(_plates, plateStatusNotAvailable));
-    Set<PlateStatus> invalidStatuses = Sets.newTreeSet(Iterables.transform(invalidPlates, Plate.ToStatus));
-    warnings.add("Plate(s) have invalid status(es): " + Joiner.on(", ").join(invalidStatuses));
+    Set<Plate> invalidPlates = Sets.newTreeSet(Iterables.filter(_plates, plateStatusIsOtherThanAvailable));
+    if (!invalidPlates.isEmpty()) {
+      Set<PlateStatus> invalidStatuses = Sets.newTreeSet(Iterables.transform(invalidPlates, Plate.ToStatus));
+      warnings.add("Plate(s) have invalid status(es): " + Joiner.on(", ").join(invalidStatuses));
+    }
 
     return Joiner.on(". ").join(warnings);
   }
