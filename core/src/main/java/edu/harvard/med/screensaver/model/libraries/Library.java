@@ -30,6 +30,7 @@ import javax.persistence.OneToOne;
 import javax.persistence.Transient;
 import javax.persistence.Version;
 
+import com.google.common.base.Function;
 import com.google.common.collect.HashMultimap;
 import com.google.common.collect.SetMultimap;
 import com.google.common.collect.Sets;
@@ -108,6 +109,14 @@ public class Library extends AuditedAbstractEntity<Integer>
   public static final RelationshipPath<Library> copies = RelationshipPath.from(Library.class).to("copies");
   public static final PropertyPath<Library> startPlate = RelationshipPath.from(Library.class).toProperty("startPlate");
   public static final PropertyPath<Library> endPlate = RelationshipPath.from(Library.class).toProperty("endPlate");
+
+  public static final Function<Library,String> ToShortName = new Function<Library,String>() {
+    @Override
+    public String apply(Library l)
+    {
+      return l.getShortName();
+    }
+  };
 
 
   // private instance data

@@ -19,6 +19,7 @@ import javax.faces.model.DataModel;
 import javax.faces.model.ListDataModel;
 import javax.faces.model.SelectItem;
 
+import com.google.common.base.Joiner;
 import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.Iterables;
 import com.google.common.collect.Lists;
@@ -609,43 +610,41 @@ public class ActivityViewer extends SearchResultContextEditableEntityViewerBacki
       LibraryScreening libraryScreening = (LibraryScreening) getEntity();
       if (libraryScreening.getNumberOfReplicates() == null ||
         libraryScreening.getNumberOfReplicates() == 0) {
-        reportApplicationError("To add a plate range, the number of replicates must first be specified");
+        showMessage("activities.numberOfReplicatesRequired");
         return REDISPLAY_PAGE_ACTION_RESULT;
       }
       if (getNewPlateRangeScreenedCopy().getSelection() == null) {
-        reportApplicationError("Please select a copy for the plate range");
+        showMessage("activities.copyRequired");
         return REDISPLAY_PAGE_ACTION_RESULT;
       }
       if (getNewPlateRangeScreenedStartPlate() != null &&
         getNewPlateRangeScreenedCopy() != null) {
-        Library library = null;
+        Set<Library> librariesInPlateRange = Sets.newLinkedHashSet();
         if (getNewPlateRangeScreenedEndPlate() == null) {
           setNewPlateRangeScreenedEndPlate(getNewPlateRangeScreenedStartPlate());
+        }
+        if (getNewPlateRangeScreenedEndPlate() < getNewPlateRangeScreenedStartPlate()) {
+          showMessage("activities.plateRangePlateNumbersReversed", getNewPlateRangeScreenedStartPlate(), getNewPlateRangeScreenedEndPlate());
+          return REDISPLAY_PAGE_ACTION_RESULT;
         }
         for (int plateNumber = getNewPlateRangeScreenedStartPlate(); plateNumber <= getNewPlateRangeScreenedEndPlate(); ++plateNumber) {
           final Plate plate = _librariesDao.findPlate(plateNumber, getNewPlateRangeScreenedCopy().getSelection());
           if (plate == null) {
-            reportApplicationError("Unknown plate number and/or copy: " + plateNumber + ":" +  
-                                   getNewPlateRangeScreenedCopy().getSelection());
+            showMessage("activities.unknownPlateNumberAndOrCopy", plateNumber, getNewPlateRangeScreenedCopy().getSelection());
             return REDISPLAY_PAGE_ACTION_RESULT;
           }
-          if (library == null) {
-            library = plate.getCopy().getLibrary();
-          }
-          // reinstate the following code to prevent the new plate range from spanning multiple libraries
-          /*
-          else {
-            if (!library.equals(plate.getCopy().getLibrary())) {
-              reportApplicationError("Plate range spans multiple libraries");
-              return REDISPLAY_PAGE_ACTION_RESULT;
-            }
-          }
-          */
+          librariesInPlateRange.add(plate.getCopy().getLibrary());
           if (_platesScreened.contains(plate)) {
-            reportApplicationError("A plate number can only be screened once per library screening (" + plate.getPlateNumber() + ")");  
+            showMessage("activities.plateNumberDuplicated", plate.getPlateNumber());
             return REDISPLAY_PAGE_ACTION_RESULT;
           }
           _platesScreened.add(plate);
+        }
+        if (librariesInPlateRange.size() > 1) {
+          showMessage("activities.plateRangeSpansMultipleLibrariesWarning",
+                      getNewPlateRangeScreenedStartPlate(),
+                      getNewPlateRangeScreenedEndPlate(),
+                      Joiner.on(", ").join(Iterables.transform(librariesInPlateRange, Library.ToShortName)));
         }
       }
       _platesScreenedDataModel = null;
