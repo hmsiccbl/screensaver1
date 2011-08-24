@@ -155,6 +155,7 @@ public class CherryPickRequestViewer extends SearchResultContextEntityViewerBack
     getIsPanelCollapsedMap().put("labCherryPicks", true);
     getIsPanelCollapsedMap().put("cherryPickPlates", true);
     _labCherryPicksSearchResult.searchForCherryPickRequest(null);
+    _labCherryPicksSearchResult.setNestedIn(this);
   }
 
   private void buildScreenerCherryPickSearchResult()

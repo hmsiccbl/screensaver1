@@ -366,7 +366,9 @@ public class LabCherryPicksSearchResult extends EntityBasedEntitySearchResults<L
     catch (NoSuchEntityException e) {
       showMessage("libraries.noSuchCopyForPlate", e.getPropertyValues().get("copy"), e.getPropertyValues().get("plate").toString());
     }
-    reload();
+    if (getNestedIn() != null) {
+      getNestedIn().reload();
+    }
   }
 
   private String _labCherryPickSourceCopyUpdateComments;
