@@ -106,6 +106,7 @@ public abstract class EntitySearchResults<E extends Entity<K>,R,K extends Serial
 
   public void setNestedIn(EntityViewerBackingBean nestedIn)
   {
+    setNested(nestedIn != null);
     _nestedIn = nestedIn;
   }
 

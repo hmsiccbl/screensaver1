@@ -863,7 +863,7 @@ public class LibraryCopyPlateSearchResults extends EntityBasedEntitySearchResult
       // note: we reload() after success *or* failure, since we want the Plate entities to be reloaded in either case
       reload();
 
-      if (isNested() && getNestedIn() != null) {
+      if (getNestedIn() != null) {
         getNestedIn().reload();
       }
     }
