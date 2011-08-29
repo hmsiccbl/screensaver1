@@ -229,4 +229,10 @@
     <constructor-arg ref="genericEntityDao" />
   </bean>
   
+  <bean id="wellCopyVolumeAdjuster"
+    class="edu.harvard.med.screensaver.service.libraries.WellCopyVolumeAdjuster">
+    <constructor-arg ref="genericEntityDao" />
+    <constructor-arg ref="cherryPickPlateSourceWellMinimumVolumePolicy" />
+  </bean>
+  
 </beans>

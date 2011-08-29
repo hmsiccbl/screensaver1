@@ -88,8 +88,7 @@
       label="Lab Cherry Picks">
       <ui:define name="content">
         <t:panelGrid columns="1">
-          <t:outputText
-            value="Cherry picks have not yet been specified"
+          <t:outputText value="Cherry picks have not yet been specified"
             styleClass="label"
             rendered="#{cherryPickRequestViewer.labCherryPicksSearchResult.rowCount == 0}" />
 
@@ -149,17 +148,25 @@
       searchResults="#{cherryPickRequestViewer.labCherryPicksSearchResult}">
       <ui:define name="searchResultFooter">
         <t:panelGrid rendered="#{searchResults.editMode}" columns="1">
+          <t:panelGroup>
+            <t:selectBooleanCheckbox
+              id="recordOriginalSourceCopyWellsAsEmptyOption"
+              value="#{searchResults.recordOriginalSourceCopyWellsAsEmpty}" />
+            <t:outputLabel
+              for="recordOriginalSourceCopyWellsAsEmptyOption"
+              value="Record original source copy wells as empty"
+              styleClass="label"
+              title="For all edited source copy wells, mark the original source copy well as having empty volume" />
+          </t:panelGroup>
           <t:outputLabel for="updateActivityComments"
-            value="Comments for source copy updates:"
-            styleClass="label"
+            value="Comments for source copy updates:" styleClass="label"
             title="Comments associated with the lab cherry pick source copy updates" />
-          <t:inputTextarea id="updateActivityComments"
-            rows="3" cols="80"
+          <t:inputTextarea id="updateActivityComments" rows="3"
+            cols="80"
             value="#{searchResults.labCherryPickSourceCopyUpdateComments}"
             styleClass="inputText" />
         </t:panelGrid>
       </ui:define>
-
     </ss:searchResult>
   </t:div>
 
@@ -190,8 +197,7 @@
             styleClass="errorMessage" />
 
           <t:message for="assayPlatesTable" styleClass="errorMessage" />
-          <t:dataTable id="assayPlatesTable" forceId="true"
-            var="row"
+          <t:dataTable id="assayPlatesTable" forceId="true" var="row"
             value="#{cherryPickRequestViewer.assayPlatesDataModel}"
             styleClass="standardTable" columnClasses="column"
             rowClasses="row1,row2" headerClass="tableHeader"
@@ -206,57 +212,68 @@
             </t:column>
             <t:column>
               <f:facet name="header">Plate Number</f:facet>
-              <t:outputText value="#{row.data.plateOrdinal + 1}"/>
+              <t:outputText value="#{row.data.plateOrdinal + 1}" />
             </t:column>
             <t:column>
               <f:facet name="header">Attempt</f:facet>
-              <t:outputText value="#{row.data.attemptOrdinal + 1}"/>
+              <t:outputText value="#{row.data.attemptOrdinal + 1}" />
             </t:column>
             <t:column>
               <f:facet name="header">Plate Name</f:facet>
-              <t:outputText value="#{row.data.name}"/>
+              <t:outputText value="#{row.data.name}" />
             </t:column>
             <t:column>
               <f:facet name="header">Status</f:facet>
-              <t:outputText value="#{row.data.statusLabel}"/>
+              <t:outputText value="#{row.data.statusLabel}" />
             </t:column>
             <t:column>
               <f:facet name="header">Plating Date</f:facet>
-              <t:outputText value="#{row.data.cherryPickLiquidTransfer.dateOfActivity}"/>
+              <t:outputText
+                value="#{row.data.cherryPickLiquidTransfer.dateOfActivity}" />
             </t:column>
             <t:column>
               <f:facet name="header">Plated By</f:facet>
-              <t:outputText value="#{row.data.cherryPickLiquidTransfer.performedBy.fullNameLastFirst}"/>
+              <t:outputText
+                value="#{row.data.cherryPickLiquidTransfer.performedBy.fullNameLastFirst}" />
             </t:column>
             <t:column>
               <f:facet name="header">Plating Activity</f:facet>
               <!-- note: explicit ID is needed to differentiate from cherryPickScreeningActivityColumn ss:entityLink -->
-              <ss:entityLink id="cherryPickLiquidTransferColumn" entity="#{row.data.cherryPickLiquidTransfer}" viewer="#{activityViewer}"/>
+              <ss:entityLink id="cherryPickLiquidTransferColumn"
+                entity="#{row.data.cherryPickLiquidTransfer}"
+                viewer="#{activityViewer}" />
             </t:column>
             <t:column>
               <f:facet name="header">Plating Comments</f:facet>
-              <t:outputText value="#{row.data.cherryPickLiquidTransfer.comments}"/>
+              <t:outputText
+                value="#{row.data.cherryPickLiquidTransfer.comments}" />
             </t:column>
             <t:column>
               <f:facet name="header">Last Screening Date</f:facet>
-              <t:outputText value="#{row.data.mostRecentCherryPickScreening.dateOfActivity}" rendered="#{!empty row.data.mostRecentCherryPickScreening}"/>
+              <t:outputText
+                value="#{row.data.mostRecentCherryPickScreening.dateOfActivity}"
+                rendered="#{!empty row.data.mostRecentCherryPickScreening}" />
             </t:column>
             <t:column>
               <f:facet name="header">Last Screened By</f:facet>
-              <t:outputText value="#{row.data.mostRecentCherryPickScreening.performedBy.fullNameLastFirst}" rendered="#{!empty row.data.mostRecentCherryPickScreening}"/>
+              <t:outputText
+                value="#{row.data.mostRecentCherryPickScreening.performedBy.fullNameLastFirst}"
+                rendered="#{!empty row.data.mostRecentCherryPickScreening}" />
             </t:column>
             <t:column>
               <f:facet name="header">Screening Activities</f:facet>
               <!-- note: explicit ID is needed to differentiate from cherryPickLiquidTransferColumn ss:entityLink -->
               <t:dataList id="cpScreeningsLinkList" var="cps"
-                value="#{row.data.cherryPickScreenings}" layout="simple" 
-                rowIndexVar="eltIndex" rowCountVar="eltCount" styleClass="propertyValue dataText" >
-                <ss:entityLink id="cherryPickScreeningActivityColumn" entity="#{cps}" viewer="#{activityViewer}"/>
+                value="#{row.data.cherryPickScreenings}" layout="simple"
+                rowIndexVar="eltIndex" rowCountVar="eltCount"
+                styleClass="propertyValue dataText">
+                <ss:entityLink id="cherryPickScreeningActivityColumn"
+                  entity="#{cps}" viewer="#{activityViewer}" />
                 <h:outputText value=", "
                   rendered="#{eltIndex &lt; eltCount - 1}" />
               </t:dataList>
             </t:column>
-            
+
           </t:dataTable>
 
           <t:panelGrid id="createCherryPickLiquidTransferCommandPanel"
@@ -298,30 +315,31 @@
             style="display:none" />
 
         </t:panelGrid>
-        
-        
-        <div class="label">Update the status for a set of plates
-        by selecting them, above, then click the appropriate action button (below). Note:
-        <ul>
-          <li>'Plated' indicates the cherry pick plate(s) were
-          successfully plated and the requested reagent volume was
-          removed from the library copy source plate(s).</li>
-          <li>'Failed' indicates the cherry pick plate(s) could not
-          be created due to a physical problem, but the requested
-          reagent volume was removed from the library copy source
-          plate(s). A new set of Lab Cherry Picks will be created for
-          the next attempt at creating the cherry pick plate(s),
-          reserving additional reagent volume from the library copy
-          source plate(s).</li>
-          <li>'Canceled' indicates that the creation of the cherry
-          pick plate(s) was not attempted and will not be attempted. The
-          requested reagent volume was not removed from the library copy
-          source plate(s) and will be made available for use by other
-          Cherry Pick Requests.</li>
-          <li>'Screened' indicates that the cherry pick plate(s)
-          were screened, which is only possible after they have been
-          plated.</li>
-        </ul>
+
+
+        <div class="label">
+          Update the status for a set of plates by selecting them,
+          above, then click the appropriate action button (below). Note:
+          <ul>
+            <li>'Plated' indicates the cherry pick plate(s) were
+              successfully plated and the requested reagent volume was
+              removed from the library copy source plate(s).</li>
+            <li>'Failed' indicates the cherry pick plate(s) could
+              not be created due to a physical problem, but the
+              requested reagent volume was removed from the library copy
+              source plate(s). A new set of Lab Cherry Picks will be
+              created for the next attempt at creating the cherry pick
+              plate(s), reserving additional reagent volume from the
+              library copy source plate(s).</li>
+            <li>'Canceled' indicates that the creation of the
+              cherry pick plate(s) was not attempted and will not be
+              attempted. The requested reagent volume was not removed
+              from the library copy source plate(s) and will be made
+              available for use by other Cherry Pick Requests.</li>
+            <li>'Screened' indicates that the cherry pick plate(s)
+              were screened, which is only possible after they have been
+              plated.</li>
+          </ul>
         </div>
       </ui:define>
     </ss:collapsiblePanel>

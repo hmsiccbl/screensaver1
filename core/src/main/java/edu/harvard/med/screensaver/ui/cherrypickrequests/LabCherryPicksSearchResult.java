@@ -6,9 +6,11 @@ import static edu.harvard.med.screensaver.ui.cherrypickrequests.CherryPickReques
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
+import com.google.common.collect.Sets;
 
 import edu.harvard.med.screensaver.db.GenericEntityDAO;
 import edu.harvard.med.screensaver.db.NoSuchEntityException;
@@ -19,16 +21,19 @@ import edu.harvard.med.screensaver.model.cherrypicks.CherryPickAssayPlate;
 import edu.harvard.med.screensaver.model.cherrypicks.CherryPickRequest;
 import edu.harvard.med.screensaver.model.cherrypicks.LabCherryPick;
 import edu.harvard.med.screensaver.model.cherrypicks.LabCherryPick.LabCherryPickStatus;
+import edu.harvard.med.screensaver.model.libraries.Copy;
 import edu.harvard.med.screensaver.model.libraries.Gene;
 import edu.harvard.med.screensaver.model.libraries.Reagent;
 import edu.harvard.med.screensaver.model.libraries.SilencingReagent;
 import edu.harvard.med.screensaver.model.libraries.Well;
+import edu.harvard.med.screensaver.model.libraries.WellCopy;
 import edu.harvard.med.screensaver.model.libraries.WellVolumeAdjustment;
 import edu.harvard.med.screensaver.model.meta.RelationshipPath;
 import edu.harvard.med.screensaver.model.screens.ScreenType;
 import edu.harvard.med.screensaver.model.users.AdministratorUser;
 import edu.harvard.med.screensaver.model.users.ScreensaverUserRole;
 import edu.harvard.med.screensaver.service.cherrypicks.CherryPickRequestAllocator;
+import edu.harvard.med.screensaver.service.libraries.WellCopyVolumeAdjuster;
 import edu.harvard.med.screensaver.ui.arch.datatable.column.TableColumn;
 import edu.harvard.med.screensaver.ui.arch.datatable.column.entity.BooleanEntityColumn;
 import edu.harvard.med.screensaver.ui.arch.datatable.column.entity.EnumEntityColumn;
@@ -37,18 +42,26 @@ import edu.harvard.med.screensaver.ui.arch.datatable.column.entity.IntegerEntity
 import edu.harvard.med.screensaver.ui.arch.datatable.column.entity.TextEntityColumn;
 import edu.harvard.med.screensaver.ui.arch.datatable.model.InMemoryEntityDataModel;
 import edu.harvard.med.screensaver.ui.arch.searchresults.EntityBasedEntitySearchResults;
+import edu.harvard.med.screensaver.util.NullSafeUtils;
 
 public class LabCherryPicksSearchResult extends EntityBasedEntitySearchResults<LabCherryPick,Integer>
 {
   private CherryPickRequest _cherryPickRequest;
+  private CherryPickRequestAllocator _cherryPickRequestAllocator;
+  private WellCopyVolumeAdjuster _wellCopyVolumeAdjuster;
   private GenericEntityDAO _dao;
+
+  private String _labCherryPickSourceCopyUpdateComments;
+  private boolean _isRecordOriginalSourceCopyWellsAsEmpty;
 
   protected LabCherryPicksSearchResult() {}
   
   public LabCherryPicksSearchResult(CherryPickRequestAllocator cherryPickRequestAllocator,
+                                    WellCopyVolumeAdjuster wellCopyVolumeAdjuster,
                                     GenericEntityDAO dao)
   {
     _cherryPickRequestAllocator = cherryPickRequestAllocator;
+    _wellCopyVolumeAdjuster = wellCopyVolumeAdjuster;
     _dao = dao;
   }
   
@@ -346,7 +359,6 @@ public class LabCherryPicksSearchResult extends EntityBasedEntitySearchResults<L
   }
 
   Map<LabCherryPick,String> lcpNewSourceCopies = Maps.newHashMap();
-  private CherryPickRequestAllocator _cherryPickRequestAllocator;
   
   @Override
   protected void doEdit()
@@ -358,10 +370,16 @@ public class LabCherryPicksSearchResult extends EntityBasedEntitySearchResults<L
   protected void doSave()
   {
     try {
+      // TODO: make the following two operations atomic
+      _wellCopyVolumeAdjuster.setWellCopyVolumesToEmpty((AdministratorUser) getScreensaverUser(),
+                                                        getUserEditedLabCherryPickSourceWellCopies(),
+                                                        getLabCherryPickSourceCopyUpdateComments());
+                                                    
       _cherryPickRequestAllocator.allocate(lcpNewSourceCopies,
                                            _cherryPickRequest,
                                            (AdministratorUser) getScreensaverUser(),
                                            getLabCherryPickSourceCopyUpdateComments());
+      
     }
     catch (NoSuchEntityException e) {
       showMessage("libraries.noSuchCopyForPlate", e.getPropertyValues().get("copy"), e.getPropertyValues().get("plate").toString());
@@ -371,7 +389,18 @@ public class LabCherryPicksSearchResult extends EntityBasedEntitySearchResults<L
     }
   }
 
-  private String _labCherryPickSourceCopyUpdateComments;
+  private Set<WellCopy> getUserEditedLabCherryPickSourceWellCopies()
+  {
+    Set<WellCopy> wellCopies = Sets.newHashSet();
+    for (Map.Entry<LabCherryPick,String> lcpNewSourceCopy : lcpNewSourceCopies.entrySet()) {
+      LabCherryPick lcp = _dao.reloadEntity(lcpNewSourceCopy.getKey(), true, LabCherryPick.wellVolumeAdjustments.to(WellVolumeAdjustment.copy).to(Copy.plates));
+      if (lcp.getSourceCopy() != null &&
+        !NullSafeUtils.nullSafeEquals(lcp.getSourceCopy().getName(), lcpNewSourceCopy.getValue())) {
+        wellCopies.add(new WellCopy(lcp.getSourceWell(), lcp.getSourceCopy()));
+      }
+    }
+    return wellCopies;
+  }
 
   public String getLabCherryPickSourceCopyUpdateComments()
   {
@@ -381,5 +410,15 @@ public class LabCherryPicksSearchResult extends EntityBasedEntitySearchResults<L
   public void setLabCherryPickSourceCopyUpdateComments(String labCherryPickSourceCopyUpdateComments)
   {
     _labCherryPickSourceCopyUpdateComments = labCherryPickSourceCopyUpdateComments;
+  }
+
+  public boolean isRecordOriginalSourceCopyWellsAsEmpty()
+  {
+    return _isRecordOriginalSourceCopyWellsAsEmpty;
+  }
+
+  public void setRecordOriginalSourceCopyWellsAsEmpty(boolean isRecordOriginalSourceCopyWellsAsEmpty)
+  {
+    _isRecordOriginalSourceCopyWellsAsEmpty = isRecordOriginalSourceCopyWellsAsEmpty;
   }
 }

@@ -451,6 +451,7 @@
     <constructor-arg ref="libraryViewer" />
     <constructor-arg ref="wellViewer" />
     <constructor-arg ref="wellVolumesBrowser" />
+    <constructor-arg ref="wellCopyVolumeAdjuster" />
     <!-- 
     <constructor-arg>
       <bean

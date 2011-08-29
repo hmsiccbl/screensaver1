@@ -23,7 +23,6 @@ import java.util.TreeSet;
 
 import com.google.common.collect.Lists;
 import org.apache.log4j.Logger;
-import org.joda.time.LocalDate;
 import org.springframework.transaction.annotation.Transactional;
 
 import edu.harvard.med.screensaver.db.DAOTransaction;
@@ -33,7 +32,6 @@ import edu.harvard.med.screensaver.db.datafetcher.AggregateDataFetcher;
 import edu.harvard.med.screensaver.db.datafetcher.DataFetcherUtil;
 import edu.harvard.med.screensaver.db.datafetcher.EntityDataFetcher;
 import edu.harvard.med.screensaver.db.hqlbuilder.HqlBuilder;
-import edu.harvard.med.screensaver.model.BusinessRuleViolationException;
 import edu.harvard.med.screensaver.model.Volume;
 import edu.harvard.med.screensaver.model.cherrypicks.CherryPickRequest;
 import edu.harvard.med.screensaver.model.cherrypicks.LabCherryPick;
@@ -46,11 +44,10 @@ import edu.harvard.med.screensaver.model.libraries.WellCopy;
 import edu.harvard.med.screensaver.model.libraries.WellKey;
 import edu.harvard.med.screensaver.model.libraries.WellVolume;
 import edu.harvard.med.screensaver.model.libraries.WellVolumeAdjustment;
-import edu.harvard.med.screensaver.model.libraries.WellVolumeCorrectionActivity;
 import edu.harvard.med.screensaver.model.meta.PropertyPath;
 import edu.harvard.med.screensaver.model.users.AdministratorUser;
-import edu.harvard.med.screensaver.model.users.ScreensaverUser;
 import edu.harvard.med.screensaver.model.users.ScreensaverUserRole;
+import edu.harvard.med.screensaver.service.libraries.WellCopyVolumeAdjuster;
 import edu.harvard.med.screensaver.ui.arch.datatable.Criterion;
 import edu.harvard.med.screensaver.ui.arch.datatable.column.BooleanColumn;
 import edu.harvard.med.screensaver.ui.arch.datatable.column.IntegerColumn;
@@ -69,11 +66,13 @@ public class WellCopyVolumeSearchResults extends EntityBasedEntitySearchResults<
   private LibraryViewer _libraryViewer;
   private WellViewer _wellViewer;
   private WellVolumeSearchResults _wellVolumeSearchResults;
+  private WellCopyVolumeAdjuster _wellCopyVolumeAdjuster;
 
   private Map<WellCopy,Volume> _newRemainingVolumes = new HashMap<WellCopy,Volume>();
   private String _wellVolumeAdjustmentActivityComments;
   private TableColumn<WellCopy,?> _newRemainingVolumeColumn;
   private TableColumn<WellCopy,?> _withdrawalsAdjustmentsColumn;
+
 
 
   /**
@@ -86,10 +85,12 @@ public class WellCopyVolumeSearchResults extends EntityBasedEntitySearchResults<
   public WellCopyVolumeSearchResults(GenericEntityDAO dao,
                                      LibraryViewer libraryViewer,
                                      WellViewer wellViewer,
-                                     WellVolumeSearchResults wellVolumeSearchResults)
+                                     WellVolumeSearchResults wellVolumeSearchResults,
+                                     WellCopyVolumeAdjuster wellCopyVolumeAdjuster)
   {
     _dao = dao;
     _wellVolumeSearchResults = wellVolumeSearchResults;
+    _wellCopyVolumeAdjuster = wellCopyVolumeAdjuster;
     _libraryViewer = libraryViewer;
     _wellViewer = wellViewer;
     setEditingRole(ScreensaverUserRole.LIBRARIES_ADMIN);
@@ -364,35 +365,9 @@ public class WellCopyVolumeSearchResults extends EntityBasedEntitySearchResults<
   @Override
   public void doSave()
   {
-    final ScreensaverUser screensaverUser = getCurrentScreensaverUser().getScreensaverUser();
-    if (!(screensaverUser instanceof AdministratorUser) || !((AdministratorUser) screensaverUser).isUserInRole(ScreensaverUserRole.LIBRARIES_ADMIN)) {
-      throw new BusinessRuleViolationException("only libraries administrators can edit well volumes");
-    }
-    _dao.doInTransaction(new DAOTransaction() {
-      public void runTransaction() {
-        if (_newRemainingVolumes.size() > 0) {
-          AdministratorUser administratorUser = (AdministratorUser) _dao.reloadEntity(screensaverUser);
-          WellVolumeCorrectionActivity wellVolumeCorrectionActivity =
-            new WellVolumeCorrectionActivity(administratorUser, new LocalDate());
-          wellVolumeCorrectionActivity.setComments(getWellVolumeAdjustmentActivityComments());
-          // TODO
-          //wellVolumeCorrectionActivity.setApprovedBy();
-          for (Map.Entry<WellCopy,Volume> entry : _newRemainingVolumes.entrySet()) {
-            WellCopy wellCopyVolume = entry.getKey();
-            Volume newRemainingVolume = entry.getValue();
-            Copy copy = _dao.reloadEntity(wellCopyVolume.getCopy());
-            Well well = _dao.reloadEntity(wellCopyVolume.getWell());
-            WellVolumeAdjustment wellVolumeAdjustment =
-              wellVolumeCorrectionActivity.createWellVolumeAdjustment(copy,
-                                                                      well,
-                                                                      newRemainingVolume.subtract(wellCopyVolume.getRemainingVolume()));
-            wellCopyVolume.addWellVolumeAdjustment(wellVolumeAdjustment);
-            log.debug("added well volume adjustment to well copy " + wellCopyVolume);
-          }
-          _dao.saveOrUpdateEntity(wellVolumeCorrectionActivity);
-        }
-      }
-    });
+    _wellCopyVolumeAdjuster.adjustWellCopyVolumes((AdministratorUser) getCurrentScreensaverUser().getScreensaverUser(),
+                                                  _newRemainingVolumes,
+                                                  getWellVolumeAdjustmentActivityComments());
     if (_newRemainingVolumes.size() > 0) {
       reload();
       _wellVolumeSearchResults.reload();
