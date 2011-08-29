@@ -75,7 +75,7 @@ public abstract class NamedVariablesDatabaseConnectionSettingsResolver implement
   public final DatabaseConnectionSettings resolve() throws DatabaseConnectionSettingsResolutionException
   {
     if (resolveProperty(databaseVariableName) == null) {
-      log.warn(resolverName + " not contain database connection settings");
+      log.warn(resolverName + " not contain database connection settings; cannot find the variable named: \"" + databaseVariableName + "\"");
       return null;
     }
     String port = resolveProperty(portVariableName);
