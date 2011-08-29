@@ -489,52 +489,10 @@ public class ScreenPrivacyExpirationUpdater extends AdminEmailApplication
                                                      screen.getFacilityId(),
                                                      getScreenTitle(screen),
                                                      EXPIRE_DATE_FORMATTER.print(screen.getDataPrivacyExpirationDate()));
-          sendEmails(subjectMessage.getFirst(), notificationMessage, screen.getAssociatedScreeningRoomUsers());
-
-          //          List<InternetAddress> recipients = Lists.newLinkedList();
-          //          for(ScreensaverUser user: screen.getAssociatedScreeningRoomUsers())
-          //          {
-          //            try {
-          //              recipients.add(new InternetAddress(user.getEmail()));  //TODO: NPE bug here if the address is null
-          //            }catch(MessagingException e) {
-          //              String errMsg = "Warn: could not validate the email address for the dataSharingLevelAdmin role: " 
-          //                + printUserInformation(user);
-          //              emailService.send("Error sending expiration notification for screen: #" + screen.getFacilityId(),
-          //                                errMsg,
-          //                                adminEmail,
-          //                                adminRecipients.toArray(new InternetAddress[] {}), null);
-          //            }
-          //          }
-          //          
-          //          try {
-          //            notificationMessage = MessageFormat.format(subjectMessage.getSecond(),
-          //                                      screen.getFacilityId(),
-          //                                      getScreenTitle(screen), 
-          //                                      EXPIRE_DATE_FORMATTER.print(screen.getDataPrivacyExpirationDate()) );
-          //
-          //            emailService.send(subjectMessage.getFirst(),
-          //                              notificationMessage,
-          //                              adminEmail,
-          //                              recipients.toArray(new InternetAddress[] {}),
-          //                              null);
-          //            //if(!isAdminEmailOnly())
-          //              _privacyUpdater.setDataPrivacyExpirationNotifiedDate(screen);
-          //          }
-          //          catch (MessagingException e)
-          //          {
-          //            //TODO: should this be a transaction rollback? yes, collect and then rethrow - sde4
-          //            log.info("Could not send a message for: " + screen + " to " + recipients, e);
-          //            exceptions.add(e);
-          //          }
-          //          if(!exceptions.isEmpty())
-          //          {
-          //            String errMsg = "Warn: Email errors while trying to send Data PrivacyExpiration Emails";
-          //            emailService.send(errMsg,
-          //                            "Error while emailing for screens: " + oldScreens + "\nErrors:\n" + exceptions,
-          //                            adminEmail,
-          //                            adminRecipients.toArray(new InternetAddress[] {}), null);
-          //            throw new MessagingException("Messaging exceptions thrown, stacktrace " + exceptions, exceptions.get(0));
-          //          }
+          if(sendEmails(subjectMessage.getFirst(), notificationMessage, screen.getAssociatedScreeningRoomUsers()))
+          {
+            _privacyUpdater.setDataPrivacyExpirationNotifiedDate(screen);
+          }
         }
       }
     }

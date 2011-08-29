@@ -260,9 +260,9 @@ public class SmallMoleculeUserExpirationUpdater extends AdminEmailApplication
         Pair<String,String> subjectMessage = getExpireNotificationSubjectMessage();
         String message = MessageFormat.format(subjectMessage.getSecond(), EXPIRE_DATE_FORMATTER.print(expireDate));
         for (Pair<ScreeningRoomUser,ChecklistItemEvent> pair : pairList) {
-          sendEmail(subjectMessage.getFirst(), message, pair.getFirst());
-
-          _userAgreementUpdater.setLastNotifiedSMUAChecklistItemEvent(pair.getFirst(), pair.getSecond());
+          if(sendEmail(subjectMessage.getFirst(), message, pair.getFirst())) {
+            _userAgreementUpdater.setLastNotifiedSMUAChecklistItemEvent(pair.getFirst(), pair.getSecond());
+          }
         }
       }
     }

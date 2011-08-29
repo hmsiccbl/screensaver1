@@ -176,7 +176,7 @@ public class AdminEmailApplication extends CommandLineApplication
     sendAdminEmails(subject, msg);
   }
 
-  public void sendEmail(String subject, String msg, ScreensaverUser user) throws MessagingException
+  public boolean sendEmail(String subject, String msg, ScreensaverUser user) throws MessagingException
   {
     List<String> failMessages = Lists.newArrayList();
     if (StringUtils.isEmpty(user.getEmail())) {
@@ -204,6 +204,7 @@ public class AdminEmailApplication extends CommandLineApplication
     if (!failMessages.isEmpty()) {
       sendFailMessages("User message: " + subject, msg, failMessages);
     }
+    return failMessages.isEmpty();
   }
 
   /**
@@ -212,9 +213,10 @@ public class AdminEmailApplication extends CommandLineApplication
    * 
    * @param subject
    * @param msg
+   * @return 
    * @throws MessagingException
    */
-  public void sendEmails(String subject, String msg, Collection<? extends ScreensaverUser> users) throws MessagingException
+  public boolean sendEmails(String subject, String msg, Collection<? extends ScreensaverUser> users) throws MessagingException
   {
     List<String> failMessages = Lists.newArrayList();
     Set<InternetAddress> recipients = Sets.newHashSet();
@@ -247,6 +249,7 @@ public class AdminEmailApplication extends CommandLineApplication
     if (!failMessages.isEmpty()) {
       sendFailMessages(subject, msg, failMessages);
     }
+    return failMessages.isEmpty();
   }
 
   public void sendAdminEmails(String subject, String msg) throws MessagingException
