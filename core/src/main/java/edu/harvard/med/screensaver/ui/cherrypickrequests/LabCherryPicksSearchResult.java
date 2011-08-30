@@ -371,10 +371,11 @@ public class LabCherryPicksSearchResult extends EntityBasedEntitySearchResults<L
   {
     try {
       // TODO: make the following two operations atomic
-      _wellCopyVolumeAdjuster.setWellCopyVolumesToEmpty((AdministratorUser) getScreensaverUser(),
-                                                        getUserEditedLabCherryPickSourceWellCopies(),
-                                                        getLabCherryPickSourceCopyUpdateComments());
-                                                    
+      if (isRecordOriginalSourceCopyWellsAsEmpty()) {
+        _wellCopyVolumeAdjuster.setWellCopyVolumesToEmpty((AdministratorUser) getScreensaverUser(),
+                                                          getUserEditedLabCherryPickSourceWellCopies(),
+                                                          getLabCherryPickSourceCopyUpdateComments());
+      }
       _cherryPickRequestAllocator.allocate(lcpNewSourceCopies,
                                            _cherryPickRequest,
                                            (AdministratorUser) getScreensaverUser(),
