@@ -17,8 +17,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.TreeSet;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
 
 import javax.persistence.TypedQuery;
 
@@ -836,6 +834,12 @@ public class LibrariesDAOImpl extends AbstractDAO implements LibrariesDAO
     return keys;
   }
   
+  @Override
+  public Set<String> findCanonicalReagentWellIds(Set<String> wellIds)
+  {
+    return Sets.newHashSet(getEntityManager().createNamedQuery("findCanonicalReagentWellIds", String.class).setParameter("wellIds", wellIds).getResultList());
+  }
+
   @Override
   public Well findCanonicalReagentWell(String facilityId,
                                        Integer saltId,

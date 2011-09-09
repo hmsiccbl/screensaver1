@@ -687,6 +687,14 @@
         primary key (screensaver_user_id, update_activity_id)
     );
 
+    create table service_activity (
+        service_activity_type text not null,
+        activity_id int4 not null,
+        serviced_screen_id int4,
+        serviced_user_id int4 not null,
+        primary key (activity_id)
+    );
+
     create table silencing_reagent (
         is_restricted_sequence bool not null,
         sequence text,
@@ -800,12 +808,12 @@
         references screensaver_user;
 
     alter table activity_update_activity 
-        add constraint FKC7350895ACAEF6AE 
+        add constraint FKC73508958BCC1B97 
         foreign key (update_activity_id) 
         references administrative_activity;
 
     alter table activity_update_activity 
-        add constraint FKC7350895702E36D6 
+        add constraint FKC7350895C472377F 
         foreign key (activity_id) 
         references activity;
 
@@ -898,7 +906,7 @@
         references screensaver_user;
 
     alter table attached_file_update_activity 
-        add constraint FKFE1ADCBDACAEF6AE 
+        add constraint FKFE1ADCBD8BCC1B97 
         foreign key (update_activity_id) 
         references administrative_activity;
 
@@ -923,7 +931,7 @@
         references checklist_item;
 
     alter table checklist_item_event_update_activity 
-        add constraint FK20C77C2DACAEF6AE 
+        add constraint FK20C77C2D8BCC1B97 
         foreign key (update_activity_id) 
         references administrative_activity;
 
@@ -983,7 +991,7 @@
         references cherry_pick_request;
 
     alter table cherry_pick_request_update_activity 
-        add constraint FKE60B02DDACAEF6AE 
+        add constraint FKE60B02DD8BCC1B97 
         foreign key (update_activity_id) 
         references administrative_activity;
 
@@ -1033,7 +1041,7 @@
         references copy;
 
     alter table copy_update_activity 
-        add constraint FK8CE38FBACAEF6AE 
+        add constraint FK8CE38FB8BCC1B97 
         foreign key (update_activity_id) 
         references administrative_activity;
 
@@ -1123,7 +1131,7 @@
         references screensaver_user;
 
     alter table library_contents_version 
-        add constraint FK4F9A4FB7426C6700 
+        add constraint FK4F9A4FB721898BE9 
         foreign key (library_contents_loading_activity_id) 
         references administrative_activity;
 
@@ -1133,7 +1141,7 @@
         references library;
 
     alter table library_contents_version 
-        add constraint FK4F9A4FB77D09D54B 
+        add constraint FK4F9A4FB75C26FA34 
         foreign key (library_contents_release_activity_id) 
         references administrative_activity;
 
@@ -1143,7 +1151,7 @@
         references screening;
 
     alter table library_update_activity 
-        add constraint FK31706241ACAEF6AE 
+        add constraint FK317062418BCC1B97 
         foreign key (update_activity_id) 
         references administrative_activity;
 
@@ -1163,12 +1171,12 @@
         references reagent;
 
     alter table plate 
-        add constraint FK65CDB166F3F8673 
+        add constraint FK65CDB164E5CAB5C 
         foreign key (plated_activity_id) 
         references administrative_activity;
 
     alter table plate 
-        add constraint FK65CDB167101618E 
+        add constraint FK65CDB16501E8677 
         foreign key (retired_activity_id) 
         references administrative_activity;
 
@@ -1188,7 +1196,7 @@
         references screensaver_user;
 
     alter table plate_update_activity 
-        add constraint FK361B029CACAEF6AE 
+        add constraint FK361B029C8BCC1B97 
         foreign key (update_activity_id) 
         references administrative_activity;
 
@@ -1309,7 +1317,7 @@
         references screensaver_user;
 
     alter table screen_result_update_activity 
-        add constraint FK77E966D6ACAEF6AE 
+        add constraint FK77E966D68BCC1B97 
         foreign key (update_activity_id) 
         references administrative_activity;
 
@@ -1324,7 +1332,7 @@
         references screen;
 
     alter table screen_update_activity 
-        add constraint FKF64A7BF2ACAEF6AE 
+        add constraint FKF64A7BF28BCC1B97 
         foreign key (update_activity_id) 
         references administrative_activity;
 
@@ -1379,7 +1387,7 @@
         references screensaver_user;
 
     alter table screensaver_user_update_activity 
-        add constraint FK4FDEE627ACAEF6AE 
+        add constraint FK4FDEE6278BCC1B97 
         foreign key (update_activity_id) 
         references administrative_activity;
 
@@ -1387,6 +1395,21 @@
         add constraint FK4FDEE627612ADCAB 
         foreign key (screensaver_user_id) 
         references screensaver_user;
+
+    alter table service_activity 
+        add constraint FKD39195944854A19 
+        foreign key (serviced_user_id) 
+        references screening_room_user;
+
+    alter table service_activity 
+        add constraint fk_service_activity_to_activity 
+        foreign key (activity_id) 
+        references activity;
+
+    alter table service_activity 
+        add constraint FKD3919593961870D 
+        foreign key (serviced_screen_id) 
+        references screen;
 
     alter table silencing_reagent 
         add constraint FKBA0F32912160CE54 

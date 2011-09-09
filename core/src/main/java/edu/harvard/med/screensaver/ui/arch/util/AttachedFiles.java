@@ -96,6 +96,8 @@ public class AttachedFiles extends AbstractBackingBean
     _newAttachedFileType = null;
     _newAttachedFileDate = null;
     _uploadedAttachedFileContents = null;
+    _entity = null;
+    _attachedFileTypes = null;
   }
 
   public String getNewAttachedFileName()
@@ -276,5 +278,10 @@ public class AttachedFiles extends AbstractBackingBean
       });
     }
     return REDISPLAY_PAGE_ACTION_RESULT;
+  }
+  
+  public boolean getIsEmpty()
+  {
+    return getAttachedFilesDataModel().getRowCount() == 0;
   }
 }

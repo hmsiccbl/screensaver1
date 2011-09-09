@@ -727,4 +727,43 @@ public class LibrariesDAOTest extends AbstractSpringPersistenceTest
     wellKeys = librariesDao.findWellKeysForCompoundName("jkl");
     assertTrue(wellKeys.isEmpty());
   }
+
+  public void testFindCanonicalReagent()
+  {
+    dataFactory.addPostCreateHook(SmallMoleculeReagent.class, new PostCreateHook<SmallMoleculeReagent>() {
+      @Override
+      public void postCreate(String callStack, SmallMoleculeReagent smr)
+      {
+        if (callStack.endsWith("csmr")) {
+          smr.getWell().setFacilityId("ID1");
+          smr.forFacilityBatchId(1);
+          smr.forSaltFormId(1);
+        }
+        else if (callStack.endsWith("smr1")) {
+          smr.getWell().setFacilityId("ID1");
+          smr.forFacilityBatchId(2);
+          smr.forSaltFormId(1);
+        }
+        else if (callStack.endsWith("smr2")) {
+          smr.getWell().setFacilityId("ID2");
+          smr.forFacilityBatchId(1);
+          smr.forSaltFormId(1);
+        }
+      }
+    });
+    SmallMoleculeReagent smr1 = dataFactory.newInstance(SmallMoleculeReagent.class, "smr1");
+    SmallMoleculeReagent smr2 = dataFactory.newInstance(SmallMoleculeReagent.class, "smr2");
+    SmallMoleculeReagent canonicalSmr = dataFactory.newInstance(SmallMoleculeReagent.class, "csmr");
+    canonicalSmr.getWell().getLibrary().setShortName("R-Lib");
+    canonicalSmr.getWell().getLibrary().getLatestContentsVersion().release(null);
+    smr1.getWell().getLibrary().getLatestContentsVersion().release(null);
+    smr2.getWell().getLibrary().getLatestContentsVersion().release(null);
+    genericEntityDao.mergeEntity(smr1.getWell().getLibrary());
+    genericEntityDao.mergeEntity(smr2.getWell().getLibrary());
+    genericEntityDao.mergeEntity(canonicalSmr.getWell().getLibrary());
+    
+    assertEquals(ImmutableSet.of(canonicalSmr.getWell().getWellId()),
+                 librariesDao.findCanonicalReagentWellIds(ImmutableSet.of(smr1.getWell().getEntityId())));
+    assertTrue(librariesDao.findCanonicalReagentWellIds(ImmutableSet.of(smr2.getWell().getEntityId())).isEmpty());
+  }
 }

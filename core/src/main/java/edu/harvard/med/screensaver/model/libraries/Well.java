@@ -29,9 +29,9 @@ import javax.persistence.Transient;
 import javax.persistence.UniqueConstraint;
 import javax.persistence.Version;
 
+import com.google.common.collect.Maps;
 import org.apache.log4j.Logger;
 import org.hibernate.annotations.MapKeyManyToMany;
-import com.google.common.collect.Maps;
 
 import edu.harvard.med.screensaver.ScreensaverConstants;
 import edu.harvard.med.screensaver.model.AbstractEntityVisitor;

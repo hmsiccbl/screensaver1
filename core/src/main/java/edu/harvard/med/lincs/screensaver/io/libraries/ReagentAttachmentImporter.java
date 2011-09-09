@@ -53,7 +53,7 @@ public class ReagentAttachmentImporter extends CommandLineApplication
   public static final Set attachmentTypes = Sets.newHashSet(new String[] { "QC-NMR", "QC-LCMS", "QC-HPLC", "Data-File" });
 
   public static final String[] OPTION_INPUT_QC_ATTACMENT_TYPE = { "type", "qc-type", "qc-type",
-    "QC attachement type, one of: " + attachmentTypes };
+    "QC attachment type, one of: " + attachmentTypes };
 
   @SuppressWarnings("static-access")
   public ReagentAttachmentImporter(String[] cmdLineArgs)
@@ -128,6 +128,11 @@ public class ReagentAttachmentImporter extends CommandLineApplication
         Integer saltId = app.getCommandLineOptionValue(OPTION_INPUT_SALT_ID[SHORT_OPTION_INDEX], Integer.class);
         Integer batchId = app.getCommandLineOptionValue(OPTION_INPUT_BATCH_ID[SHORT_OPTION_INDEX], Integer.class);
         String attachmentType = app.getCommandLineOptionValue(OPTION_INPUT_QC_ATTACMENT_TYPE[SHORT_OPTION_INDEX], String.class);
+        
+        if(attachmentTypes.contains(attachmentType) ) {
+          log.error("unknown attachment type: " + attachmentType + ", must be one of: " + attachmentTypes);
+          System.exit(1);
+        }
 
         File file = new File(fileName);
         if (!file.exists()) {

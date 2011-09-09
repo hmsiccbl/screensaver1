@@ -6,4 +6,10 @@
   xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
   xsi:schemaLocation="http://java.sun.com/xml/ns/persistence/orm http://java.sun.com/xml/ns/persistence/orm_1_0.xsd ">
   
+  <named-query name="findCanonicalReagentWellIds">
+    <query>
+      select w.id from Well qw join qw.latestReleasedReagent qr, Well w join w.library l join w.latestReleasedReagent r where qw.id in (:wellIds) and w.facilityId = qw.facilityId and r.saltFormId = qr.saltFormId and r.facilityBatchId = 1 and l.shortName like 'R-%'
+    </query>
+  </named-query>
+  
 </entity-mappings>

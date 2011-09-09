@@ -221,8 +221,8 @@ TODO:
     description="Administrative comments" type="Textarea"
     editWidth="80" editHeight="3" />
     
-  <ss:attachedFiles attachedFiles="#{studyViewer.wellStudiedAttachedFiles}"
-   adminOnly="false" entityTypeName="reagent" rendered="#{! empty studyViewer.wellStudiedLabel}" />
+  <ss:attachedFiles attachedFiles="#{studyViewer.attachedFiles}"
+   adminOnly="false" entityTypeName="screen" rendered="#{!  studyViewer.attachedFiles.isEmpty }" />
 
   <!-- NOTE: this is the same property as found in entityViewerDetails, however, there it is admin-only.  LINCS-only,  for [#3110]  -->
   <ss:property id="dateDataReceived" label="Date Data Received"

@@ -22,7 +22,7 @@ import edu.harvard.med.screensaver.ui.arch.datatable.column.TableColumn;
  * Persistence-backed data model for JSF data tables.
  * @author drew
  */
-public abstract class DataTableModel<R> extends DataModel
+public abstract class DataTableModel<R> extends DataModel implements Iterable<R>
 {
   /**
    * Fetch (or refetch) all data when data needs to be fully (re)loaded from the

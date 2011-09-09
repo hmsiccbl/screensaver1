@@ -15,9 +15,9 @@ import java.net.URL;
 import java.util.ArrayList;
 import java.util.SortedSet;
 
+import org.apache.log4j.Logger;
 import com.google.common.base.Predicate;
 import com.google.common.collect.Sets;
-import org.apache.log4j.Logger;
 
 import edu.harvard.med.lincs.screensaver.LincsScreensaverConstants;
 import edu.harvard.med.screensaver.ScreensaverConstants;
@@ -26,11 +26,11 @@ import edu.harvard.med.screensaver.io.screens.StudyImageProvider;
 import edu.harvard.med.screensaver.model.AttachedFile;
 import edu.harvard.med.screensaver.model.AttachedFileType;
 import edu.harvard.med.screensaver.model.libraries.Reagent;
-import edu.harvard.med.screensaver.model.libraries.ReagentAttachedFileType;
 import edu.harvard.med.screensaver.model.libraries.SmallMoleculeReagent;
 import edu.harvard.med.screensaver.model.libraries.Well;
 import edu.harvard.med.screensaver.model.screenresults.AnnotationType;
 import edu.harvard.med.screensaver.model.screens.Screen;
+import edu.harvard.med.screensaver.model.screens.ScreenAttachedFileType;
 import edu.harvard.med.screensaver.model.screens.Study;
 import edu.harvard.med.screensaver.model.users.LabHead;
 import edu.harvard.med.screensaver.ui.arch.searchresults.EntitySearchResults;
@@ -49,7 +49,7 @@ public class StudyViewer<E extends Study> extends SearchResultContextEntityViewe
   private WellSearchResults _reagentsBrowser;
   private StudyImageProvider _studyImageProvider; // LINCS-only feature
   private AnnotationSearchResults _annotationSearchResults;
-  private AttachedFiles _wellStudiedAttachedFiles;
+  private AttachedFiles _attachedFiles;
 
   /**
    * @motivation for CGLIB2
@@ -65,7 +65,7 @@ public class StudyViewer<E extends Study> extends SearchResultContextEntityViewe
                      WellSearchResults wellSearchResults,
                      AnnotationSearchResults annotationSearchResults,
                      StudyImageProvider studyImageProvider,
-                     AttachedFiles wellStudiedAttachedFiles)
+                     AttachedFiles attachedFiles)
   {
     super(thisProxy,
           (Class<E>) Study.class,
@@ -78,7 +78,7 @@ public class StudyViewer<E extends Study> extends SearchResultContextEntityViewe
     _wellSearchResults = wellSearchResults;
     _studyImageProvider = studyImageProvider;
     _annotationSearchResults = annotationSearchResults;
-    _wellStudiedAttachedFiles = wellStudiedAttachedFiles;
+    _attachedFiles = attachedFiles;
 
     getIsPanelCollapsedMap().put("reagentsData", false);
   }
@@ -149,12 +149,12 @@ public class StudyViewer<E extends Study> extends SearchResultContextEntityViewe
         //        _reagentsBrowser.searchCanonicalReagentsOfWellsBrowser(_wellsBrowser);
         //        _reagentsBrowser.showAnnotationTypesForStudy(study);
         _annotationSearchResults.setStudyViewerMode();
-        _annotationSearchResults.searchForCanonicalAnnotations((Screen)study);
+        _annotationSearchResults.searchForCanonicalAnnotations((Screen) study);
       }
       _studyDetailViewer.setEntity(study);
 
       if (((Screen) study).getWellStudied() != null) {
-        initalizeAttachedFiles(((Screen) study).getWellStudied().getLatestReleasedReagent());
+        initalizeAttachedFiles((Screen) study);
       }
       else {
         initalizeAttachedFiles(null);
@@ -162,32 +162,30 @@ public class StudyViewer<E extends Study> extends SearchResultContextEntityViewe
     }
   }
 
-  private void initalizeAttachedFiles(Reagent reagent)
+  private void initalizeAttachedFiles(Screen screen)
   {
-    _wellStudiedAttachedFiles.reset();
-    if (reagent != null) {
-      getDao().needReadOnly(reagent, Reagent.attachedFiles);
-      getDao().needReadOnly(reagent, Reagent.attachedFiles.to(AttachedFile.fileType));
-      SortedSet<AttachedFileType> attachedFileTypes =
-        Sets.<AttachedFileType>newTreeSet(getDao().findAllEntitiesOfType(ReagentAttachedFileType.class, true));
-      _wellStudiedAttachedFiles.setAttachedFileTypes(attachedFileTypes);
-      _wellStudiedAttachedFiles.setAttachedFilesEntity((Reagent) reagent.restrict());
-      
-      _wellStudiedAttachedFiles.setAttachedFilesFilter(new Predicate<AttachedFile> () {
-        @Override
-        public boolean apply(AttachedFile input)
+    _attachedFiles.reset();
+    getDao().needReadOnly(screen, Screen.attachedFiles);
+    getDao().needReadOnly(screen, Screen.attachedFiles.to(AttachedFile.fileType));
+    SortedSet<AttachedFileType> attachedFileTypes =
+        Sets.<AttachedFileType>newTreeSet(getDao().findAllEntitiesOfType(ScreenAttachedFileType.class, true));
+    _attachedFiles.setAttachedFileTypes(attachedFileTypes);
+    _attachedFiles.setAttachedFilesEntity(screen);
+
+    _attachedFiles.setAttachedFilesFilter(new Predicate<AttachedFile>() {
+      @Override
+      public boolean apply(AttachedFile input)
         {
           return input.getFileType().getValue().equals(ScreensaverConstants.STUDY_FILE_TYPE);
         }
-      });
-    }
+    });
   }
 
-  public AttachedFiles getWellStudiedAttachedFiles()
+  public AttachedFiles getAttachedFiles()
   {
-    return _wellStudiedAttachedFiles;
+    return _attachedFiles;
   }
-
+  
   public String getWellStudiedLabel()
   {
     Well well = ((Screen) getEntity()).getWellStudied();

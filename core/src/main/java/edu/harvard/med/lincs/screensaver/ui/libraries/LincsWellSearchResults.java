@@ -1,13 +1,14 @@
 
 package edu.harvard.med.lincs.screensaver.ui.libraries;
 
-import java.util.Iterator;
 import java.util.List;
 import java.util.Set;
 
+import com.google.common.collect.Iterables;
 import com.google.common.collect.Sets;
 import org.apache.log4j.Logger;
 
+import edu.harvard.med.screensaver.db.DAOTransaction;
 import edu.harvard.med.screensaver.db.GenericEntityDAO;
 import edu.harvard.med.screensaver.db.LibrariesDAO;
 import edu.harvard.med.screensaver.db.datafetcher.DataFetcher;
@@ -90,27 +91,21 @@ public class LincsWellSearchResults extends WellSearchResults
     TupleDataFetcher<Well,String> dataFetcher =
       new TupleDataFetcher<Well,String>(Well.class, _dao) {
         @Override
-        public void addDomainRestrictions(HqlBuilder hql)
+        public void addDomainRestrictions(final HqlBuilder hql)
         {
-          log.debug("initializing unique reagent search result");
-          Set<String> distinctFacilityIds = Sets.newHashSet();
-          fullWellSearchResults.getRowCount(); // force initialization
-          Iterator<Tuple<String>> iter = fullWellSearchResults.getDataTableModel().iterator();
-          while (iter.hasNext()) {
-            // find the canonical reagent's well for the given reagent
-            Well well = _dao.findEntityById(Well.class, iter.next().getKey(), true);
-            distinctFacilityIds.add(well.getFacilityId());
-          }
-          Set<String> canonicalReagentWellIds = Sets.newHashSet();
-          for (String facilityId : distinctFacilityIds) {
-            Well canonicalReagentWell = _librariesDao.findCanonicalReagentWell(facilityId, null, null);
-            if (canonicalReagentWell != null) {
-              canonicalReagentWellIds.add(canonicalReagentWell.getWellId());
-            }
-          }
-          DataFetcherUtil.addDomainRestrictions(hql, getRootAlias(), canonicalReagentWellIds);
-        }
+          _dao.doInTransaction(new DAOTransaction() {
 
+            @Override
+            public void runTransaction()
+            {
+              log.debug("initializing unique reagent search result");
+              fullWellSearchResults.getRowCount(); // force initialization
+              Iterable<String> fullReagentWellIds = Iterables.transform(fullWellSearchResults.getDataTableModel(), Tuple.<String>toKey());
+              Set<String> canonicalReagentWellIds = _librariesDao.findCanonicalReagentWellIds(Sets.newHashSet(fullReagentWellIds));
+              DataFetcherUtil.addDomainRestrictions(hql, getRootAlias(), canonicalReagentWellIds);
+            }
+          });
+        }
       };
     initialize(dataFetcher);
 

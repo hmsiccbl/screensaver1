@@ -9,7 +9,7 @@
     transaction-type="RESOURCE_LOCAL">
     <provider>org.hibernate.ejb.HibernatePersistence</provider>
     
-    <!-- mapping-file>queries.xml</mapping-file-->
+    <mapping-file>META-INF/queries.xml</mapping-file>
 
     <class>edu.harvard.med.screensaver.model.activities.Activity</class>
     <class>edu.harvard.med.screensaver.model.activities.AdministrativeActivity</class>
@@ -70,7 +70,7 @@
     <class>edu.harvard.med.screensaver.model.users.UserAttachedFileType</class>
     <class>edu.harvard.med.screensaver.model.users.ScreeningRoomUser</class>
     <class>edu.harvard.med.screensaver.model.users.ScreensaverUser</class>
-
+    
     <!-- superfluous in Java SE environments
     <exclude-unlisted-classes /> 
     -->

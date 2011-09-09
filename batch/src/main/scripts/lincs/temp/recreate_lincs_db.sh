@@ -2298,66 +2298,6 @@ check_errs $? "create study fails"
 --summary "`cat $DATA_DIRECTORY/study/cmt_protocol.txt`"
 check_errs $? "create study fails"
 
-./run.sh edu.harvard.med.screensaver.io.screens.StudyCreator \
--AE $ECOMMONS_ADMIN -annotationNamesInCol1  \
--y SMALL_MOLECULE -yy IN_VITRO \
--hf $LAB_HEAD_FIRST -hl $LAB_HEAD_LAST -he $LAB_HEAD_EMAIL -lf $LEAD_SCREENER_FIRST -ll $LEAD_SCREENER_LAST -le $LEAD_SCREENER_EMAIL \
--keyByFacilityId \
---replace -f $DATA_DIRECTORY/study/HMSL10052_template.xls \
--t 'Rapamycin: MGH/Sanger Institute growth inhibition data (3 dose)'  \
--i 300058 \
---parseLincsSpecificFacilityID \
---summary "`cat $DATA_DIRECTORY/study/cmt_protocol.txt`"
-check_errs $? "create study fails"
-
-./run.sh edu.harvard.med.screensaver.io.screens.StudyCreator \
--AE $ECOMMONS_ADMIN -annotationNamesInCol1  \
--y SMALL_MOLECULE -yy IN_VITRO \
--hf $LAB_HEAD_FIRST -hl $LAB_HEAD_LAST -he $LAB_HEAD_EMAIL -lf $LEAD_SCREENER_FIRST -ll $LEAD_SCREENER_LAST -le $LEAD_SCREENER_EMAIL \
--keyByFacilityId \
---replace -f $DATA_DIRECTORY/study/HMSL10001_template.xls \
--t 'Roscovitine: MGH/Sanger Institute growth inhibition data (3 dose)'  \
--i 300059 \
---parseLincsSpecificFacilityID \
---summary "`cat $DATA_DIRECTORY/study/cmt_protocol.txt`"
-check_errs $? "create study fails"
-
-./run.sh edu.harvard.med.screensaver.io.screens.StudyCreator \
--AE $ECOMMONS_ADMIN -annotationNamesInCol1  \
--y SMALL_MOLECULE -yy IN_VITRO \
--hf $LAB_HEAD_FIRST -hl $LAB_HEAD_LAST -he $LAB_HEAD_EMAIL -lf $LEAD_SCREENER_FIRST -ll $LEAD_SCREENER_LAST -le $LEAD_SCREENER_EMAIL \
--keyByFacilityId \
---replace -f $DATA_DIRECTORY/study/HMSL10008_template.xls \
--t 'BAY-439006: MGH/Sanger Institute growth inhibition data (3 dose)'  \
--i 300060 \
---parseLincsSpecificFacilityID \
---summary "`cat $DATA_DIRECTORY/study/cmt_protocol.txt`"
-check_errs $? "create study fails"
-
-./run.sh edu.harvard.med.screensaver.io.screens.StudyCreator \
--AE $ECOMMONS_ADMIN -annotationNamesInCol1  \
--y SMALL_MOLECULE -yy IN_VITRO \
--hf $LAB_HEAD_FIRST -hl $LAB_HEAD_LAST -he $LAB_HEAD_EMAIL -lf $LEAD_SCREENER_FIRST -ll $LEAD_SCREENER_LAST -le $LEAD_SCREENER_EMAIL \
--keyByFacilityId \
---replace -f $DATA_DIRECTORY/study/HMSL10097_template.xls \
--t 'OSI-774: MGH/Sanger Institute growth inhibition data (3 dose)'  \
--i 300061 \
---parseLincsSpecificFacilityID \
---summary "`cat $DATA_DIRECTORY/study/cmt_protocol.txt`"
-check_errs $? "create study fails"
-
-./run.sh edu.harvard.med.screensaver.io.screens.StudyCreator \
--AE $ECOMMONS_ADMIN -annotationNamesInCol1  \
--y SMALL_MOLECULE -yy IN_VITRO \
--hf $LAB_HEAD_FIRST -hl $LAB_HEAD_LAST -he $LAB_HEAD_EMAIL -lf $LEAD_SCREENER_FIRST -ll $LEAD_SCREENER_LAST -le $LEAD_SCREENER_EMAIL \
--keyByFacilityId \
---replace -f $DATA_DIRECTORY/study/HMSL10093_template.xls \
--t 'XMD8-85: MGH/Sanger Institute growth inhibition data (3 dose)'  \
--i 300062 \
---parseLincsSpecificFacilityID \
---summary "`cat $DATA_DIRECTORY/study/cmt_protocol.txt`"
-check_errs $? "create study fails"
-
 ## [#3110] Track data received date, data publicized date for compounds, studies, screens
 
 psql -q -U $DB_USER $DB -f $DATA_DIRECTORY/adjust_dates_received.sql -v ON_ERROR_STOP=1
@@ -2946,104 +2886,84 @@ check_errs $? "attachment import fails"
 
 # "Study-File" Attached files, for viewing in the study viewer
 
-./run.sh edu.harvard.med.lincs.screensaver.io.screens.ScreenAttachmentImporter \
--f $DATA_DIRECTORY/study/HMSL10013_GSK461364_CMT_Study300038.xls -i 300038
+./run.sh edu.harvard.med.lincs.screensaver.io.libraries.ReagentAttachmentImporter \
+-f $DATA_DIRECTORY/study/HMSL10013_GSK461364_CMT_Study300038.xls -i HMSL10013 -sid 101 -bid 2 -type Study-File
 check_errs $? "attachment import fails"
 
-./run.sh edu.harvard.med.lincs.screensaver.io.screens.ScreenAttachmentImporter \
--f $DATA_DIRECTORY/study/HMSL10020_Dasatinib_CMT_Study300039.xls -i 300039
+./run.sh edu.harvard.med.lincs.screensaver.io.libraries.ReagentAttachmentImporter \
+-f $DATA_DIRECTORY/study/HMSL10020_Dasatinib_CMT_Study300039.xls -i HMSL10020 -sid 101 -bid 2 -type Study-File
 check_errs $? "attachment import fails"
 
-./run.sh edu.harvard.med.lincs.screensaver.io.screens.ScreenAttachmentImporter \
--f $DATA_DIRECTORY/study/HMSL10021_VX680_CMT_Study300040.xls -i 300040
+./run.sh edu.harvard.med.lincs.screensaver.io.libraries.ReagentAttachmentImporter \
+-f $DATA_DIRECTORY/study/HMSL10021_VX680_CMT_Study300040.xls -i HMSL10021 -sid 101 -bid 4 -type Study-File
 check_errs $? "attachment import fails"
 
-./run.sh edu.harvard.med.lincs.screensaver.io.screens.ScreenAttachmentImporter \
--f $DATA_DIRECTORY/study/HMSL10022_GNF2_CMT_Study300041.xls -i 300041
+./run.sh edu.harvard.med.lincs.screensaver.io.libraries.ReagentAttachmentImporter \
+-f $DATA_DIRECTORY/study/HMSL10022_GNF2_CMT_Study300041.xls -i HMSL10022 -sid 101 -bid 2 -type Study-File
 check_errs $? "attachment import fails"
 
-./run.sh edu.harvard.med.lincs.screensaver.io.screens.ScreenAttachmentImporter \
--f $DATA_DIRECTORY/study/HMSL10023_Imatinib_CMT_Study300042.xls -i 300042
+./run.sh edu.harvard.med.lincs.screensaver.io.libraries.ReagentAttachmentImporter \
+-f $DATA_DIRECTORY/study/HMSL10023_Imatinib_CMT_Study300042.xls -i HMSL10023 -sid 103 -bid 2 -type Study-File
 check_errs $? "attachment import fails"
 
-./run.sh edu.harvard.med.lincs.screensaver.io.screens.ScreenAttachmentImporter \
--f $DATA_DIRECTORY/study/HMSL10024_NVP-TAE684_CMT_Study300043.xls -i 300043
+./run.sh edu.harvard.med.lincs.screensaver.io.libraries.ReagentAttachmentImporter \
+-f $DATA_DIRECTORY/study/HMSL10024_NVP-TAE684_CMT_Study300043.xls -i HMSL10024 -sid 101 -bid 2 -type Study-File
 check_errs $? "attachment import fails"
 
-./run.sh edu.harvard.med.lincs.screensaver.io.screens.ScreenAttachmentImporter \
--f $DATA_DIRECTORY/study/HMSL10025_CGP60474_CMT_Study300044.xls -i 300044
+./run.sh edu.harvard.med.lincs.screensaver.io.libraries.ReagentAttachmentImporter \
+-f $DATA_DIRECTORY/study/HMSL10025_CGP60474_CMT_Study300044.xls -i HMSL10025 -sid 101 -bid 2 -type Study-File
 check_errs $? "attachment import fails"
 
-./run.sh edu.harvard.med.lincs.screensaver.io.screens.ScreenAttachmentImporter \
--f $DATA_DIRECTORY/study/HMSL10026_PD173074_CMT_Study300045.xls -i 300045
+./run.sh edu.harvard.med.lincs.screensaver.io.libraries.ReagentAttachmentImporter \
+-f $DATA_DIRECTORY/study/HMSL10026_PD173074_CMT_Study300045.xls -i HMSL10026 -sid 101 -bid 2 -type Study-File
 check_errs $? "attachment import fails"
 
-./run.sh edu.harvard.med.lincs.screensaver.io.screens.ScreenAttachmentImporter \
--f $DATA_DIRECTORY/study/HMSL10027_PF02341066_CMT_Study300046.xls -i 300046
+./run.sh edu.harvard.med.lincs.screensaver.io.libraries.ReagentAttachmentImporter \
+-f $DATA_DIRECTORY/study/HMSL10027_PF02341066_CMT_Study300046.xls -i HMSL10027 -sid 101 -bid 2 -type Study-File
 check_errs $? "attachment import fails"
 
-./run.sh edu.harvard.med.lincs.screensaver.io.screens.ScreenAttachmentImporter \
--f $DATA_DIRECTORY/study/HMSL10032_AZD0530_CMT_Study300047.xls -i 300047
+./run.sh edu.harvard.med.lincs.screensaver.io.libraries.ReagentAttachmentImporter \
+-f $DATA_DIRECTORY/study/HMSL10032_AZD0530_CMT_Study300047.xls -i HMSL10032 -sid 101 -bid 2 -type Study-File
 check_errs $? "attachment import fails"
 
-./run.sh edu.harvard.med.lincs.screensaver.io.screens.ScreenAttachmentImporter \
--f $DATA_DIRECTORY/study/HMSL10038_WH-4-023_CMT_Study300048.xls -i 300048
+./run.sh edu.harvard.med.lincs.screensaver.io.libraries.ReagentAttachmentImporter \
+-f $DATA_DIRECTORY/study/HMSL10038_WH-4-023_CMT_Study300048.xls -i HMSL10038 -sid 101 -bid 2 -type Study-File
 check_errs $? "attachment import fails"
 
-./run.sh edu.harvard.med.lincs.screensaver.io.screens.ScreenAttachmentImporter \
--f $DATA_DIRECTORY/study/HMSL10039_WH-4-025_CMT_Study300049.xls -i 300049
+./run.sh edu.harvard.med.lincs.screensaver.io.libraries.ReagentAttachmentImporter \
+-f $DATA_DIRECTORY/study/HMSL10039_WH-4-025_CMT_Study300049.xls -i HMSL10039 -sid 101 -bid 2 -type Study-File
 check_errs $? "attachment import fails"
 
-./run.sh edu.harvard.med.lincs.screensaver.io.screens.ScreenAttachmentImporter \
--f $DATA_DIRECTORY/study/HMSL10041_BI-2536_CMT_Study300050.xls -i 300050
+./run.sh edu.harvard.med.lincs.screensaver.io.libraries.ReagentAttachmentImporter \
+-f $DATA_DIRECTORY/study/HMSL10041_BI-2536_CMT_Study300050.xls -i HMSL10041 -sid 101 -bid 3 -type Study-File
 check_errs $? "attachment import fails"
 
-./run.sh edu.harvard.med.lincs.screensaver.io.screens.ScreenAttachmentImporter \
--f $DATA_DIRECTORY/study/HMSL10043_KIN001-127_CMT_Study300051.xls -i 300051
+./run.sh edu.harvard.med.lincs.screensaver.io.libraries.ReagentAttachmentImporter \
+-f $DATA_DIRECTORY/study/HMSL10043_KIN001-127_CMT_Study300051.xls -i HMSL10043 -sid 101 -bid 2 -type Study-File
 check_errs $? "attachment import fails"
 
-./run.sh edu.harvard.med.lincs.screensaver.io.screens.ScreenAttachmentImporter \
--f $DATA_DIRECTORY/study/HMSL10045_A443644_CMT_Study300052.xls -i 300052
+./run.sh edu.harvard.med.lincs.screensaver.io.libraries.ReagentAttachmentImporter \
+-f $DATA_DIRECTORY/study/HMSL10045_A443644_CMT_Study300052.xls -i HMSL10045 -sid 101 -bid 2 -type Study-File
 check_errs $? "attachment import fails"
 
-./run.sh edu.harvard.med.lincs.screensaver.io.screens.ScreenAttachmentImporter \
--f $DATA_DIRECTORY/study/HMSL10050_AZ-628_CMT_Study300053.xls -i 300053
+./run.sh edu.harvard.med.lincs.screensaver.io.libraries.ReagentAttachmentImporter \
+-f $DATA_DIRECTORY/study/HMSL10050_AZ-628_CMT_Study300053.xls -i HMSL10050 -sid 101 -bid 2 -type Study-File
 check_errs $? "attachment import fails"
 
-./run.sh edu.harvard.med.lincs.screensaver.io.screens.ScreenAttachmentImporter \
--f $DATA_DIRECTORY/study/HMSL10051_GW-572016_CMT_Study300054.xls -i 300054
+./run.sh edu.harvard.med.lincs.screensaver.io.libraries.ReagentAttachmentImporter \
+-f $DATA_DIRECTORY/study/HMSL10051_GW-572016_CMT_Study300054.xls -i HMSL10051 -sid 104 -bid 2 -type Study-File
 check_errs $? "attachment import fails"
 
-./run.sh edu.harvard.med.lincs.screensaver.io.screens.ScreenAttachmentImporter \
--f $DATA_DIRECTORY/study/HMSL10079_Torin1_CMT_Study300055.xls -i 300055
+./run.sh edu.harvard.med.lincs.screensaver.io.libraries.ReagentAttachmentImporter \
+-f $DATA_DIRECTORY/study/HMSL10079_Torin1_CMT_Study300055.xls -i HMSL10079 -sid 101 -bid 2 -type Study-File
 check_errs $? "attachment import fails"
 
-./run.sh edu.harvard.med.lincs.screensaver.io.screens.ScreenAttachmentImporter \
--f $DATA_DIRECTORY/study/HMSL10107_MG-132_CMT_Study300056.xls -i 300056
+./run.sh edu.harvard.med.lincs.screensaver.io.libraries.ReagentAttachmentImporter \
+-f $DATA_DIRECTORY/study/HMSL10107_MG-132_CMT_Study300056.xls -i HMSL10107 -sid 101 -bid 1 -type Study-File
 check_errs $? "attachment import fails"
 
-./run.sh edu.harvard.med.lincs.screensaver.io.screens.ScreenAttachmentImporter \
--f $DATA_DIRECTORY/study/HMSL10108_Geldanamycin_CMT_Study300057.xls -i 300057
-check_errs $? "attachment import fails"
-
-./run.sh edu.harvard.med.lincs.screensaver.io.screens.ScreenAttachmentImporter \
--f $DATA_DIRECTORY/study/HMSL10052_Rapamycin_CMT_Study300058.xls -i 300058
-check_errs $? "attachment import fails"
-
-./run.sh edu.harvard.med.lincs.screensaver.io.screens.ScreenAttachmentImporter \
--f $DATA_DIRECTORY/study/HMSL10001_Roscovitine_CMT_Study300059.xls -i 300059
-check_errs $? "attachment import fails"
-
-./run.sh edu.harvard.med.lincs.screensaver.io.screens.ScreenAttachmentImporter \
--f $DATA_DIRECTORY/study/HMSL10008_BAY-439006_CMT_Study300060.xls -i 300060
-check_errs $? "attachment import fails"
-
-./run.sh edu.harvard.med.lincs.screensaver.io.screens.ScreenAttachmentImporter \
--f $DATA_DIRECTORY/study/HMSL10097_OSI-774_CMT_Study300061.xls -i 300061
-check_errs $? "attachment import fails"
-
-./run.sh edu.harvard.med.lincs.screensaver.io.screens.ScreenAttachmentImporter \
--f $DATA_DIRECTORY/study/HMSL10093_XMD8-85_CMT_Study300062.xls -i 300062
+./run.sh edu.harvard.med.lincs.screensaver.io.libraries.ReagentAttachmentImporter \
+-f $DATA_DIRECTORY/study/HMSL10108_Geldanamycin_CMT_Study300057.xls -i HMSL10108 -sid 101 -bid 1 -type Study-File
 check_errs $? "attachment import fails"
 
 # THIS SHOULD ALWAYS BE THE LAST COMMAND!

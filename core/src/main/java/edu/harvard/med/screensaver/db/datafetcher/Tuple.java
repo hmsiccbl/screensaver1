@@ -12,17 +12,30 @@ package edu.harvard.med.screensaver.db.datafetcher;
 import java.util.List;
 import java.util.Map;
 
+import com.google.common.base.Function;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
 
 public class Tuple<K>
 {
+
   private K _key;
   private Map<String,Object> _properties = Maps.newHashMap();
 
   public Tuple(K key)
   {
     _key = key;
+  }
+
+  public static <K> Function<Tuple<K>,K> toKey()
+  {
+    return new Function<Tuple<K>,K>() {
+      @Override
+      public K apply(Tuple<K> t)
+      {
+        return t._key;
+      }
+    };
   }
 
   public K getKey()

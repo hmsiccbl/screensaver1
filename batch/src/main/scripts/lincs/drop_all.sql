@@ -65,6 +65,7 @@ drop table screening_room_user_facility_usage_role cascade;
 drop table screensaver_user cascade;
 drop table screensaver_user_role cascade;
 drop table screensaver_user_update_activity cascade;
+drop table service_activity cascade;
 drop table silencing_reagent cascade;
 drop table silencing_reagent_duplex_wells cascade;
 drop table small_molecule_chembank_id cascade;
