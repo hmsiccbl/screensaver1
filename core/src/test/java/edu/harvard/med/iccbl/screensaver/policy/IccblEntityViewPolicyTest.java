@@ -235,11 +235,11 @@ public class IccblEntityViewPolicyTest extends AbstractSpringPersistenceTest
   public void testRnaiScreenPermissions()
   {
     initializeMe();
-    me.addScreensaverUserRole(ScreensaverUserRole.RNAI_SCREENS);
+    me.addScreensaverUserRole(ScreensaverUserRole.RNAI_DSL_LEVEL3_SHARED_SCREENS);
     
-    ScreeningRoomUser rnaiUser = makeUserWithRoles(false, ScreensaverUserRole.RNAI_SCREENS);
+    ScreeningRoomUser rnaiUser = makeUserWithRoles(false, ScreensaverUserRole.RNAI_DSL_LEVEL3_SHARED_SCREENS);
     ScreeningRoomUser smallMoleculeUser = makeUserWithRoles(false, ScreensaverUserRole.SM_DSL_LEVEL3_SHARED_SCREENS);
-    ScreeningRoomUser smallMoleculeRnaiUser = makeUserWithRoles(false, ScreensaverUserRole.SM_DSL_LEVEL3_SHARED_SCREENS, ScreensaverUserRole.RNAI_SCREENS);
+    ScreeningRoomUser smallMoleculeRnaiUser = makeUserWithRoles(false, ScreensaverUserRole.SM_DSL_LEVEL3_SHARED_SCREENS, ScreensaverUserRole.RNAI_DSL_LEVEL3_SHARED_SCREENS);
 
     Screen rnaiScreen = MakeDummyEntities.makeDummyScreen(1, ScreenType.RNAI);
     rnaiScreen.setDataSharingLevel(ScreenDataSharingLevel.PRIVATE);
@@ -429,7 +429,7 @@ public class IccblEntityViewPolicyTest extends AbstractSpringPersistenceTest
 
     ScreeningRoomUser screener = new ScreeningRoomUser("Screener", "User");
     screener.addScreensaverUserRole(ScreensaverUserRole.SCREENSAVER_USER);
-    screener.addScreensaverUserRole(ScreensaverUserRole.RNAI_SCREENS);
+    screener.addScreensaverUserRole(ScreensaverUserRole.RNAI_DSL_LEVEL3_SHARED_SCREENS);
 
     genericEntityDao.persistEntity(library);
     genericEntityDao.persistEntity(admin);
@@ -813,9 +813,9 @@ public class IccblEntityViewPolicyTest extends AbstractSpringPersistenceTest
     ScreeningRoomUser[] users = new ScreeningRoomUser[3];
     AdministratorUser[] admUsers = new AdministratorUser[1];
     
-    users[0] = makeUserWithRoles(false, ScreensaverUserRole.RNAI_SCREENS); 
+    users[0] = makeUserWithRoles(false, ScreensaverUserRole.RNAI_DSL_LEVEL3_SHARED_SCREENS);
     users[1] = makeUserWithRoles(false, ScreensaverUserRole.SM_DSL_LEVEL3_SHARED_SCREENS); 
-    users[2] = makeUserWithRoles(true, ScreensaverUserRole.RNAI_SCREENS); 
+    users[2] = makeUserWithRoles(true, ScreensaverUserRole.RNAI_DSL_LEVEL3_SHARED_SCREENS);
     Lab lab = new Lab((LabHead) users[2]);
     users[0].setLab(lab);
     genericEntityDao.saveOrUpdateEntity(users[0]);

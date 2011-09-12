@@ -452,10 +452,10 @@ public class ScreenResultReporterTest extends AbstractSpringPersistenceTest
     String server = "ss.harvard.com"; // note mailinator reduced size of supported addresses
     //_admin = new AdministratorUser("dev", "testaccount");
 
-    _rnaiUser = makeUserWithRoles(false, ScreensaverUserRole.RNAI_SCREENS);
+    _rnaiUser = makeUserWithRoles(false, ScreensaverUserRole.RNAI_DSL_LEVEL3_SHARED_SCREENS);
     _smallMoleculeUser = makeUserWithRoles(false, ScreensaverUserRole.SM_DSL_LEVEL1_MUTUAL_SCREENS);
     _smallMoleculeRnaiUser = makeUserWithRoles(false, ScreensaverUserRole.SM_DSL_LEVEL1_MUTUAL_SCREENS,
-                                              ScreensaverUserRole.RNAI_SCREENS);
+                                               ScreensaverUserRole.RNAI_DSL_LEVEL3_SHARED_SCREENS);
 
     // Create a library  - SM
     int libraryId = 1;

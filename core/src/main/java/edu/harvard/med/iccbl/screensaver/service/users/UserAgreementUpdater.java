@@ -153,7 +153,7 @@ public class UserAgreementUpdater
                                                         		", checklist item: " + cie.getChecklistItemEventId() + 
                                                         		", datePerformed: " + cie.getDatePerformed()));
       removeRole(findPrimaryDataSharingLevelRole(user), user, recordedBy, activitiesPerformed);
-      if (!!!user.getScreensaverUserRoles().contains(ScreensaverUserRole.RNAI_SCREENS)) {
+      if (!!!user.getScreensaverUserRoles().contains(ScreensaverUserRole.RNAI_DSL_LEVEL3_SHARED_SCREENS)) {
         removeRole(ScreensaverUserRole.SCREENSAVER_USER, user, recordedBy, activitiesPerformed);
       }
     }

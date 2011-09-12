@@ -34,7 +34,7 @@ public class DataSharingLevelMapperTest extends TestCase
     user.addScreensaverUserRole(ScreensaverUserRole.SM_DSL_LEVEL1_MUTUAL_SCREENS);
     assertEquals(ScreenDataSharingLevel.PRIVATE, DataSharingLevelMapper.getScreenDataSharingLevelForUser(ScreenType.RNAI, user));
     assertEquals(ScreenDataSharingLevel.MUTUAL_SCREENS, DataSharingLevelMapper.getScreenDataSharingLevelForUser(ScreenType.SMALL_MOLECULE, user));
-    user.addScreensaverUserRole(ScreensaverUserRole.RNAI_SCREENS);
+    user.addScreensaverUserRole(ScreensaverUserRole.RNAI_DSL_LEVEL3_SHARED_SCREENS);
     assertEquals(ScreenDataSharingLevel.PRIVATE, DataSharingLevelMapper.getScreenDataSharingLevelForUser(ScreenType.RNAI, user));
     assertEquals(ScreenDataSharingLevel.MUTUAL_SCREENS, DataSharingLevelMapper.getScreenDataSharingLevelForUser(ScreenType.SMALL_MOLECULE, user));
   }

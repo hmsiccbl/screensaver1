@@ -229,7 +229,7 @@ public class IccblEntityViewPolicy extends DefaultEntityViewPolicy
       return isOthersVisibleScreen ? screen : null;
     }
     if (screen.getScreenType().equals(ScreenType.RNAI) &&
-      user.getScreensaverUserRoles().contains(ScreensaverUserRole.RNAI_SCREENS)) {
+      user.getScreensaverUserRoles().contains(ScreensaverUserRole.RNAI_DSL_LEVEL3_SHARED_SCREENS)) {
       log.debug("screen " + screen.getFacilityId() + " is visible: \"rnai screen for rnai screener\"");
       return screen;
     }
@@ -364,7 +364,7 @@ public class IccblEntityViewPolicy extends DefaultEntityViewPolicy
         public List execute(Session session)
         {
           Set<ScreenType> screenTypes = Sets.newHashSet();
-          if (getScreensaverUser().isUserInRole(ScreensaverUserRole.RNAI_SCREENS)) {
+          if (getScreensaverUser().isUserInRole(ScreensaverUserRole.RNAI_DSL_LEVEL3_SHARED_SCREENS)) {
             screenTypes.add(ScreenType.RNAI);
           }
           if (getScreensaverUser().isUserInRole(ScreensaverUserRole.SM_DSL_LEVEL3_SHARED_SCREENS)) {

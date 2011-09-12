@@ -453,7 +453,7 @@ public class ScreeningRoomUser extends ScreensaverUser implements AttachedFilesE
   @Transient
   public boolean isRnaiUser()
   {
-    return getScreensaverUserRoles().contains(ScreensaverUserRole.RNAI_SCREENS);
+    return getScreensaverUserRoles().contains(ScreensaverUserRole.RNAI_DSL_LEVEL3_SHARED_SCREENS);
   }
 
   /**

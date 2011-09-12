@@ -87,11 +87,11 @@ public class ScreeningRoomUserTest extends AbstractEntityInstanceTest<ScreeningR
     final ScreeningRoomUser user = new ScreeningRoomUser("first",
                                                          "last");
 
-    user.addScreensaverUserRole(ScreensaverUserRole.RNAI_SCREENS);
+    user.addScreensaverUserRole(ScreensaverUserRole.RNAI_DSL_LEVEL3_SHARED_SCREENS);
     genericEntityDao.saveOrUpdateEntity(user);
 
     ScreeningRoomUser user2 = genericEntityDao.findEntityById(ScreeningRoomUser.class, user.getEntityId(), false, ScreensaverUser.roles.castToSubtype(ScreeningRoomUser.class));
-    assertEquals(Sets.newHashSet(ScreensaverUserRole.RNAI_SCREENS),
+    assertEquals(Sets.newHashSet(ScreensaverUserRole.RNAI_DSL_LEVEL3_SHARED_SCREENS),
                  user2.getScreensaverUserRoles());
 
     try {

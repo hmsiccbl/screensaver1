@@ -67,7 +67,20 @@ public enum ScreensaverUserRole implements VocabularyTerm, Principal
   SM_DSL_LEVEL2_MUTUAL_POSITIVES("smDsl2MutualPositives", "Small Molecule Screens Level 2", SM_DSL_LEVEL3_SHARED_SCREENS, "Small molecule screeners that can view each others' screen result \"positives\" data, with associated screen summary information."),
   SM_DSL_LEVEL1_MUTUAL_SCREENS("smDsl1MutualScreens", "Small Molecule Screens Level 1", SM_DSL_LEVEL2_MUTUAL_POSITIVES, "Small molecule screeners that can view each others' screen information and screen result data."),
   
-  RNAI_SCREENS("rnaiScreens", "RNAi Screens", "RNAi screeners that view RNAi screens."),
+
+  //  RNAI_SCREENS("rnaiScreens", "RNAi Screens", "RNAi screeners that view RNAi screens."),
+  RNAI_DSL_LEVEL3_SHARED_SCREENS("rnaiDsl3SharedScreens",
+                                 "RNAi Screens Level 3",
+                                 "RNAi screeners that can view shared RNAi screens."),
+  RNAI_DSL_LEVEL2_MUTUAL_POSITIVES(
+                                   "rnaiDsl2MutualPositives",
+                                     "RNAi Screens Level 2",
+                                     RNAI_DSL_LEVEL3_SHARED_SCREENS,
+                                     "RNAi screeners that can view each others' screen result \"positives\" data, with associated screen summary information."),
+  RNAI_DSL_LEVEL1_MUTUAL_SCREENS("rnaiDsl1MutualScreens",
+                                 "RNAi Screens Level 1",
+                                 RNAI_DSL_LEVEL2_MUTUAL_POSITIVES,
+                                 "RNAi screeners that can view each others' screen information and screen result data."),
 
   // note: developers do not automatically get admin roles (other than readEverythingAdmin), allowing developers to restrict themselves from mutating data in production environments
   DEVELOPER("developer", "Developer", READ_EVERYTHING_ADMIN, "Special users that have permission to invoke development-related functionality and view low-level system information."),

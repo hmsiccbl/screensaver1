@@ -81,14 +81,14 @@ public class ScreensaverUserTest extends AbstractSpringPersistenceTest
     ScreensaverUser user = new ScreeningRoomUser("First", "Last");
     user.addScreensaverUserRole(ScreensaverUserRole.SM_DSL_LEVEL2_MUTUAL_POSITIVES);
     user.addScreensaverUserRole(ScreensaverUserRole.SCREENSAVER_USER);
-    user.addScreensaverUserRole(ScreensaverUserRole.RNAI_SCREENS); // note: implies Screener role
+    user.addScreensaverUserRole(ScreensaverUserRole.RNAI_DSL_LEVEL3_SHARED_SCREENS); // note: implies Screener role
     assertEquals(Sets.newHashSet(ScreensaverUserRole.SM_DSL_LEVEL2_MUTUAL_POSITIVES, 
                                  ScreensaverUserRole.SCREENSAVER_USER, 
-                                 ScreensaverUserRole.RNAI_SCREENS),
+                                 ScreensaverUserRole.RNAI_DSL_LEVEL3_SHARED_SCREENS),
                  user.getPrimaryScreensaverUserRoles());
     assertEquals(Sets.newHashSet(ScreensaverUserRole.SM_DSL_LEVEL3_SHARED_SCREENS,
                                  ScreensaverUserRole.SM_DSL_LEVEL2_MUTUAL_POSITIVES,
-                                 ScreensaverUserRole.RNAI_SCREENS,
+                                 ScreensaverUserRole.RNAI_DSL_LEVEL3_SHARED_SCREENS,
                                  ScreensaverUserRole.SCREENSAVER_USER), 
                  user.getScreensaverUserRoles());
     try {
@@ -99,7 +99,7 @@ public class ScreensaverUserTest extends AbstractSpringPersistenceTest
     assertFalse(user.removeScreensaverUserRole(ScreensaverUserRole.SM_DSL_LEVEL1_MUTUAL_SCREENS));
     user.removeScreensaverUserRole(ScreensaverUserRole.SM_DSL_LEVEL2_MUTUAL_POSITIVES);
     assertEquals(Sets.newHashSet(ScreensaverUserRole.SCREENSAVER_USER, 
-                                 ScreensaverUserRole.RNAI_SCREENS), 
+                                 ScreensaverUserRole.RNAI_DSL_LEVEL3_SHARED_SCREENS),
                                  user.getScreensaverUserRoles());
   }
   
