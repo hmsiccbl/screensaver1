@@ -36,6 +36,7 @@ import org.apache.log4j.Logger;
 import org.joda.time.LocalDate;
 import org.springframework.transaction.annotation.Transactional;
 
+import edu.harvard.med.iccbl.screensaver.IccblScreensaverConstants;
 import edu.harvard.med.iccbl.screensaver.policy.DataSharingLevelMapper;
 import edu.harvard.med.screensaver.ScreensaverConstants;
 import edu.harvard.med.screensaver.db.GenericEntityDAO;
@@ -459,6 +460,12 @@ public class UserViewer extends SearchResultContextEditableEntityViewerBackingBe
           candidateNewUserRoles.add(userRole);
         }
       }
+
+      // At ICCB-L, the RNAi DSL 2 role is not an option, so we hide it at the UI level; we maintain it in our model for consistency with the SM DSL roles
+      if (IccblScreensaverConstants.FACILITY_NAME.equals(getApplicationProperties().getFacility())) {
+        candidateNewUserRoles.remove(ScreensaverUserRole.RNAI_DSL_LEVEL2_MUTUAL_POSITIVES);
+      }
+
       _newUserRole = new UISelectOneBean<ScreensaverUserRole>(candidateNewUserRoles, null, true) {
         @Override
         protected String makeLabel(ScreensaverUserRole r) { return r.getDisplayableRoleName(); }
