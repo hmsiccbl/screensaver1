@@ -195,14 +195,6 @@
       <type>jar</type>
     </dependency>
 
-    <dependency>
-      <groupId>junit</groupId>
-      <artifactId>junit</artifactId>
-      <version>3.8.1</version>
-        <!-- need to have in compile scope, now that we have some unit test-related classes under src/main -->
-        <!-- <scope>test</scope> -->
-    </dependency>
-
   </dependencies>
   
   

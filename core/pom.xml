@@ -320,6 +320,13 @@
     </dependency>
 
     <dependency>
+      <groupId>junit</groupId>
+      <artifactId>junit</artifactId>
+      <!-- need to have in compile scope, now that we have some unit test-related classes under src/main -->
+      <!-- <scope>test</scope> -->
+    </dependency>
+
+    <dependency>
       <groupId>org.springframework</groupId>
       <artifactId>spring-test</artifactId>
       <version>${org.springframework.version}</version>
