@@ -35,7 +35,7 @@ public class ScreensaverServletFilter extends OncePerRequestFilter
 
   public static final String DEFAULT_SESSION_FACTORY_BEAN_NAME = "sessionFactory";
   public static final String CLOSE_HTTP_SESSION = "closeHttpSession";
-  private static final String REPORT_EXCEPTION_URL = "/screensaver/main/reportException.jsf";
+  private static final String REPORT_EXCEPTION_URL = "/main/reportException.jsf";
 
   private String sessionFactoryBeanName = DEFAULT_SESSION_FACTORY_BEAN_NAME;
 
@@ -85,7 +85,7 @@ public class ScreensaverServletFilter extends OncePerRequestFilter
       if (caughtException != null) {
         httpSession.setAttribute("javax.servlet.error.exception", caughtException);
         try {
-          response.sendRedirect(REPORT_EXCEPTION_URL);
+          response.sendRedirect(request.getContextPath() + REPORT_EXCEPTION_URL);
         }
         catch (IOException e) {
           e.printStackTrace();
