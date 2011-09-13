@@ -343,6 +343,7 @@
     <res-ref-name>bean/loginModuleFactoryCapsule</res-ref-name>
     <res-type>edu.harvard.med.screensaver.ui.arch.auth.tomcat.LoginModuleFactoryCapsule</res-type>
     <res-auth>Container</res-auth>
+    <!--res-sharing-scope>Shareable</res-sharing-scope-->
   </resource-ref>
   
   
@@ -355,6 +356,29 @@
       <form-error-page>/main/login-error.jsf</form-error-page>
     </form-login-config>
   </login-config>
+
+  <!-- The roles used below for specifying security constraints. These are specified merely to avoid warnings during web app initialization. -->
+  <security-role>
+  	<role-name>cherryPickRequestsAdmin</role-name>
+  </security-role>
+  <security-role>
+  	<role-name>developer</role-name>
+  </security-role>
+  <security-role>
+  	<role-name>librariesAdmin</role-name>
+  </security-role>
+  <security-role>
+  	<role-name>readEverythingAdmin</role-name>
+  </security-role>
+  <security-role>
+  	<role-name>screenResultsAdmin</role-name>
+  </security-role>
+  <security-role>
+  	<role-name>screensaverUser</role-name>
+  </security-role>
+  <security-role>
+  	<role-name>usersAdmin</role-name>
+  </security-role>
 
   <!--
   from the 2.4 Servlet spec (SRV.12.8.1): "A security constraint that
