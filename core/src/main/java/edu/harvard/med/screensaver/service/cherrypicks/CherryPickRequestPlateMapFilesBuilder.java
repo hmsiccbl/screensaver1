@@ -70,6 +70,7 @@ public class CherryPickRequestPlateMapFilesBuilder
     "Source Copy",
     "Source Well",
     "Source Plate Type",
+    "Source Plate Location",
     "Destination Well",
     "Destination Plate Type",
     "Person Visiting",
@@ -300,6 +301,7 @@ public class CherryPickRequestPlateMapFilesBuilder
     out.print(cherryPick.getSourceCopy().getName());
     out.print(cherryPick.getSourceWell().getWellName());
     out.print(cherryPick.getSourceCopy().findPlate(cherryPick.getSourceWell().getPlateNumber()).getPlateType());
+    out.print(cherryPick.getSourceCopy().findPlate(cherryPick.getSourceWell().getPlateNumber()).getLocation().toDisplayString());
     out.print(cherryPick.getAssayPlateWellName());
     out.print(cherryPick.getAssayPlate().getAssayPlateType());
     out.print(cherryPick.getCherryPickRequest().getRequestedBy().getFullNameFirstLast());

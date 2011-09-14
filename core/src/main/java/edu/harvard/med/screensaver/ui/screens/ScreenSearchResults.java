@@ -363,6 +363,19 @@ public class ScreenSearchResults extends EntityBasedEntitySearchResults<Screen,I
     });
     columns.get(columns.size() - 1).setAdministrative(true);
     columns.get(columns.size() - 1).setVisible(false);
+        
+    columns.add(new TextEntityColumn<Screen>(RelationshipPath.from(Screen.class).toProperty("summary"),
+                                                "Summary",
+                                                "A summary of the screen",
+                                                TableColumn.UNGROUPED) {
+      @Override
+      public String getCellValue(Screen screen) 
+      { 
+        return screen.getSummary();
+      }
+    });
+    columns.get(columns.size() - 1).setAdministrative(true);
+    columns.get(columns.size() - 1).setVisible(false);    
     
     return columns;
   }
@@ -482,7 +495,31 @@ public class ScreenSearchResults extends EntityBasedEntitySearchResults<Screen,I
           return screen.getDateCreated().toLocalDate();
         }
       });
-    }
+      
+    }     
+    
+    // RNAi fields
+    columns.add(new TextEntityColumn<Screen>(RelationshipPath.from(Screen.class).toProperty("species"),
+      "Species", "The species of the cell organism", TableColumn.UNGROUPED) {
+      @Override
+      public String getCellValue(Screen screen) { return screen.getSpecies() == null? "": screen.getSpecies().getValue(); }
+    });
+    columns.get(columns.size() - 1).setVisible(false);
+
+    columns.add(new TextEntityColumn<Screen>(RelationshipPath.from(Screen.class).toProperty("cellLine"),
+      "Cell Line", "The cell line", TableColumn.UNGROUPED) {
+      @Override
+      public String getCellValue(Screen screen) { return screen.getCellLine().getValue(); }
+    });
+    columns.get(columns.size() - 1).setVisible(false);
+
+    columns.add(new TextEntityColumn<Screen>(RelationshipPath.from(Screen.class).toProperty("transfectionAgent"),
+      "Transfection Agent", "The transfection agent", TableColumn.UNGROUPED) {
+      @Override
+      public String getCellValue(Screen screen) { return screen.getTransfectionAgent().getValue(); }
+    });
+    columns.get(columns.size() - 1).setVisible(false);
+
     return columns;
   }
 }

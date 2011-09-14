@@ -22,15 +22,15 @@ import java.util.regex.Pattern;
 import javax.persistence.EntityManagerFactory;
 import javax.persistence.metamodel.ManagedType;
 
+import org.apache.log4j.Logger;
+import org.joda.time.DateTime;
+import org.joda.time.LocalDate;
+import org.springframework.transaction.annotation.Transactional;
 import com.google.common.collect.ArrayListMultimap;
 import com.google.common.collect.Iterables;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Multimap;
 import com.google.common.collect.Sets;
-import org.apache.log4j.Logger;
-import org.joda.time.DateTime;
-import org.joda.time.LocalDate;
-import org.springframework.transaction.annotation.Transactional;
 
 import edu.harvard.med.screensaver.ScreensaverConstants;
 import edu.harvard.med.screensaver.db.GenericEntityDAO;
@@ -85,6 +85,7 @@ import edu.harvard.med.screensaver.model.screenresults.ResultValue;
 import edu.harvard.med.screensaver.model.screenresults.ScreenResult;
 import edu.harvard.med.screensaver.model.screens.AssayProtocolType;
 import edu.harvard.med.screensaver.model.screens.AssayReadoutType;
+import edu.harvard.med.screensaver.model.screens.CellLine;
 import edu.harvard.med.screensaver.model.screens.LabActivity;
 import edu.harvard.med.screensaver.model.screens.LibraryScreening;
 import edu.harvard.med.screensaver.model.screens.ProjectPhase;
@@ -94,8 +95,10 @@ import edu.harvard.med.screensaver.model.screens.ScreenDataSharingLevel;
 import edu.harvard.med.screensaver.model.screens.ScreenStatus;
 import edu.harvard.med.screensaver.model.screens.ScreenType;
 import edu.harvard.med.screensaver.model.screens.Screening;
+import edu.harvard.med.screensaver.model.screens.Species;
 import edu.harvard.med.screensaver.model.screens.StatusItem;
 import edu.harvard.med.screensaver.model.screens.StudyType;
+import edu.harvard.med.screensaver.model.screens.TransfectionAgent;
 import edu.harvard.med.screensaver.model.users.AdministratorUser;
 import edu.harvard.med.screensaver.model.users.AffiliationCategory;
 import edu.harvard.med.screensaver.model.users.ChecklistItemGroup;
@@ -546,7 +549,7 @@ public class TestDataFactory
       {
         return new MolarConcentration(TestDataFactory.this.newInstance(Integer.class));
       }
-    });
+    });    
     addBuilder(new AbstractBuilder<String>(String.class) {
       @Override
       public String newInstance(String callStack)
@@ -653,6 +656,13 @@ public class TestDataFactory
       public LibraryType newInstance(String callStack)
       {
         return LibraryType.COMMERCIAL;
+      }
+    });
+    addBuilder(new AbstractBuilder<Species>(Species.class) {
+      @Override
+      public Species newInstance(String callStack)
+      {
+        return Species.OTHER;
       }
     });
     addBuilder(new AbstractBuilder<PlateSize>(PlateSize.class) {

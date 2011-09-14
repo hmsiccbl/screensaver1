@@ -38,6 +38,7 @@ import edu.harvard.med.screensaver.model.screenresults.DataColumn;
 import edu.harvard.med.screensaver.model.screenresults.ResultValue;
 import edu.harvard.med.screensaver.model.screenresults.ScreenResult;
 import edu.harvard.med.screensaver.model.screens.AbaseTestset;
+import edu.harvard.med.screensaver.model.screens.CellLine;
 import edu.harvard.med.screensaver.model.screens.CherryPickScreening;
 import edu.harvard.med.screensaver.model.screens.EquipmentUsed;
 import edu.harvard.med.screensaver.model.screens.FundingSupport;
@@ -45,6 +46,7 @@ import edu.harvard.med.screensaver.model.screens.LibraryScreening;
 import edu.harvard.med.screensaver.model.screens.Publication;
 import edu.harvard.med.screensaver.model.screens.Screen;
 import edu.harvard.med.screensaver.model.screens.Study;
+import edu.harvard.med.screensaver.model.screens.TransfectionAgent;
 import edu.harvard.med.screensaver.model.users.AdministratorUser;
 import edu.harvard.med.screensaver.model.users.ChecklistItem;
 import edu.harvard.med.screensaver.model.users.ChecklistItemEvent;
@@ -346,5 +348,17 @@ public class IccblEntityEditPolicy implements EntityEditPolicy
   public Boolean visit(ServiceActivity serviceActivity)
   {
     return visit(serviceActivity.getServicedUser());
+  }
+
+  @Override
+  public Boolean visit(CellLine cellLine)
+  {
+    return true;
+  }
+
+  @Override
+  public Boolean visit(TransfectionAgent transfectionAgent)
+  {
+    return true;
   }
 }

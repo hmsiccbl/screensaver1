@@ -56,16 +56,16 @@
 
   <profiles>
     <profile>
-      <id>iccbl</id>
+      <id>iccbl-cron</id>
       <activation>
         <property>
           <name>facility</name>
-          <value>iccbl</value>
+          <value>iccbl-cron</value>
         </property>
       </activation>
       <properties>
-        <spring.context.cmdline.file>spring-context-cmdline-iccbl.xml</spring.context.cmdline.file>
-        <assembly-type>iccbl</assembly-type>
+        <spring.context.cmdline.file>spring-context-cmdline-iccbl-cron.xml</spring.context.cmdline.file>
+        <assembly-type>iccbl-cron</assembly-type>
       </properties>
     </profile>    
     <profile>

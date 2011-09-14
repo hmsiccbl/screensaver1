@@ -14,22 +14,22 @@
       <fileMode>0755</fileMode>
     </file>
     <file>
-      <source>src/main/scripts/iccbl/batch_runner.sh</source>
+      <source>src/main/scripts/iccbl-cron/batch_runner.sh</source>
       <outputDirectory>/</outputDirectory>
       <fileMode>0755</fileMode>
     </file>
     <file>
-      <source>src/main/scripts/iccbl/batch_runner_interactive.sh</source>
+      <source>src/main/scripts/iccbl-cron/batch_runner_interactive.sh</source>
       <outputDirectory>/</outputDirectory>
       <fileMode>0755</fileMode>
     </file>
     <file>
-      <source>src/main/scripts/iccbl/bjobs.sh</source>
+      <source>src/main/scripts/iccbl-cron/bjobs.sh</source>
       <outputDirectory>/</outputDirectory>
       <fileMode>0755</fileMode>
     </file>
     <file>
-      <source>src/main/resources/log4j.properties.iccbl</source>
+      <source>src/main/resources/log4j.properties.iccbl-cron</source>
       <outputDirectory>/resources</outputDirectory>
       <destName>log4j.properties</destName>
     </file>

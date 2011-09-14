@@ -32,4 +32,4 @@ else
 fi
 
 cd $DIR
-$DIR/bjobs.sh bsub -q shared_12h $DIR/run.sh "$@"
+$DIR/bjobs.sh bsub -u sean.erickson.hms@gmail.com -Is -q shared_int_12h $DIR/run.sh "$@"

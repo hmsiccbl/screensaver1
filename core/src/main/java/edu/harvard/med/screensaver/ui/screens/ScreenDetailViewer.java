@@ -21,20 +21,21 @@ import java.util.Observable;
 import java.util.Observer;
 import java.util.Set;
 import java.util.SortedSet;
+import java.util.TreeSet;
 
 import javax.faces.model.DataModel;
 import javax.faces.model.ListDataModel;
 import javax.faces.model.SelectItem;
 
+import org.apache.log4j.Logger;
+import org.apache.myfaces.custom.fileupload.UploadedFile;
+import org.joda.time.LocalDate;
+import org.springframework.transaction.annotation.Transactional;
 import com.google.common.base.Predicate;
 import com.google.common.collect.ImmutableSortedSet;
 import com.google.common.collect.Iterables;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Sets;
-import org.apache.log4j.Logger;
-import org.apache.myfaces.custom.fileupload.UploadedFile;
-import org.joda.time.LocalDate;
-import org.springframework.transaction.annotation.Transactional;
 
 import edu.harvard.med.screensaver.ScreensaverConstants;
 import edu.harvard.med.screensaver.db.GenericEntityDAO;
@@ -47,6 +48,7 @@ import edu.harvard.med.screensaver.model.BusinessRuleViolationException;
 import edu.harvard.med.screensaver.model.RequiredPropertyException;
 import edu.harvard.med.screensaver.model.cherrypicks.CherryPickRequest;
 import edu.harvard.med.screensaver.model.screens.BillingItem;
+import edu.harvard.med.screensaver.model.screens.CellLine;
 import edu.harvard.med.screensaver.model.screens.FundingSupport;
 import edu.harvard.med.screensaver.model.screens.LabActivity;
 import edu.harvard.med.screensaver.model.screens.ProjectPhase;
@@ -55,9 +57,13 @@ import edu.harvard.med.screensaver.model.screens.Screen;
 import edu.harvard.med.screensaver.model.screens.ScreenAttachedFileType;
 import edu.harvard.med.screensaver.model.screens.ScreenDataSharingLevel;
 import edu.harvard.med.screensaver.model.screens.ScreenStatus;
+import edu.harvard.med.screensaver.model.screens.ScreenType;
 import edu.harvard.med.screensaver.model.screens.Screening;
+import edu.harvard.med.screensaver.model.screens.Species;
 import edu.harvard.med.screensaver.model.screens.StatusItem;
+import edu.harvard.med.screensaver.model.screens.TransfectionAgent;
 import edu.harvard.med.screensaver.model.users.AdministratorUser;
+import edu.harvard.med.screensaver.model.users.LabAffiliation;
 import edu.harvard.med.screensaver.model.users.LabHead;
 import edu.harvard.med.screensaver.model.users.ScreeningRoomUser;
 import edu.harvard.med.screensaver.model.users.ScreensaverUser;
@@ -74,6 +80,7 @@ import edu.harvard.med.screensaver.ui.arch.util.UISelectOneEntityBean;
 import edu.harvard.med.screensaver.ui.arch.view.EditResult;
 import edu.harvard.med.screensaver.ui.arch.view.aspects.UICommand;
 import edu.harvard.med.screensaver.ui.cherrypickrequests.CherryPickRequestDetailViewer;
+import edu.harvard.med.screensaver.util.NullSafeComparator;
 import edu.harvard.med.screensaver.util.NullSafeUtils;
 import edu.harvard.med.screensaver.util.StringUtils;
 import edu.harvard.med.screensaver.util.eutils.EutilsException;
@@ -82,6 +89,8 @@ import edu.harvard.med.screensaver.util.eutils.PublicationInfoProvider;
 public class ScreenDetailViewer extends AbstractStudyDetailViewer<Screen>
 {
   private static final int CHILD_ENTITY_TABLE_MAX_ROWS = 10;
+
+  public static final String UNKNOWN_SPECIES = "<unspecified>";
 
   private static Logger log = Logger.getLogger(ScreenDetailViewer.class);
 
@@ -110,6 +119,12 @@ public class ScreenDetailViewer extends AbstractStudyDetailViewer<Screen>
   private String _pinTransferApprovalComments;
 
   private UISelectOneBean<ScreenDataSharingLevel> _dataSharingLevel;
+
+  private UISelectOneEntityBean<CellLine> _cellLineMenu;
+  private CellLine _newCellLine;
+  private UISelectOneEntityBean<TransfectionAgent> _transfectionAgentMenu;
+  private TransfectionAgent _newTransfectionAgent;
+  
   private ScreenDataSharingLevel _lastDataSharingLevel;
   private LabHead _lastLabHead;
   private ScreeningRoomUser _lastLeadScreener;
@@ -118,7 +133,10 @@ public class ScreenDetailViewer extends AbstractStudyDetailViewer<Screen>
 
   private AttachedFileType _publicationAttachedFileType;
 
+  private UISelectOneBean<Species> _species;
+
   private ScreenGenerator _screenGenerator;
+
 
 
   /**
@@ -174,12 +192,17 @@ public class ScreenDetailViewer extends AbstractStudyDetailViewer<Screen>
     _newStatusItemValue = null;
     _newStatusItemDate = null;
     _newPublication = null;
+    _cellLineMenu=null;
+    _newCellLine=null;
+    _transfectionAgentMenu=null;
+    _newTransfectionAgent=null;
     _uploadedPublicationAttachedFileContents = null;
     _newBillingItem = null;
     _pinTransferApprovalDate = null;
     _pinTransferApprovedBy = null;
     _pinTransferApprovalComments = null;
     _dataSharingLevel = null;
+    _species = null;
     _lastDataSharingLevel = screen.getDataSharingLevel();
     _lastLabHead = screen.getLabHead();
     _lastLeadScreener = screen.getLeadScreener();
@@ -460,6 +483,138 @@ public class ScreenDetailViewer extends AbstractStudyDetailViewer<Screen>
       });
     }
     return _dataSharingLevel;
+  }
+  
+  public UISelectOneEntityBean<CellLine> getCellLineMenu()
+  {
+    if (_cellLineMenu == null) {
+      SortedSet<CellLine> cellLines= new TreeSet<CellLine>();
+      cellLines.addAll(getDao().findAllEntitiesOfType(CellLine.class));
+      _cellLineMenu= new UISelectOneEntityBean<CellLine>(cellLines, getEntity().getCellLine(), true, getDao()) ;
+            _cellLineMenu.addObserver(new Observer() {
+        public void update(Observable arg0, Object value)
+        {
+          getEntity().setCellLine((CellLine) value);
+        }
+      });
+
+    }
+    return _cellLineMenu;
+  }
+  
+  @UICommand
+  @Transactional
+  public String addNewCellLine()
+  {
+    if (StringUtils.isEmpty(_newCellLine.getValue())) {
+      showMessage("new cell line name is required");
+      return REDISPLAY_PAGE_ACTION_RESULT;
+    }
+    if (getDao().findEntityByProperty(CellLine.class,
+                                      "value",
+                                      _newCellLine.getValue()) != null) {
+      showMessage("duplicateEntity", "cell line");
+      return REDISPLAY_PAGE_ACTION_RESULT;
+    }
+    getDao().persistEntity(_newCellLine);
+    getDao().flush();
+
+    // force reload of lab affiliation selections
+    _cellLineMenu = null;
+
+    // set user's lab affiliation to new affiliation
+    getCellLineMenu().setSelection(_newCellLine);
+
+    _newCellLine = null;
+    return REDISPLAY_PAGE_ACTION_RESULT;
+  }  
+
+  public CellLine getNewCellLine()
+  {
+    if(_newCellLine == null)
+    {
+      _newCellLine = new CellLine();
+    }
+    return _newCellLine;
+  }
+
+  public UISelectOneEntityBean<TransfectionAgent> getTransfectionAgentMenu()
+  {
+    if (_transfectionAgentMenu == null) {
+      SortedSet<TransfectionAgent> transfectionAgents= new TreeSet<TransfectionAgent>();
+      transfectionAgents.addAll(getDao().findAllEntitiesOfType(TransfectionAgent.class));
+      _transfectionAgentMenu= new UISelectOneEntityBean<TransfectionAgent>(transfectionAgents, getEntity().getTransfectionAgent(), true, getDao()) ;
+            _transfectionAgentMenu.addObserver(new Observer() {
+        public void update(Observable arg0, Object value)
+        {
+          getEntity().setTransfectionAgent((TransfectionAgent) value);
+        }
+      });
+
+    }
+    return _transfectionAgentMenu;
+  }
+  
+  @UICommand
+  @Transactional
+  public String addNewTransfectionAgent()
+  {
+    if (StringUtils.isEmpty(_newTransfectionAgent.getValue())) {
+      showMessage("new transfection agent name is required");
+      return REDISPLAY_PAGE_ACTION_RESULT;
+    }
+    if (getDao().findEntityByProperty(TransfectionAgent.class,
+                                      "value",
+                                      _newTransfectionAgent.getValue()) != null) {
+      showMessage("duplicateEntity", "cell line");
+      return REDISPLAY_PAGE_ACTION_RESULT;
+    }
+    getDao().persistEntity(_newTransfectionAgent);
+    getDao().flush();
+
+    // force reload of lab affiliation selections
+    _transfectionAgentMenu = null;
+
+    // set user's lab affiliation to new affiliation
+    getTransfectionAgentMenu().setSelection(_newTransfectionAgent);
+
+    _newTransfectionAgent = null;
+    return REDISPLAY_PAGE_ACTION_RESULT;
+  }
+  
+  public TransfectionAgent getNewTransfectionAgent()
+  {
+    if(_newTransfectionAgent == null)
+    {
+      _newTransfectionAgent = new TransfectionAgent();
+    }
+    return _newTransfectionAgent;
+  }  
+
+  public UISelectOneBean<Species> getSpecies()
+  {
+    if (_species == null) {
+      Species[] speciesList = Species.values();
+      if(getEntity().getScreenType() == ScreenType.RNAI ) 
+      {
+        speciesList = Species.getRNAiSpecies();
+      }
+        _species = new UISelectOneBean<Species>(Lists.newArrayList(speciesList), getEntity().getSpecies(), true)
+      {
+        @Override
+        protected String getEmptyLabel()
+        {
+          return UNKNOWN_SPECIES;
+        }
+      };
+      _species.addObserver(new Observer() {
+        public void update(Observable arg0, Object species)
+        {
+          getEntity().setSpecies((Species) species);
+        }
+      });
+    }
+    return _species;
   }
   
   @Override
@@ -801,5 +956,5 @@ public class ScreenDetailViewer extends AbstractStudyDetailViewer<Screen>
     screens.remove(getEntity());
     return new ListDataModel(screens);
   }
-
+  
 }

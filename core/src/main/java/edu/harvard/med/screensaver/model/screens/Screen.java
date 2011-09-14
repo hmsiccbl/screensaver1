@@ -210,8 +210,11 @@ public class Screen extends Study implements AttachedFilesEntity<ScreenAttachedF
   private Integer _maxScreenedReplicateCount;
   private Integer _minDataLoadedReplicateCount;
   private Integer _maxDataLoadedReplicateCount;
-
-
+  
+  private Species _species;
+  private CellLine _cellLine;
+  private TransfectionAgent _transfectionAgent;
+  
   // public constructors
 
 
@@ -1084,6 +1087,18 @@ public class Screen extends Study implements AttachedFilesEntity<ScreenAttachedF
     _facilityId = name;
   }
 
+  @Column
+  @org.hibernate.annotations.Type(type="edu.harvard.med.screensaver.model.screens.Species$UserType")
+  public Species getSpecies()
+  {
+    return _species;
+  }
+
+  public void setSpecies(Species value)
+  {
+    _species = value;
+  }  
+
   /**
    * Get the study type.
    * @return the study type
@@ -1834,6 +1849,36 @@ public class Screen extends Study implements AttachedFilesEntity<ScreenAttachedF
     return Collections.emptySet();
   }
 
+  public void setCellLine(CellLine _cellLine)
+  {
+    this._cellLine = _cellLine;
+  }
+
+  @ManyToOne
+  @JoinColumn(name="cellLineId", nullable=true)
+  @org.hibernate.annotations.ForeignKey(name="fk_screen_to_cell_line")
+  @org.hibernate.annotations.Cascade(value={ org.hibernate.annotations.CascadeType.SAVE_UPDATE })
+  @edu.harvard.med.screensaver.model.annotations.ToOne(unidirectional=true)  
+  public CellLine getCellLine()
+  {
+    return _cellLine;
+  }
+  
+  public void setTransfectionAgent(TransfectionAgent _transfectionAgent)
+  {
+    this._transfectionAgent = _transfectionAgent;
+  }
+
+  @ManyToOne
+  @JoinColumn(name="transfectionAgentId", nullable=true)
+  @org.hibernate.annotations.ForeignKey(name="fk_screen_to_transfection_agent")
+  @org.hibernate.annotations.Cascade(value={ org.hibernate.annotations.CascadeType.SAVE_UPDATE })
+  @edu.harvard.med.screensaver.model.annotations.ToOne(unidirectional=true)  
+  public TransfectionAgent getTransfectionAgent()
+  {
+    return _transfectionAgent;
+  }
+
   @Column(nullable=false)
   //@org.hibernate.annotations.Type(type="edu.harvard.med.screensaver.model.screens.ScreenDataSharingLevel$UserType")
   public ScreenDataSharingLevel getDataSharingLevel()
@@ -1996,5 +2041,4 @@ public class Screen extends Study implements AttachedFilesEntity<ScreenAttachedF
   {
     return wellStudied;
   }
-
 }

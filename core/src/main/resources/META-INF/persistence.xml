@@ -44,6 +44,7 @@
     <class>edu.harvard.med.screensaver.model.screens.AbaseTestset</class>
     <class>edu.harvard.med.screensaver.model.screens.BillingInformation</class>
     <class>edu.harvard.med.screensaver.model.screens.BillingItem</class>
+    <class>edu.harvard.med.screensaver.model.screens.CellLine</class>
     <class>edu.harvard.med.screensaver.model.screens.EquipmentUsed</class>
     <class>edu.harvard.med.screensaver.model.screens.FundingSupport</class>
     <class>edu.harvard.med.screensaver.model.screens.LabActivity</class>
@@ -53,6 +54,7 @@
     <class>edu.harvard.med.screensaver.model.screens.Screen</class>
     <class>edu.harvard.med.screensaver.model.screens.Screening</class>
     <class>edu.harvard.med.screensaver.model.screens.ScreenAttachedFileType</class>
+    <class>edu.harvard.med.screensaver.model.screens.TransfectionAgent</class>
 
     <class>edu.harvard.med.screensaver.model.screenresults.AnnotationType</class>
     <class>edu.harvard.med.screensaver.model.screenresults.AnnotationValue</class>

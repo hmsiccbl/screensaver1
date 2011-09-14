@@ -259,7 +259,7 @@ public class AttachedFileSearchResults extends TupleBasedEntitySearchResults<Att
   {
     if (_letterOfSupportAttachedFileTypes == null) {
       _letterOfSupportAttachedFileTypes = Sets.newTreeSet(_dao.findEntitiesByHql(AttachedFileType.class,
-                                                                                 "from AttachedFileType aft where aft.value like ?",
+                                                                                 "from CellLine aft where aft.value like ?",
                                                                                  LETTER_OF_SUPPORT_ATTACHED_FILE_TYPES_PREFIX));
       if (_letterOfSupportAttachedFileTypes == null) {
         throw new BusinessRuleViolationException("'" + LETTER_OF_SUPPORT_ATTACHED_FILE_TYPES_PREFIX +

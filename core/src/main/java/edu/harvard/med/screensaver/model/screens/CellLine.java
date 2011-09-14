@@ -1,5 +1,5 @@
-// $HeadURL$
-// $Id$
+// $HeadURL: http://seanderickson1@forge.abcd.harvard.edu/svn/screensaver/branches/serickson/quickies/core/src/main/java/edu/harvard/med/screensaver/model/CellLine.java $
+// $Id: CellLine.java 3968 2010-04-08 17:04:35Z atolopko $
 //
 // Copyright © 2006, 2010 by the President and Fellows of Harvard College.
 //
@@ -7,7 +7,7 @@
 // at Harvard Medical School. This software is distributed under the terms of
 // the GNU General Public License.
 
-package edu.harvard.med.screensaver.model;
+package edu.harvard.med.screensaver.model.screens;
 
 import javax.persistence.Column;
 import javax.persistence.DiscriminatorColumn;
@@ -18,24 +18,21 @@ import javax.persistence.GenerationType;
 import javax.persistence.Id;
 import javax.persistence.Inheritance;
 import javax.persistence.InheritanceType;
-import javax.persistence.Transient;
-
 
 import org.hibernate.annotations.Immutable;
 import org.hibernate.annotations.Parameter;
 import org.hibernate.annotations.Type;
 
+import edu.harvard.med.screensaver.model.AbstractEntity;
+import edu.harvard.med.screensaver.model.AbstractEntityVisitor;
+
 /**
- * The attached file type vocabulary.
- *
- * @author <a mailto="andrew_tolopko@hms.harvard.edu">Andrew Tolopko</a>
+ * The  screen cell line vocabulary.
  */
 @Entity
 @Immutable
 @org.hibernate.annotations.Proxy
-@DiscriminatorColumn(discriminatorType=DiscriminatorType.STRING, name="forEntityType")
-@Inheritance(strategy=InheritanceType.SINGLE_TABLE)
-public abstract class AttachedFileType extends AbstractEntity<Integer> implements Comparable<AttachedFileType>
+public class CellLine extends AbstractEntity<Integer> implements Comparable<CellLine>
 {
   private static final long serialVersionUID = 1L;
 
@@ -44,7 +41,7 @@ public abstract class AttachedFileType extends AbstractEntity<Integer> implement
   /**
    * @motivation for hibernate
    */
-  protected AttachedFileType()
+  public CellLine()
   {
   }
   
@@ -52,26 +49,26 @@ public abstract class AttachedFileType extends AbstractEntity<Integer> implement
    * Constructs an <code>CellLine</code> vocabulary term.
    * @param value The value of the term.
    */
-  public AttachedFileType(String value)
+  public CellLine(String value)
   {
     _value = value;
   }
 
   @Id
   @org.hibernate.annotations.GenericGenerator(
-    name="attached_file_type_id_seq",
+    name="cell_line_id_seq",
     strategy="sequence",
-    parameters = { @Parameter(name="sequence", value="attached_file_type_id_seq") }
+    parameters = { @Parameter(name="sequence", value="cell_line_id_seq") }
   )
-  @GeneratedValue(strategy=GenerationType.SEQUENCE, generator="attached_file_type_id_seq")
-  public Integer getAttachedFileTypeId()
+  @GeneratedValue(strategy=GenerationType.SEQUENCE, generator="cell_line_id_seq")
+  public Integer getCellLineId()
   {
     return getEntityId();
   }
   
-  private void setAttachedFileTypeId(Integer attachedFileTypeId)
+  private void setCellLineId(Integer value)
   {
-    setEntityId(attachedFileTypeId);
+    setEntityId(value);
   }
 
   @Column(unique=true, nullable=false)
@@ -81,7 +78,7 @@ public abstract class AttachedFileType extends AbstractEntity<Integer> implement
     return _value;
   }
 
-  private void setValue(String value)
+  public void setValue(String value)
   {
     _value = value;
   }
@@ -98,7 +95,7 @@ public abstract class AttachedFileType extends AbstractEntity<Integer> implement
     return visitor.visit(this);
   }
 
-  public int compareTo(AttachedFileType other)
+  public int compareTo(CellLine other)
   {
     if (other == null) { 
       return 1;

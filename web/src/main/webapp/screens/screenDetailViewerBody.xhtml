@@ -139,7 +139,69 @@ TODO:
       editable="#{screenDetailViewer.editMode}"
       description="A summary of the screen" type="Textarea"
       editWidth="80" editHeight="6" />
+      <ss:property id="species" label="Species"
+        type="Vocabulary" 
+        editable="#{screenDetailViewer.editMode}"
+        value="#{screenDetailViewer.species.value}"
+        selectItems="#{screenDetailViewer.species.selectItems}" />
+        
+      <ss:property id="cellLine" label="#{screenDetailViewer.entity.screenType == 'RNAi' ? 'Mammalian ' : '' }Cell Line"
+        type="Text" 
+        editable="#{screenDetailViewer.editMode}"
+        value="#{screenDetailViewer.entity.cellLine.value}">
+        <ui:define name="editableData">
+          <t:selectOneMenu id="cellLineMenu"
+           value="#{screenDetailViewer.cellLineMenu.value}"
+           styleClass="inputText selectMenu">
+           <f:selectItems value="#{screenDetailViewer.cellLineMenu.selectItems}" />
+         </t:selectOneMenu>
+         <t:div id="newCellLineDiv" styleClass="groupingPanel"
+         >
+           <t:panelGrid columns="1" columnClasses="column">
+             <ss:propertyGroup id="newCellLineGroup"
+               label="New Cell Line (optional)">
+               
+               <ss:property id="newCellLine" label="Name (ATCC Designation)"
+                 description="The name of the new cell line to be created"
+                 value="#{screenDetailViewer.newCellLine.value}"
+                 editable="true" editWidth="60" />
+           <t:commandButton id="addNewCellLine" value="Add"
+             action="#{screenDetailViewer.addNewCellLine}" />
+             </ss:propertyGroup>
+           </t:panelGrid>
+         </t:div>
+       </ui:define>
+      </ss:property>
 
+      <ss:property id="transfectionAgent" label="RNAi Transfection Agent"
+        type="Text" 
+        editable="#{screenDetailViewer.editMode}"
+        rendered="#{screenDetailViewer.entity.screenType == 'RNAi'}"
+        value="#{screenDetailViewer.entity.transfectionAgent.value}">
+        <ui:define name="editableData">
+          <t:selectOneMenu id="transfectionAgentMenu"
+           value="#{screenDetailViewer.transfectionAgentMenu.value}"
+           styleClass="inputText selectMenu">
+           <f:selectItems value="#{screenDetailViewer.transfectionAgentMenu.selectItems}" />
+         </t:selectOneMenu>
+         <t:div id="newTransfectionAgentDiv" styleClass="groupingPanel"
+         >
+           <t:panelGrid columns="1" columnClasses="column">
+             <ss:propertyGroup id="newTransfectionAgentGroup"
+               label="New Transfection Agent (optional)">
+               
+               <ss:property id="newTransfectionAgent" label="Name"
+                 description="The name of the new transfection agent to be created"
+                 value="#{screenDetailViewer.newTransfectionAgent.value}"
+                 editable="true" editWidth="60" />
+           <t:commandButton id="addNewTransfectionAgent" value="Add"
+             action="#{screenDetailViewer.addNewTransfectionAgent}" />
+             </ss:propertyGroup>
+           </t:panelGrid>
+         </t:div>
+       </ui:define>
+      </ss:property>
+       
     <ss:propertyGroup label="Publishable Protocol" columns="1"
       columnClasses="column"
       rendered="#{screenDetailViewer.allowedAccessToScreenDetails}">
@@ -494,8 +556,8 @@ TODO:
           description="Comments for the pin transfer approval"
           value="#{screenDetailViewer.pinTransferApprovalComments}"
           editable="#{screenDetailViewer.editMode }" />
-
       </ss:propertyGroup>
+      
   </ui:define>
 
   <ui:define name="tablesContent">

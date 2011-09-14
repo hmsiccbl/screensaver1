@@ -151,7 +151,19 @@ public class LabCherryPicksSearchResult extends EntityBasedEntitySearchResults<L
         return getScreensaverUser().isUserInRole(ScreensaverUserRole.CHERRY_PICK_REQUESTS_ADMIN);
       }
     });
-
+    
+    labCherryPicksTableColumns.add(new TextEntityColumn<LabCherryPick>(
+      LabCherryPick.wellVolumeAdjustments.to(WellVolumeAdjustment.copy).to(Copy.plates),
+      "Plate Location", "The location of the plate", TableColumn.UNGROUPED) {
+      @Override
+      public String getCellValue(LabCherryPick lcp) 
+      { 
+        Integer plateNumber = lcp.getSourceWell().getPlateNumber();
+        if(lcp.getWellVolumeAdjustments()== null || lcp.getWellVolumeAdjustments().isEmpty() ) return "";
+        return lcp.getWellVolumeAdjustments().iterator().next().getCopy().getPlates().get(plateNumber).getLocation().toDisplayString();
+        }
+    });
+    
     labCherryPicksTableColumns.add(new LabCherryPickReagentEntityColumn<Reagent,String>(
       Reagent.class, 
       new TextEntityColumn<Reagent>(
