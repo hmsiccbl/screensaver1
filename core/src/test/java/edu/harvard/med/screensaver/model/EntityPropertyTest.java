@@ -103,7 +103,7 @@ public class EntityPropertyTest<E extends AbstractEntity> extends AbstractSpring
 
   //@IfProfileValue(name = "never.to.be.run.explicitly", value = "never.to.be.run.explicitly")
   public void testEntityProperty() throws Throwable
-  {log.info("test: " + _entityClass + ", " + propertyDescriptor);
+  {
     log.info("testing entity property " + fullPropName(propertyDescriptor));
 
     Method getter = propertyDescriptor.getReadMethod();
