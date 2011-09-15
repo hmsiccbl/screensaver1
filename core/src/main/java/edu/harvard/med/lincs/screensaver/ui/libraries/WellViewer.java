@@ -85,22 +85,22 @@ public class WellViewer extends edu.harvard.med.screensaver.ui.libraries.WellVie
 
   private void initalizeAttachedFiles(Reagent reagent)
   {
-    _attachedFiles.reset();
     if (reagent != null) {
       getDao().needReadOnly(reagent, Reagent.attachedFiles);
       getDao().needReadOnly(reagent, Reagent.attachedFiles.to(AttachedFile.fileType));
       SortedSet<AttachedFileType> attachedFileTypes =
         Sets.<AttachedFileType>newTreeSet(getDao().findAllEntitiesOfType(ReagentAttachedFileType.class, true));
-      _attachedFiles.setAttachedFileTypes(attachedFileTypes);
-      _attachedFiles.setAttachedFilesEntity((Reagent) reagent.restrict());
-
-      _attachedFiles.setAttachedFilesFilter(new Predicate<AttachedFile>() {
+      _attachedFiles.initialize((Reagent) reagent.restrict(), attachedFileTypes,
+                                new Predicate<AttachedFile>() {
         @Override
         public boolean apply(AttachedFile input)
         {
           return !!! input.getFileType().getValue().equals(ScreensaverConstants.STUDY_FILE_TYPE);
         }
       });
+    }
+    else {
+      _attachedFiles.initialize();
     }
   }
 

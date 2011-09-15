@@ -164,20 +164,16 @@ public class StudyViewer<E extends Study> extends SearchResultContextEntityViewe
 
   private void initalizeAttachedFiles(Screen screen)
   {
-    _attachedFiles.reset();
     getDao().needReadOnly(screen, Screen.attachedFiles);
     getDao().needReadOnly(screen, Screen.attachedFiles.to(AttachedFile.fileType));
     SortedSet<AttachedFileType> attachedFileTypes =
         Sets.<AttachedFileType>newTreeSet(getDao().findAllEntitiesOfType(ScreenAttachedFileType.class, true));
-    _attachedFiles.setAttachedFileTypes(attachedFileTypes);
-    _attachedFiles.setAttachedFilesEntity(screen);
-
-    _attachedFiles.setAttachedFilesFilter(new Predicate<AttachedFile>() {
+    _attachedFiles.initialize(screen, attachedFileTypes, new Predicate<AttachedFile>() {
       @Override
       public boolean apply(AttachedFile input)
-        {
-          return input.getFileType().getValue().equals(ScreensaverConstants.STUDY_FILE_TYPE);
-        }
+      {
+        return input.getFileType().getValue().equals(ScreensaverConstants.STUDY_FILE_TYPE);
+      }
     });
   }
 

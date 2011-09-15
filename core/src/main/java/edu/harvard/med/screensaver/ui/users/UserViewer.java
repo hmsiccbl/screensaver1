@@ -273,8 +273,7 @@ public class UserViewer extends SearchResultContextEditableEntityViewerBackingBe
     _screensDataModel = null;
     _labMembersDataModel = null;
     _screenAssociatesDataModel = null;
-    _attachedFiles.setAttachedFilesEntity(user);
-    _attachedFiles.setAttachedFileTypes(Sets.<AttachedFileType>newTreeSet(getDao().findAllEntitiesOfType(UserAttachedFileType.class)));
+    _attachedFiles.initialize(user, Sets.<AttachedFileType>newTreeSet(getDao().findAllEntitiesOfType(UserAttachedFileType.class)), null);
     _checklistItems.setEntity(user);
     _checklistItems.setChecklistItemGroups(CHECKLIST_ITEM_GROUPS);
     _lastPrimaryRoles = user.getPrimaryScreensaverUserRoles();

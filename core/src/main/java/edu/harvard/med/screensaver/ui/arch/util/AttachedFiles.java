@@ -69,35 +69,33 @@ public class AttachedFiles extends AbstractBackingBean
     return _dao;
   }
 
-  public void setAttachedFilesEntity(AttachedFilesEntity entity)
-  {
-    _entity = entity;
-  }
-
   protected AttachedFilesEntity getAttachedFilesEntity()
   {
     return _entity;
   }
 
-  public void setAttachedFileTypes(SortedSet<AttachedFileType> attachedFileTypes)
+  public void initialize(AttachedFilesEntity entity,
+                         SortedSet<AttachedFileType> attachedFileTypes,
+                         Predicate<AttachedFile> predicate)
   {
+    _entity = entity;
     _attachedFileTypes = attachedFileTypes;
+    _attachedFileFilter = predicate == null ? Predicates.<AttachedFile>alwaysTrue() : predicate;
+    reset();
   }
 
-  public void setAttachedFilesFilter(Predicate<AttachedFile> predicate)
+  public void initialize()
   {
-    _attachedFileFilter = predicate;
+    initialize(null, null, null);
   }
 
-  public void reset()
+  private void reset()
   {
     _newAttachedFileName = null;
     _newAttachedFileContents = null;
     _newAttachedFileType = null;
     _newAttachedFileDate = null;
     _uploadedAttachedFileContents = null;
-    _entity = null;
-    _attachedFileTypes = null;
   }
 
   public String getNewAttachedFileName()

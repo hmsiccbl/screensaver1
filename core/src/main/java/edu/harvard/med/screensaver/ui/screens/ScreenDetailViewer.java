@@ -219,13 +219,13 @@ public class ScreenDetailViewer extends AbstractStudyDetailViewer<Screen>
                                                          new Predicate<AttachedFileType>() { 
         public boolean apply(AttachedFileType aft) { return !!!aft.getValue().equals(Publication.PUBLICATION_ATTACHED_FILE_TYPE_VALUE); }
       }));
-    _attachedFiles.reset();
-    _attachedFiles.setAttachedFileTypes(attachedFileTypes);
-    _attachedFiles.setAttachedFilesFilter(new Predicate<AttachedFile>() { 
-      public boolean apply(AttachedFile af) { return !!!af.getFileType().getValue().equals(Publication.PUBLICATION_ATTACHED_FILE_TYPE_VALUE); }
-    });
-    _attachedFiles.setAttachedFilesEntity(screen);
-
+    _attachedFiles.initialize(screen, attachedFileTypes,
+                              new Predicate<AttachedFile>() {
+                                public boolean apply(AttachedFile af)
+                                {
+                                  return !!!af.getFileType().getValue().equals(Publication.PUBLICATION_ATTACHED_FILE_TYPE_VALUE);
+                                }
+                              });
     _publicationAttachedFileType = getDao().findEntityByProperty(AttachedFileType.class, "value", Publication.PUBLICATION_ATTACHED_FILE_TYPE_VALUE);
     if (_publicationAttachedFileType == null) {
       throw NoSuchEntityException.forProperty(AttachedFileType.class, "value", Publication.PUBLICATION_ATTACHED_FILE_TYPE_VALUE);
@@ -793,7 +793,6 @@ public class ScreenDetailViewer extends AbstractStudyDetailViewer<Screen>
     }
 
     _newPublication = null;
-    _attachedFiles.reset(); // TODO: I think this should be deleted; expect it to cause newly attached files to be ignored after adding a publication!
     return REDISPLAY_PAGE_ACTION_RESULT;
   }
 
