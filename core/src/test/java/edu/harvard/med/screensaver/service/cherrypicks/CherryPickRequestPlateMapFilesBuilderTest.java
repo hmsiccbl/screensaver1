@@ -9,27 +9,25 @@
 
 package edu.harvard.med.screensaver.service.cherrypicks;
 
-import org.apache.log4j.Logger;
+import java.util.Set;
 
+import org.apache.log4j.Logger;
+import org.springframework.beans.factory.annotation.Autowired;
+
+import edu.harvard.med.screensaver.model.cherrypicks.CherryPickAssayPlate;
+import edu.harvard.med.screensaver.model.cherrypicks.CherryPickRequest;
 import edu.harvard.med.screensaver.test.AbstractSpringTest;
 
 public class CherryPickRequestPlateMapFilesBuilderTest extends AbstractSpringTest
 {
-  // static members
-
   private static Logger log = Logger.getLogger(CherryPickRequestPlateMapFilesBuilderTest.class);
+
+  @Autowired
+  protected CherryPickRequestPlateMapFilesBuilder builder;
 
   public void testBuildZip()
   {
-    // TODO: implement
+    fail("not implemented");
   }
-
-
-  // instance data members
-
-  // public constructors and methods
-
-  // private methods
-
 }
 
