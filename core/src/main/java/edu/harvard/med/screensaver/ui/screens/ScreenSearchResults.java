@@ -502,21 +502,30 @@ public class ScreenSearchResults extends EntityBasedEntitySearchResults<Screen,I
     columns.add(new TextEntityColumn<Screen>(RelationshipPath.from(Screen.class).toProperty("species"),
       "Species", "The species of the cell organism", TableColumn.UNGROUPED) {
       @Override
-      public String getCellValue(Screen screen) { return screen.getSpecies() == null? "": screen.getSpecies().getValue(); }
+      public String getCellValue(Screen screen)
+      {
+        return screen.getSpecies() == null ? null : screen.getSpecies().getValue();
+      }
     });
     columns.get(columns.size() - 1).setVisible(false);
 
     columns.add(new TextEntityColumn<Screen>(RelationshipPath.from(Screen.class).toProperty("cellLine"),
       "Cell Line", "The cell line", TableColumn.UNGROUPED) {
       @Override
-      public String getCellValue(Screen screen) { return screen.getCellLine().getValue(); }
+      public String getCellValue(Screen screen)
+      {
+        return screen.getCellLine() == null ? null : screen.getCellLine().getValue();
+      }
     });
     columns.get(columns.size() - 1).setVisible(false);
 
     columns.add(new TextEntityColumn<Screen>(RelationshipPath.from(Screen.class).toProperty("transfectionAgent"),
       "Transfection Agent", "The transfection agent", TableColumn.UNGROUPED) {
       @Override
-      public String getCellValue(Screen screen) { return screen.getTransfectionAgent().getValue(); }
+      public String getCellValue(Screen screen)
+      {
+        return screen.getTransfectionAgent() == null ? null : screen.getTransfectionAgent().getValue();
+      }
     });
     columns.get(columns.size() - 1).setVisible(false);
 
