@@ -18,6 +18,7 @@ import javax.persistence.GenerationType;
 import javax.persistence.Id;
 import javax.persistence.Inheritance;
 import javax.persistence.InheritanceType;
+import javax.persistence.Version;
 
 import org.hibernate.annotations.Immutable;
 import org.hibernate.annotations.Parameter;
@@ -30,12 +31,12 @@ import edu.harvard.med.screensaver.model.AbstractEntityVisitor;
  * The  screen cell line vocabulary.
  */
 @Entity
-@Immutable
 @org.hibernate.annotations.Proxy
 public class CellLine extends AbstractEntity<Integer> implements Comparable<CellLine>
 {
   private static final long serialVersionUID = 1L;
 
+  private Integer _version;
   private String _value;
 
   /**
@@ -101,5 +102,18 @@ public class CellLine extends AbstractEntity<Integer> implements Comparable<Cell
       return 1;
     }
     return this.getValue().compareTo(other.getValue());
+  }
+
+
+  private void setVersion(Integer version)
+  {
+    this._version = version;
+  }
+
+  @Version
+  @Column(nullable=false)
+  private Integer getVersion()
+  {
+    return _version;
   }
 }

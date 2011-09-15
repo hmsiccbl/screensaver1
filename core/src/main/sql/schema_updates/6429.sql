@@ -13,11 +13,13 @@ alter table screen add column transfection_agent_id int4;
 create table cell_line (
     cell_line_id int4 not null,
     value text not null unique,
+    version int4 not null,
     primary key (cell_line_id)
 );
 create table transfection_agent (
     transfection_agent_id int4 not null,
     value text not null unique,
+    version int4 not null,
     primary key (transfection_agent_id)
 );
 
