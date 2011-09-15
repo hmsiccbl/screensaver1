@@ -507,7 +507,7 @@ public class ScreenDetailViewer extends AbstractStudyDetailViewer<Screen>
   public String addNewCellLine()
   {
     if (StringUtils.isEmpty(_newCellLine.getValue())) {
-      showMessage("new cell line name is required");
+      showMessage("requiredValue", "cell line name");
       return REDISPLAY_PAGE_ACTION_RESULT;
     }
     if (getDao().findEntityByProperty(CellLine.class,
@@ -560,13 +560,13 @@ public class ScreenDetailViewer extends AbstractStudyDetailViewer<Screen>
   public String addNewTransfectionAgent()
   {
     if (StringUtils.isEmpty(_newTransfectionAgent.getValue())) {
-      showMessage("new transfection agent name is required");
+      showMessage("requiredValue", "new transfection agent name");
       return REDISPLAY_PAGE_ACTION_RESULT;
     }
     if (getDao().findEntityByProperty(TransfectionAgent.class,
                                       "value",
                                       _newTransfectionAgent.getValue()) != null) {
-      showMessage("duplicateEntity", "cell line");
+      showMessage("duplicateEntity", "transfection agent");
       return REDISPLAY_PAGE_ACTION_RESULT;
     }
     getDao().persistEntity(_newTransfectionAgent);
