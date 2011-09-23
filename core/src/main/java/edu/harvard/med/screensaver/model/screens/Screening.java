@@ -79,6 +79,8 @@ public abstract class Screening extends LabActivity
   }
 
   /**
+   * The volume in the assay plates prior to the transfer of reagent volume from library copy plates.
+   * Used to calculate the final screening concentration.
    */
   @Column(precision = ScreensaverConstants.VOLUME_PRECISION, scale = ScreensaverConstants.VOLUME_SCALE)
   @org.hibernate.annotations.Type(type = "edu.harvard.med.screensaver.db.usertypes.VolumeType")
