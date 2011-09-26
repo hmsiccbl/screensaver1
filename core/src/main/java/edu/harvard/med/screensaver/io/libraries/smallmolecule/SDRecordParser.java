@@ -16,13 +16,13 @@ import java.util.Set;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-import com.google.common.base.Joiner;
 import com.google.common.collect.Sets;
 import org.apache.log4j.Logger;
 
 import edu.harvard.med.screensaver.io.DataExporter;
 import edu.harvard.med.screensaver.io.ParseError;
 import edu.harvard.med.screensaver.io.ParseException;
+import edu.harvard.med.screensaver.io.libraries.LibraryContentsParser;
 import edu.harvard.med.screensaver.model.MolarConcentration;
 import edu.harvard.med.screensaver.model.MolarUnit;
 import edu.harvard.med.screensaver.model.libraries.LibraryWellType;
@@ -39,10 +39,6 @@ public class SDRecordParser
 
   private static final Logger log = Logger.getLogger(SDRecordParser.class);
   private static final Pattern dataHeaderPattern = Pattern.compile("^>.*<(.*)>.*");
-  private static final Pattern molarConcentrationPattern = Pattern.compile("(\\d+\\.?\\d*)\\s*(" +
-                                                                      Joiner.on('|').join(MolarUnit.DISPLAY_VALUES) + ")");
-  private static final Pattern mgMlConcentrationPattern = Pattern.compile("(\\d+\\.?\\d*)\\s*mg/ml");
-
   private BufferedReader _sdFileReader;
   private int _lineNumber;
 
@@ -165,16 +161,15 @@ public class SDRecordParser
             }
           }
           else if (fieldName.equals("concentration")) {
-            Matcher matcher = molarConcentrationPattern.matcher(line);
+            Matcher matcher = LibraryContentsParser.molarConcentrationPattern.matcher(line);
             if (matcher.matches()) {
               MolarUnit unit = MolarUnit.forSymbol(matcher.group(2));
-              sdRecord.setConcentration(MolarConcentration.makeConcentration(matcher.group(1), unit));
+              sdRecord.setMolarConcentration(MolarConcentration.makeConcentration(matcher.group(1), unit));
             }
             else {
-              matcher = mgMlConcentrationPattern.matcher(line);
+              matcher = LibraryContentsParser.mgMlConcentrationPattern.matcher(line);
               if (matcher.matches()) {
-                // TODO
-                log.warn("mg/ml concentration not yet supported");
+                sdRecord.setMgMlConcentration(new BigDecimal(matcher.group(1) ));
               }
               else {
                 throw new ParseException(new ParseError("field 'concentration' value could not be interpreted as a molar or mg/ml concentration:" +

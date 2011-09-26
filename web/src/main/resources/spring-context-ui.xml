@@ -557,6 +557,7 @@
     <constructor-arg ref="librariesDao" />
     <constructor-arg ref="libraryCopyViewer" />
     <constructor-arg ref="libraryViewer" />
+    <constructor-arg ref="plateUpdater" />
     <property
       name="entityEditPolicy"
       ref="entityEditPolicy" />
@@ -1074,6 +1075,10 @@
 
   <bean id="molecularMassConverter" class="edu.harvard.med.screensaver.ui.arch.util.converter.BigDecimalConverter" >
     <constructor-arg value="2" />
+  </bean>
+  
+  <bean id="plateDilutionFactorConverter" class="edu.harvard.med.screensaver.ui.arch.util.converter.BigDecimalConverter" >
+    <constructor-arg value="4" />
   </bean>
 
   <bean id="silencingReagentTypeConverter" class="edu.harvard.med.screensaver.ui.arch.util.converter.SilencingReagentTypeConverter" />

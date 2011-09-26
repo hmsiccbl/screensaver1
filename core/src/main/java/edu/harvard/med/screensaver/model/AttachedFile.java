@@ -238,8 +238,8 @@ public class AttachedFile extends AuditedAbstractEntity<Integer> implements Comp
   /**
    * Construct an initialized <code>AttachedFile</code>. Intended only for use
    * by {@link Screen}; use
-   * {@link Screen#createAttachedFile(String, AttachedFileType, InputStream)} or
-   * {@link Screen#createAttachedFile(String, AttachedFileType, String)}.
+   * {@link Screen#createAttachedFile(String, CellLine, InputStream)} or
+   * {@link Screen#createAttachedFile(String, CellLine, String)}.
    * 
    * @param screen the screen
    * @param filename the filename
@@ -266,8 +266,8 @@ public class AttachedFile extends AuditedAbstractEntity<Integer> implements Comp
   /**
    * Construct an initialized <code>AttachedFile</code>. Intended only for use
    * by {@link ScreeningRoomUser}; use
-   * {@link ScreeningRoomUser#createAttachedFile(String, AttachedFileType, InputStream)} or
-   * {@link ScreeningRoomUser#createAttachedFile(String, AttachedFileType, String)}.
+   * {@link ScreeningRoomUser#createAttachedFile(String, CellLine, InputStream)} or
+   * {@link ScreeningRoomUser#createAttachedFile(String, CellLine, String)}.
    * 
    * @param screeningRoomUser the screening room user
    * @param filename the filename
@@ -293,8 +293,8 @@ public class AttachedFile extends AuditedAbstractEntity<Integer> implements Comp
 
   /**
    * Construct an initialized <code>AttachedFile</code>. Intended only for use
-   * by {@link Reagent}; use {@link Reagent#createAttachedFile(String, AttachedFileType, InputStream)} or
-   * {@link Reagent#createAttachedFile(String, AttachedFileType, String)}.
+   * by {@link Reagent}; use {@link Reagent#createAttachedFile(String, CellLine, InputStream)} or
+   * {@link Reagent#createAttachedFile(String, CellLine, String)}.
    * 
    * @param reagent the reagent
    * @param filename the filename

@@ -13,11 +13,11 @@ import java.math.BigDecimal;
 import java.math.RoundingMode;
 import java.util.List;
 
+import org.apache.log4j.Logger;
+import org.joda.time.LocalDate;
 import com.google.common.base.Joiner;
 import com.google.common.collect.Iterables;
 import com.google.common.collect.Lists;
-import org.apache.log4j.Logger;
-import org.joda.time.LocalDate;
 
 import edu.harvard.med.screensaver.db.GenericEntityDAO;
 import edu.harvard.med.screensaver.db.LibrariesDAO;
@@ -25,7 +25,7 @@ import edu.harvard.med.screensaver.db.datafetcher.EntityDataFetcher;
 import edu.harvard.med.screensaver.db.hqlbuilder.HqlBuilder;
 import edu.harvard.med.screensaver.model.MolarConcentration;
 import edu.harvard.med.screensaver.model.Volume;
-import edu.harvard.med.screensaver.model.activities.Activity;
+import edu.harvard.med.screensaver.model.libraries.ConcentrationStatistics;
 import edu.harvard.med.screensaver.model.libraries.Copy;
 import edu.harvard.med.screensaver.model.libraries.CopyUsageType;
 import edu.harvard.med.screensaver.model.libraries.Library;
@@ -44,8 +44,8 @@ import edu.harvard.med.screensaver.ui.arch.datatable.column.TableColumn;
 import edu.harvard.med.screensaver.ui.arch.datatable.column.VolumeColumn;
 import edu.harvard.med.screensaver.ui.arch.datatable.column.entity.DateEntityColumn;
 import edu.harvard.med.screensaver.ui.arch.datatable.column.entity.EnumEntityColumn;
+import edu.harvard.med.screensaver.ui.arch.datatable.column.entity.FixedDecimalEntityColumn;
 import edu.harvard.med.screensaver.ui.arch.datatable.column.entity.IntegerEntityColumn;
-import edu.harvard.med.screensaver.ui.arch.datatable.column.entity.MolarConcentrationEntityColumn;
 import edu.harvard.med.screensaver.ui.arch.datatable.column.entity.TextEntityColumn;
 import edu.harvard.med.screensaver.ui.arch.datatable.model.InMemoryEntityDataModel;
 import edu.harvard.med.screensaver.ui.arch.searchresults.EntityBasedEntitySearchResults;
@@ -62,6 +62,8 @@ public class LibraryCopySearchResults extends EntityBasedEntitySearchResults<Cop
   private static final Logger log = Logger.getLogger(LibraryCopySearchResults.class);
 
   protected static final int DECIMAL_SCALE = 1; // number of decimal digits (to the right of decimal point) for plate screening count average
+
+  private static final String COLUMN_GROUP_CONCENTRATION = "Concentration";
 
   private GenericEntityDAO _dao;
   private LibrariesDAO _librariesDao;
@@ -270,26 +272,7 @@ public class LibraryCopySearchResults extends EntityBasedEntitySearchResults<Cop
       }
     });
     
-    columns.add(new FixedDecimalColumn<Copy>("Primary Plate Concentration (mg/ml)",
-                                                       "The most common concentration (mg/ml) for plates of this copy",
-                                                       TableColumn.UNGROUPED) {
-      @Override
-      public BigDecimal getCellValue(Copy copy)
-      {
-        return copy.getPrimaryPlateMgMlConcentration();
-      }
-    });
-        
-    columns.add(new MolarConcentrationEntityColumn<Copy>(PropertyPath.from(Copy.class).toProperty("primaryPlateMolarConcentration"),
-                                                       "Primary Plate Concentration (molar)",
-                                                       "The most common concentration (mg/ml) for plates of this copy",
-                                                       TableColumn.UNGROUPED) {
-      @Override
-      public MolarConcentration getCellValue(Copy copy)
-      {
-        return copy.getPrimaryPlateMolarConcentration();
-      }
-    });
+    buildConcentrationColumns(columns);
     
     columns.add(new IntegerEntityColumn<Copy>(PropertyPath.from(Copy.class).toProperty("platesAvailable"),
                                               "Plates Available",
@@ -512,6 +495,105 @@ public class LibraryCopySearchResults extends EntityBasedEntitySearchResults<Cop
     return columns;
   }
 
+  private void buildConcentrationColumns(List<TableColumn<Copy,?>> columns)
+  {
+    // Concentration Columns
+
+    // molar values
+    
+    columns.add(new TextEntityColumn<Copy>(PropertyPath.from(Copy.class).toProperty("minMolarConcentration"),
+                                                          "Minimum Well Molar Concentration",
+                                                          "The minimum molar concentration of the wells of the copy's plates",
+                                                          COLUMN_GROUP_CONCENTRATION) {
+      @Override
+      public String getCellValue(Copy copy)
+      {
+        MolarConcentration value = copy.getNullSafeConcentrationStatistics().getDilutedMinMolarConcentration(copy.getWellConcentrationDilutionFactor());
+        return value == null ? "n/a": value.toString();
+      }
+    });
+    Iterables.getLast(columns).setVisible(true);
+
+    columns.add(new TextEntityColumn<Copy>(PropertyPath.from(Copy.class).toProperty("maxMolarConcentration"),
+                                                          "Maximum Well Molar Concentration",
+                                                          "The maximum molar concentration of the wells of the copy's plates",
+                                                          COLUMN_GROUP_CONCENTRATION) {
+      @Override
+      public String getCellValue(Copy copy)
+      {
+        MolarConcentration value = copy.getNullSafeConcentrationStatistics().getDilutedMaxMolarConcentration(copy.getWellConcentrationDilutionFactor());
+        return value == null ? "n/a": value.toString();
+      }
+    });
+    Iterables.getLast(columns).setVisible(true);
+    
+    columns.add(new TextEntityColumn<Copy>(PropertyPath.from(Copy.class).toProperty("primaryWellMolarConcentration"),
+                                                          "Primary Well Molar Concentration",
+                                                          "The value of the most frequent plate well molar concentration",
+                                                          COLUMN_GROUP_CONCENTRATION) {
+      @Override
+      public String getCellValue(Copy copy)
+      {
+        MolarConcentration value = copy.getNullSafeConcentrationStatistics().getDilutedPrimaryWellMolarConcentration(copy.getWellConcentrationDilutionFactor());
+        return value == null ? "n/a": value.toString();
+      }
+    });
+    Iterables.getLast(columns).setVisible(false);
+
+     // mg/mL
+    
+    columns.add(new TextEntityColumn<Copy>(PropertyPath.from(Copy.class).toProperty("minMgMlConcentration"),
+                                                    "Minimum Well Concentration (mg/mL)",
+                                                    "The minimum mg/mL concentration of the wells of the copy's plates",
+                                                    COLUMN_GROUP_CONCENTRATION) {
+      @Override
+      public String getCellValue(Copy copy)
+      {
+        BigDecimal value = copy.getNullSafeConcentrationStatistics().getDilutedMinMgMlConcentration(copy.getWellConcentrationDilutionFactor());
+        return value == null ? "n/a" : value.toString();        
+      }
+    });
+    Iterables.getLast(columns).setVisible(true);
+    
+    columns.add(new TextEntityColumn<Copy>(PropertyPath.from(Copy.class).toProperty("maxMgMlConcentration"),
+                                                    "Maximum Well Concentration (mg/mL)",
+                                                    "The minimum mg/mL concentration of the wells of the copy's plates",
+                                                    COLUMN_GROUP_CONCENTRATION) {
+      @Override
+      public String getCellValue(Copy copy)
+      {
+        BigDecimal value = copy.getNullSafeConcentrationStatistics().getDilutedMaxMgMlConcentration(copy.getWellConcentrationDilutionFactor());
+        return value == null ? "n/a" : value.toString();
+      }
+    });
+    Iterables.getLast(columns).setVisible(true);    
+    
+    columns.add(new TextEntityColumn<Copy>(PropertyPath.from(Copy.class).toProperty("primaryWellMgMlConcentration"),
+                                                    "Primary Well Concentration (mg/mL)",
+                                                    "The value of the most frequent plate well mg/mL concentration",
+                                                    COLUMN_GROUP_CONCENTRATION) {
+      @Override
+      public String getCellValue(Copy copy)
+      {
+        BigDecimal value = copy.getNullSafeConcentrationStatistics().getDilutedPrimaryWellMgMlConcentration(copy.getWellConcentrationDilutionFactor());
+        return value == null ? "n/a" : value.toString();
+      }
+    });
+    Iterables.getLast(columns).setVisible(false);
+    
+    columns.add(new FixedDecimalEntityColumn<Copy>(PropertyPath.from(Copy.class).toProperty("wellConcentrationDilutionFactor"),
+                                                    "Primary Well Concentration Dilution Factor",
+                                                    "The most often ocurring factor by which the original library well concentration is diluted for this copy's plates",
+                                                    COLUMN_GROUP_CONCENTRATION) {
+      @Override
+      public BigDecimal getCellValue(Copy copy)
+      {
+        return copy.getWellConcentrationDilutionFactor();
+      }
+    });
+    Iterables.getLast(columns).setVisible(true);
+  }
+  
   private static VolumeStatistics getNullSafeVolumeStatistics(Copy copy)
   {
     VolumeStatistics volumeStatistics = copy.getVolumeStatistics();
@@ -519,7 +601,7 @@ public class LibraryCopySearchResults extends EntityBasedEntitySearchResults<Cop
       return VolumeStatistics.Null;
     }
     return volumeStatistics;
-  }
+  }  
 
   @Override
   protected Copy rowToEntity(Copy row)

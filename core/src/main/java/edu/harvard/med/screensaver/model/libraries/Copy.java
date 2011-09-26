@@ -95,9 +95,10 @@ public class Copy extends AuditedAbstractEntity<Integer> implements Comparable<C
   private VolumeStatistics _volumeStatistics;
   private Integer _platesAvailable;
   private Integer _plateLocationsCount;
-  private BigDecimal _primaryPlateMgMlConcentration;
-  private MolarConcentration _primaryPlateMolarConcentration;
+  private ConcentrationStatistics _concentrationStatistics;
 
+  private BigDecimal _wellConcentrationDilutionFactor;
+  
   @Override
   public Object acceptVisitor(AbstractEntityVisitor visitor)
   {
@@ -252,6 +253,7 @@ public class Copy extends AuditedAbstractEntity<Integer> implements Comparable<C
       createPlate(p);
     }
     _primaryPlateStatus = PlateStatus.NOT_SPECIFIED;
+//    _concentrationStatistics = new ConcentrationStatistics();
   }
 
   /**
@@ -353,31 +355,6 @@ public class Copy extends AuditedAbstractEntity<Integer> implements Comparable<C
     _primaryPlateStatus = primaryPlateStatus;
   }
 
-  @Column(precision = ScreensaverConstants.MG_ML_CONCENTRATION_PRECISION, scale = ScreensaverConstants.MG_ML_CONCENTRATION_SCALE)
-  @Derived
-  public BigDecimal getPrimaryPlateMgMlConcentration()
-  {
-    return _primaryPlateMgMlConcentration;
-  }
-
-  public void setPrimaryPlateMgMlConcentration(BigDecimal value)
-  {
-    _primaryPlateMgMlConcentration = value;
-  }
-  
-  @Column(precision = ScreensaverConstants.MOLAR_CONCENTRATION_PRECISION, scale = ScreensaverConstants.MOLAR_CONCENTRATION_SCALE)
-  @org.hibernate.annotations.Type(type = "edu.harvard.med.screensaver.db.usertypes.MolarConcentrationType")
-  @Derived
-  public MolarConcentration getPrimaryPlateMolarConcentration()
-  {
-    return _primaryPlateMolarConcentration;
-  }
-
-  public void setPrimaryPlateMolarConcentration(MolarConcentration value)
-  {
-    _primaryPlateMolarConcentration = value;
-  }
-
   @Transient
   public VolumeStatistics getVolumeStatistics()
   {
@@ -411,4 +388,73 @@ public class Copy extends AuditedAbstractEntity<Integer> implements Comparable<C
     return _plateLocationsCount;
   }
 
+  public void setConcentrationStatistics(ConcentrationStatistics _concentrationStatistics)
+  {
+    this._concentrationStatistics = _concentrationStatistics;
+  }
+
+  @Column
+  public ConcentrationStatistics getConcentrationStatistics()
+  {
+      return _concentrationStatistics;
+  }
+      
+  @Transient
+  public ConcentrationStatistics getNullSafeConcentrationStatistics()
+  {
+    ConcentrationStatistics concentrationStatistics = getConcentrationStatistics();
+    if (concentrationStatistics == null) {
+      return ConcentrationStatistics.NULL;
+    }
+    return concentrationStatistics;
+  }
+
+  @Transient
+  public MolarConcentration getMinMolarConcentration()
+  {
+    return getNullSafeConcentrationStatistics().getMinMolarConcentration();
+  }
+
+  @Transient
+  public MolarConcentration getMaxMolarConcentration()
+  {
+    return getNullSafeConcentrationStatistics().getMaxMolarConcentration();
+  }
+
+  @Transient
+  public BigDecimal getMinMgMlConcentration()
+  {
+    return getNullSafeConcentrationStatistics().getMinMgMlConcentration();
+  }
+
+  @Transient
+  public BigDecimal getMaxMgMlConcentration()
+  {
+    return getNullSafeConcentrationStatistics().getMaxMgMlConcentration();
+  }
+  
+  @Transient
+  public BigDecimal getPrimaryWellMgMlConcentration()
+  {
+    return getNullSafeConcentrationStatistics().getPrimaryWellMgMlConcentration();
+  }
+
+  @Transient
+  public MolarConcentration getPrimaryWellMolarConcentration()
+  {
+    return getNullSafeConcentrationStatistics().getPrimaryWellMolarConcentration();
+  }
+
+  public void setWellConcentrationDilutionFactor(BigDecimal _plateDilutionFactor)
+  {
+    this._wellConcentrationDilutionFactor = _plateDilutionFactor;
+  }
+
+  @Column(precision = ScreensaverConstants.PLATE_DILUTION_FACTOR_PRECISION, scale = ScreensaverConstants.PLATE_DILUTION_FACTOR_SCALE )
+  public BigDecimal getWellConcentrationDilutionFactor()
+  {
+    if(_wellConcentrationDilutionFactor == null ) return BigDecimal.ONE; // Todo: this should not happen
+    return _wellConcentrationDilutionFactor;
+  }  
+    
 }

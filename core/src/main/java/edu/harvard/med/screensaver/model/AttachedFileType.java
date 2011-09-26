@@ -49,7 +49,7 @@ public abstract class AttachedFileType extends AbstractEntity<Integer> implement
   }
   
   /**
-   * Constructs an <code>AttachedFileType</code> vocabulary term.
+   * Constructs an <code>CellLine</code> vocabulary term.
    * @param value The value of the term.
    */
   public AttachedFileType(String value)

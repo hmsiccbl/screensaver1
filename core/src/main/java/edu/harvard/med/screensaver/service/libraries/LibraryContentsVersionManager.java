@@ -33,15 +33,18 @@ public class LibraryContentsVersionManager
   private static final Logger log = Logger.getLogger(LibraryContentsVersionManager.class);
   
   private GenericEntityDAO _dao;
+  private PlateUpdater _plateUpdater;
   
   /**
    * @motivation for CGLIB2
    */
   public LibraryContentsVersionManager() {}
 
-  public LibraryContentsVersionManager(GenericEntityDAO dao)
+  public LibraryContentsVersionManager(GenericEntityDAO dao, 
+                               PlateUpdater plateUpdater)
   {
     _dao = dao;
+    _plateUpdater = plateUpdater;
   }
 
   @Transactional
@@ -85,6 +88,11 @@ public class LibraryContentsVersionManager
       _dao.clear();
       log.debug("updated " + n + " well(s)");
     }
+    
+    log.info("update plate concentrations");
+    _plateUpdater.updatePrimaryWellConcentrations(library); 
+    log.info("updated plate concentrations");
+    
     return lcv;
   }
 }

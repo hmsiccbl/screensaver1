@@ -42,7 +42,7 @@ public class SDRecord
   private List<Integer> _pubchemCids = Lists.newLinkedList();
   private List<Integer> _chembankIds = Lists.newLinkedList();
   private List<Integer> _chemblIds = Lists.newLinkedList();
-  private MolarConcentration _concentration;
+  private MolarConcentration _molarConcentration;
   private BigDecimal _mgMlConcentration;
   private List<Integer> _pubmedIds = Lists.newLinkedList();
 
@@ -78,15 +78,26 @@ public class SDRecord
     _molfile = molfile;
   }
 
-  public MolarConcentration getConcentration()
+  public MolarConcentration getMolarConcentration()
   {
-    return _concentration;
+    return _molarConcentration;
   }
 
-  public void setConcentration(MolarConcentration value)
+  public void setMolarConcentration(MolarConcentration value)
   {
-    _concentration = value;
+    _molarConcentration = value;
   }
+    
+  public void setMgMlConcentration(BigDecimal _mgMlConcentration)
+  {
+    this._mgMlConcentration = _mgMlConcentration;
+  }
+  
+  public BigDecimal getMgMlConcentration()
+  {
+    return _mgMlConcentration;
+  }
+  
   public BigDecimal getMolecularMass() { return _molecularMass; }
   public void setMolecularMass(BigDecimal molecularMass) { _molecularMass = molecularMass; }
   public BigDecimal getMolecularWeight() { return _molecularWeight; }
@@ -145,7 +156,8 @@ public class SDRecord
       "MOLFILE = " + _molfile          + "\n" +
       "MOLMASS = " + _molecularMass    + "\n" +
       "MOLFORM = " + _molecularFormula + "\n" +
-      "CONCENTRATION = " + _concentration + "\n" +
+      "MOLARCONCENTRATION = " + _molarConcentration + "\n" +
+      "MGMLCONCENTRATION = " + _mgMlConcentration + "\n" +
       "PLATE   = " + _plateNumber      + "\n" +
       "WELL    = " + _wellName         + "\n" +
       "VEND ID = " + _vendorIdentifier + "\n" +

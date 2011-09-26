@@ -1,8 +1,10 @@
-// $HeadURL$
+// $HeadURL:
+// http://seanderickson1@forge.abcd.harvard.edu/svn/screensaver/branches/serickson/2920-rev2/core/src/main/java/edu/harvard/med/screensaver/test/TestDataFactory.java
+// $
 // $Id$
 //
 // Copyright © 2006, 2010 by the President and Fellows of Harvard College.
-// 
+//
 // Screensaver is an open-source project developed by the ICCB-L and NSRB labs
 // at Harvard Medical School. This software is distributed under the terms of
 // the GNU General Public License.
@@ -13,6 +15,7 @@ import java.lang.reflect.Constructor;
 import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
 import java.math.BigDecimal;
+import java.math.RoundingMode;
 import java.util.Arrays;
 import java.util.Comparator;
 import java.util.List;
@@ -37,6 +40,7 @@ import edu.harvard.med.screensaver.db.GenericEntityDAO;
 import edu.harvard.med.screensaver.model.AbstractEntity;
 import edu.harvard.med.screensaver.model.AttachedFileType;
 import edu.harvard.med.screensaver.model.MolarConcentration;
+import edu.harvard.med.screensaver.model.MolarUnit;
 import edu.harvard.med.screensaver.model.Volume;
 import edu.harvard.med.screensaver.model.VolumeUnit;
 import edu.harvard.med.screensaver.model.activities.AdministrativeActivity;
@@ -51,6 +55,7 @@ import edu.harvard.med.screensaver.model.cherrypicks.CherryPickRequest;
 import edu.harvard.med.screensaver.model.cherrypicks.LabCherryPick;
 import edu.harvard.med.screensaver.model.cherrypicks.RNAiCherryPickRequest;
 import edu.harvard.med.screensaver.model.cherrypicks.SmallMoleculeCherryPickRequest;
+import edu.harvard.med.screensaver.model.libraries.ConcentrationStatistics;
 import edu.harvard.med.screensaver.model.libraries.Copy;
 import edu.harvard.med.screensaver.model.libraries.CopyUsageType;
 import edu.harvard.med.screensaver.model.libraries.Gene;
@@ -85,7 +90,6 @@ import edu.harvard.med.screensaver.model.screenresults.ResultValue;
 import edu.harvard.med.screensaver.model.screenresults.ScreenResult;
 import edu.harvard.med.screensaver.model.screens.AssayProtocolType;
 import edu.harvard.med.screensaver.model.screens.AssayReadoutType;
-import edu.harvard.med.screensaver.model.screens.CellLine;
 import edu.harvard.med.screensaver.model.screens.LabActivity;
 import edu.harvard.med.screensaver.model.screens.LibraryScreening;
 import edu.harvard.med.screensaver.model.screens.ProjectPhase;
@@ -98,7 +102,6 @@ import edu.harvard.med.screensaver.model.screens.Screening;
 import edu.harvard.med.screensaver.model.screens.Species;
 import edu.harvard.med.screensaver.model.screens.StatusItem;
 import edu.harvard.med.screensaver.model.screens.StudyType;
-import edu.harvard.med.screensaver.model.screens.TransfectionAgent;
 import edu.harvard.med.screensaver.model.users.AdministratorUser;
 import edu.harvard.med.screensaver.model.users.AffiliationCategory;
 import edu.harvard.med.screensaver.model.users.ChecklistItemGroup;
@@ -133,7 +136,7 @@ import edu.harvard.med.screensaver.util.StringUtils;
 public class TestDataFactory
 {
   private static Logger log = Logger.getLogger(TestDataFactory.class);
-  
+
   private static String STRING_TEST_VALUE_PREFIX = "test-";
   private static int STRING_TEST_VALUE_RADIX = 36;
 
@@ -301,7 +304,7 @@ public class TestDataFactory
       super(entityClass, patternSuffix, dao, dataFactory);
       this.cstr = cstr;
     }
-    
+
     @Override
     public T newInstance(String callStack)
     {
@@ -400,13 +403,13 @@ public class TestDataFactory
   }
 
   private Integer _integerTestValue = 77;
-  private double  _doubleTestValue = 77.1;
+  private double _doubleTestValue = 77.1;
   private boolean _booleanTestValue = true;
   private Character _characterTestValue = 'a';
-  private int     _stringTestValueIndex = Integer.parseInt("antz", STRING_TEST_VALUE_RADIX);
-  private long    _dateMilliseconds = new LocalDate(2008, 3, 10).toDateMidnight().getMillis();
-  private int     _vocabularyTermCounter = 0;
-  private int     _wellNameTestValueIndex = 0;
+  private int _stringTestValueIndex = Integer.parseInt("antz", STRING_TEST_VALUE_RADIX);
+  private long _dateMilliseconds = new LocalDate(2008, 3, 10).toDateMidnight().getMillis();
+  private int _vocabularyTermCounter = 0;
+  private int _wellNameTestValueIndex = 0;
   private WellKey _wellKeyTestValue = new WellKey("00001:A01");
 
   private Multimap<Class,Builder> builders = ArrayListMultimap.create();
@@ -514,7 +517,7 @@ public class TestDataFactory
       @Override
       public Boolean newInstance(String callStack)
       {
-        _booleanTestValue = ! _booleanTestValue;
+        _booleanTestValue = !_booleanTestValue;
         return Boolean.valueOf(_booleanTestValue);
       }
     });
@@ -530,9 +533,16 @@ public class TestDataFactory
       @Override
       public BigDecimal newInstance(String callStack)
       {
-        BigDecimal val = new BigDecimal((TestDataFactory.this.newInstance(Double.class)).doubleValue());
-        // 2 is the default scale used in our Hibernate mapping
-        val = val.setScale(2);
+        BigDecimal val = null;
+        if(callStack.contains("mgMlConcentration")){
+          // mgMlConcentration has a max precision 5, scale 3
+          val = new BigDecimal((TestDataFactory.this.newInstance(Double.class)).doubleValue()/10);
+          val = val.setScale(3,RoundingMode.HALF_UP); 
+        }else {
+          // 2 is the default scale used in our Hibernate mapping
+          val = new BigDecimal((TestDataFactory.this.newInstance(Double.class)).doubleValue());
+          val = val.setScale(2);
+        }
         return val;
       }
     });
@@ -635,6 +645,14 @@ public class TestDataFactory
       {
         return new StockPlateMapping(TestDataFactory.this.newInstance(Plate.class, callStack).getPlateNumber(),
                                      TestDataFactory.this.newInstance(Quadrant.class, callStack));
+      }
+    });
+    addBuilder(new AbstractBuilder<ConcentrationStatistics>(ConcentrationStatistics.class) {
+      @Override
+      public ConcentrationStatistics newInstance(String callStack)
+      {
+        return new ConcentrationStatistics(MolarConcentration.makeConcentration("1", MolarUnit.MILLIMOLAR),MolarConcentration.makeConcentration("10", MolarUnit.MILLIMOLAR), MolarConcentration.makeConcentration("1", MolarUnit.MILLIMOLAR), 
+                                           new BigDecimal("1.000"), new BigDecimal("10.000"), new BigDecimal("1.000"));
       }
     });
     addBuilder(new AbstractBuilder<Quadrant>(Quadrant.class) {
@@ -869,7 +887,7 @@ public class TestDataFactory
       public Gene newInstance(String callStack)
       {
         SilencingReagent silencingReagent = TestDataFactory.this.newInstance(SilencingReagent.class, callStack);
-        return  silencingReagent.getVendorGene();
+        return silencingReagent.getVendorGene();
       }
     });
 
@@ -885,7 +903,7 @@ public class TestDataFactory
                                                                     public void postCreate(String callStack, SilencingReagent sr)
                                                                 {
                                                                   // instantiate both gene types since this must be done before the SMR is persisted.
-                                                                  Gene gene = sr.getFacilityGene()
+                                                                    Gene gene = sr.getFacilityGene()
                                                                       .withEntrezgeneId(1) // values used by GeneTest
                                                                       .withGeneName("genename")
                                                                       .withSpeciesName("species")
@@ -893,10 +911,9 @@ public class TestDataFactory
                                                                       .withEntrezgeneSymbol("symbol2")
                                                                       .withGenbankAccessionNumber("gbn1")
                                                                       .withGenbankAccessionNumber("gbn2");
-                                                                  sr.getVendorGene();
-                                                                }
-                                                                  })
-    );
+                                                                    sr.getVendorGene();
+                                                                  }
+                                                                  }));
     addBuilder(new ParentedEntityBuilder<SmallMoleculeReagent,Well>(SmallMoleculeReagent.class,
                                                                     Well.class.getMethod("createSmallMoleculeReagent", new Class[] {
                                                                       ReagentVendorIdentifier.class,
@@ -909,6 +926,20 @@ public class TestDataFactory
     addBuilder(new ParentedEntityBuilder<NaturalProductReagent,Well>(NaturalProductReagent.class,
                                                                      Well.class.getMethod("createNaturalProductReagent", new Class[] {
                                                                                           ReagentVendorIdentifier.class }), "", genericEntityDao, this));
+
+    addBuilder(new ParentedEntityBuilder<Well,Library>(Well.class,
+                                                                     Library.class.getMethod("createWell", new Class[] {
+                                                                       WellKey.class, LibraryWellType.class }), "", genericEntityDao, this)
+                                                                                          .addPostCreateHook(new PostCreateHook<Well>() {
+
+                                                                                            @Override
+                                                                                            public void postCreate(String callStack,
+                                                                                                                   Well o)
+                                                                                            {
+                                                                                              o.setMgMlConcentration(new BigDecimal("99.9"));
+                                                                                               
+                                                                                            }
+                                                                                          }));
     Builder<ResultValue> numericResultValueBuilder =
       new ParentedEntityBuilder<ResultValue,DataColumn>(ResultValue.class,
                                                         DataColumn.class.getMethod("createResultValue",
@@ -927,7 +958,7 @@ public class TestDataFactory
 
     addPostCreateHook(Well.class, new PostCreateHook<Well>() {
       /** ensure that a well has a reagent if we're ultimately instantiating a LabCherryPick */
-      public void postCreate(String callStack, Well well) 
+      public void postCreate(String callStack, Well well)
       {
         if (callStack.contains(LabCherryPick.class.getName())) {
           Library library = well.getLibrary();
@@ -953,7 +984,7 @@ public class TestDataFactory
           else {
             throw new DevelopmentException("unhandled reagent type " + reagentType);
           }
-          AdministrativeActivity releaseActivity = 
+          AdministrativeActivity releaseActivity =
             new AdministrativeActivity(newInstance(AdministratorUser.class),
                                        new LocalDate(),
                                        AdministrativeActivityType.LIBRARY_CONTENTS_VERSION_RELEASE);
@@ -962,7 +993,8 @@ public class TestDataFactory
       }
     }).addPreCreateHook(new ParentedPreCreateHook<Well,Library>() {
       /** ensures well plate numbers agree with library start/end plate */
-      public void preCreate(String callStack, Object[] args) {
+      public void preCreate(String callStack, Object[] args)
+      {
         args[0] = new WellKey(parent.getStartPlate(), 0, 0);
         args[1] = LibraryWellType.EXPERIMENTAL;
       }
@@ -995,17 +1027,17 @@ public class TestDataFactory
     });
 
     addPreCreateHook(RNAiCherryPickRequest.class,
-                     new ParentedPreCreateHook<RNAiCherryPickRequest,Screen>() 
+                     new ParentedPreCreateHook<RNAiCherryPickRequest,Screen>()
                      {
-      @Override
-      public void setParent(Screen parent)
+                       @Override
+                       public void setParent(Screen parent)
       {
         super.setParent(parent);
         parent.setScreenType(ScreenType.RNAI);
       }
                      });
     addPreCreateHook(SmallMoleculeCherryPickRequest.class,
-                     new ParentedPreCreateHook<SmallMoleculeCherryPickRequest,Screen>() 
+                     new ParentedPreCreateHook<SmallMoleculeCherryPickRequest,Screen>()
                      {
                        @Override
                        public void setParent(Screen parent)
@@ -1014,7 +1046,7 @@ public class TestDataFactory
         parent.setScreenType(ScreenType.SMALL_MOLECULE);
       }
                      });
-    
+
     addPreCreateHook(AnnotationValue.class,
                      new ParentedPreCreateHook<AnnotationValue,AnnotationType>()
                      {
@@ -1033,11 +1065,11 @@ public class TestDataFactory
                      new PreCreateHook<SmallMoleculeReagent>()
                      {
 
-                      @Override
-                      public void preCreate(String callStack, Object[] args)
+                       @Override
+                       public void preCreate(String callStack, Object[] args)
                       {
                         args[4] = new BigDecimal("1000.001");
-                         args[5] = new BigDecimal("1.001");
+                        args[5] = new BigDecimal("1.001");
                       }
                      });
   }
@@ -1173,7 +1205,8 @@ public class TestDataFactory
   {
     ContainedEntity containedEntity = entityClass.getAnnotation(ContainedEntity.class);
     if (containedEntity == null) {
-      throw new DomainModelDefinitionException("to find factory methods, @ContainedEntity annotation must exist in class " + entityClass.getName());
+      throw new DomainModelDefinitionException("to find factory methods, @ContainedEntity annotation must exist in class " +
+        entityClass.getName());
     }
     Class<? extends AbstractEntity> parentClass = containedEntity.containingEntityClass();
     SortedSet<Method> candidateFactoryMethods = Sets.newTreeSet(new Comparator<Method>() {
@@ -1206,11 +1239,12 @@ public class TestDataFactory
     }
     log.debug("candidate factory methods for " + entityClass + " in parent " + parentClass + ": " + candidateFactoryMethods);
     if (candidateFactoryMethods.isEmpty()) {
-      throw new DomainModelDefinitionException("no 'create' factory method exists for " + entityClass + " in parent " + parentClass);
+      throw new DomainModelDefinitionException("no 'create' factory method exists for " + entityClass + " in parent " +
+        parentClass);
     }
-    
+
     log.debug("chose candidate factory method " + candidateFactoryMethods.first());
-    return candidateFactoryMethods.first(); 
+    return candidateFactoryMethods.first();
   }
 
   /**

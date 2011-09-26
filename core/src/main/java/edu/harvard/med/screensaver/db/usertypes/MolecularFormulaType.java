@@ -18,7 +18,7 @@ import org.hibernate.Hibernate;
 import org.hibernate.HibernateException;
 import org.hibernate.usertype.UserType;
 
-import edu.harvard.med.screensaver.model.Volume;
+import edu.harvard.med.screensaver.model.libraries.MolecularFormula;
 
 public class MolecularFormulaType implements UserType
 {
@@ -90,7 +90,7 @@ public class MolecularFormulaType implements UserType
 
   public Class returnedClass()
   {
-    return Volume.class;
+    return MolecularFormula.class;
   }
 
   // private methods

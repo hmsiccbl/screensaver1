@@ -104,6 +104,16 @@ public class LibraryCopyViewer extends SearchResultContextEntityViewerBackingBea
   {
     return isUserInRole(ScreensaverUserRole.LIBRARY_COPIES_ADMIN);
   }
+  
+  public BigDecimal getFinalPrimaryWellMgMlConcentration() 
+  {
+    return getEntity().getNullSafeConcentrationStatistics().getDilutedPrimaryWellMgMlConcentration(getEntity().getWellConcentrationDilutionFactor());
+  }
+  
+  public MolarConcentration getFinalPrimaryWellMolarConcentration() 
+  {
+    return getEntity().getNullSafeConcentrationStatistics().getDilutedPrimaryWellMolarConcentration(getEntity().getWellConcentrationDilutionFactor());
+  }
 
   /*
    * For [#2571] copy plates info made prominent as copy viewer properties - display plate properties as (pseudo) copy
@@ -141,11 +151,11 @@ public class LibraryCopyViewer extends SearchResultContextEntityViewerBackingBea
         if (plate.getWellVolume() != null) {
           _volumes.add(plate.getWellVolume());
         }
-        if(plate.getMgMlConcentration() != null) {
-          _mgMlConcentrations.add(plate.getMgMlConcentration());
+        if(plate.getPrimaryWellMgMlConcentration() != null) {
+          _mgMlConcentrations.add(plate.getNullSafeConcentrationStatistics().getDilutedPrimaryWellMgMlConcentration(getEntity().getWellConcentrationDilutionFactor()));
         }
-        if(plate.getMolarConcentration() != null) {
-          _molarConcentrations.add(plate.getMolarConcentration());
+        if(plate.getPrimaryWellMolarConcentration() != null) {
+          _molarConcentrations.add(plate.getNullSafeConcentrationStatistics().getDilutedPrimaryWellMolarConcentration(getEntity().getWellConcentrationDilutionFactor()));
         }
         _secondaryStatuses.add(plate.getStatus());
         if (plate.getPlateType() != null) {
@@ -169,11 +179,13 @@ public class LibraryCopyViewer extends SearchResultContextEntityViewerBackingBea
     {
       return _mgMlConcentrations;
     }
+    public boolean getHasMultipleMgMlConcentrations() { return _mgMlConcentrations.size() > 1; }
     
     public SortedSet<MolarConcentration> getMolarConcentrations()
     {
       return _molarConcentrations;
     }
+    public boolean getHasMultipleMolarConcentrations() { return _molarConcentrations.size() > 1; }
 
     public SortedSet<PlateStatus> getSecondaryStatuses()
     {
@@ -184,6 +196,7 @@ public class LibraryCopyViewer extends SearchResultContextEntityViewerBackingBea
     {
       return _types;
     }
+
   };
 
 }

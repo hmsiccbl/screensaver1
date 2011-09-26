@@ -110,6 +110,7 @@
     class="edu.harvard.med.screensaver.service.libraries.LibraryContentsVersionManager"
     scope="singleton">
     <constructor-arg ref="genericEntityDao"/>
+    <constructor-arg ref="plateUpdater"/>
   </bean>
 
   <bean

@@ -104,21 +104,68 @@
         description="The maximum well volume remaining across all library screening plates of this copy"
         value="#{libraryCopyViewer.entity.volumeStatistics.maxRemaining}"
         editable="false" rendered="#{!entity.transient}" />
-    </ss:propertyGroup>
+    </ss:propertyGroup >
+
+    <ss:propertyGroup id="plateConcentrationGroup" label="Plate Concentration Dilution"
+      description="Set only one of the three fields:  If the dilution factor is known, set it directly.  If the dilution factor is not known, use the (mg/mL) or the (molar) field."
+      rendered="#{libraryCopyDetail.editMode}" >
+
+     <ss:property id="molarConcentration" label="Final Well Concentration on Copy Plates (Molar)"
+       value="#{libraryCopyDetail.molarConcentrationValue}"
+       type="MolarConcentration"
+       unitsSelector="#{libraryCopyDetail.molarConcentrationType}"
+       description="Set the diluted molar concentration of the well reagent on the copy plates" editable="#{libraryCopyDetail.editMode}"
+       rendered="#{!entity.transient &amp;&amp; ! empty libraryCopyViewer.finalPrimaryWellMolarConcentration}"
+       editWidth="6" />
+
+     <ss:property id="mgMlConcentration" label="Final Well Concentration on Copy Plates (mg/mL)"
+       value="#{libraryCopyDetail.mgMlConcentration}"
+       converter="#{mgMlConcentrationConverter}"
+       description="Set the diluted mg/mL concentration of the well reagent on the copy plate" editable="#{libraryCopyDetail.editMode}"
+       rendered="#{!entity.transient &amp;&amp; ! empty libraryCopyViewer.finalPrimaryWellMgMlConcentration}"
+       editWidth="6" />
+
+     <ss:property id="plateDilutionFactor" label="Copy Plate Well Concentration Dilution Factor"
+       value="#{libraryCopyDetail.wellConcentrationDilutionFactor}"
+       converter="#{plateDilutionFactorConverter}"
+       description="Set the factor by which the concentration of this copy's plate wells are diluted (must be greater than 1)" editable="#{libraryCopyDetail.editMode}"
+       editWidth="9" />
+
+    </ss:propertyGroup> 
     
     <ss:propertyGroup label="Plate Concentrations">
-      <ss:property id="mgMlConcentration" label="Concentration (mg/mL)"
-        type="List"
-        description="The mg/mL concentrations of reagents  on the  plates"
-        value="#{libraryCopyViewer.plateAggregateFields.mgMlConcentrations}"
-        editable="false" rendered="#{!entity.transient}" />
-      <ss:property id="molarConcentration" label="Concentration (molar)"
-        type="List"
-        description="The molar concentrations of reagents  on the  plates"
-        value="#{libraryCopyViewer.plateAggregateFields.molarConcentrations}"
-        editable="false" rendered="#{!entity.transient}" />
+
+     <ss:property id="primaryMolarConcentration" label="Primary Plate Value"
+      type="MolarConcentration"
+      description="The  most often occurring molar concentration of the wells of the copy's plates"
+      value="#{libraryCopyViewer.finalPrimaryWellMolarConcentration}"
+      editable="false" rendered="#{!entity.transient &amp;&amp; ! empty libraryCopyViewer.finalPrimaryWellMolarConcentration}" />
+
+     <ss:property id="primaryMgMlConcentration" label="Primary Plate Value"
+      type="text"
+      description="The  most often occurring mg/mL concentration of the wells of the copy's plates"
+      value="#{libraryCopyViewer.finalPrimaryWellMgMlConcentration} (mg/mL)"
+      editable="false" rendered="#{!entity.transient &amp;&amp; ! empty libraryCopyViewer.finalPrimaryWellMgMlConcentration}" />
+
+    <ss:property id="primaryConcsMolar" label="Plate Values"
+      type="List"
+      description="List the per plate most often occuring well concentrations (molar)"
+      value="#{libraryCopyViewer.plateAggregateFields.molarConcentrations}"
+      editable="false" rendered="#{!entity.transient &amp;&amp; libraryCopyViewer.plateAggregateFields.hasMultipleMolarConcentrations}" />
+
+    <ss:property id="primaryConcsMgMl" label="Plate Values (mg/mL)"
+      type="List"
+      description="List the per plate most often occuring well concentrations (mg/mL)"
+      value="#{libraryCopyViewer.plateAggregateFields.mgMlConcentrations}"
+      editable="false" rendered="#{!entity.transient &amp;&amp; libraryCopyViewer.plateAggregateFields.hasMultipleMgMlConcentrations}" />    
+
+    <ss:property id="wellConcentrationDilutionFactor" label="Well Concentration Dilution Factor"
+      type="text"
+      description="well concentration dilution factor used"
+      value="#{libraryCopyViewer.entity.wellConcentrationDilutionFactor}"
+      editable="false" rendered="#{!entity.transient }" />
     </ss:propertyGroup>
-    
+
     <ss:property id="copyComments" label="Comments" type="Textarea"
       value="#{libraryCopyDetail.entity.comments}"
       editable="#{libraryCopyDetail.editMode}" editWidth="80"

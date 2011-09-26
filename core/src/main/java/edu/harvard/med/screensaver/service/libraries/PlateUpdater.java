@@ -10,16 +10,21 @@
 package edu.harvard.med.screensaver.service.libraries;
 
 import java.math.BigDecimal;
+import java.math.RoundingMode;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.Comparator;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Set;
-import java.util.SortedMap;
 
+import org.apache.log4j.Logger;
+import org.joda.time.LocalDate;
+import org.springframework.transaction.annotation.Transactional;
 import com.google.common.base.Function;
+import com.google.common.base.Predicate;
 import com.google.common.base.Predicates;
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.Iterables;
@@ -27,12 +32,9 @@ import com.google.common.collect.Iterators;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
 import com.google.common.collect.Multimaps;
-import org.apache.commons.collections.BagUtils;
-import org.apache.commons.collections.MapUtils;
-import org.apache.log4j.Logger;
-import org.joda.time.LocalDate;
-import org.springframework.transaction.annotation.Transactional;
+import com.google.common.collect.Sets;
 
+import edu.harvard.med.screensaver.ScreensaverConstants;
 import edu.harvard.med.screensaver.db.GenericEntityDAO;
 import edu.harvard.med.screensaver.db.Query;
 import edu.harvard.med.screensaver.model.BusinessRuleViolationException;
@@ -40,13 +42,16 @@ import edu.harvard.med.screensaver.model.MolarConcentration;
 import edu.harvard.med.screensaver.model.Volume;
 import edu.harvard.med.screensaver.model.activities.AdministrativeActivity;
 import edu.harvard.med.screensaver.model.activities.AdministrativeActivityType;
+import edu.harvard.med.screensaver.model.libraries.ConcentrationStatistics;
 import edu.harvard.med.screensaver.model.libraries.Copy;
+import edu.harvard.med.screensaver.model.libraries.Library;
+import edu.harvard.med.screensaver.model.libraries.LibraryWellType;
 import edu.harvard.med.screensaver.model.libraries.Plate;
 import edu.harvard.med.screensaver.model.libraries.PlateLocation;
 import edu.harvard.med.screensaver.model.libraries.PlateStatus;
 import edu.harvard.med.screensaver.model.libraries.PlateType;
+import edu.harvard.med.screensaver.model.libraries.Well;
 import edu.harvard.med.screensaver.model.users.AdministratorUser;
-import edu.harvard.med.screensaver.ui.arch.util.converter.MgMlConcentrationConverter;
 import edu.harvard.med.screensaver.util.NullSafeUtils;
 
 public class PlateUpdater
@@ -64,6 +69,26 @@ public class PlateUpdater
       return c.size();
     }
   };
+  private static final Predicate<PlateStatus> isStoredAtFacility = new Predicate<PlateStatus>() {
+      @Override
+      public boolean apply(PlateStatus input)
+      {
+        switch(input) {
+          case AVAILABLE:
+          case NOT_AVAILABLE:
+          case NOT_SPECIFIED:
+          case RETIRED:
+            return true;
+          case NOT_CREATED:
+          case DISCARDED:
+          case GIVEN_AWAY:
+          case LOST:
+          case VOLUME_TRANSFERRED_AND_DISCARDED:
+            return false;
+        }
+        return false;
+      }
+    };
 
   private GenericEntityDAO _dao;
   private PlateFacilityIdInitializer _plateFacilityIdInitializer;
@@ -146,26 +171,121 @@ public class PlateUpdater
     copy.setPlatesAvailable(statusCounts.get(PlateStatus.AVAILABLE));
   }
         
-  private void updatePrimaryPlateConcentrations(Copy copy)
+
+  @Transactional
+  public void updatePrimaryWellConcentrations(Library library)
   {
+    library = _dao.reloadEntity(library, false, Library.copies);
+    for(Copy c: library.getCopies())
+    {
+      updatePrimaryPlateConcentrations(c);
+    }
+  }
+
+  @Transactional
+  public void updatePrimaryPlateConcentrations(Copy copy)
+  {  
+    ConcentrationStatistics concentrationStatistics = new ConcentrationStatistics();
+    copy.setConcentrationStatistics(concentrationStatistics);
+    // update the plates using values from the wells
+    Collection<Plate> platesToConsider = Sets.newHashSet(copy.getPlates().values());
+    
+    for(Iterator<Plate> iter = platesToConsider.iterator(); iter.hasNext();)
+    {
+      Plate p = iter.next();
+      p.setConcentrationStatistics(new ConcentrationStatistics());
+      updatePrimaryWellConcentration(p);
+      // update the copy with the values from the plate
+      if(p.getMaxMgMlConcentration() != null)
+      {
+        if(concentrationStatistics.getMaxMgMlConcentration() == null ) concentrationStatistics.setMaxMgMlConcentration(p.getMaxMgMlConcentration());
+        else if(p.getMaxMgMlConcentration().compareTo(concentrationStatistics.getMaxMgMlConcentration()) > 0 ) concentrationStatistics.setMaxMgMlConcentration(p.getMaxMgMlConcentration());
+        if(concentrationStatistics.getMinMgMlConcentration() == null) concentrationStatistics.setMinMgMlConcentration(p.getMinMgMlConcentration());
+        else if(p.getMinMgMlConcentration().compareTo(concentrationStatistics.getMinMgMlConcentration()) < 0 )  concentrationStatistics.setMinMgMlConcentration(p.getMinMgMlConcentration());
+      }
+      if(p.getMaxMolarConcentration() != null)
+      {
+        if(concentrationStatistics.getMaxMolarConcentration() == null ) concentrationStatistics.setMaxMolarConcentration(p.getMaxMolarConcentration());
+        else if(p.getMaxMolarConcentration().compareTo(concentrationStatistics.getMaxMolarConcentration()) > 0 ) concentrationStatistics.setMaxMolarConcentration(p.getMaxMolarConcentration());
+        if(concentrationStatistics.getMinMolarConcentration() == null) concentrationStatistics.setMinMolarConcentration(p.getMinMolarConcentration());
+        else if(p.getMinMolarConcentration().compareTo(concentrationStatistics.getMinMolarConcentration()) < 0 )  concentrationStatistics.setMinMolarConcentration(p.getMinMolarConcentration());
+      }
+      if(!isStoredAtFacility.apply(p.getStatus()))  // consider only plates stored at this facility
+      {
+        iter.remove();
+        continue;
+      }
+    }
+
     Map<BigDecimal,Integer> mgMlCounts = Maps.transformValues(Multimaps.index(
-                                                                              Lists.newArrayList(Iterators.filter(copy.getPlates().values().iterator(),
-                                                                                                                  Predicates.compose(Predicates.notNull(),Plate.ToMgMlConcentration))),
-                                                                                                                  Plate.ToMgMlConcentration).asMap(), CollectionSize);
+                                                                              Lists.newArrayList(Iterators.filter(platesToConsider.iterator(),
+                                                                                                                  Predicates.compose(Predicates.notNull(),Plate.ToPrimaryWellMgMlConcentration))),
+                                                                                                                  Plate.ToPrimaryWellMgMlConcentration).asMap(), CollectionSize);
                                                                                                                   
-    if(!mgMlCounts.isEmpty()) copy.setPrimaryPlateMgMlConcentration(findMaxByValueThenKey(mgMlCounts).getKey());
+    if(!mgMlCounts.isEmpty()) concentrationStatistics.setPrimaryWellMgMlConcentration(findMaxByValueThenKey(mgMlCounts).getKey());
 
     Map<MolarConcentration,Integer> molarCounts = Maps.transformValues(Multimaps.index(
-                                                                                       Lists.newArrayList(Iterators.filter(copy.getPlates().values().iterator(),
-                                                                                                        Predicates.compose(Predicates.notNull(), Plate.ToMolarConcentration))),
-                                                                                                        Plate.ToMolarConcentration).asMap(), CollectionSize);
-    if(!molarCounts.isEmpty()) copy.setPrimaryPlateMolarConcentration(findMaxByValueThenKey(molarCounts).getKey());
+                                                                                       Lists.newArrayList(Iterators.filter(platesToConsider.iterator(),
+                                                                                                        Predicates.compose(Predicates.notNull(), Plate.ToPrimaryWellMolarConcentration))),
+                                                                                                        Plate.ToPrimaryWellMolarConcentration).asMap(), CollectionSize);
+    if(!molarCounts.isEmpty()) concentrationStatistics.setPrimaryWellMolarConcentration(findMaxByValueThenKey(molarCounts).getKey());
   }
   
+  private void updatePrimaryWellConcentration(Plate plate)
+  {
+    Map<String,Object> properties = Maps.newHashMap();
+    properties.put("plateNumber", plate.getPlateNumber());
+    properties.put("libraryWellType", LibraryWellType.EXPERIMENTAL);
+    List<Well> wells = _dao.findEntitiesByProperties(Well.class, properties);
+    ConcentrationStatistics concentrationStatistics = plate.getConcentrationStatistics();
+    for(Well well: wells)
+    {
+      if(well.getMgMlConcentration() != null)
+      {
+        if(concentrationStatistics.getMaxMgMlConcentration() == null ) concentrationStatistics.setMaxMgMlConcentration(well.getMgMlConcentration());
+        else if(well.getMgMlConcentration().compareTo(concentrationStatistics.getMaxMgMlConcentration()) > 0 ) concentrationStatistics.setMaxMgMlConcentration(well.getMgMlConcentration());
+        if(concentrationStatistics.getMinMgMlConcentration() == null) concentrationStatistics.setMinMgMlConcentration(well.getMgMlConcentration());
+        else if(well.getMgMlConcentration().compareTo(concentrationStatistics.getMinMgMlConcentration()) < 0 )  concentrationStatistics.setMinMgMlConcentration(well.getMgMlConcentration());
+      }
+      if(well.getMolarConcentration() != null)
+      {
+        if(concentrationStatistics.getMaxMolarConcentration() == null ) concentrationStatistics.setMaxMolarConcentration(well.getMolarConcentration());
+        else if(well.getMolarConcentration().compareTo(concentrationStatistics.getMaxMolarConcentration()) > 0 ) concentrationStatistics.setMaxMolarConcentration(well.getMolarConcentration());
+        if(concentrationStatistics.getMinMolarConcentration() == null) concentrationStatistics.setMinMolarConcentration(well.getMolarConcentration());
+        else if(well.getMolarConcentration().compareTo(concentrationStatistics.getMinMolarConcentration()) < 0 )  concentrationStatistics.setMinMolarConcentration(well.getMolarConcentration());
+      }
+    }
+    
+    Map<BigDecimal,Integer> mgMlCounts = Maps.transformValues(Multimaps.index(
+                                                                            Lists.newArrayList(Iterators.filter(wells.iterator(),
+                                                                                                                Predicates.compose(Predicates.notNull(),Well.ToMgMlConcentration))),
+                                                                                                                Well.ToMgMlConcentration).asMap(), CollectionSize);
+    if(!mgMlCounts.isEmpty()) concentrationStatistics.setPrimaryWellMgMlConcentration((findMaxByValueThenKey(mgMlCounts).getKey()));
+    
+    
+    Map<MolarConcentration,Integer> molarCounts = Maps.transformValues(Multimaps.index(
+                                                                                     Lists.newArrayList(Iterators.filter(wells.iterator(),
+                                                                                                      Predicates.compose(Predicates.notNull(), Well.ToMolarConcentration))),
+                                                                                                      Well.ToMolarConcentration).asMap(), CollectionSize);
+    if(!molarCounts.isEmpty()) concentrationStatistics.setPrimaryWellMolarConcentration(findMaxByValueThenKey(molarCounts).getKey());
+  }
+
+//  private void updatePrimaryPlateDilutionFactor(Copy copy)
+//  {  
+//    Map<BigDecimal,Integer> dilutionFactorCounts = Maps.transformValues(Multimaps.index(
+//                                                                              Lists.newArrayList(Iterators.filter(
+//                                                                                                                  Iterators.filter(copy.getPlates().values().iterator(),
+//                                                                                                                  Predicates.compose(Predicates.notNull(),Plate.ToWellConcentrationDilutionFactor)),
+//                                                                                                                  Predicates.compose(isStoredAtFacility, Plate.ToStatus))),
+//                                                                                                                  Plate.ToWellConcentrationDilutionFactor).asMap(), CollectionSize);
+//                                                                                                                  
+//// TODO: fix this by storing df on the copy
+//    if(!dilutionFactorCounts.isEmpty()) copy.getConcentrationStatistics().setWellConcentrationDilutionFactor(findMaxByValueThenKey(dilutionFactorCounts).getKey());
+//  }
+
   private <T extends Comparable<? super T>, U extends Comparable<? super U>> Map.Entry<T,U> findMaxByValueThenKey(Map<T,U> map)
   {
     // This method avoids having to define a comparator for each type
-    // TODO: figure out a nice generic/functional way to do this
     if(map.isEmpty()) return null;
     Map.Entry<T,U> max = null;
     for(Map.Entry<T,U> entry: map.entrySet())
@@ -373,34 +493,76 @@ public class PlateUpdater
     }
     return false;
   }
+//
+//  /**
+//   * Note: this method calculates the plate dilution factor
+//   */
+//  @Transactional
+//  public boolean updateAbsoluteMolarConcentration(Plate plate, MolarConcentration newConcentration, AdministratorUser recordByAdmin)
+//  {
+//    // [#2920]  1. get the primary/min/max well concentrations
+//    if(plate.getPrimaryWellMolarConcentration() == null )
+//    {
+//      throw new BusinessRuleViolationException("Cannot set the plate dilution factor using an absolute concentration if the library well concentrations for the plate have not been set.  Set using the plate dilution factor instead"); // TODO: [#2920] make an error message property for this
+//    }
+//    if(!!! NullSafeUtils.nullSafeEquals(plate.getMaxMolarConcentration(), plate.getMinMolarConcentration()) || 
+//      !!! NullSafeUtils.nullSafeEquals(plate.getMaxMolarConcentration(), plate.getPrimaryWellMolarConcentration()) )
+//    {
+//        throw new BusinessRuleViolationException("Cannot set the plate dilution factor using an absolute concentration if the wells of the plate have varying concentrations.  Set using the plate dilution factor instead"); // TODO:  [#2920] make an error message property for this
+//    }
+//    if(plate.getPrimaryWellMolarConcentration().compareTo(newConcentration) < 0 ) {
+//      throw new BusinessRuleViolationException("Target concentration cannot be less than the primary well concentration (only dilution is allowed)."); // TODO:  [#2920] make an error message property for this
+//    }
+//      // 2. calculate a dilution factor
+//      BigDecimal newDilutionFactor = plate.getPrimaryWellMolarConcentration().getValue().divide(newConcentration.getValue(), RoundingMode.HALF_UP);
+//      newDilutionFactor = newDilutionFactor.scaleByPowerOfTen(newConcentration.getUnits().getScale() - plate.getPrimaryWellMolarConcentration().getUnits().getScale());
+//      newDilutionFactor = newDilutionFactor.setScale(ScreensaverConstants.PLATE_DILUTION_FACTOR_SCALE, RoundingMode.HALF_UP);
+//      return updatePlateDilutionFactor(plate, newDilutionFactor, recordByAdmin);
+//  }
 
-  @Transactional
-  public boolean updateMolarConcentration(Plate plate, MolarConcentration newConcentration, AdministratorUser recordByAdmin)
-  {
-    if (!!!NullSafeUtils.nullSafeEquals(newConcentration, plate.getMolarConcentration())) {
-      plate = _dao.reloadEntity(plate);
-      StringBuilder updateComments = new StringBuilder().append("Concentration (molar) changed from '").append(NullSafeUtils.toString(plate.getMolarConcentration(), "<not specified>")).append("' to '").append(newConcentration).append("'");
-      plate.createUpdateActivity(recordByAdmin, updateComments.toString());
-      plate.setMolarConcentration(newConcentration);
-      updatePrimaryPlateConcentrations(plate.getCopy());
-      return true;
-    }
-    return false;
-  }
-
-  @Transactional
-  public boolean updateMgMlConcentration(Plate plate, BigDecimal newConcentration, AdministratorUser recordByAdmin)
-  {
-    if (!!!NullSafeUtils.nullSafeEquals(newConcentration, plate.getMgMlConcentration())) {
-      plate = _dao.reloadEntity(plate);
-      StringBuilder updateComments = new StringBuilder().append("Concentration (mg/mL) changed from '").append(NullSafeUtils.toString(plate.getMgMlConcentration(), "<not specified>")).append("' to '").append(newConcentration).append("'");
-      plate.createUpdateActivity(recordByAdmin, updateComments.toString());
-      plate.setMgMlConcentration(newConcentration);
-      updatePrimaryPlateConcentrations(plate.getCopy());
-      return true;
-    }
-    return false;
-  }
+//  /**
+//   * Note: this method calculates the plate dilution factor
+//   * "absolute" concentration refers to the value shown, not the stored primary well concentration.
+//   */
+//  @Transactional
+//  public boolean updateAbsoluteMgMlConcentration(Plate plate, BigDecimal newConcentration, AdministratorUser recordByAdmin)
+//  {
+//    if(plate.getPrimaryWellMgMlConcentration() == null )
+//    {
+//      throw new BusinessRuleViolationException("Cannot set the plate dilution factor using an absolute concentration if the library well concentrations for the plate have not been set.  Set using the plate dilution factor instead"); // TODO:  [#2920] make an error message property for this
+//    }
+//    if(!!! NullSafeUtils.nullSafeEquals(plate.getMaxMgMlConcentration(), plate.getMinMgMlConcentration()) || 
+//      !!! NullSafeUtils.nullSafeEquals(plate.getMaxMgMlConcentration(), plate.getPrimaryWellMgMlConcentration()) )
+//    {
+//      throw new BusinessRuleViolationException("Cannot set the plate dilution factor using an absolute concentration if the wells of the plate have varying concentrations.  Set using the plate dilution factor instead"); // TODO:  [#2920] make an error message property for this
+//    }
+//    if(plate.getPrimaryWellMgMlConcentration().compareTo(newConcentration) < 0 ) {
+//      throw new BusinessRuleViolationException("Target concentration cannot be less than the primary well concentration (only dilution is allowed)."); // TODO:  [#2920] make an error message property for this
+//    }
+//    BigDecimal newDilutionFactor = plate.getPrimaryWellMgMlConcentration().divide(newConcentration, ScreensaverConstants.PLATE_DILUTION_FACTOR_SCALE, RoundingMode.HALF_UP);  // TODO: An error occurred during the requested operation: Non-terminating decimal expansion; no exact representable decimal result.
+//    return updatePlateDilutionFactor(plate, newDilutionFactor, recordByAdmin);
+//  }
+  
+//  @Transactional
+//  public boolean updateDilutionFactor(Plate plate, BigDecimal newDilutionFactor, AdministratorUser recordByAdmin)
+//  {
+//    if(newDilutionFactor.compareTo(BigDecimal.ONE) < 0 ) {  
+//      throw new BusinessRuleViolationException("Dilution factor must be greater than or equal to 1 (only dilution is allowed)."); // TODO:  [#2920] make an error message property for this
+//    }
+//    if (!!!NullSafeUtils.nullSafeEquals(newDilutionFactor, plate.getWellConcentrationDilutionFactor())) {
+//      plate = _dao.reloadEntity(plate);
+//      StringBuilder updateComments = new StringBuilder().append("Dilution factor changed from '").append(NullSafeUtils.toString(plate.getWellConcentrationDilutionFactor(), "<not specified>")).append("' to '").append(newDilutionFactor).append("'");
+//      plate.createUpdateActivity(recordByAdmin, updateComments.toString());
+//      plate.getConcentrationStatistics().setWellConcentrationDilutionFactor(newDilutionFactor);
+//      //TODO: how to set the plate.min/max/primary concentrations then here?  - this method should also call updateAbsolutePlateMgMlConcentration
+//      // TODO: should plate be only mg_ml/or/molar; and if so, then choose one of them.
+//      
+//      
+//      updatePrimaryPlateDilutionFactor(plate.getCopy());
+//      return true;
+//    }
+//    return false;
+//  }
 
   @Transactional
   public boolean updatePlateType(Plate plate, PlateType newPlateType, AdministratorUser recordedByAdmin)

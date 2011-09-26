@@ -32,11 +32,11 @@ import javax.persistence.Transient;
 import javax.persistence.UniqueConstraint;
 import javax.persistence.Version;
 
-import com.google.common.base.Function;
-import com.google.common.collect.Sets;
 import org.hibernate.annotations.Parameter;
 import org.hibernate.annotations.Sort;
 import org.hibernate.annotations.SortType;
+import com.google.common.base.Function;
+import com.google.common.collect.Sets;
 
 import edu.harvard.med.screensaver.ScreensaverConstants;
 import edu.harvard.med.screensaver.model.AbstractEntityVisitor;
@@ -45,6 +45,7 @@ import edu.harvard.med.screensaver.model.MolarConcentration;
 import edu.harvard.med.screensaver.model.Volume;
 import edu.harvard.med.screensaver.model.activities.AdministrativeActivity;
 import edu.harvard.med.screensaver.model.annotations.ContainedEntity;
+import edu.harvard.med.screensaver.model.annotations.Derived;
 import edu.harvard.med.screensaver.model.annotations.ToMany;
 import edu.harvard.med.screensaver.model.meta.Cardinality;
 import edu.harvard.med.screensaver.model.meta.PropertyPath;
@@ -87,19 +88,25 @@ public class Plate extends AuditedAbstractEntity<Integer> implements Comparable<
       return p.getStatus();
     }
   };
-  public static final Function<Plate,BigDecimal> ToMgMlConcentration = new Function<Plate,BigDecimal>() {
+  public static final Function<Plate,BigDecimal> ToWellConcentrationDilutionFactor = new Function<Plate,BigDecimal>() {
     public BigDecimal apply(Plate p)
     {
-      return p.getMgMlConcentration() == null ? BigDecimal.ZERO : p.getMgMlConcentration();
+      return p.getWellConcentrationDilutionFactor();
     }
   };
-  public static final Function<Plate,MolarConcentration> ToMolarConcentration = new Function<Plate,MolarConcentration>() {
+  public static final Function<Plate,MolarConcentration> ToPrimaryWellMolarConcentration = new Function<Plate,MolarConcentration>() {
     public MolarConcentration apply(Plate p)
     {
-      return p.getMolarConcentration();
-      //return p.getMolarConcentration() == null ? MolarConcentration.MOLAR_ZERO : p.getMolarConcentration();
+      return p.getNullSafeConcentrationStatistics().getPrimaryWellMolarConcentration();
     }
   };
+  public static final Function<Plate,BigDecimal> ToPrimaryWellMgMlConcentration = new Function<Plate,BigDecimal>() {
+    public BigDecimal apply(Plate p)
+    {
+      return p.getNullSafeConcentrationStatistics().getPrimaryWellMgMlConcentration();
+    }
+  };
+  
 
   private Integer _version;
   private Copy _copy;
@@ -109,8 +116,7 @@ public class Plate extends AuditedAbstractEntity<Integer> implements Comparable<
   private PlateType _plateType;
   /** The default initial volume for a well on this copy plate. */
   private Volume _wellVolume;
-  private MolarConcentration _molarConcentration;
-  private BigDecimal _mgMlConcentration;
+  private ConcentrationStatistics _concentrationStatistics; 
   private PlateStatus _status;
   private AdministrativeActivity _platedActivity;
   private AdministrativeActivity _retiredActivity;
@@ -277,29 +283,6 @@ public class Plate extends AuditedAbstractEntity<Integer> implements Comparable<
     _wellVolume = volume;
   }
 
-  public void setMolarConcentration(MolarConcentration molarConcentration)
-  {
-    _molarConcentration = molarConcentration;
-  }
-
-  @Column(precision = ScreensaverConstants.MOLAR_CONCENTRATION_PRECISION, scale = ScreensaverConstants.MOLAR_CONCENTRATION_SCALE)
-  @org.hibernate.annotations.Type(type = "edu.harvard.med.screensaver.db.usertypes.MolarConcentrationType")
-  public MolarConcentration getMolarConcentration()
-  {
-    return _molarConcentration;
-  }
-
-  public void setMgMlConcentration(BigDecimal mgMlConcentration)
-  {
-    _mgMlConcentration = mgMlConcentration;
-  }
-
-  @Column(precision = ScreensaverConstants.MG_ML_CONCENTRATION_PRECISION, scale = ScreensaverConstants.MG_ML_CONCENTRATION_SCALE)
-  public BigDecimal getMgMlConcentration()
-  {
-    return _mgMlConcentration;
-  }
-
   public Plate withWellVolume(Volume volume)
   {
     setWellVolume(volume);
@@ -452,4 +435,67 @@ public class Plate extends AuditedAbstractEntity<Integer> implements Comparable<
   {
     _volumeStatistics = volumeStatistics;
   }
+  
+  public void setConcentrationStatistics(ConcentrationStatistics _concentrationStatistics)
+  {
+    this._concentrationStatistics = _concentrationStatistics;
+  }
+
+  @Column
+  public ConcentrationStatistics getConcentrationStatistics()
+  {
+    return _concentrationStatistics;
+  }
+      
+  @Transient
+  public ConcentrationStatistics getNullSafeConcentrationStatistics()
+  {
+    ConcentrationStatistics concentrationStatistics = getConcentrationStatistics();
+    if (concentrationStatistics == null) {
+      return ConcentrationStatistics.NULL;
+    }
+    return concentrationStatistics;
+  }
+
+  @Transient
+  public MolarConcentration getMinMolarConcentration()
+  {
+    return getNullSafeConcentrationStatistics().getMinMolarConcentration();
+  }
+
+  @Transient
+  public MolarConcentration getMaxMolarConcentration()
+  {
+    return getNullSafeConcentrationStatistics().getMaxMolarConcentration();
+  }
+
+  @Transient
+  public BigDecimal getMinMgMlConcentration()
+  {
+    return getNullSafeConcentrationStatistics().getMinMgMlConcentration();
+  }
+
+  @Transient
+  public BigDecimal getMaxMgMlConcentration()
+  {
+    return getNullSafeConcentrationStatistics().getMaxMgMlConcentration();
+  }
+  
+  @Transient
+  public BigDecimal getPrimaryWellMgMlConcentration()
+  {
+    return getNullSafeConcentrationStatistics().getPrimaryWellMgMlConcentration();
+  }
+
+  @Transient
+  public MolarConcentration getPrimaryWellMolarConcentration()
+  {
+    return getNullSafeConcentrationStatistics().getPrimaryWellMolarConcentration();
+  }
+
+  @Transient
+  public BigDecimal getWellConcentrationDilutionFactor()
+  {
+    return getCopy().getWellConcentrationDilutionFactor(); 
+  }  
 }

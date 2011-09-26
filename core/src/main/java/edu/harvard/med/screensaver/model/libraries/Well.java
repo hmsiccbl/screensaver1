@@ -29,6 +29,7 @@ import javax.persistence.Transient;
 import javax.persistence.UniqueConstraint;
 import javax.persistence.Version;
 
+import com.google.common.base.Function;
 import com.google.common.collect.Maps;
 import org.apache.log4j.Logger;
 import org.hibernate.annotations.MapKeyManyToMany;
@@ -82,7 +83,18 @@ public class Well extends SemanticIDAbstractEntity<String> implements Comparable
   public static final RelationshipPath<Well> resultValues = RelationshipPath.from(Well.class).to("resultValues", ResultValue.class, "well", Cardinality.TO_MANY);
   public static final RelationshipPath<Well> deprecationActivity = RelationshipPath.from(Well.class).to("deprecationActivity", Cardinality.TO_ONE);
 
-
+  public static final Function<Well,BigDecimal> ToMgMlConcentration = new Function<Well,BigDecimal>() {
+    public BigDecimal apply(Well w)
+    {
+      return w.getMgMlConcentration();
+    }
+  };
+  public static final Function<Well,MolarConcentration> ToMolarConcentration = new Function<Well,MolarConcentration>() {
+    public MolarConcentration apply(Well w)
+    {
+      return w.getMolarConcentration();
+    }
+  };
   // instance fields
 
   private transient WellKey _wellKey;
@@ -94,7 +106,8 @@ public class Well extends SemanticIDAbstractEntity<String> implements Comparable
   private String _facilityId;
   private Map<DataColumn,ResultValue> _resultValues = new HashMap<DataColumn,ResultValue>();
   private AdministrativeActivity _deprecationActivity;
-  private MolarConcentration _concentration;
+  private MolarConcentration _molarConcentration;
+  private BigDecimal _mgMlConcentration;
 
 
   /**
@@ -526,23 +539,34 @@ public class Well extends SemanticIDAbstractEntity<String> implements Comparable
 
   public void setMolarConcentration(MolarConcentration value)
   {
-    _concentration = value;
+    _molarConcentration = value;
   }
   
   /**
    * Concentration, in nanoMolar units
    * @return
    */
-  @Column(precision = ScreensaverConstants.CONCENTRATION_FULL_PRECISION, scale = ScreensaverConstants.CONCENTRATION_FULL_SCALE)
+  @Column(precision = ScreensaverConstants.MOLAR_CONCENTRATION_PRECISION, scale = ScreensaverConstants.MOLAR_CONCENTRATION_SCALE)
   @org.hibernate.annotations.Type(type = "edu.harvard.med.screensaver.db.usertypes.MolarConcentrationType")
   public MolarConcentration getMolarConcentration()
   {
-    return _concentration;
+    return _molarConcentration;
   }
 
   @Transient
   public MolarUnit getConcentrationUnit()
   {
-    return _concentration.getUnits();
+   return _molarConcentration.getUnits();
+  }
+
+  public void setMgMlConcentration(BigDecimal _mgMlConcentration)
+  {
+    this._mgMlConcentration = _mgMlConcentration;
+  }
+
+  @Column(precision = ScreensaverConstants.MG_ML_CONCENTRATION_PRECISION, scale = ScreensaverConstants.MG_ML_CONCENTRATION_SCALE)
+  public BigDecimal getMgMlConcentration()
+  {
+    return _mgMlConcentration;
   }
 }

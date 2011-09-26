@@ -12,13 +12,19 @@ package edu.harvard.med.screensaver.io.libraries;
 import java.io.PrintWriter;
 import java.io.Writer;
 
+import org.apache.log4j.Logger;
+
 import edu.harvard.med.screensaver.model.libraries.LibraryContentsVersion;
 import edu.harvard.med.screensaver.model.libraries.SmallMoleculeReagent;
 import edu.harvard.med.screensaver.model.libraries.Well;
+import edu.harvard.med.screensaver.model.screens.Publication;
+import edu.harvard.med.screensaver.ui.libraries.LibraryCopySearchResults;
 
 // TODO: use common file specification with SDRecordParser
 public class WellSdfWriter extends PrintWriter 
 {
+  private static final Logger log = Logger.getLogger(WellSdfWriter.class);
+
   public WellSdfWriter(Writer writer)
   {
     super(writer);
@@ -104,6 +110,28 @@ public class WellSdfWriter extends PrintWriter
     println(">  <Vendor_Reagent_ID>");
     if (smallMoleculeReagent.getVendorId().getVendorIdentifier() != null) {
       println(smallMoleculeReagent.getVendorId().getVendorIdentifier());
+    }    
+    println();
+    println(">  <Vendor_Batch_ID>");
+    if (smallMoleculeReagent.getVendorBatchId()!= null) {
+      println(smallMoleculeReagent.getVendorBatchId());
+    }
+    println();
+    println(">  <Salt_Form_ID>");
+    if (smallMoleculeReagent.getSaltFormId()!= null) {
+      println(smallMoleculeReagent.getSaltFormId());
+    }
+    println();
+    println(">  <Concentration>");
+    if (well.getMgMlConcentration()!= null) {
+      println(well.getMgMlConcentration() + " mg/ml" );
+    }
+    if (well.getMolarConcentration()!= null) {
+      println(well.getMolarConcentration());
+    }
+    if(well.getMgMlConcentration() != null && well.getMolarConcentration() != null)
+    {
+      log.warn("Both mg/mL and molar concentration values found for well: " + well.getWellId());
     }
     println();
     for (String compoundName : smallMoleculeReagent.getCompoundNames()) {
@@ -121,6 +149,21 @@ public class WellSdfWriter extends PrintWriter
       println(chembankId);
       println();
     }
+    for (Integer chemblId : smallMoleculeReagent.getChemblIds()) {
+      println(">  <ChEMBL_ID>");
+      println(chemblId);
+      println();
+    }
+    for (Publication publication : smallMoleculeReagent.getPublications()) {
+      if(publication.getPubmedId() != null)
+      {
+        println(">  <Pubmed_ID>");
+        println(publication.getPubmedId());
+        println();
+      }
+    }
+
+    
     println("$$$$");
   }
 }

@@ -52,6 +52,12 @@
     value="#{wellViewer.entity.molarConcentration}">
    </ss:property>
 
+   <ss:property id="mgMlConcentration" label="Concentration (mg/mL)"
+    rendered="#{! empty wellViewer.entity.mgMlConcentration}"
+    description="Concentration (mg/mL)" editable="{false}"
+    value="#{wellViewer.entity.mgMlConcentration}">
+   </ss:property>
+
    <ss:property id="deprecated" label="Deprecated" type="Text"
     rendered="#{wellViewer.entity.deprecated}"
     description="Why the well is deprecated"

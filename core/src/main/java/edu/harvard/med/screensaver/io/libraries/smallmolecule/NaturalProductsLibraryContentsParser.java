@@ -15,8 +15,10 @@ import edu.harvard.med.screensaver.io.ParseError;
 import edu.harvard.med.screensaver.io.ParseException;
 import edu.harvard.med.screensaver.io.libraries.rnai.WorkbookLibraryContentsParser;
 import edu.harvard.med.screensaver.io.parseutil.CsvColumn;
+import edu.harvard.med.screensaver.io.parseutil.CsvConcentrationColumn;
 import edu.harvard.med.screensaver.io.parseutil.CsvIntegerColumn;
 import edu.harvard.med.screensaver.io.parseutil.CsvTextColumn;
+import edu.harvard.med.screensaver.model.libraries.ConcentrationStatistics;
 import edu.harvard.med.screensaver.model.libraries.Library;
 import edu.harvard.med.screensaver.model.libraries.LibraryWellType;
 import edu.harvard.med.screensaver.model.libraries.NaturalProductReagent;
@@ -47,6 +49,7 @@ public class NaturalProductsLibraryContentsParser extends WorkbookLibraryContent
   };
   private CsvTextColumn VENDOR_REAGENT_ID = new CsvTextColumn("Vendor Reagent ID", AlphabeticCounter.toIndex("C"), false);
   private CsvTextColumn FACILITY_REAGENT_ID = new CsvTextColumn("Facility Reagent ID", AlphabeticCounter.toIndex("D"), false);
+  private CsvConcentrationColumn CONCENTRATION = new CsvConcentrationColumn("Concentration", AlphabeticCounter.toIndex("E"), false);
   
   public NaturalProductsLibraryContentsParser(GenericEntityDAO dao, InputStream stream, Library library)
   {
@@ -84,6 +87,16 @@ public class NaturalProductsLibraryContentsParser extends WorkbookLibraryContent
     }
     
     well.setFacilityId(FACILITY_REAGENT_ID.getValue(row));
+    
+    
+    if (well.getLibraryWellType() == LibraryWellType.EXPERIMENTAL)
+    {
+      if(CONCENTRATION.getValue(row) == null) {
+        throw new ParseException(new ParseError(CONCENTRATION.getName() + " must be set for 'experimental' wells"));
+      }
+      well.setMgMlConcentration(CONCENTRATION.getMgMlConcentration());
+      well.setMolarConcentration(CONCENTRATION.getMolarConcentration());
+    }
     
     return new Pair<Well,NaturalProductReagent>(well, reagent);
   }    

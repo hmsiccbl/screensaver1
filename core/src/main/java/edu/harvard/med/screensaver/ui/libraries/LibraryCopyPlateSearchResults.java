@@ -50,6 +50,7 @@ import edu.harvard.med.screensaver.model.libraries.Quadrant;
 import edu.harvard.med.screensaver.model.libraries.ScreeningStatistics;
 import edu.harvard.med.screensaver.model.libraries.VolumeStatistics;
 import edu.harvard.med.screensaver.model.meta.PropertyPath;
+import edu.harvard.med.screensaver.model.meta.RelationshipPath;
 import edu.harvard.med.screensaver.model.screens.ScreenType;
 import edu.harvard.med.screensaver.model.users.ScreensaverUser;
 import edu.harvard.med.screensaver.model.users.ScreensaverUserRole;
@@ -96,7 +97,9 @@ public class LibraryCopyPlateSearchResults extends EntityBasedEntitySearchResult
       return plate.getVolumeStatistics() == null;
     }
   };
-
+  
+  private static final String COLUMN_GROUP_CONCENTRATION = "Concentration";
+  
   private GenericEntityDAO _dao;
   private LibrariesDAO _librariesDao;
   private LibraryViewer _libraryViewer;
@@ -251,6 +254,7 @@ public class LibraryCopyPlateSearchResults extends EntityBasedEntitySearchResult
           ((HasFetchPaths<Plate>) columns.get(0)).addRelationshipPath(Plate.location);
           ((HasFetchPaths<Plate>) columns.get(0)).addRelationshipPath(Plate.copy.to(Copy.library));
         }
+        ((HasFetchPaths<Plate>) columns.get(0)).addRelationshipPath(RelationshipPath.from(Plate.class).to("updateActivities"));
 
         super.fetch(columns);
       }
@@ -393,7 +397,7 @@ public class LibraryCopyPlateSearchResults extends EntityBasedEntitySearchResult
     Iterables.getLast(columns).setVisible(_mode == Mode.ALL);
 
     columns.add(new IntegerEntityColumn<Plate>(Plate.stockPlate.toProperty("plateNumber"),
-                                               "Maps to Library Plate",
+                                               "Maps to Library Plate Number",
                                                "The stock plate to which this master stock plate maps",
                                                TableColumn.UNGROUPED) {
       @Override
@@ -557,28 +561,8 @@ public class LibraryCopyPlateSearchResults extends EntityBasedEntitySearchResult
         return getNullSafeVolumeStatistics(plate).getAverageRemaining();
       }
     });
-
-    columns.add(new MolarConcentrationEntityColumn<Plate>(PropertyPath.from(Plate.class).toProperty("molarConcentration"),
-                                                          "Molar Concentration",
-                                                          "The molar concentration of each well of the plate when it was created",
-                                                          TableColumn.UNGROUPED) {
-      @Override
-      public MolarConcentration getCellValue(Plate plate)
-      {
-        return plate.getMolarConcentration();
-      }
-    });
-
-    columns.add(new FixedDecimalEntityColumn<Plate>(PropertyPath.from(Plate.class).toProperty("mgMlConcentration"),
-                                                    "Concentration (mg/mL)",
-                                                    "The mg/mL concentration of each well of the plate when it was created",
-                                                    TableColumn.UNGROUPED) {
-      @Override
-      public BigDecimal getCellValue(Plate plate)
-      {
-        return plate.getMgMlConcentration();
-      }
-    });
+    
+    buildConcentrationColumns(columns);    
 
     columns.add(new DateEntityColumn<Plate>(PropertyPath.from(Plate.class).to(Plate.updateActivities).to(Activity.dateOfActivity),
                                             "Location Transfer Date",
@@ -780,6 +764,193 @@ public class LibraryCopyPlateSearchResults extends EntityBasedEntitySearchResult
     Iterables.getLast(columns).setVisible(false);
 
     return columns;
+  }
+
+  private void buildConcentrationColumns(List<TableColumn<Plate,?>> columns)
+  {
+    // Concentration Columns
+
+    // molar values - undiluted
+    
+    columns.add(new TextEntityColumn<Plate>(PropertyPath.from(Plate.class).toProperty("minMolarConcentration"),
+                                                          "Undiluted Minimum Well Molar Concentration",
+                                                          "The undiluted minimum molar concentration of the wells of the plate when it was created",
+                                                          COLUMN_GROUP_CONCENTRATION) {
+      @Override
+      public String getCellValue(Plate plate)
+      {
+        MolarConcentration value = plate.getMinMolarConcentration();
+        return value == null ? "n/a": value.toString();
+      }
+    });
+    Iterables.getLast(columns).setVisible(false);
+
+    columns.add(new TextEntityColumn<Plate>(PropertyPath.from(Plate.class).toProperty("maxMolarConcentration"),
+                                                          "Undiluted Maximum Well Molar Concentration",
+                                                          "The undiluted maximum molar concentration of the wells of the plate when it was created",
+                                                          COLUMN_GROUP_CONCENTRATION) {
+      @Override
+      public String getCellValue(Plate plate)
+      {
+        MolarConcentration value = plate.getMaxMolarConcentration();
+        return value == null ? "n/a": value.toString();
+      }
+    });
+    Iterables.getLast(columns).setVisible(false);
+    
+    columns.add(new TextEntityColumn<Plate>(PropertyPath.from(Plate.class).toProperty("primaryWellMolarConcentration"),
+                                                          "Undiluted Primary Well Molar Concentration",
+                                                          "The undiluted value of the most frequent plate well molar concentration on creation",
+                                                          COLUMN_GROUP_CONCENTRATION) {
+      @Override
+      public String getCellValue(Plate plate)
+      {
+        MolarConcentration value = plate.getPrimaryWellMolarConcentration();
+        return value == null ? "n/a": value.toString();
+      }
+    });
+    Iterables.getLast(columns).setVisible(false);
+    
+    // molar values - undiluted
+    
+    columns.add(new TextEntityColumn<Plate>(PropertyPath.from(Plate.class).toProperty("concentrationStatistics"),
+                                                          "Final Minimum Well Molar Concentration",
+                                                          "The diluted minimum molar concentration of the wells of the plate when it was created",
+                                                          COLUMN_GROUP_CONCENTRATION) {
+      @Override
+      public String getCellValue(Plate plate)
+      {
+        BigDecimal df = plate.getCopy().getWellConcentrationDilutionFactor();
+        MolarConcentration value = plate.getNullSafeConcentrationStatistics().getDilutedMinMolarConcentration(df);
+        return value == null ? "n/a": value.toString();
+      }
+    });
+    Iterables.getLast(columns).setVisible(true);
+
+    columns.add(new TextEntityColumn<Plate>(PropertyPath.from(Plate.class).toProperty("concentrationStatistics"),
+                                                          "Final Maximum Well Molar Concentration",
+                                                          "The diluted maximum molar concentration of the wells of the plate when it was created",
+                                                          COLUMN_GROUP_CONCENTRATION) {
+      @Override
+      public String getCellValue(Plate plate)
+      {
+        BigDecimal df = plate.getCopy().getWellConcentrationDilutionFactor();
+        MolarConcentration value = plate.getNullSafeConcentrationStatistics().getDilutedMaxMolarConcentration(df);
+        return value == null ? "n/a": value.toString();
+      }
+    });
+    Iterables.getLast(columns).setVisible(true);
+    
+    columns.add(new TextEntityColumn<Plate>(PropertyPath.from(Plate.class).toProperty("concentrationStatistics"),
+                                                          "Final Primary Molar Concentration",
+                                                          "The diluted primary (most often occurring) plate well molar concentration",
+                                                          COLUMN_GROUP_CONCENTRATION) {
+      @Override
+      public String getCellValue(Plate plate)
+      {
+        BigDecimal df = plate.getCopy().getWellConcentrationDilutionFactor();
+        MolarConcentration value = plate.getNullSafeConcentrationStatistics().getDilutedPrimaryWellMolarConcentration(df);
+        return value == null ? "n/a": value.toString();
+      }
+    });
+    Iterables.getLast(columns).setVisible(false);
+    
+    // mg/mL values - undiluted
+    
+    columns.add(new TextEntityColumn<Plate>(PropertyPath.from(Plate.class).toProperty("minMgMlConcentration"),
+                                                    "Undiluted Minimum Well Concentration (mg/mL)",
+                                                    "The undiluted minimum mg/mL concentration of the wells of the plate when it was created",
+                                                    COLUMN_GROUP_CONCENTRATION) {
+      @Override
+      public String getCellValue(Plate plate)
+      {
+        BigDecimal value = plate.getMinMgMlConcentration();
+        return value == null ? "n/a" : value.toString();
+      }
+    });
+    Iterables.getLast(columns).setVisible(false);
+    
+    columns.add(new TextEntityColumn<Plate>(PropertyPath.from(Plate.class).toProperty("maxMgMlConcentration"),
+                                                    "Undiluted Maximum Well Concentration (mg/mL)",
+                                                    "The undiluted minimum mg/mL concentration of the wells of the plate when it was created",
+                                                    COLUMN_GROUP_CONCENTRATION) {
+      @Override
+      public String getCellValue(Plate plate)
+      {
+        BigDecimal value = plate.getMaxMgMlConcentration();
+        return value == null ? "n/a" : value.toString();
+      }
+    });
+    Iterables.getLast(columns).setVisible(false);    
+
+    columns.add(new TextEntityColumn<Plate>(PropertyPath.from(Plate.class).toProperty("primaryWellMgMlConcentration"),
+                                                    "Undiluted Primary Well Concentration (mg/mL)",
+                                                    "The undiluted value of the most frequent plate well mg/mL concentration on creation",
+                                                    COLUMN_GROUP_CONCENTRATION) {
+      @Override
+      public String getCellValue(Plate plate)
+      {
+        BigDecimal value = plate.getPrimaryWellMgMlConcentration();
+        return value == null ? "n/a" : value.toString();
+      }
+    });
+    Iterables.getLast(columns).setVisible(false);
+    
+    // mg/mL values - diluted
+    
+    columns.add(new TextEntityColumn<Plate>(PropertyPath.from(Plate.class).toProperty("concentrationStatistics"),
+                                                    "Final Minimum Well Concentration (mg/mL)",
+                                                    "The diluted minimum mg/mL concentration of the wells of the plate when it was created",
+                                                    COLUMN_GROUP_CONCENTRATION) {
+      @Override
+      public String getCellValue(Plate plate)
+      {
+        BigDecimal df = plate.getCopy().getWellConcentrationDilutionFactor();
+        BigDecimal value = plate.getNullSafeConcentrationStatistics().getDilutedMinMgMlConcentration(df);
+        return value == null ? "n/a" : value.toString();
+      }
+    });
+    Iterables.getLast(columns).setVisible(true);
+    
+    columns.add(new TextEntityColumn<Plate>(PropertyPath.from(Plate.class).toProperty("concentrationStatistics"),
+                                                    "Final Maximum Well Concentration (mg/mL)",
+                                                    "The diluted minimum mg/mL concentration of the wells of the plate when it was created",
+                                                    COLUMN_GROUP_CONCENTRATION) {
+      @Override
+      public String getCellValue(Plate plate)
+      {
+        BigDecimal df = plate.getCopy().getWellConcentrationDilutionFactor();
+        BigDecimal value = plate.getNullSafeConcentrationStatistics().getDilutedMaxMgMlConcentration(df);
+        return value == null ? "n/a" : value.toString();
+      }
+    });
+    Iterables.getLast(columns).setVisible(true);    
+
+    columns.add(new TextEntityColumn<Plate>(PropertyPath.from(Plate.class).toProperty("concentrationStatistics"),
+                                                    "Final Primary Concentration (mg/mL)",
+                                                    "The diluted primary (most often occurring) plate well mg/mL concentration",
+                                                    COLUMN_GROUP_CONCENTRATION) {
+      @Override
+      public String getCellValue(Plate plate)
+      {
+        BigDecimal df = plate.getCopy().getWellConcentrationDilutionFactor();
+        BigDecimal value = plate.getNullSafeConcentrationStatistics().getDilutedPrimaryWellMgMlConcentration(df);
+        return value == null ? "n/a" : value.toString();
+      }
+    });
+    Iterables.getLast(columns).setVisible(false);    
+    
+    columns.add(new FixedDecimalEntityColumn<Plate>(PropertyPath.from(Plate.class).to("copy").toProperty("wellConcentrationDilutionFactor"),
+                                                    "Well Concentration Dilution Factor",
+                                                    "The factor by which the original library well concentration is diluted for this copy plate",
+                                                    COLUMN_GROUP_CONCENTRATION) {
+      @Override
+      public BigDecimal getCellValue(Plate plate)
+      {
+        return plate.getCopy().getWellConcentrationDilutionFactor();
+      }
+    });
+    Iterables.getLast(columns).setVisible(false);
   }
 
   private static ScreeningStatistics getNullSafeScreeningStatistics(Plate plate)

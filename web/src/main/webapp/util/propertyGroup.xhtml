@@ -17,10 +17,19 @@
    -->
 
 <ui:composition>
-
-  <t:outputText value="#{label}"
-    styleClass="label #{adminOnly ? 'adminOnly' : ''}"
-    rendered="#{(empty rendered ? true : rendered) &amp;&amp; (adminOnly ? appInfo.screensaverUser.isUserInRoleOfNameMap['readEverythingAdmin'] : true)}" />
+  <t:div
+    rendered="#{(empty rendered ? true : rendered) &amp;&amp; (adminOnly ? appInfo.screensaverUser.isUserInRoleOfNameMap['readEverythingAdmin'] : true)}"
+    styleClass="label #{adminOnly ? 'adminOnly' : ''}" >
+    <ui:insert name="label">
+      <t:popup>
+        <f:facet name="popup">
+          <t:div styleClass="popupHelp popupText">#{description}</t:div>
+        </f:facet>
+        <t:outputText value="#{label}"
+          styleClass="label #{adminOnly ? 'adminOnly' : ''}" />
+      </t:popup>
+    </ui:insert>
+  </t:div>
   <t:panelGrid columns="#{empty columns ? 2 : columns}"
     styleClass="layoutPanel"
     columnClasses="#{empty columnClasses &amp;&amp; empty columns ? 'propertyLabelColumn,column' : columnClasses}"

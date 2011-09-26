@@ -75,6 +75,7 @@ public class WellsSdfDataExporter implements DataExporter<String>
       EntityDataFetcher<Well,String> dataFetcher = new EntityDataFetcher<Well,String>(Well.class, _dao);
       List<PropertyPath<Well>> relationships = Lists.newArrayList();
       relationships.add(Well.library.toFullEntity());
+      relationships.add(Well.reagents.to(Reagent.publications).toFullEntity());
       RelationshipPath<Well> toReagentPath;
       if (getLibraryContentsVersion() == null) {
         toReagentPath = Well.latestReleasedReagent;
@@ -86,6 +87,7 @@ public class WellsSdfDataExporter implements DataExporter<String>
       relationships.add(toReagentPath.to(SmallMoleculeReagent.compoundNames));
       relationships.add(toReagentPath.to(SmallMoleculeReagent.pubchemCids));
       relationships.add(toReagentPath.to(SmallMoleculeReagent.chembankIds));
+      relationships.add(toReagentPath.to(SmallMoleculeReagent.chemblIds));
       relationships.add(toReagentPath.to(SmallMoleculeReagent.molfileList));
       relationships.add(toReagentPath.to(SilencingReagent.facilityGene).to(Gene.genbankAccessionNumbers).toFullEntity());
       dataFetcher.setPropertiesToFetch(relationships);

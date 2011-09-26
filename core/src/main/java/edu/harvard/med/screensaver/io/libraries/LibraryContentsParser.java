@@ -11,10 +11,14 @@ package edu.harvard.med.screensaver.io.libraries;
 
 import java.io.IOException;
 import java.io.InputStream;
+import java.util.regex.Pattern;
+
+import com.google.common.base.Joiner;
 
 import edu.harvard.med.screensaver.db.GenericEntityDAO;
 import edu.harvard.med.screensaver.io.ParseErrorsException;
 import edu.harvard.med.screensaver.io.ParseException;
+import edu.harvard.med.screensaver.model.MolarUnit;
 import edu.harvard.med.screensaver.model.libraries.Library;
 import edu.harvard.med.screensaver.model.libraries.Reagent;
 import edu.harvard.med.screensaver.model.libraries.Well;
@@ -25,6 +29,9 @@ public abstract class LibraryContentsParser<R extends Reagent>
   private GenericEntityDAO _dao;
   private InputStream _stream;
   private Library _library;
+  public static final Pattern molarConcentrationPattern = Pattern.compile("(\\d+\\.?\\d*)\\s*(" +
+  Joiner.on('|').join(MolarUnit.DISPLAY_VALUES) + ")");
+  public static final Pattern mgMlConcentrationPattern = Pattern.compile("(\\d+?\\.?\\d*)\\s*mg/ml", Pattern.CASE_INSENSITIVE);
 
   /**
    * @param stream containing the Library in the proper format (sdf for Small Molecule, xls...)

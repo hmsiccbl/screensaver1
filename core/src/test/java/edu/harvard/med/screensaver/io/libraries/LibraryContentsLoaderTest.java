@@ -17,21 +17,24 @@ import java.math.BigDecimal;
 import java.util.List;
 import java.util.Set;
 
-import com.google.common.collect.Sets;
 import org.apache.log4j.Logger;
 import org.joda.time.LocalDate;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.io.ClassPathResource;
+import com.google.common.collect.Sets;
 
 import edu.harvard.med.screensaver.db.DAOTransaction;
 import edu.harvard.med.screensaver.db.GenericEntityDAO;
 import edu.harvard.med.screensaver.db.LibrariesDAO;
+import edu.harvard.med.screensaver.db.NoSuchEntityException;
 import edu.harvard.med.screensaver.io.ParseError;
 import edu.harvard.med.screensaver.io.ParseErrorsException;
 import edu.harvard.med.screensaver.model.MolarConcentration;
 import edu.harvard.med.screensaver.model.MolarUnit;
 import edu.harvard.med.screensaver.model.activities.AdministrativeActivity;
 import edu.harvard.med.screensaver.model.activities.AdministrativeActivityType;
+import edu.harvard.med.screensaver.model.libraries.Copy;
+import edu.harvard.med.screensaver.model.libraries.CopyUsageType;
 import edu.harvard.med.screensaver.model.libraries.Gene;
 import edu.harvard.med.screensaver.model.libraries.Library;
 import edu.harvard.med.screensaver.model.libraries.LibraryContentsVersion;
@@ -39,7 +42,9 @@ import edu.harvard.med.screensaver.model.libraries.LibraryType;
 import edu.harvard.med.screensaver.model.libraries.LibraryWellType;
 import edu.harvard.med.screensaver.model.libraries.MolecularFormula;
 import edu.harvard.med.screensaver.model.libraries.NaturalProductReagent;
+import edu.harvard.med.screensaver.model.libraries.Plate;
 import edu.harvard.med.screensaver.model.libraries.PlateSize;
+import edu.harvard.med.screensaver.model.libraries.PlateStatus;
 import edu.harvard.med.screensaver.model.libraries.Reagent;
 import edu.harvard.med.screensaver.model.libraries.ReagentVendorIdentifier;
 import edu.harvard.med.screensaver.model.libraries.SilencingReagent;
@@ -65,8 +70,6 @@ import edu.harvard.med.screensaver.test.AbstractSpringPersistenceTest;
 public class LibraryContentsLoaderTest extends AbstractSpringPersistenceTest
 {
   private static final Logger log = Logger.getLogger(LibraryContentsLoaderTest.class);
-  private static final File TEST_INPUT_FILE_DIR =
-    new File("src/test/java/edu/harvard/med/screensaver/io/libraries/");
 
   @Autowired
   protected edu.harvard.med.screensaver.service.libraries.LibraryCreator libraryCreator;
@@ -185,6 +188,7 @@ public class LibraryContentsLoaderTest extends AbstractSpringPersistenceTest
         SilencingReagent sr = (SilencingReagent)a05.getLatestReleasedReagent();
         assertEquals("vendorX", sr.getVendorId().getVendorName());
         assertEquals("M-005300-00", sr.getVendorId().getVendorIdentifier());
+        assertEquals(MolarConcentration.makeConcentration("1", MolarUnit.MICROMOLAR),a05.getMolarConcentration());
         assertEquals("F-005300-00", a05.getFacilityId());
         assertEquals(SilencingReagentType.SIRNA, sr.getSilencingReagentType());
         assertEquals("GACAUGCACUGCCUAAUUA;GUACAGAACUCUCCCAUUC;GAUGAAAUGUGCCUUGAAA;GAAGGUGGAUUUGCUAUUG",
@@ -217,6 +221,8 @@ public class LibraryContentsLoaderTest extends AbstractSpringPersistenceTest
         assertEquals(LibraryWellType.EMPTY, a09.getLibraryWellType());
         assertEquals(LibraryWellType.RNAI_BUFFER, a11.getLibraryWellType());
         assertEquals(LibraryWellType.LIBRARY_CONTROL, a20.getLibraryWellType());
+        assertEquals(MolarConcentration.makeConcentration("111.11", MolarUnit.MILLIMOLAR),a15.getMolarConcentration());
+
       }
     });
   }
@@ -250,15 +256,15 @@ public class LibraryContentsLoaderTest extends AbstractSpringPersistenceTest
 
             // expected error cells, [row,col]
             Set<ParseError> expectedErrors = Sets.newHashSet();
-            expectedErrors.add(new ParseError("Vendor and Vendor Reagent ID must be null for well type: empty", "Human Kinases:(E,4)"));
+            expectedErrors.add(new ParseError("Vendor and Vendor Reagent ID must be null for well type: empty", "Human Kinases:(F,4)"));
             expectedErrors.add(new ParseError("'buffer1' must be one of: [DMSO, empty, experimental, <undefined>, RNAi buffer, library control]", "Human Kinases:(C,5)"));
-            expectedErrors.add(new ParseError("Vendor and Vendor Reagent ID must both be specified, or neither should be specified", "Human Kinases:(E,6)"));
-            expectedErrors.add(new ParseError("if sequence is specified, Vendor Reagent ID and Silencing Reagent Type must be specified", "Human Kinases:(H,7)"));
+            expectedErrors.add(new ParseError("Vendor and Vendor Reagent ID must both be specified, or neither should be specified", "Human Kinases:(F,6)"));
+            expectedErrors.add(new ParseError("if sequence is specified, Vendor Reagent ID and Silencing Reagent Type must be specified", "Human Kinases:(I,7)"));
             expectedErrors.add(new ParseError("Well is required", "Human Kinases:(B,8)"));
             expectedErrors.add(new ParseError("Well Type is required", "Human Kinases:(C,9)"));
-            expectedErrors.add(new ParseError("Vendor is required", "Human Kinases:(D,10)"));
-            expectedErrors.add(new ParseError("Silencing Reagent Type is required", "Human Kinases:(G,11)"));
-            expectedErrors.add(new ParseError("NumberFormatException", "Human Kinases 2:(I,12)"));
+            expectedErrors.add(new ParseError("Vendor is required", "Human Kinases:(E,10)"));
+            expectedErrors.add(new ParseError("Silencing Reagent Type is required", "Human Kinases:(H,11)"));
+            expectedErrors.add(new ParseError("NumberFormatException", "Human Kinases 2:(J,12)"));
 
             log.debug("expected errors that were not reported: " +
               Sets.difference(expectedErrors, Sets.newHashSet(e.getErrors())));
@@ -465,6 +471,11 @@ public class LibraryContentsLoaderTest extends AbstractSpringPersistenceTest
                                       1534,
                                       PlateSize.WELLS_384);
         libraryCreator.createLibrary(library);
+        // for [#2920] create the plate and copy so that the library loading will invoke the plateUpdater
+        Plate plate = findPlateAndCreateCopyIfNecessary(genericEntityDao, librariesDao, 1534, "A", CopyUsageType.STOCK_PLATES, _admin);
+        library = genericEntityDao.reloadEntity(library, false, Library.copies);
+
+        String filename = "clean_data_small_molecule.sdf";
         library = genericEntityDao.reloadEntity(library, false);
 
         try {
@@ -488,117 +499,7 @@ public class LibraryContentsLoaderTest extends AbstractSpringPersistenceTest
     genericEntityDao.doInTransaction(new DAOTransaction() {
       public void runTransaction()
       {
-        // test non-specified well is undefined
-        Well well = librariesDao.findWell(new WellKey(1534, "A23"));
-        assertNotNull(well);
-        assertEquals(LibraryWellType.UNDEFINED, well.getLibraryWellType());
-
-        // test empty well is empty
-        well = librariesDao.findWell(new WellKey(1534, "A09"));
-        assertNotNull(well);
-        assertEquals(LibraryWellType.EMPTY, well.getLibraryWellType());
-
-        // test sd record with empty molfile
-        well = librariesDao.findWell(new WellKey(1534, "A01"));
-        assertNotNull(well);
-        assertEquals(LibraryWellType.EXPERIMENTAL, well.getLibraryWellType());
-        assertEquals(new ReagentVendorIdentifier("Biomol-TimTec", "SPL000058"), well.<Reagent>getLatestReleasedReagent().getVendorId());
-        assertEquals("ICCB-00589081", well.getFacilityId());
-
-        // doTestNonstructuralCompoundAttributes
-        // ICCB_NUM; CompoundName
-        well = librariesDao.findWell(new WellKey(1534, "A02"));
-        assertNotNull(well);
-        assertEquals(LibraryWellType.EXPERIMENTAL, well.getLibraryWellType());
-        assertEquals(new ReagentVendorIdentifier("Biomol-TimTec", "ST001215"), well.<Reagent>getLatestReleasedReagent().getVendorId());
-        assertEquals("ICCB-00589082", well.getFacilityId());
-        SmallMoleculeReagent compound = well.<SmallMoleculeReagent>getLatestReleasedReagent();
-        List<String> compoundNames = compound.getCompoundNames();
-        assertEquals("compound must have one compound name", compoundNames.size(), 1);
-        String compoundName = compoundNames.iterator().next();
-        assertEquals("fake compound name 1", compoundName);
-
-        // ICCB_Num; compound_identifier
-        well = librariesDao.findWell(new WellKey(1534, "A03"));
-        compound = well.<SmallMoleculeReagent>getLatestReleasedReagent();
-        compoundNames = compound.getCompoundNames();
-        assertEquals("compound must have one compound name", 1, compoundNames.size());
-        compoundName = compoundNames.iterator().next();
-        assertEquals("fake compound name 2", compoundName);
-
-        // ChemicalName
-        well = librariesDao.findWell(new WellKey(1534, "A04"));
-        compound = well.<SmallMoleculeReagent>getLatestReleasedReagent();
-        compoundNames = compound.getCompoundNames();
-        assertEquals("compound must have one compound name", 1, compoundNames.size());
-        compoundName = compoundNames.iterator().next();
-        assertEquals("fake compound name 3", compoundName);
-
-        // Chemical_Name
-        well = librariesDao.findWell(new WellKey(1534, "A05"));
-        compound = well.<SmallMoleculeReagent>getLatestReleasedReagent();
-        compoundNames = compound.getCompoundNames();
-        assertEquals("compound has one compound name", 1, compoundNames.size());
-        compoundName = compoundNames.iterator().next();
-        assertEquals("fake compound name 4", compoundName);
-
-        // doTestStructuralCompoundAttributes()
-        well = librariesDao.findWell(new WellKey(1534, "A08"));
-        compound = well.<SmallMoleculeReagent>getLatestReleasedReagent();
-        assertTrue("molfile contents", compound.getMolfile().contains("Structure113") &&
-                   compound.getMolfile().contains("15 14  1  0  0  0  0") &&
-                   compound.getMolfile().contains("M  END"));
-        assertEquals("compound smiles", "O=C1CC(C)(C)CC(=O)C1C(c1ccccc1)C1=C(O)CC(C)(C)CC1=O", compound.getSmiles());
-        assertEquals("compound inchi", "InChI=1/C23H28O4/c1-22(2)10-15(24)20(16(25)11-22)19(14-8-6-5-7-9-14)21-17(26)12-23(3,4)13-18(21)27/h5-9,19-20,26H,10-13H2,1-4H3", compound.getInchi());
-        assertEquals("molecular mass", new BigDecimal("368.46602"), compound.getMolecularMass().setScale(5));
-        assertEquals("molecular weight", new BigDecimal("369.00020"), compound.getMolecularWeight().setScale(5));
-        
-        assertEquals("molecular formula", new MolecularFormula("C23H28O4"), compound.getMolecularFormula());
-        assertEquals("pubchem cid", Sets.newHashSet(558309, 7335957), compound.getPubchemCids());
-        assertEquals("chembank id", Sets.newHashSet(6066882,1665724), compound.getChembankIds());
-      }
-    });
-  }
-    
-  public void testCleanDataSmallMolecule_LINCS() throws IOException
-  {
-    genericEntityDao.doInTransaction(new DAOTransaction()
-    {
-      public void runTransaction()
-      {
         _admin = genericEntityDao.reloadEntity(_admin, false, ScreensaverUser.activitiesPerformed.castToSubtype(AdministratorUser.class));
-        Library library = new Library(_admin,
-                                      "COMP",
-                                      "COMP",
-                                      ScreenType.SMALL_MOLECULE,
-                                      LibraryType.OTHER,
-                                      1534,
-                                      1534,
-                                      PlateSize.WELLS_384);
-        libraryCreator.createLibrary(library);
-        library = genericEntityDao.reloadEntity(library, false);
-
-        try {
-          LibraryContentsVersion lcv = libraryContentsLoader.loadLibraryContents(library, _admin, "clean data small molecule",
-                                                                                 new ClassPathResource("/libraries/clean_data_small_molecule_LINCS.sdf").getInputStream());
-          libraryContentsVersionManager.releaseLibraryContentsVersion(lcv, _admin);
-          log.info("added library definition for " + library);
-        }
-        catch (ParseErrorsException e)
-        {
-          log.warn(e.getErrors());
-          fail("input file has errors");
-        }
-        catch (IOException e) {
-          log.error(e);
-          fail("could not load the file");
-        }
-      }
-    });
-    
-    genericEntityDao.doInTransaction(new DAOTransaction() {
-      public void runTransaction()
-      {
         // test non-specified well is undefined
         Well well = librariesDao.findWell(new WellKey(1534, "A23"));
         assertNotNull(well);
@@ -650,7 +551,8 @@ public class LibraryContentsLoaderTest extends AbstractSpringPersistenceTest
         assertEquals("compound must have one compound name", 1, compoundNames.size());
         compoundName = compoundNames.iterator().next();
         assertEquals("fake compound name 2", compoundName);
-  
+        assertEquals("mg/mL concentration", new BigDecimal("2.460"), well.getMgMlConcentration());  
+ 
         // ChemicalName
         well = librariesDao.findWell(new WellKey(1534, "A04"));
         compound = well.<SmallMoleculeReagent>getLatestReleasedReagent();
@@ -658,6 +560,7 @@ public class LibraryContentsLoaderTest extends AbstractSpringPersistenceTest
         assertEquals("compound must have one compound name", 1, compoundNames.size());
         compoundName = compoundNames.iterator().next();
         assertEquals("fake compound name 3", compoundName);
+        assertEquals("mg/mL concentration", new BigDecimal("0.123"), well.getMgMlConcentration());
   
         // Chemical_Name
         well = librariesDao.findWell(new WellKey(1534, "A05"));
@@ -667,6 +570,7 @@ public class LibraryContentsLoaderTest extends AbstractSpringPersistenceTest
         compoundName = compoundNames.iterator().next();
         assertEquals("fake compound name 4", compoundName);
         assertEquals("concentration", MolarConcentration.makeConcentration("115", MolarUnit.PICOMOLAR), well.getMolarConcentration());
+        assertEquals("molar concentration", MolarConcentration.makeConcentration("115", MolarUnit.PICOMOLAR), well.getMolarConcentration());
   
         // doTestStructuralCompoundAttributes()
         well = librariesDao.findWell(new WellKey(1534, "A08"));
@@ -683,7 +587,51 @@ public class LibraryContentsLoaderTest extends AbstractSpringPersistenceTest
         assertEquals("molecular formula", new MolecularFormula("C23H28O4"), compound.getMolecularFormula());
         assertEquals("pubchem cid", Sets.newHashSet(558309, 7335957), compound.getPubchemCids());
         assertEquals("chembank id", Sets.newHashSet(6066882,1665724), compound.getChembankIds());
+        
+        // test the plate concentration values
+        
+        Plate plate = genericEntityDao.findEntityByProperty(Plate.class, "plateNumber" , 1534, true, Plate.copy);
+        assertNotNull(plate);
+        assertEquals(MolarConcentration.makeConcentration("115", MolarUnit.NANOMOLAR), plate.getMaxMolarConcentration());
+        assertEquals(MolarConcentration.makeConcentration("115", MolarUnit.PICOMOLAR), plate.getMinMolarConcentration());
+        assertEquals(MolarConcentration.makeConcentration("115", MolarUnit.NANOMOLAR), plate.getPrimaryWellMolarConcentration());
+        assertEquals(new BigDecimal("2.460"), plate.getMaxMgMlConcentration());
+        assertEquals(new BigDecimal("0.123"), plate.getMinMgMlConcentration());
+        assertEquals(new BigDecimal("2.460"), plate.getPrimaryWellMgMlConcentration()); // note: 2.46 occurs once, as does 0.123, so the comparator chooses the greater value
+
+        // test the copy concentration values
+
+        Copy copy = genericEntityDao.reloadEntity(plate.getCopy());
+        assertNotNull(copy);
+        assertEquals(MolarConcentration.makeConcentration("115", MolarUnit.NANOMOLAR), copy.getMaxMolarConcentration());
+        assertEquals(MolarConcentration.makeConcentration("115", MolarUnit.PICOMOLAR), copy.getMinMolarConcentration());
+        assertEquals(MolarConcentration.makeConcentration("115", MolarUnit.NANOMOLAR), copy.getPrimaryWellMolarConcentration());
+        assertEquals(new BigDecimal("2.460"), copy.getMaxMgMlConcentration());
+        assertEquals(new BigDecimal("0.123"), copy.getMinMgMlConcentration());
+        assertEquals(new BigDecimal("2.460"), copy.getPrimaryWellMgMlConcentration()); // note: 2.46 occurs once, as does 0.123, so the comparator chooses the greater value
       }
     });
   }
+    
+  public static Plate findPlateAndCreateCopyIfNecessary(GenericEntityDAO dao,
+                                                        LibrariesDAO librariesDao,
+                                                        Integer plateNumber,
+                                                        String copyName,
+                                                        CopyUsageType copyUsageType,
+                                                        AdministratorUser recordedBy)
+  {
+    Plate plate = librariesDao.findPlate(plateNumber, copyName);
+    if (plate == null) {
+      Library library = librariesDao.findLibraryWithPlate(plateNumber);
+      if (library == null) {
+        throw NoSuchEntityException.forProperty(Library.class, "plateNumber", plateNumber);
+      }
+      Copy copy = library.createCopy(recordedBy, copyUsageType, copyName);
+      log.info("created new copy " + copyName + " for library " + library.getLibraryName());
+      dao.flush();
+      plate = copy.findPlate(plateNumber);
+    }
+    plate.setStatus(PlateStatus.AVAILABLE);
+    return plate;
+  }  
 }

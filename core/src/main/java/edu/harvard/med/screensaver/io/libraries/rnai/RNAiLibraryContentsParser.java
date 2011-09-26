@@ -13,10 +13,13 @@ package edu.harvard.med.screensaver.io.libraries.rnai;
 import java.io.InputStream;
 import java.util.Set;
 
+import org.apache.log4j.Logger;
+
 import edu.harvard.med.screensaver.db.GenericEntityDAO;
 import edu.harvard.med.screensaver.io.ParseError;
 import edu.harvard.med.screensaver.io.ParseException;
 import edu.harvard.med.screensaver.io.parseutil.CsvColumn;
+import edu.harvard.med.screensaver.io.parseutil.CsvConcentrationColumn;
 import edu.harvard.med.screensaver.io.parseutil.CsvIntegerColumn;
 import edu.harvard.med.screensaver.io.parseutil.CsvSetColumn;
 import edu.harvard.med.screensaver.io.parseutil.CsvTextColumn;
@@ -34,16 +37,11 @@ import edu.harvard.med.screensaver.util.AlphabeticCounter;
 import edu.harvard.med.screensaver.util.Pair;
 import edu.harvard.med.screensaver.util.StringUtils;
 
-import org.apache.log4j.Logger;
-
-
-
 /**
  * This class accomplishes both:
  * <ul>
  * <li>Parsing of the library input file, and
- * <li>Loading of the data into Library and related domain model objects on the
- * database.
+ * <li>Loading of the data into Library and related domain model objects on the database.
  */
 public class RNAiLibraryContentsParser extends WorkbookLibraryContentsParser<SilencingReagent>
 {
@@ -54,44 +52,65 @@ public class RNAiLibraryContentsParser extends WorkbookLibraryContentsParser<Sil
 
   private CsvIntegerColumn PLATE = new CsvIntegerColumn("Plate", AlphabeticCounter.toIndex("A"), true);
   private CsvColumn<WellName> WELL = new CsvColumn<WellName>("Well", AlphabeticCounter.toIndex("B"), true) {
-    @Override public WellName parseField(String value) throws ParseException { return new WellName(value); }
+    @Override
+    public WellName parseField(String value) throws ParseException
+    {
+      return new WellName(value);
+    }
   };
   private CsvColumn<LibraryWellType> WELL_TYPE = new CsvColumn<LibraryWellType>("Well Type", AlphabeticCounter.toIndex("C"), true) {
     @Override
-    public LibraryWellType parseField(String value)throws ParseException
+    public LibraryWellType parseField(String value) throws ParseException
     {
       return _libraryWellTypeParser.getTermForValueCaseInsensitive(value);
     }
   };
-  private CsvTextColumn VENDOR = new CsvTextColumn("Vendor", AlphabeticCounter.toIndex("D"), false) {
-    public boolean isConditionallyRequired(String[] row) throws ParseException { return WELL_TYPE.getValue(row) == LibraryWellType.EXPERIMENTAL; }
+  private CsvConcentrationColumn CONCENTRATION = new CsvConcentrationColumn("concentration", AlphabeticCounter.toIndex("D"), false);
+  private CsvTextColumn VENDOR = new CsvTextColumn("Vendor", AlphabeticCounter.toIndex("E"), false) {
+    public boolean isConditionallyRequired(String[] row) throws ParseException
+    {
+      return WELL_TYPE.getValue(row) == LibraryWellType.EXPERIMENTAL;
+    }
   };
-  private CsvTextColumn VENDOR_REAGENT_ID = new CsvTextColumn("Vendor Reagent ID", AlphabeticCounter.toIndex("E"), false) {
-    public boolean isConditionallyRequired(String[] row) throws ParseException { return WELL_TYPE.getValue(row) == LibraryWellType.EXPERIMENTAL; }
+  private CsvTextColumn VENDOR_REAGENT_ID = new CsvTextColumn("Vendor Reagent ID", AlphabeticCounter.toIndex("F"), false) {
+    public boolean isConditionallyRequired(String[] row) throws ParseException
+    {
+      return WELL_TYPE.getValue(row) == LibraryWellType.EXPERIMENTAL;
+    }
   };
-  
-  private CsvTextColumn FACILITY_REAGENT_ID = new CsvTextColumn("Facility Reagent ID", AlphabeticCounter.toIndex("F"), false);
-  private CsvColumn<SilencingReagentType> SILENCING_REAGENT_TYPE = new CsvColumn<SilencingReagentType>("Silencing Reagent Type", AlphabeticCounter.toIndex("G"), false) {
+
+  private CsvTextColumn FACILITY_REAGENT_ID = new CsvTextColumn("Facility Reagent ID", AlphabeticCounter.toIndex("G"), false);
+  private CsvColumn<SilencingReagentType> SILENCING_REAGENT_TYPE = new CsvColumn<SilencingReagentType>("Silencing Reagent Type", AlphabeticCounter.toIndex("H"), false) {
     @Override
-    protected SilencingReagentType parseField(String value) throws ParseException {
+    protected SilencingReagentType parseField(String value) throws ParseException
+    {
       return _silencingReagentTypeParser.getTermForValueCaseInsensitive(value);
     }
-    public boolean isConditionallyRequired(String[] row) throws ParseException { return WELL_TYPE.getValue(row) == LibraryWellType.EXPERIMENTAL; }
+
+    public boolean isConditionallyRequired(String[] row) throws ParseException
+    {
+      return WELL_TYPE.getValue(row) == LibraryWellType.EXPERIMENTAL;
+    }
   };
-  private CsvTextColumn SEQUENCES = new CsvTextColumn("Sequences", AlphabeticCounter.toIndex("H"), false);
-  private CsvIntegerColumn VENDOR_ENTREZGENE_ID = new CsvIntegerColumn("Vendor Entrezgene ID", AlphabeticCounter.toIndex("I"), false);
-  private CsvTextSetColumn VENDOR_ENTREZGENE_SYMBOLS = new CsvTextSetColumn("Vendor Entrezgene Symbols", AlphabeticCounter.toIndex("J"), false);
-  private CsvTextColumn VENDOR_GENE_NAME = new CsvTextColumn("Vendor Gene Name", AlphabeticCounter.toIndex("K"), false);
-  private CsvTextSetColumn VENDOR_GENBANK_ACCESSION_NUMBERS = new CsvTextSetColumn("Vendor Genbank Accession Numbers", AlphabeticCounter.toIndex("L"), false);
-  private CsvTextColumn VENDOR_SPECIES = new CsvTextColumn("Vendor Species", AlphabeticCounter.toIndex("M"), false);
-  private CsvIntegerColumn FACILITY_ENTREZGENE_ID = new CsvIntegerColumn("Vendor Entrezgene ID", AlphabeticCounter.toIndex("N"), false);
-  private CsvTextSetColumn FACILITY_ENTREZGENE_SYMBOLS = new CsvTextSetColumn("Vendor Entrezgene Symbols", AlphabeticCounter.toIndex("O"), false);
-  private CsvTextColumn FACILITY_GENE_NAME = new CsvTextColumn("Vendor Gene Name", AlphabeticCounter.toIndex("P"), false);
-  private CsvTextSetColumn FACILITY_GENBANK_ACCESSION_NUMBERS = new CsvTextSetColumn("Vendor Genbank Accession Numbers", AlphabeticCounter.toIndex("Q"), false);
-  private CsvTextColumn FACILITY_SPECIES = new CsvTextColumn("Vendor Species", AlphabeticCounter.toIndex("R"), false);
-  private CsvSetColumn<WellKey> DUPLEX_WELLS = new CsvSetColumn<WellKey>("Duplex Wells", AlphabeticCounter.toIndex("S"), false) {
-    @Override protected WellKey parseElement(String value) { return new WellKey(value); } 
+  private CsvTextColumn SEQUENCES = new CsvTextColumn("Sequences", AlphabeticCounter.toIndex("I"), false);
+  private CsvIntegerColumn VENDOR_ENTREZGENE_ID = new CsvIntegerColumn("Vendor Entrezgene ID", AlphabeticCounter.toIndex("J"), false);
+  private CsvTextSetColumn VENDOR_ENTREZGENE_SYMBOLS = new CsvTextSetColumn("Vendor Entrezgene Symbols", AlphabeticCounter.toIndex("K"), false);
+  private CsvTextColumn VENDOR_GENE_NAME = new CsvTextColumn("Vendor Gene Name", AlphabeticCounter.toIndex("L"), false);
+  private CsvTextSetColumn VENDOR_GENBANK_ACCESSION_NUMBERS = new CsvTextSetColumn("Vendor Genbank Accession Numbers", AlphabeticCounter.toIndex("M"), false);
+  private CsvTextColumn VENDOR_SPECIES = new CsvTextColumn("Vendor Species", AlphabeticCounter.toIndex("N"), false);
+  private CsvIntegerColumn FACILITY_ENTREZGENE_ID = new CsvIntegerColumn("Vendor Entrezgene ID", AlphabeticCounter.toIndex("O"), false);
+  private CsvTextSetColumn FACILITY_ENTREZGENE_SYMBOLS = new CsvTextSetColumn("Vendor Entrezgene Symbols", AlphabeticCounter.toIndex("P"), false);
+  private CsvTextColumn FACILITY_GENE_NAME = new CsvTextColumn("Vendor Gene Name", AlphabeticCounter.toIndex("Q"), false);
+  private CsvTextSetColumn FACILITY_GENBANK_ACCESSION_NUMBERS = new CsvTextSetColumn("Vendor Genbank Accession Numbers", AlphabeticCounter.toIndex("R"), false);
+  private CsvTextColumn FACILITY_SPECIES = new CsvTextColumn("Vendor Species", AlphabeticCounter.toIndex("S"), false);
+  private CsvSetColumn<WellKey> DUPLEX_WELLS = new CsvSetColumn<WellKey>("Duplex Wells", AlphabeticCounter.toIndex("T"), false) {
+    @Override
+    protected WellKey parseElement(String value)
+    {
+      return new WellKey(value);
+    }
   };
+
 
   public RNAiLibraryContentsParser(GenericEntityDAO dao, InputStream stream, Library library)
   {
@@ -132,6 +151,15 @@ public class RNAiLibraryContentsParser extends WorkbookLibraryContentsParser<Sil
 
     well.setFacilityId((String) FACILITY_REAGENT_ID.getValue(row));
 
+    if (wellType == LibraryWellType.EXPERIMENTAL)
+    {
+      if(CONCENTRATION.getValue(row) == null) {
+        throw new ParseException(new ParseError(CONCENTRATION.getName() + " must be set for 'experimental' wells"));
+      }
+      well.setMgMlConcentration(CONCENTRATION.getMgMlConcentration());
+      well.setMolarConcentration(CONCENTRATION.getMolarConcentration());
+    }
+    
     if (wellType != LibraryWellType.EXPERIMENTAL &&
       wellType != LibraryWellType.LIBRARY_CONTROL) {
       // TODO: this is just the first field that should be blank; same

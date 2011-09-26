@@ -1,4 +1,6 @@
-// $HeadURL$
+// $HeadURL:
+// http://seanderickson1@forge.abcd.harvard.edu/svn/screensaver/branches/serickson/2920-rev2/core/src/main/java/edu/harvard/med/screensaver/io/libraries/smallmolecule/SmallMoleculeLibraryContentsParser.java
+// $
 // $Id: SmallMoleculeLibraryContentsLoader.java 1990 2007-10-24 02:12:17Z ant4
 // $
 //
@@ -36,7 +38,7 @@ import edu.harvard.med.screensaver.util.eutils.PublicationInfoProvider;
 /**
  * Parses the contents of a small molecule Library from an SDFile into the
  * domain model.
- *
+ * 
  * @author <a mailto="andrew_tolopko@hms.harvard.edu">Andrew Tolopko</a>
  * @author <a mailto="john_sullivan@hms.harvard.edu">John Sullivan</a>
  */
@@ -73,6 +75,11 @@ public class SmallMoleculeLibraryContentsParser extends LibraryContentsParser<Sm
       log.warn(new ParseError("inchi is required for 'experimental' well", _sdRecordParser.getLineNumber()).toString());
       //[#2037] throw new ParseException(new ParseError("inchi is required for 'experimental' well", _sdRecordParser.getLineNumber()));
     }
+    if(record.getMgMlConcentration() == null && record.getMolarConcentration() == null && record.getLibraryWellType() == LibraryWellType.EXPERIMENTAL)
+    {
+      throw new ParseException(new ParseError("concentration is required for 'experimental' well", _sdRecordParser.getLineNumber()));
+    }
+    
     try {
       return updateWell(record, getDao(), getLibrary());
     }
@@ -81,17 +88,17 @@ public class SmallMoleculeLibraryContentsParser extends LibraryContentsParser<Sm
     }
   }
 
-  private Pair<Well,SmallMoleculeReagent> updateWell(SDRecord sdRecordData, GenericEntityDAO dao, Library library) 
+  private Pair<Well,SmallMoleculeReagent> updateWell(SDRecord sdRecordData, GenericEntityDAO dao, Library library)
     throws IOException
   {
     String molfile = sdRecordData.getMolfile();
     if (molfile == null) {
       log.warn("encountered an SD record with an empty MDL molfile specification");
     }
-    
+
     //TODO: enforce "required" fields?
     // "Plate" "Well" Well_type", and in some cases "Chemical_Name" ([#1420])
-    
+
     WellKey key = new WellKey(sdRecordData.getPlateNumber(),
                               sdRecordData.getWellName());
     Well well = dao.findEntityById(Well.class, key.getKey(), false, Well.library);
@@ -103,21 +110,32 @@ public class SmallMoleculeLibraryContentsParser extends LibraryContentsParser<Sm
     }
     if (sdRecordData.getLibraryWellType() != LibraryWellType.UNDEFINED &&
       well.getLibraryWellType() != sdRecordData.getLibraryWellType()) {
-      log.warn("well type for well " + key + " changed from " + well.getLibraryWellType() + " to " + sdRecordData.getLibraryWellType());
+      log.warn("well type for well " + key + " changed from " + well.getLibraryWellType() + " to " +
+        sdRecordData.getLibraryWellType());
       well.setLibraryWellType(sdRecordData.getLibraryWellType());
     }
     if (sdRecordData.getFacilityId() != null &&
-        ! sdRecordData.getFacilityId().equals(well.getFacilityId())) {
+          !sdRecordData.getFacilityId().equals(well.getFacilityId())) {
       log.warn("facility ID for well " + key + " changed from " + well.getFacilityId() + " to " + sdRecordData.getFacilityId());
       well.setFacilityId(sdRecordData.getFacilityId());
     }
-    if (sdRecordData.getConcentration() != null &&
-        !sdRecordData.getConcentration().equals(well.getMolarConcentration())) {
+
+    // Set the the well concentration: 
+    // Note, for  [#2920] - the LibraryContentsVersionManager will invoke the PlateUpdater.updatePrimaryWellConcentrations() 
+    // to set plate/copy primary[well/plate][mgml/molar]Concentrations
+    if (sdRecordData.getMolarConcentration() != null &&
+        !sdRecordData.getMolarConcentration().equals(well.getMolarConcentration())) {
       log.warn("Concentration for well " + key + " changed from " + well.getMolarConcentration() + " to " +
-        sdRecordData.getConcentration());
-      well.setMolarConcentration(sdRecordData.getConcentration());
-      // TODO: mg_ml_concentration, ticket [#2920]
+        sdRecordData.getMolarConcentration());
+      well.setMolarConcentration(sdRecordData.getMolarConcentration());
     }
+    if (sdRecordData.getMgMlConcentration() != null &&
+        !sdRecordData.getMgMlConcentration().equals(well.getMgMlConcentration())) {
+      log.warn("Concentration for well " + key + " changed from " + well.getMgMlConcentration() + " mg/mL to " +
+               sdRecordData.getMgMlConcentration() + " mg/mL");
+      well.setMgMlConcentration(sdRecordData.getMgMlConcentration());
+    }
+    
     SmallMoleculeReagent reagent = null;
     if (sdRecordData.getLibraryWellType() == LibraryWellType.EXPERIMENTAL) {
       reagent = addSmallMoleculeReagentForWell(well, dao, sdRecordData);
@@ -160,12 +178,11 @@ public class SmallMoleculeLibraryContentsParser extends LibraryContentsParser<Sm
     smallMoleculeReagent.getPubchemCids().addAll(sdRecordData.getPubchemCids());
     smallMoleculeReagent.getChembankIds().addAll(sdRecordData.getChembankIds());
     smallMoleculeReagent.getChemblIds().addAll(sdRecordData.getChemblIds());
-    
+
     smallMoleculeReagent.forVendorBatchId(sdRecordData.getVendorBatchId());
     smallMoleculeReagent.forFacilityBatchId(sdRecordData.getFacilityBatchId());
     smallMoleculeReagent.forSaltFormId(sdRecordData.getSaltFormId());
 
-    log.info("add pubmed ids: " + sdRecordData.getPubmedIds());
     for (Integer pubmedId : sdRecordData.getPubmedIds()) {
       Publication publication = new Publication();
       publication.setPubmedId(pubmedId);
