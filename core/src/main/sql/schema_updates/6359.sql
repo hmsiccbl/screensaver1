@@ -6,8 +6,8 @@ SELECT
 current_timestamp,
 'change molar concentration type to numeric(13,12) for plate, lab_activity, copy, and well, add new fields for [#2920] well concentration';
 
-/** NOTE: this is an ICCB-L specific data migration script to be performed after schema updates are applied for the ticket:
- * [#2920]  - store concentration values at the well level
+/** TODO: this is an ICCB-L specific data migration script to be performed after schema updates are applied for the ticket:
+ * [#2920] - store concentration values at the well level
  * This script migrates concentration values from the plate to the new values on the well and the copy entity.
  */
 
@@ -51,7 +51,7 @@ update plate set min_molar_concentration = primary_well_molar_concentration;
 update plate set max_molar_concentration = primary_well_molar_concentration;
  
 
-/** set the well value to the max for all the plates in all the copies **/
+/** set the well value to the max mg/ml concentratoin for all the plates in all the copies **/
 create temp table plate_concentration as select plate_number, max(primary_well_mg_ml_concentration) from plate 
   where primary_well_mg_ml_concentration is not null group by plate_number;
 update well set mg_ml_concentration = (select max from plate_concentration pc where pc.plate_number = well.plate_number)
@@ -59,7 +59,7 @@ update well set mg_ml_concentration = (select max from plate_concentration pc wh
   and well.library_well_type = 'experimental';
 drop table plate_concentration;
 
-/** set the well value to the max for all the plates in all the copies **/
+/** set the well value to the max molar concentration for all the plates in all the copies **/
 create temp table plate_concentration as select plate_number, max(primary_well_molar_concentration) from plate 
   where primary_well_molar_concentration is not null group by plate_number;
 update well set molar_concentration = (select max from plate_concentration pc where pc.plate_number = well.plate_number)
