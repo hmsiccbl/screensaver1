@@ -58,7 +58,8 @@ public class ScreeningDuplicatorTest extends AbstractSpringPersistenceTest
         assertNull(libraryScreening1.getAssayProtocolLastModifiedDate()); 
         assertNull(libraryScreening1.getAssayProtocolType()); 
         assertNull(libraryScreening1.getNumberOfReplicates()); 
-        assertNull(libraryScreening1.getVolumeTransferredPerWell()); 
+        assertNull(libraryScreening1.getVolumeTransferredPerWellToAssayPlates());
+        assertNull(libraryScreening1.getVolumeTransferredPerWellFromLibraryPlates()); 
         assertNull(libraryScreening1.getMolarConcentration());
         assertEquals(_screen.getLeadScreener(), libraryScreening1.getPerformedBy());
 
@@ -67,7 +68,8 @@ public class ScreeningDuplicatorTest extends AbstractSpringPersistenceTest
         libraryScreening1.setAssayProtocolLastModifiedDate(new LocalDate(2009, 1, 1));
         libraryScreening1.setAssayProtocolType(AssayProtocolType.ESTABLISHED);
         libraryScreening1.setNumberOfReplicates(1);
-        libraryScreening1.setVolumeTransferredPerWell(new Volume("1.00", VolumeUnit.MILLILITERS));
+        libraryScreening1.setVolumeTransferredPerWellToAssayPlates(new Volume("1.00", VolumeUnit.MILLILITERS));
+        libraryScreening1.setVolumeTransferredPerWellFromLibraryPlates(new Volume("1.00", VolumeUnit.MILLILITERS));
         libraryScreening1.setMolarConcentration(new MolarConcentration("2.00", MolarUnit.MILLIMOLAR));
         libraryScreening1.setPerformedBy(_screen.getLabHead());
         genericEntityDao.saveOrUpdateEntity(libraryScreening1);
@@ -83,7 +85,8 @@ public class ScreeningDuplicatorTest extends AbstractSpringPersistenceTest
         assertEquals(new LocalDate(2009, 1, 1), libraryScreening2.getAssayProtocolLastModifiedDate()); 
         assertEquals(AssayProtocolType.ESTABLISHED, libraryScreening2.getAssayProtocolType()); 
         assertEquals(Integer.valueOf(1), libraryScreening2.getNumberOfReplicates());
-        assertEquals(new Volume("1.00", VolumeUnit.MILLILITERS), libraryScreening2.getVolumeTransferredPerWell()); 
+        assertEquals(new Volume("1.00", VolumeUnit.MILLILITERS), libraryScreening2.getVolumeTransferredPerWellToAssayPlates());
+        assertEquals(new Volume("1.00", VolumeUnit.MILLILITERS), libraryScreening2.getVolumeTransferredPerWellFromLibraryPlates()); 
         assertEquals(new MolarConcentration("2.00", MolarUnit.MILLIMOLAR), libraryScreening2.getMolarConcentration()); 
         assertEquals(_screen.getLabHead(), libraryScreening2.getPerformedBy());
       }
@@ -112,7 +115,8 @@ public class ScreeningDuplicatorTest extends AbstractSpringPersistenceTest
         assertNull(rnaiCpScreening1.getAssayProtocolLastModifiedDate()); 
         assertNull(rnaiCpScreening1.getAssayProtocolType()); 
         assertNull(rnaiCpScreening1.getNumberOfReplicates()); 
-        assertNull(rnaiCpScreening1.getVolumeTransferredPerWell()); 
+        assertNull(rnaiCpScreening1.getVolumeTransferredPerWellToAssayPlates());
+        assertNull(rnaiCpScreening1.getVolumeTransferredPerWellFromLibraryPlates()); 
         assertNull(rnaiCpScreening1.getMolarConcentration());
         assertEquals(cpr.getRequestedBy(), rnaiCpScreening1.getPerformedBy());
 
@@ -120,8 +124,9 @@ public class ScreeningDuplicatorTest extends AbstractSpringPersistenceTest
         rnaiCpScreening1.setAssayProtocol("assay protocol");
         rnaiCpScreening1.setAssayProtocolLastModifiedDate(new LocalDate(2009, 1, 1));
         rnaiCpScreening1.setAssayProtocolType(AssayProtocolType.ESTABLISHED);
-        rnaiCpScreening1.setNumberOfReplicates(1);
-        rnaiCpScreening1.setVolumeTransferredPerWell(new Volume("1.00", VolumeUnit.MILLILITERS));
+        rnaiCpScreening1.setNumberOfReplicates(2);
+        rnaiCpScreening1.setVolumeTransferredPerWellToAssayPlates(new Volume("1.00", VolumeUnit.MILLILITERS));
+        rnaiCpScreening1.setVolumeTransferredPerWellFromLibraryPlates(new Volume("2.00", VolumeUnit.MILLILITERS));
         rnaiCpScreening1.setMolarConcentration(new MolarConcentration("2.00", MolarUnit.MILLIMOLAR));
         rnaiCpScreening1.setPerformedBy(_screen.getLabHead());
         genericEntityDao.saveOrUpdateEntity(rnaiCpScreening1);
@@ -138,8 +143,9 @@ public class ScreeningDuplicatorTest extends AbstractSpringPersistenceTest
         assertEquals("assay protocol", rnaiCpScreening2.getAssayProtocol()); 
         assertEquals(new LocalDate(2009, 1, 1), rnaiCpScreening2.getAssayProtocolLastModifiedDate()); 
         assertEquals(AssayProtocolType.ESTABLISHED, rnaiCpScreening2.getAssayProtocolType()); 
-        assertEquals(Integer.valueOf(1), rnaiCpScreening2.getNumberOfReplicates());
-        assertEquals(new Volume("1.00", VolumeUnit.MILLILITERS), rnaiCpScreening2.getVolumeTransferredPerWell()); 
+        assertEquals(Integer.valueOf(2), rnaiCpScreening2.getNumberOfReplicates());
+        assertEquals(new Volume("1.00", VolumeUnit.MILLILITERS), rnaiCpScreening2.getVolumeTransferredPerWellToAssayPlates());
+        assertEquals(new Volume("2.00", VolumeUnit.MILLILITERS), rnaiCpScreening2.getVolumeTransferredPerWellFromLibraryPlates());
         assertEquals(new MolarConcentration("2.00", MolarUnit.MILLIMOLAR), rnaiCpScreening2.getMolarConcentration()); 
         assertEquals(_screen.getLabHead(), rnaiCpScreening2.getPerformedBy());
       }

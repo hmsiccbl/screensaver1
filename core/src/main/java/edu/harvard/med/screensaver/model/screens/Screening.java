@@ -43,22 +43,16 @@ import edu.harvard.med.screensaver.model.users.ScreeningRoomUser;
 @org.hibernate.annotations.Proxy
 public abstract class Screening extends LabActivity
 {
-  // private static data
-
   private static final long serialVersionUID = 1L;
   private static Logger log = Logger.getLogger(Screening.class);
-
-
-  // private instance data
 
   private String _assayProtocol;
   private LocalDate _assayProtocolLastModifiedDate;
   private AssayProtocolType _assayProtocolType;
   private Integer _numberOfReplicates;
+  private Volume _volumeTransferedPerWellToAssayPlates;
   private Volume _assayWellVolume;
 
-  // public instance methods
-  
   /**
    * Get the assay protocol.
    * @return the assay protocol
@@ -152,8 +146,26 @@ public abstract class Screening extends LabActivity
     _numberOfReplicates = numberOfReplicates;
   }
 
+  /**
+   * Get the volume transferred to each well of an assay plate. If there a multiple replicates, this is the volume
+   * transferred for each replicate. Note that "volumeTransferedToAssayPlates * numberOfReplicates" will generally match
+   * the {@link LabActivity#getVolumeTransferredPerWellFromLibraryPlates() volumeTransferredPerWellFromLibraryPlates},
+   * but can differ in cases where the transfer is indirect and uses an intermediate plating step (e.g. to adjust the
+   * dilution).
+   * 
+   * @return
+   */
+  @Column(precision = ScreensaverConstants.VOLUME_PRECISION, scale = ScreensaverConstants.VOLUME_SCALE)
+  @org.hibernate.annotations.Type(type = "edu.harvard.med.screensaver.db.usertypes.VolumeType")
+  public Volume getVolumeTransferredPerWellToAssayPlates()
+  {
+    return _volumeTransferedPerWellToAssayPlates;
+  }
 
-  // protected constructors
+  public void setVolumeTransferredPerWellToAssayPlates(Volume volumeTransferedToAssayPlates)
+  {
+    _volumeTransferedPerWellToAssayPlates = volumeTransferedToAssayPlates;
+  }
 
   /**
    * Construct an initialized <code>Screening</code>.

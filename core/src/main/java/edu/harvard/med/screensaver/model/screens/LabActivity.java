@@ -60,7 +60,7 @@ public abstract class LabActivity extends Activity
 
   private Screen _screen;
   private Set<EquipmentUsed> _equipmentUsed = new HashSet<EquipmentUsed>();
-  private Volume _volumeTransferredPerWell;
+  private Volume _volumeTransferredPerWellFromLibraryPlates;
 
   private MolarConcentration _molarConcentration;
 
@@ -82,23 +82,24 @@ public abstract class LabActivity extends Activity
   }
 
   /**
-   * Get the volume transferred per well
-   * @return the volume transferred per well
+   * Get the volume transferred per well, from library plates
+   * 
+   * @return the volume transferred per well, from library plates
    */
   @Column(precision=ScreensaverConstants.VOLUME_PRECISION, scale=ScreensaverConstants.VOLUME_SCALE)
   @org.hibernate.annotations.Type(type="edu.harvard.med.screensaver.db.usertypes.VolumeType") 
-  public Volume getVolumeTransferredPerWell()
+  public Volume getVolumeTransferredPerWellFromLibraryPlates()
   {
-    return _volumeTransferredPerWell;
+    return _volumeTransferredPerWellFromLibraryPlates;
   }
   
   /**
    * Set the volume transferred per well
    * @param volumeTransferredPerWell the new volume transferred per well
    */
-  public void setVolumeTransferredPerWell(Volume volumeTransferredPerWell)
+  public void setVolumeTransferredPerWellFromLibraryPlates(Volume volumeTransferredPerWell)
   {
-    _volumeTransferredPerWell = volumeTransferredPerWell;
+    _volumeTransferredPerWellFromLibraryPlates = volumeTransferredPerWell;
   }
 
   @Transient

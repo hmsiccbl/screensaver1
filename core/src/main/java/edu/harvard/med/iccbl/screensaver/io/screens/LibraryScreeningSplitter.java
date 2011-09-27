@@ -133,7 +133,8 @@ public class LibraryScreeningSplitter
     newLibraryScreening.setMolarConcentration(libraryScreening.getMolarConcentration());
     newLibraryScreening.setForExternalLibraryPlates(libraryScreening.isForExternalLibraryPlates());
     newLibraryScreening.setNumberOfReplicates(libraryScreening.getNumberOfReplicates());
-    newLibraryScreening.setVolumeTransferredPerWell(libraryScreening.getVolumeTransferredPerWell());
+    newLibraryScreening.setVolumeTransferredPerWellToAssayPlates(libraryScreening.getVolumeTransferredPerWellToAssayPlates());
+    newLibraryScreening.setVolumeTransferredPerWellFromLibraryPlates(libraryScreening.getVolumeTransferredPerWellFromLibraryPlates());
     newLibraryScreening.setAssayWellVolume(libraryScreening.getAssayWellVolume());
     for (AssayPlate assayPlate : assayPlatesToMove) {
       assayPlate.setLibraryScreening(newLibraryScreening);

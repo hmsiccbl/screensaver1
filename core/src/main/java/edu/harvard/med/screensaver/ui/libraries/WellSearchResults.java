@@ -1012,7 +1012,7 @@ public abstract class WellSearchResults extends TupleBasedEntitySearchResults<We
             });
             columns.get(columns.size() - 1).setVisible(false);
 
-            // TODO: determine the visiblity for this column
+            // TODO: determine the visibility for this column
             columns.add(new TableColumn<Tuple<String>,Volume>("Volume Transferred per Well",
                                                               "The volume of library compound transferred to the assay well",
                                                               ColumnType.VOLUME,
@@ -1020,7 +1020,7 @@ public abstract class WellSearchResults extends TupleBasedEntitySearchResults<We
               @Override
               public Volume getCellValue(Tuple<String> tuple)
               {
-                return libraryScreening.getVolumeTransferredPerWell();
+                return libraryScreening.getVolumeTransferredPerWellToAssayPlates();
               }
 
               @Override
@@ -1038,7 +1038,7 @@ public abstract class WellSearchResults extends TupleBasedEntitySearchResults<We
               @Override
               public Volume getCellValue(Tuple<String> tuple)
               {
-                return libraryScreening.getVolumeTransferredPerWell().add(libraryScreening.getAssayWellVolume());
+                return libraryScreening.getVolumeTransferredPerWellToAssayPlates().add(libraryScreening.getAssayWellVolume());
               }
 
               @Override
@@ -1058,7 +1058,7 @@ public abstract class WellSearchResults extends TupleBasedEntitySearchResults<We
               {
                 // TODO: don't show if well.type != experimental
                 MolarConcentration libraryWellConcentration = super.getCellValue(tuple);
-                Volume volumeXferred = libraryScreening.getVolumeTransferredPerWell();
+                Volume volumeXferred = libraryScreening.getVolumeTransferredPerWellToAssayPlates();
                 if (libraryWellConcentration == null || volumeXferred == null ||
                   libraryScreening.getAssayWellVolume() == null) return null;
                 Volume finalAssayVolume = volumeXferred.add(libraryScreening.getAssayWellVolume());

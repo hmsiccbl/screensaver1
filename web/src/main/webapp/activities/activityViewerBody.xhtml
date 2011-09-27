@@ -130,12 +130,22 @@
       editWidth="2"
       rendered="#{activityViewer.entity.class.simpleName == 'LibraryScreening' || activityViewer.entity.class.simpleName == 'CherryPickScreening'}" />
 
-    <ss:property id="volumeTransferredPerWell"
-      label="Volume Transferred per Replicate"
-      value="#{activityViewer.volumeTransferredPerWellValue}"
+    <ss:property id="volumeTransferredPerWellToAssayPlates"
+      label="Volume Transferred to Assay Plates (per replicate)"
+      value="#{activityViewer.volumeTransferredPerWellToAssayPlatesValue}"
       type="Volume"
-      unitsSelector="#{activityViewer.volumeTransferredPerWellType}"
-      description="The volume transferred per replicate well"
+      unitsSelector="#{activityViewer.volumeTransferredPerWellToAssayPlatesType}"
+      description="The volume transferred per replicate well to the assay plates"
+      editable="#{activityViewer.editMode}" editWidth="6"
+      rendered="#{activityViewer.entity.class.simpleName == 'LibraryScreening' || activityViewer.entity.class.simpleName == 'CherryPickScreening'}" />
+
+    <ss:property id="volumeTransferredPerWellFromLibraryPlates"
+      label="Volume Transferred From Library Plates (all replicates) #{activityViewer.editMode ? ' [Leave blank to auto-calculate]' : ''}"
+      escape="false"
+      value="#{activityViewer.volumeTransferredPerWellFromLibraryPlatesValue}"
+      type="Volume"
+      unitsSelector="#{activityViewer.volumeTransferredPerWellFromLibraryPlatesType}"
+      description="The volume transferred per library well from the library plates"
       editable="#{activityViewer.editMode}" editWidth="6"
       rendered="#{activityViewer.entity.class.simpleName == 'LibraryScreening' || activityViewer.entity.class.simpleName == 'CherryPickScreening'}" />
 

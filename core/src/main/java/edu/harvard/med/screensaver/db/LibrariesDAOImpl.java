@@ -601,9 +601,9 @@ public class LibrariesDAOImpl extends AbstractDAO implements LibrariesDAO
     // note: we are forced to use native SQL query, as HQL does not perform volume multiplication properly (always results in value of 0)
     String sql =
       "select prv.copy_id, avg(prv.plate_remaining_volume), min(prv.plate_remaining_volume), max(prv.plate_remaining_volume) from "
-        + "(select p.copy_id, p.well_volume - sum(la.volume_transferred_per_well) as plate_remaining_volume "
+        + "(select p.copy_id, p.well_volume - sum(la.volume_transferred_per_well_from_library_plates) as plate_remaining_volume "
         + "from plate p join assay_plate ap using(plate_id) join screening ls on(ls.activity_id = ap.library_screening_id) join lab_activity la using(activity_id) "
-        + "where p.copy_id in (:copyIds) "
+        + "where p.copy_id in (:copyIds) and ap.replicate_ordinal = 0 "
         + "group by p.copy_id, p.plate_id, p.well_volume) as prv "
         + "group by prv.copy_id";
     javax.persistence.Query query = getEntityManager().createNativeQuery(sql);
@@ -632,9 +632,9 @@ public class LibrariesDAOImpl extends AbstractDAO implements LibrariesDAO
   {
     // note: we are forced to use native SQL query, as HQL does not perform volume multiplication properly (always results in value of 0)
     String sql =
-      "select p.plate_id, p.well_volume - sum(la.volume_transferred_per_well)"
+      "select p.plate_id, p.well_volume - sum(la.volume_transferred_per_well_from_library_plates)"
         + "from plate p join assay_plate ap using(plate_id) join screening ls on(ls.activity_id = ap.library_screening_id) join lab_activity la using(activity_id) "
-        + "where p.plate_id in (:plateIds)"
+        + "where p.plate_id in (:plateIds) and ap.replicate_ordinal = 0 "
         + "group by p.plate_id, p.well_volume";
     javax.persistence.Query query = getEntityManager().createNativeQuery(sql);
     Map<Serializable,Plate> platesById = Maps.uniqueIndex(plates, Plate.ToEntityId);

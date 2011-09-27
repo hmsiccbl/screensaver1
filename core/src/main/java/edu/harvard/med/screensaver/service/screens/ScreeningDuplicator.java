@@ -36,7 +36,8 @@ import edu.harvard.med.screensaver.model.users.ScreensaverUser;
  * <li>assayProtocolLastModifiedDate</li>
  * <li>assayProtocolType</li>
  * <li>numberOfReplicates</li>
- * <li>volumeTransferredPerWell</li>
+ * <li>volumeTransferredPerWellFromAssayPlates</li>
+ * <li>volumeTransferredPerWellToLibraryPlates</li>
  * <li>concentration</li>
  * <li>performedBy</li>
  * </ul>
@@ -134,12 +135,13 @@ public class ScreeningDuplicator
     toScreening.setAssayProtocolLastModifiedDate(fromScreening.getAssayProtocolLastModifiedDate());
     toScreening.setAssayProtocolType(fromScreening.getAssayProtocolType());
     toScreening.setNumberOfReplicates(fromScreening.getNumberOfReplicates());
+    toScreening.setVolumeTransferredPerWellToAssayPlates(fromScreening.getVolumeTransferredPerWellToAssayPlates());
     toScreening.setAssayWellVolume(fromScreening.getAssayWellVolume());
   }
 
   private void copyActivityProperties(LabActivity fromActivity, LabActivity toActivity)
   {
-    toActivity.setVolumeTransferredPerWell(fromActivity.getVolumeTransferredPerWell());
+    toActivity.setVolumeTransferredPerWellFromLibraryPlates(fromActivity.getVolumeTransferredPerWellFromLibraryPlates());
     toActivity.setMolarConcentration(fromActivity.getMolarConcentration());
     toActivity.setPerformedBy(fromActivity.getPerformedBy());
   }

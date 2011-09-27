@@ -9,6 +9,7 @@
 
 package edu.harvard.med.screensaver.ui.activities;
 
+import java.math.BigDecimal;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Set;
@@ -70,6 +71,7 @@ import edu.harvard.med.screensaver.ui.cherrypickrequests.SelectableRow;
 import edu.harvard.med.screensaver.ui.libraries.LibrarySearchResults;
 import edu.harvard.med.screensaver.ui.screens.ScreenViewer;
 import edu.harvard.med.screensaver.ui.users.UserViewer;
+import edu.harvard.med.screensaver.util.StringUtils;
 
 public class ActivityViewer extends SearchResultContextEditableEntityViewerBackingBean<Activity,Activity>
 {
@@ -88,10 +90,12 @@ public class ActivityViewer extends SearchResultContextEditableEntityViewerBacki
   private Screen _screen;
   private UISelectOneBean<AssayProtocolType> _assayProtocolType;
   private UISelectOneBean<MolarUnit> _concentrationType;
-  private UISelectOneBean<VolumeUnit> _volumeType;
+  private UISelectOneBean<VolumeUnit> _volumeTransferredPerWellToAssayPlatesType;
+  private UISelectOneBean<VolumeUnit> _volumeTransferredPerWellFromLibraryPlatesType;
   private UISelectOneBean<VolumeUnit> _assayWellVolumeType;
   private String _concentrationValue;
-  private String _volumeValue;
+  private String _volumeTransferredPerWellToAssayPlatesValue;
+  private String _volumeTransferredPerWellFromLibraryPlatesValue;
   private String _assayWellVolumeValue;
   private DataModel _cherryPickPlatesDataModel;
   private DataModel _platesScreenedDataModel;
@@ -162,7 +166,12 @@ public class ActivityViewer extends SearchResultContextEditableEntityViewerBacki
       getDao().needReadOnly((LabActivity) entity, LabActivity.Screen);
 
       if (entity instanceof Screening) {
-        ((Screening) entity).setVolumeTransferredPerWell(Volume.makeVolume(_volumeValue, _volumeType.getSelection()));
+        ((Screening) entity).setVolumeTransferredPerWellToAssayPlates(Volume.makeVolume(_volumeTransferredPerWellToAssayPlatesValue, _volumeTransferredPerWellToAssayPlatesType.getSelection()));
+        if (StringUtils.isEmpty(_volumeTransferredPerWellFromLibraryPlatesValue)) {
+          _volumeTransferredPerWellFromLibraryPlatesValue = ((Screening) entity).getVolumeTransferredPerWellToAssayPlates().getValue().multiply(new BigDecimal(((Screening) entity).getNumberOfReplicates())).toString();
+          _volumeTransferredPerWellFromLibraryPlatesType.setSelection(_volumeTransferredPerWellToAssayPlatesType.getSelection());
+        }
+        ((Screening) entity).setVolumeTransferredPerWellFromLibraryPlates(Volume.makeVolume(_volumeTransferredPerWellFromLibraryPlatesValue, _volumeTransferredPerWellFromLibraryPlatesType.getSelection()));
         ((Screening) entity).setAssayWellVolume(Volume.makeVolume(_assayWellVolumeValue, _assayWellVolumeType.getSelection()));
         ((Screening) entity).setMolarConcentration(MolarConcentration.makeConcentration(_concentrationValue, _concentrationType.getSelection()));
       }
@@ -256,8 +265,11 @@ public class ActivityViewer extends SearchResultContextEditableEntityViewerBacki
     _platesScreenedDataModel = null;
     _concentrationType = null;
     _concentrationValue = null;
-    _volumeType = null;
-    _volumeValue = null;
+    _volumeTransferredPerWellFromLibraryPlatesType = null;
+    _volumeTransferredPerWellToAssayPlatesType = null;
+    _volumeTransferredPerWellToAssayPlatesValue = null;
+    _volumeTransferredPerWellFromLibraryPlatesType = null;
+    _volumeTransferredPerWellFromLibraryPlatesValue = null;
     _assayWellVolumeValue = null;
     _assayWellVolumeType = null;
   }
@@ -296,52 +308,66 @@ public class ActivityViewer extends SearchResultContextEditableEntityViewerBacki
     return _servicedUser;
   }
 
-  public UISelectOneBean<VolumeUnit> getVolumeTransferredPerWellType()
+  public UISelectOneBean<VolumeUnit> getVolumeTransferredPerWellFromLibraryPlatesType()
   {
-    try {
-      if (_volumeType == null) {
-        if (getEntity() instanceof LabActivity) {
-          Volume v = ((LabActivity) getEntity()).getVolumeTransferredPerWell();
-          VolumeUnit unit = (v == null ? VolumeUnit.NANOLITERS : v.getUnits());
-  
-          _volumeType = new UISelectOneBean<VolumeUnit>(VolumeUnit.DISPLAY_VALUES, unit)
-          {
-            @Override
-            protected String makeLabel(VolumeUnit t)
-            {
-              return t.getValue();
-            }
-          };
-        }
-      }
-      return _volumeType;
-    } catch (Exception e) {
-      log.error("err: " + e);
-      return null;
+    if (_volumeTransferredPerWellFromLibraryPlatesType == null && getEntity() instanceof LabActivity) {
+      _volumeTransferredPerWellFromLibraryPlatesType = initVolumeType(((LabActivity) getEntity()).getVolumeTransferredPerWellFromLibraryPlates());
     }
+    return _volumeTransferredPerWellFromLibraryPlatesType;
+    
   }
 
-  /**
-   * This method exists to grab the value portion of the Quantity stored
-  */
-  public String getVolumeTransferredPerWellValue()
+  public UISelectOneBean<VolumeUnit> getVolumeTransferredPerWellToAssayPlatesType()
   {
-    if (_volumeValue == null) {
-      Volume volumeTransferredPerWell = ((LabActivity) getEntity()).getVolumeTransferredPerWell();
+    if (_volumeTransferredPerWellToAssayPlatesType == null && getEntity() instanceof Screening) {
+      _volumeTransferredPerWellToAssayPlatesType = initVolumeType(((Screening) getEntity()).getVolumeTransferredPerWellToAssayPlates());
+    }
+    return _volumeTransferredPerWellToAssayPlatesType;
+  }
+
+  private UISelectOneBean<VolumeUnit> initVolumeType(Volume initialVolume)
+  {
+    Volume v = initialVolume;
+    VolumeUnit unit = (v == null ? VolumeUnit.NANOLITERS : v.getUnits());
+    return new UISelectOneBean<VolumeUnit>(VolumeUnit.DISPLAY_VALUES, unit) {
+      @Override
+      protected String makeLabel(VolumeUnit t)
+      {
+        return t.getValue();
+      }
+    };
+  }
+
+  public String getVolumeTransferredPerWellToAssayPlatesValue()
+  {
+    if (_volumeTransferredPerWellToAssayPlatesValue == null) {
+      Volume volumeTransferredPerWell = ((Screening) getEntity()).getVolumeTransferredPerWellToAssayPlates();
       if (volumeTransferredPerWell != null) {
-        _volumeValue = volumeTransferredPerWell.getDisplayValue().toString();
+        _volumeTransferredPerWellToAssayPlatesValue = volumeTransferredPerWell.getDisplayValue().toString();
       }
     }
-    return _volumeValue;
+    return _volumeTransferredPerWellToAssayPlatesValue;
   }
 
-  /**
-   * This method exists to set the value portion of the Quantity stored
-   * @see #save()
-  */
-  public void setVolumeTransferredPerWellValue(String value)
+  public void setVolumeTransferredPerWellToAssayPlatesValue(String value)
   {
-    _volumeValue = value;
+    _volumeTransferredPerWellToAssayPlatesValue = value;
+  }
+
+  public String getVolumeTransferredPerWellFromLibraryPlatesValue()
+  {
+    if (_volumeTransferredPerWellFromLibraryPlatesValue == null) {
+      Volume volumeTransferredPerWell = ((LabActivity) getEntity()).getVolumeTransferredPerWellFromLibraryPlates();
+      if (volumeTransferredPerWell != null) {
+        _volumeTransferredPerWellFromLibraryPlatesValue = volumeTransferredPerWell.getDisplayValue().toString();
+      }
+    }
+    return _volumeTransferredPerWellFromLibraryPlatesValue;
+  }
+
+  public void setVolumeTransferredPerWellFromLibraryPlatesValue(String value)
+  {
+    _volumeTransferredPerWellFromLibraryPlatesValue = value;
   }
 
   public MolarConcentration getMolarConcentration()
@@ -471,11 +497,19 @@ public class ActivityViewer extends SearchResultContextEditableEntityViewerBacki
     boolean valid = true;
     if (entity instanceof Screening) {
       try {
-        Volume.makeVolume(getVolumeTransferredPerWellValue(),
-                          getVolumeTransferredPerWellType().getSelection());
+        Volume.makeVolume(getVolumeTransferredPerWellToAssayPlatesValue(),
+                          getVolumeTransferredPerWellToAssayPlatesType().getSelection());
+      }
+      catch (Exception e) {
+        showFieldInputError("Volume Transferred Per Replicate To Assay Plates", e.getLocalizedMessage());
+        valid = false;
+      }
+      try {
+        Volume.makeVolume(getVolumeTransferredPerWellToAssayPlatesValue(),
+                          getVolumeTransferredPerWellFromLibraryPlatesType().getSelection());
       } 
       catch (Exception e) {
-        showFieldInputError("Volume Transferred Per Replicate", e.getLocalizedMessage());
+        showFieldInputError("Volume Transferred Per Replicate From Library Plates", e.getLocalizedMessage());
         valid = false;
       }
       try {

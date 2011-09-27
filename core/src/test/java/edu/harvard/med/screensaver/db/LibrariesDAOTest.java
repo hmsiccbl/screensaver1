@@ -538,7 +538,8 @@ public class LibrariesDAOTest extends AbstractSpringPersistenceTest
       @Override
       public void postCreate(String callStack, LibraryScreening ls) {
         if (callStack.endsWith(getName())) {
-          ls.setVolumeTransferredPerWell(new Volume("1.5", VolumeUnit.MICROLITERS));
+          ls.setVolumeTransferredPerWellFromLibraryPlates(new Volume("3.0", VolumeUnit.MICROLITERS));
+          ls.setVolumeTransferredPerWellToAssayPlates(new Volume("1.5", VolumeUnit.MICROLITERS));
           ls.setNumberOfReplicates(2);
         }
       } 
@@ -590,12 +591,12 @@ public class LibrariesDAOTest extends AbstractSpringPersistenceTest
     copy2 = library.getCopy("D");
     copy3 = library.getCopy("E");
 
-    LibraryScreening libScreening1 = newLibraryScreening(2, new Volume("1.0", VolumeUnit.MICROLITERS));
-    LibraryScreening libScreening2 = newLibraryScreening(2, new Volume("1.5", VolumeUnit.MICROLITERS));
-    LibraryScreening libScreening3 = newLibraryScreening(2, new Volume("2.0", VolumeUnit.MICROLITERS));
-    LibraryScreening libScreening4 = newLibraryScreening(2, new Volume("2.5", VolumeUnit.MICROLITERS));
-    LibraryScreening libScreening5 = newLibraryScreening(2, new Volume("2.0", VolumeUnit.MICROLITERS));
-    LibraryScreening libScreening6 = newLibraryScreening(2, new Volume("2.0", VolumeUnit.MICROLITERS));
+    LibraryScreening libScreening1 = newLibraryScreening(new Volume("2.0", VolumeUnit.MICROLITERS));
+    LibraryScreening libScreening2 = newLibraryScreening(new Volume("3.0", VolumeUnit.MICROLITERS));
+    LibraryScreening libScreening3 = newLibraryScreening(new Volume("4.0", VolumeUnit.MICROLITERS));
+    LibraryScreening libScreening4 = newLibraryScreening(new Volume("5.0", VolumeUnit.MICROLITERS));
+    LibraryScreening libScreening5 = newLibraryScreening(new Volume("4.0", VolumeUnit.MICROLITERS));
+    LibraryScreening libScreening6 = newLibraryScreening(new Volume("4.0", VolumeUnit.MICROLITERS));
     
     libScreening1.addAssayPlatesScreened(copy1.findPlate(1));
     libScreening1.addAssayPlatesScreened(copy1.findPlate(2));
@@ -641,11 +642,12 @@ public class LibrariesDAOTest extends AbstractSpringPersistenceTest
     librariesDao.calculateCopyVolumeStatistics(ImmutableSet.<Copy>of());
   }
 
-  private LibraryScreening newLibraryScreening(int replicates, Volume volume)
+  private LibraryScreening newLibraryScreening(Volume volume)
   {
     LibraryScreening ls = dataFactory.newInstance(LibraryScreening.class, getName());
-    ls.setNumberOfReplicates(replicates);
-    ls.setVolumeTransferredPerWell(volume);
+    ls.setVolumeTransferredPerWellFromLibraryPlates(volume);
+    ls.setVolumeTransferredPerWellToAssayPlates(volume);
+    ls.setNumberOfReplicates(1);
     return ls;
   }
     /**
