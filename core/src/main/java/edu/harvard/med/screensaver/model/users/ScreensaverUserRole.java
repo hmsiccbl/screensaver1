@@ -55,6 +55,7 @@ public enum ScreensaverUserRole implements VocabularyTerm, Principal
   LAB_HEADS_ADMIN("labHeadsAdmin", "Lab Heads Administrator", USERS_ADMIN, "Administrators that can create and modify user accounts that are lab heads."),
   USER_ROLES_ADMIN("userRolesAdmin", "User Roles Admin", USERS_ADMIN , "Administrators that can modify data access roles on user accounts."),
   SCREENS_ADMIN("screensAdmin", "Screens Administrator", READ_EVERYTHING_ADMIN, "Administrators that can create and modify screens."),
+  SERVICE_ACTIVITY_ADMIN("serviceActivityAdmin", "Service Activity Administrator", READ_EVERYTHING_ADMIN, "Administrators that can add service activities to users."),
   SCREEN_RESULTS_ADMIN("screenResultsAdmin", "Screen Results Administrator", READ_EVERYTHING_ADMIN, "Administrators that can create and modify screen results."),
   CHERRY_PICK_REQUESTS_ADMIN("cherryPickRequestsAdmin", "Cherry Pick Requests Administrator", READ_EVERYTHING_ADMIN, "Administrators that can create and modify cherry pick requests, including the generation of cherry pick plate mapping files, and the recording of cherry pick liquid transfers."),
   BILLING_ADMIN("billingAdmin", "Billing Information Administrator", SCREENS_ADMIN, "Administrators that can view, create, and modify billing information for a screen."),
