@@ -360,7 +360,8 @@ public class CherryPickRequestViewer extends SearchResultContextEntityViewerBack
   @Override
   public void initializeEntity(CherryPickRequest cherryPickRequest)
   {
-    getDao().needReadOnly(cherryPickRequest, CherryPickRequest.screenerCherryPicks);
+    // note: eager fetching screenedWell and latestReleasedReagent, since Hibernate otherwise loads them individually, and slowly
+    getDao().needReadOnly(cherryPickRequest, CherryPickRequest.screenerCherryPicks.to(ScreenerCherryPick.screenedWell).to(Well.latestReleasedReagent));
     getDao().needReadOnly(cherryPickRequest, CherryPickRequest.labCherryPicks.to(LabCherryPick.wellVolumeAdjustments));
   }
   

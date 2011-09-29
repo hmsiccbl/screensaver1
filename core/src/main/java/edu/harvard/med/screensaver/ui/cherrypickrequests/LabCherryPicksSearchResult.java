@@ -8,12 +8,11 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
-import com.google.common.collect.Iterables;
-
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
 import com.google.common.collect.Sets;
 
+import edu.harvard.med.screensaver.db.EntityInflator;
 import edu.harvard.med.screensaver.db.GenericEntityDAO;
 import edu.harvard.med.screensaver.db.NoSuchEntityException;
 import edu.harvard.med.screensaver.db.datafetcher.DataFetcherUtil;
@@ -31,7 +30,6 @@ import edu.harvard.med.screensaver.model.libraries.Well;
 import edu.harvard.med.screensaver.model.libraries.WellCopy;
 import edu.harvard.med.screensaver.model.libraries.WellVolumeAdjustment;
 import edu.harvard.med.screensaver.model.meta.RelationshipPath;
-import edu.harvard.med.screensaver.model.screens.ScreenType;
 import edu.harvard.med.screensaver.model.users.AdministratorUser;
 import edu.harvard.med.screensaver.model.users.ScreensaverUserRole;
 import edu.harvard.med.screensaver.service.cherrypicks.CherryPickRequestAllocator;
@@ -88,8 +86,15 @@ public class LabCherryPicksSearchResult extends EntityBasedEntitySearchResults<L
           DataFetcherUtil.addDomainRestrictions(hql, RelationshipPath.from(LabCherryPick.class).to("cherryPickRequest"), _cherryPickRequest, getRootAlias());
         }
       }));
-      getColumnManager().setVisibilityOfColumnsInGroup(RNAI_COLUMNS_GROUP, cpr.getScreen().getScreenType() == ScreenType.RNAI);
-      getColumnManager().setVisibilityOfColumnsInGroup(SMALL_MOLECULE_COLUMNS_GROUP, cpr.getScreen().getScreenType() == ScreenType.SMALL_MOLECULE);
+      getColumnManager().setVisibilityOfColumnsInGroup(RNAI_COLUMNS_GROUP, false /*
+                                                                                  * cpr.getScreen().getScreenType() ==
+                                                                                  * ScreenType.RNAI
+                                                                                  */);
+      getColumnManager().setVisibilityOfColumnsInGroup(SMALL_MOLECULE_COLUMNS_GROUP, false /*
+                                                                                            * cpr.getScreen().getScreenType
+                                                                                            * () ==
+                                                                                            * ScreenType.SMALL_MOLECULE
+                                                                                            */);
     }
     setEditingRole(ScreensaverUserRole.CHERRY_PICK_REQUESTS_ADMIN);
   }
@@ -117,6 +122,9 @@ public class LabCherryPicksSearchResult extends EntityBasedEntitySearchResults<L
       }
     });
     ((HasFetchPaths<LabCherryPick>) labCherryPicksTableColumns.get(0)).addRelationshipPath(LabCherryPick.assayPlate.to(CherryPickAssayPlate.cherryPickLiquidTransfer));
+    // note: eager fetching LCP.screenerCherryPick, since Hibernate otherwise loads them individually, and slowly (this RelationshipPath is arbitrarily added to the first column)
+    ((HasFetchPaths<LabCherryPick>) labCherryPicksTableColumns.get(0)).addRelationshipPath(LabCherryPick.screenerCherryPick);
+    
     labCherryPicksTableColumns.add(new TextEntityColumn<LabCherryPick>(
       LabCherryPick.sourceWell.to(Well.library).toProperty("shortName"),
       "Library Name", "The library name of the cherry picked well", TableColumn.UNGROUPED) {
@@ -154,20 +162,22 @@ public class LabCherryPicksSearchResult extends EntityBasedEntitySearchResults<L
       }
     });
     
-    labCherryPicksTableColumns.add(new TextEntityColumn<LabCherryPick>(
-      LabCherryPick.wellVolumeAdjustments.to(WellVolumeAdjustment.copy).to(Copy.plates),
-                                                                       "Plate Freezer Location",
-                                                                       "The freezer in which the plate is stored",
-                                                                       TableColumn.UNGROUPED) {
-      @Override
-      public String getCellValue(LabCherryPick lcp) 
-      { 
-        if (lcp.isAllocated()) {
-          return lcp.getSourceCopy().getPlates().get(lcp.getSourceWell().getPlateNumber()).getLocation().getFreezer();
-        }
-        return null;
-      }
-    });
+
+
+//    labCherryPicksTableColumns.add(new TextEntityColumn<LabCherryPick>(
+//                                                                       LabCherryPick.wellVolumeAdjustments.to(WellVolumeAdjustment.copy).to(Copy.plates),
+//                                                                       "Plate Freezer Location",
+//                                                                       "The freezer in which the plate is stored",
+//                                                                       TableColumn.UNGROUPED) {
+//      @Override
+//      public String getCellValue(LabCherryPick lcp)
+//      {
+//        if (lcp.isAllocated()) {
+//          return lcp.getSourceCopy().getPlates().get(lcp.getSourceWell().getPlateNumber()).getLocation().getFreezer();
+//        }
+//        return null;
+//      }
+//    });
     
     labCherryPicksTableColumns.add(new LabCherryPickReagentEntityColumn<Reagent,String>(
       Reagent.class, 
@@ -411,7 +421,8 @@ public class LabCherryPicksSearchResult extends EntityBasedEntitySearchResults<L
   {
     Set<WellCopy> wellCopies = Sets.newHashSet();
     for (Map.Entry<LabCherryPick,String> lcpNewSourceCopy : lcpNewSourceCopies.entrySet()) {
-      LabCherryPick lcp = _dao.reloadEntity(lcpNewSourceCopy.getKey(), true, LabCherryPick.wellVolumeAdjustments.to(WellVolumeAdjustment.copy).to(Copy.plates));
+      LabCherryPick lcp = new EntityInflator<LabCherryPick>(_dao, lcpNewSourceCopy.getKey(), true).
+      need(LabCherryPick.wellVolumeAdjustments.to(WellVolumeAdjustment.copy).to(Copy.plates)).need(LabCherryPick.sourceWell).inflate();
       if (lcp.getSourceCopy() != null &&
         !NullSafeUtils.nullSafeEquals(lcp.getSourceCopy().getName(), lcpNewSourceCopy.getValue())) {
         wellCopies.add(new WellCopy(lcp.getSourceWell(), lcp.getSourceCopy()));

@@ -119,7 +119,7 @@ public class ScreenerCherryPick extends AbstractEntity<Integer>
    * Get the cherry pick request.
    * @return the cherry pick request
    */
-  @ManyToOne(fetch = FetchType.EAGER)
+  @ManyToOne
   @JoinColumn(name="cherryPickRequestId", nullable=false, updatable=false)
   @org.hibernate.annotations.ForeignKey(name="fk_screener_cherry_pick_to_cherry_pick_request")
   public CherryPickRequest getCherryPickRequest()
@@ -134,7 +134,7 @@ public class ScreenerCherryPick extends AbstractEntity<Integer>
    * @return the screened well
    * @see LabCherryPick#getSourceWell()
    */
-  @ManyToOne(fetch = FetchType.EAGER)
+  @ManyToOne
   @JoinColumn(name="screenedWellId", nullable=false, updatable=false)
   @org.hibernate.annotations.ForeignKey(name="fk_screener_cherry_pick_to_screened_well")
   @edu.harvard.med.screensaver.model.annotations.ToOne(unidirectional = true)
