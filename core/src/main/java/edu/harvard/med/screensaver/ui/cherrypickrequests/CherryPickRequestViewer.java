@@ -178,12 +178,7 @@ public class CherryPickRequestViewer extends SearchResultContextEntityViewerBack
     _screenerCherryPicksSearchResult.setCurrentScreensaverUser(getCurrentScreensaverUser());
     _screenerCherryPicksSearchResult.setMessages(getMessages());
     _screenerCherryPicksSearchResult.setApplicationProperties(getApplicationProperties());
-    if (getEntity() != null) {
-      _screenerCherryPicksSearchResult.getColumnManager().setVisibilityOfColumnsInGroup(RNAI_COLUMNS_GROUP, getEntity().getScreen().getScreenType() == ScreenType.RNAI);
-      _screenerCherryPicksSearchResult.getColumnManager().setVisibilityOfColumnsInGroup(SMALL_MOLECULE_COLUMNS_GROUP, getEntity().getScreen().getScreenType() == ScreenType.SMALL_MOLECULE);
-    }
     _screenerCherryPicksSearchResult.searchAll();
-    
   }
 
   private List<TableColumn<ScreenerCherryPick,?>> buildScreenerCherryPicksTableColumns()
@@ -195,6 +190,7 @@ public class CherryPickRequestViewer extends SearchResultContextEntityViewerBack
       @Override
       public String getCellValue(ScreenerCherryPick scp) { return scp.getScreenedWell().getLibrary().getShortName(); }
     });
+
     screenerCherryPicksTableColumns.add(new IntegerEntityColumn<ScreenerCherryPick>(
       ScreenerCherryPick.screenedWell.toProperty("plateNumber"),
       "Library Plate", "The library plate number of the well that was originally screened", TableColumn.UNGROUPED) {
@@ -372,6 +368,8 @@ public class CherryPickRequestViewer extends SearchResultContextEntityViewerBack
     _labCherryPicksSearchResult.searchForCherryPickRequest(cherryPickRequest);
     _cherryPicksInput = null;
     getScreenerCherryPicksSearchResult().initialize(buildCherryPicksDataTableModel(ScreenerCherryPick.class, cherryPickRequest));
+    _screenerCherryPicksSearchResult.getColumnManager().setVisibilityOfColumnsInGroup(RNAI_COLUMNS_GROUP, false); // cherryPickRequest.getScreen().getScreenType() == ScreenType.RNAI
+    _screenerCherryPicksSearchResult.getColumnManager().setVisibilityOfColumnsInGroup(SMALL_MOLECULE_COLUMNS_GROUP, false);// cherryPickRequest.getScreen().getScreenType() == ScreenType.SMALL_MOLECULE 
 
     _assayPlatesDataModel = null;
     
