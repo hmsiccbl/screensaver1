@@ -167,7 +167,9 @@ public class ActivityViewer extends SearchResultContextEditableEntityViewerBacki
 
       if (entity instanceof Screening) {
         ((Screening) entity).setVolumeTransferredPerWellToAssayPlates(Volume.makeVolume(_volumeTransferredPerWellToAssayPlatesValue, _volumeTransferredPerWellToAssayPlatesType.getSelection()));
-        if (StringUtils.isEmpty(_volumeTransferredPerWellFromLibraryPlatesValue)) {
+        // auto-calculate the volumeTransferredPerWellFromLibraryPlates property, if user left it blank
+        if (StringUtils.isEmpty(_volumeTransferredPerWellFromLibraryPlatesValue) &&
+          !!!StringUtils.isEmpty(_volumeTransferredPerWellToAssayPlatesValue)) {
           _volumeTransferredPerWellFromLibraryPlatesValue = ((Screening) entity).getVolumeTransferredPerWellToAssayPlates().getValue().multiply(new BigDecimal(((Screening) entity).getNumberOfReplicates())).toString();
           _volumeTransferredPerWellFromLibraryPlatesType.setSelection(_volumeTransferredPerWellToAssayPlatesType.getSelection());
         }
@@ -796,6 +798,7 @@ public class ActivityViewer extends SearchResultContextEditableEntityViewerBacki
     return ImmutableSet.of();
   }
   
+  // TODO: refactor this into a UsersDAO method: findUsersInRole() 
   private Set<ScreensaverUser> findServiceActivityAdminUsers()
   {
     String hql = "from ScreensaverUser where ? in elements (screensaverUserRoles)";
