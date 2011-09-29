@@ -22,6 +22,7 @@ import edu.harvard.med.screensaver.model.cherrypicks.CherryPickAssayPlate;
 import edu.harvard.med.screensaver.model.cherrypicks.CherryPickRequest;
 import edu.harvard.med.screensaver.model.cherrypicks.LabCherryPick;
 import edu.harvard.med.screensaver.model.cherrypicks.LabCherryPick.LabCherryPickStatus;
+import edu.harvard.med.screensaver.model.cherrypicks.ScreenerCherryPick;
 import edu.harvard.med.screensaver.model.libraries.Copy;
 import edu.harvard.med.screensaver.model.libraries.Gene;
 import edu.harvard.med.screensaver.model.libraries.Reagent;
@@ -122,8 +123,8 @@ public class LabCherryPicksSearchResult extends EntityBasedEntitySearchResults<L
       }
     });
     ((HasFetchPaths<LabCherryPick>) labCherryPicksTableColumns.get(0)).addRelationshipPath(LabCherryPick.assayPlate.to(CherryPickAssayPlate.cherryPickLiquidTransfer));
-    // note: eager fetching LCP.screenerCherryPick, since Hibernate otherwise loads them individually, and slowly (this RelationshipPath is arbitrarily added to the first column)
-    ((HasFetchPaths<LabCherryPick>) labCherryPicksTableColumns.get(0)).addRelationshipPath(LabCherryPick.screenerCherryPick);
+    // note: eager fetching relationsihps, since Hibernate otherwise loads them individually, and slowly (this RelationshipPath is arbitrarily added to the first column)
+    ((HasFetchPaths<LabCherryPick>) labCherryPicksTableColumns.get(0)).addRelationshipPath(LabCherryPick.screenerCherryPick.to(ScreenerCherryPick.screenedWell).to(Well.latestReleasedReagent));
     
     labCherryPicksTableColumns.add(new TextEntityColumn<LabCherryPick>(
       LabCherryPick.sourceWell.to(Well.library).toProperty("shortName"),
