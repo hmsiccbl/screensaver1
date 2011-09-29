@@ -297,10 +297,10 @@ public class CherryPickRequestViewerTest extends AbstractBackingBeanTest
     assertEquals("A", genericEntityDao.reloadEntity(lcp1, true, LabCherryPick.wellVolumeAdjustments.to(WellVolumeAdjustment.copy)).getSourceCopy().getName());
     assertEquals("B", genericEntityDao.reloadEntity(lcp2, true, LabCherryPick.wellVolumeAdjustments.to(WellVolumeAdjustment.copy)).getSourceCopy().getName());
     cpr = genericEntityDao.reloadEntity(cherryPickRequestViewer.getEntity(), true, CherryPickRequest.updateActivities.castToSubtype(CherryPickRequest.class));
-    // TODO: the ordering of the lab cherry pick comments is not deterministic; need to update assertion to account for this (sometimes fails)
-    assertEquals("updated source copy for lab cherry pick(s): " + lcp1.getSourceWell().getWellKey() + " from <none> to A, " +
-                 lcp2.getSourceWell().getWellKey() + " from A to B",
-                 cpr.getUpdateActivitiesOfType(AdministrativeActivityType.LAB_CHERRY_PICK_SOURCE_COPY_OVERRIDE).last().getComments());
+    // note: the ordering of the lab cherry pick comments is not deterministic so need to assert as follows:
+    String comments = cpr.getUpdateActivitiesOfType(AdministrativeActivityType.LAB_CHERRY_PICK_SOURCE_COPY_OVERRIDE).last().getComments();
+    assertTrue(comments.contains(lcp1.getSourceWell().getWellKey() + " from <none> to A"));
+    assertTrue(comments.contains(lcp2.getSourceWell().getWellKey() + " from A to B"));
     assertEquals("update3", cpr.getUpdateActivitiesOfType(AdministrativeActivityType.COMMENT).last().getComments());
     wellCopyVolumes = _librariesDao.findRemainingVolumesInWellCopies(lcp1.getSourceWell(), CopyUsageType.CHERRY_PICK_SOURCE_PLATES);
     assertEquals("Copy A well volume decreased", new Volume(999, VolumeUnit.DEFAULT), wellCopyVolumes.get(copyA));
