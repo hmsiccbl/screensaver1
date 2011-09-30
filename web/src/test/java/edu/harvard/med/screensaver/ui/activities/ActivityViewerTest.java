@@ -33,6 +33,7 @@ import edu.harvard.med.screensaver.model.screens.ScreenType;
 import edu.harvard.med.screensaver.model.users.LabHead;
 import edu.harvard.med.screensaver.model.users.ScreeningRoomUser;
 import edu.harvard.med.screensaver.model.users.ScreeningRoomUserClassification;
+import edu.harvard.med.screensaver.model.users.ScreensaverUserRole;
 import edu.harvard.med.screensaver.service.screens.ScreenGenerator;
 import edu.harvard.med.screensaver.ui.arch.searchresults.EntitySearchResults;
 import edu.harvard.med.screensaver.ui.arch.view.AbstractBackingBeanTest;
@@ -66,6 +67,11 @@ public class ActivityViewerTest extends AbstractBackingBeanTest
   protected void setUp() throws Exception
   {
     super.setUp();
+
+    // for testServiceActivity
+    _admin.addScreensaverUserRole(ScreensaverUserRole.SERVICE_ACTIVITY_ADMIN);
+    _admin = genericEntityDao.mergeEntity(_admin);
+    currentScreensaverUser.setScreensaverUser(_admin);
 
     _screener = new ScreeningRoomUser(_admin);
     _screener.setFirstName("A");
@@ -143,7 +149,7 @@ public class ActivityViewerTest extends AbstractBackingBeanTest
   public void testServiceActivity()
   {
     userViewer.viewEntity(_screener);
-    userViewer.addServiceActivity();
+    assertEquals(ScreensaverConstants.VIEW_ACTIVITY, userViewer.addServiceActivity());
     List<SelectItem> selectItems = activityViewer.getServicedScreen().getSelectItems();
     assertEquals("", selectItems.get(0).getValue());
     assertEquals("<none>", selectItems.get(0).getLabel());
@@ -152,6 +158,8 @@ public class ActivityViewerTest extends AbstractBackingBeanTest
     activityViewer.getServicedScreen().setValue(_screen.getScreenId().toString());
     activityViewer.getEntity().setDateOfActivity(new LocalDate(2011, 1, 1));
     ((ServiceActivity) activityViewer.getEntity()).setType(ServiceActivityType.MEDCHEM_CONSULT);
+    // note: this assertion also initializes the performedBy UISelectOneBean, which is required for save() to succeed
+    assertEquals(_admin, activityViewer.getPerformedBy().getSelection());
     assertEquals(ScreensaverConstants.BROWSE_SCREENERS, activityViewer.save());
     assertTrue(userViewer.getContextualSearchResults().isEntityView());
     assertEquals(2, userViewer.getUserActivitiesCount());
