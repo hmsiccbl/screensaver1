@@ -171,6 +171,7 @@
   </t:div>
 
 
+
   <h:form id="cherryPickPlatesForm">
 
     <ss:collapsiblePanel id="cherryPickPlatesPanel"
@@ -191,10 +192,12 @@
               title="Download the input files for the liquid transfer equipment" />
           </t:panelGroup>
 
+<ui:remove> <!-- This is non-performant for large CPRs -->
           <t:outputText
             value="WARNING: Some cherry pick plates will be created from the same source plate!  Be aware that you will need to reload one or more source plates."
             rendered="#{cherryPickRequestViewer.sourcePlateReloadRequired}"
             styleClass="errorMessage" />
+</ui:remove>
 
           <t:message for="assayPlatesTable" styleClass="errorMessage" />
           <t:dataTable id="assayPlatesTable" forceId="true" var="row"
