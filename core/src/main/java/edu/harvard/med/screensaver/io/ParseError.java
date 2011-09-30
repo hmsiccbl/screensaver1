@@ -28,7 +28,7 @@ public class ParseError
   
   public String toString()
   {
-    return _location + ": " + _message;
+    return "location: " + _location + ": " + _message;
   }
   
   public String getErrorMessage() 

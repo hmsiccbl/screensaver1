@@ -487,7 +487,7 @@ public class ScreenSearchResults extends EntityBasedEntitySearchResults<Screen,I
     else {
       columns.add(new DateEntityColumn<Screen>(Screen.thisEntity.toProperty("dateCreated"),
         "Date Data Received",
-        "The date the screen was first recorded in the Screensaver",
+        "The date the screen data was received",
         TableColumn.UNGROUPED) {
         @Override
         protected LocalDate getDate(Screen screen)
@@ -496,7 +496,33 @@ public class ScreenSearchResults extends EntityBasedEntitySearchResults<Screen,I
         }
       });
       
-    }     
+    }   
+    
+    if (LincsScreensaverConstants.FACILITY_NAME.equals(getApplicationProperties().getFacility())) {
+      columns.add(new DateEntityColumn<Screen>(Screen.thisEntity.toProperty("dateLoaded"),
+                                                   "Date Loaded",
+                                                   "The date the screen data was loaded",
+                                                   TableColumn.UNGROUPED) {
+        @Override
+        protected LocalDate getDate(Screen screen)
+        {
+          return screen.getDateLoaded()==null ? null : screen.getDateLoaded().toLocalDate();
+        }
+      });
+    }    
+    
+    if (LincsScreensaverConstants.FACILITY_NAME.equals(getApplicationProperties().getFacility())) {
+      columns.add(new DateEntityColumn<Screen>(Screen.thisEntity.toProperty("datePubliclyAvailable"),
+                                                   "Date Publicly Available",
+                                                   "The date the screen data was made publicly available",
+                                                   TableColumn.UNGROUPED) {
+        @Override
+        protected LocalDate getDate(Screen screen)
+        {
+          return screen.getDatePubliclyAvailable() == null ? null : screen.getDatePubliclyAvailable().toLocalDate();
+        }
+      });
+    }
     
     // RNAi fields
     columns.add(new TextEntityColumn<Screen>(RelationshipPath.from(Screen.class).toProperty("species"),

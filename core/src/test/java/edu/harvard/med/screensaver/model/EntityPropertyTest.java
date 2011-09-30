@@ -626,7 +626,7 @@ public class EntityPropertyTest<E extends AbstractEntity> extends AbstractSpring
       // need special case for BigDecimal, since scale is taken into account
       // by BigDecimal.equals(), but we want to ignore scale, since we can't
       // reliably instantiate test values with the correct scale
-      assertTrue(assertMessage, ((BigDecimal) expectedValue).compareTo((BigDecimal) actualValue) == 0);
+      assertTrue(assertMessage + ":" + expectedValue + ", " + actualValue, ((BigDecimal) expectedValue).compareTo((BigDecimal) actualValue) == 0);
     }
     else if (expectedValue instanceof byte[]) {
       assertEquals(assertMessage,

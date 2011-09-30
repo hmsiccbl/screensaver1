@@ -394,6 +394,7 @@ public class Copy extends AuditedAbstractEntity<Integer> implements Comparable<C
   }
 
   @Column
+  @edu.harvard.med.screensaver.model.annotations.Column(hasNonconventionalSetterMethod=true) 
   public ConcentrationStatistics getConcentrationStatistics()
   {
       return _concentrationStatistics;

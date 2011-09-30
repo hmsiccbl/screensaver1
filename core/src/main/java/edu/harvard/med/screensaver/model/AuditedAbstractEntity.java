@@ -67,6 +67,8 @@ public abstract class AuditedAbstractEntity<K extends Serializable> extends Abst
   
   private ScreensaverUser _createdBy;
   private DateTime _createdTimestamp;
+  private DateTime _loadedTimestamp;
+  private DateTime _publiclyAvailableTimestamp;
   
   /**
    * @motivation for Hibernate ONLY
@@ -93,6 +95,38 @@ public abstract class AuditedAbstractEntity<K extends Serializable> extends Abst
   private void setDateCreated(DateTime createdTimeStamp)
   {
     _createdTimestamp = createdTimeStamp;
+  }  
+  
+  /**
+   * The date that data is loaded into the database (used by LINCS)
+   */
+  @Column(nullable = true, updatable = false)
+  @edu.harvard.med.screensaver.model.annotations.Column(hasNonconventionalSetterMethod=true) /* this property is currently set by LINCS scripts only */
+  @Type(type="org.joda.time.contrib.hibernate.PersistentDateTime")
+  public DateTime getDateLoaded()
+  {
+    return _loadedTimestamp;
+  }
+  
+  private void setDateLoaded(DateTime value)
+  {
+    _loadedTimestamp = value;
+  }
+
+  /**
+   * The date that data has been made publicly available (used by LINCS)
+   */
+  @Column(nullable = true, updatable = false)
+  @edu.harvard.med.screensaver.model.annotations.Column(hasNonconventionalSetterMethod=true) /* this property is currently set by LINCS scripts only */
+  @Type(type="org.joda.time.contrib.hibernate.PersistentDateTime")
+  public DateTime getDatePubliclyAvailable()
+  {
+    return _publiclyAvailableTimestamp;
+  }
+  
+  private void setDatePubliclyAvailable(DateTime value)
+  {
+    _publiclyAvailableTimestamp = value;
   }
 
   @ManyToOne(fetch = FetchType.LAZY, cascade = { CascadeType.PERSIST, CascadeType.MERGE })

@@ -17,6 +17,11 @@
       <source>src/main/scripts/lincs/recreate_lincs_db.sh</source>
       <outputDirectory>/</outputDirectory>
       <fileMode>0775</fileMode>
+    </file>    
+    <file>
+      <source>src/main/scripts/lincs/generate_drop_all.sh</source>
+      <outputDirectory>/scripts/</outputDirectory>
+      <fileMode>0775</fileMode>
     </file>
     <file>
       <source>src/main/resources/log4j.properties.lincs</source>
@@ -46,6 +51,7 @@
       </includes>
       <excludes>
         <exclude>recreate_lincs_db*</exclude>
+        <exclude>generate_drop_all*</exclude>
       </excludes>
       <filtered>true</filtered>
     </fileSet>

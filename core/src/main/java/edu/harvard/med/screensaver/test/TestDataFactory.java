@@ -534,10 +534,14 @@ public class TestDataFactory
       public BigDecimal newInstance(String callStack)
       {
         BigDecimal val = null;
-        if(callStack.contains("mgMlConcentration")){
+        if(callStack.contains("mgmlconcentration")){
           // mgMlConcentration has a max precision 5, scale 3
-          val = new BigDecimal((TestDataFactory.this.newInstance(Double.class)).doubleValue()/10);
+          val = new BigDecimal((TestDataFactory.this.newInstance(Double.class)).doubleValue()/_doubleTestValue);
           val = val.setScale(3,RoundingMode.HALF_UP); 
+        }else if(callStack.contains("dilution")){
+          // dilution factor has a max precision 2, scale 8
+          val = new BigDecimal((TestDataFactory.this.newInstance(Double.class)).doubleValue()/(_doubleTestValue/10) );
+          val = val.setScale(2,RoundingMode.HALF_UP); 
         }else {
           // 2 is the default scale used in our Hibernate mapping
           val = new BigDecimal((TestDataFactory.this.newInstance(Double.class)).doubleValue());

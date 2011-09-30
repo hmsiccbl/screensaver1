@@ -153,6 +153,31 @@ public class StudySearchResults extends EntityBasedEntitySearchResults<Screen,In
           return screen.getDateCreated().toLocalDate();
         }
       });
+    }  
+ 
+    if (LincsScreensaverConstants.FACILITY_NAME.equals(getApplicationProperties().getFacility())) {
+      columns.add(new DateEntityColumn<Screen>(Screen.thisEntity.toProperty("dateLoaded"),
+                                               "Date Loaded",
+                                               "The date the data was loaded",
+                                               TableColumn.UNGROUPED) {
+        @Override
+        protected LocalDate getDate(Screen screen)
+        {
+          return screen.getDateLoaded()== null ? null : screen.getDateLoaded().toLocalDate();
+        }
+      });
+    }    
+    if (LincsScreensaverConstants.FACILITY_NAME.equals(getApplicationProperties().getFacility())) {
+      columns.add(new DateEntityColumn<Screen>(Screen.thisEntity.toProperty("datePubliclyAvailable"),
+                                               "Date Publicly Available",
+                                               "The date the data was made publicly available",
+                                               TableColumn.UNGROUPED) {
+        @Override
+        protected LocalDate getDate(Screen screen)
+        {
+          return screen.getDatePubliclyAvailable() == null ? null : screen.getDatePubliclyAvailable().toLocalDate();
+        }
+      });
     }    
 
 //  TableColumnManager<Screen> columnManager = getColumnManager();

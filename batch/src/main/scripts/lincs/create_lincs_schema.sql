@@ -12,6 +12,8 @@
     create table activity (
         activity_id int4 not null,
         date_created timestamp not null,
+        date_loaded timestamp,
+        date_publicly_available timestamp,
         comments text,
         date_of_activity date not null,
         version int4 not null,
@@ -87,6 +89,8 @@
     create table attached_file (
         attached_file_id int4 not null,
         date_created timestamp not null,
+        date_loaded timestamp,
+        date_publicly_available timestamp,
         file_contents oid not null,
         file_date date,
         filename text not null,
@@ -113,6 +117,13 @@
         primary key (attached_file_id, update_activity_id)
     );
 
+    create table cell_line (
+        cell_line_id int4 not null,
+        value text not null unique,
+        version int4 not null,
+        primary key (cell_line_id)
+    );
+
     create table checklist_item (
         checklist_item_id int4 not null,
         checklist_item_group text not null,
@@ -127,6 +138,8 @@
     create table checklist_item_event (
         checklist_item_event_id int4 not null,
         date_created timestamp not null,
+        date_loaded timestamp,
+        date_publicly_available timestamp,
         date_performed date,
         is_expiration bool not null,
         is_not_applicable bool not null,
@@ -171,6 +184,8 @@
     create table cherry_pick_request (
         cherry_pick_request_id int4 not null,
         date_created timestamp not null,
+        date_loaded timestamp,
+        date_publicly_available timestamp,
         assay_plate_type text,
         assay_protocol_comments text,
         cherry_pick_assay_protocols_followed text,
@@ -218,16 +233,23 @@
     create table copy (
         copy_id int4 not null,
         date_created timestamp not null,
+        date_loaded timestamp,
+        date_publicly_available timestamp,
         comments varchar(255),
+        max_mg_ml_concentration numeric(5, 3),
+        max_molar_concentration numeric(13, 12),
+        min_mg_ml_concentration numeric(5, 3),
+        min_molar_concentration numeric(13, 12),
+        primary_well_mg_ml_concentration numeric(5, 3),
+        primary_well_molar_concentration numeric(13, 12),
         date_plated date,
         name text not null,
         plate_locations_count int4,
         plates_available int4,
-        primary_plate_mg_ml_concentration numeric(4, 1),
-        primary_plate_molar_concentration numeric(12, 9),
         primary_plate_status text not null,
         usage_type text not null,
         version int4 not null,
+        well_concentration_dilution_factor numeric(8, 2),
         created_by_id int4,
         library_id int4 not null,
         primary_plate_location_id int4,
@@ -312,8 +334,8 @@
     );
 
     create table lab_activity (
-        molar_concentration numeric(12, 9),
-        volume_transferred_per_well numeric(10, 9),
+        molar_concentration numeric(13, 12),
+        volume_transferred_per_well_from_library_plates numeric(10, 9),
         activity_id int4 not null,
         screen_id int4 not null,
         primary key (activity_id)
@@ -348,6 +370,8 @@
     create table library (
         library_id int4 not null,
         date_created timestamp not null,
+        date_loaded timestamp,
+        date_publicly_available timestamp,
         date_received date,
         date_screenable date,
         description text,
@@ -412,9 +436,15 @@
     create table plate (
         plate_id int4 not null,
         date_created timestamp not null,
+        date_loaded timestamp,
+        date_publicly_available timestamp,
+        max_mg_ml_concentration numeric(5, 3),
+        max_molar_concentration numeric(13, 12),
+        min_mg_ml_concentration numeric(5, 3),
+        min_molar_concentration numeric(13, 12),
+        primary_well_mg_ml_concentration numeric(5, 3),
+        primary_well_molar_concentration numeric(13, 12),
         facility_id varchar(255),
-        mg_ml_concentration numeric(4, 1),
-        molar_concentration numeric(12, 9),
         plate_number int4 not null,
         plate_type text,
         status text not null,
@@ -501,6 +531,8 @@
     create table screen (
         screen_id int4 not null,
         date_created timestamp not null,
+        date_loaded timestamp,
+        date_publicly_available timestamp,
         abase_protocol_id text,
         abase_study_id text,
         assay_plates_screened_count int4 not null,
@@ -547,6 +579,7 @@
         publishable_protocol_entered_by text,
         screen_type text not null,
         screened_experimental_well_count int4 not null,
+        species text,
         study_type text not null,
         summary text,
         title text not null,
@@ -555,9 +588,11 @@
         url text,
         version int4 not null,
         created_by_id int4,
+        cell_line_id int4,
         lab_head_id int4,
         lead_screener_id int4,
         pin_transfer_admin_activity_id int4,
+        transfection_agent_id int4,
         well_studied_id text,
         primary key (screen_id)
     );
@@ -592,6 +627,8 @@
     create table screen_result (
         screen_result_id int4 not null,
         date_created timestamp not null,
+        date_loaded timestamp,
+        date_publicly_available timestamp,
         channel_count int4 not null,
         experimental_well_count int4 not null,
         replicate_count int4 not null,
@@ -635,6 +672,7 @@
         assay_protocol_type text,
         assay_well_volume numeric(10, 9),
         number_of_replicates int4,
+        volume_transferred_per_well_to_assay_plates numeric(10, 9),
         activity_id int4 not null,
         primary key (activity_id)
     );
@@ -658,6 +696,8 @@
     create table screensaver_user (
         screensaver_user_id int4 not null,
         date_created timestamp not null,
+        date_loaded timestamp,
+        date_publicly_available timestamp,
         ecommons_id text,
         comments text,
         digested_password text,
@@ -759,12 +799,20 @@
         primary key (study_id, reagent_id)
     );
 
+    create table transfection_agent (
+        transfection_agent_id int4 not null,
+        value text not null unique,
+        version int4 not null,
+        primary key (transfection_agent_id)
+    );
+
     create table well (
         well_id text not null,
         is_deprecated bool not null,
         facility_id text,
         library_well_type text not null,
-        molar_concentration numeric(15, 12),
+        mg_ml_concentration numeric(5, 3),
+        molar_concentration numeric(13, 12),
         plate_number int4 not null,
         version int4 not null,
         well_name text not null,
@@ -1276,6 +1324,16 @@
         foreign key (created_by_id) 
         references screensaver_user;
 
+    alter table screen 
+        add constraint fk_screen_to_cell_line 
+        foreign key (cell_line_id) 
+        references cell_line;
+
+    alter table screen 
+        add constraint fk_screen_to_transfection_agent 
+        foreign key (transfection_agent_id) 
+        references transfection_agent;
+
     alter table screen_billing_item 
         add constraint FKC41F4A806C52FD 
         foreign key (screen_id) 
@@ -1532,6 +1590,8 @@
 
     create sequence attached_file_type_id_seq;
 
+    create sequence cell_line_id_seq;
+
     create sequence checklist_item_event_id_seq;
 
     create sequence checklist_item_id_seq;
@@ -1575,5 +1635,7 @@
     create sequence screener_cherry_pick_id_seq;
 
     create sequence screensaver_user_id_seq;
+
+    create sequence transfection_agent_id_seq;
 
     create sequence well_volume_adjustment_id_seq;

@@ -19,6 +19,7 @@ import com.google.common.collect.Iterables;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Sets;
 import org.apache.log4j.Logger;
+import org.joda.time.DateTime;
 import org.joda.time.LocalDate;
 
 import edu.harvard.med.lincs.screensaver.LincsScreensaverConstants;
@@ -44,6 +45,7 @@ import edu.harvard.med.screensaver.ui.arch.datatable.column.DateColumn;
 import edu.harvard.med.screensaver.ui.arch.datatable.column.TableColumn;
 import edu.harvard.med.screensaver.ui.arch.datatable.column.entity.BooleanEntityColumn;
 import edu.harvard.med.screensaver.ui.arch.datatable.column.entity.DateEntityColumn;
+import edu.harvard.med.screensaver.ui.arch.datatable.column.entity.DateTimeEntityColumn;
 import edu.harvard.med.screensaver.ui.arch.datatable.column.entity.EnumEntityColumn;
 import edu.harvard.med.screensaver.ui.arch.datatable.column.entity.IntegerEntityColumn;
 import edu.harvard.med.screensaver.ui.arch.datatable.column.entity.TextEntityColumn;
@@ -311,6 +313,32 @@ public class LibrarySearchResults extends EntityBasedEntitySearchResults<Library
         protected LocalDate getDate(Library library)
         {
           return library.getDateCreated().toLocalDate();
+        }
+      });
+    }
+    
+    if (LincsScreensaverConstants.FACILITY_NAME.equals(getApplicationProperties().getFacility())) {
+      columns.add(new DateEntityColumn<Library>(RelationshipPath.from(Library.class).toProperty("dateLoaded"),
+                                                "Date Loaded",
+                                                "The date the library data was loaded",
+                                                TableColumn.UNGROUPED) {
+        @Override
+        protected LocalDate getDate(Library library)
+        {
+          return library.getDateLoaded()==null ? null : library.getDateLoaded().toLocalDate();
+        }
+      });
+    }
+    
+        if (LincsScreensaverConstants.FACILITY_NAME.equals(getApplicationProperties().getFacility())) {
+      columns.add(new DateEntityColumn<Library>(RelationshipPath.from(Library.class).toProperty("datePubliclyAvailable"),
+                                                "Date Publicly Available",
+                                                "The date the library data was made publicly available",
+                                                TableColumn.UNGROUPED) {
+        @Override
+        protected LocalDate getDate(Library library)
+        {
+          return library.getDatePubliclyAvailable()==null ? null : library.getDatePubliclyAvailable().toLocalDate();
         }
       });
     }

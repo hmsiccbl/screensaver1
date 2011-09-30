@@ -71,7 +71,8 @@ echo SCREENSAVER_PROPERTIES_FILE=$SCREENSAVER_PROPERTIES_FILE
 
 if [[ `psql -U $DB_USER $DB -c '\dt'` != 'No relations found.' ]]; then
   echo dropping existing database
-  psql -q -U $DB_USER $DB -f scripts/drop_all.sql -v ON_ERROR_STOP=1
+  psql -q -U $DB_USER $DB -c "`scripts/generate_drop_all.sh $DB_USER $DB`" -v ON_ERROR_STOP=1
+#  psql -q -U $DB_USER $DB -f scripts/drop_all.sql -v ON_ERROR_STOP=1
   check_errs $? "drop_all.sh fails"
 fi
 

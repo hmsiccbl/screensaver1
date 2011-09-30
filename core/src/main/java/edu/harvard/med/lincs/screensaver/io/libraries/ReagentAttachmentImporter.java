@@ -129,7 +129,7 @@ public class ReagentAttachmentImporter extends CommandLineApplication
         Integer batchId = app.getCommandLineOptionValue(OPTION_INPUT_BATCH_ID[SHORT_OPTION_INDEX], Integer.class);
         String attachmentType = app.getCommandLineOptionValue(OPTION_INPUT_QC_ATTACMENT_TYPE[SHORT_OPTION_INDEX], String.class);
         
-        if(attachmentTypes.contains(attachmentType) ) {
+        if(!attachmentTypes.contains(attachmentType) ) {
           log.error("unknown attachment type: " + attachmentType + ", must be one of: " + attachmentTypes);
           System.exit(1);
         }

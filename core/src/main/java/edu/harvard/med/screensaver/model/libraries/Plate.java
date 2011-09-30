@@ -442,6 +442,7 @@ public class Plate extends AuditedAbstractEntity<Integer> implements Comparable<
   }
 
   @Column
+  @edu.harvard.med.screensaver.model.annotations.Column(hasNonconventionalSetterMethod=true) 
   public ConcentrationStatistics getConcentrationStatistics()
   {
     return _concentrationStatistics;
