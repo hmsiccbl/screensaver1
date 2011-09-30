@@ -752,8 +752,13 @@ public class UserViewer extends SearchResultContextEditableEntityViewerBackingBe
   @UICommand
   public String addServiceActivity()
   {
-    return _activityViewer.editNewEntity(new ServiceActivity((AdministratorUser) getScreensaverUser(),
-                                                             (AdministratorUser) getScreensaverUser(),
+    AdministratorUser admin = (AdministratorUser) getScreensaverUser();
+    if (!admin.getScreensaverUserRoles().contains(ScreensaverUserRole.SERVICE_ACTIVITY_ADMIN)) {
+      throw new OperationRestrictedException("admin user does not have the " + ScreensaverUserRole.SERVICE_ACTIVITY_ADMIN +
+        " role");
+    }
+    return _activityViewer.editNewEntity(new ServiceActivity(admin,
+                                                             admin,
                                                              new LocalDate(),
                                                              null,
                                                              getEntity()));
