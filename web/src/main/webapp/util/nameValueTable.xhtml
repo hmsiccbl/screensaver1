@@ -14,7 +14,6 @@
 
 <ui:composition>
 
-	<h:form id="#{id}NameValueTableForm">
     <t:dataTable id="#{id}NameValueTable"
       value="#{value}" var="rowValue"
       styleClass="standardTable"
@@ -52,54 +51,8 @@
         <h:outputText value="#{rowValue.value}"
           rendered="true"
           styleClass="propertyValue dataText" />
-<!-- 
-        <h:outputText value="#{rowValue}"
-          rendered="#{value.isUnescapedTextValue}"
-          escape="false" styleClass="propertyValue dataText" />
-
-        <h:commandLink action="#{value.action}"
-          value="#{rowValue}" rendered="#{value.isCommandValue}"
-          styleClass="propertyValue dataText">
-          <f:param name="actionValue" value="#{rowValue}" />
-        </h:commandLink>
-
-        <h:outputLink value="#{value.link[rowValue]}"
-          rendered="#{value.isLinkValue}" target="_blank"
-          styleClass="propertyValue dataText">
-          <h:outputText value="#{rowValue}" />
-        </h:outputLink>
-
-        <t:graphicImage url="#{rowValue}"
-          rendered="#{value.isImageValue}" style="float: left;">
-        </t:graphicImage>
-
-        <t:dataList id="textList" var="eltValue" value="#{rowValue}"
-          layout="simple" rendered="#{value.isTextListValue}"
-          rowIndexVar="eltIndex" rowCountVar="eltCount">
-          <t:outputText value="#{eltValue}"
-            styleClass="propertyValue dataText" />
-          <h:outputText value=";"
-            rendered="#{eltIndex &lt; eltCount - 1}"
-            styleClass="propertyValue dataText" />
-        </t:dataList>
-        
-        <t:dataList id="linkList" var="eltValue" value="#{rowValue}"
-          layout="simple" rendered="#{value.isLinkListValue}"
-          rowIndexVar="eltIndex" rowCountVar="eltCount">
-          <h:outputLink value="#{value.link[eltValue]}"
-            target="_blank">
-            <h:outputText value="#{eltValue}"
-              styleClass="propertyValue dataText" />
-          </h:outputLink>
-          <h:outputText value=";"
-            rendered="#{eltIndex &lt; eltCount - 1}"
-            styleClass="propertyValue dataText" />
-        </t:dataList>
--->        
       </t:column>
     </t:dataTable>
-
-  </h:form>
 
 </ui:composition>
 
