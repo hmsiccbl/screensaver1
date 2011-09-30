@@ -534,7 +534,7 @@ public class TestDataFactory
       public BigDecimal newInstance(String callStack)
       {
         BigDecimal val = null;
-        if(callStack.contains("mgmlconcentration")){
+        if(callStack.contains("mgMlConcentration")){
           // mgMlConcentration has a max precision 5, scale 3
           val = new BigDecimal((TestDataFactory.this.newInstance(Double.class)).doubleValue()/_doubleTestValue);
           val = val.setScale(3,RoundingMode.HALF_UP); 
