@@ -8,6 +8,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
+import com.google.common.collect.Iterables;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
 import com.google.common.collect.Sets;
@@ -104,6 +105,11 @@ public class LabCherryPicksSearchResult extends EntityBasedEntitySearchResults<L
   public List<? extends TableColumn<LabCherryPick,?>> buildColumns()
   {
     List<TableColumn<LabCherryPick,?>> labCherryPicksTableColumns = buildLabCherryPicksTableColumns();
+
+    // note: eager fetching relationships, since Hibernate otherwise loads them individually, and slowly (these RelationshipPaths are arbitrarily added to the first column)
+    ((HasFetchPaths<LabCherryPick>) labCherryPicksTableColumns.get(0)).addRelationshipPath(LabCherryPick.sourceWell.to(Well.latestReleasedReagent));
+    ((HasFetchPaths<LabCherryPick>) labCherryPicksTableColumns.get(0)).addRelationshipPath(LabCherryPick.screenerCherryPick.to(ScreenerCherryPick.screenedWell).to(Well.latestReleasedReagent));
+
     getColumnManager().addAllCompoundSorts(buildLabCherryPicksTableCompoundSorts(labCherryPicksTableColumns));
     return labCherryPicksTableColumns;
   }
@@ -123,8 +129,6 @@ public class LabCherryPicksSearchResult extends EntityBasedEntitySearchResults<L
       }
     });
     ((HasFetchPaths<LabCherryPick>) labCherryPicksTableColumns.get(0)).addRelationshipPath(LabCherryPick.assayPlate.to(CherryPickAssayPlate.cherryPickLiquidTransfer));
-    // note: eager fetching relationsihps, since Hibernate otherwise loads them individually, and slowly (this RelationshipPath is arbitrarily added to the first column)
-    ((HasFetchPaths<LabCherryPick>) labCherryPicksTableColumns.get(0)).addRelationshipPath(LabCherryPick.screenerCherryPick.to(ScreenerCherryPick.screenedWell).to(Well.latestReleasedReagent));
     
     labCherryPicksTableColumns.add(new TextEntityColumn<LabCherryPick>(
       LabCherryPick.sourceWell.to(Well.library).toProperty("shortName"),
@@ -193,6 +197,7 @@ public class LabCherryPicksSearchResult extends EntityBasedEntitySearchResults<L
             return r.getVendorId().getVendorName(); 
           }
       }));
+    //Iterables.getLast(labCherryPicksTableColumns).setVisible(false);
 
     labCherryPicksTableColumns.add(new LabCherryPickReagentEntityColumn<Reagent,String>(
       Reagent.class, 
@@ -207,6 +212,7 @@ public class LabCherryPicksSearchResult extends EntityBasedEntitySearchResults<L
             return r.getVendorId().getVendorIdentifier(); 
           }
       }));
+    //Iterables.getLast(labCherryPicksTableColumns).setVisible(false);
 
     labCherryPicksTableColumns.add(new LabCherryPickReagentEntityColumn<SilencingReagent,String>(
       SilencingReagent.class,

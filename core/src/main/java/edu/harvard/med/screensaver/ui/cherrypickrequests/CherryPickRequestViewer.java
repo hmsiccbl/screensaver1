@@ -429,7 +429,7 @@ public class CherryPickRequestViewer extends SearchResultContextEntityViewerBack
           getDao().needReadOnly(cpr, CherryPickRequest.cherryPickAssayPlates.to(CherryPickAssayPlate.cherryPickRequest).to(CherryPickRequest.requestedBy));
           getDao().needReadOnly(cpr, CherryPickRequest.screen);
           // HACK: following reln is (only) needed by validateSelectedAssayPlates() in LIQUID_TRANSFER case 
-          getDao().needReadOnly(cpr, CherryPickRequest.cherryPickAssayPlates.to(CherryPickAssayPlate.labCherryPicks));
+          getDao().needReadOnly(cpr, CherryPickRequest.cherryPickAssayPlates.to(CherryPickAssayPlate.labCherryPicks).to(LabCherryPick.screenerCherryPick).to(ScreenerCherryPick.screenedWell).to(Well.latestReleasedReagent));
           List<AssayPlateRow> rows = new ArrayList<AssayPlateRow>();
           for (CherryPickAssayPlate assayPlate : cpr.getCherryPickAssayPlates()) {
             AssayPlateRow row = new AssayPlateRow(assayPlate);
