@@ -347,7 +347,7 @@ public class IccblEntityEditPolicy implements EntityEditPolicy
   @Override
   public Boolean visit(ServiceActivity serviceActivity)
   {
-    return visit(serviceActivity.getServicedUser());
+    return getScreensaverUser().isUserInRole(ScreensaverUserRole.SERVICE_ACTIVITY_ADMIN);
   }
 
   @Override

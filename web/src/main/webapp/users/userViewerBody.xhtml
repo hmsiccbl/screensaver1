@@ -25,7 +25,7 @@
 			styleClass="command" />
     <t:commandButton action="#{userViewer.addServiceActivity}"
       id="addServiceActivityCommand" value="Add Service Activity..."
-      rendered="#{userViewer.screensaverUser.isUserInRoleOfNameMap['serviceActivityAdmin']  &amp;&amp; userViewer.editable &amp;&amp; !userViewer.editMode &amp;&amp; userViewer.screeningRoomUserViewMode}"
+      rendered="#{userViewer.screensaverUser.isUserInRoleOfNameMap['serviceActivityAdmin']  &amp;&amp; !userViewer.editMode &amp;&amp; userViewer.screeningRoomUserViewMode}"
       styleClass="command" />
     <t:commandButton action="updateUserAgreement"
       id="updateUserAgreement" value="Update User Agreement..."
