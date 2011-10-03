@@ -534,15 +534,18 @@ public class TestDataFactory
       public BigDecimal newInstance(String callStack)
       {
         BigDecimal val = null;
-        if(callStack.contains("mgMlConcentration")){
+        // TODO: we should be able to generalize these special case BigDecimal builders by inspecting the model annotations for precision and scale and then construct a BigDecimal that is appropriate for the test
+        if (callStack.contains("mgMlConcentration")) {
           // mgMlConcentration has a max precision 5, scale 3
-          val = new BigDecimal((TestDataFactory.this.newInstance(Double.class)).doubleValue()/_doubleTestValue);
-          val = val.setScale(3,RoundingMode.HALF_UP); 
-        }else if(callStack.contains("dilution")){
+          val = new BigDecimal((TestDataFactory.this.newInstance(Double.class)).doubleValue() / _doubleTestValue);
+          val = val.setScale(3, RoundingMode.HALF_UP);
+        }
+        else if (callStack.contains("dilution")) {
           // dilution factor has a max precision 2, scale 8
-          val = new BigDecimal((TestDataFactory.this.newInstance(Double.class)).doubleValue()/(_doubleTestValue/10) );
-          val = val.setScale(2,RoundingMode.HALF_UP); 
-        }else {
+          val = new BigDecimal((TestDataFactory.this.newInstance(Double.class)).doubleValue() / (_doubleTestValue / 10));
+          val = val.setScale(2, RoundingMode.HALF_UP);
+        }
+        else {
           // 2 is the default scale used in our Hibernate mapping
           val = new BigDecimal((TestDataFactory.this.newInstance(Double.class)).doubleValue());
           val = val.setScale(2);
