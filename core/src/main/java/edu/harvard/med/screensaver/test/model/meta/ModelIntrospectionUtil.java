@@ -413,33 +413,54 @@ public class ModelIntrospectionUtil
   }
 
   /**
-   * Find the method with the given name, and unspecified arguments. If no such
-   * method exists, and the isRequiredMethod parameter is true, then fail. If no
-   * such method exists, and isRequiredMethod is false, then return null. Fail if
-   * the method does not return a boolen. Return the method.
-   * @param beanClass the class to find the method in
-   * @param methodName the name of the method to find
-   * @param isRequiredMethod true iff the method is required to exist
-   * @return the method. Return null if isRequiredMethod is false and no such
-   * method exists.
+   * Check whether a method with the given name adheres to its existence requirement.
+   * 
+   * @return the method, if it exists and is allowed to exist; null if method does not exist and its existence is not required
+   * @throw DevelopmentException if method existence is required and no such method exists OR if method existence is not
+   *        allowed and the method exists
    */
   public static Method findAndCheckMethod(Class<? extends AbstractEntity> beanClass,
                                           String methodName,
                                           ExistenceRequirement requirement)
   {
+    return findAndCheckMethod(beanClass, methodName, requirement, (Class<?>[]) null);
+  }
+
+  /**
+   * Check whether a method with the given name and specified parameter types adheres to its existence requirement.
+   * 
+   * @return the method, if it exists and is allowed to exist; null if method does not exist and its existence is not required
+   * @throw DevelopmentException if method existence is required and no such method exists OR if method existence is not
+   *        allowed and the method exists
+   */
+  public static Method findAndCheckMethod(Class<? extends AbstractEntity> beanClass,
+                                          String methodName, 
+                                          ExistenceRequirement requirement,
+                                          Class<?>... paramTypes)
+  {
     String fullMethodName = beanClass.getName() + "." + methodName;
     Method foundMethod = null;
-    // note: we're calling getMethods() instead of getDeclaredMethods() to allow
-    // inherited methods to satisfy our isRequiredMethod constraint (e.g. for
-    // AdministratorUser.addRole())
-    // TODO: getMethods() will only return public methods, is this okay?
-    for (Method method : beanClass.getMethods()) {
-      if (method.getName().equals(methodName)) {
-        foundMethod = method;
-        break;
+    
+    if (paramTypes != null) {
+      // match a specific parameter list, if provided
+	    try {
+	    	foundMethod = beanClass.getMethod(methodName, paramTypes);
       }
+      catch (NoSuchMethodException e) {}
     }
-
+    else if (foundMethod == null) {
+      // perform a name-based search that ignores the parameter list
+	    // note: we're calling getMethods() instead of getDeclaredMethods() to allow
+      // inherited methods to satisfy our isRequiredMethod constraint
+	    // TODO: getMethods() will only return public methods, is this okay?
+	    for (Method method : beanClass.getMethods()) {
+	      if (method.getName().equals(methodName)) {
+	        foundMethod = method;
+	        break;
+	      }
+	    }
+    }
+    
     if (requirement != ExistenceRequirement.REQUIRED && foundMethod == null) {
       log.debug("findAndCheckMethod(): non-required method was not found: " + fullMethodName);
       return null;

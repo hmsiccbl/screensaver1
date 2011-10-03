@@ -296,7 +296,7 @@ public class EntityPropertyTest<E extends AbstractEntity> extends AbstractSpring
     final String addMethodName = "add" + StringUtils.capitalize(singularPropertyName); 
     final String removeMethodName = "remove" + StringUtils.capitalize(singularPropertyName);
     final Method getterMethod = propertyDescriptor.getReadMethod();
-    final Method addMethod = ModelIntrospectionUtil.findAndCheckMethod(beanClass, addMethodName, ExistenceRequirement.OPTIONAL);
+    final Method addMethod = ModelIntrospectionUtil.findAndCheckMethod(beanClass, addMethodName, ExistenceRequirement.OPTIONAL, ModelIntrospectionUtil.getCollectionOfElementsType(propertyDescriptor));
     final Method removeMethod = ModelIntrospectionUtil.findAndCheckMethod(beanClass, 
                                                                           removeMethodName, 
                                                                           addMethod == null ? ExistenceRequirement.NOT_ALLOWED : ExistenceRequirement.OPTIONAL);
@@ -525,7 +525,7 @@ public class EntityPropertyTest<E extends AbstractEntity> extends AbstractSpring
     }
     else {
       relatedEntity = dataFactory.newInstance(relatedEntityType, testName);
-      final Method addMethod = ModelIntrospectionUtil.findAndCheckMethod(beanClass, addMethodName, ExistenceRequirement.REQUIRED);
+      final Method addMethod = ModelIntrospectionUtil.findAndCheckMethod(beanClass, addMethodName, ExistenceRequirement.REQUIRED, relatedEntityType);
       /*final Method removeMethod = */ModelIntrospectionUtil.findAndCheckMethod(beanClass, removeMethodName, 
                                                                             addMethod == null ? ExistenceRequirement.NOT_ALLOWED : ExistenceRequirement.OPTIONAL);
       class ToManyAdder implements RelatedBeansTester
