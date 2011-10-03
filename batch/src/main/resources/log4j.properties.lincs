@@ -6,7 +6,7 @@ log4j.appender.fileLog=org.apache.log4j.DailyRollingFileAppender
 log4j.appender.fileLog.DatePattern='.'yyyy-MM-dd
 log4j.appender.fileLog.File=screensaver.log
 log4j.appender.fileLog.layout=org.apache.log4j.PatternLayout
-log4j.appender.fileLog.layout.ConversionPattern=%d{ISO8601} %5p %c{3}:%L - %m%n
+log4j.appender.fileLog.layout.ConversionPattern=%d{ISO8601} %5p %c:%L - %m%n
 
 ### direct log messages to stdout ###
 log4j.appender.stdout=org.apache.log4j.ConsoleAppender
@@ -26,6 +26,8 @@ log4j.logger.edu.harvard.med.screensaver.ScreensaverProperties=ERROR
 log4j.logger.edu.harvard.med.screensaver.db.NamedVariablesDatabaseConnectionSettingsResolver=ERROR
 log4j.logger.edu.harvard.med.screensaver.db.CommandLineArgumentsDatabaseConnectionSettingsResolver=ERROR
 
+# TODO: remove this when hibernate/jpa issue related to log msg is fixed:  ERROR org.hibernate.util.xml.ErrorLogger:57 - Error parsing XML (7) : cvc-complex-type.3.1: Value '1.0' of attribute 'version' of element 'entity-mappings' is not valid with respect to the corresponding attribute use. Attribute 'version' has a fixed value of '2.0'.
+log4j.logger.org.hibernate.util.xml.ErrorLogger=FATAL
 
 #log4j.logger.edu.harvard.med.screensaver.db=debug
 #log4j.logger.edu.harvard.med.screensaver.db.datafetcher=debug

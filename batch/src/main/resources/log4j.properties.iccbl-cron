@@ -27,3 +27,6 @@ log4j.logger.org.hibernate.loader=warn
 log4j.logger.org.hibernate.cfg.annotations=ERROR
 log4j.logger.org.hibernate.engine=ERROR
 log4j.logger.org.springframework=error
+
+# TODO: remove this when hibernate/jpa issue related to log msg is fixed:  ERROR org.hibernate.util.xml.ErrorLogger:57 - Error parsing XML (7) : cvc-complex-type.3.1: Value '1.0' of attribute 'version' of element 'entity-mappings' is not valid with respect to the corresponding attribute use. Attribute 'version' has a fixed value of '2.0'.
+log4j.logger.org.hibernate.util.xml.ErrorLogger=FATAL
