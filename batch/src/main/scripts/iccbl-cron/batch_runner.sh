@@ -23,9 +23,6 @@ then
 elif [[ "$SERVER" == "DEV" ]] || [[ "$SERVER" == "dev" ]]
 then
   export SCREENSAVER_PROPERTIES_FILE=/groups/screensaver/screensaver-configs/screensaver.properties.batch.dev
-elif [[ "$SERVER" == "LOCAL" ]] || [[ "$SERVER" == "local" ]]
-then
-  export SCREENSAVER_PROPERTIES_FILE=/home/sde4/workspace/current/screensaver.properties.batch
 else
   echo "Unknown option: \"$SERVER\""
   exit 1
