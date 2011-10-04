@@ -81,6 +81,16 @@ public abstract class AuditedAbstractEntity<K extends Serializable> extends Abst
   {
     _createdBy = createdBy;
     _createdTimestamp = new DateTime(); 
+    _loadedTimestamp = new DateTime();
+    _publiclyAvailableTimestamp = new DateTime();
+  }  
+  
+  protected AuditedAbstractEntity(AdministratorUser createdBy, DateTime loaded, DateTime publiclyAvailable)
+  {
+    _createdBy = createdBy;
+    _createdTimestamp = new DateTime();
+    _loadedTimestamp = loaded;
+    _publiclyAvailableTimestamp = publiclyAvailable;
   }
 
   
@@ -101,7 +111,6 @@ public abstract class AuditedAbstractEntity<K extends Serializable> extends Abst
    * The date that data is loaded into the database (used by LINCS)
    */
   @Column(nullable = true, updatable = false)
-  @edu.harvard.med.screensaver.model.annotations.Column(hasNonconventionalSetterMethod=true) /* this property is currently set by LINCS scripts only */
   @Type(type="org.joda.time.contrib.hibernate.PersistentDateTime")
   public DateTime getDateLoaded()
   {
@@ -117,7 +126,6 @@ public abstract class AuditedAbstractEntity<K extends Serializable> extends Abst
    * The date that data has been made publicly available (used by LINCS)
    */
   @Column(nullable = true, updatable = false)
-  @edu.harvard.med.screensaver.model.annotations.Column(hasNonconventionalSetterMethod=true) /* this property is currently set by LINCS scripts only */
   @Type(type="org.joda.time.contrib.hibernate.PersistentDateTime")
   public DateTime getDatePubliclyAvailable()
   {
@@ -218,13 +226,4 @@ public abstract class AuditedAbstractEntity<K extends Serializable> extends Abst
                                 comment);
   }
 
-  //  public DateTime getDateLastUpdated()
-//  {
-//    return null;
-//  }
-//  
-//  public ScreensaverUser getLastUpdatedBy()
-//  {
-//    return null;
-//  }
 }
