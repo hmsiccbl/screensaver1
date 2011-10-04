@@ -379,7 +379,7 @@ public class AdminEmailApplication extends CommandLineApplication
                          InternetAddress[] cclist, File attachedFile) throws MessagingException, IOException
         {
           log.info("Mock Email (Not Sent):\n" +
-            SmtpEmailService.printEmail(subject, message, from, recipients, cclist, (attachedFile == null ? "" : "" +
+            SmtpEmailService.printEmail(subject, message, from, null, recipients, cclist, (attachedFile == null ? "" : "" +
               attachedFile.getCanonicalFile())));
         }
       };

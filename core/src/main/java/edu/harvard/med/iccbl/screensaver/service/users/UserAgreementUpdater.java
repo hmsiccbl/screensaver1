@@ -273,9 +273,7 @@ public class UserAgreementUpdater
   public Set<ScreensaverUser> findUserAgreementAdmins()
   {
     String hql = "from ScreensaverUser where ? in elements (screensaverUserRoles)" ;
-    Set<ScreensaverUser> admins = Sets.newHashSet(_dao.findEntitiesByHql(ScreensaverUser.class, hql, ScreensaverUserRole.USERS_ADMIN.getRoleName()));
-    admins.addAll(Sets.newHashSet(_dao.findEntitiesByHql(ScreensaverUser.class, hql, ScreensaverUserRole.USER_ROLES_ADMIN.getRoleName())));
-    admins.addAll(Sets.newHashSet(_dao.findEntitiesByHql(ScreensaverUser.class, hql, ScreensaverUserRole.LAB_HEADS_ADMIN.getRoleName())));
+    Set<ScreensaverUser> admins = Sets.newHashSet(_dao.findEntitiesByHql(ScreensaverUser.class, hql, ScreensaverUserRole.USER_AGREEMENT_EXPIRATION_NOTIFY.getRoleName()));
     return admins;
   }
   

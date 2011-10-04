@@ -85,8 +85,12 @@ public enum ScreensaverUserRole implements VocabularyTerm, Principal
 
   // note: developers do not automatically get admin roles (other than readEverythingAdmin), allowing developers to restrict themselves from mutating data in production environments
   DEVELOPER("developer", "Developer", READ_EVERYTHING_ADMIN, "Special users that have permission to invoke development-related functionality and view low-level system information."),
-  ;
 
+  // Expiration service notification roles
+  SCREEN_DSL_EXPIRATION_NOTIFY("screenDslExpirationNotify", "Notification Role for Screen DSL Expiration", READ_EVERYTHING_ADMIN, "Administrators with this role will be notified by automated screen expiration service actions."),
+  USER_AGREEMENT_EXPIRATION_NOTIFY("userAgreementExpirationNotify", "Notification Role for User Agreement Expiration", READ_EVERYTHING_ADMIN, "Administrators with this role will be notified by automated user agreement expiration service actions."),
+  ;
+  
   // static inner class
 
   /**

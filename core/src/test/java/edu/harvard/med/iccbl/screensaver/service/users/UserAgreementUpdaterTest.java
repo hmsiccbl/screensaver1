@@ -51,17 +51,17 @@ public class UserAgreementUpdaterTest extends AbstractSpringPersistenceTest
   private void initializeData()
   {
     admin = new AdministratorUser("admin", "testaccount");
-    admin.addScreensaverUserRole(ScreensaverUserRole.USERS_ADMIN);
     admin.addScreensaverUserRole(ScreensaverUserRole.USER_ROLES_ADMIN);
     admin.addScreensaverUserRole(ScreensaverUserRole.LAB_HEADS_ADMIN);
+    admin.addScreensaverUserRole(ScreensaverUserRole.USER_AGREEMENT_EXPIRATION_NOTIFY);
     genericEntityDao.persistEntity(admin);
 
     otherUserAgreementAdmin = new AdministratorUser("userAgreementAdmin", "testaccount");
-    otherUserAgreementAdmin.addScreensaverUserRole(ScreensaverUserRole.USERS_ADMIN);
+    otherUserAgreementAdmin.addScreensaverUserRole(ScreensaverUserRole.USER_AGREEMENT_EXPIRATION_NOTIFY);
     genericEntityDao.persistEntity(otherUserAgreementAdmin);
 
     nonAdminUser = new AdministratorUser("nonAdminUser", "testaccount");
-    nonAdminUser.addScreensaverUserRole(ScreensaverUserRole.USERS_ADMIN);
+    nonAdminUser.addScreensaverUserRole(ScreensaverUserRole.USER_AGREEMENT_EXPIRATION_NOTIFY);
     genericEntityDao.persistEntity(nonAdminUser);
   }
   
@@ -73,12 +73,6 @@ public class UserAgreementUpdaterTest extends AbstractSpringPersistenceTest
   public void testFindUsersWithOldSMUAgreements() throws IOException
   {
     initializeData();
-
-//    // create the entities
-//    AdministratorUser admin = new AdministratorUser("Test", "Admin", "testadmin@screensaver.med.harvard.edu", "", "", "", "dev", "");
-//    admin.addScreensaverUserRole(ScreensaverUserRole.USERS_ADMIN);
-//    admin.addScreensaverUserRole(ScreensaverUserRole.USER_ROLES_ADMIN);
-//    genericEntityDao.persistEntity(admin);
 
     // create the UA CLI
     ChecklistItem checklistItem = new ChecklistItem(UserAgreementUpdater.USER_AGREEMENT_CHECKLIST_ITEM_NAME, 
@@ -194,12 +188,6 @@ public class UserAgreementUpdaterTest extends AbstractSpringPersistenceTest
   public void testFindUsersWithOldSMUAgreementsAndExpire() throws IOException
   {
     initializeData();
-
-    //    // create the entities
-    //    AdministratorUser admin = new AdministratorUser("Test", "Admin", "testadmin@screensaver.med.harvard.edu", "", "", "", "dev", "");
-    //    admin.addScreensaverUserRole(ScreensaverUserRole.USERS_ADMIN);
-    //    admin.addScreensaverUserRole(ScreensaverUserRole.USER_ROLES_ADMIN);
-    //    genericEntityDao.persistEntity(admin);
 
     // create the UA CLI
     ChecklistItem checklistItem = new ChecklistItem(UserAgreementUpdater.USER_AGREEMENT_CHECKLIST_ITEM_NAME, true, ChecklistItemGroup.FORMS, 0);

@@ -19,11 +19,6 @@ public interface EmailService
 {
   public static final String DELIMITER = ",";
 
-  //  public void send(String subject,
-  //                   String message,
-  //                   String from,
-  //                   String[] recipients,
-  //                   String[] cclist) throws MessagingException;
   public void send(String subject,
                    String message,
                    InternetAddress from,

@@ -12,6 +12,7 @@ package edu.harvard.med.iccbl.screensaver.service;
 import java.io.File;
 import java.io.IOException;
 import java.util.Properties;
+import java.util.Set;
 
 import javax.activation.DataHandler;
 import javax.activation.FileDataSource;
@@ -20,6 +21,7 @@ import javax.mail.MessagingException;
 import javax.mail.Multipart;
 import javax.mail.Session;
 import javax.mail.Transport;
+import javax.mail.internet.AddressException;
 import javax.mail.internet.InternetAddress;
 import javax.mail.internet.MimeBodyPart;
 import javax.mail.internet.MimeMessage;
@@ -27,6 +29,7 @@ import javax.mail.internet.MimeMultipart;
 
 import org.apache.commons.cli.OptionBuilder;
 import org.apache.log4j.Logger;
+import com.google.common.collect.Sets;
 
 import edu.harvard.med.screensaver.io.CommandLineApplication;
 import edu.harvard.med.screensaver.service.EmailService;
@@ -45,6 +48,8 @@ public class SmtpEmailService implements EmailService
   public static final String[] MAIL_FROM_OPTION = { "mf", "mail-from", "from address for the mail, defaults to the username" };
   public static final String[] MAIL_CC_LIST_OPTION = 
   { "cclist", "mail-cc-list", "the cc recipient(s) of the message, delimited by \"" + DELIMITER + "\"" };
+  public static final String[] MAIL_REPLYTO_LIST_OPTION = 
+  { "replyTos", "mail-replyto-list", "the replyto address(es) of the message, delimited by \"" + DELIMITER + "\"" };
   public static final String[] MAIL_RECIPIENT_LIST_OPTION = 
   { "recipientlist", "mail-recipient-list", "the recipient(s) of the message, delimited by \"" + DELIMITER + "\"" };
   public static final String[] MAIL_MESSAGE_OPTION = { "mm", "mail-message", "the mail message" };
@@ -60,10 +65,11 @@ public class SmtpEmailService implements EmailService
   private String username;
   private String password;
   private boolean useSmtps;
+  private InternetAddress [] replyTos;
 
-  public SmtpEmailService(String host, String username)
+  public SmtpEmailService(String host, String username, String replyTos) throws AddressException
   {
-    this(host,username, null,false);
+    this(host,username, replyTos, null,false);
   }  
   
   /**
@@ -72,23 +78,34 @@ public class SmtpEmailService implements EmailService
    * @param username mail account name
    * @param password password, can be blank if unnecessary
    * @param useSmtps in order to use smtp.gmail.com (for testing)
+   * @throws AddressException 
    */
-  public SmtpEmailService(String host, String username, String password)
+  public SmtpEmailService(String host, String username, String replyTos, String password) throws AddressException
   {
-    this(host,username, password,false);
+    this(host,username, replyTos, password,false);
   }
 
   /**
    * @param useSmtps in order to use smtp.gmail.com (for testing)
+   * @throws AddressException 
    */
-  public SmtpEmailService(String host, String username, String password, boolean useSmtps)
+  public SmtpEmailService(String host, String username, String replyTos, String password, boolean useSmtps) throws AddressException
   {
     this.host = host;
     this.username = username;
     this.password = password;
     this.useSmtps = useSmtps;
+    if(replyTos != null)
+    {
+      String[] sreplyTos = replyTos.split(",");
+      Set<InternetAddress> set = Sets.newHashSet();
+      for(String s:sreplyTos) {
+        set.add(new InternetAddress(s));
+      }
+      this.replyTos = set.toArray(new InternetAddress[] {} );
+    }
   }
-
+  
   public void send(String subject,
                        String message,
                        InternetAddress from,
@@ -183,7 +200,7 @@ public class SmtpEmailService implements EmailService
                        throws MessagingException, IOException
   {
     log.info("try to send: " +
-      printEmail(subject, message, from, recipients, cclist, (attachedFile == null ? "" : "" + attachedFile.getCanonicalFile())));
+      printEmail(subject, message, from, this.replyTos, recipients, cclist, (attachedFile == null ? "" : "" + attachedFile.getCanonicalFile())));
     log.info("host: " + host + ", useSMTPS: " + useSmtps);
     Properties props = new Properties();
     String protocol = "smtp";
@@ -197,6 +214,7 @@ public class SmtpEmailService implements EmailService
 
     try {
       MimeMessage msg = new MimeMessage(session);
+      if(this.replyTos != null) msg.setReplyTo(replyTos);
       msg.setFrom(from);  
       msg.setSubject(subject);
 
@@ -217,7 +235,7 @@ public class SmtpEmailService implements EmailService
       t.close();
     }
     log.info("sent: " +
-      printEmailHeader(subject, from, recipients, cclist, (attachedFile == null ? "" : "" + attachedFile.getCanonicalFile())));
+      printEmailHeader(subject, from, this.replyTos, recipients, cclist, (attachedFile == null ? "" : "" + attachedFile.getCanonicalFile())));
   }
 
     // Set a file as an attachment.  Uses JAF FileDataSource.
@@ -299,21 +317,24 @@ public class SmtpEmailService implements EmailService
   public static String printEmail(String subject,
                                   String message,
                                   InternetAddress from,
+                                  InternetAddress[] replyTos,
                                   InternetAddress[] recipients,
                                   InternetAddress[] cclist, String attachedFilePath)
   {
-    return printEmailHeader(subject, from, recipients, cclist, attachedFilePath)
+    return printEmailHeader(subject, from, replyTos, recipients, cclist, attachedFilePath)
              + "\n========message========\n" + message;
   }
 
   public static String printEmailHeader(String subject,
                                         InternetAddress from,
+                                        InternetAddress[] replyTos,
                                         InternetAddress[] recipients,
                                         InternetAddress[] cclist,
                                         String attachedFilePath)
   {
     return "\nSubject: " + subject
              + "\nFrom: " + from
+             + "\nReplyTo's: " + (replyTos == null ? "" : com.google.common.base.Joiner.on(',').join(replyTos))
              + "\nTo: " + com.google.common.base.Joiner.on(',').join(recipients)
              + "\nCC: " + (cclist == null ? "" : com.google.common.base.Joiner.on(',').join(cclist))
                + "\nAttached File: " + attachedFilePath;
@@ -335,6 +356,14 @@ public class SmtpEmailService implements EmailService
                                           .create(option[SHORT_OPTION_INDEX]));
 
     option = MAIL_CC_LIST_OPTION;
+    app.addCommandLineOption(OptionBuilder
+                                           .hasArg()
+                                          .withArgName(option[SHORT_OPTION_INDEX])
+                                          .withDescription(option[DESCRIPTION_INDEX])
+                                          .withLongOpt(option[LONG_OPTION_INDEX])
+                                          .create(option[SHORT_OPTION_INDEX]));
+
+    option = MAIL_REPLYTO_LIST_OPTION;
     app.addCommandLineOption(OptionBuilder
                                            .hasArg()
                                           .withArgName(option[SHORT_OPTION_INDEX])
@@ -434,6 +463,11 @@ public class SmtpEmailService implements EmailService
       ccrecipients = cclist.split(DELIMITER);
     }
 
+    String replytos = null;
+    if (app.isCommandLineFlagSet(MAIL_REPLYTO_LIST_OPTION[SHORT_OPTION_INDEX])) {
+      replytos = app.getCommandLineOptionValue(MAIL_CC_LIST_OPTION[SHORT_OPTION_INDEX]);
+    }
+
     String mailHost = app.getCommandLineOptionValue(MAIL_SERVER_OPTION[SHORT_OPTION_INDEX]);
     String username = app.getCommandLineOptionValue(MAIL_USERNAME_OPTION[SHORT_OPTION_INDEX]);
     String password = app.getCommandLineOptionValue(MAIL_USER_PASSWORD_OPTION[SHORT_OPTION_INDEX]);
@@ -444,7 +478,9 @@ public class SmtpEmailService implements EmailService
       mailFrom = app.getCommandLineOptionValue(MAIL_FROM_OPTION[SHORT_OPTION_INDEX]);
     }
 
-    SmtpEmailService service = new SmtpEmailService(mailHost, username, password, useSmtps);
+    SmtpEmailService service = new SmtpEmailService(mailHost, username, replytos, password, useSmtps);
     service.send(subject, message, mailFrom, recipients, ccrecipients, attachedFile);
   }
+
+
 }

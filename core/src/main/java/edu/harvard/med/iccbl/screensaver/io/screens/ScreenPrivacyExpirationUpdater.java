@@ -189,10 +189,6 @@ public class ScreenPrivacyExpirationUpdater extends AdminEmailApplication
       public void runTransaction()
       {
         try {
-          //          AdministratorUser admin = app.findAdministratorUser();
-          //
-          //          EmailService emailService = app.getEmailServiceBasedOnCommandLineOption();
-
           // check that not too many options are specified
           int numberOfActions = 0;
           if (app.isCommandLineFlagSet(NOTIFY_PRIVACY_EXPIRATION[SHORT_OPTION_INDEX])) numberOfActions++;
@@ -241,13 +237,6 @@ public class ScreenPrivacyExpirationUpdater extends AdminEmailApplication
           }
           catch (OperationRestrictedException e) {
             app.sendErrorMail("Warn: Could not complete expiration service operation", "Warn: Could not complete expiration service operation", e);
-            //            InternetAddress address = app.getEmail(admin);
-            //            StringWriter out = new StringWriter();
-            //            e.printStackTrace(new PrintWriter(out));
-            //            emailService.send("Warn: Could not complete expiration service operation",
-            //                              "Exception: " + e + "\n " + out.toString(),
-            //                              address
-            //                              , new InternetAddress[] { address }, null);
             throw new DAOTransactionRollbackException(e);
           }
         }
@@ -282,11 +271,6 @@ public class ScreenPrivacyExpirationUpdater extends AdminEmailApplication
       StringBuilder msg = new StringBuilder(
                                             getMessages().getMessage("admin.screens.dataPrivacyExpiration.publicationNotification.messageBoilerplate",
                                                                      publishedScreens.size(), new LocalDate()));
-      msg.append("\n");
-      //      Set<InternetAddress> adminRecipients = getExtraRecipients1();
-      //      adminRecipients.add(adminEmail);
-      //      adminRecipients.addAll(getDataSharingLevelAdminEmails(adminEmail, emailService));
-
       msg.append("\n\n");
       for (Screen screen : publishedScreens) {
         msg.append("\nScreen with Publication:\n");
@@ -299,28 +283,16 @@ public class ScreenPrivacyExpirationUpdater extends AdminEmailApplication
         }
       }
       sendAdminEmails(subject, msg.toString(), _privacyUpdater.findDataSharingLevelAdminUsers());
-      //      emailService.send(subject,
-      //                     msg.toString(),
-      //                     adminEmail,
-      //                     adminRecipients.toArray(new InternetAddress[] {}), null);
     }
   }
 
   private void adjustDataPrivacyExpirationByActivities(Integer ageToExpireFromActivityDateInDays) throws MessagingException
   {
     ScreenDataSharingLevelUpdater.DataPrivacyAdjustment adjustment = _privacyUpdater.adjustDataPrivacyExpirationByActivities(ageToExpireFromActivityDateInDays, findAdministratorUser());
-    //    InternetAddress adminEmail = getEmail(admin);
-
     if (adjustment.isEmpty(isCommandLineFlagSet(NOTIFY_OF_OVERRIDES[SHORT_OPTION_INDEX]))) {
       String subject = getMessages().getMessage("admin.screens.dataPrivacyExpiration.dataPrivacyExpirationdate.adjustment.noaction.subject");
       String msg = "No Screens with Activities to adjust the dataPrivacyExpirationDate";
       sendAdminEmails(subject, msg);
-      //      log.info(msg);
-      //      //TODO: do we want this noise if the results can be put in a log file?
-      //      emailService.send(subject,
-      //                        msg,
-      //                        adminEmail,
-      //                        new InternetAddress[] { adminEmail }, null);
     }
     else {
       // Send a summary notification to this admin and recipients specified on the command line
@@ -390,15 +362,6 @@ public class ScreenPrivacyExpirationUpdater extends AdminEmailApplication
         }
       }
       sendAdminEmails(subject, msg.toString(), _privacyUpdater.findDataSharingLevelAdminUsers());
-      //      Set<InternetAddress> adminRecipients = getExtraRecipients1();
-      //      adminRecipients.add(adminEmail);
-      //      adminRecipients.addAll(getDataSharingLevelAdminEmails(adminEmail, emailService));
-      //
-      //      emailService.send(subject,
-      //                        msg.toString(),
-      //                        adminEmail,
-      //                        adminRecipients.toArray(new InternetAddress[] {}), null);
-
     }
   }
 
@@ -406,8 +369,6 @@ public class ScreenPrivacyExpirationUpdater extends AdminEmailApplication
     throws MessagingException
   {
     LocalDate expireDate = new LocalDate().plusDays(daysAheadToNotify);
-
-    //    InternetAddress adminEmail = getEmail(admin);
 
     List<Screen> oldScreens = new ArrayList<Screen>(_privacyUpdater.findNewExpiredNotNotified(expireDate));
     // sort by DPED
@@ -425,10 +386,6 @@ public class ScreenPrivacyExpirationUpdater extends AdminEmailApplication
         + expireDate + " that have not already been notified.";
       log.info(msg);
       sendAdminEmails(subject, msg);
-      //      emailService.send(subject,
-      //                        msg,
-      //                        adminEmail,
-      //                        new InternetAddress[] { adminEmail }, null);
     }
     else {
       // 1. send a summary email to the admin, dateSharingLevelAdmin's and recipients specified on the command line
@@ -468,14 +425,6 @@ public class ScreenPrivacyExpirationUpdater extends AdminEmailApplication
 
       sendAdminEmails(subject, msg.toString(), _privacyUpdater.findDataSharingLevelAdminUsers());
 
-      //      Set<InternetAddress> adminRecipients = getExtraRecipients1();
-      //      adminRecipients.add(adminEmail);
-      //      adminRecipients.addAll(getDataSharingLevelAdminEmails(adminEmail, emailService));
-      //
-      //      emailService.send(subject,
-      //                     msg.toString(),
-      //                     adminEmail,
-      //                     adminRecipients.toArray(new InternetAddress[] {}), null);
       if (isAdminEmailOnly() || isCommandLineFlagSet(TEST_ONLY[SHORT_OPTION_INDEX])) {
         for (Screen screen : oldScreens) {
           _privacyUpdater.setDataPrivacyExpirationNotifiedDate(screen);
@@ -504,16 +453,10 @@ public class ScreenPrivacyExpirationUpdater extends AdminEmailApplication
     LocalDate expireDate = new LocalDate();
     List<Pair<Screen,AdministrativeActivity>> results = _privacyUpdater.expireScreenDataSharingLevels(expireDate, findAdministratorUser());
 
-    //    InternetAddress adminEmail = getEmail(admin);
-
     if (results.isEmpty()) {
       String subject = getMessages().getMessage("admin.screens.dataPrivacyExpiration.dataPrivacyExpirattion.notification.noaction.subject");
       String msg = "No Small Molecule Screens with SDSL > 1 have agreements dated on or before: " + expireDate;
       sendAdminEmails(subject, msg);
-      //      emailService.send(subject,
-      //                        msg,
-      //                        adminEmail,
-      //                        new InternetAddress[] { adminEmail }, null);
     }
     else {
       // Send a notification that the screens have expired to this admin and recipients specified on the command line
@@ -541,55 +484,8 @@ public class ScreenPrivacyExpirationUpdater extends AdminEmailApplication
       }
 
       sendAdminEmails(subject, msg.toString(), _privacyUpdater.findDataSharingLevelAdminUsers());
-
-      //      Set<InternetAddress> adminRecipients = getExtraRecipients1();
-      //      adminRecipients.add(adminEmail);
-      //      adminRecipients.addAll(getDataSharingLevelAdminEmails(adminEmail, emailService));
-      //
-      //      emailService.send(subject,
-      //                        msg.toString(),
-      //                        adminEmail,
-      //                        adminRecipients.toArray(new InternetAddress[] {}), null);
     }
   }
-
-  //  private InternetAddress getEmail(ScreensaverUser admin)
-  //    throws MessagingException
-  //  {
-  //    try {
-  //      return new InternetAddress(admin.getEmail());
-  //    }
-  //    catch (AddressException e) {
-  //      throw new MessagingException("Admin address is wrong: " + printUserInformation(admin), e);
-  //    }
-  //  }
-
-  //  public List<InternetAddress> getDataSharingLevelAdminEmails(InternetAddress emailAddressForErrors, 
-  //                                                              EmailService emailServiceForErrorReporting) 
-  //                                                              throws MessagingException, ParseException
-  //  {
-  //    List<InternetAddress> adminRecipients = Lists.newLinkedList();
-  //    List<MessagingException> errors = Lists.newLinkedList();
-  //    List<String> failUsers = Lists.newLinkedList();
-  //    for(ScreensaverUser adminUser: _privacyUpdater.findDataSharingLevelAdminUsers())
-  //    {
-  //      try {
-  //        adminRecipients.add(getEmail(adminUser));
-  //      }catch(MessagingException e) {
-  //        errors.add(e);
-  //        failUsers.add("" + printUserInformation(adminUser));
-  //      }
-  //    }
-  //    if(!errors.isEmpty())
-  //    {
-  //      String errMsg = "Warn: could not validate the email address for the dataSharingLevelAdmin roles";
-  //      emailServiceForErrorReporting.send("Error getting the email address for dataSharingLevelAdmin roles", 
-  //                                         errMsg + "\n" + failUsers + "\nErrors: " + errors, 
-  //                                         emailAddressForErrors, 
-  //                                         new InternetAddress[] { emailAddressForErrors } , null );
-  //    }
-  //    return adminRecipients;
-  //  }
 
   public static String SCREEN_PRINT_FORMAT = "|%1$-6s|%2$-12s|%3$-25s|%4$-60s";
 
@@ -665,53 +561,4 @@ public class ScreenPrivacyExpirationUpdater extends AdminEmailApplication
     }
   }
 
-  //  private String printScreensHtml(Collection<Screen> screens)
-  //  {
-  //    StringBuilder msg = new StringBuilder();
-  //    msg.append("<table>");
-  //    msg.append(printTableHtmlHeader(new String[] {
-  //      "Number","Expiration Date", "Sharing Level", "Title", "Associated Users"
-  //    }));
-  //    for (Screen screen:screens) {
-  //      printScreenHtml(msg, screen);
-  //    }
-  //    msg.append("</table>");
-  //    return msg.toString();
-  //  }
-  //
-  //  private void printScreenHtml(StringBuilder msg, Screen screen)
-  //  {
-  //    String tempUserTable = "<table>" + printTableHtmlHeader(new String[] {
-  //      "Id", "Name", "Email"
-  //    });
-  //    for(ScreensaverUser user:screen.getAssociatedScreeningRoomUsers())
-  //    {
-  //      String id = StringUtils.isEmpty(user.getECommonsId())? user.getLoginId() : user.getECommonsId();
-  //      tempUserTable += printTableRow(new String[] {
-  //        id, user.getFullNameFirstLast(), user.getEmail()
-  //      });
-  //    }
-  //    tempUserTable += "</table>";
-  //    msg.append(printTableRow(new String[] {
-  //      "" + screen.getName(),"" + screen.getDataPrivacyExpirationDate(), "" + screen.getDataSharingLevel(), screen.getTitle(), tempUserTable 
-  //    }));
-  //  }
-
-  //  public static String printTableHtmlHeader(String[] headers)
-  //  {
-  //    StringBuffer buf = new StringBuffer();
-  //    buf.append("<tr>");
-  //    for(String header:headers) buf.append("<th>" + header + "</th>");
-  //    buf.append("</tr>");
-  //    return buf.toString();
-  //  }
-  //  
-  //  public static String printTableRow(String[] row)
-  //  {
-  //    StringBuffer buf = new StringBuffer();
-  //    buf.append("<tr>");
-  //    for(String val:row) buf.append("<td>" + val + "</td>");
-  //    buf.append("</tr>");
-  //    return buf.toString();
-  //  }
 }

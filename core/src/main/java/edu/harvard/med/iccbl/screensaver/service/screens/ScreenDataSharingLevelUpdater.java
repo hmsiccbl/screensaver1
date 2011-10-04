@@ -335,6 +335,6 @@ public class ScreenDataSharingLevelUpdater
   public Set<ScreensaverUser> findDataSharingLevelAdminUsers()
   {
     String hql = "from ScreensaverUser where ? in elements (screensaverUserRoles)" ;
-    return Sets.newHashSet(_dao.findEntitiesByHql(ScreensaverUser.class, hql, ScreensaverUserRole.SCREEN_DATA_SHARING_LEVELS_ADMIN.getRoleName()));
+    return Sets.newHashSet(_dao.findEntitiesByHql(ScreensaverUser.class, hql, ScreensaverUserRole.SCREEN_DSL_EXPIRATION_NOTIFY.getRoleName()));
   }
 }

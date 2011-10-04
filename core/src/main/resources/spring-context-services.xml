@@ -180,6 +180,7 @@
         scope="singleton">
     <constructor-arg value="#{screensaverProperties.map['screensaver.service.smtpemailservice.host']}" />
     <constructor-arg value="#{screensaverProperties.map['screensaver.service.smtpemailservice.username']}" />
+    <constructor-arg value="#{screensaverProperties.map['screensaver.service.smtpemailservice.admin.replytos']}" />
   </bean>
 
   <bean id="screenResultReporter"

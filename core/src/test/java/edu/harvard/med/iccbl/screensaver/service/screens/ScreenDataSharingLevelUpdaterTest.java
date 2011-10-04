@@ -63,11 +63,14 @@ public class ScreenDataSharingLevelUpdaterTest extends AbstractSpringPersistence
     admin = new AdministratorUser("admin", "testaccount");
     admin.addScreensaverUserRole(ScreensaverUserRole.SCREENS_ADMIN);
     admin.addScreensaverUserRole(ScreensaverUserRole.SCREEN_DATA_SHARING_LEVELS_ADMIN);
+    admin.addScreensaverUserRole(ScreensaverUserRole.SCREEN_DSL_EXPIRATION_NOTIFY);
+    
     genericEntityDao.persistEntity(admin);
 
     otherDSLAdmin = new AdministratorUser("dslAdmin", "testaccount");
     otherDSLAdmin.addScreensaverUserRole(ScreensaverUserRole.SCREENS_ADMIN);
     otherDSLAdmin.addScreensaverUserRole(ScreensaverUserRole.SCREEN_DATA_SHARING_LEVELS_ADMIN);
+    otherDSLAdmin.addScreensaverUserRole(ScreensaverUserRole.SCREEN_DSL_EXPIRATION_NOTIFY);
     genericEntityDao.persistEntity(otherDSLAdmin);
  
     labHead = new LabHead("test", "PrincipalInvestigator", null);
