@@ -56,7 +56,7 @@
                 value="Delete data"
                 onclick="javascript: return confirm('Delete screen result data permanently?');"
                 styleClass="command"
-                rendered="#{screenViewer.screensaverUser.isUserInRoleOfNameMap['screenResultsAdmin']}"
+                rendered="#{! empty screenViewer.entity.screenResult &amp;&amp; screenViewer.screensaverUser.isUserInRoleOfNameMap['screenResultsAdmin']}"
                 title="Delete the screen result data for this screen" />
             </t:panelGroup>
 
