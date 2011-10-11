@@ -5,6 +5,7 @@ import java.util.List;
 import java.util.Set;
 
 import com.google.common.collect.Iterables;
+import com.google.common.collect.Lists;
 import com.google.common.collect.Sets;
 import org.apache.log4j.Logger;
 
@@ -22,6 +23,7 @@ import edu.harvard.med.screensaver.io.libraries.smallmolecule.StructureImageProv
 import edu.harvard.med.screensaver.model.libraries.Well;
 import edu.harvard.med.screensaver.model.meta.PropertyPath;
 import edu.harvard.med.screensaver.policy.EntityViewPolicy;
+import edu.harvard.med.screensaver.ui.arch.datatable.column.TableColumn;
 import edu.harvard.med.screensaver.ui.arch.datatable.model.InMemoryEntityDataModel;
 import edu.harvard.med.screensaver.ui.libraries.LibraryViewer;
 import edu.harvard.med.screensaver.ui.libraries.WellSearchResults;
@@ -120,4 +122,14 @@ public class LincsWellSearchResults extends WellSearchResults
     getColumnManager().getColumn("Plate").setVisible(false);
     getColumnManager().getColumn("Well").setVisible(false);
   }
+
+  /**
+   * For LINCS, it does not make sense to show study annotation data in Well Search Results, as these data only apply to
+   * a single compound, and so these data are better viewed in the Study Viewer itself
+   */
+  protected void buildAnnotationTypeColumns(List<TableColumn<Tuple<String>,?>> columns)
+  {
+    return;
+  }
+
 }

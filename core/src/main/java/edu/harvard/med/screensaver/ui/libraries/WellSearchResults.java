@@ -1173,10 +1173,9 @@ public abstract class WellSearchResults extends TupleBasedEntitySearchResults<We
     });
   }
 
-  private void buildAnnotationTypeColumns(List<TableColumn<Tuple<String>,?>> columns)
+  protected void buildAnnotationTypeColumns(List<TableColumn<Tuple<String>,?>> columns)
   {
     List<TableColumn<Tuple<String>,?>> otherColumns = Lists.newArrayList();
-    if (true) return;
     for (final AnnotationType annotationType : findValidAnnotationTypes()) {
       String studyId = annotationType.getStudy().getFacilityId();
       String studyTitle = annotationType.getStudy().getTitle();
