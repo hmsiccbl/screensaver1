@@ -169,10 +169,10 @@ public class TableColumnManager<R> extends Observable implements Observer
       Map<String,TreeNode> groups = new HashMap<String,TreeNode>();
       for (TableColumn<R,?> column : _columns) {
         if (!isColumnRestricted(column)) {
-          TreeNode groupNode = getOrCreateGroupNode(root, groups, column.getGroup());
-          groupNode.getChildren().add(new SelectableColumnTreeNode<R>(column));
+            TreeNode groupNode = getOrCreateGroupNode(root, groups, column.getGroup());
+            groupNode.getChildren().add(new SelectableColumnTreeNode<R>(column));
+          }
         }
-      }
       _columnsSelectionTree = new TreeModelBase(root);
     }
     return _columnsSelectionTree;
@@ -535,7 +535,13 @@ public class TableColumnManager<R> extends Observable implements Observer
                                       groupPath.substring(0, lastPathDelimPos));
         groupName = groupPath.substring(lastPathDelimPos + GROUP_NODE_DELIMITER.length());
       }
-      groupNode = new TreeNodeBase("group", groupName, false);
+      // TODO: remove special cases here by adding appropriate flag param 
+      if (parent.getDescription().contains("Annotations") || parent.getDescription().contains("Data Columns")) {
+        groupNode = new SelectableColumnGroupTreeNode(groupName);
+      }
+      else {
+        groupNode = new TreeNodeBase("group", groupName, false);
+      }
       parent.getChildren().add(groupNode);
       groups.put(groupPath, groupNode);
     }

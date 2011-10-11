@@ -35,8 +35,14 @@ version, see the "columnSelectorReorder" component.
 						</h:panelGroup>
 					</f:facet>
 					<f:facet name="group">
+	          <h:outputText value="#{node.description}" styleClass="label" />
+					</f:facet>
+					<f:facet name="selectableGroup">
 						<h:panelGroup>
-							<h:outputText value="#{node.description}" styleClass="label" />
+							<t:selectBooleanCheckbox id="groupSelector"
+								value="#{node.checked}" styleClass="command" />
+							<t:outputLabel for="groupSelector" value="#{node.description}"
+								styleClass="label" />
 						</h:panelGroup>
 					</f:facet>
 					<f:facet name="column">
