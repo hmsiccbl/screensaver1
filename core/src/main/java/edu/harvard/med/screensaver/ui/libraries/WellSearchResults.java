@@ -494,10 +494,18 @@ public abstract class WellSearchResults extends TupleBasedEntitySearchResults<We
   {
     List<TableColumn<Tuple<String>,?>> columns = Lists.newArrayList();
     if (isLINCS()) {
-      buildCompoundPropertyColumns(columns);
-      buildWellPropertyColumns(columns);
-      buildReagentPropertyColumns(columns);
-      buildSilencingReagentPropertyColumns(columns);
+      if (_mode == WellSearchResultMode.SET_OF_CANONICAL_REAGENT_WELLS) {
+        buildWellPropertyColumns(columns);
+        buildReagentPropertyColumns(columns);
+        buildCompoundPropertyColumns(columns);
+        buildSilencingReagentPropertyColumns(columns);
+      }
+      else {
+        buildCompoundPropertyColumns(columns);
+        buildWellPropertyColumns(columns);
+        buildReagentPropertyColumns(columns);
+        buildSilencingReagentPropertyColumns(columns);
+      }
     }
     else {
       buildWellPropertyColumns(columns);
@@ -1168,6 +1176,7 @@ public abstract class WellSearchResults extends TupleBasedEntitySearchResults<We
   private void buildAnnotationTypeColumns(List<TableColumn<Tuple<String>,?>> columns)
   {
     List<TableColumn<Tuple<String>,?>> otherColumns = Lists.newArrayList();
+    if (true) return;
     for (final AnnotationType annotationType : findValidAnnotationTypes()) {
       String studyId = annotationType.getStudy().getFacilityId();
       String studyTitle = annotationType.getStudy().getTitle();
