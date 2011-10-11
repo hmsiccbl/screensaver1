@@ -209,7 +209,7 @@ Day 4: Repeat for 48 hr time point
 Day 5: Repeat for 72 hr time point
 
 Plates are imaged on the ImageXpress Micro screening microscope (Molecular Devices).  4 images are collected per well of the plate at 10X magnification, using the DAPI and FITC filter sets of this instrument.
-Images are analyzed using MetaXpress software.  The multiwavelength cell scoring module of the software is used detect all cells using the DAPI channel, score cells as apoptotic cells (NucView 488 positive) using the FITC channel.  The analysis produces for each well the total cell count and the % of cells in the well that are apoptotic.
+Images are analyzed using MetaXpress software.  The multiwavelength cell scoring module of the software is used to detect all cells using the DAPI channel and score cells as apoptotic cells (NucView 488 positive) using the FITC channel.  The analysis produces for each well the total cell count and the % of cells in the well that are apoptotic.
 
 Reagent stocks:
 Hoechst 33342 (Invitrogen ) – 1 mg/mL stock in H2O, store at -20 degrees C
@@ -251,7 +251,7 @@ Day 4: Repeat for 48 hr time point
 Day 5: Repeat for 72 hr time point
 
 Plates are imaged on the ImageXpress Micro screening microscope (Molecular Devices).  4 images are collected per well of the plate at 10X magnification, using the DAPI and FITC filter sets of this instrument.
-Images are analyzed using MetaXpress software.  The multiwavelength cell scoring module of the software is used detect all cells using the DAPI channel, score cells as apoptotic cells (NucView 488 positive) using the FITC channel.  The analysis produces for each well the total cell count and the % of cells in the well that are apoptotic.
+Images are analyzed using MetaXpress software.  The multiwavelength cell scoring module of the software is used to detect all cells using the DAPI channel and score cells as apoptotic cells (NucView 488 positive) using the FITC channel.  The analysis produces for each well the total cell count and the % of cells in the well that are apoptotic.
 
 Reagent stocks:
 Hoechst 33342 (Invitrogen ) – 1 mg/mL stock in H2O, store at -20 degrees C
@@ -293,7 +293,7 @@ Day 4: Repeat for 48 hr time point
 Day 5: Repeat for 72 hr time point
 
 Plates are imaged on the ImageXpress Micro screening microscope (Molecular Devices).  4 images are collected per well of the plate at 10X magnification, using the DAPI and FITC filter sets of this instrument.
-Images are analyzed using MetaXpress software.  The multiwavelength cell scoring module of the software is used detect all cells using the DAPI channel, score cells as apoptotic cells (NucView 488 positive) using the FITC channel.  The analysis produces for each well the total cell count and the % of cells in the well that are apoptotic.
+Images are analyzed using MetaXpress software.  The multiwavelength cell scoring module of the software is used to detect all cells using the DAPI channel and score cells as apoptotic cells (NucView 488 positive) using the FITC channel.  The analysis produces for each well the total cell count and the % of cells in the well that are apoptotic.
 
 Reagent stocks:
 Hoechst 33342 (Invitrogen ) – 1 mg/mL stock in H2O, store at -20 degrees C
@@ -335,7 +335,7 @@ Day 4: Repeat for 48 hr time point
 Day 5: Repeat for 72 hr time point
 
 Plates are imaged on the ImageXpress Micro screening microscope (Molecular Devices).  4 images are collected per well of the plate at 10X magnification, using the DAPI and FITC filter sets of this instrument.
-Images are analyzed using MetaXpress software.  The multiwavelength cell scoring module of the software is used detect all cells using the DAPI channel, score cells as apoptotic cells (NucView 488 positive) using the FITC channel.  The analysis produces for each well the total cell count and the % of cells in the well that are apoptotic.
+Images are analyzed using MetaXpress software.  The multiwavelength cell scoring module of the software is used to detect all cells using the DAPI channel and score cells as apoptotic cells (NucView 488 positive) using the FITC channel.  The analysis produces for each well the total cell count and the % of cells in the well that are apoptotic.
 
 Reagent stocks:
 Hoechst 33342 (Invitrogen ) – 1 mg/mL stock in H2O, store at -20 degrees C
@@ -377,7 +377,7 @@ Day 4: Repeat for 48 hr time point
 Day 5: Repeat for 72 hr time point
 
 Plates are imaged on the ImageXpress Micro screening microscope (Molecular Devices).  4 images are collected per well of the plate at 10X magnification, using the DAPI and FITC filter sets of this instrument.
-Images are analyzed using MetaXpress software.  The multiwavelength cell scoring module of the software is used detect all cells using the DAPI channel, score cells as apoptotic cells (NucView 488 positive) using the FITC channel.  The analysis produces for each well the total cell count and the % of cells in the well that are apoptotic.
+Images are analyzed using MetaXpress software.  The multiwavelength cell scoring module of the software is used to detect all cells using the DAPI channel and score cells as apoptotic cells (NucView 488 positive) using the FITC channel.  The analysis produces for each well the total cell count and the % of cells in the well that are apoptotic.
 
 Reagent stocks:
 Hoechst 33342 (Invitrogen ) – 1 mg/mL stock in H2O, store at -20 degrees C
@@ -418,7 +418,7 @@ Day 4: Repeat for 48 hr time point
 Day 5: Repeat for 72 hr time point
 
 Plates are imaged on the ImageXpress Micro screening microscope.  4 images are collected per well of the plate at 10X magnification, using the DAPI, FITC, and Cy5 filter sets of this instrument.
-Images are analyzed using MetaXpress software.  The multiwavelength cell scoring module of the software is used detect all cells using the DAPI channel, score cells as apoptotic cells (NucView 488 positive) using the FITC channel, and score cells as dead or dying (TO-PRO-3 positive) using the Cy5 channel.  The analysis produces for each well the total cell count, the % of cells in the well that are apoptotic, and the % of cells in the well that are dead or dying.
+Images are analyzed using MetaXpress software.  The multiwavelength cell scoring module of the software is used to detect all cells using the DAPI channel, score cells as apoptotic cells (NucView 488 positive) using the FITC channel, and score cells as dead or dying (TO-PRO-3 positive) using the Cy5 channel.  The analysis produces for each well the total cell count, the % of cells in the well that are apoptotic, and the % of cells in the well that are dead or dying.
 
 Reagent stocks:
 Hoechst 33342 (Invitrogen ) – 1 mg/mL stock in H2O, store at -20 degrees C
@@ -460,7 +460,7 @@ Day 4: Repeat for 48 hr time point
 Day 5: Repeat for 72 hr time point
 
 Plates are imaged on the ImageXpress Micro screening microscope.  4 images are collected per well of the plate at 10X magnification, using the DAPI, FITC, and Cy5 filter sets of this instrument.
-Images are analyzed using MetaXpress software.  The multiwavelength cell scoring module of the software is used detect all cells using the DAPI channel, score cells as apoptotic cells (NucView 488 positive) using the FITC channel, and score cells as dead or dying (TO-PRO-3 positive) using the Cy5 channel.  The analysis produces for each well the total cell count, the % of cells in the well that are apoptotic, and the % of cells in the well that are dead or dying.
+Images are analyzed using MetaXpress software.  The multiwavelength cell scoring module of the software is used to detect all cells using the DAPI channel, score cells as apoptotic cells (NucView 488 positive) using the FITC channel, and score cells as dead or dying (TO-PRO-3 positive) using the Cy5 channel.  The analysis produces for each well the total cell count, the % of cells in the well that are apoptotic, and the % of cells in the well that are dead or dying.
 
 Reagent stocks:
 Hoechst 33342 (Invitrogen ) – 1 mg/mL stock in H2O, store at -20 degrees C
@@ -502,7 +502,7 @@ Day 4: Repeat for 48 hr time point
 Day 5: Repeat for 72 hr time point
 
 Plates are imaged on the ImageXpress Micro screening microscope.  4 images are collected per well of the plate at 10X magnification, using the DAPI, FITC, and Cy5 filter sets of this instrument.
-Images are analyzed using MetaXpress software.  The multiwavelength cell scoring module of the software is used detect all cells using the DAPI channel, score cells as apoptotic cells (NucView 488 positive) using the FITC channel, and score cells as dead or dying (TO-PRO-3 positive) using the Cy5 channel.  The analysis produces for each well the total cell count, the % of cells in the well that are apoptotic, and the % of cells in the well that are dead or dying.
+Images are analyzed using MetaXpress software.  The multiwavelength cell scoring module of the software is used to detect all cells using the DAPI channel, score cells as apoptotic cells (NucView 488 positive) using the FITC channel, and score cells as dead or dying (TO-PRO-3 positive) using the Cy5 channel.  The analysis produces for each well the total cell count, the % of cells in the well that are apoptotic, and the % of cells in the well that are dead or dying.
 
 Reagent stocks:
 Hoechst 33342 (Invitrogen ) – 1 mg/mL stock in H2O, store at -20 degrees C
@@ -544,7 +544,7 @@ Day 4: Repeat for 48 hr time point
 Day 5: Repeat for 72 hr time point
 
 Plates are imaged on the ImageXpress Micro screening microscope.  4 images are collected per well of the plate at 10X magnification, using the DAPI, FITC, and Cy5 filter sets of this instrument.
-Images are analyzed using MetaXpress software.  The multiwavelength cell scoring module of the software is used detect all cells using the DAPI channel, score cells as apoptotic cells (NucView 488 positive) using the FITC channel, and score cells as dead or dying (TO-PRO-3 positive) using the Cy5 channel.  The analysis produces for each well the total cell count, the % of cells in the well that are apoptotic, and the % of cells in the well that are dead or dying.
+Images are analyzed using MetaXpress software.  The multiwavelength cell scoring module of the software is used to detect all cells using the DAPI channel, score cells as apoptotic cells (NucView 488 positive) using the FITC channel, and score cells as dead or dying (TO-PRO-3 positive) using the Cy5 channel.  The analysis produces for each well the total cell count, the % of cells in the well that are apoptotic, and the % of cells in the well that are dead or dying.
 
 Reagent stocks:
 Hoechst 33342 (Invitrogen ) – 1 mg/mL stock in H2O, store at -20 degrees C
@@ -586,7 +586,7 @@ Day 4: Repeat for 48 hr time point
 Day 5: Repeat for 72 hr time point
 
 Plates are imaged on the ImageXpress Micro screening microscope.  4 images are collected per well of the plate at 10X magnification, using the DAPI, FITC, and Cy5 filter sets of this instrument.
-Images are analyzed using MetaXpress software.  The multiwavelength cell scoring module of the software is used detect all cells using the DAPI channel, score cells as apoptotic cells (NucView 488 positive) using the FITC channel, and score cells as dead or dying (TO-PRO-3 positive) using the Cy5 channel.  The analysis produces for each well the total cell count, the % of cells in the well that are apoptotic, and the % of cells in the well that are dead or dying.
+Images are analyzed using MetaXpress software.  The multiwavelength cell scoring module of the software is used to detect all cells using the DAPI channel, score cells as apoptotic cells (NucView 488 positive) using the FITC channel, and score cells as dead or dying (TO-PRO-3 positive) using the Cy5 channel.  The analysis produces for each well the total cell count, the % of cells in the well that are apoptotic, and the % of cells in the well that are dead or dying.
 
 Reagent stocks:
 Hoechst 33342 (Invitrogen ) – 1 mg/mL stock in H2O, store at -20 degrees C
@@ -614,9 +614,9 @@ LEAD_SCREENER_EMAIL="yangzhong_tang@hms.harvard.edu"
 -AE $ECOMMONS_ADMIN  \
 -st SMALL_MOLECULE  \
 -hf $LAB_HEAD_FIRST -hl $LAB_HEAD_LAST -he $LAB_HEAD_EMAIL -lf $LEAD_SCREENER_FIRST -ll $LEAD_SCREENER_LAST -le $LEAD_SCREENER_EMAIL \
--t 'Tang Mitosis/Apoptosis ver.II: A375S3 cells.'  \
+-t 'Tang Mitosis/Apoptosis ver.II: A375S2 cells.'  \
 -i 10011 \
---summary "Tang Mitosis/Apoptosis ver.II: A375S3 cells. Dose response of anti-mitotic compounds in human cancer cell line A375S3 at 24 and 48 hours to determine effect on apoptosis, mitosis and cell death. 
+--summary "Tang Mitosis/Apoptosis ver.II: A375S2 cells. Dose response of anti-mitotic compounds in human cancer cell line A375S2 at 24 and 48 hours to determine effect on apoptosis, mitosis and cell death. 
 
 In screening for small-molecule compounds that are effective at killing cancer cells, one-dimensional readout GI50, which is the EC50 value of growth inhibition, is usually used as the only criterion. A major problem with this one-readout approach is that other useful information is discarded, which could be critical for understanding the action of the compounds. In this screen, we use a single-cell-based imaging assay that can report multi-dimensional physiological responses in cells treated with small molecule kinase inhibitors." \
 -p 'Protocol:
@@ -653,7 +653,7 @@ check_errs $? "create screen fails"
 
 ./run.sh edu.harvard.med.screensaver.io.screenresults.ScreenResultImporter \
 -AE $ECOMMONS_ADMIN \
--f $DATA_DIRECTORY/screen/tang_MitoApop2_A375S3.xls \
+-f $DATA_DIRECTORY/screen/tang_MitoApop2_A375S2.xls \
 -s 10011 -i 
 check_errs $? "create screen result import fails"
 
@@ -1424,7 +1424,7 @@ In screening for small-molecule compounds that are effective at killing cancer c
 2. On Day 2, pin transfer performed by an ICCB-Longwood Screening Facility staff member using an Epson robot system. The pin transfer adds 100nL of each diluted compound from the 384-well compound library plate to each well of the assay plate.
 
 3. On each day of Day 3, 4, and 5 (24, 48, and 72 hrs after pin transfer), perform the following:
-(A) Prepare a cocktail of reagents in PBS that has 4g/mL Hoechst33342 (Sigma B2261), 4M LysoTracker-Red (Invitrogen L7528), and 2M DEVD-NucView488 (Biotium 10403).
+(A) Prepare a cocktail of reagents in PBS that has 4μg/mL Hoechst33342 (Sigma B2261), 4µM LysoTracker-Red (Invitrogen L7528), and 2M DEVD-NucView488 (Biotium 10403).
 (B) Add 10L of the reagent cocktail to each well of the assay plate using benchtop WellMate plate filler, so that the final concentration of Hoechst33342 is 1g/mL, LysoTracker-Red is 1M, and DEVD-NucView488 is 500nM.
 (C) Incubate cells in a tissue culture incubator at 37C, 5% CO2 for 1.5 hrs.
 (D) Prepare 2% formaldehyde in PBS and pre-warm it in 37C water bath. 
@@ -1595,6 +1595,919 @@ check_errs $? "create screen fails"
 -AE $ECOMMONS_ADMIN \
 -f $DATA_DIRECTORY/screen/tang_MitoApop2_WiDr.xls \
 -s 10031 -i
+check_errs $? "create screen result import fails"
+
+./run.sh edu.harvard.med.screensaver.io.screens.ScreenCreator \
+-AE $ECOMMONS_ADMIN  \
+-st SMALL_MOLECULE  \
+-hf $LAB_HEAD_FIRST -hl $LAB_HEAD_LAST -he $LAB_HEAD_EMAIL -lf $LEAD_SCREENER_FIRST -ll $LEAD_SCREENER_LAST -le $LEAD_SCREENER_EMAIL \
+-t 'Tang Proliferation/Mitosis: 5637 cells.'  \
+-i 10032 \
+--summary "Tang Proliferation/Mitosis: 5637 cells. Dose response of anti-mitotic compounds in human cancer cell line 5637 at 24, 48 and 72 hours to determine effect on cell proliferation and mitosis." \
+-p '1. On Day 1, seed ~2000-3000 cells in 30 uL of growth medium into each well of a 384-well clear-bottom black assay plate (Corning 3712), using a WellMate plate filler in a cell culture hood. 
+
+2. On Day 2, pin transfer performed by an ICCB-Longwood Screening Facility staff member using an Epson robot system. The pin transfer adds 100nL of each diluted compound from the 384-well compound library plate to each well of the assay plate.
+
+3. On Day 2, 3, and 4 (0, 24, and 48 hrs after pin transfer), add 3 uL of 100 uM EdU (diluted from 10 mM stock to growth medium) to each well.
+
+4. On Day 3, 4, and 5 (24, 48, and 72 hrs after pin transfer), perform the following to the plate to which EdU was added 24 hrs ago:
+(A) Prepare 2 fixation/permeabilization solution in PBS and pre-warm it in 37C water bath.
+(B) Add 30uL of the pre-warmed fixation/permeabilization solution to each well of cells using benchtop WellMate, so that the final concentration of formaldehyde is 3.7% and the final concentration of Triton-100 is 0.2%. Immediately centrifuge the plates at 1000rpm at room temperature for 20 minutes, in a plate centrifuge, while the cells are being fixed and permeabilized. 
+(C) Prepare an EdU reaction cocktail in H2O that has:
+100mM TBS,
+2mM CuSO4,
+2uM Alexa488-azide, and
+2mM ascorbic acid.
+(Add individual components to the cocktail in the above order.)
+(D) Add 50 uL of the above freshly prepared EdU reaction cocktail to each well.
+(E) Incubate the plate at RT for 40-50 mins.
+(F) Wash the plate three times with PBS. After washing, the residual volume in each well should be ~20uL.
+(G) Add 20uL of anti-MPM2 primary antibody (Millipore #05-368, final dilution 1:500) in blocking buffer (4% BSA and 0.2% Triton-100 in PBS) to each well. Incubate for 1hr at RT.
+(H) Wash the plate three times with PBS.
+(I) Add 20uL of Goat-anti-mouse Alexa fluor 568 (Invitrogen A11004, final dilution 1:500) in blocking buffer to each well. Incubate for 1hr at RT.
+(J) Wash the plate three times with PBS.
+(K) Add 20uL of Hoechst (final concentration 1 ug/mL) in PBS to each well. Incubate for 30min at RT.
+(L) Wash the plate. Seal with a plate seal. 
+(M) Image the plates using the ImageXpress Micro screening microscope (Molecular Devices) and the 10x objective lens. Image 4 sites/per well.
+
+Filter information:
+DAPI [Excitation 377/50; Emission 447/60]
+FITC [Excitation 482/35; Emission 536/40]
+Texas Red [Excitation 562/40; Emission 624/40]
+
+4. After image acquisition, image analysis is done using a customized Matlab program developed by Dr. Tiao Xie (Harvard Medical School). The program does segmentation on the DAPI channel to identify all nuclei, and then it identifies bright spots in the Texas Red (MPM2) channel to score for mitotic cells. In a separate step, the program measures the average FITC (EdU) intensity for all the nuclei, and scores for actively proliferating cells (cells that are incorporating EdU) by applying an EdU threshold.
+
+5. When reporting data, 5 parameters are reported for each replicate for each cell line and compound condition:
+a. Cell Count: The total number of cells (nuclei) stained with Hoechst 33342 and detected in the DAPI channel.
+b. EdU positive cells: The percentage of actively proliferating cells that have average FITC (EdU) intensity above the EdU threshold.
+c. Mitotic cells: The percentage of cells that are MPM2-positive.
+d. Non-mitotic cells that are EdU-positive: The percentage of EdU-positive cells within the non-mitotic population.
+e. Mitotic cells that are EdU-positive: The percentage of EdU-positive cells within the mitotic population. 
+
+Reference for EdU labeling:
+Salic A, Mitchison TJ. A chemical method for fast and sensitive detection of DNA synthesis in vivo. Proc Natl Acad Sci USA. 2008 Feb 19;105(7):2415-20.' 
+check_errs $? "create screen fails"
+
+./run.sh edu.harvard.med.screensaver.io.screenresults.ScreenResultImporter \
+-AE $ECOMMONS_ADMIN \
+-f $DATA_DIRECTORY/screen/tang_ProMitosis_5637.xls \
+-s 10032 -i
+check_errs $? "create screen result import fails"
+
+./run.sh edu.harvard.med.screensaver.io.screens.ScreenCreator \
+-AE $ECOMMONS_ADMIN  \
+-st SMALL_MOLECULE  \
+-hf $LAB_HEAD_FIRST -hl $LAB_HEAD_LAST -he $LAB_HEAD_EMAIL -lf $LEAD_SCREENER_FIRST -ll $LEAD_SCREENER_LAST -le $LEAD_SCREENER_EMAIL \
+-t 'Tang Proliferation/Mitosis: BTH-1 cells.'  \
+-i 10033 \
+--summary "Tang Proliferation/Mitosis: BTH-1 cells. Dose response of anti-mitotic compounds in human cancer cell line BTH-1 at 24, 48 and 72 hours to determine effect on cell proliferation and mitosis." \
+-p '1. On Day 1, seed ~2000-3000 cells in 30 uL of growth medium into each well of a 384-well clear-bottom black assay plate (Corning 3712), using a WellMate plate filler in a cell culture hood. 
+
+2. On Day 2, pin transfer performed by an ICCB-Longwood Screening Facility staff member using an Epson robot system. The pin transfer adds 100nL of each diluted compound from the 384-well compound library plate to each well of the assay plate.
+
+3. On Day 2, 3, and 4 (0, 24, and 48 hrs after pin transfer), add 3 uL of 100 uM EdU (diluted from 10 mM stock to growth medium) to each well.
+
+4. On Day 3, 4, and 5 (24, 48, and 72 hrs after pin transfer), perform the following to the plate to which EdU was added 24 hrs ago:
+(A) Prepare 2 fixation/permeabilization solution in PBS and pre-warm it in 37C water bath.
+(B) Add 30uL of the pre-warmed fixation/permeabilization solution to each well of cells using benchtop WellMate, so that the final concentration of formaldehyde is 3.7% and the final concentration of Triton-100 is 0.2%. Immediately centrifuge the plates at 1000rpm at room temperature for 20 minutes, in a plate centrifuge, while the cells are being fixed and permeabilized. 
+(C) Prepare an EdU reaction cocktail in H2O that has:
+100mM TBS,
+2mM CuSO4,
+2uM Alexa488-azide, and
+2mM ascorbic acid.
+(Add individual components to the cocktail in the above order.)
+(D) Add 50 uL of the above freshly prepared EdU reaction cocktail to each well.
+(E) Incubate the plate at RT for 40-50 mins.
+(F) Wash the plate three times with PBS. After washing, the residual volume in each well should be ~20uL.
+(G) Add 20uL of anti-MPM2 primary antibody (Millipore #05-368, final dilution 1:500) in blocking buffer (4% BSA and 0.2% Triton-100 in PBS) to each well. Incubate for 1hr at RT.
+(H) Wash the plate three times with PBS.
+(I) Add 20uL of Goat-anti-mouse Alexa fluor 568 (Invitrogen A11004, final dilution 1:500) in blocking buffer to each well. Incubate for 1hr at RT.
+(J) Wash the plate three times with PBS.
+(K) Add 20uL of Hoechst (final concentration 1 ug/mL) in PBS to each well. Incubate for 30min at RT.
+(L) Wash the plate. Seal with a plate seal. 
+(M) Image the plates using the ImageXpress Micro screening microscope (Molecular Devices) and the 10x objective lens. Image 4 sites/per well.
+
+Filter information:
+DAPI [Excitation 377/50; Emission 447/60]
+FITC [Excitation 482/35; Emission 536/40]
+Texas Red [Excitation 562/40; Emission 624/40]
+
+4. After image acquisition, image analysis is done using a customized Matlab program developed by Dr. Tiao Xie (Harvard Medical School). The program does segmentation on the DAPI channel to identify all nuclei, and then it identifies bright spots in the Texas Red (MPM2) channel to score for mitotic cells. In a separate step, the program measures the average FITC (EdU) intensity for all the nuclei, and scores for actively proliferating cells (cells that are incorporating EdU) by applying an EdU threshold.
+
+5. When reporting data, 5 parameters are reported for each replicate for each cell line and compound condition:
+a. Cell Count: The total number of cells (nuclei) stained with Hoechst 33342 and detected in the DAPI channel.
+b. EdU positive cells: The percentage of actively proliferating cells that have average FITC (EdU) intensity above the EdU threshold.
+c. Mitotic cells: The percentage of cells that are MPM2-positive.
+d. Non-mitotic cells that are EdU-positive: The percentage of EdU-positive cells within the non-mitotic population.
+e. Mitotic cells that are EdU-positive: The percentage of EdU-positive cells within the mitotic population. 
+
+Reference for EdU labeling:
+Salic A, Mitchison TJ. A chemical method for fast and sensitive detection of DNA synthesis in vivo. Proc Natl Acad Sci USA. 2008 Feb 19;105(7):2415-20.' 
+check_errs $? "create screen fails"
+
+./run.sh edu.harvard.med.screensaver.io.screenresults.ScreenResultImporter \
+-AE $ECOMMONS_ADMIN \
+-f $DATA_DIRECTORY/screen/tang_ProMitosis_BTH-1.xls \
+-s 10033 -i
+check_errs $? "create screen result import fails"
+
+./run.sh edu.harvard.med.screensaver.io.screens.ScreenCreator \
+-AE $ECOMMONS_ADMIN  \
+-st SMALL_MOLECULE  \
+-hf $LAB_HEAD_FIRST -hl $LAB_HEAD_LAST -he $LAB_HEAD_EMAIL -lf $LEAD_SCREENER_FIRST -ll $LEAD_SCREENER_LAST -le $LEAD_SCREENER_EMAIL \
+-t 'Tang Proliferation/Mitosis: Colo-800 cells.'  \
+-i 10034 \
+--summary "Tang Proliferation/Mitosis: Colo-800 cells. Dose response of anti-mitotic compounds in human cancer cell line Colo-800 at 24, 48 and 72 hours to determine effect on cell proliferation and mitosis." \
+-p '1. On Day 1, seed ~2000-3000 cells in 30 uL of growth medium into each well of a 384-well clear-bottom black assay plate (Corning 3712), using a WellMate plate filler in a cell culture hood. 
+
+2. On Day 2, pin transfer performed by an ICCB-Longwood Screening Facility staff member using an Epson robot system. The pin transfer adds 100nL of each diluted compound from the 384-well compound library plate to each well of the assay plate.
+
+3. On Day 2, 3, and 4 (0, 24, and 48 hrs after pin transfer), add 3 uL of 100 uM EdU (diluted from 10 mM stock to growth medium) to each well.
+
+4. On Day 3, 4, and 5 (24, 48, and 72 hrs after pin transfer), perform the following to the plate to which EdU was added 24 hrs ago:
+(A) Prepare 2 fixation/permeabilization solution in PBS and pre-warm it in 37C water bath.
+(B) Add 30uL of the pre-warmed fixation/permeabilization solution to each well of cells using benchtop WellMate, so that the final concentration of formaldehyde is 3.7% and the final concentration of Triton-100 is 0.2%. Immediately centrifuge the plates at 1000rpm at room temperature for 20 minutes, in a plate centrifuge, while the cells are being fixed and permeabilized. 
+(C) Prepare an EdU reaction cocktail in H2O that has:
+100mM TBS,
+2mM CuSO4,
+2uM Alexa488-azide, and
+2mM ascorbic acid.
+(Add individual components to the cocktail in the above order.)
+(D) Add 50 uL of the above freshly prepared EdU reaction cocktail to each well.
+(E) Incubate the plate at RT for 40-50 mins.
+(F) Wash the plate three times with PBS. After washing, the residual volume in each well should be ~20uL.
+(G) Add 20uL of anti-MPM2 primary antibody (Millipore #05-368, final dilution 1:500) in blocking buffer (4% BSA and 0.2% Triton-100 in PBS) to each well. Incubate for 1hr at RT.
+(H) Wash the plate three times with PBS.
+(I) Add 20uL of Goat-anti-mouse Alexa fluor 568 (Invitrogen A11004, final dilution 1:500) in blocking buffer to each well. Incubate for 1hr at RT.
+(J) Wash the plate three times with PBS.
+(K) Add 20uL of Hoechst (final concentration 1 ug/mL) in PBS to each well. Incubate for 30min at RT.
+(L) Wash the plate. Seal with a plate seal. 
+(M) Image the plates using the ImageXpress Micro screening microscope (Molecular Devices) and the 10x objective lens. Image 4 sites/per well.
+
+Filter information:
+DAPI [Excitation 377/50; Emission 447/60]
+FITC [Excitation 482/35; Emission 536/40]
+Texas Red [Excitation 562/40; Emission 624/40]
+
+4. After image acquisition, image analysis is done using a customized Matlab program developed by Dr. Tiao Xie (Harvard Medical School). The program does segmentation on the DAPI channel to identify all nuclei, and then it identifies bright spots in the Texas Red (MPM2) channel to score for mitotic cells. In a separate step, the program measures the average FITC (EdU) intensity for all the nuclei, and scores for actively proliferating cells (cells that are incorporating EdU) by applying an EdU threshold.
+
+5. When reporting data, 5 parameters are reported for each replicate for each cell line and compound condition:
+a. Cell Count: The total number of cells (nuclei) stained with Hoechst 33342 and detected in the DAPI channel.
+b. EdU positive cells: The percentage of actively proliferating cells that have average FITC (EdU) intensity above the EdU threshold.
+c. Mitotic cells: The percentage of cells that are MPM2-positive.
+d. Non-mitotic cells that are EdU-positive: The percentage of EdU-positive cells within the non-mitotic population.
+e. Mitotic cells that are EdU-positive: The percentage of EdU-positive cells within the mitotic population. 
+
+Reference for EdU labeling:
+Salic A, Mitchison TJ. A chemical method for fast and sensitive detection of DNA synthesis in vivo. Proc Natl Acad Sci USA. 2008 Feb 19;105(7):2415-20.' 
+check_errs $? "create screen fails"
+
+./run.sh edu.harvard.med.screensaver.io.screenresults.ScreenResultImporter \
+-AE $ECOMMONS_ADMIN \
+-f $DATA_DIRECTORY/screen/tang_ProMitosis_Colo-800.xls \
+-s 10034 -i
+check_errs $? "create screen result import fails"
+
+./run.sh edu.harvard.med.screensaver.io.screens.ScreenCreator \
+-AE $ECOMMONS_ADMIN  \
+-st SMALL_MOLECULE  \
+-hf $LAB_HEAD_FIRST -hl $LAB_HEAD_LAST -he $LAB_HEAD_EMAIL -lf $LEAD_SCREENER_FIRST -ll $LEAD_SCREENER_LAST -le $LEAD_SCREENER_EMAIL \
+-t 'Tang Proliferation/Mitosis: HuTu-80 cells.'  \
+-i 10035 \
+--summary "Tang Proliferation/Mitosis: HuTu-80 cells. Dose response of anti-mitotic compounds in human cancer cell line HuTu-80 at 24, 48 and 72 hours to determine effect on cell proliferation and mitosis." \
+-p '1. On Day 1, seed ~2000-3000 cells in 30 uL of growth medium into each well of a 384-well clear-bottom black assay plate (Corning 3712), using a WellMate plate filler in a cell culture hood. 
+
+2. On Day 2, pin transfer performed by an ICCB-Longwood Screening Facility staff member using an Epson robot system. The pin transfer adds 100nL of each diluted compound from the 384-well compound library plate to each well of the assay plate.
+
+3. On Day 2, 3, and 4 (0, 24, and 48 hrs after pin transfer), add 3 uL of 100 uM EdU (diluted from 10 mM stock to growth medium) to each well.
+
+4. On Day 3, 4, and 5 (24, 48, and 72 hrs after pin transfer), perform the following to the plate to which EdU was added 24 hrs ago:
+(A) Prepare 2 fixation/permeabilization solution in PBS and pre-warm it in 37C water bath.
+(B) Add 30uL of the pre-warmed fixation/permeabilization solution to each well of cells using benchtop WellMate, so that the final concentration of formaldehyde is 3.7% and the final concentration of Triton-100 is 0.2%. Immediately centrifuge the plates at 1000rpm at room temperature for 20 minutes, in a plate centrifuge, while the cells are being fixed and permeabilized. 
+(C) Prepare an EdU reaction cocktail in H2O that has:
+100mM TBS,
+2mM CuSO4,
+2uM Alexa488-azide, and
+2mM ascorbic acid.
+(Add individual components to the cocktail in the above order.)
+(D) Add 50 uL of the above freshly prepared EdU reaction cocktail to each well.
+(E) Incubate the plate at RT for 40-50 mins.
+(F) Wash the plate three times with PBS. After washing, the residual volume in each well should be ~20uL.
+(G) Add 20uL of anti-MPM2 primary antibody (Millipore #05-368, final dilution 1:500) in blocking buffer (4% BSA and 0.2% Triton-100 in PBS) to each well. Incubate for 1hr at RT.
+(H) Wash the plate three times with PBS.
+(I) Add 20uL of Goat-anti-mouse Alexa fluor 568 (Invitrogen A11004, final dilution 1:500) in blocking buffer to each well. Incubate for 1hr at RT.
+(J) Wash the plate three times with PBS.
+(K) Add 20uL of Hoechst (final concentration 1 ug/mL) in PBS to each well. Incubate for 30min at RT.
+(L) Wash the plate. Seal with a plate seal. 
+(M) Image the plates using the ImageXpress Micro screening microscope (Molecular Devices) and the 10x objective lens. Image 4 sites/per well.
+
+Filter information:
+DAPI [Excitation 377/50; Emission 447/60]
+FITC [Excitation 482/35; Emission 536/40]
+Texas Red [Excitation 562/40; Emission 624/40]
+
+4. After image acquisition, image analysis is done using a customized Matlab program developed by Dr. Tiao Xie (Harvard Medical School). The program does segmentation on the DAPI channel to identify all nuclei, and then it identifies bright spots in the Texas Red (MPM2) channel to score for mitotic cells. In a separate step, the program measures the average FITC (EdU) intensity for all the nuclei, and scores for actively proliferating cells (cells that are incorporating EdU) by applying an EdU threshold.
+
+5. When reporting data, 5 parameters are reported for each replicate for each cell line and compound condition:
+a. Cell Count: The total number of cells (nuclei) stained with Hoechst 33342 and detected in the DAPI channel.
+b. EdU positive cells: The percentage of actively proliferating cells that have average FITC (EdU) intensity above the EdU threshold.
+c. Mitotic cells: The percentage of cells that are MPM2-positive.
+d. Non-mitotic cells that are EdU-positive: The percentage of EdU-positive cells within the non-mitotic population.
+e. Mitotic cells that are EdU-positive: The percentage of EdU-positive cells within the mitotic population. 
+
+Reference for EdU labeling:
+Salic A, Mitchison TJ. A chemical method for fast and sensitive detection of DNA synthesis in vivo. Proc Natl Acad Sci USA. 2008 Feb 19;105(7):2415-20.' 
+check_errs $? "create screen fails"
+
+./run.sh edu.harvard.med.screensaver.io.screenresults.ScreenResultImporter \
+-AE $ECOMMONS_ADMIN \
+-f $DATA_DIRECTORY/screen/tang_ProMitosis_HuTu-80.xls \
+-s 10035 -i
+check_errs $? "create screen result import fails"
+
+./run.sh edu.harvard.med.screensaver.io.screens.ScreenCreator \
+-AE $ECOMMONS_ADMIN  \
+-st SMALL_MOLECULE  \
+-hf $LAB_HEAD_FIRST -hl $LAB_HEAD_LAST -he $LAB_HEAD_EMAIL -lf $LEAD_SCREENER_FIRST -ll $LEAD_SCREENER_LAST -le $LEAD_SCREENER_EMAIL \
+-t 'Tang Proliferation/Mitosis: IA-LM cells.'  \
+-i 10036 \
+--summary "Tang Proliferation/Mitosis: IA-LM cells. Dose response of anti-mitotic compounds in human cancer cell line IA-LM at 24, 48 and 72 hours to determine effect on cell proliferation and mitosis." \
+-p '1. On Day 1, seed ~2000-3000 cells in 30 uL of growth medium into each well of a 384-well clear-bottom black assay plate (Corning 3712), using a WellMate plate filler in a cell culture hood. 
+
+2. On Day 2, pin transfer performed by an ICCB-Longwood Screening Facility staff member using an Epson robot system. The pin transfer adds 100nL of each diluted compound from the 384-well compound library plate to each well of the assay plate.
+
+3. On Day 2, 3, and 4 (0, 24, and 48 hrs after pin transfer), add 3 uL of 100 uM EdU (diluted from 10 mM stock to growth medium) to each well.
+
+4. On Day 3, 4, and 5 (24, 48, and 72 hrs after pin transfer), perform the following to the plate to which EdU was added 24 hrs ago:
+(A) Prepare 2 fixation/permeabilization solution in PBS and pre-warm it in 37C water bath.
+(B) Add 30uL of the pre-warmed fixation/permeabilization solution to each well of cells using benchtop WellMate, so that the final concentration of formaldehyde is 3.7% and the final concentration of Triton-100 is 0.2%. Immediately centrifuge the plates at 1000rpm at room temperature for 20 minutes, in a plate centrifuge, while the cells are being fixed and permeabilized. 
+(C) Prepare an EdU reaction cocktail in H2O that has:
+100mM TBS,
+2mM CuSO4,
+2uM Alexa488-azide, and
+2mM ascorbic acid.
+(Add individual components to the cocktail in the above order.)
+(D) Add 50 uL of the above freshly prepared EdU reaction cocktail to each well.
+(E) Incubate the plate at RT for 40-50 mins.
+(F) Wash the plate three times with PBS. After washing, the residual volume in each well should be ~20uL.
+(G) Add 20uL of anti-MPM2 primary antibody (Millipore #05-368, final dilution 1:500) in blocking buffer (4% BSA and 0.2% Triton-100 in PBS) to each well. Incubate for 1hr at RT.
+(H) Wash the plate three times with PBS.
+(I) Add 20uL of Goat-anti-mouse Alexa fluor 568 (Invitrogen A11004, final dilution 1:500) in blocking buffer to each well. Incubate for 1hr at RT.
+(J) Wash the plate three times with PBS.
+(K) Add 20uL of Hoechst (final concentration 1 ug/mL) in PBS to each well. Incubate for 30min at RT.
+(L) Wash the plate. Seal with a plate seal. 
+(M) Image the plates using the ImageXpress Micro screening microscope (Molecular Devices) and the 10x objective lens. Image 4 sites/per well.
+
+Filter information:
+DAPI [Excitation 377/50; Emission 447/60]
+FITC [Excitation 482/35; Emission 536/40]
+Texas Red [Excitation 562/40; Emission 624/40]
+
+4. After image acquisition, image analysis is done using a customized Matlab program developed by Dr. Tiao Xie (Harvard Medical School). The program does segmentation on the DAPI channel to identify all nuclei, and then it identifies bright spots in the Texas Red (MPM2) channel to score for mitotic cells. In a separate step, the program measures the average FITC (EdU) intensity for all the nuclei, and scores for actively proliferating cells (cells that are incorporating EdU) by applying an EdU threshold.
+
+5. When reporting data, 5 parameters are reported for each replicate for each cell line and compound condition:
+a. Cell Count: The total number of cells (nuclei) stained with Hoechst 33342 and detected in the DAPI channel.
+b. EdU positive cells: The percentage of actively proliferating cells that have average FITC (EdU) intensity above the EdU threshold.
+c. Mitotic cells: The percentage of cells that are MPM2-positive.
+d. Non-mitotic cells that are EdU-positive: The percentage of EdU-positive cells within the non-mitotic population.
+e. Mitotic cells that are EdU-positive: The percentage of EdU-positive cells within the mitotic population. 
+
+Reference for EdU labeling:
+Salic A, Mitchison TJ. A chemical method for fast and sensitive detection of DNA synthesis in vivo. Proc Natl Acad Sci USA. 2008 Feb 19;105(7):2415-20.' 
+check_errs $? "create screen fails"
+
+./run.sh edu.harvard.med.screensaver.io.screenresults.ScreenResultImporter \
+-AE $ECOMMONS_ADMIN \
+-f $DATA_DIRECTORY/screen/tang_ProMitosis_IA-LM.xls \
+-s 10036 -i
+check_errs $? "create screen result import fails"
+
+./run.sh edu.harvard.med.screensaver.io.screens.ScreenCreator \
+-AE $ECOMMONS_ADMIN  \
+-st SMALL_MOLECULE  \
+-hf $LAB_HEAD_FIRST -hl $LAB_HEAD_LAST -he $LAB_HEAD_EMAIL -lf $LEAD_SCREENER_FIRST -ll $LEAD_SCREENER_LAST -le $LEAD_SCREENER_EMAIL \
+-t 'Tang Proliferation/Mitosis: IS-MEL1 cells.'  \
+-i 10037 \
+--summary "Tang Proliferation/Mitosis: IS-MEL1 cells. Dose response of anti-mitotic compounds in human cancer cell line IS-MEL1 at 24, 48 and 72 hours to determine effect on cell proliferation and mitosis." \
+-p '1. On Day 1, seed ~2000-3000 cells in 30 uL of growth medium into each well of a 384-well clear-bottom black assay plate (Corning 3712), using a WellMate plate filler in a cell culture hood. 
+
+2. On Day 2, pin transfer performed by an ICCB-Longwood Screening Facility staff member using an Epson robot system. The pin transfer adds 100nL of each diluted compound from the 384-well compound library plate to each well of the assay plate.
+
+3. On Day 2, 3, and 4 (0, 24, and 48 hrs after pin transfer), add 3 uL of 100 uM EdU (diluted from 10 mM stock to growth medium) to each well.
+
+4. On Day 3, 4, and 5 (24, 48, and 72 hrs after pin transfer), perform the following to the plate to which EdU was added 24 hrs ago:
+(A) Prepare 2 fixation/permeabilization solution in PBS and pre-warm it in 37C water bath.
+(B) Add 30uL of the pre-warmed fixation/permeabilization solution to each well of cells using benchtop WellMate, so that the final concentration of formaldehyde is 3.7% and the final concentration of Triton-100 is 0.2%. Immediately centrifuge the plates at 1000rpm at room temperature for 20 minutes, in a plate centrifuge, while the cells are being fixed and permeabilized. 
+(C) Prepare an EdU reaction cocktail in H2O that has:
+100mM TBS,
+2mM CuSO4,
+2uM Alexa488-azide, and
+2mM ascorbic acid.
+(Add individual components to the cocktail in the above order.)
+(D) Add 50 uL of the above freshly prepared EdU reaction cocktail to each well.
+(E) Incubate the plate at RT for 40-50 mins.
+(F) Wash the plate three times with PBS. After washing, the residual volume in each well should be ~20uL.
+(G) Add 20uL of anti-MPM2 primary antibody (Millipore #05-368, final dilution 1:500) in blocking buffer (4% BSA and 0.2% Triton-100 in PBS) to each well. Incubate for 1hr at RT.
+(H) Wash the plate three times with PBS.
+(I) Add 20uL of Goat-anti-mouse Alexa fluor 568 (Invitrogen A11004, final dilution 1:500) in blocking buffer to each well. Incubate for 1hr at RT.
+(J) Wash the plate three times with PBS.
+(K) Add 20uL of Hoechst (final concentration 1 ug/mL) in PBS to each well. Incubate for 30min at RT.
+(L) Wash the plate. Seal with a plate seal. 
+(M) Image the plates using the ImageXpress Micro screening microscope (Molecular Devices) and the 10x objective lens. Image 4 sites/per well.
+
+Filter information:
+DAPI [Excitation 377/50; Emission 447/60]
+FITC [Excitation 482/35; Emission 536/40]
+Texas Red [Excitation 562/40; Emission 624/40]
+
+4. After image acquisition, image analysis is done using a customized Matlab program developed by Dr. Tiao Xie (Harvard Medical School). The program does segmentation on the DAPI channel to identify all nuclei, and then it identifies bright spots in the Texas Red (MPM2) channel to score for mitotic cells. In a separate step, the program measures the average FITC (EdU) intensity for all the nuclei, and scores for actively proliferating cells (cells that are incorporating EdU) by applying an EdU threshold.
+
+5. When reporting data, 5 parameters are reported for each replicate for each cell line and compound condition:
+a. Cell Count: The total number of cells (nuclei) stained with Hoechst 33342 and detected in the DAPI channel.
+b. EdU positive cells: The percentage of actively proliferating cells that have average FITC (EdU) intensity above the EdU threshold.
+c. Mitotic cells: The percentage of cells that are MPM2-positive.
+d. Non-mitotic cells that are EdU-positive: The percentage of EdU-positive cells within the non-mitotic population.
+e. Mitotic cells that are EdU-positive: The percentage of EdU-positive cells within the mitotic population. 
+
+Reference for EdU labeling:
+Salic A, Mitchison TJ. A chemical method for fast and sensitive detection of DNA synthesis in vivo. Proc Natl Acad Sci USA. 2008 Feb 19;105(7):2415-20.' 
+check_errs $? "create screen fails"
+
+./run.sh edu.harvard.med.screensaver.io.screenresults.ScreenResultImporter \
+-AE $ECOMMONS_ADMIN \
+-f $DATA_DIRECTORY/screen/tang_ProMitosis_IS-MEL1.xls \
+-s 10037 -i
+check_errs $? "create screen result import fails"
+
+./run.sh edu.harvard.med.screensaver.io.screens.ScreenCreator \
+-AE $ECOMMONS_ADMIN  \
+-st SMALL_MOLECULE  \
+-hf $LAB_HEAD_FIRST -hl $LAB_HEAD_LAST -he $LAB_HEAD_EMAIL -lf $LEAD_SCREENER_FIRST -ll $LEAD_SCREENER_LAST -le $LEAD_SCREENER_EMAIL \
+-t 'Tang Proliferation/Mitosis: KATO-III cells.'  \
+-i 10038 \
+--summary "Tang Proliferation/Mitosis: KATO-III cells. Dose response of anti-mitotic compounds in human cancer cell line KATO-III at 24, 48 and 72 hours to determine effect on cell proliferation and mitosis." \
+-p '1. On Day 1, seed ~2000-3000 cells in 30 uL of growth medium into each well of a 384-well clear-bottom black assay plate (Corning 3712), using a WellMate plate filler in a cell culture hood. 
+
+2. On Day 2, pin transfer performed by an ICCB-Longwood Screening Facility staff member using an Epson robot system. The pin transfer adds 100nL of each diluted compound from the 384-well compound library plate to each well of the assay plate.
+
+3. On Day 2, 3, and 4 (0, 24, and 48 hrs after pin transfer), add 3 uL of 100 uM EdU (diluted from 10 mM stock to growth medium) to each well.
+
+4. On Day 3, 4, and 5 (24, 48, and 72 hrs after pin transfer), perform the following to the plate to which EdU was added 24 hrs ago:
+(A) Prepare 2 fixation/permeabilization solution in PBS and pre-warm it in 37C water bath.
+(B) Add 30uL of the pre-warmed fixation/permeabilization solution to each well of cells using benchtop WellMate, so that the final concentration of formaldehyde is 3.7% and the final concentration of Triton-100 is 0.2%. Immediately centrifuge the plates at 1000rpm at room temperature for 20 minutes, in a plate centrifuge, while the cells are being fixed and permeabilized. 
+(C) Prepare an EdU reaction cocktail in H2O that has:
+100mM TBS,
+2mM CuSO4,
+2uM Alexa488-azide, and
+2mM ascorbic acid.
+(Add individual components to the cocktail in the above order.)
+(D) Add 50 uL of the above freshly prepared EdU reaction cocktail to each well.
+(E) Incubate the plate at RT for 40-50 mins.
+(F) Wash the plate three times with PBS. After washing, the residual volume in each well should be ~20uL.
+(G) Add 20uL of anti-MPM2 primary antibody (Millipore #05-368, final dilution 1:500) in blocking buffer (4% BSA and 0.2% Triton-100 in PBS) to each well. Incubate for 1hr at RT.
+(H) Wash the plate three times with PBS.
+(I) Add 20uL of Goat-anti-mouse Alexa fluor 568 (Invitrogen A11004, final dilution 1:500) in blocking buffer to each well. Incubate for 1hr at RT.
+(J) Wash the plate three times with PBS.
+(K) Add 20uL of Hoechst (final concentration 1 ug/mL) in PBS to each well. Incubate for 30min at RT.
+(L) Wash the plate. Seal with a plate seal. 
+(M) Image the plates using the ImageXpress Micro screening microscope (Molecular Devices) and the 10x objective lens. Image 4 sites/per well.
+
+Filter information:
+DAPI [Excitation 377/50; Emission 447/60]
+FITC [Excitation 482/35; Emission 536/40]
+Texas Red [Excitation 562/40; Emission 624/40]
+
+4. After image acquisition, image analysis is done using a customized Matlab program developed by Dr. Tiao Xie (Harvard Medical School). The program does segmentation on the DAPI channel to identify all nuclei, and then it identifies bright spots in the Texas Red (MPM2) channel to score for mitotic cells. In a separate step, the program measures the average FITC (EdU) intensity for all the nuclei, and scores for actively proliferating cells (cells that are incorporating EdU) by applying an EdU threshold.
+
+5. When reporting data, 5 parameters are reported for each replicate for each cell line and compound condition:
+a. Cell Count: The total number of cells (nuclei) stained with Hoechst 33342 and detected in the DAPI channel.
+b. EdU positive cells: The percentage of actively proliferating cells that have average FITC (EdU) intensity above the EdU threshold.
+c. Mitotic cells: The percentage of cells that are MPM2-positive.
+d. Non-mitotic cells that are EdU-positive: The percentage of EdU-positive cells within the non-mitotic population.
+e. Mitotic cells that are EdU-positive: The percentage of EdU-positive cells within the mitotic population. 
+
+Reference for EdU labeling:
+Salic A, Mitchison TJ. A chemical method for fast and sensitive detection of DNA synthesis in vivo. Proc Natl Acad Sci USA. 2008 Feb 19;105(7):2415-20.' 
+check_errs $? "create screen fails"
+
+./run.sh edu.harvard.med.screensaver.io.screenresults.ScreenResultImporter \
+-AE $ECOMMONS_ADMIN \
+-f $DATA_DIRECTORY/screen/tang_ProMitosis_KATO-III.xls \
+-s 10038 -i
+check_errs $? "create screen result import fails"
+
+./run.sh edu.harvard.med.screensaver.io.screens.ScreenCreator \
+-AE $ECOMMONS_ADMIN  \
+-st SMALL_MOLECULE  \
+-hf $LAB_HEAD_FIRST -hl $LAB_HEAD_LAST -he $LAB_HEAD_EMAIL -lf $LEAD_SCREENER_FIRST -ll $LEAD_SCREENER_LAST -le $LEAD_SCREENER_EMAIL \
+-t 'Tang Proliferation/Mitosis: KYSE-140 cells.'  \
+-i 10039 \
+--summary "Tang Proliferation/Mitosis: KYSE-140 cells. Dose response of anti-mitotic compounds in human cancer cell line KYSE-140 at 24, 48 and 72 hours to determine effect on cell proliferation and mitosis." \
+-p '1. On Day 1, seed ~2000-3000 cells in 30 uL of growth medium into each well of a 384-well clear-bottom black assay plate (Corning 3712), using a WellMate plate filler in a cell culture hood. 
+
+2. On Day 2, pin transfer performed by an ICCB-Longwood Screening Facility staff member using an Epson robot system. The pin transfer adds 100nL of each diluted compound from the 384-well compound library plate to each well of the assay plate.
+
+3. On Day 2, 3, and 4 (0, 24, and 48 hrs after pin transfer), add 3 uL of 100 uM EdU (diluted from 10 mM stock to growth medium) to each well.
+
+4. On Day 3, 4, and 5 (24, 48, and 72 hrs after pin transfer), perform the following to the plate to which EdU was added 24 hrs ago:
+(A) Prepare 2 fixation/permeabilization solution in PBS and pre-warm it in 37C water bath.
+(B) Add 30uL of the pre-warmed fixation/permeabilization solution to each well of cells using benchtop WellMate, so that the final concentration of formaldehyde is 3.7% and the final concentration of Triton-100 is 0.2%. Immediately centrifuge the plates at 1000rpm at room temperature for 20 minutes, in a plate centrifuge, while the cells are being fixed and permeabilized. 
+(C) Prepare an EdU reaction cocktail in H2O that has:
+100mM TBS,
+2mM CuSO4,
+2uM Alexa488-azide, and
+2mM ascorbic acid.
+(Add individual components to the cocktail in the above order.)
+(D) Add 50 uL of the above freshly prepared EdU reaction cocktail to each well.
+(E) Incubate the plate at RT for 40-50 mins.
+(F) Wash the plate three times with PBS. After washing, the residual volume in each well should be ~20uL.
+(G) Add 20uL of anti-MPM2 primary antibody (Millipore #05-368, final dilution 1:500) in blocking buffer (4% BSA and 0.2% Triton-100 in PBS) to each well. Incubate for 1hr at RT.
+(H) Wash the plate three times with PBS.
+(I) Add 20uL of Goat-anti-mouse Alexa fluor 568 (Invitrogen A11004, final dilution 1:500) in blocking buffer to each well. Incubate for 1hr at RT.
+(J) Wash the plate three times with PBS.
+(K) Add 20uL of Hoechst (final concentration 1 ug/mL) in PBS to each well. Incubate for 30min at RT.
+(L) Wash the plate. Seal with a plate seal. 
+(M) Image the plates using the ImageXpress Micro screening microscope (Molecular Devices) and the 10x objective lens. Image 4 sites/per well.
+
+Filter information:
+DAPI [Excitation 377/50; Emission 447/60]
+FITC [Excitation 482/35; Emission 536/40]
+Texas Red [Excitation 562/40; Emission 624/40]
+
+4. After image acquisition, image analysis is done using a customized Matlab program developed by Dr. Tiao Xie (Harvard Medical School). The program does segmentation on the DAPI channel to identify all nuclei, and then it identifies bright spots in the Texas Red (MPM2) channel to score for mitotic cells. In a separate step, the program measures the average FITC (EdU) intensity for all the nuclei, and scores for actively proliferating cells (cells that are incorporating EdU) by applying an EdU threshold.
+
+5. When reporting data, 5 parameters are reported for each replicate for each cell line and compound condition:
+a. Cell Count: The total number of cells (nuclei) stained with Hoechst 33342 and detected in the DAPI channel.
+b. EdU positive cells: The percentage of actively proliferating cells that have average FITC (EdU) intensity above the EdU threshold.
+c. Mitotic cells: The percentage of cells that are MPM2-positive.
+d. Non-mitotic cells that are EdU-positive: The percentage of EdU-positive cells within the non-mitotic population.
+e. Mitotic cells that are EdU-positive: The percentage of EdU-positive cells within the mitotic population. 
+
+Reference for EdU labeling:
+Salic A, Mitchison TJ. A chemical method for fast and sensitive detection of DNA synthesis in vivo. Proc Natl Acad Sci USA. 2008 Feb 19;105(7):2415-20.' 
+check_errs $? "create screen fails"
+
+./run.sh edu.harvard.med.screensaver.io.screenresults.ScreenResultImporter \
+-AE $ECOMMONS_ADMIN \
+-f $DATA_DIRECTORY/screen/tang_ProMitosis_KYSE-140.xls \
+-s 10039 -i
+check_errs $? "create screen result import fails"
+
+./run.sh edu.harvard.med.screensaver.io.screens.ScreenCreator \
+-AE $ECOMMONS_ADMIN  \
+-st SMALL_MOLECULE  \
+-hf $LAB_HEAD_FIRST -hl $LAB_HEAD_LAST -he $LAB_HEAD_EMAIL -lf $LEAD_SCREENER_FIRST -ll $LEAD_SCREENER_LAST -le $LEAD_SCREENER_EMAIL \
+-t 'Tang Proliferation/Mitosis: KYSE-180 cells.'  \
+-i 10040 \
+--summary "Tang Proliferation/Mitosis: KYSE-180 cells. Dose response of anti-mitotic compounds in human cancer cell line KYSE-180 at 24, 48 and 72 hours to determine effect on cell proliferation and mitosis." \
+-p '1. On Day 1, seed ~2000-3000 cells in 30 uL of growth medium into each well of a 384-well clear-bottom black assay plate (Corning 3712), using a WellMate plate filler in a cell culture hood. 
+
+2. On Day 2, pin transfer performed by an ICCB-Longwood Screening Facility staff member using an Epson robot system. The pin transfer adds 100nL of each diluted compound from the 384-well compound library plate to each well of the assay plate.
+
+3. On Day 2, 3, and 4 (0, 24, and 48 hrs after pin transfer), add 3 uL of 100 uM EdU (diluted from 10 mM stock to growth medium) to each well.
+
+4. On Day 3, 4, and 5 (24, 48, and 72 hrs after pin transfer), perform the following to the plate to which EdU was added 24 hrs ago:
+(A) Prepare 2 fixation/permeabilization solution in PBS and pre-warm it in 37C water bath.
+(B) Add 30uL of the pre-warmed fixation/permeabilization solution to each well of cells using benchtop WellMate, so that the final concentration of formaldehyde is 3.7% and the final concentration of Triton-100 is 0.2%. Immediately centrifuge the plates at 1000rpm at room temperature for 20 minutes, in a plate centrifuge, while the cells are being fixed and permeabilized. 
+(C) Prepare an EdU reaction cocktail in H2O that has:
+100mM TBS,
+2mM CuSO4,
+2uM Alexa488-azide, and
+2mM ascorbic acid.
+(Add individual components to the cocktail in the above order.)
+(D) Add 50 uL of the above freshly prepared EdU reaction cocktail to each well.
+(E) Incubate the plate at RT for 40-50 mins.
+(F) Wash the plate three times with PBS. After washing, the residual volume in each well should be ~20uL.
+(G) Add 20uL of anti-MPM2 primary antibody (Millipore #05-368, final dilution 1:500) in blocking buffer (4% BSA and 0.2% Triton-100 in PBS) to each well. Incubate for 1hr at RT.
+(H) Wash the plate three times with PBS.
+(I) Add 20uL of Goat-anti-mouse Alexa fluor 568 (Invitrogen A11004, final dilution 1:500) in blocking buffer to each well. Incubate for 1hr at RT.
+(J) Wash the plate three times with PBS.
+(K) Add 20uL of Hoechst (final concentration 1 ug/mL) in PBS to each well. Incubate for 30min at RT.
+(L) Wash the plate. Seal with a plate seal. 
+(M) Image the plates using the ImageXpress Micro screening microscope (Molecular Devices) and the 10x objective lens. Image 4 sites/per well.
+
+Filter information:
+DAPI [Excitation 377/50; Emission 447/60]
+FITC [Excitation 482/35; Emission 536/40]
+Texas Red [Excitation 562/40; Emission 624/40]
+
+4. After image acquisition, image analysis is done using a customized Matlab program developed by Dr. Tiao Xie (Harvard Medical School). The program does segmentation on the DAPI channel to identify all nuclei, and then it identifies bright spots in the Texas Red (MPM2) channel to score for mitotic cells. In a separate step, the program measures the average FITC (EdU) intensity for all the nuclei, and scores for actively proliferating cells (cells that are incorporating EdU) by applying an EdU threshold.
+
+5. When reporting data, 5 parameters are reported for each replicate for each cell line and compound condition:
+a. Cell Count: The total number of cells (nuclei) stained with Hoechst 33342 and detected in the DAPI channel.
+b. EdU positive cells: The percentage of actively proliferating cells that have average FITC (EdU) intensity above the EdU threshold.
+c. Mitotic cells: The percentage of cells that are MPM2-positive.
+d. Non-mitotic cells that are EdU-positive: The percentage of EdU-positive cells within the non-mitotic population.
+e. Mitotic cells that are EdU-positive: The percentage of EdU-positive cells within the mitotic population. 
+
+Reference for EdU labeling:
+Salic A, Mitchison TJ. A chemical method for fast and sensitive detection of DNA synthesis in vivo. Proc Natl Acad Sci USA. 2008 Feb 19;105(7):2415-20.' 
+check_errs $? "create screen fails"
+
+./run.sh edu.harvard.med.screensaver.io.screenresults.ScreenResultImporter \
+-AE $ECOMMONS_ADMIN \
+-f $DATA_DIRECTORY/screen/tang_ProMitosis_KYSE-180.xls \
+-s 10040 -i
+check_errs $? "create screen result import fails"
+
+./run.sh edu.harvard.med.screensaver.io.screens.ScreenCreator \
+-AE $ECOMMONS_ADMIN  \
+-st SMALL_MOLECULE  \
+-hf $LAB_HEAD_FIRST -hl $LAB_HEAD_LAST -he $LAB_HEAD_EMAIL -lf $LEAD_SCREENER_FIRST -ll $LEAD_SCREENER_LAST -le $LEAD_SCREENER_EMAIL \
+-t 'Tang Proliferation/Mitosis: NCI-H1648 cells.'  \
+-i 10041 \
+--summary "Tang Proliferation/Mitosis: NCI-H1648 cells. Dose response of anti-mitotic compounds in human cancer cell line NCI-H1648 at 24, 48 and 72 hours to determine effect on cell proliferation and mitosis." \
+-p '1. On Day 1, seed ~2000-3000 cells in 30 uL of growth medium into each well of a 384-well clear-bottom black assay plate (Corning 3712), using a WellMate plate filler in a cell culture hood. 
+
+2. On Day 2, pin transfer performed by an ICCB-Longwood Screening Facility staff member using an Epson robot system. The pin transfer adds 100nL of each diluted compound from the 384-well compound library plate to each well of the assay plate.
+
+3. On Day 2, 3, and 4 (0, 24, and 48 hrs after pin transfer), add 3 uL of 100 uM EdU (diluted from 10 mM stock to growth medium) to each well.
+
+4. On Day 3, 4, and 5 (24, 48, and 72 hrs after pin transfer), perform the following to the plate to which EdU was added 24 hrs ago:
+(A) Prepare 2 fixation/permeabilization solution in PBS and pre-warm it in 37C water bath.
+(B) Add 30uL of the pre-warmed fixation/permeabilization solution to each well of cells using benchtop WellMate, so that the final concentration of formaldehyde is 3.7% and the final concentration of Triton-100 is 0.2%. Immediately centrifuge the plates at 1000rpm at room temperature for 20 minutes, in a plate centrifuge, while the cells are being fixed and permeabilized. 
+(C) Prepare an EdU reaction cocktail in H2O that has:
+100mM TBS,
+2mM CuSO4,
+2uM Alexa488-azide, and
+2mM ascorbic acid.
+(Add individual components to the cocktail in the above order.)
+(D) Add 50 uL of the above freshly prepared EdU reaction cocktail to each well.
+(E) Incubate the plate at RT for 40-50 mins.
+(F) Wash the plate three times with PBS. After washing, the residual volume in each well should be ~20uL.
+(G) Add 20uL of anti-MPM2 primary antibody (Millipore #05-368, final dilution 1:500) in blocking buffer (4% BSA and 0.2% Triton-100 in PBS) to each well. Incubate for 1hr at RT.
+(H) Wash the plate three times with PBS.
+(I) Add 20uL of Goat-anti-mouse Alexa fluor 568 (Invitrogen A11004, final dilution 1:500) in blocking buffer to each well. Incubate for 1hr at RT.
+(J) Wash the plate three times with PBS.
+(K) Add 20uL of Hoechst (final concentration 1 ug/mL) in PBS to each well. Incubate for 30min at RT.
+(L) Wash the plate. Seal with a plate seal. 
+(M) Image the plates using the ImageXpress Micro screening microscope (Molecular Devices) and the 10x objective lens. Image 4 sites/per well.
+
+Filter information:
+DAPI [Excitation 377/50; Emission 447/60]
+FITC [Excitation 482/35; Emission 536/40]
+Texas Red [Excitation 562/40; Emission 624/40]
+
+4. After image acquisition, image analysis is done using a customized Matlab program developed by Dr. Tiao Xie (Harvard Medical School). The program does segmentation on the DAPI channel to identify all nuclei, and then it identifies bright spots in the Texas Red (MPM2) channel to score for mitotic cells. In a separate step, the program measures the average FITC (EdU) intensity for all the nuclei, and scores for actively proliferating cells (cells that are incorporating EdU) by applying an EdU threshold.
+
+5. When reporting data, 5 parameters are reported for each replicate for each cell line and compound condition:
+a. Cell Count: The total number of cells (nuclei) stained with Hoechst 33342 and detected in the DAPI channel.
+b. EdU positive cells: The percentage of actively proliferating cells that have average FITC (EdU) intensity above the EdU threshold.
+c. Mitotic cells: The percentage of cells that are MPM2-positive.
+d. Non-mitotic cells that are EdU-positive: The percentage of EdU-positive cells within the non-mitotic population.
+e. Mitotic cells that are EdU-positive: The percentage of EdU-positive cells within the mitotic population. 
+
+Reference for EdU labeling:
+Salic A, Mitchison TJ. A chemical method for fast and sensitive detection of DNA synthesis in vivo. Proc Natl Acad Sci USA. 2008 Feb 19;105(7):2415-20.' 
+check_errs $? "create screen fails"
+
+./run.sh edu.harvard.med.screensaver.io.screenresults.ScreenResultImporter \
+-AE $ECOMMONS_ADMIN \
+-f $DATA_DIRECTORY/screen/tang_ProMitosis_NCI-H1648.xls \
+-s 10041 -i
+check_errs $? "create screen result import fails"
+
+./run.sh edu.harvard.med.screensaver.io.screens.ScreenCreator \
+-AE $ECOMMONS_ADMIN  \
+-st SMALL_MOLECULE  \
+-hf $LAB_HEAD_FIRST -hl $LAB_HEAD_LAST -he $LAB_HEAD_EMAIL -lf $LEAD_SCREENER_FIRST -ll $LEAD_SCREENER_LAST -le $LEAD_SCREENER_EMAIL \
+-t 'Tang Proliferation/Mitosis: NCI-H1703 cells.'  \
+-i 10042 \
+--summary "Tang Proliferation/Mitosis: NCI-H1703 cells. Dose response of anti-mitotic compounds in human cancer cell line NCI-H1703 at 24, 48 and 72 hours to determine effect on cell proliferation and mitosis." \
+-p '1. On Day 1, seed ~2000-3000 cells in 30 uL of growth medium into each well of a 384-well clear-bottom black assay plate (Corning 3712), using a WellMate plate filler in a cell culture hood. 
+
+2. On Day 2, pin transfer performed by an ICCB-Longwood Screening Facility staff member using an Epson robot system. The pin transfer adds 100nL of each diluted compound from the 384-well compound library plate to each well of the assay plate.
+
+3. On Day 2, 3, and 4 (0, 24, and 48 hrs after pin transfer), add 3 uL of 100 uM EdU (diluted from 10 mM stock to growth medium) to each well.
+
+4. On Day 3, 4, and 5 (24, 48, and 72 hrs after pin transfer), perform the following to the plate to which EdU was added 24 hrs ago:
+(A) Prepare 2 fixation/permeabilization solution in PBS and pre-warm it in 37C water bath.
+(B) Add 30uL of the pre-warmed fixation/permeabilization solution to each well of cells using benchtop WellMate, so that the final concentration of formaldehyde is 3.7% and the final concentration of Triton-100 is 0.2%. Immediately centrifuge the plates at 1000rpm at room temperature for 20 minutes, in a plate centrifuge, while the cells are being fixed and permeabilized. 
+(C) Prepare an EdU reaction cocktail in H2O that has:
+100mM TBS,
+2mM CuSO4,
+2uM Alexa488-azide, and
+2mM ascorbic acid.
+(Add individual components to the cocktail in the above order.)
+(D) Add 50 uL of the above freshly prepared EdU reaction cocktail to each well.
+(E) Incubate the plate at RT for 40-50 mins.
+(F) Wash the plate three times with PBS. After washing, the residual volume in each well should be ~20uL.
+(G) Add 20uL of anti-MPM2 primary antibody (Millipore #05-368, final dilution 1:500) in blocking buffer (4% BSA and 0.2% Triton-100 in PBS) to each well. Incubate for 1hr at RT.
+(H) Wash the plate three times with PBS.
+(I) Add 20uL of Goat-anti-mouse Alexa fluor 568 (Invitrogen A11004, final dilution 1:500) in blocking buffer to each well. Incubate for 1hr at RT.
+(J) Wash the plate three times with PBS.
+(K) Add 20uL of Hoechst (final concentration 1 ug/mL) in PBS to each well. Incubate for 30min at RT.
+(L) Wash the plate. Seal with a plate seal. 
+(M) Image the plates using the ImageXpress Micro screening microscope (Molecular Devices) and the 10x objective lens. Image 4 sites/per well.
+
+Filter information:
+DAPI [Excitation 377/50; Emission 447/60]
+FITC [Excitation 482/35; Emission 536/40]
+Texas Red [Excitation 562/40; Emission 624/40]
+
+4. After image acquisition, image analysis is done using a customized Matlab program developed by Dr. Tiao Xie (Harvard Medical School). The program does segmentation on the DAPI channel to identify all nuclei, and then it identifies bright spots in the Texas Red (MPM2) channel to score for mitotic cells. In a separate step, the program measures the average FITC (EdU) intensity for all the nuclei, and scores for actively proliferating cells (cells that are incorporating EdU) by applying an EdU threshold.
+
+5. When reporting data, 5 parameters are reported for each replicate for each cell line and compound condition:
+a. Cell Count: The total number of cells (nuclei) stained with Hoechst 33342 and detected in the DAPI channel.
+b. EdU positive cells: The percentage of actively proliferating cells that have average FITC (EdU) intensity above the EdU threshold.
+c. Mitotic cells: The percentage of cells that are MPM2-positive.
+d. Non-mitotic cells that are EdU-positive: The percentage of EdU-positive cells within the non-mitotic population.
+e. Mitotic cells that are EdU-positive: The percentage of EdU-positive cells within the mitotic population. 
+
+Reference for EdU labeling:
+Salic A, Mitchison TJ. A chemical method for fast and sensitive detection of DNA synthesis in vivo. Proc Natl Acad Sci USA. 2008 Feb 19;105(7):2415-20.' 
+check_errs $? "create screen fails"
+
+./run.sh edu.harvard.med.screensaver.io.screenresults.ScreenResultImporter \
+-AE $ECOMMONS_ADMIN \
+-f $DATA_DIRECTORY/screen/tang_ProMitosis_NCI-H1703.xls \
+-s 10042 -i
+check_errs $? "create screen result import fails"
+
+./run.sh edu.harvard.med.screensaver.io.screens.ScreenCreator \
+-AE $ECOMMONS_ADMIN  \
+-st SMALL_MOLECULE  \
+-hf $LAB_HEAD_FIRST -hl $LAB_HEAD_LAST -he $LAB_HEAD_EMAIL -lf $LEAD_SCREENER_FIRST -ll $LEAD_SCREENER_LAST -le $LEAD_SCREENER_EMAIL \
+-t 'Tang Proliferation/Mitosis: PC-9 cells.'  \
+-i 10043 \
+--summary "Tang Proliferation/Mitosis: PC-9 cells. Dose response of anti-mitotic compounds in human cancer cell line PC-9 at 24, 48 and 72 hours to determine effect on cell proliferation and mitosis." \
+-p '1. On Day 1, seed ~2000-3000 cells in 30 uL of growth medium into each well of a 384-well clear-bottom black assay plate (Corning 3712), using a WellMate plate filler in a cell culture hood. 
+
+2. On Day 2, pin transfer performed by an ICCB-Longwood Screening Facility staff member using an Epson robot system. The pin transfer adds 100nL of each diluted compound from the 384-well compound library plate to each well of the assay plate.
+
+3. On Day 2, 3, and 4 (0, 24, and 48 hrs after pin transfer), add 3 uL of 100 uM EdU (diluted from 10 mM stock to growth medium) to each well.
+
+4. On Day 3, 4, and 5 (24, 48, and 72 hrs after pin transfer), perform the following to the plate to which EdU was added 24 hrs ago:
+(A) Prepare 2 fixation/permeabilization solution in PBS and pre-warm it in 37C water bath.
+(B) Add 30uL of the pre-warmed fixation/permeabilization solution to each well of cells using benchtop WellMate, so that the final concentration of formaldehyde is 3.7% and the final concentration of Triton-100 is 0.2%. Immediately centrifuge the plates at 1000rpm at room temperature for 20 minutes, in a plate centrifuge, while the cells are being fixed and permeabilized. 
+(C) Prepare an EdU reaction cocktail in H2O that has:
+100mM TBS,
+2mM CuSO4,
+2uM Alexa488-azide, and
+2mM ascorbic acid.
+(Add individual components to the cocktail in the above order.)
+(D) Add 50 uL of the above freshly prepared EdU reaction cocktail to each well.
+(E) Incubate the plate at RT for 40-50 mins.
+(F) Wash the plate three times with PBS. After washing, the residual volume in each well should be ~20uL.
+(G) Add 20uL of anti-MPM2 primary antibody (Millipore #05-368, final dilution 1:500) in blocking buffer (4% BSA and 0.2% Triton-100 in PBS) to each well. Incubate for 1hr at RT.
+(H) Wash the plate three times with PBS.
+(I) Add 20uL of Goat-anti-mouse Alexa fluor 568 (Invitrogen A11004, final dilution 1:500) in blocking buffer to each well. Incubate for 1hr at RT.
+(J) Wash the plate three times with PBS.
+(K) Add 20uL of Hoechst (final concentration 1 ug/mL) in PBS to each well. Incubate for 30min at RT.
+(L) Wash the plate. Seal with a plate seal. 
+(M) Image the plates using the ImageXpress Micro screening microscope (Molecular Devices) and the 10x objective lens. Image 4 sites/per well.
+
+Filter information:
+DAPI [Excitation 377/50; Emission 447/60]
+FITC [Excitation 482/35; Emission 536/40]
+Texas Red [Excitation 562/40; Emission 624/40]
+
+4. After image acquisition, image analysis is done using a customized Matlab program developed by Dr. Tiao Xie (Harvard Medical School). The program does segmentation on the DAPI channel to identify all nuclei, and then it identifies bright spots in the Texas Red (MPM2) channel to score for mitotic cells. In a separate step, the program measures the average FITC (EdU) intensity for all the nuclei, and scores for actively proliferating cells (cells that are incorporating EdU) by applying an EdU threshold.
+
+5. When reporting data, 5 parameters are reported for each replicate for each cell line and compound condition:
+a. Cell Count: The total number of cells (nuclei) stained with Hoechst 33342 and detected in the DAPI channel.
+b. EdU positive cells: The percentage of actively proliferating cells that have average FITC (EdU) intensity above the EdU threshold.
+c. Mitotic cells: The percentage of cells that are MPM2-positive.
+d. Non-mitotic cells that are EdU-positive: The percentage of EdU-positive cells within the non-mitotic population.
+e. Mitotic cells that are EdU-positive: The percentage of EdU-positive cells within the mitotic population. 
+
+Reference for EdU labeling:
+Salic A, Mitchison TJ. A chemical method for fast and sensitive detection of DNA synthesis in vivo. Proc Natl Acad Sci USA. 2008 Feb 19;105(7):2415-20.' 
+check_errs $? "create screen fails"
+
+./run.sh edu.harvard.med.screensaver.io.screenresults.ScreenResultImporter \
+-AE $ECOMMONS_ADMIN \
+-f $DATA_DIRECTORY/screen/tang_ProMitosis_PC-9.xls \
+-s 10043 -i
+check_errs $? "create screen result import fails"
+
+./run.sh edu.harvard.med.screensaver.io.screens.ScreenCreator \
+-AE $ECOMMONS_ADMIN  \
+-st SMALL_MOLECULE  \
+-hf $LAB_HEAD_FIRST -hl $LAB_HEAD_LAST -he $LAB_HEAD_EMAIL -lf $LEAD_SCREENER_FIRST -ll $LEAD_SCREENER_LAST -le $LEAD_SCREENER_EMAIL \
+-t 'Tang Proliferation/Mitosis: SJCRH30 cells.'  \
+-i 10044 \
+--summary "Tang Proliferation/Mitosis: SJCRH30 cells. Dose response of anti-mitotic compounds in human cancer cell line SJCRH30 at 24, 48 and 72 hours to determine effect on cell proliferation and mitosis." \
+-p '1. On Day 1, seed ~2000-3000 cells in 30 uL of growth medium into each well of a 384-well clear-bottom black assay plate (Corning 3712), using a WellMate plate filler in a cell culture hood. 
+
+2. On Day 2, pin transfer performed by an ICCB-Longwood Screening Facility staff member using an Epson robot system. The pin transfer adds 100nL of each diluted compound from the 384-well compound library plate to each well of the assay plate.
+
+3. On Day 2, 3, and 4 (0, 24, and 48 hrs after pin transfer), add 3 uL of 100 uM EdU (diluted from 10 mM stock to growth medium) to each well.
+
+4. On Day 3, 4, and 5 (24, 48, and 72 hrs after pin transfer), perform the following to the plate to which EdU was added 24 hrs ago:
+(A) Prepare 2 fixation/permeabilization solution in PBS and pre-warm it in 37C water bath.
+(B) Add 30uL of the pre-warmed fixation/permeabilization solution to each well of cells using benchtop WellMate, so that the final concentration of formaldehyde is 3.7% and the final concentration of Triton-100 is 0.2%. Immediately centrifuge the plates at 1000rpm at room temperature for 20 minutes, in a plate centrifuge, while the cells are being fixed and permeabilized. 
+(C) Prepare an EdU reaction cocktail in H2O that has:
+100mM TBS,
+2mM CuSO4,
+2uM Alexa488-azide, and
+2mM ascorbic acid.
+(Add individual components to the cocktail in the above order.)
+(D) Add 50 uL of the above freshly prepared EdU reaction cocktail to each well.
+(E) Incubate the plate at RT for 40-50 mins.
+(F) Wash the plate three times with PBS. After washing, the residual volume in each well should be ~20uL.
+(G) Add 20uL of anti-MPM2 primary antibody (Millipore #05-368, final dilution 1:500) in blocking buffer (4% BSA and 0.2% Triton-100 in PBS) to each well. Incubate for 1hr at RT.
+(H) Wash the plate three times with PBS.
+(I) Add 20uL of Goat-anti-mouse Alexa fluor 568 (Invitrogen A11004, final dilution 1:500) in blocking buffer to each well. Incubate for 1hr at RT.
+(J) Wash the plate three times with PBS.
+(K) Add 20uL of Hoechst (final concentration 1 ug/mL) in PBS to each well. Incubate for 30min at RT.
+(L) Wash the plate. Seal with a plate seal. 
+(M) Image the plates using the ImageXpress Micro screening microscope (Molecular Devices) and the 10x objective lens. Image 4 sites/per well.
+
+Filter information:
+DAPI [Excitation 377/50; Emission 447/60]
+FITC [Excitation 482/35; Emission 536/40]
+Texas Red [Excitation 562/40; Emission 624/40]
+
+4. After image acquisition, image analysis is done using a customized Matlab program developed by Dr. Tiao Xie (Harvard Medical School). The program does segmentation on the DAPI channel to identify all nuclei, and then it identifies bright spots in the Texas Red (MPM2) channel to score for mitotic cells. In a separate step, the program measures the average FITC (EdU) intensity for all the nuclei, and scores for actively proliferating cells (cells that are incorporating EdU) by applying an EdU threshold.
+
+5. When reporting data, 5 parameters are reported for each replicate for each cell line and compound condition:
+a. Cell Count: The total number of cells (nuclei) stained with Hoechst 33342 and detected in the DAPI channel.
+b. EdU positive cells: The percentage of actively proliferating cells that have average FITC (EdU) intensity above the EdU threshold.
+c. Mitotic cells: The percentage of cells that are MPM2-positive.
+d. Non-mitotic cells that are EdU-positive: The percentage of EdU-positive cells within the non-mitotic population.
+e. Mitotic cells that are EdU-positive: The percentage of EdU-positive cells within the mitotic population. 
+
+Reference for EdU labeling:
+Salic A, Mitchison TJ. A chemical method for fast and sensitive detection of DNA synthesis in vivo. Proc Natl Acad Sci USA. 2008 Feb 19;105(7):2415-20.' 
+check_errs $? "create screen fails"
+
+./run.sh edu.harvard.med.screensaver.io.screenresults.ScreenResultImporter \
+-AE $ECOMMONS_ADMIN \
+-f $DATA_DIRECTORY/screen/tang_ProMitosis_SJCRH30.xls \
+-s 10044 -i
+check_errs $? "create screen result import fails"
+
+./run.sh edu.harvard.med.screensaver.io.screens.ScreenCreator \
+-AE $ECOMMONS_ADMIN  \
+-st SMALL_MOLECULE  \
+-hf $LAB_HEAD_FIRST -hl $LAB_HEAD_LAST -he $LAB_HEAD_EMAIL -lf $LEAD_SCREENER_FIRST -ll $LEAD_SCREENER_LAST -le $LEAD_SCREENER_EMAIL \
+-t 'Tang Proliferation/Mitosis: SK-LMS1 cells.'  \
+-i 10045 \
+--summary "Tang Proliferation/Mitosis: SK-LMS1 cells. Dose response of anti-mitotic compounds in human cancer cell line SK-LMS1 at 24, 48 and 72 hours to determine effect on cell proliferation and mitosis." \
+-p '1. On Day 1, seed ~2000-3000 cells in 30 uL of growth medium into each well of a 384-well clear-bottom black assay plate (Corning 3712), using a WellMate plate filler in a cell culture hood. 
+
+2. On Day 2, pin transfer performed by an ICCB-Longwood Screening Facility staff member using an Epson robot system. The pin transfer adds 100nL of each diluted compound from the 384-well compound library plate to each well of the assay plate.
+
+3. On Day 2, 3, and 4 (0, 24, and 48 hrs after pin transfer), add 3 uL of 100 uM EdU (diluted from 10 mM stock to growth medium) to each well.
+
+4. On Day 3, 4, and 5 (24, 48, and 72 hrs after pin transfer), perform the following to the plate to which EdU was added 24 hrs ago:
+(A) Prepare 2 fixation/permeabilization solution in PBS and pre-warm it in 37C water bath.
+(B) Add 30uL of the pre-warmed fixation/permeabilization solution to each well of cells using benchtop WellMate, so that the final concentration of formaldehyde is 3.7% and the final concentration of Triton-100 is 0.2%. Immediately centrifuge the plates at 1000rpm at room temperature for 20 minutes, in a plate centrifuge, while the cells are being fixed and permeabilized. 
+(C) Prepare an EdU reaction cocktail in H2O that has:
+100mM TBS,
+2mM CuSO4,
+2uM Alexa488-azide, and
+2mM ascorbic acid.
+(Add individual components to the cocktail in the above order.)
+(D) Add 50 uL of the above freshly prepared EdU reaction cocktail to each well.
+(E) Incubate the plate at RT for 40-50 mins.
+(F) Wash the plate three times with PBS. After washing, the residual volume in each well should be ~20uL.
+(G) Add 20uL of anti-MPM2 primary antibody (Millipore #05-368, final dilution 1:500) in blocking buffer (4% BSA and 0.2% Triton-100 in PBS) to each well. Incubate for 1hr at RT.
+(H) Wash the plate three times with PBS.
+(I) Add 20uL of Goat-anti-mouse Alexa fluor 568 (Invitrogen A11004, final dilution 1:500) in blocking buffer to each well. Incubate for 1hr at RT.
+(J) Wash the plate three times with PBS.
+(K) Add 20uL of Hoechst (final concentration 1 ug/mL) in PBS to each well. Incubate for 30min at RT.
+(L) Wash the plate. Seal with a plate seal. 
+(M) Image the plates using the ImageXpress Micro screening microscope (Molecular Devices) and the 10x objective lens. Image 4 sites/per well.
+
+Filter information:
+DAPI [Excitation 377/50; Emission 447/60]
+FITC [Excitation 482/35; Emission 536/40]
+Texas Red [Excitation 562/40; Emission 624/40]
+
+4. After image acquisition, image analysis is done using a customized Matlab program developed by Dr. Tiao Xie (Harvard Medical School). The program does segmentation on the DAPI channel to identify all nuclei, and then it identifies bright spots in the Texas Red (MPM2) channel to score for mitotic cells. In a separate step, the program measures the average FITC (EdU) intensity for all the nuclei, and scores for actively proliferating cells (cells that are incorporating EdU) by applying an EdU threshold.
+
+5. When reporting data, 5 parameters are reported for each replicate for each cell line and compound condition:
+a. Cell Count: The total number of cells (nuclei) stained with Hoechst 33342 and detected in the DAPI channel.
+b. EdU positive cells: The percentage of actively proliferating cells that have average FITC (EdU) intensity above the EdU threshold.
+c. Mitotic cells: The percentage of cells that are MPM2-positive.
+d. Non-mitotic cells that are EdU-positive: The percentage of EdU-positive cells within the non-mitotic population.
+e. Mitotic cells that are EdU-positive: The percentage of EdU-positive cells within the mitotic population. 
+
+Reference for EdU labeling:
+Salic A, Mitchison TJ. A chemical method for fast and sensitive detection of DNA synthesis in vivo. Proc Natl Acad Sci USA. 2008 Feb 19;105(7):2415-20.' 
+check_errs $? "create screen fails"
+
+./run.sh edu.harvard.med.screensaver.io.screenresults.ScreenResultImporter \
+-AE $ECOMMONS_ADMIN \
+-f $DATA_DIRECTORY/screen/tang_ProMitosis_SK-LMS1.xls \
+-s 10045 -i
+check_errs $? "create screen result import fails"
+
+./run.sh edu.harvard.med.screensaver.io.screens.ScreenCreator \
+-AE $ECOMMONS_ADMIN  \
+-st SMALL_MOLECULE  \
+-hf $LAB_HEAD_FIRST -hl $LAB_HEAD_LAST -he $LAB_HEAD_EMAIL -lf $LEAD_SCREENER_FIRST -ll $LEAD_SCREENER_LAST -le $LEAD_SCREENER_EMAIL \
+-t 'Tang Proliferation/Mitosis: SK-MES cells.'  \
+-i 10046 \
+--summary "Tang Proliferation/Mitosis: SK-MES cells. Dose response of anti-mitotic compounds in human cancer cell line SK-MES at 24, 48 and 72 hours to determine effect on cell proliferation and mitosis." \
+-p '1. On Day 1, seed ~2000-3000 cells in 30 uL of growth medium into each well of a 384-well clear-bottom black assay plate (Corning 3712), using a WellMate plate filler in a cell culture hood. 
+
+2. On Day 2, pin transfer performed by an ICCB-Longwood Screening Facility staff member using an Epson robot system. The pin transfer adds 100nL of each diluted compound from the 384-well compound library plate to each well of the assay plate.
+
+3. On Day 2, 3, and 4 (0, 24, and 48 hrs after pin transfer), add 3 uL of 100 uM EdU (diluted from 10 mM stock to growth medium) to each well.
+
+4. On Day 3, 4, and 5 (24, 48, and 72 hrs after pin transfer), perform the following to the plate to which EdU was added 24 hrs ago:
+(A) Prepare 2 fixation/permeabilization solution in PBS and pre-warm it in 37C water bath.
+(B) Add 30uL of the pre-warmed fixation/permeabilization solution to each well of cells using benchtop WellMate, so that the final concentration of formaldehyde is 3.7% and the final concentration of Triton-100 is 0.2%. Immediately centrifuge the plates at 1000rpm at room temperature for 20 minutes, in a plate centrifuge, while the cells are being fixed and permeabilized. 
+(C) Prepare an EdU reaction cocktail in H2O that has:
+100mM TBS,
+2mM CuSO4,
+2uM Alexa488-azide, and
+2mM ascorbic acid.
+(Add individual components to the cocktail in the above order.)
+(D) Add 50 uL of the above freshly prepared EdU reaction cocktail to each well.
+(E) Incubate the plate at RT for 40-50 mins.
+(F) Wash the plate three times with PBS. After washing, the residual volume in each well should be ~20uL.
+(G) Add 20uL of anti-MPM2 primary antibody (Millipore #05-368, final dilution 1:500) in blocking buffer (4% BSA and 0.2% Triton-100 in PBS) to each well. Incubate for 1hr at RT.
+(H) Wash the plate three times with PBS.
+(I) Add 20uL of Goat-anti-mouse Alexa fluor 568 (Invitrogen A11004, final dilution 1:500) in blocking buffer to each well. Incubate for 1hr at RT.
+(J) Wash the plate three times with PBS.
+(K) Add 20uL of Hoechst (final concentration 1 ug/mL) in PBS to each well. Incubate for 30min at RT.
+(L) Wash the plate. Seal with a plate seal. 
+(M) Image the plates using the ImageXpress Micro screening microscope (Molecular Devices) and the 10x objective lens. Image 4 sites/per well.
+
+Filter information:
+DAPI [Excitation 377/50; Emission 447/60]
+FITC [Excitation 482/35; Emission 536/40]
+Texas Red [Excitation 562/40; Emission 624/40]
+
+4. After image acquisition, image analysis is done using a customized Matlab program developed by Dr. Tiao Xie (Harvard Medical School). The program does segmentation on the DAPI channel to identify all nuclei, and then it identifies bright spots in the Texas Red (MPM2) channel to score for mitotic cells. In a separate step, the program measures the average FITC (EdU) intensity for all the nuclei, and scores for actively proliferating cells (cells that are incorporating EdU) by applying an EdU threshold.
+
+5. When reporting data, 5 parameters are reported for each replicate for each cell line and compound condition:
+a. Cell Count: The total number of cells (nuclei) stained with Hoechst 33342 and detected in the DAPI channel.
+b. EdU positive cells: The percentage of actively proliferating cells that have average FITC (EdU) intensity above the EdU threshold.
+c. Mitotic cells: The percentage of cells that are MPM2-positive.
+d. Non-mitotic cells that are EdU-positive: The percentage of EdU-positive cells within the non-mitotic population.
+e. Mitotic cells that are EdU-positive: The percentage of EdU-positive cells within the mitotic population. 
+
+Reference for EdU labeling:
+Salic A, Mitchison TJ. A chemical method for fast and sensitive detection of DNA synthesis in vivo. Proc Natl Acad Sci USA. 2008 Feb 19;105(7):2415-20.' 
+check_errs $? "create screen fails"
+
+./run.sh edu.harvard.med.screensaver.io.screenresults.ScreenResultImporter \
+-AE $ECOMMONS_ADMIN \
+-f $DATA_DIRECTORY/screen/tang_ProMitosis_SK-MES.xls \
+-s 10046 -i
+check_errs $? "create screen result import fails"
+
+./run.sh edu.harvard.med.screensaver.io.screens.ScreenCreator \
+-AE $ECOMMONS_ADMIN  \
+-st SMALL_MOLECULE  \
+-hf $LAB_HEAD_FIRST -hl $LAB_HEAD_LAST -he $LAB_HEAD_EMAIL -lf $LEAD_SCREENER_FIRST -ll $LEAD_SCREENER_LAST -le $LEAD_SCREENER_EMAIL \
+-t 'Tang Proliferation/Mitosis: SNB75 cells.'  \
+-i 10047 \
+--summary "Tang Proliferation/Mitosis: SNB75 cells. Dose response of anti-mitotic compounds in human cancer cell line SNB75 at 24, 48 and 72 hours to determine effect on cell proliferation and mitosis." \
+-p '1. On Day 1, seed ~2000-3000 cells in 30 uL of growth medium into each well of a 384-well clear-bottom black assay plate (Corning 3712), using a WellMate plate filler in a cell culture hood. 
+
+2. On Day 2, pin transfer performed by an ICCB-Longwood Screening Facility staff member using an Epson robot system. The pin transfer adds 100nL of each diluted compound from the 384-well compound library plate to each well of the assay plate.
+
+3. On Day 2, 3, and 4 (0, 24, and 48 hrs after pin transfer), add 3 uL of 100 uM EdU (diluted from 10 mM stock to growth medium) to each well.
+
+4. On Day 3, 4, and 5 (24, 48, and 72 hrs after pin transfer), perform the following to the plate to which EdU was added 24 hrs ago:
+(A) Prepare 2 fixation/permeabilization solution in PBS and pre-warm it in 37C water bath.
+(B) Add 30uL of the pre-warmed fixation/permeabilization solution to each well of cells using benchtop WellMate, so that the final concentration of formaldehyde is 3.7% and the final concentration of Triton-100 is 0.2%. Immediately centrifuge the plates at 1000rpm at room temperature for 20 minutes, in a plate centrifuge, while the cells are being fixed and permeabilized. 
+(C) Prepare an EdU reaction cocktail in H2O that has:
+100mM TBS,
+2mM CuSO4,
+2uM Alexa488-azide, and
+2mM ascorbic acid.
+(Add individual components to the cocktail in the above order.)
+(D) Add 50 uL of the above freshly prepared EdU reaction cocktail to each well.
+(E) Incubate the plate at RT for 40-50 mins.
+(F) Wash the plate three times with PBS. After washing, the residual volume in each well should be ~20uL.
+(G) Add 20uL of anti-MPM2 primary antibody (Millipore #05-368, final dilution 1:500) in blocking buffer (4% BSA and 0.2% Triton-100 in PBS) to each well. Incubate for 1hr at RT.
+(H) Wash the plate three times with PBS.
+(I) Add 20uL of Goat-anti-mouse Alexa fluor 568 (Invitrogen A11004, final dilution 1:500) in blocking buffer to each well. Incubate for 1hr at RT.
+(J) Wash the plate three times with PBS.
+(K) Add 20uL of Hoechst (final concentration 1 ug/mL) in PBS to each well. Incubate for 30min at RT.
+(L) Wash the plate. Seal with a plate seal. 
+(M) Image the plates using the ImageXpress Micro screening microscope (Molecular Devices) and the 10x objective lens. Image 4 sites/per well.
+
+Filter information:
+DAPI [Excitation 377/50; Emission 447/60]
+FITC [Excitation 482/35; Emission 536/40]
+Texas Red [Excitation 562/40; Emission 624/40]
+
+4. After image acquisition, image analysis is done using a customized Matlab program developed by Dr. Tiao Xie (Harvard Medical School). The program does segmentation on the DAPI channel to identify all nuclei, and then it identifies bright spots in the Texas Red (MPM2) channel to score for mitotic cells. In a separate step, the program measures the average FITC (EdU) intensity for all the nuclei, and scores for actively proliferating cells (cells that are incorporating EdU) by applying an EdU threshold.
+
+5. When reporting data, 5 parameters are reported for each replicate for each cell line and compound condition:
+a. Cell Count: The total number of cells (nuclei) stained with Hoechst 33342 and detected in the DAPI channel.
+b. EdU positive cells: The percentage of actively proliferating cells that have average FITC (EdU) intensity above the EdU threshold.
+c. Mitotic cells: The percentage of cells that are MPM2-positive.
+d. Non-mitotic cells that are EdU-positive: The percentage of EdU-positive cells within the non-mitotic population.
+e. Mitotic cells that are EdU-positive: The percentage of EdU-positive cells within the mitotic population. 
+
+Reference for EdU labeling:
+Salic A, Mitchison TJ. A chemical method for fast and sensitive detection of DNA synthesis in vivo. Proc Natl Acad Sci USA. 2008 Feb 19;105(7):2415-20.' 
+check_errs $? "create screen fails"
+
+./run.sh edu.harvard.med.screensaver.io.screenresults.ScreenResultImporter \
+-AE $ECOMMONS_ADMIN \
+-f $DATA_DIRECTORY/screen/tang_ProMitosis_SNB75.xls \
+-s 10047 -i
+check_errs $? "create screen result import fails"
 
 ## Create the studies
 
