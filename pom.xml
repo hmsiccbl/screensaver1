@@ -10,7 +10,7 @@
 
   <description>
     usage:
-    $ mvn -Dbuild.number=`svnversion -n` [-Dfacility={generic,iccbl}] [-Denv={dev,prod}] clean package
+    $ mvn -Dbuild.number=`svnversion -n` [-Dfacility={generic,iccbl,lincs,}] [-Denv={dev,prod}] clean package
   </description>
   <scm>
     <url>https://forge.abcd.harvard.edu/svn/screensaver</url>

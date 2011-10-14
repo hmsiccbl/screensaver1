@@ -233,6 +233,11 @@ public class ScreensaverProperties implements ScreensaverConstants
     return getProperty(FACILITY_NAME);
   }
 
+  public String getProfile()
+  {
+	return _versionProperties.getProperty(FACILITY_PROPERTY);
+  }
+  
   /**
    * @deprecated use {@link #getFacility()}
    */
