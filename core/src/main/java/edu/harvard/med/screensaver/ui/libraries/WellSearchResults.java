@@ -19,14 +19,14 @@ import java.util.Map;
 import java.util.Set;
 import java.util.SortedSet;
 
-import org.apache.log4j.Logger;
-import org.hibernate.Session;
 import com.google.common.base.Function;
 import com.google.common.base.Joiner;
 import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.Iterables;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Sets;
+import org.apache.log4j.Logger;
+import org.hibernate.Session;
 
 import edu.harvard.med.lincs.screensaver.LincsScreensaverConstants;
 import edu.harvard.med.screensaver.db.GenericEntityDAO;
@@ -79,7 +79,6 @@ import edu.harvard.med.screensaver.ui.arch.datatable.column.TableColumn;
 import edu.harvard.med.screensaver.ui.arch.datatable.column.TableColumnManager;
 import edu.harvard.med.screensaver.ui.arch.datatable.column.entity.BooleanTupleColumn;
 import edu.harvard.med.screensaver.ui.arch.datatable.column.entity.EnumTupleColumn;
-import edu.harvard.med.screensaver.ui.arch.datatable.column.entity.FixedDecimalTupleColumn;
 import edu.harvard.med.screensaver.ui.arch.datatable.column.entity.HasFetchPaths;
 import edu.harvard.med.screensaver.ui.arch.datatable.column.entity.ImageTupleColumn;
 import edu.harvard.med.screensaver.ui.arch.datatable.column.entity.IntegerSetTupleColumn;
@@ -892,19 +891,6 @@ public abstract class WellSearchResults extends TupleBasedEntitySearchResults<We
                                                  "Why the well has been deprecated",
                                                  WELL_COLUMNS_GROUP));
     columns.get(columns.size() - 1).setVisible(false);
-
-    
-    columns.add(new MolarConcentrationTupleColumn<Well,String>(RelationshipPath.from(Well.class).toProperty("molarConcentration"),
-                                               "Molar Concentration",
-                                               "The molar concentration",
-                                               WELL_COLUMNS_GROUP));
-    Iterables.getLast(columns).setVisible(true);
-
-    columns.add(new FixedDecimalTupleColumn<Well,String>(RelationshipPath.from(Well.class).toProperty("mgMlConcentration"),
-                                              "mg/mL Concentration",
-                                              "mg/mL Concentration",
-                                              WELL_COLUMNS_GROUP));   
-    Iterables.getLast(columns).setVisible(true);
   }
 
   private void buildDataColumns(List<TableColumn<Tuple<String>,?>> columns, List<DataColumn> dataColumns)
