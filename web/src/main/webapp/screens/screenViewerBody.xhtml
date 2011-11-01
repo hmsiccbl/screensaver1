@@ -48,8 +48,13 @@
                 rendered="#{screenDetailViewer.editable}"
                 styleClass="command" />
               <t:commandButton
+                action="#{plateReaderRawDataTransformer.view}"
+                value="Transform Raw Data" styleClass="command"
+                rendered="#{screenViewer.screensaverUser.isUserInRoleOfNameMap['screenResultsAdmin']}"
+                title="Trasnform plate reader raw data into intermediate screen result format" />
+              <t:commandButton
                 action="#{screenResultImporter.importScreenResultData}"
-                value="Load data" styleClass="command"
+                value="Load Data" styleClass="command"
                 rendered="#{screenViewer.screensaverUser.isUserInRoleOfNameMap['screenResultsAdmin']}"
                 title="Load screen result data for this screen" />
               <t:commandButton action="#{screenResultViewer.delete}"

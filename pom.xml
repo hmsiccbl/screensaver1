@@ -234,6 +234,7 @@
     <module>test</module>
     <module>web</module>
     <module>batch</module>
+    <module>plate-reader-data-parser</module>
 <!--    <module>screensaver-cellhts</module>-->
   </modules>
 </project>

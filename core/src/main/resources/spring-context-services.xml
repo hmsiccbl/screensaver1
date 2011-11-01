@@ -26,7 +26,7 @@
   class="edu.harvard.med.screensaver.service.libraries.LibraryScreeningDerivedPropertiesUpdater"
   autowire="constructor">
   </bean>
-
+  
   <bean
     id="screenResultParser"
     class="edu.harvard.med.screensaver.io.screenresults.ScreenResultParser"

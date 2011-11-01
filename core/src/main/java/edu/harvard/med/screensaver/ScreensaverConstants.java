@@ -78,6 +78,7 @@ public interface ScreensaverConstants
   public static final String BROWSE_CHERRY_PICK_REQUESTS = "browseCherryPickRequests";
   public static final String VIEW_CHERRY_PICK_REQUEST = "viewCherryPickRequest";
   public static final String EDIT_CHERRY_PICK_REQUEST = "editCherryPickRequest";
+  public static final String TRANSFORM_PLATE_READER_RAW_DATA = "transformPlateReaderRawData";
   public static final String IMPORT_SCREEN_RESULT_DATA = "importScreenResultData";
   public static final String BROWSE_ACTIVITIES = "browseActivities";
   public static final String VIEW_ACTIVITY = "viewActivity";

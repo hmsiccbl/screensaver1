@@ -169,6 +169,12 @@
   	</dependency>
 
     <dependency>
+      <groupId>edu.harvard.med.iccbl</groupId>
+      <artifactId>plate-reader-data-parser</artifactId>
+      <version>1</version>
+    </dependency>
+
+    <dependency>
       <groupId>edu.harvard.med</groupId>
       <artifactId>screensaver-test</artifactId>
       <version>2011-09-30</version>

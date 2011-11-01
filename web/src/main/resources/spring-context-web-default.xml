@@ -92,6 +92,15 @@
     class="edu.harvard.med.screensaver.service.libraries.DefaultPlateFacilityIdInitializer">
   </bean>
 
+  
+  <!--  TODO: this needs to be moved back to spring-context-services.xml, once we have dependency issues worked out plate-reader-data-parser and core -->  
+  <bean
+    id="plateReaderRawDataTransformerService"
+    class="edu.harvard.med.screensaver.service.screenresult.PlateReaderRawDataTransformer"
+    scope="prototype">
+    <constructor-arg ref="librariesDao"/>
+  </bean>
+
   <!--  Top-level web application construction -->
   
   <import resource="classpath:spring-context-persistence.xml"/>

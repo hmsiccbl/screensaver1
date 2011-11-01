@@ -707,6 +707,17 @@
   </bean>
 
   <bean
+    id="plateReaderRawDataTransformer"
+    parent="uiBean"
+    class="edu.harvard.med.screensaver.ui.screenresults.PlateReaderRawDataTransformer"
+    scope="session">
+    <constructor-arg ref="plateReaderRawDataTransformerService"/>
+    <constructor-arg ref="screenViewer"/>
+    <aop:scoped-proxy />
+  </bean>
+  
+
+  <bean
     id="screenResultImporter"
     parent="uiBean"
     scope="session"

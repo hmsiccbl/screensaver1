@@ -212,6 +212,12 @@ Config 1.1//EN" "http://java.sun.com/dtd/web-facesconfig_1_1.dtd">
     <!-- === screenresults navigation rules === -->
 
     <navigation-case>
+      <from-outcome>transformPlateReaderRawData</from-outcome>
+      <to-view-id>/screens/screenresults/admin/plateReaderRawDataTransformer</to-view-id>
+      <redirect/>
+    </navigation-case>
+    
+    <navigation-case>
       <from-outcome>importScreenResultData</from-outcome>
       <to-view-id>/screens/screenresults/admin/screenResultImporter</to-view-id>
       <redirect/>

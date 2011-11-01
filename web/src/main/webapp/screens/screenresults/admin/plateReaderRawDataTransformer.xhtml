@@ -1,0 +1,63 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+<html xmlns="http://www.w3.org/1999/xhtml"
+  xmlns:ui="http://java.sun.com/jsf/facelets"
+  xmlns:h="http://java.sun.com/jsf/html"
+  xmlns:f="http://java.sun.com/jsf/core"
+  xmlns:t="http://myfaces.apache.org/tomahawk"
+  xmlns:s="http://myfaces.apache.org/sandbox"
+  xmlns:ss="http://screensaver.med.harvard.edu/ui">
+
+<ui:composition template="/main/template.xhtml">
+
+  <ui:param name="pageTitle" value="Plate Reader Raw Data Transformer" />
+
+  <ui:define name="body">
+
+    <h:form id="uploadRawDataFileForm" enctype="multipart/form-data"
+      rendered="#{plateReaderRawDataTransformer.screensaverUser.isUserInRoleOfNameMap['screenResultsAdmin']}">
+      <h:panelGrid columns="1">
+        <t:panelGrid id="screeningSummaryPropertiesPanel" columns="2"
+          columnClasses="propertyLabelColumn,column"
+          styleClass="layoutPanel">
+          <t:outputLabel for="uploadPlateReaderRawDataFile"
+            value="Upload plate reader raw data file:"
+            styleClass="label" />
+          <t:inputFileUpload id="uploadPlateReaderRawDataFile"
+            value="#{plateReaderRawDataTransformer.uploadedFile}"
+            storage="file" accept="application/vnd.ms-excel"
+            required="true" styleClass="inputText" />
+          <ss:property id="plates" label="Plates" editable="true"
+            value="#{plateReaderRawDataTransformer.plates}"
+            type="Textarea" editWidth="20" edithHeight="10" />
+          <ss:property id="readoutTypes" label="Readout Types"
+            editable="true"
+            value="#{plateReaderRawDataTransformer.readoutTypes.value}"
+            type="Vocabulary"
+            selectItems="#{plateReaderRawDataTransformer.readoutTypes.selectItems}" />
+          <ss:property id="conditions" label="Conditions" editable="true"
+            value="#{plateReaderRawDataTransformer.conditions}"
+            type="Textarea" editWidth="80" edithHeight="3" />
+          <ss:property id="replicates" label="Replicates"
+            editable="true"
+            value="#{plateReaderRawDataTransformer.replicates}"
+            type="Integer"/>
+          <ss:property id="comments" label="Comments" editable="true"
+            value="#{plateReaderRawDataTransformer.comments}"
+            type="Textarea" editWidth="80" editHeight="5"
+            description="Comments to be recorded for this activity" />
+        </t:panelGrid>
+        <t:commandButton value="Transform Raw Data"
+          action="#{plateReaderRawDataTransformer.transform}"
+          styleClass="command" />
+        <t:commandButton id="done"
+          action="#{plateReaderRawDataTransformer.cancel}"
+          immediate="true" value="Done" styleClass="command" />
+      </h:panelGrid>
+    </h:form>
+  </ui:define>
+
+</ui:composition>
+
+</html>
+
