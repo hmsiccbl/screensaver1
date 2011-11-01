@@ -1,21 +1,17 @@
 <!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
-
 <html xmlns="http://www.w3.org/1999/xhtml"
   xmlns:ui="http://java.sun.com/jsf/facelets"
   xmlns:h="http://java.sun.com/jsf/html"
   xmlns:f="http://java.sun.com/jsf/core"
   xmlns:t="http://myfaces.apache.org/tomahawk"
-  xmlns:s="http://myfaces.apache.org/sandbox">
+  xmlns:s="http://myfaces.apache.org/sandbox"
+  xmlns:ss="http://screensaver.med.harvard.edu/ui">
 
 <ui:composition template="/main/template.xhtml">
 
-  <ui:param name="pageTitle" value="Study Viewer" />
-  <ui:param name="pageHelpURL" value="screens/studyViewerHelp.jsf" />
-
   <ui:define name="body">
-    <ui:include src="studyViewerBody.xhtml" />
+    <t:outputText value="It works. Take a REST!" />
   </ui:define>
-
 </ui:composition>
 
 </html>

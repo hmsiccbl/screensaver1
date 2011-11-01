@@ -19,14 +19,21 @@ import edu.harvard.med.screensaver.model.users.ScreensaverUser;
 public interface ScreenDAO
 {
   void deleteStudy(Screen study);
+  
   int countScreenedExperimentalWells(Screen screen, boolean distinct);
+  
   int countTotalPlatedLabCherryPicks(Screen screen);
 
   List<Screen> findRelatedScreens(Screen screen);
+  
+  List<Screen> findAllScreens();
+
+  List<Screen>  findAllStudies();
 
   boolean isScreenFacilityIdUnique(Screen screen);
 
   Set<ScreensaverUser> findLabActivityPerformedByCandidates(LabActivity a);
 
   int countLoadedExperimentalWells(Screen screen);
+
 }

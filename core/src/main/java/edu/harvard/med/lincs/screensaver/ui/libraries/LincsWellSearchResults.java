@@ -1,13 +1,15 @@
 
 package edu.harvard.med.lincs.screensaver.ui.libraries;
 
+import java.util.Collection;
+import java.util.Collections;
 import java.util.List;
 import java.util.Set;
 
+import org.apache.log4j.Logger;
 import com.google.common.collect.Iterables;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Sets;
-import org.apache.log4j.Logger;
 
 import edu.harvard.med.screensaver.db.DAOTransaction;
 import edu.harvard.med.screensaver.db.GenericEntityDAO;
@@ -23,6 +25,8 @@ import edu.harvard.med.screensaver.io.libraries.smallmolecule.StructureImageProv
 import edu.harvard.med.screensaver.model.libraries.Well;
 import edu.harvard.med.screensaver.model.meta.PropertyPath;
 import edu.harvard.med.screensaver.policy.EntityViewPolicy;
+import edu.harvard.med.screensaver.ui.arch.datatable.Criterion;
+import edu.harvard.med.screensaver.ui.arch.datatable.Criterion.Operator;
 import edu.harvard.med.screensaver.ui.arch.datatable.column.TableColumn;
 import edu.harvard.med.screensaver.ui.arch.datatable.model.InMemoryEntityDataModel;
 import edu.harvard.med.screensaver.ui.libraries.LibraryViewer;
@@ -76,12 +80,73 @@ public class LincsWellSearchResults extends WellSearchResults
   @Override
   protected void initialize(DataFetcher<Tuple<String>,String,PropertyPath<Well>> dataFetcher)
   {
-    InMemoryEntityDataModel<Well,String,Tuple<String>> dataModel = new InMemoryEntityDataModel<Well,String,Tuple<String>>(dataFetcher);
+    InMemoryEntityDataModel<Well,String,Tuple<String>> dataModel = new InMemoryEntityDataModel<Well,String,Tuple<String>>(dataFetcher)
+    {
+      @Override
+      public void filter(List<? extends TableColumn<Tuple<String>,?>> columns)
+      {
+        if(((Collection)getWrappedData()).isEmpty())
+        {
+          refetch();
+        }
+        super.filter(columns);
+      }
+    };
+    
     initialize(dataModel);
-    if (!!!isNested() && _reagentsBrowser != null) {
+    if (!!!isNested() && _reagentsBrowser != null ) {
       assert _reagentsBrowser.getReagentsBrowser() == null : "infinite recursion error in reagents browser";
       _reagentsBrowser.searchCanonicalReagentsOfWellsBrowser(this, getTitle().replaceFirst("(Reagent )?Wells", "Unique Reagents"));
     }
+  }
+  
+    @Override
+  public void searchAll()
+  {
+    setTitle("Wells Search Result");
+    setMode(WellSearchResultMode.SET_OF_CANONICAL_REAGENT_WELLS);
+    // initially, show an empty search result, but with all columns available
+    TupleDataFetcher<Well,String> dataFetcher = new TupleDataFetcher<Well,String>(Well.class, _dao)
+    {
+      @Override
+      public List<Tuple<String>> fetchAllData()
+      {
+        //log.info("fetchAllData: " + hasCriteriaDefined(getCriterion(getColumnManager().getAllColumns())) );
+        if (!hasCriteriaDefined(getCriterion(getColumnManager().getAllColumns()))) { 
+          return Collections.emptyList();
+        }
+        return super.fetchAllData();
+      }
+      
+      private List<? extends Criterion<?>> getCriterion(List<TableColumn<Tuple<String>,?>> columns)
+      {
+        List<Criterion<?>> criterion = Lists.newArrayList();
+        for(TableColumn<Tuple<String>,?> column:columns) {
+          criterion.add(column.getCriterion());
+        }
+        return criterion;
+      }
+      private boolean hasCriteriaDefined(List<? extends Criterion<?>> criteria)
+      {
+        for (Criterion<?> c : criteria) {
+            if (!c.isUndefined()) {
+              return true;
+            }
+        }
+        return false;
+      }
+        @Override
+        public void addDomainRestrictions(final HqlBuilder hql)
+        {
+          hql.from(getRootAlias(), Well.reagents, "r").where("r", "vendorId.vendorIdentifier", Operator.NOT_EMPTY, null);
+        }
+        
+    };
+    initialize(dataFetcher);
+
+    // start with search panel open
+    setTableFilterMode(true);
+    adjustVisibleColumnsForLincs();
   }
   
   public void searchCanonicalReagentsOfWellsBrowser(final WellSearchResults fullWellSearchResults,
@@ -113,11 +178,15 @@ public class LincsWellSearchResults extends WellSearchResults
 
     // start with search panel closed
     setTableFilterMode(false);
-    
+    adjustVisibleColumnsForLincs();
+  }
+
+  private void adjustVisibleColumnsForLincs()
+  {
     getColumnManager().setVisibilityOfColumnsInGroup("Compound Reagent Columns", false);
     getColumnManager().setVisibilityOfColumnsInGroup("Well Columns", false);
     getColumnManager().getColumn("Facility ID").setVisible(true);
-      getColumnManager().getColumn("Primary Compound Name").setVisible(true);
+    getColumnManager().getColumn("Primary Compound Name").setVisible(true);
     getColumnManager().getColumn("Compound Names").setVisible(true);
     getColumnManager().getColumn("Plate").setVisible(false);
     getColumnManager().getColumn("Well").setVisible(false);

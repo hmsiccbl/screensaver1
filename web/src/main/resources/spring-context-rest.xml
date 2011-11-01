@@ -1,0 +1,191 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<beans xmlns="http://www.springframework.org/schema/beans"
+  xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:mvc="http://www.springframework.org/schema/mvc"
+  xmlns:aop="http://www.springframework.org/schema/aop"
+  xmlns:context="http://www.springframework.org/schema/context"
+  xsi:schemaLocation="
+        http://www.springframework.org/schema/mvc http://www.springframework.org/schema/mvc/spring-mvc-3.0.xsd
+        http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans-3.0.xsd
+        http://www.springframework.org/schema/context http://www.springframework.org/schema/context/spring-context-3.0.xsd
+        http://www.springframework.org/schema/aop http://www.springframework.org/schema/aop/spring-aop-2.0.xsd">
+
+  <!-- Scans within the base package of the application for @Components to configure as beans -->
+  <!-- @Controller, @Service, @Configuration, etc. -->
+  <context:component-scan base-package="edu.harvard.med.screensaver.rest" />
+
+  <!-- Enables the Spring MVC @Controller programming model -->
+  <mvc:annotation-driven />
+
+   <aop:config>
+    <aop:pointcut
+      id="dataRequestMethodPointcut"
+      expression="@annotation(org.springframework.web.bind.annotation.RequestMapping)" />
+    <aop:aspect
+      id="dataRequestActivityLoggerAspect"
+      ref="dataRequestActivityLoggerAspectBean">
+      <aop:before
+        method="logDataRequestActivity"
+        pointcut-ref="dataRequestMethodPointcut" />
+    </aop:aspect>
+  </aop:config>
+  
+   <bean
+     id="dataRequestActivityLoggerAspectBean"
+     class="edu.harvard.med.screensaver.ui.arch.view.aspects.DataRequestActivityLoggerAspect">
+     <!-- execute earlier than other advice (e.g. before the transactional advice) -->
+     <property
+       name="order"
+       value="1" />
+   </bean>
+
+  <bean
+    class="org.springframework.web.servlet.view.ContentNegotiatingViewResolver">
+    <property name="mediaTypes">
+      <map>
+        <entry key="html" value="text/html" />
+        <entry key="json" value="application/json" />
+        <entry key="xml" value="application/xml" />
+      </map>
+    </property>
+    <property name="defaultViews">
+      <list>
+        <bean id="html"
+          class="edu.harvard.med.screensaver.rest.ScreensaverEntityView">
+          <property name="entityViewers">
+            <list>
+              <bean class="edu.harvard.med.screensaver.rest.ScreensaverEntityView.ViewerMapping">
+                <property name="entityClass" value="edu.harvard.med.screensaver.model.libraries.Library"/>
+                <property name="viewer" ref="libraryViewer"/>
+                <property name="relativeUrlPath" value="/libraries/libraryViewer.jsf"/>
+              </bean>
+              <bean class="edu.harvard.med.screensaver.rest.ScreensaverEntityView.ViewerMapping">
+                <property name="entityClass" value="edu.harvard.med.screensaver.model.screens.Screen"/>
+                <property name="viewer" ref="screenViewer"/>
+                <property name="relativeUrlPath" value="/screens/screenViewer.jsf"/>
+              </bean>
+              <bean class="edu.harvard.med.screensaver.rest.ScreensaverEntityView.ViewerMapping">
+                <property name="entityClass" value="edu.harvard.med.screensaver.model.screens.Study"/>
+                <property name="viewer" ref="studyViewer"/>
+                <property name="relativeUrlPath" value="/studies/studyViewer.jsf"/>
+              </bean>
+              <bean class="edu.harvard.med.screensaver.rest.ScreensaverEntityView.ViewerMapping">
+                <property name="entityClass" value="edu.harvard.med.screensaver.model.libraries.Well"/>
+                <property name="viewer" ref="wellViewer"/>
+                <property name="relativeUrlPath" value="/libraries/wellViewer.jsf"/>
+              </bean>
+              <bean class="edu.harvard.med.screensaver.rest.ScreensaverEntityView.ViewerMapping">
+                <property name="entityClass" value="edu.harvard.med.screensaver.model.libraries.Reagent"/>
+                <property name="viewer" ref="wellViewer"/>
+                <property name="relativeUrlPath" value="/libraries/wellViewer.jsf"/>
+              </bean>
+            </list>
+          </property>
+          <property name="modelEntityKey" value="data"/>
+        </bean>
+
+        <bean id="json" class="org.springframework.web.servlet.view.xml.MarshallingView">
+          <property name="contentType" value="application/json" />
+          <property name="modelKey" value="data" />
+          <constructor-arg>
+            <bean parent="abstractMarshaller">
+             <property name="streamDriver" >
+               <bean class="com.thoughtworks.xstream.io.json.JsonHierarchicalStreamDriver" />
+              </property>
+            </bean>              
+          </constructor-arg>
+        </bean>
+
+        <bean id="xml" class="org.springframework.web.servlet.view.xml.MarshallingView">
+          <property name="contentType" value="application/xml" />
+          <property name="modelKey" value="data" />
+          <constructor-arg>
+            <bean parent="abstractMarshaller"/>
+          </constructor-arg>
+        </bean>
+      </list>
+    </property>
+  </bean>
+
+  <bean id="abstractMarshaller"
+    class="org.springframework.oxm.xstream.XStreamMarshaller" abstract="true">
+    <property name="aliases">
+      <props>
+        <prop key="libraries">edu.harvard.med.screensaver.rest.EntityCollection.Libraries</prop>
+        <prop key="library">edu.harvard.med.screensaver.model.libraries.Library</prop>
+        <prop key="well">edu.harvard.med.screensaver.model.libraries.Well</prop>
+        <prop key="reagents">edu.harvard.med.screensaver.rest.EntityCollection.Reagents</prop>
+        <prop key="screens">edu.harvard.med.screensaver.rest.EntityCollection.Screens</prop>
+        <prop key="screen">edu.harvard.med.screensaver.model.screens.Screen</prop>
+        <prop key="screenResult">edu.harvard.med.screensaver.rest.ScreenResultValuesConverter.ScreenResult</prop>
+        <prop key="screenColumns">edu.harvard.med.screensaver.rest.EntityCollection.ScreenColumns</prop>
+        <prop key="screenColumn">edu.harvard.med.screensaver.model.screenresults.DataColumn</prop>
+        <prop key="screenColumnValues">edu.harvard.med.screensaver.rest.DataColumnValuesConverter.DataColumnValuesRequest</prop>
+        <prop key="screenAssayWells">edu.harvard.med.screensaver.rest.EntityCollection.AssayWells</prop>
+        <prop key="screenAssayWellValues">edu.harvard.med.screensaver.rest.AssayWellValuesConverter.AssayWellValuesRequest</prop>
+        <prop key="studies">edu.harvard.med.screensaver.rest.EntityCollection.Studies</prop>
+        <prop key="studyResult">edu.harvard.med.screensaver.rest.StudyValuesConverter.StudyValues</prop>
+        <prop key="studyColumns">edu.harvard.med.screensaver.rest.EntityCollection.StudyColumns</prop>
+        <prop key="studyColumn">edu.harvard.med.screensaver.model.screenresults.AnnotationType</prop>
+        <prop key="studyColumnValues">edu.harvard.med.screensaver.rest.StudyColumnValuesConverter.StudyColumnValuesRequest</prop>
+        <prop key="studyReagents">edu.harvard.med.screensaver.rest.StudyReagentsCanonicalConverter.StudyReagentsCanonical</prop>
+        <prop key="studyReagentValues">edu.harvard.med.screensaver.rest.StudyRowConverter.StudyRow</prop>
+        <prop key="user">edu.harvard.med.screensaver.model.users.ScreensaverUser</prop>
+        <prop key="screener">edu.harvard.med.screensaver.model.users.ScreeningRoomUser</prop>
+        <prop key="labHead">edu.harvard.med.screensaver.model.users.LabHead</prop>
+        <prop key="assayReadoutType">edu.harvard.med.screensaver.model.screens.AssayReadoutType</prop>
+        <prop key="publication">edu.harvard.med.screensaver.model.screens.Publication</prop>
+        <prop key="assayWell">edu.harvard.med.screensaver.model.screenresults.AssayWell</prop>
+        <prop key="error">edu.harvard.med.screensaver.rest.ErrorConverter.ErrorContainer</prop>
+      </props>
+    </property>
+    <property name="converters">
+      <list>
+        <bean id="collectionConverter" class="edu.harvard.med.screensaver.rest.EntityCollectionConverter" />
+        <bean id="screenConverter" class="edu.harvard.med.screensaver.rest.ScreenConverter" />
+        <bean id="dataColumnConverter" class="edu.harvard.med.screensaver.rest.DataColumnConverter" />
+        <bean id="dataColumnValuesConverter" class="edu.harvard.med.screensaver.rest.DataColumnValuesConverter" />
+        <bean id="studyColumnValuesConverter" class="edu.harvard.med.screensaver.rest.StudyColumnValuesConverter" />
+        <bean id="wellConverter" class="edu.harvard.med.screensaver.rest.WellConverter" />
+        <bean id="dateConverter" class="edu.harvard.med.screensaver.rest.DateConverter" />
+        <bean id="labHeadConverter" class="edu.harvard.med.screensaver.rest.LabHeadConverter" />
+        <bean id="libraryConverter" class="edu.harvard.med.screensaver.rest.LibraryConverter" />
+        <bean id="screensaverUserConverter" class="edu.harvard.med.screensaver.rest.ScreensaverUserConverter" />
+        <bean id="screeningRoomUserConverter" class="edu.harvard.med.screensaver.rest.ScreeningRoomUserConverter" />
+        <bean id="publicationConverter" class="edu.harvard.med.screensaver.rest.PublicationConverter" />
+        <bean id="assayWellConverter" class="edu.harvard.med.screensaver.rest.AssayWellConverter" />
+        <bean id="assayWellsConverter" class="edu.harvard.med.screensaver.rest.AssayWellsConverter" />
+        <bean id="annotationTypeConverter" class="edu.harvard.med.screensaver.rest.AnnotationTypeConverter" />
+        <bean id="studyReagentsCanonicalConverter" class="edu.harvard.med.screensaver.rest.StudyReagentsCanonicalConverter" />
+        <bean id="studyRowConverter" class="edu.harvard.med.screensaver.rest.StudyRowConverter" />
+        <bean id="studyValuesConverter" class="edu.harvard.med.screensaver.rest.StudyValuesConverter" />
+        <bean id="assayWellValuesConverter" class="edu.harvard.med.screensaver.rest.AssayWellValuesConverter" />
+        <bean id="screenResultValuesConverter" class="edu.harvard.med.screensaver.rest.ScreenResultValuesConverter" />
+        <bean id="vocabularyConverter" class="edu.harvard.med.screensaver.rest.VocabularyConverter" />
+        <bean id="errorConverter" class="edu.harvard.med.screensaver.rest.ErrorConverter" />
+      </list>
+    </property>
+  </bean>
+
+  <bean
+    id="entityUriGenerator"
+    class="edu.harvard.med.screensaver.rest.LincsEntityUriGenerator"
+    scope="request">
+    <aop:scoped-proxy /> <!-- Note need to specify that an AOP proxy, fully instantiated when the scope is available, can be injected in this bean's place, see Spring Reference Documentation, 3.0: 3.5.4.5 Scoped beans as dependencies -->
+  </bean>
+  <bean
+    id="entityToRestNodeNameMap"
+    class="edu.harvard.med.screensaver.rest.LincsEntityToNodeNameMap"
+    scope="singleton">
+    <property name="mapping">
+      <map>
+        <entry key="edu.harvard.med.screensaver.model.screenresults.DataColumn" value="column"/>
+        <entry key="edu.harvard.med.screensaver.model.screenresults.AnnotationType" value="column"/>
+        <entry key="edu.harvard.med.screensaver.model.screens.Screen" value="screen"/>
+      </map>
+    </property>
+  </bean>      
+  
+        
+
+</beans>

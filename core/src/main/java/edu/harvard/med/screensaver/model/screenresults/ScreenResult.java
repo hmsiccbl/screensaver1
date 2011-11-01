@@ -590,7 +590,7 @@ public class ScreenResult extends AuditedAbstractEntity<Integer>
   {
     for (DataColumn col : getDataColumns()) {
       if (col.getName().equals(name)) {
-        throw new DuplicateEntityException(this, col);
+        throw new DuplicateEntityException(this, col); // TODO: this error is unhelpful as the entities are transient and the tostring is ambiguous here.
       }
     }
   }

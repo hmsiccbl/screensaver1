@@ -532,4 +532,10 @@ public class MockDaoForScreenResultImporter implements GenericEntityDAO, ScreenR
     return null;
   }
 
+  @Override
+  public Set<Well> findAllCanonicalReagentWells()
+  {
+    return null;
+  }
+
 }

@@ -19,6 +19,8 @@ import edu.harvard.med.screensaver.ScreensaverConstants;
 import edu.harvard.med.screensaver.model.AbstractEntity;
 import edu.harvard.med.screensaver.model.AttachedFile;
 import edu.harvard.med.screensaver.model.DownloadRestrictedAttachedFile;
+import edu.harvard.med.screensaver.model.Entity;
+import edu.harvard.med.screensaver.model.libraries.Reagent;
 import edu.harvard.med.screensaver.model.libraries.SilencingReagent;
 import edu.harvard.med.screensaver.model.libraries.SmallMoleculeReagent;
 import edu.harvard.med.screensaver.model.users.ScreensaverUser;
@@ -94,11 +96,18 @@ public class LincsEntityViewPolicy extends DefaultEntityViewPolicy
   @Override
   public AttachedFile visit(AttachedFile entity)
   {
-    if (isGuestUser() && !!! entity.getFileType().getValue().equals(ScreensaverConstants.STUDY_FILE_TYPE)) {
-      if (log.isDebugEnabled()) {
-        log.info("returning download restricted attached file: " + entity);
+    if (isGuestUser() && !!! entity.getFileType().getValue().equals(ScreensaverConstants.STUDY_FILE_TYPE)) {  // if studies can become restricted, then modify this
+      if(entity.getReagent() != null)
+      {
+        Entity<Integer> restrictedReagent = entity.getReagent().restrict();
+        if(StructureRestrictedSmallMoleculeReagent.class.isAssignableFrom(restrictedReagent.getClass())
+          || SequenceRestrictedSilencingReagent.class.isAssignableFrom(restrictedReagent.getClass())) {
+          if (log.isDebugEnabled()) {
+            log.info("returning download restricted attached file: " + entity);
+          }
+          return new DownloadRestrictedAttachedFile(entity);
+        }
       }
-      return new DownloadRestrictedAttachedFile(entity);
     }
     return entity;
   }

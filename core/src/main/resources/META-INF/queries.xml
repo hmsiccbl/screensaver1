@@ -12,4 +12,10 @@
     </query>
   </named-query>
   
+  <named-query name="findAllCanonicalReagentWells">
+    <query>
+      select w from Well w join w.library l join w.latestReleasedReagent r where r.facilityBatchId = 1 and l.shortName like 'R-%'
+    </query>
+  </named-query>
+  
 </entity-mappings>

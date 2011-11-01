@@ -106,6 +106,7 @@
   <import resource="classpath:spring-context-persistence.xml"/>
   <import resource="classpath:spring-context-services.xml"/>
   <import resource="classpath:spring-context-ui.xml"/>
+  <!-- <import resource="classpath:spring-context-rest.xml"/>  -->
   <import resource="classpath:spring-context-authentication.xml"/>
   
 </beans>

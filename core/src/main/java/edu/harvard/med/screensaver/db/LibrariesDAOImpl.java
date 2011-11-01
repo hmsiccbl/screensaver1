@@ -835,6 +835,12 @@ public class LibrariesDAOImpl extends AbstractDAO implements LibrariesDAO
   }
   
   @Override
+  public Set<Well> findAllCanonicalReagentWells()
+  {
+    return Sets.newHashSet(getEntityManager().createNamedQuery("findAllCanonicalReagentWells", Well.class).getResultList());
+  }
+
+  @Override
   public Set<String> findCanonicalReagentWellIds(Set<String> wellIds)
   {
     return Sets.newHashSet(getEntityManager().createNamedQuery("findCanonicalReagentWellIds", String.class).setParameter("wellIds", wellIds).getResultList());

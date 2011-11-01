@@ -65,8 +65,11 @@ public class WebCurrentScreensaverUser extends CurrentScreensaverUser
   @Transactional
   public ScreensaverUser getScreensaverUser()
   {
-    final FacesContext facesContext = FacesContext.getCurrentInstance();
-    final String remoteUser = facesContext.getExternalContext().getRemoteUser();
+    String remoteUser = null;
+    FacesContext facesContext = FacesContext.getCurrentInstance();
+    if (facesContext != null) {
+      remoteUser = facesContext.getExternalContext().getRemoteUser();
+    }
     boolean noAuthenticatedUser = StringUtils.isEmpty(remoteUser);
     if (noAuthenticatedUser) {
       if (_applicationProperties.isAllowGuestLogin()) {
@@ -76,7 +79,7 @@ public class WebCurrentScreensaverUser extends CurrentScreensaverUser
       }
     }
     else if (super.getScreensaverUser() == null ||
-      super.getScreensaverUser() instanceof GuestUser) {
+      super.getScreensaverUser() instanceof GuestUser /* allow authentication if currently a guest user */) {
       ScreensaverUser screensaverUser = findScreensaverUserForUsername(remoteUser);
       setScreensaverUser(screensaverUser);
     }

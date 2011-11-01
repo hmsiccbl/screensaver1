@@ -75,17 +75,33 @@
     <param-value>classpath*:${web.application.context.file}</param-value>
   </context-param>
 
-  <!-- Servlet listener to enable loading the above Spring application context XML files. -->
+  <!-- Servlet listener to create the root application context (from the above Spring application context XML file). -->
   <listener>
     <listener-class>org.springframework.web.context.ContextLoaderListener</listener-class>
   </listener>
-
+ 
   <!-- Servlet listener to enable access to Spring {request,session}-scoped beans. -->
   <listener>
     <listener-class>
       org.springframework.web.context.request.RequestContextListener
     </listener-class>
   </listener>
+  
+  <!--  Spring MVC for REST support. The DispatcherServlet will share the root application context, but can also load its own private application context. -->
+  <servlet>
+    <servlet-name>rest</servlet-name>
+    <servlet-class>org.springframework.web.servlet.DispatcherServlet</servlet-class>
+       <init-param>
+            <param-name>contextConfigLocation</param-name>
+            <param-value>classpath*:spring-context-rest.xml</param-value>
+        </init-param>
+    <load-on-startup>2</load-on-startup>
+  </servlet>
+
+  <servlet-mapping>
+    <servlet-name>rest</servlet-name>
+    <url-pattern>/data/*</url-pattern>
+  </servlet-mapping>  
   
   <!-- MyFaces Orchestra servlet listener -->
   <!-- 
@@ -403,6 +419,16 @@
       <http-method>GET</http-method>
     </web-resource-collection>
     <auth-constraint />
+  </security-constraint>
+
+  <security-constraint>
+    <display-name>REST</display-name>
+    <web-resource-collection>
+      <web-resource-name>REST</web-resource-name>
+      <description>Allow unauthenticated user to REST services.</description>
+      <url-pattern>/data/*</url-pattern>
+      <http-method>GET</http-method>
+    </web-resource-collection>
   </security-constraint>
 
   <security-constraint>

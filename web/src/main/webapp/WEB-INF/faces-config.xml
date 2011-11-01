@@ -43,6 +43,9 @@ Config 1.1//EN" "http://java.sun.com/dtd/web-facesconfig_1_1.dtd">
     <phase-listener>edu.harvard.med.screensaver.ui.arch.util.Messages</phase-listener>
   </lifecycle>
 
+  <lifecycle>
+    <phase-listener>edu.harvard.med.screensaver.ui.arch.util.servlet.EntityViewerInitializerPhaseListener</phase-listener>
+  </lifecycle>
 
   <!-- === === Managed beans === === -->
 

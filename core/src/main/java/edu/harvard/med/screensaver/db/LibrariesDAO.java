@@ -116,6 +116,8 @@ public interface LibrariesDAO
   
   public void calculateCopyScreeningStatistics(Collection<Copy> copies);
 
+  public Set<Well> findAllCanonicalReagentWells();
+
   public Set<String> findCanonicalReagentWellIds(Set<String> wellIds);
 
   public Well findCanonicalReagentWell(String facilityId,

@@ -95,7 +95,12 @@ public class Well extends SemanticIDAbstractEntity<String> implements Comparable
       return w.getMolarConcentration();
     }
   };
-  // instance fields
+  public static final Function<Well,Reagent> toLatestReleasedReagent = new Function<Well,Reagent>() {
+    public Reagent apply(Well w)
+    {
+      return w.getLatestReleasedReagent();
+    }
+  };
 
   private transient WellKey _wellKey;
   private Integer _version;
@@ -136,7 +141,7 @@ public class Well extends SemanticIDAbstractEntity<String> implements Comparable
   protected Well() {}
 
   @Override
-  public Object acceptVisitor(AbstractEntityVisitor visitor)
+  public <R> R acceptVisitor(AbstractEntityVisitor<R> visitor)
   {
     return visitor.visit(this);
   }

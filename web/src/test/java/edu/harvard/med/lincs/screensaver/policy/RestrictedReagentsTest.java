@@ -3,6 +3,8 @@ package edu.harvard.med.lincs.screensaver.policy;
 
 import java.io.StringWriter;
 import java.io.Writer;
+import java.math.BigDecimal;
+import java.util.List;
 
 import org.joda.time.LocalDate;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -12,8 +14,13 @@ import org.springframework.transaction.annotation.Transactional;
 import edu.harvard.med.lincs.screensaver.ui.libraries.WellViewer;
 import edu.harvard.med.screensaver.db.datafetcher.Tuple;
 import edu.harvard.med.screensaver.io.libraries.WellSdfWriter;
+import edu.harvard.med.screensaver.model.AttachedFile;
+import edu.harvard.med.screensaver.model.Entity;
 import edu.harvard.med.screensaver.model.activities.AdministrativeActivity;
 import edu.harvard.med.screensaver.model.activities.AdministrativeActivityType;
+import edu.harvard.med.screensaver.model.libraries.MolecularFormula;
+import edu.harvard.med.screensaver.model.libraries.ReagentAttachedFileType;
+import edu.harvard.med.screensaver.model.libraries.ReagentVendorIdentifier;
 import edu.harvard.med.screensaver.model.libraries.SilencingReagent;
 import edu.harvard.med.screensaver.model.libraries.SmallMoleculeReagent;
 import edu.harvard.med.screensaver.model.libraries.Well;
@@ -22,6 +29,7 @@ import edu.harvard.med.screensaver.model.users.ScreeningRoomUser;
 import edu.harvard.med.screensaver.model.users.ScreeningRoomUserClassification;
 import edu.harvard.med.screensaver.model.users.ScreensaverUser;
 import edu.harvard.med.screensaver.model.users.ScreensaverUserRole;
+import edu.harvard.med.screensaver.policy.EntityViewPolicy;
 import edu.harvard.med.screensaver.test.AbstractSpringPersistenceTest;
 import edu.harvard.med.screensaver.test.TestDataFactory.PostCreateHook;
 import edu.harvard.med.screensaver.ui.CurrentScreensaverUser;
@@ -41,6 +49,8 @@ public class RestrictedReagentsTest extends AbstractSpringPersistenceTest
   private WellSearchResults wellsBrowser;
   @Autowired
   private WellViewer wellViewer;
+  @Autowired
+  private EntityViewPolicy<Entity> entityViewPolicy;
 
   private SmallMoleculeReagent _restrictedSmr;
   private SmallMoleculeReagent _unrestrictedSmr;
@@ -94,6 +104,13 @@ public class RestrictedReagentsTest extends AbstractSpringPersistenceTest
     _unrestrictedSmr = dataFactory.newInstance(SmallMoleculeReagent.class, "unrestricted");
     _restrictedSr = dataFactory.newInstance(SilencingReagent.class, "restricted");
     _unrestrictedSr = dataFactory.newInstance(SilencingReagent.class, "unrestricted");
+    
+    ReagentAttachedFileType atf = dataFactory.newInstance(ReagentAttachedFileType.class, "test-atf");
+    AttachedFile af = _restrictedSmr.createAttachedFile("test-file.restricted", atf, new LocalDate(), "test-file-for-restricted-reagent" );
+    af.setEntityViewPolicy(entityViewPolicy);  // TODO: figure out how to not set this
+    af = _unrestrictedSmr.createAttachedFile("test-file.unrestricted", atf, new LocalDate(), "test-file-for-unrestricted-reagent" );
+    af.setEntityViewPolicy(entityViewPolicy);  // TODO: figure out how to not set this
+    
 
     guestUser = new ScreeningRoomUser("Guest", "User", ScreeningRoomUserClassification.OTHER);
     guestUser.addScreensaverUserRole(ScreensaverUserRole.SCREENSAVER_USER);
@@ -213,8 +230,10 @@ public class RestrictedReagentsTest extends AbstractSpringPersistenceTest
     doTestWellViewer(guestUser, _unrestrictedSmr, true);
     doTestWellViewer(adminUser, _restrictedSmr, true);
     doTestWellViewer(adminUser, _unrestrictedSmr, true);
+    doTestDownloadAttachedFiles(guestUser, _restrictedSmr, false);
+    doTestDownloadAttachedFiles(guestUser, _unrestrictedSmr, true);
   }
-
+  
   private void doTestWellViewer(ScreensaverUser user, SmallMoleculeReagent smr, boolean isRestrictedPropertyVisible)
   {
     currentScreensaverUser.setScreensaverUser(user);
@@ -242,8 +261,19 @@ public class RestrictedReagentsTest extends AbstractSpringPersistenceTest
     }      
   }
 
-  public void testDownloadAttachedFiles()
+  public void doTestDownloadAttachedFiles(ScreensaverUser user, SmallMoleculeReagent smr, boolean isRestrictedPropertyVisible)
   {
-    fail("not implemented");
+    currentScreensaverUser.setScreensaverUser(user);
+    wellViewer.viewEntity(smr.getWell());
+    assertNotNull(wellViewer.getEntity());
+
+    List<AttachedFile> files = (List<AttachedFile>) wellViewer.getAttachedFiles().getAttachedFilesDataModel().getWrappedData();
+
+    assertTrue("expected 1", files.size() == 1);
+    if(isRestrictedPropertyVisible) {
+      assertNotNull(files.get(0).getFileContents());
+    }else {
+      assertNull(files.get(0).getFileContents());
+    }
   }
 }

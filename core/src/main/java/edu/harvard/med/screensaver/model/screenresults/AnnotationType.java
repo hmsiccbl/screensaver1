@@ -169,7 +169,7 @@ public class AnnotationType extends AbstractEntity<Integer> implements MetaDataT
   @MapKey(name="reagent")
   @OptimisticLock(excluded=true)
   @org.hibernate.annotations.Cascade(value={org.hibernate.annotations.CascadeType.SAVE_UPDATE, org.hibernate.annotations.CascadeType.DELETE})
-  @org.hibernate.annotations.LazyCollection(LazyCollectionOption.EXTRA)
+  // removing, as this inconveniently forces us to access all reagents before looking for them in the map collection  @org.hibernate.annotations.LazyCollection(LazyCollectionOption.EXTRA)
   public Map<Reagent,AnnotationValue> getAnnotationValues()
   {
     return _values;

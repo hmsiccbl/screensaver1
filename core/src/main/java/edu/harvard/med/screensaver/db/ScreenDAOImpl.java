@@ -15,14 +15,15 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Set;
 
-import com.google.common.collect.Sets;
 import org.apache.log4j.Logger;
 import org.hibernate.Query;
 import org.hibernate.Session;
+import com.google.common.collect.Sets;
 
 import edu.harvard.med.screensaver.db.hqlbuilder.HqlBuilder;
 import edu.harvard.med.screensaver.model.DataModelViolationException;
 import edu.harvard.med.screensaver.model.screens.LabActivity;
+import edu.harvard.med.screensaver.model.screens.ProjectPhase;
 import edu.harvard.med.screensaver.model.screens.Screen;
 import edu.harvard.med.screensaver.model.screens.Screening;
 import edu.harvard.med.screensaver.model.users.ScreensaverUser;
@@ -133,6 +134,18 @@ public class ScreenDAOImpl extends AbstractDAO implements ScreenDAO
       }
     });
     return result;
+  }
+  
+  @Override
+  public List<Screen> findAllScreens()
+  {
+    return _dao.findEntitiesByHql(Screen.class, "from Screen s where s.projectPhase <> ? order by facilityId", ProjectPhase.ANNOTATION);
+  }
+
+  @Override
+  public List<Screen> findAllStudies()
+  {
+    return _dao.findEntitiesByHql(Screen.class, "from Screen s where s.projectPhase = ? order by facilityId", ProjectPhase.ANNOTATION);
   }
 
   @Override

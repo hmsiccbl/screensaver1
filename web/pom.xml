@@ -2,14 +2,14 @@
   <modelVersion>4.0.0</modelVersion>
   <parent>
     <artifactId>screensaver</artifactId>
-    <version>2011-09-30</version>
+    <version>2011-10-24</version>
     <groupId>edu.harvard.med</groupId>
     <relativePath>../pom.xml</relativePath>
   </parent>
   
   <groupId>edu.harvard.med</groupId>
   <artifactId>screensaver-web</artifactId>
-  <version>2011-09-30</version>
+  <version>2011-10-24</version>
   <name>Screensaver Web</name>
   <description>Screensaver web application</description>
 
@@ -160,12 +160,14 @@
     </profile>
   </profiles>
   
+  <repositories>
+  </repositories>
   <dependencies>
 
   	<dependency>
   		<groupId>edu.harvard.med</groupId>
   		<artifactId>screensaver-core</artifactId>
-  		<version>2011-09-30</version>
+  		<version>2011-10-24</version>
   	</dependency>
 
     <dependency>
@@ -177,7 +179,7 @@
     <dependency>
       <groupId>edu.harvard.med</groupId>
       <artifactId>screensaver-test</artifactId>
-      <version>2011-09-30</version>
+      <version>2011-10-24</version>
       <scope>test</scope>
     </dependency>
 
@@ -189,5 +191,33 @@
       <scope>provided</scope>
     </dependency>
 
+    <dependency>
+    	<groupId>org.springframework</groupId>
+    	<artifactId>spring-webmvc</artifactId>
+    	<version>3.0.6.RELEASE</version>
+    	<type>jar</type>
+    	<scope>compile</scope>
+    </dependency>
+    <dependency>
+    	<groupId>org.codehaus.jackson</groupId>
+    	<artifactId>jackson-mapper-asl</artifactId>
+    	<version>1.9.0</version>
+    	<type>jar</type>
+    	<scope>compile</scope>
+    </dependency>
+        
+     <dependency>
+      <groupId>com.thoughtworks.xstream</groupId>
+      <artifactId>xstream</artifactId>
+      <version>1.3.1</version>
+    </dependency>
+    
+    <dependency>
+      <groupId>org.springframework</groupId>
+      <artifactId>org.springframework.oxm</artifactId>
+      <version>${org.springframework.version}</version>
+      <scope>compile</scope>
+    </dependency>
+  
   </dependencies>
 </project>
