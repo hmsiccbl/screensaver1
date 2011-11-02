@@ -1253,7 +1253,7 @@ public abstract class WellSearchResults extends TupleBasedEntitySearchResults<We
   protected boolean isLINCS()
   {
     if (_isLINCS == null) {
-      _isLINCS = LincsScreensaverConstants.FACILITY_NAME.equals(getApplicationProperties().getFacility());
+      _isLINCS = getApplicationProperties().isFacility(LincsScreensaverConstants.FACILITY_KEY);
     }
     return _isLINCS;
   }

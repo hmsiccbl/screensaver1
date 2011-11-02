@@ -43,7 +43,7 @@ TODO:
 
   <ss:property id="studyType" label="Study Type"
     value="#{studyDetailViewer.entity.studyType}"
-    rendered="#{appInfo.applicationProperties.facility != 'LINCS'}"
+    rendered="#{appInfo.applicationProperties.facilityKey != 'lincs'}"
     adminOnly="false" editable="#{studyDetailViewer.editMode}"
     description="'In Vitro' or 'In Silico'" type="Text"
     editWidth="80" editHeight="3" />
@@ -92,7 +92,7 @@ TODO:
     
   <ss:property id="url" label="Home Page"
     value="#{studyDetailViewer.entity.url}"
-    rendered="#{appInfo.applicationProperties.facility != 'LINCS'}"
+    rendered="#{appInfo.applicationProperties.facilityKey != 'lincs'}"
     editable="#{studyDetailViewer.editMode}"
     description="A URL for the home page of the study" type="Text"
     editWidth="80" editHeight="6" />
@@ -229,7 +229,7 @@ TODO:
     description="The date the data was received"
     value="#{entity.dateCreated}" 
     type="Date"
-    rendered="#{appInfo.applicationProperties.facility == 'LINCS' }" 
+    rendered="#{appInfo.applicationProperties.facilityKey == 'lincs' }" 
     />      
 
   </ui:define>

@@ -47,11 +47,13 @@
                 action="#{screenDetailViewer.addLibraryScreening}"
                 rendered="#{screenDetailViewer.editable}"
                 styleClass="command" />
+              <ui:remove>
               <t:commandButton
                 action="#{plateReaderRawDataTransformer.view}"
                 value="Transform Raw Data" styleClass="command"
                 rendered="#{screenViewer.screensaverUser.isUserInRoleOfNameMap['screenResultsAdmin']}"
-                title="Trasnform plate reader raw data into intermediate screen result format" />
+                title="Transform plate reader raw data into intermediate screen result format" />
+              </ui:remove>
               <t:commandButton
                 action="#{screenResultImporter.importScreenResultData}"
                 value="Load Data" styleClass="command"
@@ -75,7 +77,7 @@
                 value="#{screenResultViewer.entity.lastDataLoadingActivity.dateCreated}" />
 
               <ss:property id="librariesScreened"
-                rendered="#{screenViewer.entity.projectPhase != 'Follow Up Screen' &amp;&amp; appInfo.applicationProperties.facility != 'LINCS'}"
+                rendered="#{screenViewer.entity.projectPhase != 'Follow Up Screen' &amp;&amp; appInfo.applicationProperties.facilityKey != 'lincs'}"
                 label="Libraries Screened"
                 description="The number of libraries that have been screened">
                 <ui:define name="data">
@@ -86,7 +88,7 @@
               </ss:property>
 
               <ss:property id="libraryPlatesScreened"
-                rendered="#{screenViewer.entity.projectPhase != 'Follow Up Screen' &amp;&amp; appInfo.applicationProperties.facility != 'LINCS'}"
+                rendered="#{screenViewer.entity.projectPhase != 'Follow Up Screen' &amp;&amp; appInfo.applicationProperties.facilityKey != 'lincs'}"
                 label="Library Plates Screened"
                 description="The number of library plates that have been screened">
                 <ui:define name="data">
@@ -117,7 +119,7 @@
                 rendered="#{screenViewer.entity.projectPhase != 'Follow Up Screen'}" />
 
               <ss:property id="screenedExperimentalWellCount"
-                rendered="#{screenViewer.entity.projectPhase != 'Follow Up Screen' &amp;&amp; appInfo.applicationProperties.facility != 'LINCS'}"
+                rendered="#{screenViewer.entity.projectPhase != 'Follow Up Screen' &amp;&amp; appInfo.applicationProperties.facilityKey != 'lincs'}"
                 label="Experimental Wells Screened"
                 value="#{screenViewer.entity.screenedExperimentalWellCount} (#{screenViewer.entity.uniqueScreenedExperimentalWellCount} unique)"
                 description="The number of experimental library wells that have been screened, ignoring replicates">
@@ -129,7 +131,7 @@
                 value="#{screenResultViewer.entity.experimentalWellCount}" />
 
               <ss:property id="dataScreenedReplicateCount"
-                rendered="#{screenViewer.entity.projectPhase != 'Follow Up Screen' &amp;&amp; appInfo.applicationProperties.facility != 'LINCS'}"
+                rendered="#{screenViewer.entity.projectPhase != 'Follow Up Screen' &amp;&amp; appInfo.applicationProperties.facilityKey != 'lincs'}"
                 label="Replicates Screened"
                 description="The number of replicates that have been screened (min...max if replicate count varies across library plates)">
                 <ui:define name="data">
@@ -140,7 +142,7 @@
               </ss:property>
 
               <ss:property id="dataLoadedReplicateCount"
-                rendered="#{screenViewer.entity.projectPhase != 'Follow Up Screen' &amp;&amp; appInfo.applicationProperties.facility != 'LINCS'}"
+                rendered="#{screenViewer.entity.projectPhase != 'Follow Up Screen' &amp;&amp; appInfo.applicationProperties.facilityKey != 'lincs'}"
                 label="Replicates Data Loaded"
                 description="The number of replicates represented in the loaded screen result data (min...max if replicate count varies across library plates)">
                 <ui:define name="data">
@@ -164,7 +166,7 @@
               <ss:property id="positivesSummary"
                 label="Positives Summary"
                 description="Summary of positives"
-                rendered="#{!empty screenResultViewer.entity &amp;&amp; appInfo.applicationProperties.facility != 'LINCS'}">
+                rendered="#{!empty screenResultViewer.entity &amp;&amp; appInfo.applicationProperties.facilityKey != 'lincs'}">
                 <ui:define name="data">
                   <t:dataTable id="positivesSummaryTable"
                     var="dataColumn"

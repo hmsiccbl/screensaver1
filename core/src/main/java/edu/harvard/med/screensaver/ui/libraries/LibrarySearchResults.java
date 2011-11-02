@@ -182,7 +182,7 @@ public class LibrarySearchResults extends EntityBasedEntitySearchResults<Library
     };
     columns.add(column);
     
-    if (!!!LincsScreensaverConstants.FACILITY_NAME.equals(getApplicationProperties().getFacility()) ||
+    if (!!!getApplicationProperties().isFacility(LincsScreensaverConstants.FACILITY_KEY) ||
       !!!getScreensaverUser().isUserInRole(ScreensaverUserRole.GUEST)) {
       columns.add(new TextEntityColumn<Library>(RelationshipPath.from(Library.class).toProperty("provider"),
                                                 "Provider",
@@ -219,7 +219,7 @@ public class LibrarySearchResults extends EntityBasedEntitySearchResults<Library
     });
     Iterables.getLast(columns).setVisible(false);
 
-    if (!!!LincsScreensaverConstants.FACILITY_NAME.equals(getApplicationProperties().getFacility())) {
+    if (!!!getApplicationProperties().isFacility(LincsScreensaverConstants.FACILITY_KEY)) {
       columns.add(new EnumEntityColumn<Library,LibraryType>(RelationshipPath.from(Library.class).toProperty("libraryType"),
                                                             "Library Type", "The type of library, e.g., 'Commercial', 'Known Bioactives', 'siRNA', etc.",
                                                             TableColumn.UNGROUPED, LibraryType.values()) {
@@ -264,7 +264,7 @@ public class LibrarySearchResults extends EntityBasedEntitySearchResults<Library
       }
     });
 
-    if (!!!LincsScreensaverConstants.FACILITY_NAME.equals(getApplicationProperties().getFacility())) {
+    if (!!!getApplicationProperties().isFacility(LincsScreensaverConstants.FACILITY_KEY)) {
       columns.add(new TextSetEntityColumn<Library>(Library.copies.toProperty("name"),
                                                    "Copies",
                                                    "The copies that have been made of this library",
@@ -304,7 +304,7 @@ public class LibrarySearchResults extends EntityBasedEntitySearchResults<Library
       }
     });
     
-    if (LincsScreensaverConstants.FACILITY_NAME.equals(getApplicationProperties().getFacility())) {
+    if (getApplicationProperties().isFacility(LincsScreensaverConstants.FACILITY_KEY)) {
       columns.add(new DateEntityColumn<Library>(RelationshipPath.from(Library.class).toProperty("dateCreated"),
                                                 "Date Data Received",
                                                 "The date the data was received",
@@ -317,7 +317,7 @@ public class LibrarySearchResults extends EntityBasedEntitySearchResults<Library
       });
     }
     
-    if (LincsScreensaverConstants.FACILITY_NAME.equals(getApplicationProperties().getFacility())) {
+    if (getApplicationProperties().isFacility(LincsScreensaverConstants.FACILITY_KEY)) {
       columns.add(new DateEntityColumn<Library>(RelationshipPath.from(Library.class).toProperty("dateLoaded"),
                                                 "Date Loaded",
                                                 "The date the library data was loaded",
@@ -330,7 +330,7 @@ public class LibrarySearchResults extends EntityBasedEntitySearchResults<Library
       });
     }
     
-        if (LincsScreensaverConstants.FACILITY_NAME.equals(getApplicationProperties().getFacility())) {
+    if (getApplicationProperties().isFacility(LincsScreensaverConstants.FACILITY_KEY)) {
       columns.add(new DateEntityColumn<Library>(RelationshipPath.from(Library.class).toProperty("datePubliclyAvailable"),
                                                 "Date Publicly Available",
                                                 "The date the library data was made publicly available",

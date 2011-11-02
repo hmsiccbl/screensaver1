@@ -33,8 +33,7 @@
         <s:focus id="focuser" for="j_username" />
       </t:panelGrid>
 
-      <t:div styleClass="smallLabel" rendered="#{appInfo.applicationProperties.map['screensaver.ui.facility_name'] == 'ICCB-Longwood/NSRB'}">
-				Confidentiality Agreement: The
+      <t:div styleClass="smallLabel" rendered="#{appInfo.applicationProperties.facilityKey == 'iccbl'}">
 				information in this database is confidential and is to be shared
 				only among members of the ICCB-Longwood and NSRB screening
 				communities. By logging into this database, I am agreeing to hold in
@@ -46,7 +45,7 @@
 				work if they so choose.
       </t:div>
 
-      <t:div styleClass="smallLabel" rendered="#{appInfo.applicationProperties.map['screensaver.ui.facility_name'] == 'LINCS'}">
+      <t:div styleClass="smallLabel" rendered="#{appInfo.applicationProperties.facilityKey == 'lincs'}">
         Confidentiality Agreement:  Some compound structures in this database are confidential and to be shared only among members of the HMS LINCS community.  
         Those which are not confidential are publicly available without logging in as an HMS LINCS user. 
         By logging into this database, I am agreeing to hold in confidence all restricted structure information until it is publicly available.

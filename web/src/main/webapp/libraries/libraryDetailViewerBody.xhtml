@@ -55,7 +55,7 @@
 			editWidth="60" />
 
     <ss:property id="libraryProvider" label="Provider"
-      rendered="#{appInfo.applicationProperties.facility != 'LINCS' || appInfo.screensaverUser.isUserInRoleOfNameMap['lincsCollaborator']}"
+      rendered="#{appInfo.applicationProperties.facilityKey != 'lincs' || appInfo.screensaverUser.isUserInRoleOfNameMap['lincsCollaborator']}"
       description="The name of the library provider"
       value="#{libraryDetailViewer.entity.provider}"
       editable="#{libraryDetailViewer.editMode}" />
@@ -91,7 +91,7 @@
     </ss:property>
 
     <ss:property id="libraryTypeLabel" label="Library Type" type="Vocabulary"
-        rendered="#{appInfo.applicationProperties.facility != 'LINCS'}"
+        rendered="#{appInfo.applicationProperties.facilityKey != 'lincs'}"
 				description="The type of library, e.g., 'Commercial', 'Known Bioactives', 'siRNA', etc."
         value="#{libraryDetailViewer.entity.libraryType}"
         converter="#{libraryTypeConverter}"
@@ -99,7 +99,7 @@
         editable="#{libraryDetailViewer.editMode}"/>
 
     <ss:property id="isPool" label="Is Pool" type="Boolean"
-      rendered="#{appInfo.applicationProperties.facility != 'LINCS'}"
+      rendered="#{appInfo.applicationProperties.facilityKey != 'lincs'}"
       description="Whether wells contains pools of reagents or single reagents"
       value="#{libraryDetailViewer.entity.pool}"
       editable="#{libraryDetailViewer.editMode}" />
@@ -131,7 +131,7 @@
       description="The date the data was received"
       value="#{entity.dateCreated}" 
       type="Date"
-      rendered="#{appInfo.applicationProperties.facility == 'LINCS' }" 
+      rendered="#{appInfo.applicationProperties.facilityKey == 'lincs' }" 
       />      
 
     <ss:entityComments id="libraryComments"
@@ -167,14 +167,14 @@
 
     <ss:property id="description" label="Description"
       description="A description of the library"
-      rendered="#{appInfo.applicationProperties.facility != 'LINCS' || appInfo.screensaverUser.isUserInRoleOfNameMap['lincsCollaborator']}"
+      rendered="#{appInfo.applicationProperties.facilityKey != 'lincs' || appInfo.screensaverUser.isUserInRoleOfNameMap['lincsCollaborator']}"
 			value="#{libraryDetailViewer.entity.description}"
 			editable="#{libraryDetailViewer.editMode}" type="Textarea"
 			editWidth="80" editHeight="3" />
 
     <ss:property id="owner" label="Owner"
       description="The user that owns the library, if applicable"
-      rendered="#{appInfo.applicationProperties.facility != 'LINCS' || appInfo.screensaverUser.isUserInRoleOfNameMap['lincsCollaborator']}"
+      rendered="#{appInfo.applicationProperties.facilityKey != 'lincs' || appInfo.screensaverUser.isUserInRoleOfNameMap['lincsCollaborator']}"
       value="#{libraryDetailViewer.owner.value}" type="Vocabulary"
       selectItems="#{libraryDetailViewer.owner.selectItems}" />
 

@@ -35,7 +35,7 @@
             </t:commandLink>
             <t:panelGrid columns="2" styleClass="layoutPanel">
              <t:commandLink id="login" action="#{menu.login}"
-               value="#{menu.applicationProperties.lincsAppVersion?'HMS LINCS ':''}Login" styleClass="menuItem"
+               value="#{menu.applicationProperties.facilityKey == 'lincs' ?'HMS LINCS ':''}Login" styleClass="menuItem"
                title="Click here to log in"
                rendered="#{appInfo.screensaverUser.isUserInRoleOfNameMap['guest']}"
                 />
@@ -59,13 +59,13 @@
             <t:commandLink action="#{reagentFinder.browseReagents}"
               styleClass="menuItem" accesskey="R"
               title="Browse all unique HMS LINCS pertubagen reagents"
-              rendered="#{menu.applicationProperties.map['screensaver.ui.facility_name'] == 'LINCS'}">
+              rendered="#{menu.applicationProperties.facilityKey == 'lincs'}">
             R<u>e</u>agents</t:commandLink>
 
             <t:commandLink action="#{reagentFinder.browseReagentWells}"
               styleClass="menuItem"
               title="Browse all wells containing HMS LINCS pertubagen reagents"
-              rendered="#{menu.applicationProperties.map['screensaver.ui.facility_name'] == 'LINCS'}">
+              rendered="#{menu.applicationProperties.facilityKey == 'lincs'}">
             Reagent Wells</t:commandLink>
 
             <t:panelGrid columns="2" styleClass="layoutPanel"
@@ -192,7 +192,7 @@
  -->
             <t:commandLink action="#{menu.browseLettersOfSupport}"
               styleClass="menuItem"
-              rendered="#{menu.readAdmin &amp;&amp; menu.applicationProperties.map['screensaver.ui.facility_name'] != 'LINCS'}"
+              rendered="#{menu.readAdmin &amp;&amp; menu.applicationProperties.facilityKey != 'lincs'}"
               title="Letters of Support">
               Letters of Support
             </t:commandLink>
@@ -203,7 +203,7 @@
         <t:htmlTag value="hr" />
 
         <t:outputText styleClass="menuSectionHeader"
-          value="Find&amp;nbsp;#{menu.applicationProperties.facility == 'LINCS' ? 'Reagents' : 'Wells'}&amp;nbsp;by..."
+          value="Find&amp;nbsp;#{menu.applicationProperties.facilityKey == 'lincs' ? 'Reagents' : 'Wells'}&amp;nbsp;by..."
           escape="false"/> 
         <h:form id="findWellsByNameFacilityVendorIDForm"
           title="Find the information for a small molecule reagent by the compound name, facility ID, or vendor ID">

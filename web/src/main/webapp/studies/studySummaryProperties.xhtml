@@ -58,7 +58,7 @@
 
   <!-- NOTE: for [#2417] this is a LINCS-only feature -->
   <ss:property id="studyImage" label="Study Image"
-    description="Study Image" rendered="#{studyViewer.applicationProperties.map['screensaver.ui.facility_name'] == 'LINCS'}">
+    description="Study Image" rendered="#{studyViewer.applicationProperties.facilityKey == 'lincs'}">
     <ui:define name="data">
       <t:graphicImage url="#{studyViewer.studyImageUrl}" height="200"
         onclick="w=window.open('#{studyViewer.studyImageUrl}','image','height=500,width=500');w.moveTo(500,400);"

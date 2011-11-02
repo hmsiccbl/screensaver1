@@ -461,7 +461,7 @@ public class UserViewer extends SearchResultContextEditableEntityViewerBackingBe
       }
 
       // At ICCB-L, the RNAi DSL 2 role is not an option, so we hide it at the UI level; we maintain it in our model for consistency with the SM DSL roles
-      if (IccblScreensaverConstants.FACILITY_NAME.equals(getApplicationProperties().getFacility())) {
+      if (getApplicationProperties().isFacility(IccblScreensaverConstants.FACILITY_KEY)) {
         candidateNewUserRoles.remove(ScreensaverUserRole.RNAI_DSL_LEVEL2_MUTUAL_POSITIVES);
       }
 

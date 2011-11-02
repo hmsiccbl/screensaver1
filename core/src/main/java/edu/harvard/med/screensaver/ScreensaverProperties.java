@@ -27,6 +27,7 @@ import edu.harvard.med.lincs.screensaver.LincsScreensaverConstants;
 import edu.harvard.med.screensaver.db.DatabaseConnectionSettingsResolutionException;
 import edu.harvard.med.screensaver.db.DatabaseConnectionSettingsResolver;
 import edu.harvard.med.screensaver.db.NeedsScreensaverProperties;
+import edu.harvard.med.screensaver.util.NullSafeUtils;
 import edu.harvard.med.screensaver.util.StringUtils;
 
 public class ScreensaverProperties implements ScreensaverConstants
@@ -227,24 +228,41 @@ public class ScreensaverProperties implements ScreensaverConstants
   {
     return _properties;
   }
-  
-  public String getFacility()
+
+  /**
+   * Return a human-readable facility name; this is for display purposes only.
+   * 
+   * @see #getFacilityKey()
+   */
+  public String getFacilityName()
   {
     return getProperty(FACILITY_NAME);
   }
 
-  public String getProfile()
-  {
-	return _versionProperties.getProperty(FACILITY_PROPERTY);
-  }
-  
   /**
-   * @deprecated use {@link #getFacility()}
+   * Return the facility key for the running application. This key can be used to conditionally enable or disable
+   * facility-specific features or behaviors of the running application. Use the facility key, and not the
+   * {@link #getFacilityName() facility name} for this purpose. Note that this property is set at build-time.
+   * 
+   * @see #getFacilityName()
+   */
+  public String getFacilityKey()
+  {
+    return _versionProperties.getProperty(FACILITY_KEY_PROPERTY);
+  }
+
+  public boolean isFacility(String facilityKey)
+  {
+    return NullSafeUtils.nullSafeEquals(getFacilityKey(), facilityKey);
+  }
+
+  /**
+   * @deprecated use {@link #getFacilityKey()}
    */
   @Deprecated
   public boolean isLincsAppVersion()
   {
-    return LincsScreensaverConstants.FACILITY_NAME.equals(getProperty(FACILITY_NAME));
+    return LincsScreensaverConstants.FACILITY_KEY.equals(getProperty(FACILITY_NAME));
   }
 
   public boolean isAllowGuestLogin()

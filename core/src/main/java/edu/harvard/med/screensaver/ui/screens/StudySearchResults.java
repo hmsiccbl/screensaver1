@@ -124,7 +124,7 @@ public class StudySearchResults extends EntityBasedEntitySearchResults<Screen,In
       public ScreeningRoomUser getUser(Screen study) { return study.getLeadScreener(); }
     });
 
-    if (!!!LincsScreensaverConstants.FACILITY_NAME.equals(getApplicationProperties().getFacility())) {
+    if (!!!getApplicationProperties().isFacility(LincsScreensaverConstants.FACILITY_KEY)) {
       columns.add(new EnumEntityColumn<Screen,StudyType>(Screen.thisEntity.toProperty("studyType"),
                                                          "Study Type", "'" + StudyType.IN_SILICO + "'' or '" +
                                                            StudyType.IN_VITRO + "'",
@@ -142,7 +142,7 @@ public class StudySearchResults extends EntityBasedEntitySearchResults<Screen,In
       public ScreenType getCellValue(Screen study) { return study.getScreenType(); }
     });
 
-    if (LincsScreensaverConstants.FACILITY_NAME.equals(getApplicationProperties().getFacility())) {
+    if (getApplicationProperties().isFacility(LincsScreensaverConstants.FACILITY_KEY)) {
       columns.add(new DateEntityColumn<Screen>(Screen.thisEntity.toProperty("dateCreated"),
                                                "Date Data Received",
                                                "The date the data was received",
@@ -155,7 +155,7 @@ public class StudySearchResults extends EntityBasedEntitySearchResults<Screen,In
       });
     }  
  
-    if (LincsScreensaverConstants.FACILITY_NAME.equals(getApplicationProperties().getFacility())) {
+    if (getApplicationProperties().isFacility(LincsScreensaverConstants.FACILITY_KEY)) {
       columns.add(new DateEntityColumn<Screen>(Screen.thisEntity.toProperty("dateLoaded"),
                                                "Date Loaded",
                                                "The date the data was loaded",
@@ -167,7 +167,7 @@ public class StudySearchResults extends EntityBasedEntitySearchResults<Screen,In
         }
       });
     }    
-    if (LincsScreensaverConstants.FACILITY_NAME.equals(getApplicationProperties().getFacility())) {
+    if (getApplicationProperties().isFacility(LincsScreensaverConstants.FACILITY_KEY)) {
       columns.add(new DateEntityColumn<Screen>(Screen.thisEntity.toProperty("datePubliclyAvailable"),
                                                "Date Publicly Available",
                                                "The date the data was made publicly available",

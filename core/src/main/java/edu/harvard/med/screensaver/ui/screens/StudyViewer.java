@@ -142,14 +142,12 @@ public class StudyViewer<E extends Study> extends SearchResultContextEntityViewe
   {
     if (study.isStudyOnly()) {
       _annotationTypesTable.initialize(new ArrayList<AnnotationType>(study.getAnnotationTypes()));
-      if (!!!LincsScreensaverConstants.FACILITY_NAME.equals(getApplicationProperties().getFacility())) {
-        _wellSearchResults.searchReagentsForStudy(study);
-      }
-      else if (LincsScreensaverConstants.FACILITY_NAME.equals(getApplicationProperties().getFacility())) {
-        //        _reagentsBrowser.searchCanonicalReagentsOfWellsBrowser(_wellsBrowser);
-        //        _reagentsBrowser.showAnnotationTypesForStudy(study);
+      if (getApplicationProperties().isFacility(LincsScreensaverConstants.FACILITY_KEY)) {
         _annotationSearchResults.setStudyViewerMode();
         _annotationSearchResults.searchForCanonicalAnnotations((Screen) study);
+      }
+      else {
+        _wellSearchResults.searchReagentsForStudy(study);
       }
       _studyDetailViewer.setEntity(study);
 
@@ -186,7 +184,7 @@ public class StudyViewer<E extends Study> extends SearchResultContextEntityViewe
   {
     Well well = ((Screen) getEntity()).getWellStudied();
     if (well == null) return null;
-    if (!!!LincsScreensaverConstants.FACILITY_NAME.equals(getApplicationProperties().getFacility())) {
+    if (!!!getApplicationProperties().isFacility(LincsScreensaverConstants.FACILITY_KEY)) {
       return well.getWellKey().toString();
     }
     else {

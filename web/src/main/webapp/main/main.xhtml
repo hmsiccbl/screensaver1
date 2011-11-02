@@ -11,7 +11,7 @@
 
   <ui:define name="body">
     <t:outputText id="welcomeMessage"
-      value="Welcome to #{appInfo.applicationProperties.map['screensaver.ui.facility_name'] == 'LINCS' ? 'the' : '' } #{appInfo.applicationProperties.map['screensaver.ui.application_name']}, #{menu.screensaverUser.fullNameFirstLast}!"
+      value="Welcome to #{appInfo.applicationProperties.facilityKey == 'lincs' ? 'the' : '' } #{appInfo.applicationProperties.map['screensaver.ui.application_name']}, #{menu.screensaverUser.fullNameFirstLast}!"
       styleClass="title" />
 
     <div id="ie_detection_message"
@@ -24,7 +24,7 @@
           </script></div>
 
     <t:div id="screenerWelcomeMessage"
-      rendered="#{appInfo.applicationProperties.map['screensaver.ui.facility_name'] != 'LINCS' &amp;&amp; !menu.readAdmin}">
+      rendered="#{appInfo.applicationProperties.facilityKey != 'lincs' &amp;&amp; !menu.readAdmin}">
       <ul>
         <li>Use "Browse Libraries" to view the set of small
           molecule and RNAi libraries available for use at the screening
@@ -88,7 +88,7 @@
     </t:div>
 
     <t:div id="lincsWelcomeMessage" 
-      rendered="#{appInfo.applicationProperties.map['screensaver.ui.facility_name'] == 'LINCS' &amp;&amp; !menu.readAdmin}">
+      rendered="#{appInfo.applicationProperties.facilityKey == 'lincs' &amp;&amp; !menu.readAdmin}">
       <ul>
       <li>This database is under development, improvements are ongoing.</li>
       <li>The HMS LINCS Database currently contains information on perturbagens and several datasets. A list of the datasets available via the HMS LINCS Database can be found on the "Data being collected" page of the <a href="http://lincs.hms.harvard.edu/">HMS LINCS website</a>. Other large and more complex HMS LINCS datasets are stored in the HMS LINCS Data Repository, which will be accessible online by the end of the summer of 2011.  In the future it will be possible to search for metadata in Data Repository using the Database.  As of July 2011, this is not yet implemented.</li>

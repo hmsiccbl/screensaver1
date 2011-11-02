@@ -13,7 +13,7 @@
   <ui:param name="pageHelpURL" value="libraries/wellViewerHelp.jsf" />
 
   <ui:define name="body">
-    <ui:include src="#{appInfo.applicationProperties.map['screensaver.ui.facility_name'] == 'LINCS' ? 'wellViewerBodyLincs.xhtml' : 'wellViewerBody.xhtml'}" >
+    <ui:include src="#{appInfo.applicationProperties.facilityKey == 'lincs' ? 'wellViewerBodyLincs.xhtml' : 'wellViewerBody.xhtml'}" >
       <ui:param name="wellViewerSpecialMessage" value="#{wellViewer.specialMessage}" />
     </ui:include>
   </ui:define>

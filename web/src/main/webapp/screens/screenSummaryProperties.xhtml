@@ -39,7 +39,7 @@
 	</ss:property>
 
   <ss:property id="projectId" label="Project ID"
-    rendered="#{appInfo.applicationProperties.facility != 'LINCS'}"
+    rendered="#{appInfo.applicationProperties.facilityKey != 'lincs'}"
     description="The project ID shared by this screen"
     value="#{screen.projectId}" editable="#{editable}">
     <ui:define name="data">
@@ -59,7 +59,7 @@
   </ss:property>
 
   <ss:property id="projectPhase" label="Project Phase"
-    rendered="#{appInfo.applicationProperties.facility != 'LINCS'}"
+    rendered="#{appInfo.applicationProperties.facilityKey != 'lincs'}"
     description="'Primary','Counter', or 'Follow-Up'" value="#{screen.projectPhase}"
     editable="#{editable}"
     converter="#{projectPhaseConverter}">
@@ -100,7 +100,7 @@
 		editable="#{editable}" editWidth="80" editHeight="3">
 		<ui:define name="valueHeader">
 			<t:outputText
-        rendered="#{screen.screenType.value== 'Small Molecule' &amp;&amp; screenDetailViewer.applicationProperties.map['screensaver.ui.facility_name'] != 'LINCS'}"
+        rendered="#{screen.screenType.value== 'Small Molecule' &amp;&amp; screenDetailViewer.applicationProperties.facilityKey != 'lincs'}"
 				value="A screen for compounds that..." styleClass="dataText" />
 		</ui:define>
 	</ss:property>
@@ -110,7 +110,7 @@
     description="The date the data was received"
     value="#{entity.dateCreated}" 
     type="Date"
-    rendered="#{appInfo.applicationProperties.facility == 'LINCS' }" 
+    rendered="#{appInfo.applicationProperties.facilityKey == 'lincs' }" 
     />      
 
 </ui:composition>

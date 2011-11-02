@@ -154,7 +154,7 @@
       unitsSelector="#{activityViewer.assayWellVolumeType}"
       description="The final volume of the assay well"
       editable="#{activityViewer.editMode}" editWidth="6"
-      rendered="#{appInfo.applicationProperties.map['screensaver.ui.facility_name'] == 'LINCS' &amp;&amp; (activityViewer.entity.class.simpleName == 'LibraryScreening' || activityViewer.entity.class.simpleName == 'CherryPickScreening')}" />
+      rendered="#{appInfo.applicationProperties.facilityKey == 'lincs' &amp;&amp; (activityViewer.entity.class.simpleName == 'LibraryScreening' || activityViewer.entity.class.simpleName == 'CherryPickScreening')}" />
 
     <ss:property id="isForExternalLibraryPlates" type="Boolean"
       submitOnChange="true" label="External library plates"

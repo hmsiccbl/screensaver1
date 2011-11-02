@@ -16,7 +16,7 @@
   <ui:define name="searchResultHeader">
     <h:form>
       <t:panelGroup id="wellSearchResultsCmdPanel" styleClass="commandPanel"
-        rendered="#{appInfo.applicationProperties.facility == 'LINCS' &amp;&amp; !(searchResults.nested || searchResults.entityView)}">
+        rendered="#{appInfo.applicationProperties.facilityKey == 'lincs' &amp;&amp; !(searchResults.nested || searchResults.entityView)}">
         <t:commandButton id="viewUniqueReagentsCommand" value="Browse Unique Reagents..." action="browseReagents" title="List matching reagents from only the first HMS LINCS batch entered for each reagent"/>
       </t:panelGroup>
     </h:form>        

@@ -24,7 +24,7 @@ public interface ScreensaverConstants
   public static final String VERSION_PROPERTIES_RESOURCE = "/version.properties";
   public static final String BUILD_NUMBER_PROPERTY = "build.number";
   public static final String VERSION_PROPERTY = "version";
-  public static final String FACILITY_PROPERTY = "facility";
+  public static final String FACILITY_KEY_PROPERTY = "facility";
 
   /* Constants for application properties that are found in the screensaver.properties file.  Use these constants to retrieve property values using getApplicationProperties(). */
   public static final String APPLICATION_NAME_PROPERTY = "screensaver.ui.application_name";

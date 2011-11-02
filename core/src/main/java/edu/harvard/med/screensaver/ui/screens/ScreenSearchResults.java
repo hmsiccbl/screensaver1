@@ -283,7 +283,7 @@ public class ScreenSearchResults extends EntityBasedEntitySearchResults<Screen,I
     columns.get(columns.size() - 1).setAdministrative(true);
     columns.get(columns.size() - 1).setVisible(false);
 
-    if (!!!LincsScreensaverConstants.FACILITY_NAME.equals(getApplicationProperties().getFacility())) {
+    if (!!!getApplicationProperties().isFacility(LincsScreensaverConstants.FACILITY_KEY)) {
       columns.add(new EnumEntityColumn<Screen,ScreenStatus>(Screen.statusItems.toProperty("status"),
                                                             "Status", "The current status of the screen, e.g., 'Completed', 'Ongoing', 'Pending', etc.",
                                                             TableColumn.UNGROUPED,
@@ -409,7 +409,7 @@ public class ScreenSearchResults extends EntityBasedEntitySearchResults<Screen,I
       public ScreenType getCellValue(Screen screen) { return screen.getScreenType(); }
     });
 
-    if (!!!LincsScreensaverConstants.FACILITY_NAME.equals(getApplicationProperties().getFacility())) {
+    if (!!!getApplicationProperties().isFacility(LincsScreensaverConstants.FACILITY_KEY)) {
       columns.add(new EnumEntityColumn<Screen,ProjectPhase>(RelationshipPath.from(Screen.class).toProperty("projectPhase"),
                                                             "Project Phase", "'Primary','Counter', or 'Follow-Up'", TableColumn.UNGROUPED, ProjectPhase.values()) {
         @Override
@@ -472,7 +472,7 @@ public class ScreenSearchResults extends EntityBasedEntitySearchResults<Screen,I
       public ScreeningRoomUser getUser(Screen screen) { return screen.getLeadScreener(); }
     });
 
-    if (!!!LincsScreensaverConstants.FACILITY_NAME.equals(getApplicationProperties().getFacility())) {
+    if (!!!getApplicationProperties().isFacility(LincsScreensaverConstants.FACILITY_KEY)) {
       columns.add(new DateTimeEntityColumn<Screen>(Screen.thisEntity.toProperty("dateCreated"),
                                                    isNonScreenSearchResults ? "Date Screen Recorded" : "Date Recorded",
                                                    "The date the screen was first recorded in the Screensaver",
@@ -498,7 +498,7 @@ public class ScreenSearchResults extends EntityBasedEntitySearchResults<Screen,I
       
     }   
     
-    if (LincsScreensaverConstants.FACILITY_NAME.equals(getApplicationProperties().getFacility())) {
+    if (getApplicationProperties().isFacility(LincsScreensaverConstants.FACILITY_KEY)) {
       columns.add(new DateEntityColumn<Screen>(Screen.thisEntity.toProperty("dateLoaded"),
                                                    "Date Loaded",
                                                    "The date the screen data was loaded",
@@ -511,7 +511,7 @@ public class ScreenSearchResults extends EntityBasedEntitySearchResults<Screen,I
       });
     }    
     
-    if (LincsScreensaverConstants.FACILITY_NAME.equals(getApplicationProperties().getFacility())) {
+    if (getApplicationProperties().isFacility(LincsScreensaverConstants.FACILITY_KEY)) {
       columns.add(new DateEntityColumn<Screen>(Screen.thisEntity.toProperty("datePubliclyAvailable"),
                                                    "Date Publicly Available",
                                                    "The date the screen data was made publicly available",

@@ -15,7 +15,7 @@
   <ui:define name="searchResultHeader">
     <h:form>
       <t:panelGroup id="reagentSearchResultsCmdPanel" styleClass="commandPanel"
-        rendered="#{appInfo.applicationProperties.facility == 'LINCS' &amp;&amp; !(searchResults.nested || searchResults.entityView)}">
+        rendered="#{appInfo.applicationProperties.facilityKey == 'lincs' &amp;&amp; !(searchResults.nested || searchResults.entityView)}">
         <t:commandButton id="viewReagentWellsCommand" value="Browse Reagent Wells..." action="browseWells" title="List all matching reagents from the HMS LINCS database"/>
       </t:panelGroup>
     </h:form>        

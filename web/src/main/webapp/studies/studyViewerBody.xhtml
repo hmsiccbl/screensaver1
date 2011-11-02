@@ -87,7 +87,7 @@
   </h:form>
 
   <t:div
-   rendered="#{ appInfo.applicationProperties.facility != 'LINCS' &amp;&amp; ! empty studyViewer.entity &amp;&amp; ! studyViewer.isPanelCollapsedMap['reagentsData'] }">
+   rendered="#{ appInfo.applicationProperties.facilityKey != 'lincs' &amp;&amp; ! empty studyViewer.entity &amp;&amp; ! studyViewer.isPanelCollapsedMap['reagentsData'] }">
    <ui:include src="../libraries/wellSearchResultsBody.xhtml">
      <ui:param name="wellsBrowser" value="#{studyViewer.wellSearchResults}" />
    </ui:include>
@@ -100,7 +100,7 @@
     -->
   </ui:remove>
   <t:div
-   rendered="#{appInfo.applicationProperties.facility == 'LINCS' &amp;&amp; ! empty studyViewer.entity &amp;&amp; ! studyViewer.isPanelCollapsedMap['reagentsData']}">
+   rendered="#{appInfo.applicationProperties.facilityKey == 'lincs' &amp;&amp; ! empty studyViewer.entity &amp;&amp; ! studyViewer.isPanelCollapsedMap['reagentsData']}">
    <ui:include src="/annotations/annotationSearchResultsBody.xhtml">
     <ui:param name="annotationsBrowser"
      value="#{studyViewer.annotationSearchResults}" />

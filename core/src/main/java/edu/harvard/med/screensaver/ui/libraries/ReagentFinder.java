@@ -139,7 +139,7 @@ public class ReagentFinder extends AbstractBackingBean
     if (_wellsBrowser.getRowCount() == 1) {
       _wellsBrowser.getRowsPerPageSelector().setSelection(1);
     }
-    if (!!!LincsScreensaverConstants.FACILITY_NAME.equals(getApplicationProperties().getFacility())) {
+    if (!!!getApplicationProperties().isFacility(LincsScreensaverConstants.FACILITY_KEY)) {
       _wellsBrowser.getColumnManager().setVisibilityOfColumnsInGroup("Compound Reagent Columns", true);
     }
     resetSearchFields();

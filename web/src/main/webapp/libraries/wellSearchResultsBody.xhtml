@@ -12,7 +12,7 @@
 
 	<ss:searchResult searchResults="#{wellsBrowser}">
 		<ui:define name="entityViewer">
-			<ui:include src="#{appInfo.applicationProperties.facility == 'LINCS' ? 'wellViewerBodyLincs.xhtml' : 'wellViewerBody.xhtml'}">
+			<ui:include src="#{appInfo.applicationProperties.facilityKey == 'lincs' ? 'wellViewerBodyLincs.xhtml' : 'wellViewerBody.xhtml'}">
         <ui:param name="wellViewerSpecialMessage" value="#{wellViewer.specialMessage}" />
  			</ui:include>
 		</ui:define>
