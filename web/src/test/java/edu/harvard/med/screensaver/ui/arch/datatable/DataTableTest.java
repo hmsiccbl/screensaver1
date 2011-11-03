@@ -21,12 +21,12 @@ import java.util.Set;
 import junit.framework.TestCase;
 import org.apache.log4j.Logger;
 
+import edu.harvard.med.screensaver.db.Criterion;
 import edu.harvard.med.screensaver.db.SortDirection;
+import edu.harvard.med.screensaver.db.Criterion.Operator;
 import edu.harvard.med.screensaver.db.datafetcher.DataFetcher;
 import edu.harvard.med.screensaver.db.hqlbuilder.HqlBuilder;
-import edu.harvard.med.screensaver.ui.arch.datatable.Criterion;
 import edu.harvard.med.screensaver.ui.arch.datatable.DataTable;
-import edu.harvard.med.screensaver.ui.arch.datatable.Criterion.Operator;
 import edu.harvard.med.screensaver.ui.arch.datatable.column.EnumColumn;
 import edu.harvard.med.screensaver.ui.arch.datatable.column.IntegerColumn;
 import edu.harvard.med.screensaver.ui.arch.datatable.column.RealColumn;

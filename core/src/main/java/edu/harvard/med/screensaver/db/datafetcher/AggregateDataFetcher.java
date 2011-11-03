@@ -16,11 +16,11 @@ import java.util.Map;
 import java.util.Set;
 import java.util.SortedSet;
 
+import edu.harvard.med.screensaver.db.Criterion;
 import edu.harvard.med.screensaver.db.GenericEntityDAO;
 import edu.harvard.med.screensaver.db.hqlbuilder.HqlBuilder;
 import edu.harvard.med.screensaver.model.Entity;
 import edu.harvard.med.screensaver.model.meta.PropertyPath;
-import edu.harvard.med.screensaver.ui.arch.datatable.Criterion;
 
 /**
  * @param AT aggregate type

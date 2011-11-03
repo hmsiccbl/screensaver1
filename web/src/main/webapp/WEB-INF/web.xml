@@ -175,7 +175,7 @@
   <!-- servlet to present cellHTS2 output documents from an file location outside the webapps subdirectory -->
    <servlet>
      <servlet-name>cellHTS2DataServlet</servlet-name>
-   	 <servlet-class>edu.harvard.med.screensaver.analysis.cellhts2.DataServlet</servlet-class>
+   	 <servlet-class>edu.harvard.med.screensaver.ui.arch.auth.servlet.DataServlet</servlet-class>
    </servlet>
    
    <servlet-mapping>

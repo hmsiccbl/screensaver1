@@ -45,7 +45,6 @@
     <constructor-arg>
       <bean class="edu.harvard.med.lincs.screensaver.io.libraries.smallmolecule.SmallMoleculeReagentFacilitySaltIdStructureImageProvider">
         <constructor-arg value="#{screensaverProperties.map['screensaver.images.base_url']}/compound-images-by-facility-salt-id/" />
-        <constructor-arg ref="imageProviderServlet" />
       </bean>
     </constructor-arg>
   </bean>
@@ -53,7 +52,6 @@
   <bean id="studyImageProvider"
         class="edu.harvard.med.lincs.screensaver.io.screens.StudyFacilityIdStudyImageProvider">
     <constructor-arg value="#{screensaverProperties.map['screensaver.images.base_url']}/screen-images-by-facility-id/" />
-    <constructor-arg ref="imageProviderServlet" />
   </bean>
 
   <bean
@@ -179,7 +177,6 @@
     <constructor-arg>
       <bean class="edu.harvard.med.lincs.screensaver.io.screens.SmallMoleculeReagentFacilitySaltIdStudyImageProvider">
         <constructor-arg value="#{screensaverProperties.map['screensaver.images.base_url']}/ambit-study-compound-images-by-facility-salt-id/" />
-        <constructor-arg ref="imageProviderServlet" />
       </bean>
     </constructor-arg>
     <constructor-arg ref="attachedFiles" />

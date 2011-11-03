@@ -15,11 +15,12 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Set;
 
+import com.google.common.collect.Sets;
 import org.apache.log4j.Logger;
 import org.hibernate.Query;
 import org.hibernate.Session;
-import com.google.common.collect.Sets;
 
+import edu.harvard.med.screensaver.db.Criterion.Operator;
 import edu.harvard.med.screensaver.db.hqlbuilder.HqlBuilder;
 import edu.harvard.med.screensaver.model.DataModelViolationException;
 import edu.harvard.med.screensaver.model.screens.LabActivity;
@@ -27,7 +28,6 @@ import edu.harvard.med.screensaver.model.screens.ProjectPhase;
 import edu.harvard.med.screensaver.model.screens.Screen;
 import edu.harvard.med.screensaver.model.screens.Screening;
 import edu.harvard.med.screensaver.model.users.ScreensaverUser;
-import edu.harvard.med.screensaver.ui.arch.datatable.Criterion.Operator;
 
 public class ScreenDAOImpl extends AbstractDAO implements ScreenDAO
 {

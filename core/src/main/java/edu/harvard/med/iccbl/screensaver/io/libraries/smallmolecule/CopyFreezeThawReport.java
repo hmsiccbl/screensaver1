@@ -16,10 +16,9 @@ import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.math.BigDecimal;
-import java.util.Set;
 
 import javax.mail.MessagingException;
-import javax.mail.internet.InternetAddress;
+import javax.swing.table.TableColumn;
 
 import jxl.Workbook;
 import jxl.write.WritableWorkbook;
@@ -28,21 +27,14 @@ import jxl.write.biff.RowsExceededException;
 import org.apache.commons.cli.OptionBuilder;
 import org.apache.log4j.Logger;
 
-import com.google.common.collect.Lists;
-
 import edu.harvard.med.iccbl.screensaver.io.AdminEmailApplication;
+import edu.harvard.med.screensaver.db.Criterion;
+import edu.harvard.med.screensaver.db.Criterion.Operator;
 import edu.harvard.med.screensaver.db.GenericEntityDAO;
 import edu.harvard.med.screensaver.model.libraries.Copy;
 import edu.harvard.med.screensaver.model.libraries.LibraryType;
 import edu.harvard.med.screensaver.model.screens.ScreenType;
 import edu.harvard.med.screensaver.model.users.AdministratorUser;
-import edu.harvard.med.screensaver.service.EmailService;
-import edu.harvard.med.screensaver.ui.arch.datatable.Criterion;
-import edu.harvard.med.screensaver.ui.arch.datatable.Criterion.Operator;
-import edu.harvard.med.screensaver.ui.arch.datatable.column.FixedDecimalColumn;
-import edu.harvard.med.screensaver.ui.arch.datatable.column.TableColumn;
-import edu.harvard.med.screensaver.ui.arch.searchresults.ExcelWorkbookDataExporter;
-import edu.harvard.med.screensaver.ui.libraries.LibraryCopySearchResults;
 
 /**
  * Copies to retire report<br/>
@@ -98,88 +90,89 @@ public class CopyFreezeThawReport extends AdminEmailApplication
                          /* acceptAdminUserOptions= */true);
     log.info("==== Running CopyFreezeThawReport: " + app.toString() + "======");
 
-    try {
-      AdministratorUser admin = app.findAdministratorUser();
-
-      String fileName = app.getCommandLineOptionValue(OPTION_OUTPUT_FILE[SHORT_OPTION_INDEX]);
-      int threshold = app.getCommandLineOptionValue(OPTION_FREEZE_THAW_THRESHOLD[SHORT_OPTION_INDEX], Integer.class);
-
-      GenericEntityDAO dao = (GenericEntityDAO) app.getSpringBean("genericEntityDao");
-      LibraryCopySearchResults lcsr = (LibraryCopySearchResults) app.getSpringBean("libraryCopiesBrowser2");
-
-      lcsr.searchAll();
-      BigDecimal bThreshold = new BigDecimal(threshold);
-      FixedDecimalColumn<Copy> column = (FixedDecimalColumn<Copy>) lcsr.getColumnManager().getColumn("Plate Screening Count Average");
-      column.addCriterion(new Criterion<BigDecimal>(Operator.GREATER_THAN_EQUAL, bThreshold));
-      column.setVisible(true);
-
-      TableColumn<Copy,ScreenType> column2 = (TableColumn<Copy,ScreenType>) lcsr.getColumnManager().getColumn("Screen Type");
-      column2.addCriterion(new Criterion<ScreenType>(Operator.EQUAL, ScreenType.SMALL_MOLECULE));
-      column2.setVisible(true);
-
-      //      TableColumn<Copy,PlateStatus> column3 = (TableColumn<Copy,PlateStatus>) lcsr.getColumnManager().getColumn("Primary Plate Status");
-      //      column3.addCriterion(new Criterion<PlateStatus>(Operator.LESS_THAN, PlateStatus.RETIRED));
-      //      column3.setVisible(true);
-
-      TableColumn<Copy,Integer> column3a = (TableColumn<Copy,Integer>) lcsr.getColumnManager().getColumn("Plates Available");
-      column3a.addCriterion(new Criterion<Integer>(Operator.GREATER_THAN, 0));
-      column3a.setVisible(true);
-
-      //TODO: katriana has asked about filtering a list of old libraries out; and to filter out "DOS" Library Types
-      TableColumn<Copy,LibraryType> column4 = (TableColumn<Copy,LibraryType>) lcsr.getColumnManager().getColumn("Library Type");
-      column4.addCriterion(new Criterion<LibraryType>(Operator.NOT_EQUAL, LibraryType.DOS));
-      column4.setVisible(true);
-
-      log.debug("starting exporting data for download, threshold " + threshold);
-
-      int rowCount = lcsr.getDataTableModel().getRowCount();
-      log.info("preparing to write: " + rowCount + " rows");
-      ExcelWorkbookDataExporter<Copy> dataExporter = new ExcelWorkbookDataExporter<Copy>("searchResult");
-      dataExporter.setTableColumns(lcsr.getColumnManager().getAllColumns()); //getVisibleColumns());
-
-      ByteArrayOutputStream bos = new ByteArrayOutputStream();
-
-      WritableWorkbook workbook = Workbook.createWorkbook(bos);
-      dataExporter.writeWorkbook(workbook, lcsr.getDataTableModel().iterator());
-      workbook.write();
-      workbook.close();
-
-      File file = new File(fileName + ".xls"); //TODO: if the email option is used, then this file should default to an email attachment
-      if (file.exists()) {
-        log.warn("file: " + file + ", exists, overwriting");
-      }
-      FileOutputStream fos = new FileOutputStream(file);
-      bos.writeTo(fos);
-      fos.close();
-      log.info("finished exporting data to: " + file.getCanonicalPath());
-
-      String subject = "Small Molecule Freeze Thaw Report";
-      String msg = "Small Molecule Libraries Freeze Thaw report:\n"
-        + "Found " + rowCount + " copies that match the criteria:\n" +
-            "- Plate Screening Count Average  >= " + threshold + " \n" +
-            "- has \"Available\" Plates\n" +
-            "- Libary Type != \"DOS\"\n" +
-            "Please see the attached file for the full report.";
-      log.info(msg);
-      app.sendAdminEmails(subject, msg, file);
-
-    }
-    catch (IOException e) {
-      app.sendErrorMail("CopyFreezeThawReport: Error exporting", app.toString(), e);
-      System.exit(1); // error
-    }
-    catch (RowsExceededException e) {
-      app.sendErrorMail("CopyFreezeThawReport: too many rows to export as a workbook ", app.toString(), e);
-      System.exit(1); // error
-    }
-    catch (WriteException e) {
-      app.sendErrorMail("CopyFreezeThawReport: Error exporting", app.toString(), e);
-      System.exit(1); // error
-    }
-    catch (MessagingException e) {
-      app.sendErrorMail("CopyFreezeThawReport: Error mailing", app.toString(), e);
-      System.exit(1); // error
-    }
-    log.info("==== Running CopyFreezeThawReport: " + app.toString() + "======");
+      // TODO: reinstate, once we figure out how to remove dependencies upon UI code
+//    try {
+//      AdministratorUser admin = app.findAdministratorUser();
+//
+//      String fileName = app.getCommandLineOptionValue(OPTION_OUTPUT_FILE[SHORT_OPTION_INDEX]);
+//      int threshold = app.getCommandLineOptionValue(OPTION_FREEZE_THAW_THRESHOLD[SHORT_OPTION_INDEX], Integer.class);
+//
+//      GenericEntityDAO dao = (GenericEntityDAO) app.getSpringBean("genericEntityDao");
+//      LibraryCopySearchResults lcsr = (LibraryCopySearchResults) app.getSpringBean("libraryCopiesBrowser2");
+//
+//      lcsr.searchAll();
+//      BigDecimal bThreshold = new BigDecimal(threshold);
+//      FixedDecimalColumn<Copy> column = (FixedDecimalColumn<Copy>) lcsr.getColumnManager().getColumn("Plate Screening Count Average");
+//      column.addCriterion(new Criterion<BigDecimal>(Operator.GREATER_THAN_EQUAL, bThreshold));
+//      column.setVisible(true);
+//
+//      TableColumn<Copy,ScreenType> column2 = (TableColumn<Copy,ScreenType>) lcsr.getColumnManager().getColumn("Screen Type");
+//      column2.addCriterion(new Criterion<ScreenType>(Operator.EQUAL, ScreenType.SMALL_MOLECULE));
+//      column2.setVisible(true);
+//
+//      //      TableColumn<Copy,PlateStatus> column3 = (TableColumn<Copy,PlateStatus>) lcsr.getColumnManager().getColumn("Primary Plate Status");
+//      //      column3.addCriterion(new Criterion<PlateStatus>(Operator.LESS_THAN, PlateStatus.RETIRED));
+//      //      column3.setVisible(true);
+//
+//      TableColumn<Copy,Integer> column3a = (TableColumn<Copy,Integer>) lcsr.getColumnManager().getColumn("Plates Available");
+//      column3a.addCriterion(new Criterion<Integer>(Operator.GREATER_THAN, 0));
+//      column3a.setVisible(true);
+//
+//      //TODO: katriana has asked about filtering a list of old libraries out; and to filter out "DOS" Library Types
+//      TableColumn<Copy,LibraryType> column4 = (TableColumn<Copy,LibraryType>) lcsr.getColumnManager().getColumn("Library Type");
+//      column4.addCriterion(new Criterion<LibraryType>(Operator.NOT_EQUAL, LibraryType.DOS));
+//      column4.setVisible(true);
+//
+//      log.debug("starting exporting data for download, threshold " + threshold);
+//
+//      int rowCount = lcsr.getDataTableModel().getRowCount();
+//      log.info("preparing to write: " + rowCount + " rows");
+//      ExcelWorkbookDataExporter<Copy> dataExporter = new ExcelWorkbookDataExporter<Copy>("searchResult");
+//      dataExporter.setTableColumns(lcsr.getColumnManager().getAllColumns()); //getVisibleColumns());
+//
+//      ByteArrayOutputStream bos = new ByteArrayOutputStream();
+//
+//      WritableWorkbook workbook = Workbook.createWorkbook(bos);
+//      dataExporter.writeWorkbook(workbook, lcsr.getDataTableModel().iterator());
+//      workbook.write();
+//      workbook.close();
+//
+//      File file = new File(fileName + ".xls"); //TODO: if the email option is used, then this file should default to an email attachment
+//      if (file.exists()) {
+//        log.warn("file: " + file + ", exists, overwriting");
+//      }
+//      FileOutputStream fos = new FileOutputStream(file);
+//      bos.writeTo(fos);
+//      fos.close();
+//      log.info("finished exporting data to: " + file.getCanonicalPath());
+//
+//      String subject = "Small Molecule Freeze Thaw Report";
+//      String msg = "Small Molecule Libraries Freeze Thaw report:\n"
+//        + "Found " + rowCount + " copies that match the criteria:\n" +
+//            "- Plate Screening Count Average  >= " + threshold + " \n" +
+//            "- has \"Available\" Plates\n" +
+//            "- Libary Type != \"DOS\"\n" +
+//            "Please see the attached file for the full report.";
+//      log.info(msg);
+//      app.sendAdminEmails(subject, msg, file);
+//
+//    }
+//    catch (IOException e) {
+//      app.sendErrorMail("CopyFreezeThawReport: Error exporting", app.toString(), e);
+//      System.exit(1); // error
+//    }
+//    catch (RowsExceededException e) {
+//      app.sendErrorMail("CopyFreezeThawReport: too many rows to export as a workbook ", app.toString(), e);
+//      System.exit(1); // error
+//    }
+//    catch (WriteException e) {
+//      app.sendErrorMail("CopyFreezeThawReport: Error exporting", app.toString(), e);
+//      System.exit(1); // error
+//    }
+//    catch (MessagingException e) {
+//      app.sendErrorMail("CopyFreezeThawReport: Error mailing", app.toString(), e);
+//      System.exit(1); // error
+//    }
+//    log.info("==== Running CopyFreezeThawReport: " + app.toString() + "======");
   }
 }

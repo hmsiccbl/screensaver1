@@ -27,11 +27,9 @@ import javax.persistence.Table;
 import javax.persistence.UniqueConstraint;
 import javax.persistence.Version;
 
-import org.apache.log4j.Logger;
-import org.hibernate.annotations.LazyCollectionOption;
-import org.hibernate.annotations.OptimisticLock;
-
 import com.google.common.base.Function;
+import org.apache.log4j.Logger;
+import org.hibernate.annotations.OptimisticLock;
 
 import edu.harvard.med.screensaver.model.AbstractEntity;
 import edu.harvard.med.screensaver.model.AbstractEntityVisitor;
@@ -40,7 +38,6 @@ import edu.harvard.med.screensaver.model.libraries.Reagent;
 import edu.harvard.med.screensaver.model.meta.Cardinality;
 import edu.harvard.med.screensaver.model.meta.RelationshipPath;
 import edu.harvard.med.screensaver.model.screens.Screen;
-import edu.harvard.med.screensaver.ui.screenresults.MetaDataType;
 
 /**
  * Annotation type on a reagent.

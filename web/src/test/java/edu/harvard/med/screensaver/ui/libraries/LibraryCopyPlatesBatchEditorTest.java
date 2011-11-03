@@ -22,6 +22,7 @@ import com.google.common.collect.Maps;
 
 import edu.harvard.med.screensaver.db.DAOTransaction;
 import edu.harvard.med.screensaver.db.LibrariesDAO;
+import edu.harvard.med.screensaver.db.Criterion.Operator;
 import edu.harvard.med.screensaver.model.MolarConcentration;
 import edu.harvard.med.screensaver.model.MolarUnit;
 import edu.harvard.med.screensaver.model.Volume;
@@ -43,7 +44,6 @@ import edu.harvard.med.screensaver.model.users.ScreensaverUserRole;
 import edu.harvard.med.screensaver.service.libraries.LibraryContentsVersionManager;
 import edu.harvard.med.screensaver.service.libraries.LibraryCreator;
 import edu.harvard.med.screensaver.service.libraries.PlateUpdater;
-import edu.harvard.med.screensaver.ui.arch.datatable.Criterion.Operator;
 import edu.harvard.med.screensaver.ui.arch.datatable.column.TableColumn;
 import edu.harvard.med.screensaver.ui.arch.view.AbstractBackingBeanTest;
 

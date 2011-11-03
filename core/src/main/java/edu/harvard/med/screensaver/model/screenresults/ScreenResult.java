@@ -51,13 +51,13 @@ import edu.harvard.med.screensaver.model.activities.AdministrativeActivity;
 import edu.harvard.med.screensaver.model.activities.AdministrativeActivityType;
 import edu.harvard.med.screensaver.model.annotations.ToMany;
 import edu.harvard.med.screensaver.model.libraries.Plate;
+import edu.harvard.med.screensaver.model.libraries.PlateRange;
 import edu.harvard.med.screensaver.model.libraries.Well;
 import edu.harvard.med.screensaver.model.meta.RelationshipPath;
 import edu.harvard.med.screensaver.model.screens.AssayReadoutType;
 import edu.harvard.med.screensaver.model.screens.LibraryScreening;
 import edu.harvard.med.screensaver.model.screens.Screen;
 import edu.harvard.med.screensaver.model.users.AdministratorUser;
-import edu.harvard.med.screensaver.ui.activities.PlateRange;
 import edu.harvard.med.screensaver.util.CollectionUtils;
 import edu.harvard.med.screensaver.util.StringUtils;
 

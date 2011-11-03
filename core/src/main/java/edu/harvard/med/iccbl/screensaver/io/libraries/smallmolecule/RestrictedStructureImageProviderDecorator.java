@@ -4,9 +4,9 @@ import java.net.URL;
 
 import org.apache.log4j.Logger;
 
+import edu.harvard.med.iccbl.screensaver.io.ImageProvider;
 import edu.harvard.med.screensaver.io.libraries.smallmolecule.StructureImageProvider;
 import edu.harvard.med.screensaver.model.libraries.SmallMoleculeReagent;
-import edu.harvard.med.screensaver.ui.arch.images.ImageProvider;
 
 public class RestrictedStructureImageProviderDecorator implements StructureImageProvider
 {

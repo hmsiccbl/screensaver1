@@ -52,7 +52,7 @@ import edu.harvard.med.screensaver.test.AbstractSpringPersistenceTest;
 import edu.harvard.med.screensaver.test.MakeDummyEntities;
 
 /**
- * Tests WedDataAccessPolicy implementation, as well as Hibernate interceptor-based
+ * Tests EntityViewPolicy implementation for ICCB-L facility, as well as Hibernate interceptor-based
  * mechanism for setting "restricted" flag on entities.
  * 
  * @author <a mailto="andrew_tolopko@hms.harvard.edu">Andrew Tolopko</a>

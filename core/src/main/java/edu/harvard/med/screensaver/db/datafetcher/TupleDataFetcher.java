@@ -24,6 +24,7 @@ import com.google.common.collect.Multimaps;
 import org.apache.log4j.Logger;
 import org.hibernate.Session;
 
+import edu.harvard.med.screensaver.db.Criterion.Operator;
 import edu.harvard.med.screensaver.db.GenericEntityDAO;
 import edu.harvard.med.screensaver.db.Query;
 import edu.harvard.med.screensaver.db.hqlbuilder.HqlBuilder;
@@ -33,7 +34,6 @@ import edu.harvard.med.screensaver.model.meta.Cardinality;
 import edu.harvard.med.screensaver.model.meta.PropertyNameAndValue;
 import edu.harvard.med.screensaver.model.meta.PropertyPath;
 import edu.harvard.med.screensaver.model.meta.RelationshipPath;
-import edu.harvard.med.screensaver.ui.arch.datatable.Criterion.Operator;
 
 /**
  * DataFetcher that fetches tuples from persistent storage. Each tuple property is specified via {@link PropertyPath},

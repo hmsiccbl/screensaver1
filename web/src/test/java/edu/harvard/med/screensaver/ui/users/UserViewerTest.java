@@ -26,7 +26,7 @@ import edu.harvard.med.screensaver.model.users.ChecklistItem;
 import edu.harvard.med.screensaver.model.users.ChecklistItemEvent;
 import edu.harvard.med.screensaver.model.users.ChecklistItemGroup;
 import edu.harvard.med.screensaver.model.users.ScreeningRoomUser;
-import edu.harvard.med.screensaver.ui.CurrentScreensaverUser;
+import edu.harvard.med.screensaver.policy.CurrentScreensaverUser;
 import edu.harvard.med.screensaver.ui.arch.util.Messages;
 import edu.harvard.med.screensaver.ui.arch.view.AbstractBackingBeanTest;
 import edu.harvard.med.screensaver.util.CryptoUtils;

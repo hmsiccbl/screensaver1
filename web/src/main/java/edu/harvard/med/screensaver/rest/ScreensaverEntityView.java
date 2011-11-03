@@ -8,15 +8,12 @@ import javax.servlet.http.HttpServletResponse;
 
 import com.google.common.base.Function;
 import com.google.common.collect.Maps;
-import org.apache.commons.lang.NotImplementedException;
 import org.apache.log4j.Logger;
 import org.springframework.web.servlet.view.AbstractView;
 
-import edu.harvard.med.iccbl.screensaver.ui.EntityViewerInitializer;
 import edu.harvard.med.screensaver.model.Entity;
-import edu.harvard.med.screensaver.model.screens.Screen;
-import edu.harvard.med.screensaver.model.screens.Study;
 import edu.harvard.med.screensaver.ui.arch.view.EntityViewerBackingBean;
+import edu.harvard.med.screensaver.ui.arch.view.EntityViewerInitializer;
 
 public class ScreensaverEntityView extends AbstractView
 {

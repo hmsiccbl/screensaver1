@@ -20,6 +20,7 @@ import org.hibernate.Session;
 import org.joda.time.LocalDate;
 import org.springframework.beans.factory.annotation.Autowired;
 
+import edu.harvard.med.screensaver.db.Criterion.Operator;
 import edu.harvard.med.screensaver.db.DAOTransaction;
 import edu.harvard.med.screensaver.db.Query;
 import edu.harvard.med.screensaver.db.hqlbuilder.HqlBuilder;
@@ -38,7 +39,6 @@ import edu.harvard.med.screensaver.model.libraries.PlateStatus;
 import edu.harvard.med.screensaver.model.screens.ScreenType;
 import edu.harvard.med.screensaver.model.users.AdministratorUser;
 import edu.harvard.med.screensaver.test.AbstractSpringPersistenceTest;
-import edu.harvard.med.screensaver.ui.arch.datatable.Criterion.Operator;
 
 public class PlateUpdaterTest extends AbstractSpringPersistenceTest
 {

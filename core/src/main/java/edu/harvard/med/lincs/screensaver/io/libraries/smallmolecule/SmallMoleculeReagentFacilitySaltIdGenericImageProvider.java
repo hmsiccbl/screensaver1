@@ -16,7 +16,8 @@ import org.apache.log4j.Logger;
 import edu.harvard.med.lincs.screensaver.LincsScreensaverConstants;
 import edu.harvard.med.screensaver.io.libraries.smallmolecule.StructureImageProvider;
 import edu.harvard.med.screensaver.model.libraries.SmallMoleculeReagent;
-import edu.harvard.med.screensaver.ui.arch.util.servlet.ImageProviderServlet;
+
+// import edu.harvard.med.screensaver.ui.arch.util.servlet.ImageProviderServlet;
 
 public abstract class SmallMoleculeReagentFacilitySaltIdGenericImageProvider implements StructureImageProvider
 {
@@ -25,13 +26,17 @@ public abstract class SmallMoleculeReagentFacilitySaltIdGenericImageProvider imp
   private static Logger log = Logger.getLogger(SmallMoleculeReagentFacilitySaltIdGenericImageProvider.class);
   
   private String _baseUrl;
-  private ImageProviderServlet _imageProviderServlet;
+
+  //private ImageProviderServlet _imageProviderServlet;
   
 
-  public SmallMoleculeReagentFacilitySaltIdGenericImageProvider(String baseUrl, ImageProviderServlet imageProviderServlet)
+  public SmallMoleculeReagentFacilitySaltIdGenericImageProvider(String baseUrl/*
+                                                                               * , ImageProviderServlet
+                                                                               * imageProviderServlet
+                                                                               */)
   {
     _baseUrl = baseUrl;
-    _imageProviderServlet = imageProviderServlet;
+    //_imageProviderServlet = imageProviderServlet;
   }
 
   @Override
@@ -51,10 +56,12 @@ public abstract class SmallMoleculeReagentFacilitySaltIdGenericImageProvider imp
       if (log.isDebugEnabled()) {
         log.debug("image URL for reagent " + reagent + ": " + url);
       }
-      if (!_imageProviderServlet.canFindImage(url) ){
-        log.info("image not available from the url: " + url);
-        return null;
-      }
+      /*
+       * if (!_imageProviderServlet.canFindImage(url) ){
+       * log.info("image not available from the url: " + url);
+       * return null;
+       * }
+       */
       return url;
     }
     catch (Exception e) {

@@ -18,7 +18,6 @@ import edu.harvard.med.screensaver.model.libraries.LibraryContentsVersion;
 import edu.harvard.med.screensaver.model.libraries.SmallMoleculeReagent;
 import edu.harvard.med.screensaver.model.libraries.Well;
 import edu.harvard.med.screensaver.model.screens.Publication;
-import edu.harvard.med.screensaver.ui.libraries.LibraryCopySearchResults;
 
 // TODO: use common file specification with SDRecordParser
 public class WellSdfWriter extends PrintWriter 

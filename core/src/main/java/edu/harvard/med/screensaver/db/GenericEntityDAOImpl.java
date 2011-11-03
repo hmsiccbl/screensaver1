@@ -20,12 +20,12 @@ import com.google.common.collect.Sets;
 import org.apache.log4j.Logger;
 import org.hibernate.Query;
 
+import edu.harvard.med.screensaver.db.Criterion.Operator;
 import edu.harvard.med.screensaver.db.datafetcher.EntityDataFetcher;
 import edu.harvard.med.screensaver.db.hqlbuilder.HqlBuilder;
 import edu.harvard.med.screensaver.model.Entity;
 import edu.harvard.med.screensaver.model.meta.PropertyPath;
 import edu.harvard.med.screensaver.model.meta.RelationshipPath;
-import edu.harvard.med.screensaver.ui.arch.datatable.Criterion.Operator;
 
 /**
  * GenericEntityDAO that provides basic data access methods that are applicable

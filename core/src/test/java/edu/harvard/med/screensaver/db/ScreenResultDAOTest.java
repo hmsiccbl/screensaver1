@@ -40,7 +40,6 @@ import edu.harvard.med.screensaver.model.users.AdministratorUser;
 import edu.harvard.med.screensaver.service.screens.ScreenDerivedPropertiesUpdater;
 import edu.harvard.med.screensaver.test.AbstractSpringPersistenceTest;
 import edu.harvard.med.screensaver.test.MakeDummyEntities;
-import edu.harvard.med.screensaver.ui.libraries.WellSearchResults;
 
 /**
  * @author <a mailto="andrew_tolopko@hms.harvard.edu">Andrew Tolopko</a>
@@ -179,12 +178,6 @@ public class ScreenResultDAOTest extends AbstractSpringPersistenceTest
     genericEntityDao.flush();
 
     List<DataColumn> columns = screenResultsDao.findMutualPositiveColumns(myScreen.getScreenResult());
-    for (DataColumn dc : columns) {
-      log.info("return dataColumn: " +
-               WellSearchResults.makeColumnName(dc, dc.getScreenResult()
-                                                      .getScreen()
-                                                      .getFacilityId()));
-    }
     assertEquals("should only find one mutual column", 1, columns.size());
     assertTrue("should contain the mutual column: " + mutualColumn,
                columns.contains(mutualColumn));

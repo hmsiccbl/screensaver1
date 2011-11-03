@@ -101,15 +101,6 @@
   </profiles>
 
   <dependencies>
-    <!-- It is entirely wrong for batch apps to depend upon a servlet-api! However, this is a workaround for one app that makes use 
-      of a DataTable... (to be fixed! [#2625]) -->
-    <dependency>
-      <groupId>javax.servlet</groupId>
-      <artifactId>servlet-api</artifactId>
-      <version>2.3</version>
-      <scope>provided</scope>
-    </dependency>
-
     <dependency>
       <groupId>edu.harvard.med</groupId>
       <artifactId>screensaver-core</artifactId>

@@ -31,6 +31,7 @@ import org.hibernate.Session;
 import org.joda.time.LocalDate;
 
 import edu.harvard.med.screensaver.ScreensaverConstants;
+import edu.harvard.med.screensaver.db.Criterion.Operator;
 import edu.harvard.med.screensaver.db.hqlbuilder.HqlBuilder;
 import edu.harvard.med.screensaver.db.hqlbuilder.JoinType;
 import edu.harvard.med.screensaver.io.libraries.LibraryCopyPlateListParserResult;
@@ -57,7 +58,6 @@ import edu.harvard.med.screensaver.model.libraries.WellKey;
 import edu.harvard.med.screensaver.model.screenresults.AssayPlate;
 import edu.harvard.med.screensaver.model.screens.LibraryScreening;
 import edu.harvard.med.screensaver.model.screens.ScreenType;
-import edu.harvard.med.screensaver.ui.arch.datatable.Criterion.Operator;
 import edu.harvard.med.screensaver.util.Pair;
 import edu.harvard.med.screensaver.util.StringUtils;
 

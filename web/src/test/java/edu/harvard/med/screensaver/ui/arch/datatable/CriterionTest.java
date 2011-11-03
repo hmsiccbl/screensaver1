@@ -16,7 +16,8 @@ import junit.framework.TestCase;
 import org.apache.log4j.Logger;
 import org.joda.time.LocalDate;
 
-import edu.harvard.med.screensaver.ui.arch.datatable.Criterion.Operator;
+import edu.harvard.med.screensaver.db.Criterion;
+import edu.harvard.med.screensaver.db.Criterion.Operator;
 
 // TODO: test other operators
 public class CriterionTest extends TestCase

@@ -23,11 +23,11 @@ import org.hibernate.Query;
 import org.hibernate.Session;
 import org.hibernate.transform.DistinctRootEntityResultTransformer;
 
+import edu.harvard.med.screensaver.db.Criterion.Operator;
 import edu.harvard.med.screensaver.db.SortDirection;
 import edu.harvard.med.screensaver.model.Entity;
 import edu.harvard.med.screensaver.model.meta.PropertyPath;
 import edu.harvard.med.screensaver.model.meta.RelationshipPath;
-import edu.harvard.med.screensaver.ui.arch.datatable.Criterion.Operator;
 import edu.harvard.med.screensaver.util.StringUtils;
 
 public class HqlBuilder

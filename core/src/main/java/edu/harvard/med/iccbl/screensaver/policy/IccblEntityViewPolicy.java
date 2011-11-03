@@ -19,6 +19,7 @@ import com.google.common.collect.Sets;
 import org.apache.log4j.Logger;
 import org.hibernate.Session;
 
+import edu.harvard.med.screensaver.db.Criterion.Operator;
 import edu.harvard.med.screensaver.db.GenericEntityDAO;
 import edu.harvard.med.screensaver.db.Query;
 import edu.harvard.med.screensaver.db.hqlbuilder.HqlBuilder;
@@ -49,9 +50,8 @@ import edu.harvard.med.screensaver.model.users.LabHead;
 import edu.harvard.med.screensaver.model.users.ScreeningRoomUser;
 import edu.harvard.med.screensaver.model.users.ScreensaverUser;
 import edu.harvard.med.screensaver.model.users.ScreensaverUserRole;
+import edu.harvard.med.screensaver.policy.CurrentScreensaverUser;
 import edu.harvard.med.screensaver.policy.DefaultEntityViewPolicy;
-import edu.harvard.med.screensaver.ui.CurrentScreensaverUser;
-import edu.harvard.med.screensaver.ui.arch.datatable.Criterion.Operator;
 
 /**
  * An EntityViewPolicy implementation for ICCB-Longwood that is used by the production web application. 

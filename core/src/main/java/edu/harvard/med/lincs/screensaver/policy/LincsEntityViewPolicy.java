@@ -16,18 +16,15 @@ import org.apache.log4j.Logger;
 import edu.harvard.med.iccbl.screensaver.policy.SequenceRestrictedSilencingReagent;
 import edu.harvard.med.iccbl.screensaver.policy.StructureRestrictedSmallMoleculeReagent;
 import edu.harvard.med.screensaver.ScreensaverConstants;
-import edu.harvard.med.screensaver.model.AbstractEntity;
 import edu.harvard.med.screensaver.model.AttachedFile;
 import edu.harvard.med.screensaver.model.DownloadRestrictedAttachedFile;
 import edu.harvard.med.screensaver.model.Entity;
-import edu.harvard.med.screensaver.model.libraries.Reagent;
 import edu.harvard.med.screensaver.model.libraries.SilencingReagent;
 import edu.harvard.med.screensaver.model.libraries.SmallMoleculeReagent;
 import edu.harvard.med.screensaver.model.users.ScreensaverUser;
 import edu.harvard.med.screensaver.model.users.ScreensaverUserRole;
+import edu.harvard.med.screensaver.policy.CurrentScreensaverUser;
 import edu.harvard.med.screensaver.policy.DefaultEntityViewPolicy;
-import edu.harvard.med.screensaver.ui.CurrentScreensaverUser;
-import edu.harvard.med.screensaver.ui.WebCurrentScreensaverUser;
 
 /**
  * An EntityViewPolicy implementation for LINCS that is used by the production web application.
@@ -89,8 +86,7 @@ public class LincsEntityViewPolicy extends DefaultEntityViewPolicy
 
   private boolean isGuestUser()
   {
-    return _currentScreensaverUser.getScreensaverUser() instanceof WebCurrentScreensaverUser.GuestUser ||
-      _currentScreensaverUser.getScreensaverUser().getScreensaverUserRoles().contains(ScreensaverUserRole.GUEST);
+    return _currentScreensaverUser.getScreensaverUser().getScreensaverUserRoles().contains(ScreensaverUserRole.GUEST);
   }
 
   @Override

@@ -37,7 +37,7 @@
 
   <bean
     id="currentScreensaverUser"
-    class="edu.harvard.med.screensaver.ui.CurrentScreensaverUser"
+    class="edu.harvard.med.screensaver.policy.CurrentScreensaverUser"
     scope="session">
     <property name="screensaverUser">
       <bean class="edu.harvard.med.screensaver.model.users.ScreeningRoomUser">

@@ -19,6 +19,8 @@ import com.google.common.collect.Maps;
 import org.apache.log4j.Logger;
 import org.hibernate.Session;
 
+import edu.harvard.med.screensaver.db.Criterion;
+import edu.harvard.med.screensaver.db.Criterion.Operator;
 import edu.harvard.med.screensaver.db.GenericEntityDAO;
 import edu.harvard.med.screensaver.db.Query;
 import edu.harvard.med.screensaver.db.SortDirection;
@@ -29,8 +31,6 @@ import edu.harvard.med.screensaver.model.Entity;
 import edu.harvard.med.screensaver.model.meta.PropertyNameAndValue;
 import edu.harvard.med.screensaver.model.meta.PropertyPath;
 import edu.harvard.med.screensaver.model.meta.RelationshipPath;
-import edu.harvard.med.screensaver.ui.arch.datatable.Criterion;
-import edu.harvard.med.screensaver.ui.arch.datatable.Criterion.Operator;
 
 public abstract class PropertyPathDataFetcher<R,E extends Entity,K> implements DataFetcher<R,K,PropertyPath<E>>
 {

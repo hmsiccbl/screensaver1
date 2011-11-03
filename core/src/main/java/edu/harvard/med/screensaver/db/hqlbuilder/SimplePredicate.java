@@ -11,8 +11,8 @@ package edu.harvard.med.screensaver.db.hqlbuilder;
 
 import java.util.Set;
 
-import edu.harvard.med.screensaver.ui.arch.datatable.Criterion.Operator;
-import edu.harvard.med.screensaver.ui.arch.datatable.Criterion.OperatorClass;
+import edu.harvard.med.screensaver.db.Criterion.Operator;
+import edu.harvard.med.screensaver.db.Criterion.OperatorClass;
 
 public class SimplePredicate extends Predicate
 {

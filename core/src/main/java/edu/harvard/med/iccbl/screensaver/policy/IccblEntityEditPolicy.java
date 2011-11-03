@@ -55,8 +55,8 @@ import edu.harvard.med.screensaver.model.users.LabHead;
 import edu.harvard.med.screensaver.model.users.ScreeningRoomUser;
 import edu.harvard.med.screensaver.model.users.ScreensaverUser;
 import edu.harvard.med.screensaver.model.users.ScreensaverUserRole;
+import edu.harvard.med.screensaver.policy.CurrentScreensaverUser;
 import edu.harvard.med.screensaver.policy.EntityEditPolicy;
-import edu.harvard.med.screensaver.ui.CurrentScreensaverUser;
 
 public class IccblEntityEditPolicy implements EntityEditPolicy
 {

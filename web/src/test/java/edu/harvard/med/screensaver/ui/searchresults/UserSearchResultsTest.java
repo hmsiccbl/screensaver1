@@ -15,11 +15,11 @@ import java.util.List;
 import org.apache.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
 
+import edu.harvard.med.screensaver.db.Criterion;
 import edu.harvard.med.screensaver.db.SortDirection;
+import edu.harvard.med.screensaver.db.Criterion.Operator;
 import edu.harvard.med.screensaver.model.users.ScreeningRoomUser;
 import edu.harvard.med.screensaver.test.MakeDummyEntities;
-import edu.harvard.med.screensaver.ui.arch.datatable.Criterion;
-import edu.harvard.med.screensaver.ui.arch.datatable.Criterion.Operator;
 import edu.harvard.med.screensaver.ui.arch.datatable.column.TableColumnManager;
 import edu.harvard.med.screensaver.ui.arch.datatable.column.entity.UserNameColumn;
 import edu.harvard.med.screensaver.ui.arch.datatable.model.DataTableModel;

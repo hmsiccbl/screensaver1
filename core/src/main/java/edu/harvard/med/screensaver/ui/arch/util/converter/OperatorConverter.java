@@ -9,7 +9,7 @@
 
 package edu.harvard.med.screensaver.ui.arch.util.converter;
 
-import edu.harvard.med.screensaver.ui.arch.datatable.Criterion.Operator;
+import edu.harvard.med.screensaver.db.Criterion.Operator;
 
 public class OperatorConverter extends VocabularyConverter<Operator>
 {

@@ -18,7 +18,6 @@ import org.apache.log4j.Logger;
 
 import edu.harvard.med.screensaver.io.libraries.smallmolecule.StructureImageProvider;
 import edu.harvard.med.screensaver.model.libraries.SmallMoleculeReagent;
-import edu.harvard.med.screensaver.ui.arch.util.servlet.ImageProviderServlet;
 import edu.harvard.med.screensaver.util.CryptoUtils;
 
 /**
@@ -38,12 +37,13 @@ public class StaticHashedSmilesStructureImageProvider implements StructureImageP
   private static Logger log = Logger.getLogger(StaticHashedSmilesStructureImageProvider.class);
 
   private String _baseUrl;
-  private ImageProviderServlet _imageProviderServlet;
 
-  public StaticHashedSmilesStructureImageProvider(String baseUrl, ImageProviderServlet imageProviderServlet)
+  //private ImageProviderServlet _imageProviderServlet;
+
+  public StaticHashedSmilesStructureImageProvider(String baseUrl/* , ImageProviderServlet imageProviderServlet */)
   {
     _baseUrl = baseUrl;
-    _imageProviderServlet = imageProviderServlet;
+    //_imageProviderServlet = imageProviderServlet;
   }
 
   @Override
@@ -51,10 +51,12 @@ public class StaticHashedSmilesStructureImageProvider implements StructureImageP
   {
     try {
       URL url = new URL(_baseUrl + makeRelativeImageFilePath(reagent.getSmiles()));
-      if (!_imageProviderServlet.canFindImage(url) ){
-        log.info("image not available from the url: " + url);
-        return null;
-      }
+      /*
+       * if (!_imageProviderServlet.canFindImage(url) ){
+       * log.info("image not available from the url: " + url);
+       * return null;
+       * }
+       */
       return url;
     }
     catch (MalformedURLException e) {

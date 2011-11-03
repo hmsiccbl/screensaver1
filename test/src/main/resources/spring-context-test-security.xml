@@ -27,7 +27,7 @@
   
   <bean
     id="currentScreensaverUser"
-    class="edu.harvard.med.screensaver.ui.WebCurrentScreensaverUser"
+    class="edu.harvard.med.screensaver.policy.CurrentScreensaverUser"
     scope="session">
     <property
       name="dao"

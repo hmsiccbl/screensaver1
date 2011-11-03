@@ -9,8 +9,8 @@
 
 package edu.harvard.med.screensaver.io.screens;
 
+import edu.harvard.med.iccbl.screensaver.io.ImageProvider;
 import edu.harvard.med.screensaver.model.Entity;
-import edu.harvard.med.screensaver.ui.arch.images.ImageProvider;
 
 /**
  * Type-safe tag interface for services that can provide images of study images.

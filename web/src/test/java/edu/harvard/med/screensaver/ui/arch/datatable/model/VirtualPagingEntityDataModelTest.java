@@ -32,7 +32,7 @@ import edu.harvard.med.screensaver.model.screens.ScreenType;
 import edu.harvard.med.screensaver.test.MakeDummyEntities;
 import edu.harvard.med.screensaver.ui.arch.datatable.column.entity.TextTupleColumn;
 import edu.harvard.med.screensaver.ui.arch.datatable.model.VirtualPagingEntityDataModel;
-import edu.harvard.med.screensaver.ui.arch.util.ValueReference;
+import edu.harvard.med.screensaver.util.ValueReference;
 
 
 public class VirtualPagingEntityDataModelTest extends TestCase
