@@ -10,6 +10,7 @@
 package edu.harvard.med.screensaver.ui.activities;
 
 import java.math.BigDecimal;
+import java.math.RoundingMode;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Set;
@@ -167,16 +168,18 @@ public class ActivityViewer extends SearchResultContextEditableEntityViewerBacki
       getDao().needReadOnly((LabActivity) entity, LabActivity.Screen);
 
       if (entity instanceof Screening) {
-        ((Screening) entity).setVolumeTransferredPerWellToAssayPlates(Volume.makeVolume(_volumeTransferredPerWellToAssayPlatesValue, _volumeTransferredPerWellToAssayPlatesType.getSelection()));
+        ((Screening) entity).setVolumeTransferredPerWellToAssayPlates(
+                                                                      Volume.makeVolume(_volumeTransferredPerWellToAssayPlatesValue, _volumeTransferredPerWellToAssayPlatesType.getSelection(), RoundingMode.HALF_UP));
         // auto-calculate the volumeTransferredPerWellFromLibraryPlates property, if user left it blank
         if (StringUtils.isEmpty(_volumeTransferredPerWellFromLibraryPlatesValue) &&
           !!!StringUtils.isEmpty(_volumeTransferredPerWellToAssayPlatesValue)) {
           _volumeTransferredPerWellFromLibraryPlatesValue = ((Screening) entity).getVolumeTransferredPerWellToAssayPlates().getValue().multiply(new BigDecimal(((Screening) entity).getNumberOfReplicates())).toString();
           _volumeTransferredPerWellFromLibraryPlatesType.setSelection(_volumeTransferredPerWellToAssayPlatesType.getSelection());
         }
-        ((Screening) entity).setVolumeTransferredPerWellFromLibraryPlates(Volume.makeVolume(_volumeTransferredPerWellFromLibraryPlatesValue, _volumeTransferredPerWellFromLibraryPlatesType.getSelection()));
-        ((Screening) entity).setAssayWellVolume(Volume.makeVolume(_assayWellVolumeValue, _assayWellVolumeType.getSelection()));
-        ((Screening) entity).setMolarConcentration(MolarConcentration.makeConcentration(_concentrationValue, _concentrationType.getSelection()));
+        ((Screening) entity).setVolumeTransferredPerWellFromLibraryPlates(
+                                                                          Volume.makeVolume(_volumeTransferredPerWellFromLibraryPlatesValue, _volumeTransferredPerWellFromLibraryPlatesType.getSelection(), RoundingMode.HALF_UP));
+        ((Screening) entity).setAssayWellVolume(Volume.makeVolume(_assayWellVolumeValue, _assayWellVolumeType.getSelection(), RoundingMode.HALF_UP));
+        ((Screening) entity).setMolarConcentration(MolarConcentration.makeConcentration(_concentrationValue, _concentrationType.getSelection(), RoundingMode.HALF_UP));
       }
       if (entity instanceof CherryPickScreening) {
         CherryPickScreening screening = (CherryPickScreening) entity;
@@ -501,7 +504,7 @@ public class ActivityViewer extends SearchResultContextEditableEntityViewerBacki
     if (entity instanceof Screening) {
       try {
         Volume.makeVolume(getVolumeTransferredPerWellToAssayPlatesValue(),
-                          getVolumeTransferredPerWellToAssayPlatesType().getSelection());
+                          getVolumeTransferredPerWellToAssayPlatesType().getSelection(), RoundingMode.HALF_UP);
       }
       catch (Exception e) {
         showFieldInputError("Volume Transferred Per Replicate To Assay Plates", e.getLocalizedMessage());
@@ -509,7 +512,7 @@ public class ActivityViewer extends SearchResultContextEditableEntityViewerBacki
       }
       try {
         Volume.makeVolume(getVolumeTransferredPerWellToAssayPlatesValue(),
-                          getVolumeTransferredPerWellFromLibraryPlatesType().getSelection());
+                          getVolumeTransferredPerWellFromLibraryPlatesType().getSelection(), RoundingMode.HALF_UP);
       } 
       catch (Exception e) {
         showFieldInputError("Volume Transferred Per Replicate From Library Plates", e.getLocalizedMessage());
@@ -525,7 +528,7 @@ public class ActivityViewer extends SearchResultContextEditableEntityViewerBacki
       }
       try {
         MolarConcentration.makeConcentration(getMolarConcentrationValue(),
-                                             getMolarConcentrationType().getSelection());
+                                             getMolarConcentrationType().getSelection(), RoundingMode.HALF_UP);
       } 
       catch (Exception e) {
         showFieldInputError("molarConcentration", e.getLocalizedMessage());
