@@ -10,6 +10,7 @@
 package edu.harvard.med.screensaver.model;
 
 import java.math.BigDecimal;
+import java.math.RoundingMode;
 
 import edu.harvard.med.screensaver.util.StringUtils;
 
@@ -62,6 +63,11 @@ public class Volume extends Quantity<Volume,VolumeUnit>
     super(value, units);
   }
 
+  public Volume(String value, VolumeUnit unit, RoundingMode roundingMode)
+  {
+    super(new BigDecimal(value), unit, roundingMode);
+  }
+
   @Override
   protected Volume newQuantity(BigDecimal value,
                                       VolumeUnit unit)
@@ -77,4 +83,14 @@ public class Volume extends Quantity<Volume,VolumeUnit>
     }
     return v;
   }
+  
+  public static Volume makeVolume(String value, VolumeUnit unit, RoundingMode roundingMode)
+  {
+    Volume c = null;
+    if (!StringUtils.isEmpty(value)) {
+      c = new Volume(value, unit, roundingMode).convertToReasonableUnits();
+    }
+    return c;
+  }
+  
 }
