@@ -33,6 +33,7 @@ import org.springframework.context.ApplicationContext;
 import org.springframework.context.support.ClassPathXmlApplicationContext;
 
 import edu.harvard.med.screensaver.DatabaseConnectionSettings;
+import edu.harvard.med.screensaver.db.CommandLineArgumentsDatabaseConnectionSettingsResolver;
 import edu.harvard.med.screensaver.db.GenericEntityDAO;
 import edu.harvard.med.screensaver.model.users.AdministratorUser;
 
@@ -63,8 +64,6 @@ public class CommandLineApplication
   public static final String DEFAULT_SPRING_CONFIG = "spring-context-cmdline.xml";
 
   public static final String DEFAULT_DATE_PATTERN = "yyyy-MM-dd";
-
-  public static final String CMD_LINE_ARGS_DATABASE_CONNECTION_SETTINGS = "cmdline.args.database.connection.settings";
 
   // instance data
 
@@ -280,7 +279,7 @@ public class CommandLineApplication
                                            getCommandLineOptionValue("D"),
                                            isCommandLineFlagSet("U") ? getCommandLineOptionValue("U") : null,
                                            isCommandLineFlagSet("P") ? getCommandLineOptionValue("P") : null);
-          System.getProperties().put(CMD_LINE_ARGS_DATABASE_CONNECTION_SETTINGS, settings);
+          System.getProperties().put(CommandLineArgumentsDatabaseConnectionSettingsResolver.CMD_LINE_ARGS_DATABASE_CONNECTION_SETTINGS, settings);
         }
       }
 

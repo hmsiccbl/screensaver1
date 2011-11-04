@@ -12,8 +12,6 @@
 package edu.harvard.med.iccbl.screensaver.io.screens;
 
 import javax.mail.MessagingException;
-import javax.mail.internet.AddressException;
-import javax.mail.internet.InternetAddress;
 
 import org.apache.commons.cli.OptionBuilder;
 import org.apache.log4j.Logger;
@@ -25,12 +23,13 @@ import edu.harvard.med.screensaver.db.DAOTransactionRollbackException;
 import edu.harvard.med.screensaver.db.GenericEntityDAO;
 import edu.harvard.med.screensaver.db.ScreenDAO;
 import edu.harvard.med.screensaver.db.ScreenResultsDAO;
+import edu.harvard.med.screensaver.io.screenresults.ScreenResultReporter;
+import edu.harvard.med.screensaver.io.screens.StudyCreator;
 import edu.harvard.med.screensaver.model.screenresults.ScreenResult;
 import edu.harvard.med.screensaver.model.screens.Screen;
 import edu.harvard.med.screensaver.model.screens.ScreenType;
 import edu.harvard.med.screensaver.model.users.AdministratorUser;
-import edu.harvard.med.screensaver.service.EmailService;
-import edu.harvard.med.screensaver.service.screenresult.ScreenResultReporter;
+import edu.harvard.med.screensaver.model.users.LabHead;
 
 /**
  * TODO: Move the transactional code out of this class and into service methods
@@ -247,7 +246,14 @@ public class ScreenPositivesCountStudyCreator extends AdminEmailApplication
             }
           }
 
+          LabHead labHead = (LabHead) StudyCreator.findOrCreateScreeningRoomUser(dao,
+                                                                                 admin.getFirstName(),
+                                                                                 admin.getLastName(),
+                                                                                 admin.getEmail(),
+                                                                                 true,
+                                                                                 null);
           int count = report.createReagentCountStudy(admin,
+                                                     labHead,
                                                      studyFacilityId,
                                                      title,
                                                      summary,

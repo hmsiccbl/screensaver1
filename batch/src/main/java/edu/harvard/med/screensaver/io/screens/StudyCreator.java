@@ -38,7 +38,7 @@ import edu.harvard.med.screensaver.model.users.ScreeningRoomUser;
 import edu.harvard.med.screensaver.util.StringUtils;
 
 /**
- * Command-line application that creates a new screen in the database.
+ * Command-line application that creates a new study in the database.
  * 
  * @author <a mailto="andrew_tolopko@hms.harvard.edu">Andrew Tolopko</a>
  */

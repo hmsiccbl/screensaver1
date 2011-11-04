@@ -176,7 +176,7 @@
   </bean>
 
   <bean id="emailService"
-        class="edu.harvard.med.iccbl.screensaver.service.SmtpEmailService" 
+        class="edu.harvard.med.screensaver.service.SmtpEmailService" 
         scope="singleton">
     <constructor-arg value="#{screensaverProperties.map['screensaver.service.smtpemailservice.host']}" />
     <constructor-arg value="#{screensaverProperties.map['screensaver.service.smtpemailservice.username']}" />
@@ -184,7 +184,7 @@
   </bean>
 
   <bean id="screenResultReporter"
-        class="edu.harvard.med.screensaver.service.screenresult.ScreenResultReporter"
+        class="edu.harvard.med.screensaver.io.screenresults.ScreenResultReporter"
         scope="singleton"  >
     <constructor-arg ref="genericEntityDao"/>
   </bean>

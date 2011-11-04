@@ -27,21 +27,17 @@ import javax.mail.internet.InternetAddress;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Sets;
 import org.apache.commons.cli.OptionBuilder;
-import org.apache.commons.cli.ParseException;
 import org.apache.commons.lang.StringUtils;
 import org.apache.log4j.Logger;
 import org.joda.time.format.DateTimeFormat;
 import org.joda.time.format.DateTimeFormatter;
 
-import edu.harvard.med.iccbl.screensaver.service.SmtpEmailService;
 import edu.harvard.med.screensaver.io.CommandLineApplication;
 import edu.harvard.med.screensaver.model.users.AdministratorUser;
-import edu.harvard.med.screensaver.model.users.ChecklistItemEvent;
-import edu.harvard.med.screensaver.model.users.ScreeningRoomUser;
 import edu.harvard.med.screensaver.model.users.ScreensaverUser;
 import edu.harvard.med.screensaver.service.EmailService;
 import edu.harvard.med.screensaver.service.ServiceMessages;
-import edu.harvard.med.screensaver.util.Pair;
+import edu.harvard.med.screensaver.service.SmtpEmailService;
 
 public class AdminEmailApplication extends CommandLineApplication
 {

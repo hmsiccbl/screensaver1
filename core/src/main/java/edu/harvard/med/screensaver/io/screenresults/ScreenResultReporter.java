@@ -7,7 +7,7 @@
 // at Harvard Medical School. This software is distributed under the terms of
 // the GNU General Public License.
 
-package edu.harvard.med.screensaver.service.screenresult;
+package edu.harvard.med.screensaver.io.screenresults;
 
 import java.math.BigDecimal;
 import java.math.RoundingMode;
@@ -34,7 +34,6 @@ import edu.harvard.med.screensaver.db.Criterion.Operator;
 import edu.harvard.med.screensaver.db.GenericEntityDAO;
 import edu.harvard.med.screensaver.db.hqlbuilder.HqlBuilder;
 import edu.harvard.med.screensaver.db.hqlbuilder.JoinType;
-import edu.harvard.med.screensaver.io.screens.StudyCreator;
 import edu.harvard.med.screensaver.model.libraries.Library;
 import edu.harvard.med.screensaver.model.libraries.LibraryWellType;
 import edu.harvard.med.screensaver.model.libraries.Reagent;
@@ -242,6 +241,7 @@ public class ScreenResultReporter
    */
   @Transactional
   public int createReagentCountStudy(AdministratorUser admin,
+                                     LabHead labHead,
                                      String studyName,
                                      String title,
                                      String summary,
@@ -261,12 +261,6 @@ public class ScreenResultReporter
       throw new IllegalArgumentException(errMsg);
     }
 
-    LabHead labHead = (LabHead) StudyCreator.findOrCreateScreeningRoomUser(_dao,
-                                                                           admin.getFirstName(),
-                                                                           admin.getLastName(),
-                                                                           admin.getEmail(),
-                                                                           true,
-                                                                           null);
     study = new Screen(admin,
                        studyName,
                        labHead,

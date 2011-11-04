@@ -20,7 +20,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.test.annotation.Rollback;
 import org.springframework.transaction.annotation.Transactional;
 
-import edu.harvard.med.iccbl.screensaver.io.screens.ScreenPrivacyExpirationUpdater;
 import edu.harvard.med.screensaver.model.activities.AdministrativeActivity;
 import edu.harvard.med.screensaver.model.screens.LibraryScreening;
 import edu.harvard.med.screensaver.model.screens.ProjectPhase;
@@ -170,8 +169,8 @@ public class ScreenDataSharingLevelUpdaterTest extends AbstractSpringPersistence
     genericEntityDao.persistEntity(screen6MinMaxSet);
     flushAndClear();
 
-    // 4. find the ones with "old" activities (activity age > SCREEN_ACTIVITY_DATA_PRIVACY_EXPIRATION_AGE_DAYS
-    int ageToExpireFromActivityDateInDays = ScreenPrivacyExpirationUpdater.SCREEN_ACTIVITY_DATA_PRIVACY_EXPIRATION_AGE_DAYS;
+    // 4. find the ones with "old" activities (activity age > SCREEN_ACTIVITY_DATA_PRIVACY_EXPIRATION_AGE_DAYS)
+    int ageToExpireFromActivityDateInDays = 760;
 
     ScreenDataSharingLevelUpdater.DataPrivacyAdjustment adjustment = screenDataSharingLevelUpdater
         .adjustDataPrivacyExpirationByActivities(ageToExpireFromActivityDateInDays, admin);

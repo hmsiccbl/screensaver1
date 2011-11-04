@@ -11,12 +11,9 @@ package edu.harvard.med.screensaver.ui.searchresults;
 
 import java.io.BufferedInputStream;
 import java.io.BufferedReader;
-import java.io.File;
-import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
-import java.io.OutputStream;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Iterator;
@@ -30,18 +27,13 @@ import com.google.common.collect.Sets;
 import jxl.Cell;
 import jxl.Sheet;
 import jxl.Workbook;
-import org.apache.commons.cli.OptionBuilder;
-import org.apache.commons.io.IOUtils;
 import org.apache.log4j.Logger;
 
 import edu.harvard.med.screensaver.db.Criterion;
-import edu.harvard.med.screensaver.db.GenericEntityDAO;
-import edu.harvard.med.screensaver.db.SortDirection;
 import edu.harvard.med.screensaver.db.Criterion.Operator;
+import edu.harvard.med.screensaver.db.SortDirection;
 import edu.harvard.med.screensaver.db.datafetcher.Tuple;
 import edu.harvard.med.screensaver.db.datafetcher.TupleDataFetcher;
-import edu.harvard.med.screensaver.io.CommandLineApplication;
-import edu.harvard.med.screensaver.io.DataExporter;
 import edu.harvard.med.screensaver.model.libraries.Library;
 import edu.harvard.med.screensaver.model.libraries.LibraryWellType;
 import edu.harvard.med.screensaver.model.libraries.Reagent;
@@ -49,10 +41,7 @@ import edu.harvard.med.screensaver.model.libraries.SmallMoleculeReagent;
 import edu.harvard.med.screensaver.model.libraries.Well;
 import edu.harvard.med.screensaver.model.meta.PropertyPath;
 import edu.harvard.med.screensaver.model.meta.RelationshipPath;
-import edu.harvard.med.screensaver.model.screenresults.ScreenResult;
-import edu.harvard.med.screensaver.model.screens.Screen;
 import edu.harvard.med.screensaver.model.screens.ScreenType;
-import edu.harvard.med.screensaver.policy.DefaultEntityViewPolicy;
 import edu.harvard.med.screensaver.test.AbstractSpringPersistenceTest;
 import edu.harvard.med.screensaver.test.MakeDummyEntities;
 import edu.harvard.med.screensaver.ui.arch.datatable.DataTableModelType;
@@ -68,8 +57,6 @@ import edu.harvard.med.screensaver.ui.arch.datatable.column.entity.TextTupleColu
 import edu.harvard.med.screensaver.ui.arch.datatable.model.DataTableModel;
 import edu.harvard.med.screensaver.ui.arch.searchresults.CsvDataExporter;
 import edu.harvard.med.screensaver.ui.arch.searchresults.ExcelWorkbookDataExporter;
-import edu.harvard.med.screensaver.ui.libraries.DefaultWellSearchResults;
-import edu.harvard.med.screensaver.ui.libraries.WellSearchResults;
 
 public class DataExportersTest extends AbstractSpringPersistenceTest
 {
@@ -242,36 +229,36 @@ public class DataExportersTest extends AbstractSpringPersistenceTest
                  Integer.parseInt(workbook.getSheet(1).getCell(0, 1).getContents()));
   }
 
-  @SuppressWarnings("static-access")
-  public static void main(String[] args) throws Exception
-  {
-    final CommandLineApplication app = new CommandLineApplication(args);
-    
-    app.addCommandLineOption(OptionBuilder.isRequired().hasArg().withArgName("output workbook file").create("f"));
-    app.processOptions(true, false);
-    GenericEntityDAO dao = (GenericEntityDAO) app.getSpringBean("genericEntityDao");
-    WellSearchResults searchResults = new DefaultWellSearchResults(dao,
-                                                                   null,
-                                                                   new DefaultEntityViewPolicy(),
-                                                                   null, null, null, null,
-                                                                   Lists.<DataExporter<Tuple<String>>>newArrayList(new ExcelWorkbookDataExporter<Tuple<String>>("wells")));
-    ScreenResult screenResult = dao.findEntityByProperty(Screen.class, Screen.facilityId.getPropertyName(), 974, true, Screen.screenResult.to(ScreenResult.dataColumns)).getScreenResult();
-    searchResults.searchWellsForScreenResult(screenResult);
-    searchResults.getRowCount(); // force initial data fetch
-
-    ExcelWorkbookDataExporter<Tuple<String>> dataExporter = (ExcelWorkbookDataExporter<Tuple<String>>) searchResults.getDataExporterSelector().getDefaultSelection();
-
-    log.debug("starting exporting data for download");
-    dataExporter.setTableColumns(searchResults.getColumnManager().getVisibleColumns());
-    InputStream inputStream = dataExporter.export(searchResults.getDataTableModel().iterator());
-    log.debug("finished exporting data for download");
-
-    File file = app.getCommandLineOptionValue("f", File.class);
-
-    OutputStream outputStream = new FileOutputStream(file);
-    IOUtils.copy(inputStream, outputStream);
-    outputStream.close();
-    log.info("export completed");
-  }
+//  @SuppressWarnings("static-access")
+//  public static void main(String[] args) throws Exception
+//  {
+//    final CommandLineApplication app = new CommandLineApplication(args);
+//    
+//    app.addCommandLineOption(OptionBuilder.isRequired().hasArg().withArgName("output workbook file").create("f"));
+//    app.processOptions(true, false);
+//    GenericEntityDAO dao = (GenericEntityDAO) app.getSpringBean("genericEntityDao");
+//    WellSearchResults searchResults = new DefaultWellSearchResults(dao,
+//                                                                   null,
+//                                                                   new DefaultEntityViewPolicy(),
+//                                                                   null, null, null, null,
+//                                                                   Lists.<DataExporter<Tuple<String>>>newArrayList(new ExcelWorkbookDataExporter<Tuple<String>>("wells")));
+//    ScreenResult screenResult = dao.findEntityByProperty(Screen.class, Screen.facilityId.getPropertyName(), 974, true, Screen.screenResult.to(ScreenResult.dataColumns)).getScreenResult();
+//    searchResults.searchWellsForScreenResult(screenResult);
+//    searchResults.getRowCount(); // force initial data fetch
+//
+//    ExcelWorkbookDataExporter<Tuple<String>> dataExporter = (ExcelWorkbookDataExporter<Tuple<String>>) searchResults.getDataExporterSelector().getDefaultSelection();
+//
+//    log.debug("starting exporting data for download");
+//    dataExporter.setTableColumns(searchResults.getColumnManager().getVisibleColumns());
+//    InputStream inputStream = dataExporter.export(searchResults.getDataTableModel().iterator());
+//    log.debug("finished exporting data for download");
+//
+//    File file = app.getCommandLineOptionValue("f", File.class);
+//
+//    OutputStream outputStream = new FileOutputStream(file);
+//    IOUtils.copy(inputStream, outputStream);
+//    outputStream.close();
+//    log.info("export completed");
+//  }
 
 }

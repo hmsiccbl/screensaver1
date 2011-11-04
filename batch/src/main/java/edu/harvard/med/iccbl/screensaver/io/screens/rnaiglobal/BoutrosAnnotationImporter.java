@@ -7,7 +7,7 @@
 //at Harvard Medical School. This software is distributed under the terms of
 //the GNU General Public License.
 
-package edu.harvard.med.iccbl.screensaver.io.rnaiglobal;
+package edu.harvard.med.iccbl.screensaver.io.screens.rnaiglobal;
 
 import java.io.File;
 import java.io.FileNotFoundException;

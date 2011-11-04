@@ -9,7 +9,7 @@
 // at Harvard Medical School. This software is distributed under the terms of
 // the GNU General Public License.
 
-package edu.harvard.med.iccbl.screensaver.io.libraries.smallmolecule;
+package edu.harvard.med.iccbl.screensaver.io.libraries;
 
 import java.io.ByteArrayOutputStream;
 import java.io.File;

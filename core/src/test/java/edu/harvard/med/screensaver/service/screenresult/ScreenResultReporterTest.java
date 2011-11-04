@@ -26,12 +26,11 @@ import org.apache.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.transaction.annotation.Transactional;
 
-import edu.harvard.med.iccbl.screensaver.io.screens.ConfirmedPositivesStudyCreator;
-import edu.harvard.med.iccbl.screensaver.io.screens.ScreenPositivesCountStudyCreator;
 import edu.harvard.med.iccbl.screensaver.policy.IccblEntityViewPolicy;
 import edu.harvard.med.screensaver.ScreensaverConstants;
 import edu.harvard.med.screensaver.db.EntityInflator;
-import edu.harvard.med.screensaver.io.screens.StudyCreator;
+import edu.harvard.med.screensaver.io.screenresults.ScreenResultReporter;
+import edu.harvard.med.screensaver.io.screenresults.ScreenResultReporter.ConfirmationReport;
 import edu.harvard.med.screensaver.model.libraries.Library;
 import edu.harvard.med.screensaver.model.libraries.LibraryWellType;
 import edu.harvard.med.screensaver.model.libraries.Reagent;
@@ -59,7 +58,6 @@ import edu.harvard.med.screensaver.model.users.ScreensaverUser;
 import edu.harvard.med.screensaver.model.users.ScreensaverUserRole;
 import edu.harvard.med.screensaver.policy.EntityViewPolicy;
 import edu.harvard.med.screensaver.service.libraries.LibraryContentsVersionManager;
-import edu.harvard.med.screensaver.service.screenresult.ScreenResultReporter.ConfirmationReport;
 import edu.harvard.med.screensaver.test.AbstractSpringPersistenceTest;
 import edu.harvard.med.screensaver.test.MakeDummyEntities;
 
@@ -90,6 +88,7 @@ public class ScreenResultReporterTest extends AbstractSpringPersistenceTest
   public int[] _binArray = new int[5]; // store the counts as we create them, for testing
 
   public AdministratorUser _admin = null;
+  public LabHead _labHead = null;
   public List<String> _sequences = Lists.newArrayList("GAUGAACAGACUCCAAUUC", "GAUGAAGAGCCUAUUGAAG", "GAGCUUACAACCUGCCUUA", "GAACAGACUCCAAUUCAUA");
 
 
@@ -108,27 +107,23 @@ public class ScreenResultReporterTest extends AbstractSpringPersistenceTest
     _admin = dataFactory.newInstance(AdministratorUser.class);
     _admin.addScreensaverUserRole(ScreensaverUserRole.LIBRARIES_ADMIN);
     genericEntityDao.persistEntity(_admin);
+    _labHead = dataFactory.newInstance(LabHead.class);
+    genericEntityDao.persistEntity(_labHead);
   }
 
   private void setupInTransaction_createStudy()
   {
-    LabHead labHead = (LabHead) StudyCreator.findOrCreateScreeningRoomUser(genericEntityDao,
-                                                                           _admin.getFirstName(),
-                                                                           _admin.getLastName(),
-                                                                           _admin.getEmail(),
-                                                                           true,
-                                                                           null);
-
+    LabHead labHead = dataFactory.newInstance(LabHead.class);
     _study = new Screen(_admin,
-                              ScreensaverConstants.DEFAULT_BATCH_STUDY_ID_CONFIRMATION_SUMMARY,
-                              labHead,
-                              labHead,
-                              ScreenType.RNAI,
-                              StudyType.IN_SILICO,
-                              ProjectPhase.ANNOTATION,
-                              ConfirmedPositivesStudyCreator.DEFAULT_STUDY_TITLE);
+                        ScreensaverConstants.DEFAULT_BATCH_STUDY_ID_CONFIRMATION_SUMMARY,
+                        labHead,
+                        labHead,
+                        ScreenType.RNAI,
+                        StudyType.IN_SILICO,
+                        ProjectPhase.ANNOTATION,
+                        "Title");
     _study.setDataSharingLevel(ScreenDataSharingLevel.SHARED);
-    _study.setSummary(ConfirmedPositivesStudyCreator.DEFAULT_STUDY_SUMMARY);
+    _study.setSummary("Summary");
 
     genericEntityDao.persistEntity(_study);
   }
@@ -767,13 +762,14 @@ public class ScreenResultReporterTest extends AbstractSpringPersistenceTest
     //    Multiset<Reagent> reagents = screenResultsDao.findScreenPositiveReagentsNotDistinct(screenType);
     //    assertFalse("no SM positives found!", reagents.isEmpty());
     int count = screenResultReporter.createReagentCountStudy(_admin,
-                                                     ScreensaverConstants.DEFAULT_BATCH_STUDY_ID_POSITIVE_COUNT_SM,
-                                                     ScreenPositivesCountStudyCreator.DEFAULT_SM_STUDY_TITLE,
-                                                     ScreenPositivesCountStudyCreator.DEFAULT_SM_STUDY_SUMMARY,
-                                                     ScreenPositivesCountStudyCreator.DEFAULT_POSITIVES_ANNOTATION_NAME,
-                                                     ScreenPositivesCountStudyCreator.DEFAULT_SM_POSITIVES_ANNOTATION_DESC,
-                                                     ScreenPositivesCountStudyCreator.DEFAULT_OVERALL_ANNOTATION_NAME,
-                                                     ScreenPositivesCountStudyCreator.DEFAULT_SM_OVERALL_ANNOTATION_DESC,
+                                                             _labHead,
+                                                             ScreensaverConstants.DEFAULT_BATCH_STUDY_ID_POSITIVE_COUNT_SM,
+                                                             "Title",
+                                                             "Summary",
+                                                             "Positives",
+                                                             "The positives",
+                                                             "Overall",
+                                                             "The overall",
                                                              screenType);
     assertTrue(count > 0);
 
@@ -809,7 +805,7 @@ public class ScreenResultReporterTest extends AbstractSpringPersistenceTest
 
     AnnotationValue avPositiveCount = null;
     for (Entry<AnnotationType,AnnotationValue> entry : studyReagent.getAnnotationValues().entrySet()) {
-      if (entry.getKey().getName().equals(ScreenPositivesCountStudyCreator.DEFAULT_POSITIVES_ANNOTATION_NAME)) {
+      if (entry.getKey().getName().equals("Positives")) {
         avPositiveCount = entry.getValue();
         break;
       }
@@ -819,7 +815,7 @@ public class ScreenResultReporterTest extends AbstractSpringPersistenceTest
 
     AnnotationValue avOverallCount = null;
     for (Entry<AnnotationType,AnnotationValue> entry : studyReagent.getAnnotationValues().entrySet()) {
-      if (entry.getKey().getName().equals(ScreenPositivesCountStudyCreator.DEFAULT_OVERALL_ANNOTATION_NAME)) {
+      if (entry.getKey().getName().equals("Overall")) {
         avOverallCount = entry.getValue();
         break;
       }
@@ -845,13 +841,14 @@ public class ScreenResultReporterTest extends AbstractSpringPersistenceTest
     //    reagents = screenResultsDao.findScreenPositiveReagentsNotDistinct(screenType);
     //    assertFalse("no RNAi positives found!", reagents.isEmpty());
     int count = screenResultReporter.createReagentCountStudy(_admin,
+                                                             _labHead,
                                                              ScreensaverConstants.DEFAULT_BATCH_STUDY_ID_POSITIVE_COUNT_RNAI,
-                                                             ScreenPositivesCountStudyCreator.DEFAULT_RNAi_STUDY_TITLE,
-                                                             ScreenPositivesCountStudyCreator.DEFAULT_RNAi_STUDY_SUMMARY,
-                                                             ScreenPositivesCountStudyCreator.DEFAULT_POSITIVES_ANNOTATION_NAME,
-                                                             ScreenPositivesCountStudyCreator.DEFAULT_RNAi_POSITIVES_ANNOTATION_DESC,
-                                                             ScreenPositivesCountStudyCreator.DEFAULT_OVERALL_ANNOTATION_NAME,
-                                                             ScreenPositivesCountStudyCreator.DEFAULT_RNAi_OVERALL_ANNOTATION_DESC,
+                                                             "RNAi Study Title",
+                                                             "RNAi Study Summary",
+                                                             "Positives",
+                                                             "The positives",
+                                                             "Overall",
+                                                             "The overall",
                                                              screenType);
     assertTrue(count > 0);
 
@@ -888,7 +885,7 @@ public class ScreenResultReporterTest extends AbstractSpringPersistenceTest
 
     AnnotationValue avPositiveCountRnai = null;
     for (Entry<AnnotationType,AnnotationValue> entry : studyReagent.getAnnotationValues().entrySet()) {
-      if (entry.getKey().getName().equals(ScreenPositivesCountStudyCreator.DEFAULT_POSITIVES_ANNOTATION_NAME)) {
+      if (entry.getKey().getName().equals("Overall")) {
         avPositiveCountRnai = entry.getValue();
         break;
       }
