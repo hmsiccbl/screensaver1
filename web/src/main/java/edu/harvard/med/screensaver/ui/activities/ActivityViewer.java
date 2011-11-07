@@ -10,7 +10,6 @@
 package edu.harvard.med.screensaver.ui.activities;
 
 import java.math.BigDecimal;
-import java.math.RoundingMode;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Set;
@@ -169,7 +168,7 @@ public class ActivityViewer extends SearchResultContextEditableEntityViewerBacki
 
       if (entity instanceof Screening) {
         ((Screening) entity).setVolumeTransferredPerWellToAssayPlates(
-                                                                      Volume.makeVolume(_volumeTransferredPerWellToAssayPlatesValue, _volumeTransferredPerWellToAssayPlatesType.getSelection(), RoundingMode.HALF_UP));
+                                                                      Volume.makeVolume(_volumeTransferredPerWellToAssayPlatesValue, _volumeTransferredPerWellToAssayPlatesType.getSelection() )) ;//, RoundingMode.HALF_UP));
         // auto-calculate the volumeTransferredPerWellFromLibraryPlates property, if user left it blank
         if (StringUtils.isEmpty(_volumeTransferredPerWellFromLibraryPlatesValue) &&
           !!!StringUtils.isEmpty(_volumeTransferredPerWellToAssayPlatesValue)) {
@@ -177,9 +176,9 @@ public class ActivityViewer extends SearchResultContextEditableEntityViewerBacki
           _volumeTransferredPerWellFromLibraryPlatesType.setSelection(_volumeTransferredPerWellToAssayPlatesType.getSelection());
         }
         ((Screening) entity).setVolumeTransferredPerWellFromLibraryPlates(
-                                                                          Volume.makeVolume(_volumeTransferredPerWellFromLibraryPlatesValue, _volumeTransferredPerWellFromLibraryPlatesType.getSelection(), RoundingMode.HALF_UP));
-        ((Screening) entity).setAssayWellVolume(Volume.makeVolume(_assayWellVolumeValue, _assayWellVolumeType.getSelection(), RoundingMode.HALF_UP));
-        ((Screening) entity).setMolarConcentration(MolarConcentration.makeConcentration(_concentrationValue, _concentrationType.getSelection(), RoundingMode.HALF_UP));
+                                                                          Volume.makeVolume(_volumeTransferredPerWellFromLibraryPlatesValue, _volumeTransferredPerWellFromLibraryPlatesType.getSelection())); //, RoundingMode.HALF_UP));
+        ((Screening) entity).setAssayWellVolume(Volume.makeVolume(_assayWellVolumeValue, _assayWellVolumeType.getSelection())); //, RoundingMode.HALF_UP));
+        ((Screening) entity).setMolarConcentration(MolarConcentration.makeConcentration(_concentrationValue, _concentrationType.getSelection())); //, RoundingMode.HALF_UP));
       }
       if (entity instanceof CherryPickScreening) {
         CherryPickScreening screening = (CherryPickScreening) entity;
@@ -504,7 +503,11 @@ public class ActivityViewer extends SearchResultContextEditableEntityViewerBacki
     if (entity instanceof Screening) {
       try {
         Volume.makeVolume(getVolumeTransferredPerWellToAssayPlatesValue(),
-                          getVolumeTransferredPerWellToAssayPlatesType().getSelection(), RoundingMode.HALF_UP);
+                          getVolumeTransferredPerWellToAssayPlatesType().getSelection());//, RoundingMode.HALF_UP);
+      }
+      catch (ArithmeticException e) {
+        showFieldInputError("Volume Transferred Per Replicate To Assay Plates: value is out of range (1 nL to 1 L), rounding not allowed",  e.getLocalizedMessage());
+        valid = false;
       }
       catch (Exception e) {
         showFieldInputError("Volume Transferred Per Replicate To Assay Plates", e.getLocalizedMessage());
@@ -512,8 +515,12 @@ public class ActivityViewer extends SearchResultContextEditableEntityViewerBacki
       }
       try {
         Volume.makeVolume(getVolumeTransferredPerWellToAssayPlatesValue(),
-                          getVolumeTransferredPerWellFromLibraryPlatesType().getSelection(), RoundingMode.HALF_UP);
-      } 
+                          getVolumeTransferredPerWellFromLibraryPlatesType().getSelection());// , RoundingMode.HALF_UP);
+      }
+      catch (ArithmeticException e) {
+        showFieldInputError("Volume Transferred Per Replicate From Library Plates: value is out of range (1 nL to 1 L), rounding not allowed",  e.getLocalizedMessage());
+        valid = false;
+      }
       catch (Exception e) {
         showFieldInputError("Volume Transferred Per Replicate From Library Plates", e.getLocalizedMessage());
         valid = false;
@@ -522,16 +529,24 @@ public class ActivityViewer extends SearchResultContextEditableEntityViewerBacki
         Volume.makeVolume(getAssayWellVolumeValue(),
                           getAssayWellVolumeType().getSelection());
       }
+      catch (ArithmeticException e) {
+        showFieldInputError("Assay Well Volume: value is out of range (1 nL to 1 L), rounding not allowed",  e.getLocalizedMessage());
+        valid = false;
+      }
       catch (Exception e) {
         showFieldInputError("Assay Well Volume", e.getLocalizedMessage());
         valid = false;
       }
       try {
         MolarConcentration.makeConcentration(getMolarConcentrationValue(),
-                                             getMolarConcentrationType().getSelection(), RoundingMode.HALF_UP);
-      } 
+                                             getMolarConcentrationType().getSelection()); //, RoundingMode.HALF_UP);
+      }
+      catch (ArithmeticException e) {
+        showFieldInputError("Molar Concentration: value is out of range (1pM to 10 M), rounding not allowed",  e.getLocalizedMessage());
+        valid = false;
+      }
       catch (Exception e) {
-        showFieldInputError("molarConcentration", e.getLocalizedMessage());
+        showFieldInputError("Molar Concentration", e.getLocalizedMessage());
         valid = false;
       }
     }
