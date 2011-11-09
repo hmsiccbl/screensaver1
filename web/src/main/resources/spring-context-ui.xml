@@ -185,7 +185,6 @@
     scope="session"
     autowire="constructor"
     class="edu.harvard.med.screensaver.ui.Menu">
-    <!-- 
     <constructor-arg ref="genericEntityDao" />
     <constructor-arg ref="librariesDao" />
     <constructor-arg ref="screenGenerator" />
@@ -202,7 +201,7 @@
     <constructor-arg ref="userViewer" />
     <constructor-arg ref="libraryDetailViewer" />
     <constructor-arg ref="wellsBrowser" />
-     -->
+    <constructor-arg ref="attachedFilesBrowser" />
     <aop:scoped-proxy/>
   </bean>
 
@@ -517,8 +516,7 @@
     <constructor-arg ref="libraryContentsLoader" />
     <aop:scoped-proxy/>
   </bean>
-
-
+ 
   <bean
     id="libraryCopiesBrowser"
     parent="uiBean"
