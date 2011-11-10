@@ -106,11 +106,13 @@ public interface ScreensaverConstants
   public static final int PLATE_NUMBER_LEN = 5;
   public static final int VOLUME_PRECISION = 10;
   public static final int VOLUME_SCALE = 9;
-  public static final int MOLAR_CONCENTRATION_PRECISION = 13;   /* set for a range of 1pM to 10 M */
-  public static final int MOLAR_CONCENTRATION_SCALE = 12;          /* set for a range of 1pM to 10 M */
-  public static final int MG_ML_CONCENTRATION_PRECISION = 5;
+  public static final int MOLAR_CONCENTRATION_PRECISION = 13;   /* set for a range of 1pM to 10 M, in 1pM increments */
+  public static final int MOLAR_CONCENTRATION_SCALE = 12;          /* set for a range of 1pM to 10 M, in 1pM increments */
+  public static final int MG_ML_CONCENTRATION_PRECISION = 5; /* set for a range of 99.999 to 0.001 */
   public static final int MG_ML_CONCENTRATION_SCALE = 3;
-  public static final int PLATE_DILUTION_FACTOR_PRECISION = 8;  
+  public static final int UG_ML_CONCENTRATION_PRECISION = 5;
+  public static final int UG_ML_CONCENTRATION_SCALE = 3;
+  public static final int PLATE_DILUTION_FACTOR_PRECISION = 8;  /** range is >=10^-2, < 10^6 **/
   public static final int PLATE_DILUTION_FACTOR_SCALE=2;
   public static final int MOLECULAR_MASS_PRECISION = 15;
   public static final int MOLECULAR_MASS_SCALE = 9;

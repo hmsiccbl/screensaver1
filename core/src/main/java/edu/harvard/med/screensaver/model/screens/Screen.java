@@ -53,6 +53,7 @@ import org.hibernate.annotations.SortType;
 import org.hibernate.annotations.Type;
 import org.joda.time.LocalDate;
 
+import edu.harvard.med.screensaver.ScreensaverConstants;
 import edu.harvard.med.screensaver.db.ScreenResultsDAO;
 import edu.harvard.med.screensaver.model.AbstractEntityVisitor;
 import edu.harvard.med.screensaver.model.AttachedFile;
@@ -60,6 +61,7 @@ import edu.harvard.med.screensaver.model.AttachedFilesEntity;
 import edu.harvard.med.screensaver.model.BusinessRuleViolationException;
 import edu.harvard.med.screensaver.model.DataModelViolationException;
 import edu.harvard.med.screensaver.model.DuplicateEntityException;
+import edu.harvard.med.screensaver.model.MolarConcentration;
 import edu.harvard.med.screensaver.model.RequiredPropertyException;
 import edu.harvard.med.screensaver.model.activities.AdministrativeActivity;
 import edu.harvard.med.screensaver.model.activities.AdministrativeActivityType;
@@ -214,6 +216,8 @@ public class Screen extends Study implements AttachedFilesEntity<ScreenAttachedF
   private Species _species;
   private CellLine _cellLine;
   private TransfectionAgent _transfectionAgent;
+  private MolarConcentration perturbagenMolarConcentration;
+  private BigDecimal perturbagenUgMlConcentration;
   
   // public constructors
 
@@ -2040,5 +2044,28 @@ public class Screen extends Study implements AttachedFilesEntity<ScreenAttachedF
   public Well getWellStudied()
   {
     return wellStudied;
+  }
+
+  @Column(precision=ScreensaverConstants.MOLAR_CONCENTRATION_PRECISION, scale=ScreensaverConstants.MOLAR_CONCENTRATION_SCALE)
+  @org.hibernate.annotations.Type(type = "edu.harvard.med.screensaver.db.usertypes.MolarConcentrationType")
+  public MolarConcentration getPerturbagenMolarConcentration()
+  {
+    return perturbagenMolarConcentration;
+  }
+  
+  public void setPerturbagenMolarConcentration(MolarConcentration value)
+  {
+    this.perturbagenMolarConcentration = value;
+  }
+  
+    public void setPerturbagenUgMlConcentration(BigDecimal ugMlConcentration)
+  {
+    this.perturbagenUgMlConcentration = ugMlConcentration;
+  }
+
+  @Column(precision = ScreensaverConstants.UG_ML_CONCENTRATION_PRECISION, scale = ScreensaverConstants.UG_ML_CONCENTRATION_SCALE)
+  public BigDecimal getPerturbagenUgMlConcentration()
+  {
+    return this.perturbagenUgMlConcentration;
   }
 }

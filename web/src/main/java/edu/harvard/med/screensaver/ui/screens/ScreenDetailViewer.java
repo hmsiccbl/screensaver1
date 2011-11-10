@@ -45,7 +45,10 @@ import edu.harvard.med.screensaver.db.UsersDAO;
 import edu.harvard.med.screensaver.model.AttachedFile;
 import edu.harvard.med.screensaver.model.AttachedFileType;
 import edu.harvard.med.screensaver.model.BusinessRuleViolationException;
+import edu.harvard.med.screensaver.model.MolarConcentration;
+import edu.harvard.med.screensaver.model.MolarUnit;
 import edu.harvard.med.screensaver.model.RequiredPropertyException;
+import edu.harvard.med.screensaver.model.Volume;
 import edu.harvard.med.screensaver.model.cherrypicks.CherryPickRequest;
 import edu.harvard.med.screensaver.model.screens.BillingItem;
 import edu.harvard.med.screensaver.model.screens.CellLine;
@@ -75,6 +78,7 @@ import edu.harvard.med.screensaver.service.screens.ScreenGenerator;
 import edu.harvard.med.screensaver.service.screens.ScreeningDuplicator;
 import edu.harvard.med.screensaver.ui.activities.ActivityViewer;
 import edu.harvard.med.screensaver.ui.arch.util.AttachedFiles;
+import edu.harvard.med.screensaver.ui.arch.util.UICompositeSelectorBean;
 import edu.harvard.med.screensaver.ui.arch.util.UISelectOneBean;
 import edu.harvard.med.screensaver.ui.arch.util.UISelectOneEntityBean;
 import edu.harvard.med.screensaver.ui.arch.view.EditResult;
@@ -124,6 +128,7 @@ public class ScreenDetailViewer extends AbstractStudyDetailViewer<Screen>
   private CellLine _newCellLine;
   private UISelectOneEntityBean<TransfectionAgent> _transfectionAgentMenu;
   private TransfectionAgent _newTransfectionAgent;
+  private UICompositeSelectorBean<MolarUnit> _perturbagenMolarConcentrationSelector;
   
   private ScreenDataSharingLevel _lastDataSharingLevel;
   private LabHead _lastLabHead;
@@ -209,7 +214,7 @@ public class ScreenDetailViewer extends AbstractStudyDetailViewer<Screen>
     initalizeAttachedFiles(screen);
     _lastMinAllowedDataPrivacyExpirationDate = screen.getMinAllowedDataPrivacyExpirationDate();
     _lastMaxAllowedDataPrivacyExpirationDate = screen.getMaxAllowedDataPrivacyExpirationDate();
-    
+    _perturbagenMolarConcentrationSelector = null;    
   }
 
   private void initalizeAttachedFiles(Screen screen)
@@ -693,6 +698,15 @@ public class ScreenDetailViewer extends AbstractStudyDetailViewer<Screen>
     else if (!StringUtils.isEmpty(getPinTransferApprovalComments()) && screen.getPinTransferApprovalActivity() != null) {
       screen.getPinTransferApprovalActivity().setComments(getPinTransferApprovalComments());
     }
+
+    if(getPerturbagenMolarConcentrationSelector().isEmpty())
+    {
+      screen.setPerturbagenMolarConcentration(null);
+    } else {
+        screen.setPerturbagenMolarConcentration(MolarConcentration.makeConcentration(getPerturbagenMolarConcentrationSelector().getValue(),
+                                             getPerturbagenMolarConcentrationSelector().getSelectorBean().getSelection()));
+    }
+
   }
   
   @Override
@@ -706,14 +720,31 @@ public class ScreenDetailViewer extends AbstractStudyDetailViewer<Screen>
     LocalDate max = screen.getMaxAllowedDataPrivacyExpirationDate();
     LocalDate min = screen.getMinAllowedDataPrivacyExpirationDate();
     
-    //TODO: consider using a Comparator Utility class! - sde4
     if (max != null && min != null) {
       if(max.compareTo(min) < 0) {
         showMessage("screens.dataPrivacyExpirationDateOrderError", min, max);
         return false;
       }
     }
-    return super.validateEntity(screen);
+
+    boolean valid = true;
+    if(!getPerturbagenMolarConcentrationSelector().isEmpty())
+    {
+      try {
+       MolarConcentration.makeConcentration(getPerturbagenMolarConcentrationSelector().getValue(),
+                                             getPerturbagenMolarConcentrationSelector().getSelectorBean().getSelection());
+      }
+      catch (ArithmeticException e) {
+        showFieldInputError("Molar Concentration: number format error: allowed range (>= 1.0 pM, < 10.0 M), in 1 pM increments",  e.getLocalizedMessage());
+        valid = false;
+      }
+      catch (Exception e) {
+        showFieldInputError("Molar Concentration", StringUtils.isEmpty(e.getMessage())? e.getClass().getName() : e.getMessage() ); 
+        valid = false;
+      }
+    }
+
+    return valid && super.validateEntity(screen);
   }
 
   @UICommand
@@ -956,4 +987,19 @@ public class ScreenDetailViewer extends AbstractStudyDetailViewer<Screen>
     return new ListDataModel(screens);
   }
   
+  public UICompositeSelectorBean<MolarUnit> getPerturbagenMolarConcentrationSelector()
+  {
+    if( _perturbagenMolarConcentrationSelector == null )
+    {
+      MolarUnit defaultUnit = MolarUnit.MICROMOLAR;      
+      if(getEntity().getScreenType() == ScreenType.RNAI) {
+        defaultUnit = MolarUnit.NANOMOLAR;
+      }
+      MolarConcentration c = getEntity().getPerturbagenMolarConcentration();
+       _perturbagenMolarConcentrationSelector = new UICompositeSelectorBean<MolarUnit>(
+         c == null ? "" : c.getDisplayValue().toString(), c == null ? defaultUnit : c.getUnits(), MolarUnit.DISPLAY_VALUES);
+    }
+    return _perturbagenMolarConcentrationSelector;
+  }  
+
 }

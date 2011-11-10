@@ -59,7 +59,7 @@
         <t:outputText id="#{id}#{type}Value" value="#{value}"
           escape="#{(empty escape ? true : escape)}"
           rendered="#{!empty value &amp;&amp; !(type == 'Textarea' || type == 'Volume' || type == 'MolarConcentration' || type == 'ListOfLinks' || type == 'Link' || type == 'Vocabulary')}"
-          converter="#{!empty converter ? converter : (empty type || type == 'Text' || type == 'Textarea') ? stringConverter : type == 'Integer' ? javax.faces.convert.IntegerConverter : type == 'Date' ? dateConverter : type == 'Set' ? setConverter : type == 'List' ? listConverter : type == 'Volume' ? volumeConverter : type == 'MolarConcentration' ? molarConcentrationConverter : type == 'Currency' ? currencyConverter : null}" />
+          converter="#{!empty converter ? converter : (empty type || type == 'Text' || type == 'Textarea') ? stringConverter : type == 'Integer' ? javax.faces.convert.IntegerConverter : type == 'Date' ? dateConverter : type == 'Set' ? setConverter : type == 'List' ? listConverter : type == 'Volume' ? volumeValueConverter : type == 'MolarConcentration' ? molarConcentrationValueConverter : type == 'Currency' ? currencyConverter : null}" />
         <t:inputTextarea id="#{id}#{type}Value1"
           rendered="#{!empty value &amp;&amp; type == 'Textarea'}"
           value="#{value}"

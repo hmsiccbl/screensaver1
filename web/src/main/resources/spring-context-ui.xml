@@ -1066,8 +1066,6 @@
 
   <bean id="stringConverter" class="edu.harvard.med.screensaver.ui.arch.util.converter.NoOpStringConverter" />
 
-  <bean id="mgMlConcentrationConverter" class="edu.harvard.med.screensaver.ui.arch.util.converter.MgMlConcentrationConverter" />
-
   <bean id="toLowerCaseConverter" class="edu.harvard.med.screensaver.ui.arch.util.converter.ToLowerCaseConverter" />
 
   <bean id="dateConverter" class="edu.harvard.med.screensaver.ui.arch.util.converter.LocalDateConverter" />
@@ -1078,16 +1076,26 @@
 
   <bean id="setConverter" class="edu.harvard.med.screensaver.ui.arch.util.converter.SortedSetConverter" />
 
-  <bean id="volumeConverter" class="edu.harvard.med.screensaver.ui.arch.util.converter.VolumeConverter" />
-
-  <bean id="molarConcentrationConverter" class="edu.harvard.med.screensaver.ui.arch.util.converter.MolarConcentrationConverter" />
+  <bean id="volumeValueConverter" class="edu.harvard.med.screensaver.ui.arch.util.converter.BigDecimalConverter" >
+    <constructor-arg value="3" />
+  </bean>
 
   <bean id="molecularMassConverter" class="edu.harvard.med.screensaver.ui.arch.util.converter.BigDecimalConverter" >
     <constructor-arg value="2" />
   </bean>
   
+  <bean id="molarConcentrationValueConverter" class="edu.harvard.med.screensaver.ui.arch.util.converter.BigDecimalConverter" >
+    <constructor-arg value="3" />
+  </bean>
+  
+  <bean id="mgMlConcentrationConverter" class="edu.harvard.med.screensaver.ui.arch.util.converter.BigDecimalConverter" >
+    <constructor-arg value="3" />
+    <constructor-arg value="5" />
+  </bean>
+  
   <bean id="plateDilutionFactorConverter" class="edu.harvard.med.screensaver.ui.arch.util.converter.BigDecimalConverter" >
-    <constructor-arg value="4" />
+    <constructor-arg value="2" />
+    <constructor-arg value="8" />
   </bean>
 
   <bean id="silencingReagentTypeConverter" class="edu.harvard.med.screensaver.ui.arch.util.converter.SilencingReagentTypeConverter" />

@@ -506,7 +506,7 @@ public class ActivityViewer extends SearchResultContextEditableEntityViewerBacki
                           getVolumeTransferredPerWellToAssayPlatesType().getSelection());//, RoundingMode.HALF_UP);
       }
       catch (ArithmeticException e) {
-        showFieldInputError("Volume Transferred Per Replicate To Assay Plates: value is out of range (1 nL to 1 L), rounding not allowed",  e.getLocalizedMessage());
+        showFieldInputError("Volume Transferred Per Replicate To Assay Plates: number format error: allowed range (>= 1.0 nL, < 1.0L), in 1 nL increments",  e.getLocalizedMessage());
         valid = false;
       }
       catch (Exception e) {
@@ -518,7 +518,7 @@ public class ActivityViewer extends SearchResultContextEditableEntityViewerBacki
                           getVolumeTransferredPerWellFromLibraryPlatesType().getSelection());// , RoundingMode.HALF_UP);
       }
       catch (ArithmeticException e) {
-        showFieldInputError("Volume Transferred Per Replicate From Library Plates: value is out of range (1 nL to 1 L), rounding not allowed",  e.getLocalizedMessage());
+        showFieldInputError("Volume Transferred Per Replicate From Library Plates: number format error: allowed range (>= 1.0 nL, < 1.0L), in 1 nL increments",  e.getLocalizedMessage());
         valid = false;
       }
       catch (Exception e) {
@@ -530,7 +530,7 @@ public class ActivityViewer extends SearchResultContextEditableEntityViewerBacki
                           getAssayWellVolumeType().getSelection());
       }
       catch (ArithmeticException e) {
-        showFieldInputError("Assay Well Volume: value is out of range (1 nL to 1 L), rounding not allowed",  e.getLocalizedMessage());
+        showFieldInputError("Assay Well Volume: number format error: allowed range (>= 1.0 nL, < 1.0L), in 1 nL increments",  e.getLocalizedMessage());
         valid = false;
       }
       catch (Exception e) {

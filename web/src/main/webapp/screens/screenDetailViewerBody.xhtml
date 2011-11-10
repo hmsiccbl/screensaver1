@@ -201,7 +201,27 @@ TODO:
          </t:div>
        </ui:define>
       </ss:property>
-       
+
+    <ss:propertyGroup label="Perturbagen Concentration" columns="2"
+      columnClasses="column" >
+     
+     <ss:property id="perturbagenMolarConcentration" label="Molar: "
+      value="#{screenDetailViewer.perturbagenMolarConcentrationSelector.value}"
+      type="MolarConcentration"
+      unitsSelector="#{screenDetailViewer.perturbagenMolarConcentrationSelector.selectorBean}"
+      description="perturbagen (Molar)concentration"
+      converter="#{molarConcentrationValueConverter}"
+      editable="#{screenDetailViewer.editMode}" />
+      
+     <ss:property id="perturbagenUgMlConcentration" label="ug/mL: "
+       value="#{screenDetailViewer.entity.perturbagenUgMlConcentration}"
+       converter="#{mgMlConcentrationConverter}"
+       rendered="#{screenDetailViewer.entity.screenType == 'Small Molecule'}"
+       description="perturbagen concentration (ug/mL)" editable="#{screenDetailViewer.editMode}"
+       editWidth="6" />
+             
+    </ss:propertyGroup>
+
     <ss:propertyGroup label="Publishable Protocol" columns="1"
       columnClasses="column"
       rendered="#{screenDetailViewer.allowedAccessToScreenDetails}">
