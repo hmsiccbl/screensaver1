@@ -33,14 +33,20 @@ import org.apache.commons.collections.MultiMap;
 import org.apache.commons.collections.map.MultiValueMap;
 import org.apache.log4j.Logger;
 
+import com.google.common.collect.Sets;
+
 import edu.harvard.med.screensaver.db.GenericEntityDAO;
+import edu.harvard.med.screensaver.db.LibrariesDAO;
 import edu.harvard.med.screensaver.model.VolumeUnit;
 import edu.harvard.med.screensaver.model.cherrypicks.CherryPickAssayPlate;
 import edu.harvard.med.screensaver.model.cherrypicks.CherryPickRequest;
 import edu.harvard.med.screensaver.model.cherrypicks.LabCherryPick;
+import edu.harvard.med.screensaver.model.libraries.Copy;
+import edu.harvard.med.screensaver.model.libraries.Plate;
 import edu.harvard.med.screensaver.model.libraries.PlateType;
 import edu.harvard.med.screensaver.util.CSVPrintWriter;
 import edu.harvard.med.screensaver.util.CustomNewlinePrintWriter;
+import edu.harvard.med.screensaver.util.Pair;
 
 /**
  * For a cherry pick request, builds the CSV files that define the assay plate
@@ -76,8 +82,14 @@ public class CherryPickRequestPlateMapFilesBuilder
     "Screen Number",
     "Volume"};
 
+  private static final String[] DISTINCT_PLATECOPYLIST_FILE_HEADERS = {
+    "Source Copy",
+    "Source Plate",
+    "Location" };
+
 
   private static final String README_FILE_NAME = "README.txt";
+  private static final String DISTINCT_PLATE_COPY_LIST_FILE_NAME = "DISTINCT_PLATE_COPY_LIST.csv";
 
 
   // static members
@@ -89,14 +101,17 @@ public class CherryPickRequestPlateMapFilesBuilder
 
   private GenericEntityDAO genericEntityDao;
   private CherryPickRequestPlateMapper cherryPickRequestPlateMapper;
+  private LibrariesDAO librariesDao;
 
 
   // public constructors and methods
 
   public CherryPickRequestPlateMapFilesBuilder(GenericEntityDAO dao,
+                                               LibrariesDAO librariesDao,
                                                CherryPickRequestPlateMapper cherryPickRequestPlateMapper)
   {
     this.genericEntityDao = dao;
+    this.librariesDao = librariesDao;
     this.cherryPickRequestPlateMapper = cherryPickRequestPlateMapper;
   }
 
@@ -119,9 +134,10 @@ public class CherryPickRequestPlateMapFilesBuilder
   {
     ByteArrayOutputStream zipOutRaw = new ByteArrayOutputStream();
     ZipOutputStream zipOut = new ZipOutputStream(zipOutRaw);
-    PrintWriter out = new CSVPrintWriter(new OutputStreamWriter(zipOut), NEWLINE);
     MultiMap/*<String,SortedSet<CherryPick>>*/ files2CherryPicks = buildCherryPickFiles(cherryPickRequest, forPlates);
     buildReadme(cherryPickRequest, zipOut);
+    buildDistinctPlateCopyFile(cherryPickRequest, zipOut);
+    PrintWriter out = new CSVPrintWriter(new OutputStreamWriter(zipOut), NEWLINE);
     for (Iterator iter = files2CherryPicks.keySet().iterator(); iter.hasNext();) {
       String fileName = (String) iter.next();
       ZipEntry zipEntry = new ZipEntry(fileName);
@@ -211,6 +227,32 @@ public class CherryPickRequestPlateMapFilesBuilder
     writer.flush();
   }
 
+
+  /**
+   * for  [#3206] Generate a distinct plate/copy list for CPR download file
+   */
+  private void buildDistinctPlateCopyFile(CherryPickRequest cherryPickRequest, ZipOutputStream zipOut) throws IOException
+  {
+    PrintWriter out = new CSVPrintWriter(new OutputStreamWriter(zipOut), NEWLINE);
+    zipOut.putNextEntry(new ZipEntry(DISTINCT_PLATE_COPY_LIST_FILE_NAME));
+    for (String string : DISTINCT_PLATECOPYLIST_FILE_HEADERS) {
+      out.print(string);
+    }
+    out.println();
+
+    // TODO: consider caching this while building the CPR
+    Set<Plate> sourcePlates = Sets.newHashSet();
+    for(LabCherryPick lcp:cherryPickRequest.getLabCherryPicks()) {
+      sourcePlates.add(librariesDao.findPlate(lcp.getSourceWell().getPlateNumber(), lcp.getSourceCopy().getName()));
+    }
+    for(Plate p:sourcePlates)
+    {
+      out.print(p.getCopy().getName());
+      out.print(p.getPlateNumber());
+      out.print(p.getLocation() == null ?  "" : p.getLocation().toDisplayString());
+      out.println();
+    }
+  }
 
   @SuppressWarnings("unchecked")
   /**
