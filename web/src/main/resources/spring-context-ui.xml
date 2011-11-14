@@ -252,6 +252,7 @@
     <constructor-arg ref="genericEntityDao" />
     <constructor-arg ref="librariesDao" />
     <constructor-arg ref="wellsBrowser"/>
+    <property name="maxQueryInputItems" value="10" />
     <aop:scoped-proxy/>
   </bean>
 
@@ -264,6 +265,7 @@
     <constructor-arg ref="librariesDao" />
     <constructor-arg ref="wellsBrowser" />
     <constructor-arg ref="wellCopyVolumesBrowser" />
+    <property name="maxQueryInputItems" value="10" />
     <aop:scoped-proxy/>
   </bean>
 
@@ -795,6 +797,7 @@
     <constructor-arg ref="cherryPickRequestPlateMapper" />
     <constructor-arg ref="cherryPickRequestPlateMapFilesBuilder" />
     <constructor-arg ref="screeningDuplicator" />
+    <property name="maxQueryInputItems" value="10" />
     <aop:scoped-proxy/>
   </bean>
   
@@ -1077,25 +1080,30 @@
   <bean id="setConverter" class="edu.harvard.med.screensaver.ui.arch.util.converter.SortedSetConverter" />
 
   <bean id="volumeValueConverter" class="edu.harvard.med.screensaver.ui.arch.util.converter.BigDecimalConverter" >
-    <constructor-arg value="3" />
+    <property name="messages" ref="messages" />
+    <property name="scale" value="3" />
   </bean>
 
   <bean id="molecularMassConverter" class="edu.harvard.med.screensaver.ui.arch.util.converter.BigDecimalConverter" >
-    <constructor-arg value="2" />
+    <property name="messages" ref="messages" />
+    <property name="scale" value="2" />
   </bean>
   
   <bean id="molarConcentrationValueConverter" class="edu.harvard.med.screensaver.ui.arch.util.converter.BigDecimalConverter" >
-    <constructor-arg value="3" />
+    <property name="messages" ref="messages" />
+    <property name="scale" value="3" />
   </bean>
   
   <bean id="mgMlConcentrationConverter" class="edu.harvard.med.screensaver.ui.arch.util.converter.BigDecimalConverter" >
-    <constructor-arg value="3" />
-    <constructor-arg value="5" />
+    <property name="messages" ref="messages" />
+    <property name="scale" value="3" />
+    <property name="precision" value="5" />
   </bean>
   
   <bean id="plateDilutionFactorConverter" class="edu.harvard.med.screensaver.ui.arch.util.converter.BigDecimalConverter" >
-    <constructor-arg value="2" />
-    <constructor-arg value="8" />
+    <property name="messages" ref="messages" />
+    <property name="scale" value="2" />
+    <property name="precision" value="8" />
   </bean>
 
   <bean id="silencingReagentTypeConverter" class="edu.harvard.med.screensaver.ui.arch.util.converter.SilencingReagentTypeConverter" />

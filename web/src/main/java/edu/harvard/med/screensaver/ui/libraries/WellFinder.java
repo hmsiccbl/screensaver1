@@ -9,6 +9,8 @@
 
 package edu.harvard.med.screensaver.ui.libraries;
 
+import java.util.SortedSet;
+
 import com.google.common.base.Joiner;
 import org.apache.log4j.Logger;
 
@@ -16,6 +18,7 @@ import edu.harvard.med.screensaver.db.GenericEntityDAO;
 import edu.harvard.med.screensaver.db.LibrariesDAO;
 import edu.harvard.med.screensaver.io.libraries.PlateWellListParser;
 import edu.harvard.med.screensaver.io.libraries.PlateWellListParserResult;
+import edu.harvard.med.screensaver.model.libraries.WellKey;
 import edu.harvard.med.screensaver.ui.arch.view.AbstractBackingBean;
 import edu.harvard.med.screensaver.ui.arch.view.aspects.UICommand;
 import edu.harvard.med.screensaver.util.Pair;
@@ -33,6 +36,7 @@ public class WellFinder extends AbstractBackingBean
   private LibrariesDAO _librariesDao;
   private WellSearchResults _wellsBrowser;
   private WellCopyVolumeSearchResults _wellCopyVolumesBrowser;
+  private int _maxQueryInputItems;
 
   private String _plateWellList;
 
@@ -67,14 +71,21 @@ public class WellFinder extends AbstractBackingBean
   @UICommand
   public String findWells()
   {
-    PlateWellListParserResult parseResult = PlateWellListParser.parseWellsFromPlateWellList(_plateWellList);
+    PlateWellListParserResult result = PlateWellListParser.parseWellsFromPlateWellList(_plateWellList);
     // display parse errors before proceeding with successfully parsed wells
-    for (Pair<Integer,String> error : parseResult.getErrors()) {
+    for (Pair<Integer,String> error : result.getErrors()) {
       showMessage("libraries.plateWellListParseError", error.getSecond());
     }
+    
+    SortedSet<WellKey> keysToShow = result.getParsedWellKeys();
+    if(result.getParsedWellKeys().size() > getMaxQueryInputItems()) {
+      showMessage("maxQueryInputSizeReached", result.getParsedWellKeys().size(), getMaxQueryInputItems());
+      keysToShow = result.getFirst(getMaxQueryInputItems());
+    }
+
     getCurrentScreensaverUser().logActivity("searching for wells: " +
-                                            Joiner.on(", ").join(parseResult.getParsedWellKeys()));
-    _wellsBrowser.searchWells(parseResult.getParsedWellKeys(), "Well Search Results");
+                                            Joiner.on(", ").join(keysToShow));
+    _wellsBrowser.searchWells(keysToShow, "Well Search Results");
     if (_wellsBrowser.getRowCount() == 1) {
       _wellsBrowser.getRowsPerPageSelector().setSelection(1);
     }
@@ -90,7 +101,14 @@ public class WellFinder extends AbstractBackingBean
     for (Pair<Integer,String> error : parseResult.getErrors()) {
       showMessage("libraries.plateWellListParseError", error.getSecond());
     }
-    _wellCopyVolumesBrowser.searchWells(parseResult.getParsedWellKeys());
+    
+    SortedSet<WellKey> keysToShow = parseResult.getParsedWellKeys();
+    if(parseResult.getParsedWellKeys().size() > getMaxQueryInputItems()) {
+      showMessage("maxQueryInputSizeReached", parseResult.getParsedWellKeys().size(), getMaxQueryInputItems());
+      keysToShow = parseResult.getFirst(getMaxQueryInputItems());
+    }
+    
+    _wellCopyVolumesBrowser.searchWells(keysToShow);
     resetSearchFields();
     return BROWSE_WELL_VOLUMES;
   }
@@ -98,5 +116,15 @@ public class WellFinder extends AbstractBackingBean
   private void resetSearchFields()
   {
     _plateWellList = null;
+  }
+
+  public void setMaxQueryInputItems(int _maxQueryInputItems)
+  {
+    this._maxQueryInputItems = _maxQueryInputItems;
+  }
+
+  public int getMaxQueryInputItems()
+  {
+    return _maxQueryInputItems;
   }
 }

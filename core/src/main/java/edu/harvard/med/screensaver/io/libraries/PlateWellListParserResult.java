@@ -73,5 +73,18 @@ public class PlateWellListParserResult
   {
     return _parsedWellKeys; 
   }
+  
+  public SortedSet<WellKey> getFirst(int numberOfItems)
+  {
+    if(getParsedWellKeys().size() > numberOfItems) {
+      int i=0;
+      for(WellKey key:getParsedWellKeys()) {
+        if(++i > numberOfItems) {
+          return getParsedWellKeys().headSet(key);
+        }
+      }
+    }
+    return getParsedWellKeys();
+  }
 }
 

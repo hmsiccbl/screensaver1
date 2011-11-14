@@ -43,7 +43,7 @@ public class ReagentFinder extends AbstractBackingBean
 
   private String _reagentIdentifiersInput;
   private String _nameFacilityVendorIDInput;
-
+  private int _maxQueryInputItems;
 
   /**
    * @motivation for CGLIB2
@@ -73,14 +73,25 @@ public class ReagentFinder extends AbstractBackingBean
   @UICommand
   public String findReagentsByVendorIdentifier() throws IOException
   {
-    Set<String> reagentIdentifiers = parseReagentIdentifier();
+    SortedSet<String> reagentIdentifiers = parseReagentIdentifier();
+    SortedSet<String> keysToShow = reagentIdentifiers;
+    if(reagentIdentifiers.size() > getMaxQueryInputItems()) {
+      showMessage("maxQueryInputSizeReached", reagentIdentifiers.size(), getMaxQueryInputItems());
+      int i=0;
+      for(String key:reagentIdentifiers) {
+        if(++i > getMaxQueryInputItems()) {
+          keysToShow = reagentIdentifiers.headSet(key);
+        }
+      }
+    }
+
     getCurrentScreensaverUser().logActivity("searching for wells by reagent vendor identifier(s): " +
-                                            Joiner.on(", ").join(reagentIdentifiers));
-    _wellsBrowser.searchReagentsByVendorIdentifier(reagentIdentifiers);
+                                            Joiner.on(", ").join(keysToShow));
+    _wellsBrowser.searchReagentsByVendorIdentifier(keysToShow);
     return BROWSE_WELLS;
   }
 
-  private Set<String> parseReagentIdentifier() throws IOException
+  private SortedSet<String> parseReagentIdentifier() throws IOException
   {
     SortedSet<String> parsedIdentifiers = Sets.newTreeSet();
     BufferedReader inputReader = new BufferedReader(new StringReader(_reagentIdentifiersInput));
@@ -188,5 +199,15 @@ public class ReagentFinder extends AbstractBackingBean
   {
     _nameFacilityVendorIDInput = null;
     _reagentIdentifiersInput = null;
+  }
+
+  public void setMaxQueryInputItems(int _maxQueryInputItems)
+  {
+    this._maxQueryInputItems = _maxQueryInputItems;
+  }
+
+  public int getMaxQueryInputItems()
+  {
+    return _maxQueryInputItems;
   }
 }

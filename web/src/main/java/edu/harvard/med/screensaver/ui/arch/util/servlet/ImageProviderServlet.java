@@ -55,6 +55,9 @@ import edu.harvard.med.screensaver.util.StringUtils;
  * <li>The application property <b>&quot;screensaver.ui.imageproviderservlet.filesystempath&quot;</b> is required. This
  * should be {@link File#isAbsolute()}; however, if the path is relative, it will be interpreted as relative to the web
  * application root directory.
+ *
+ * TODO: consider replacing this class with a REST-ful service now that we have begun implementing that. -sde4
+ * 
  * </ul>
  */
 public class ImageProviderServlet extends HttpServlet

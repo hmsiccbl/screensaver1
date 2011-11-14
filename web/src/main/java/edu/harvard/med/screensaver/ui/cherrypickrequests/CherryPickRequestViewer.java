@@ -16,6 +16,7 @@ import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Set;
+import java.util.SortedSet;
 
 import javax.faces.model.DataModel;
 import javax.faces.model.ListDataModel;
@@ -48,6 +49,7 @@ import edu.harvard.med.screensaver.model.libraries.Gene;
 import edu.harvard.med.screensaver.model.libraries.Reagent;
 import edu.harvard.med.screensaver.model.libraries.SilencingReagent;
 import edu.harvard.med.screensaver.model.libraries.Well;
+import edu.harvard.med.screensaver.model.libraries.WellKey;
 import edu.harvard.med.screensaver.model.meta.PropertyPath;
 import edu.harvard.med.screensaver.model.meta.RelationshipPath;
 import edu.harvard.med.screensaver.model.screens.CherryPickScreening;
@@ -72,6 +74,7 @@ import edu.harvard.med.screensaver.ui.arch.util.JSFUtils;
 import edu.harvard.med.screensaver.ui.arch.view.SearchResultContextEntityViewerBackingBean;
 import edu.harvard.med.screensaver.ui.arch.view.aspects.UICommand;
 import edu.harvard.med.screensaver.ui.libraries.WellCopyVolumeSearchResults;
+import edu.harvard.med.screensaver.ui.libraries.WellFinder;
 
 /**
  * Backing bean for Cherry Pick Request Viewer page.
@@ -114,6 +117,7 @@ public class CherryPickRequestViewer extends SearchResultContextEntityViewerBack
 
   private DataModel _assayPlatesDataModel;
   private boolean _selectAllAssayPlates = true;
+  private int _maxQueryInputItems;
 
 
   /**
@@ -470,13 +474,19 @@ public class CherryPickRequestViewer extends SearchResultContextEntityViewerBack
   private String doAddCherryPicksForPoolWells(boolean deconvoluteToDuplexWells)
   {
     PlateWellListParserResult result = PlateWellListParser.parseWellsFromPlateWellList(_cherryPicksInput);
-    // TODO: report errors
     if (result.getErrors().size() > 0) {
       showMessage("cherryPicks.parseError");
       return REDISPLAY_PAGE_ACTION_RESULT;
     }
+
+    SortedSet<WellKey> keysToShow = result.getParsedWellKeys();
+    if(result.getParsedWellKeys().size() > getMaxQueryInputItems()) {
+      showMessage("maxQueryInputSizeReached", result.getParsedWellKeys().size(), getMaxQueryInputItems());
+      keysToShow = result.getFirst(getMaxQueryInputItems());
+    }
+
     _cherryPickRequestCherryPicksAdder.addCherryPicksForWells(getEntity(),
-                                                              result.getParsedWellKeys(),
+                                                              keysToShow,
                                                               deconvoluteToDuplexWells);
     _cherryPickRequestDetailViewer.showAdminWarnings();
     return getThisProxy().reload();
@@ -802,4 +812,15 @@ public class CherryPickRequestViewer extends SearchResultContextEntityViewerBack
   {
     return _cherryPickRequestPlateMapper.getAssayPlatesRequiringSourcePlateReload(getEntity()).size() > 0;
   }
+
+  public void setMaxQueryInputItems(int _maxQueryInputItems)
+  {
+    this._maxQueryInputItems = _maxQueryInputItems;
+  }
+
+  public int getMaxQueryInputItems()
+  {
+    return _maxQueryInputItems;
+  }
+  
 }

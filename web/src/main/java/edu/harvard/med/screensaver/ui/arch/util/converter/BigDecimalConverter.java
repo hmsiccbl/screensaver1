@@ -18,21 +18,27 @@ import javax.faces.context.FacesContext;
 import javax.faces.convert.Converter;
 import javax.faces.convert.ConverterException;
 
+import edu.harvard.med.screensaver.ui.arch.util.Messages;
 import edu.harvard.med.screensaver.util.StringUtils;
 
 public class BigDecimalConverter implements Converter
 {
   private Integer _scale;
   private Integer _precision;
+  private Messages _messages;
 
-  public BigDecimalConverter(Integer scale)
+  public void setMessages(Messages messages)
+  {
+    _messages = messages;
+  }
+  
+  public void setScale(Integer scale)
   {
     _scale = scale;
   }
-
-  public BigDecimalConverter(Integer scale, Integer precision)
+  
+  public void setPrecision(Integer precision)
   {
-    _scale = scale;
     _precision = precision;
   }
 
@@ -46,24 +52,33 @@ public class BigDecimalConverter implements Converter
       BigDecimal d = new BigDecimal(s);
       BigDecimal lowerBound = new BigDecimal(1).movePointLeft(_scale);
       if (d.compareTo(lowerBound) < 0) {
-        throw new ConverterException(new FacesMessage(arg1.getId() + ": Conversion exception: minimum precision allowed is " +
-          lowerBound));
+        // Note, this should be reworked using a Validator, however, see [#1259]
+        // Note: this message will eventually be retrieved by the calling AbstractBackingBean class and enqued in the Messages (how?) - sde4
+        throw new ConverterException(new FacesMessage(arg1.getId() +": " +  _messages.getMessage("conversionExceptionMinPrecisionAllowed", lowerBound), "")); 
       }
       if (_precision != null) {
         BigDecimal upperBound = new BigDecimal(1).movePointRight(_precision - _scale).setScale(_scale);
         if (d.compareTo(upperBound) > 0) {
-          throw new ConverterException(new FacesMessage(arg1.getId() + ": Conversion exception: out of range: (>=" +
-            lowerBound + ", <" + upperBound + ") "));
+          // Note, this should be reworked using a Validator, however, see [#1259]
+          // Note: this message will eventually be retrieved by the calling AbstractBackingBean class and enqued in the Messages (how?) - sde4
+          throw new ConverterException(new FacesMessage(arg1.getId() +": " +  _messages.getMessage("conversionExceptionPrecisionRangeAllowed", lowerBound, upperBound), "" ));
         }
       }
       d = d.setScale(_scale, RoundingMode.UNNECESSARY);
       return d;
     }
+    catch(ConverterException e) {
+      throw e;
+    }
     catch (NumberFormatException e) {
-      throw new ConverterException(new FacesMessage(arg1.getId() + ": Input value must be a valid number. ", e.getMessage()), e);
+      // Note, this should be reworked using a Validator, however, see [#1259]
+      // Note: this message will eventually be retrieved by the calling AbstractBackingBean class and enqued in the Messages (how?) - sde4
+      throw new ConverterException(new FacesMessage(arg1.getId() + ": Input value must be a valid number. ", e.getMessage()), e); //TODO: use messages
     }
     catch (Exception e) {
-      throw new ConverterException(new FacesMessage(arg1.getId() + ": Number conversion exception. ", e.getMessage()), e);
+      // Note, this should be reworked using a Validator, however, see [#1259]
+      // Note: this message will eventually be retrieved by the calling AbstractBackingBean class and enqued in the Messages (how?) - sde4
+      throw new ConverterException(new FacesMessage(arg1.getId() + ": Number conversion exception. ", e.getMessage()), e); //TODO: use messages
     }
   }
 
