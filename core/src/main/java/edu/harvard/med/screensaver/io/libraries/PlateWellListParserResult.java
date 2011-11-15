@@ -14,6 +14,8 @@ import java.util.List;
 import java.util.SortedSet;
 import java.util.TreeSet;
 
+import com.google.common.collect.Iterables;
+
 import edu.harvard.med.screensaver.model.libraries.WellKey;
 import edu.harvard.med.screensaver.util.Pair;
 
@@ -77,6 +79,7 @@ public class PlateWellListParserResult
   public SortedSet<WellKey> getFirst(int numberOfItems)
   {
     if(getParsedWellKeys().size() > numberOfItems) {
+      // TODO: replace with com.google.common.collect.Iterables.limit()
       int i=0;
       for(WellKey key:getParsedWellKeys()) {
         if(++i > numberOfItems) {
