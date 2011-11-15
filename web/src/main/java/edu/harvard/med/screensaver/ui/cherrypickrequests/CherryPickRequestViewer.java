@@ -479,14 +479,8 @@ public class CherryPickRequestViewer extends SearchResultContextEntityViewerBack
       return REDISPLAY_PAGE_ACTION_RESULT;
     }
 
-    SortedSet<WellKey> keysToShow = result.getParsedWellKeys();
-    if(result.getParsedWellKeys().size() > getMaxQueryInputItems()) {
-      showMessage("maxQueryInputSizeReached", result.getParsedWellKeys().size(), getMaxQueryInputItems());
-      keysToShow = result.getFirst(getMaxQueryInputItems());
-    }
-
     _cherryPickRequestCherryPicksAdder.addCherryPicksForWells(getEntity(),
-                                                              keysToShow,
+                                                              result.getParsedWellKeys(),
                                                               deconvoluteToDuplexWells);
     _cherryPickRequestDetailViewer.showAdminWarnings();
     return getThisProxy().reload();
@@ -811,16 +805,6 @@ public class CherryPickRequestViewer extends SearchResultContextEntityViewerBack
   public boolean isSourcePlateReloadRequired()
   {
     return _cherryPickRequestPlateMapper.getAssayPlatesRequiringSourcePlateReload(getEntity()).size() > 0;
-  }
-
-  public void setMaxQueryInputItems(int _maxQueryInputItems)
-  {
-    this._maxQueryInputItems = _maxQueryInputItems;
-  }
-
-  public int getMaxQueryInputItems()
-  {
-    return _maxQueryInputItems;
   }
   
 }
