@@ -759,7 +759,7 @@ public abstract class WellSearchResults extends TupleBasedEntitySearchResults<We
                                                     "Compound Names",
                                                     "The names of the compound in the well",
                                                     COMPOUND_COLUMNS_GROUP));
-    columns.get(columns.size() - 1).setVisible(isLINCS() ? true : false);
+    columns.get(columns.size() - 1).setVisible(true);
 
     columns.add(new IntegerSetTupleColumn<Well,String>(relPath.to(SmallMoleculeReagent.pubchemCids),
       "PubChem CIDs",
