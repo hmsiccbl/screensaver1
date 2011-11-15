@@ -141,7 +141,7 @@ public class ConcentrationStatistics implements Serializable
     if(getPrimaryWellMolarConcentration() == null ) return null;
     // NOTE: a null value for the well concentration dilution factor should be considered a db error
     BigDecimal value = getPrimaryWellMolarConcentration().getValue().divide(df,ScreensaverConstants.PLATE_DILUTION_FACTOR_SCALE, RoundingMode.HALF_UP);
-    return MolarConcentration.makeConcentration(value.toString(), getPrimaryWellMolarConcentration().getUnits()); 
+    return MolarConcentration.makeConcentration(value.toString(), getPrimaryWellMolarConcentration().getUnits(), RoundingMode.HALF_UP); 
   }  
   
   @Transient
@@ -149,7 +149,7 @@ public class ConcentrationStatistics implements Serializable
   {
     if(getMinMolarConcentration() == null ) return null; 
     BigDecimal value = getMinMolarConcentration().getValue().divide(df,ScreensaverConstants.PLATE_DILUTION_FACTOR_SCALE, RoundingMode.HALF_UP);
-    return MolarConcentration.makeConcentration(value.toString(), getMinMolarConcentration().getUnits()); 
+    return MolarConcentration.makeConcentration(value.toString(), getMinMolarConcentration().getUnits(), RoundingMode.HALF_UP); 
   }  
   
   @Transient
@@ -157,7 +157,7 @@ public class ConcentrationStatistics implements Serializable
   {
     if(getMaxMolarConcentration() == null ) return null;
     BigDecimal value = getMaxMolarConcentration().getValue().divide(df,ScreensaverConstants.PLATE_DILUTION_FACTOR_SCALE, RoundingMode.HALF_UP);
-    return MolarConcentration.makeConcentration(value.toString(), getMaxMolarConcentration().getUnits()); 
+    return MolarConcentration.makeConcentration(value.toString(), getMaxMolarConcentration().getUnits(), RoundingMode.HALF_UP); 
   }
 
   @Transient
