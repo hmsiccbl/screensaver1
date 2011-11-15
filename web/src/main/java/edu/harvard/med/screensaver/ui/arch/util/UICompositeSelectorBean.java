@@ -4,14 +4,10 @@ import java.util.List;
 
 import org.apache.commons.lang.StringUtils;
 
-import edu.harvard.med.screensaver.model.Entity;
 import edu.harvard.med.screensaver.model.VocabularyTerm;
-import edu.harvard.med.screensaver.ui.arch.view.EditableEntityViewer;
 
 /**
- * Special UI class that works closely with a paired inputText field and selectOneMenu widget, providing the necessary bound values.
- * 
- * Note: be sure to manually bind values to the Entity using {@link EditableEntityViewer#updateEntityProperties(Entity) } 
+ * Pairs an inputText field and selectOneMenu widget, providing the necessary bound values.
   **/
 public class UICompositeSelectorBean<T extends VocabularyTerm>
 {
@@ -19,10 +15,10 @@ public class UICompositeSelectorBean<T extends VocabularyTerm>
   private UISelectOneBean<T> selectorOneBean;
   private String value;
   
-  public UICompositeSelectorBean(String initialValue, T initialUnit, List<T> displayValues)
+  public UICompositeSelectorBean(String initialValue, T defaultSelection, List<T> displayValues)
    {
      this.selectorOneBean =
-      new UISelectOneBean<T>(displayValues, initialUnit)
+      new UISelectOneBean<T>(displayValues, defaultSelection)
       {
         @Override
         protected String makeLabel(T t) { return t.getValue(); }
