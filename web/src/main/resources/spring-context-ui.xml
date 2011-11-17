@@ -252,7 +252,7 @@
     <constructor-arg ref="genericEntityDao" />
     <constructor-arg ref="librariesDao" />
     <constructor-arg ref="wellsBrowser"/>
-    <property name="maxQueryInputItems" value="10" />
+    <property name="maxQueryInputItems" value="1000"/>
     <aop:scoped-proxy/>
   </bean>
 
@@ -265,7 +265,7 @@
     <constructor-arg ref="librariesDao" />
     <constructor-arg ref="wellsBrowser" />
     <constructor-arg ref="wellCopyVolumesBrowser" />
-    <property name="maxQueryInputItems" value="10" />
+    <property name="maxQueryInputItems" value="1000" />
     <aop:scoped-proxy/>
   </bean>
 
@@ -521,6 +521,19 @@
  
   <bean
     id="libraryCopiesBrowser"
+    parent="uiBean"
+    scope="session"
+    class="edu.harvard.med.screensaver.ui.libraries.LibraryCopySearchResults">
+    <constructor-arg ref="genericEntityDao" />
+    <constructor-arg ref="librariesDao" />
+    <constructor-arg ref="libraryCopyViewer" />
+    <constructor-arg ref="libraryViewer" />
+    <constructor-arg ref="activitiesBrowser" />
+    <constructor-arg ref="libraryCopyPlatesBrowser" />    
+    <aop:scoped-proxy/>
+  </bean>
+  <bean
+    id="copyFreezeThawReportSearchResults"
     parent="uiBean"
     scope="session"
     class="edu.harvard.med.screensaver.ui.libraries.LibraryCopySearchResults">
@@ -1142,5 +1155,6 @@
     id="envInfo"
     parent="uiBean"
     class="edu.harvard.med.screensaver.ui.Environment" />
+    
 
 </beans>
