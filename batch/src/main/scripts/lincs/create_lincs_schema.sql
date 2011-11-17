@@ -569,6 +569,8 @@
         min_allowed_data_privacy_expiration_date date,
         min_data_loaded_replicate_count int4,
         min_screened_replicate_count int4,
+        perturbagen_molar_concentration numeric(13, 12),
+        perturbagen_ug_ml_concentration numeric(5, 3),
         project_id text,
         project_phase text not null,
         pubchem_assay_id int4,
