@@ -270,19 +270,6 @@ public class PlateUpdater
     if(!molarCounts.isEmpty()) concentrationStatistics.setPrimaryWellMolarConcentration(findMaxByValueThenKey(molarCounts).getKey());
   }
 
-//  private void updatePrimaryPlateDilutionFactor(Copy copy)
-//  {  
-//    Map<BigDecimal,Integer> dilutionFactorCounts = Maps.transformValues(Multimaps.index(
-//                                                                              Lists.newArrayList(Iterators.filter(
-//                                                                                                                  Iterators.filter(copy.getPlates().values().iterator(),
-//                                                                                                                  Predicates.compose(Predicates.notNull(),Plate.ToWellConcentrationDilutionFactor)),
-//                                                                                                                  Predicates.compose(isStoredAtFacility, Plate.ToStatus))),
-//                                                                                                                  Plate.ToWellConcentrationDilutionFactor).asMap(), CollectionSize);
-//                                                                                                                  
-//// TODO: fix this by storing df on the copy
-//    if(!dilutionFactorCounts.isEmpty()) copy.getConcentrationStatistics().setWellConcentrationDilutionFactor(findMaxByValueThenKey(dilutionFactorCounts).getKey());
-//  }
-
   private <T extends Comparable<? super T>, U extends Comparable<? super U>> Map.Entry<T,U> findMaxByValueThenKey(Map<T,U> map)
   {
     // This method avoids having to define a comparator for each type
@@ -493,76 +480,6 @@ public class PlateUpdater
     }
     return false;
   }
-//
-//  /**
-//   * Note: this method calculates the plate dilution factor
-//   */
-//  @Transactional
-//  public boolean updateAbsoluteMolarConcentration(Plate plate, MolarConcentration newConcentration, AdministratorUser recordByAdmin)
-//  {
-//    // [#2920]  1. get the primary/min/max well concentrations
-//    if(plate.getPrimaryWellMolarConcentration() == null )
-//    {
-//      throw new BusinessRuleViolationException("Cannot set the plate dilution factor using an absolute concentration if the library well concentrations for the plate have not been set.  Set using the plate dilution factor instead"); // TODO: [#2920] make an error message property for this
-//    }
-//    if(!!! NullSafeUtils.nullSafeEquals(plate.getMaxMolarConcentration(), plate.getMinMolarConcentration()) || 
-//      !!! NullSafeUtils.nullSafeEquals(plate.getMaxMolarConcentration(), plate.getPrimaryWellMolarConcentration()) )
-//    {
-//        throw new BusinessRuleViolationException("Cannot set the plate dilution factor using an absolute concentration if the wells of the plate have varying concentrations.  Set using the plate dilution factor instead"); // TODO:  [#2920] make an error message property for this
-//    }
-//    if(plate.getPrimaryWellMolarConcentration().compareTo(newConcentration) < 0 ) {
-//      throw new BusinessRuleViolationException("Target concentration cannot be less than the primary well concentration (only dilution is allowed)."); // TODO:  [#2920] make an error message property for this
-//    }
-//      // 2. calculate a dilution factor
-//      BigDecimal newDilutionFactor = plate.getPrimaryWellMolarConcentration().getValue().divide(newConcentration.getValue(), RoundingMode.HALF_UP);
-//      newDilutionFactor = newDilutionFactor.scaleByPowerOfTen(newConcentration.getUnits().getScale() - plate.getPrimaryWellMolarConcentration().getUnits().getScale());
-//      newDilutionFactor = newDilutionFactor.setScale(ScreensaverConstants.PLATE_DILUTION_FACTOR_SCALE, RoundingMode.HALF_UP);
-//      return updatePlateDilutionFactor(plate, newDilutionFactor, recordByAdmin);
-//  }
-
-//  /**
-//   * Note: this method calculates the plate dilution factor
-//   * "absolute" concentration refers to the value shown, not the stored primary well concentration.
-//   */
-//  @Transactional
-//  public boolean updateAbsoluteMgMlConcentration(Plate plate, BigDecimal newConcentration, AdministratorUser recordByAdmin)
-//  {
-//    if(plate.getPrimaryWellMgMlConcentration() == null )
-//    {
-//      throw new BusinessRuleViolationException("Cannot set the plate dilution factor using an absolute concentration if the library well concentrations for the plate have not been set.  Set using the plate dilution factor instead"); // TODO:  [#2920] make an error message property for this
-//    }
-//    if(!!! NullSafeUtils.nullSafeEquals(plate.getMaxMgMlConcentration(), plate.getMinMgMlConcentration()) || 
-//      !!! NullSafeUtils.nullSafeEquals(plate.getMaxMgMlConcentration(), plate.getPrimaryWellMgMlConcentration()) )
-//    {
-//      throw new BusinessRuleViolationException("Cannot set the plate dilution factor using an absolute concentration if the wells of the plate have varying concentrations.  Set using the plate dilution factor instead"); // TODO:  [#2920] make an error message property for this
-//    }
-//    if(plate.getPrimaryWellMgMlConcentration().compareTo(newConcentration) < 0 ) {
-//      throw new BusinessRuleViolationException("Target concentration cannot be less than the primary well concentration (only dilution is allowed)."); // TODO:  [#2920] make an error message property for this
-//    }
-//    BigDecimal newDilutionFactor = plate.getPrimaryWellMgMlConcentration().divide(newConcentration, ScreensaverConstants.PLATE_DILUTION_FACTOR_SCALE, RoundingMode.HALF_UP);  // TODO: An error occurred during the requested operation: Non-terminating decimal expansion; no exact representable decimal result.
-//    return updatePlateDilutionFactor(plate, newDilutionFactor, recordByAdmin);
-//  }
-  
-//  @Transactional
-//  public boolean updateDilutionFactor(Plate plate, BigDecimal newDilutionFactor, AdministratorUser recordByAdmin)
-//  {
-//    if(newDilutionFactor.compareTo(BigDecimal.ONE) < 0 ) {  
-//      throw new BusinessRuleViolationException("Dilution factor must be greater than or equal to 1 (only dilution is allowed)."); // TODO:  [#2920] make an error message property for this
-//    }
-//    if (!!!NullSafeUtils.nullSafeEquals(newDilutionFactor, plate.getWellConcentrationDilutionFactor())) {
-//      plate = _dao.reloadEntity(plate);
-//      StringBuilder updateComments = new StringBuilder().append("Dilution factor changed from '").append(NullSafeUtils.toString(plate.getWellConcentrationDilutionFactor(), "<not specified>")).append("' to '").append(newDilutionFactor).append("'");
-//      plate.createUpdateActivity(recordByAdmin, updateComments.toString());
-//      plate.getConcentrationStatistics().setWellConcentrationDilutionFactor(newDilutionFactor);
-//      //TODO: how to set the plate.min/max/primary concentrations then here?  - this method should also call updateAbsolutePlateMgMlConcentration
-//      // TODO: should plate be only mg_ml/or/molar; and if so, then choose one of them.
-//      
-//      
-//      updatePrimaryPlateDilutionFactor(plate.getCopy());
-//      return true;
-//    }
-//    return false;
-//  }
 
   @Transactional
   public boolean updatePlateType(Plate plate, PlateType newPlateType, AdministratorUser recordedByAdmin)
