@@ -11,6 +11,7 @@ package edu.harvard.med.screensaver.ui.screens;
 
 import java.io.IOException;
 import java.io.InputStream;
+import java.math.BigDecimal;
 import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.Collections;
@@ -128,7 +129,7 @@ public class ScreenDetailViewer extends AbstractStudyDetailViewer<Screen>
   private CellLine _newCellLine;
   private UISelectOneEntityBean<TransfectionAgent> _transfectionAgentMenu;
   private TransfectionAgent _newTransfectionAgent;
-  private UICompositeSelectorBean<MolarUnit> _perturbagenMolarConcentrationSelector;
+  private UICompositeSelectorBean<BigDecimal, MolarUnit> _perturbagenMolarConcentrationSelector;
   
   private ScreenDataSharingLevel _lastDataSharingLevel;
   private LabHead _lastLabHead;
@@ -703,7 +704,7 @@ public class ScreenDetailViewer extends AbstractStudyDetailViewer<Screen>
     {
       screen.setPerturbagenMolarConcentration(null);
     } else {
-        screen.setPerturbagenMolarConcentration(MolarConcentration.makeConcentration(getPerturbagenMolarConcentrationSelector().getValue(),
+        screen.setPerturbagenMolarConcentration(MolarConcentration.makeConcentration(getPerturbagenMolarConcentrationSelector().getValue().toString(),
                                              getPerturbagenMolarConcentrationSelector().getSelectorBean().getSelection()));
     }
 
@@ -731,7 +732,7 @@ public class ScreenDetailViewer extends AbstractStudyDetailViewer<Screen>
     if(!getPerturbagenMolarConcentrationSelector().isEmpty())
     {
       try {
-       MolarConcentration.makeConcentration(getPerturbagenMolarConcentrationSelector().getValue(),
+       MolarConcentration.makeConcentration(getPerturbagenMolarConcentrationSelector().getValue().toString(),
                                              getPerturbagenMolarConcentrationSelector().getSelectorBean().getSelection());
       }
       catch (ArithmeticException e) {
@@ -987,7 +988,7 @@ public class ScreenDetailViewer extends AbstractStudyDetailViewer<Screen>
     return new ListDataModel(screens);
   }
   
-  public UICompositeSelectorBean<MolarUnit> getPerturbagenMolarConcentrationSelector()
+  public UICompositeSelectorBean<BigDecimal, MolarUnit> getPerturbagenMolarConcentrationSelector()
   {
     if( _perturbagenMolarConcentrationSelector == null )
     {
@@ -996,8 +997,8 @@ public class ScreenDetailViewer extends AbstractStudyDetailViewer<Screen>
         defaultUnit = MolarUnit.NANOMOLAR;
       }
       MolarConcentration c = getEntity().getPerturbagenMolarConcentration();
-       _perturbagenMolarConcentrationSelector = new UICompositeSelectorBean<MolarUnit>(
-         c == null ? "" : c.getDisplayValue().toString(), c == null ? defaultUnit : c.getUnits(), MolarUnit.DISPLAY_VALUES);
+       _perturbagenMolarConcentrationSelector = new UICompositeSelectorBean<BigDecimal, MolarUnit>(
+         c == null ? null  : c.getDisplayValue(), c == null ? defaultUnit : c.getUnits(), MolarUnit.DISPLAY_VALUES);
     }
     return _perturbagenMolarConcentrationSelector;
   }  

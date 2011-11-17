@@ -50,11 +50,11 @@ public class BigDecimalConverter implements Converter
     }
     try {
       BigDecimal d = new BigDecimal(s);
-      BigDecimal lowerBound = new BigDecimal(1).movePointLeft(_scale);
-      if (d.compareTo(lowerBound) < 0) {
+      if (d.scale() > _scale ) { 
         // Note, this should be reworked using a Validator, however, see [#1259]
         // Note: this message will eventually be retrieved by the calling AbstractBackingBean class and enqued in the Messages (how?) - sde4
-        throw new ConverterException(new FacesMessage(arg1.getId() +": " +  _messages.getMessage("conversionExceptionMinPrecisionAllowed", lowerBound), "")); 
+        BigDecimal lowerBound = new BigDecimal(1).movePointLeft(_scale);
+        throw new ConverterException(new FacesMessage(arg1.getId() +": " +  _messages.getMessage("conversionExceptionMinScaleAllowed", lowerBound), "")); 
       }
       if (_precision != null) {
         BigDecimal upperBound = new BigDecimal(1).movePointRight(_precision - _scale).setScale(_scale);
@@ -88,6 +88,7 @@ public class BigDecimalConverter implements Converter
     if (value == null) {
       return "";
     }
-    return ((BigDecimal) value).setScale(_scale, RoundingMode.HALF_UP).toString();
+    return value.toString();
+    //return ((BigDecimal) value).setScale(_scale, RoundingMode.HALF_UP).toString();
   }
 }
