@@ -147,19 +147,14 @@ public class LibraryCopyPlateBatchEditor extends AbstractBackingBean
       Volume.makeVolume(getVolumeValue(),
                         getVolumeType().getSelection());
     }
+    catch (ArithmeticException e) {
+      showMessage("invalidUserInput", "Volume: number format error: allowed range (>= 1.0 nL, < 1.0L), in 1 nL increments",  e.getLocalizedMessage());
+      valid = false;
+    }
     catch (Exception e) {
       showMessage("invalidUserInput", "Volume", e.getLocalizedMessage());
       valid = false;
     }
-
-//    try {
-//      MolarConcentration.makeConcentration(getMolarConcentrationValue(),
-//                                           getMolarConcentrationType().getSelection());
-//    }
-//    catch (Exception e) {
-//      showMessage("invalidUserInput", "Concentration (molar)", e.getLocalizedMessage());
-//      valid = false;
-//    }
 
     if (getPlateStatus().getSelection() != null) {
       if (_statusChangeActivity.getPerformedBy() == null) {
