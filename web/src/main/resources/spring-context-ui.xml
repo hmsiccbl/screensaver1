@@ -1078,11 +1078,6 @@
 
   <bean id="setConverter" class="edu.harvard.med.screensaver.ui.arch.util.converter.SortedSetConverter" />
 
-  <bean id="volumeValueConverter" class="edu.harvard.med.screensaver.ui.arch.util.converter.BigDecimalConverter" >
-    <property name="messages" ref="messages" />
-    <property name="scale" value="3" />
-  </bean>
-
   <bean id="molecularMassConverter" class="edu.harvard.med.screensaver.ui.arch.util.converter.BigDecimalConverter" >
     <property name="messages" ref="messages" />
     <property name="scale" value="2" />
