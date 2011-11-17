@@ -503,7 +503,7 @@ public class ActivityViewer extends SearchResultContextEditableEntityViewerBacki
     if (entity instanceof Screening) {
       try {
         Volume.makeVolume(getVolumeTransferredPerWellToAssayPlatesValue(),
-                          getVolumeTransferredPerWellToAssayPlatesType().getSelection());//, RoundingMode.HALF_UP);
+                          getVolumeTransferredPerWellToAssayPlatesType().getSelection());
       }
       catch (ArithmeticException e) {
         showFieldInputError("Volume Transferred Per Replicate To Assay Plates: number format error: allowed range (>= 1.0 nL, < 1.0L), in 1 nL increments",  e.getLocalizedMessage());
@@ -514,8 +514,8 @@ public class ActivityViewer extends SearchResultContextEditableEntityViewerBacki
         valid = false;
       }
       try {
-        Volume.makeVolume(getVolumeTransferredPerWellToAssayPlatesValue(),
-                          getVolumeTransferredPerWellFromLibraryPlatesType().getSelection());// , RoundingMode.HALF_UP);
+        Volume.makeVolume(getVolumeTransferredPerWellFromLibraryPlatesValue(),
+                          getVolumeTransferredPerWellFromLibraryPlatesType().getSelection());
       }
       catch (ArithmeticException e) {
         showFieldInputError("Volume Transferred Per Replicate From Library Plates: number format error: allowed range (>= 1.0 nL, < 1.0L), in 1 nL increments",  e.getLocalizedMessage());
