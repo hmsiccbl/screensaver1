@@ -100,7 +100,7 @@
           rendered="#{!(type == 'Textarea' || type == 'Boolean' || type == 'Volume' || type == 'MolarConcentration' || type == 'Vocabulary' )}"
           required="#{required}" value="#{value}" size="#{editWidth}"
           styleClass="inputText"
-          converter="#{!empty converter ? converter : (empty type || type == 'Text' || type == 'Textarea') ? stringConverter : type == 'Integer' ? javax.faces.convert.IntegerConverter : type == 'Date' ? dateConverter : type == 'Set' ? setConverter : type == 'List' ? listConverter : type == 'Volume' ? volumeConverter : type == 'MolarConcentration' ? molarConcentrationConverter : type == 'Currency' ? currencyConverter : null}" />
+          converter="#{!empty converter ? converter : (empty type || type == 'Text' || type == 'Textarea') ? stringConverter : type == 'Integer' ? javax.faces.convert.IntegerConverter : type == 'Date' ? dateConverter : type == 'Set' ? setConverter : type == 'List' ? listConverter : type == 'Currency' ? currencyConverter : null}" />
         <t:inputTextarea id="#{id}#{type}Field1"
           rendered="#{type == 'Textarea'}" required="#{required}"
           value="#{value}" cols="#{editWidth}" rows="#{editHeight}"
@@ -116,7 +116,9 @@
           submitOnChange="#{empty submitOnChange ? false : submitOnChange}" />
         <t:div rendered="#{type == 'Volume' || type == 'MolarConcentration'}">
           <t:inputText id="#{id}#{type}Field3" value="#{value}" size="4"
-            styleClass="inputText">
+            styleClass="inputText"
+            converter="#{!empty converter ? converter : null }" 
+            >
             <ui:insert name="editValidator" />
           </t:inputText>
           <t:selectOneMenu id="#{id}#{type}SelectMenu"
