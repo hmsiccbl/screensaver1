@@ -238,7 +238,7 @@ public class ScreenResultViewer extends EntityViewerBackingBean<ScreenResult>
     final ScreenResult screenResult = getEntity();
     String crossScreenCountColumnName = "";
     if (screenResult.getScreen().getScreenType() == ScreenType.SMALL_MOLECULE) {
-      crossScreenCountColumnName = "[" + ScreensaverConstants.DEFAULT_BATCH_STUDY_ID_POSITIVE_COUNT_SM + "]";
+      crossScreenCountColumnName = "[" + ScreensaverConstants.DEFAULT_BATCH_STUDY_ID_POSITIVE_COUNT_SM + "]";  //TODO: get this from a bean property
     }
     else {
       crossScreenCountColumnName = "[" + ScreensaverConstants.DEFAULT_BATCH_STUDY_ID_POSITIVE_COUNT_RNAI + "]";
