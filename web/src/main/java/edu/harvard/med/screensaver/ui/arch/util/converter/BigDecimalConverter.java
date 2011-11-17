@@ -50,10 +50,10 @@ public class BigDecimalConverter implements Converter
     }
     try {
       BigDecimal d = new BigDecimal(s);
+      BigDecimal lowerBound = new BigDecimal(1).movePointLeft(_scale);
       if (d.scale() > _scale ) { 
         // Note, this should be reworked using a Validator, however, see [#1259]
         // Note: this message will eventually be retrieved by the calling AbstractBackingBean class and enqued in the Messages (how?) - sde4
-        BigDecimal lowerBound = new BigDecimal(1).movePointLeft(_scale);
         throw new ConverterException(new FacesMessage(arg1.getId() +": " +  _messages.getMessage("conversionExceptionMinScaleAllowed", lowerBound), "")); 
       }
       if (_precision != null) {
