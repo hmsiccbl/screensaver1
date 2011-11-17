@@ -58,7 +58,7 @@ public class BigDecimalConverter implements Converter
       }
       if (_precision != null) {
         BigDecimal upperBound = new BigDecimal(1).movePointRight(_precision - _scale).setScale(_scale);
-        if (d.compareTo(upperBound) > 0) {
+        if (d.compareTo(upperBound) >= 0) {
           // Note, this should be reworked using a Validator, however, see [#1259]
           // Note: this message will eventually be retrieved by the calling AbstractBackingBean class and enqued in the Messages (how?) - sde4
           throw new ConverterException(new FacesMessage(arg1.getId() +": " +  _messages.getMessage("conversionExceptionPrecisionRangeAllowed", lowerBound, upperBound), "" ));
