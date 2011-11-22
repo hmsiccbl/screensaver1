@@ -39,7 +39,7 @@ import edu.harvard.med.screensaver.util.Triple;
 @Immutable
 @org.hibernate.annotations.Proxy
 @Table(uniqueConstraints = { @UniqueConstraint(columnNames = { "room", "freezer", "shelf", "bin" }) })
-public class PlateLocation extends AbstractEntity<Integer>
+public class PlateLocation extends AbstractEntity<Integer> implements Comparable<PlateLocation>
 {
   private static final long serialVersionUID = 1L;
 
@@ -199,5 +199,11 @@ public class PlateLocation extends AbstractEntity<Integer>
   public String toDisplayString()
   {
     return Joiner.on("-").join(ImmutableList.of(_room, _freezer, _shelf, _bin));
+  }
+
+  @Override
+  public int compareTo(PlateLocation o)
+  {
+    return toDisplayString().compareTo(o.toDisplayString());
   }
 }

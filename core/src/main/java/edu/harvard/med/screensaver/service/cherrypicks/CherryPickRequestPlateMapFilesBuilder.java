@@ -17,9 +17,12 @@ import java.io.OutputStreamWriter;
 import java.io.PrintWriter;
 import java.io.Serializable;
 import java.math.RoundingMode;
+import java.util.Collections;
+import java.util.Comparator;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
+import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.SortedSet;
@@ -33,6 +36,7 @@ import org.apache.commons.collections.MultiMap;
 import org.apache.commons.collections.map.MultiValueMap;
 import org.apache.log4j.Logger;
 
+import com.google.common.collect.Lists;
 import com.google.common.collect.Sets;
 
 import edu.harvard.med.screensaver.db.GenericEntityDAO;
@@ -83,13 +87,13 @@ public class CherryPickRequestPlateMapFilesBuilder
     "Volume"};
 
   private static final String[] DISTINCT_PLATECOPYLIST_FILE_HEADERS = {
-    "Source Copy",
     "Source Plate",
+    "Source Copy",
     "Location" };
 
 
   private static final String README_FILE_NAME = "README.txt";
-  private static final String DISTINCT_PLATE_COPY_LIST_FILE_NAME = "DISTINCT_PLATE_COPY_LIST.csv";
+  private static final String DISTINCT_PLATE_COPY_LIST_FILE_NAME = "plate-copy-location.csv";
 
 
   // static members
@@ -245,10 +249,22 @@ public class CherryPickRequestPlateMapFilesBuilder
     for(LabCherryPick lcp:cherryPickRequest.getLabCherryPicks()) {
       sourcePlates.add(librariesDao.findPlate(lcp.getSourceWell().getPlateNumber(), lcp.getSourceCopy().getName()));
     }
-    for(Plate p:sourcePlates)
+    // sort by plate/copy/location
+    List<Plate> list = Lists.newArrayList(sourcePlates);
+    Collections.sort(list, new Comparator<Plate>() {
+      @Override
+      public int compare(Plate o1, Plate o2)
+      {
+        if(o1.equals(o2))
+        {
+            return o1.getLocation().compareTo(o2.getLocation());
+        }
+        return o1.compareTo(o2);  // note Plate.compare() does a plate/copy compare
+      }});
+    for(Plate p:list)
     {
-      out.print(p.getCopy().getName());
       out.print(p.getPlateNumber());
+      out.print(p.getCopy().getName());
       out.print(p.getLocation() == null ?  "" : p.getLocation().toDisplayString());
       out.println();
     }
