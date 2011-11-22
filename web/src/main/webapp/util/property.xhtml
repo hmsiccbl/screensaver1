@@ -32,12 +32,13 @@
        - selectItems (required for 'Vocabulary' type, ignored otherwise)
        - labelStyle (defaults to 'propertyLabel')
        - valueStyle (defaults to 'propertyValue' or 'primaryPropertyValue')
+       - labelPosition: use 'after' if label should  be placed immediately after the property, default is 'before'
 	 -->
 
 <ui:composition>
 
   <t:div
-    rendered="#{(empty rendered ? true : rendered) &amp;&amp; (adminOnly ? appInfo.screensaverUser.isUserInRoleOfNameMap['readEverythingAdmin'] : true)}"
+    rendered="#{(empty labelPosition || labelPosition == 'before') &amp;&amp; (empty rendered ? true : rendered) &amp;&amp; (adminOnly ? appInfo.screensaverUser.isUserInRoleOfNameMap['readEverythingAdmin'] : true)}"
     styleClass="#{(empty labelStyle ? propertyLabel : labelStyle ) }">
     <ui:insert name="label">
       <t:popup>
@@ -134,6 +135,19 @@
       </ui:insert>
     </t:div>
     <ui:insert name="valueFooter" />
+  </t:div>
+  <t:div 
+    rendered="#{! empty labelPosition &amp;&amp; labelPosition == 'after' &amp;&amp; (empty rendered ? true : rendered) &amp;&amp; (adminOnly ? appInfo.screensaverUser.isUserInRoleOfNameMap['readEverythingAdmin'] : true)}"
+    styleClass="#{(empty labelStyle ? propertyLabel : labelStyle ) }">
+    <ui:insert name="label">
+      <t:popup>
+        <f:facet name="popup">
+          <t:div styleClass="popupHelp popupText">#{description}</t:div>
+        </f:facet>
+        <t:outputText value="#{label}"
+          styleClass="label #{adminOnly ? 'adminOnly' : ''}" />
+      </t:popup>
+    </ui:insert>
   </t:div>
 </ui:composition>
 

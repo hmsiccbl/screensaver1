@@ -205,7 +205,8 @@ TODO:
     <ss:propertyGroup label="Perturbagen Concentration" columns="2"
       columnClasses="column" >
      
-     <ss:property id="perturbagenMolarConcentration" label="Molar: "
+     <ss:property id="perturbagenMolarConcentration" label="" labelPosition="after"
+      rendered="#{screenDetailViewer.editMode || ! empty screenDetailViewer.perturbagenMolarConcentrationSelector.value}"
       value="#{screenDetailViewer.perturbagenMolarConcentrationSelector.value}"
       type="MolarConcentration"
       unitsSelector="#{screenDetailViewer.perturbagenMolarConcentrationSelector.selectorBean}"
@@ -213,10 +214,10 @@ TODO:
       converter="#{molarConcentrationValueConverter}"
       editable="#{screenDetailViewer.editMode}" />
       
-     <ss:property id="perturbagenUgMlConcentration" label="ug/mL: "
+     <ss:property id="perturbagenUgMlConcentration" label="ug/mL" labelPosition="after"
        value="#{screenDetailViewer.entity.perturbagenUgMlConcentration}"
        converter="#{mgMlConcentrationConverter}"
-       rendered="#{screenDetailViewer.entity.screenType == 'Small Molecule'}"
+       rendered="#{screenDetailViewer.entity.screenType == 'Small Molecule' &amp;&amp; (! empty screenDetailViewer.entity.perturbagenUgMlConcentration || screenDetailViewer.editMode)}"
        description="perturbagen concentration (ug/mL)" editable="#{screenDetailViewer.editMode}"
        editWidth="6" />
              
