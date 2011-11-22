@@ -418,14 +418,16 @@ public class ScreenPrivacyExpirationUpdater extends AdminEmailApplication
       String notificationMessage = MessageFormat.format(subjectMessage.getSecond(),
                                                         "---",
                                                         "[-- a Small Molecule Screen Title]",
-                                                        "[expire_date]");
-      msg.append("\n\n=============================example email=================================");
-      msg.append("\nSubject: " + subjectMessage.getFirst());
+                                                        "[current screen data sharing level]",
+                                                       EXPIRE_DATE_FORMATTER.print(expireDate));
+      msg.append("\n\n[example email]\n");
+      msg.append("\nSubject: " + subjectMessage.getFirst() + "\n\n");
       msg.append(notificationMessage);
 
       sendAdminEmails(subject, msg.toString(), _privacyUpdater.findDataSharingLevelAdminUsers());
 
-      if (isAdminEmailOnly() || isCommandLineFlagSet(TEST_ONLY[SHORT_OPTION_INDEX])) {
+      if (isAdminEmailOnly() || 
+        ( isCommandLineFlagSet(TEST_ONLY[SHORT_OPTION_INDEX]) && ! isCommandLineFlagSet(TEST_EMAIL_ONLY[SHORT_OPTION_INDEX]) )) {
         for (Screen screen : oldScreens) {
           _privacyUpdater.setDataPrivacyExpirationNotifiedDate(screen);
         }
@@ -437,6 +439,7 @@ public class ScreenPrivacyExpirationUpdater extends AdminEmailApplication
           notificationMessage = MessageFormat.format(subjectMessage.getSecond(),
                                                      screen.getFacilityId(),
                                                      getScreenTitle(screen),
+                                                     screen.getDataSharingLevel(),
                                                      EXPIRE_DATE_FORMATTER.print(screen.getDataPrivacyExpirationDate()));
           if(sendEmails(subjectMessage.getFirst(), notificationMessage, screen.getAssociatedScreeningRoomUsers()))
           {

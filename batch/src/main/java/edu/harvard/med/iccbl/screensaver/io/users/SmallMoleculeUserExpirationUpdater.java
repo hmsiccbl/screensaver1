@@ -247,9 +247,19 @@ public class SmallMoleculeUserExpirationUpdater extends AdminEmailApplication
         msg.append(printUser(pair.getFirst()) + "| " + pair.getSecond().getDatePerformed() + "\n");
       }
 
+      Pair<String,String> notificationSubjectAndMessage = getExpireNotificationSubjectMessage();
+      
+      String exampleMessage = MessageFormat.format(notificationSubjectAndMessage.getSecond(),
+                                                   EXPIRE_DATE_FORMATTER.print(expireDate),
+                                                   "[user's primary data sharing level]" );
+      msg.append("\n\n[example email]\n");
+      msg.append("\nSubject: " + notificationSubjectAndMessage.getFirst() + "\n\n");
+      msg.append(exampleMessage);
+      
       sendAdminEmails(subject, msg.toString(), _userAgreementUpdater.findUserAgreementAdmins());
 
-      if (isAdminEmailOnly() || isCommandLineFlagSet(TEST_ONLY[SHORT_OPTION_INDEX])) {
+      if (isAdminEmailOnly() || 
+        ( isCommandLineFlagSet(TEST_ONLY[SHORT_OPTION_INDEX]) && ! isCommandLineFlagSet(TEST_EMAIL_ONLY[SHORT_OPTION_INDEX]) )) {
         for (Pair<ScreeningRoomUser,ChecklistItemEvent> pair : pairList) {
           // set the flag so that we don't notify for this CIE again.
           _userAgreementUpdater.setLastNotifiedSMUAChecklistItemEvent(pair.getFirst(), pair.getSecond());
@@ -257,10 +267,12 @@ public class SmallMoleculeUserExpirationUpdater extends AdminEmailApplication
       }
       else {
         // send user an email
-        Pair<String,String> subjectMessage = getExpireNotificationSubjectMessage();
-        String message = MessageFormat.format(subjectMessage.getSecond(), EXPIRE_DATE_FORMATTER.print(expireDate));
         for (Pair<ScreeningRoomUser,ChecklistItemEvent> pair : pairList) {
-          if(sendEmail(subjectMessage.getFirst(), message, pair.getFirst())) {
+          String message = MessageFormat.format(
+                                              notificationSubjectAndMessage.getSecond(), 
+                                              EXPIRE_DATE_FORMATTER.print(expireDate),
+                                              _userAgreementUpdater.findPrimaryDataSharingLevelRole(pair.getFirst()).getDisplayableRoleName());
+          if(sendEmail(notificationSubjectAndMessage.getFirst(), message, pair.getFirst())) {
             _userAgreementUpdater.setLastNotifiedSMUAChecklistItemEvent(pair.getFirst(), pair.getSecond());
           }
         }

@@ -110,6 +110,7 @@ public class UserAgreementUpdater
     sru.setLastNotifiedSMUAChecklistItemEvent(cie);
     _dao.saveOrUpdateEntity(sru);
   }  
+  
   /**
    * <ul>Expire a user, by 
    * <li>creating an &quot;expiration&quot; ChecklistItemEvent 
@@ -160,7 +161,8 @@ public class UserAgreementUpdater
     return activitiesPerformed;
   }
 
-  private ScreensaverUserRole findPrimaryDataSharingLevelRole(ScreeningRoomUser user)
+  @Transactional
+  public ScreensaverUserRole findPrimaryDataSharingLevelRole(ScreeningRoomUser user)
   {
     assert Sets.intersection(user.getPrimaryScreensaverUserRoles(), DataSharingLevelMapper.UserSmDslRoles).size() == 1;
     return Sets.intersection(user.getPrimaryScreensaverUserRoles(), DataSharingLevelMapper.UserSmDslRoles).iterator().next();
