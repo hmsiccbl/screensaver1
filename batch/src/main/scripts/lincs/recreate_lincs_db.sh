@@ -2509,6 +2509,627 @@ check_errs $? "create screen fails"
 -s 10047 -i
 check_errs $? "create screen result import fails"
 
+./run.sh edu.harvard.med.screensaver.io.screens.ScreenCreator \
+-AE $ECOMMONS_ADMIN  \
+-st SMALL_MOLECULE  \
+-hf $LAB_HEAD_FIRST -hl $LAB_HEAD_LAST -he $LAB_HEAD_EMAIL -lf $LEAD_SCREENER_FIRST -ll $LEAD_SCREENER_LAST -le $LEAD_SCREENER_EMAIL \
+-t 'Tang Proliferation/Mitosis: SNB75 cells.'  \
+-i 10048 \
+--summary "Tang Proliferation/Mitosis: SNB75 cells. Dose response of anti-mitotic compounds in human cancer cell line SNB75 at 24, 48 and 72 hours to determine effect on cell proliferation and mitosis." \
+-p '1. On Day 1, seed ~2000-3000 cells in 30 uL of growth medium into each well of a 384-well clear-bottom black assay plate (Corning 3712), using a WellMate plate filler in a cell culture hood. 
+
+2. On Day 2, pin transfer performed by an ICCB-Longwood Screening Facility staff member using an Epson robot system. The pin transfer adds 100nL of each diluted compound from the 384-well compound library plate to each well of the assay plate.
+
+3. On Day 2, 3, and 4 (0, 24, and 48 hrs after pin transfer), add 3 uL of 100 uM EdU (diluted from 10 mM stock to growth medium) to each well.
+
+4. On Day 3, 4, and 5 (24, 48, and 72 hrs after pin transfer), perform the following to the plate to which EdU was added 24 hrs ago:
+(A) Prepare 2 fixation/permeabilization solution in PBS and pre-warm it in 37C water bath.
+(B) Add 30uL of the pre-warmed fixation/permeabilization solution to each well of cells using benchtop WellMate, so that the final concentration of formaldehyde is 3.7% and the final concentration of Triton-100 is 0.2%. Immediately centrifuge the plates at 1000rpm at room temperature for 20 minutes, in a plate centrifuge, while the cells are being fixed and permeabilized. 
+(C) Prepare an EdU reaction cocktail in H2O that has:
+100mM TBS,
+2mM CuSO4,
+2uM Alexa488-azide, and
+2mM ascorbic acid.
+(Add individual components to the cocktail in the above order.)
+(D) Add 50 uL of the above freshly prepared EdU reaction cocktail to each well.
+(E) Incubate the plate at RT for 40-50 mins.
+(F) Wash the plate three times with PBS. After washing, the residual volume in each well should be ~20uL.
+(G) Add 20uL of anti-MPM2 primary antibody (Millipore #05-368, final dilution 1:500) in blocking buffer (4% BSA and 0.2% Triton-100 in PBS) to each well. Incubate for 1hr at RT.
+(H) Wash the plate three times with PBS.
+(I) Add 20uL of Goat-anti-mouse Alexa fluor 568 (Invitrogen A11004, final dilution 1:500) in blocking buffer to each well. Incubate for 1hr at RT.
+(J) Wash the plate three times with PBS.
+(K) Add 20uL of Hoechst (final concentration 1 ug/mL) in PBS to each well. Incubate for 30min at RT.
+(L) Wash the plate. Seal with a plate seal. 
+(M) Image the plates using the ImageXpress Micro screening microscope (Molecular Devices) and the 10x objective lens. Image 4 sites/per well.
+
+Filter information:
+DAPI [Excitation 377/50; Emission 447/60]
+FITC [Excitation 482/35; Emission 536/40]
+Texas Red [Excitation 562/40; Emission 624/40]
+
+4. After image acquisition, image analysis is done using a customized Matlab program developed by Dr. Tiao Xie (Harvard Medical School). The program does segmentation on the DAPI channel to identify all nuclei, and then it identifies bright spots in the Texas Red (MPM2) channel to score for mitotic cells. In a separate step, the program measures the average FITC (EdU) intensity for all the nuclei, and scores for actively proliferating cells (cells that are incorporating EdU) by applying an EdU threshold.
+
+5. When reporting data, 5 parameters are reported for each replicate for each cell line and compound condition:
+a. Cell Count: The total number of cells (nuclei) stained with Hoechst 33342 and detected in the DAPI channel.
+b. EdU positive cells: The percentage of actively proliferating cells that have average FITC (EdU) intensity above the EdU threshold.
+c. Mitotic cells: The percentage of cells that are MPM2-positive.
+d. Non-mitotic cells that are EdU-positive: The percentage of EdU-positive cells within the non-mitotic population.
+e. Mitotic cells that are EdU-positive: The percentage of EdU-positive cells within the mitotic population. 
+
+Reference for EdU labeling:
+Salic A, Mitchison TJ. A chemical method for fast and sensitive detection of DNA synthesis in vivo. Proc Natl Acad Sci USA. 2008 Feb 19;105(7):2415-20.' 
+check_errs $? "create screen fails"
+
+./run.sh edu.harvard.med.screensaver.io.screenresults.ScreenResultImporter \
+-AE $ECOMMONS_ADMIN \
+-f $DATA_DIRECTORY/screen/tang_ProMitosis_SNB75.xls \
+-s 10048 -i
+check_errs $? "create screen result import fails"
+
+./run.sh edu.harvard.med.screensaver.io.screens.ScreenCreator \
+-AE $ECOMMONS_ADMIN  \
+-st SMALL_MOLECULE  \
+-hf $LAB_HEAD_FIRST -hl $LAB_HEAD_LAST -he $LAB_HEAD_EMAIL -lf $LEAD_SCREENER_FIRST -ll $LEAD_SCREENER_LAST -le $LEAD_SCREENER_EMAIL \
+-t 'Tang Mitosis/Apoptosis ver.II: 647-V cells.'  \
+-i 10049 \
+--summary "Tang Mitosis/Apoptosis ver.II: 647-V cells. Dose response of anti-mitotic compounds in human cancer cell line 647-V at 24, 48 and 72 hours to determine effect on apoptosis, mitosis and cell death. 
+
+In screening for small-molecule compounds that are effective at killing cancer cells, one-dimensional readout GI50, which is the EC50 value of growth inhibition, is usually used as the only criterion. A major problem with this one-readout approach is that other useful information is discarded, which could be critical for understanding the action of the compounds. In this screen, we use a single-cell-based imaging assay that can report multi-dimensional physiological responses in cells treated with small molecule kinase inhibitors." \
+-p 'Protocol:
+1. On Day 1, seed ~3000 cells in 30 uL of growth medium into each well of a 384-well clear-bottom black assay plate (Corning 3712), using a WellMate plate filler in a cell culture hood. 
+
+2. On Day 2, pin transfer performed by an ICCB-Longwood Screening Facility staff member using an Epson robot system. The pin transfer adds 100nL of each diluted compound from the 384-well compound library plate to each well of the assay plate.
+
+3. On each day of Day 3, 4, and 5 (24, 48, and 72 hrs after pin transfer), perform the following:
+(A) Prepare a cocktail of reagents in PBS that has 4ug/mL Hoechst33342 (Sigma B2261), 4uM LysoTracker-Red (Invitrogen L7528), and 2uM DEVD-NucView488 (Biotium 10403).
+(B) Add 10uL of the reagent cocktail to each well of the assay plate using benchtop WellMate plate filler, so that the final concentration of Hoechst33342 is 1ug/mL, LysoTracker-Red is 1uM, and DEVD-NucView488 is 500nM.
+(C) Incubate cells in a tissue culture incubator at 37C, 5% CO2 for 1.5 hrs.
+(D) Prepare 2% formaldehyde in PBS and pre-warm it in 37C water bath. 
+(E) Add 40uL of the pre-warmed formaldehyde to each well of cells using benchtop WellMate, so that the final concentration of formaldehyde is 1%. Then immediately centrifuge the plates at 1000rpm at room temperature for 20 minutes, in a plate centrifuge, while the cells are being fixed. 
+(F) After 20 mins of fixation and centrifugation, seal the plates with adhesive plate seals. 
+(G) Image the plates, ideally within the same day, using the ImageXpress Micro screening microscope (Molecular Devices) and the 10x objective lens. Image 4 sites/per well.
+
+Filter information:
+DAPI [Excitation 377/50; Emission 447/60]
+FITC [Excitation 482/35; Emission 536/40]
+Texas Red [Excitation 562/40; Emission 624/40]
+
+4. After image acquisition, image analysis is done using a customized Matlab program developed by Dr. Tiao Xie (Harvard Medical School). The program does segmentation on the DAPI channel to identify all nuclei, then it counts the bright, rounded cells in the Texas Red channel (LysoTracker-Red) to score mitotic cells. Finally it detects bright spots in the FITC channel (NucView) to score apoptotic cells. We also identify a population of late-stage dead cells with a “blurry” DAPI morphology, and no NucView Signal or LysoTracker Red signal.
+
+5. When reporting data, 5 parameters are reported for each replicate for each cell line and compound condition:
+a. Cell Count: The total number of cells (nuclei) stained with Hoechst 33342 and detected in the DAPI channel.
+b. Interphase cells: The total number of cells less the number of Apoptotic cells, Dead cells, and Mitotic cells.
+c. Apoptotic cells: The cells stained with NucView.
+d. Dead cells: The “late-stage” dead cells with blurry DAPI morphology that do not stain with either NucView or LysoTracker Red.
+e. Mitotic cells: The cells that stain brightly with LysoTracker Red and that have a rounded morphology.
+
+Reference for NucView:
+Cen H, Mao F, Aronchik I, Fuentes RJ, Firestone GL. DEVD-NucView488: a novel class of enzyme substrates for real-time detection of caspase-3 activity in live cells. FASEB J. 2008 Jul;22(7):2243-52.' 
+check_errs $? "create screen fails"
+
+./run.sh edu.harvard.med.screensaver.io.screenresults.ScreenResultImporter \
+-AE $ECOMMONS_ADMIN \
+-f $DATA_DIRECTORY/screen/tang_MitoApop2_647-V.xls \
+-s 10049 -i
+check_errs $? "create screen result import fails"
+
+./run.sh edu.harvard.med.screensaver.io.screens.ScreenCreator \
+-AE $ECOMMONS_ADMIN  \
+-st SMALL_MOLECULE  \
+-hf $LAB_HEAD_FIRST -hl $LAB_HEAD_LAST -he $LAB_HEAD_EMAIL -lf $LEAD_SCREENER_FIRST -ll $LEAD_SCREENER_LAST -le $LEAD_SCREENER_EMAIL \
+-t 'Tang Mitosis/Apoptosis ver.II: 5637 cells.'  \
+-i 10050 \
+--summary "Tang Mitosis/Apoptosis ver.II: 5637 cells. Dose response of anti-mitotic compounds in human cancer cell line 5637 at 24, 48 and 72 hours to determine effect on apoptosis, mitosis and cell death. 
+
+In screening for small-molecule compounds that are effective at killing cancer cells, one-dimensional readout GI50, which is the EC50 value of growth inhibition, is usually used as the only criterion. A major problem with this one-readout approach is that other useful information is discarded, which could be critical for understanding the action of the compounds. In this screen, we use a single-cell-based imaging assay that can report multi-dimensional physiological responses in cells treated with small molecule kinase inhibitors." \
+-p 'Protocol:
+1. On Day 1, seed ~3000 cells in 30 uL of growth medium into each well of a 384-well clear-bottom black assay plate (Corning 3712), using a WellMate plate filler in a cell culture hood. 
+
+2. On Day 2, pin transfer performed by an ICCB-Longwood Screening Facility staff member using an Epson robot system. The pin transfer adds 100nL of each diluted compound from the 384-well compound library plate to each well of the assay plate.
+
+3. On each day of Day 3, 4, and 5 (24, 48, and 72 hrs after pin transfer), perform the following:
+(A) Prepare a cocktail of reagents in PBS that has 4ug/mL Hoechst33342 (Sigma B2261), 4uM LysoTracker-Red (Invitrogen L7528), and 2uM DEVD-NucView488 (Biotium 10403).
+(B) Add 10uL of the reagent cocktail to each well of the assay plate using benchtop WellMate plate filler, so that the final concentration of Hoechst33342 is 1ug/mL, LysoTracker-Red is 1uM, and DEVD-NucView488 is 500nM.
+(C) Incubate cells in a tissue culture incubator at 37C, 5% CO2 for 1.5 hrs.
+(D) Prepare 2% formaldehyde in PBS and pre-warm it in 37C water bath. 
+(E) Add 40uL of the pre-warmed formaldehyde to each well of cells using benchtop WellMate, so that the final concentration of formaldehyde is 1%. Then immediately centrifuge the plates at 1000rpm at room temperature for 20 minutes, in a plate centrifuge, while the cells are being fixed. 
+(F) After 20 mins of fixation and centrifugation, seal the plates with adhesive plate seals. 
+(G) Image the plates, ideally within the same day, using the ImageXpress Micro screening microscope (Molecular Devices) and the 10x objective lens. Image 4 sites/per well.
+
+Filter information:
+DAPI [Excitation 377/50; Emission 447/60]
+FITC [Excitation 482/35; Emission 536/40]
+Texas Red [Excitation 562/40; Emission 624/40]
+
+4. After image acquisition, image analysis is done using a customized Matlab program developed by Dr. Tiao Xie (Harvard Medical School). The program does segmentation on the DAPI channel to identify all nuclei, then it counts the bright, rounded cells in the Texas Red channel (LysoTracker-Red) to score mitotic cells. Finally it detects bright spots in the FITC channel (NucView) to score apoptotic cells. We also identify a population of late-stage dead cells with a “blurry” DAPI morphology, and no NucView Signal or LysoTracker Red signal.
+
+5. When reporting data, 5 parameters are reported for each replicate for each cell line and compound condition:
+a. Cell Count: The total number of cells (nuclei) stained with Hoechst 33342 and detected in the DAPI channel.
+b. Interphase cells: The total number of cells less the number of Apoptotic cells, Dead cells, and Mitotic cells.
+c. Apoptotic cells: The cells stained with NucView.
+d. Dead cells: The “late-stage” dead cells with blurry DAPI morphology that do not stain with either NucView or LysoTracker Red.
+e. Mitotic cells: The cells that stain brightly with LysoTracker Red and that have a rounded morphology.
+
+Reference for NucView:
+Cen H, Mao F, Aronchik I, Fuentes RJ, Firestone GL. DEVD-NucView488: a novel class of enzyme substrates for real-time detection of caspase-3 activity in live cells. FASEB J. 2008 Jul;22(7):2243-52.' 
+check_errs $? "create screen fails"
+
+./run.sh edu.harvard.med.screensaver.io.screenresults.ScreenResultImporter \
+-AE $ECOMMONS_ADMIN \
+-f $DATA_DIRECTORY/screen/tang_MitoApop2_5637.xls \
+-s 10050 -i
+check_errs $? "create screen result import fails"
+
+./run.sh edu.harvard.med.screensaver.io.screens.ScreenCreator \
+-AE $ECOMMONS_ADMIN  \
+-st SMALL_MOLECULE  \
+-hf $LAB_HEAD_FIRST -hl $LAB_HEAD_LAST -he $LAB_HEAD_EMAIL -lf $LEAD_SCREENER_FIRST -ll $LEAD_SCREENER_LAST -le $LEAD_SCREENER_EMAIL \
+-t 'Tang Mitosis/Apoptosis ver.II: Ca9-22 cells.'  \
+-i 10051 \
+--summary "Tang Mitosis/Apoptosis ver.II: Ca9-22 cells. Dose response of anti-mitotic compounds in human cancer cell line Ca9-22 at 24, 48 and 72 hours to determine effect on apoptosis, mitosis and cell death. 
+
+In screening for small-molecule compounds that are effective at killing cancer cells, one-dimensional readout GI50, which is the EC50 value of growth inhibition, is usually used as the only criterion. A major problem with this one-readout approach is that other useful information is discarded, which could be critical for understanding the action of the compounds. In this screen, we use a single-cell-based imaging assay that can report multi-dimensional physiological responses in cells treated with small molecule kinase inhibitors." \
+-p 'Protocol:
+1. On Day 1, seed ~3000 cells in 30 uL of growth medium into each well of a 384-well clear-bottom black assay plate (Corning 3712), using a WellMate plate filler in a cell culture hood. 
+
+2. On Day 2, pin transfer performed by an ICCB-Longwood Screening Facility staff member using an Epson robot system. The pin transfer adds 100nL of each diluted compound from the 384-well compound library plate to each well of the assay plate.
+
+3. On each day of Day 3, 4, and 5 (24, 48, and 72 hrs after pin transfer), perform the following:
+(A) Prepare a cocktail of reagents in PBS that has 4ug/mL Hoechst33342 (Sigma B2261), 4uM LysoTracker-Red (Invitrogen L7528), and 2uM DEVD-NucView488 (Biotium 10403).
+(B) Add 10uL of the reagent cocktail to each well of the assay plate using benchtop WellMate plate filler, so that the final concentration of Hoechst33342 is 1ug/mL, LysoTracker-Red is 1uM, and DEVD-NucView488 is 500nM.
+(C) Incubate cells in a tissue culture incubator at 37C, 5% CO2 for 1.5 hrs.
+(D) Prepare 2% formaldehyde in PBS and pre-warm it in 37C water bath. 
+(E) Add 40uL of the pre-warmed formaldehyde to each well of cells using benchtop WellMate, so that the final concentration of formaldehyde is 1%. Then immediately centrifuge the plates at 1000rpm at room temperature for 20 minutes, in a plate centrifuge, while the cells are being fixed. 
+(F) After 20 mins of fixation and centrifugation, seal the plates with adhesive plate seals. 
+(G) Image the plates, ideally within the same day, using the ImageXpress Micro screening microscope (Molecular Devices) and the 10x objective lens. Image 4 sites/per well.
+
+Filter information:
+DAPI [Excitation 377/50; Emission 447/60]
+FITC [Excitation 482/35; Emission 536/40]
+Texas Red [Excitation 562/40; Emission 624/40]
+
+4. After image acquisition, image analysis is done using a customized Matlab program developed by Dr. Tiao Xie (Harvard Medical School). The program does segmentation on the DAPI channel to identify all nuclei, then it counts the bright, rounded cells in the Texas Red channel (LysoTracker-Red) to score mitotic cells. Finally it detects bright spots in the FITC channel (NucView) to score apoptotic cells. We also identify a population of late-stage dead cells with a “blurry” DAPI morphology, and no NucView Signal or LysoTracker Red signal.
+
+5. When reporting data, 5 parameters are reported for each replicate for each cell line and compound condition:
+a. Cell Count: The total number of cells (nuclei) stained with Hoechst 33342 and detected in the DAPI channel.
+b. Interphase cells: The total number of cells less the number of Apoptotic cells, Dead cells, and Mitotic cells.
+c. Apoptotic cells: The cells stained with NucView.
+d. Dead cells: The “late-stage” dead cells with blurry DAPI morphology that do not stain with either NucView or LysoTracker Red.
+e. Mitotic cells: The cells that stain brightly with LysoTracker Red and that have a rounded morphology.
+
+Reference for NucView:
+Cen H, Mao F, Aronchik I, Fuentes RJ, Firestone GL. DEVD-NucView488: a novel class of enzyme substrates for real-time detection of caspase-3 activity in live cells. FASEB J. 2008 Jul;22(7):2243-52.' 
+check_errs $? "create screen fails"
+
+./run.sh edu.harvard.med.screensaver.io.screenresults.ScreenResultImporter \
+-AE $ECOMMONS_ADMIN \
+-f $DATA_DIRECTORY/screen/tang_MitoApop2_Ca9-22.xls \
+-s 10051 -i
+check_errs $? "create screen result import fails"
+
+./run.sh edu.harvard.med.screensaver.io.screens.ScreenCreator \
+-AE $ECOMMONS_ADMIN  \
+-st SMALL_MOLECULE  \
+-hf $LAB_HEAD_FIRST -hl $LAB_HEAD_LAST -he $LAB_HEAD_EMAIL -lf $LEAD_SCREENER_FIRST -ll $LEAD_SCREENER_LAST -le $LEAD_SCREENER_EMAIL \
+-t 'Tang Mitosis/Apoptosis ver.II: Cal51 cells.'  \
+-i 10052 \
+--summary "Tang Mitosis/Apoptosis ver.II: Cal51 cells. Dose response of anti-mitotic compounds in human cancer cell line Cal51 at 24, 48 and 72 hours to determine effect on apoptosis, mitosis and cell death. 
+
+In screening for small-molecule compounds that are effective at killing cancer cells, one-dimensional readout GI50, which is the EC50 value of growth inhibition, is usually used as the only criterion. A major problem with this one-readout approach is that other useful information is discarded, which could be critical for understanding the action of the compounds. In this screen, we use a single-cell-based imaging assay that can report multi-dimensional physiological responses in cells treated with small molecule kinase inhibitors." \
+-p 'Protocol:
+1. On Day 1, seed ~3000 cells in 30 uL of growth medium into each well of a 384-well clear-bottom black assay plate (Corning 3712), using a WellMate plate filler in a cell culture hood. 
+
+2. On Day 2, pin transfer performed by an ICCB-Longwood Screening Facility staff member using an Epson robot system. The pin transfer adds 100nL of each diluted compound from the 384-well compound library plate to each well of the assay plate.
+
+3. On each day of Day 3, 4, and 5 (24, 48, and 72 hrs after pin transfer), perform the following:
+(A) Prepare a cocktail of reagents in PBS that has 4ug/mL Hoechst33342 (Sigma B2261), 4uM LysoTracker-Red (Invitrogen L7528), and 2uM DEVD-NucView488 (Biotium 10403).
+(B) Add 10uL of the reagent cocktail to each well of the assay plate using benchtop WellMate plate filler, so that the final concentration of Hoechst33342 is 1ug/mL, LysoTracker-Red is 1uM, and DEVD-NucView488 is 500nM.
+(C) Incubate cells in a tissue culture incubator at 37C, 5% CO2 for 1.5 hrs.
+(D) Prepare 2% formaldehyde in PBS and pre-warm it in 37C water bath. 
+(E) Add 40uL of the pre-warmed formaldehyde to each well of cells using benchtop WellMate, so that the final concentration of formaldehyde is 1%. Then immediately centrifuge the plates at 1000rpm at room temperature for 20 minutes, in a plate centrifuge, while the cells are being fixed. 
+(F) After 20 mins of fixation and centrifugation, seal the plates with adhesive plate seals. 
+(G) Image the plates, ideally within the same day, using the ImageXpress Micro screening microscope (Molecular Devices) and the 10x objective lens. Image 4 sites/per well.
+
+Filter information:
+DAPI [Excitation 377/50; Emission 447/60]
+FITC [Excitation 482/35; Emission 536/40]
+Texas Red [Excitation 562/40; Emission 624/40]
+
+4. After image acquisition, image analysis is done using a customized Matlab program developed by Dr. Tiao Xie (Harvard Medical School). The program does segmentation on the DAPI channel to identify all nuclei, then it counts the bright, rounded cells in the Texas Red channel (LysoTracker-Red) to score mitotic cells. Finally it detects bright spots in the FITC channel (NucView) to score apoptotic cells. We also identify a population of late-stage dead cells with a “blurry” DAPI morphology, and no NucView Signal or LysoTracker Red signal.
+
+5. When reporting data, 5 parameters are reported for each replicate for each cell line and compound condition:
+a. Cell Count: The total number of cells (nuclei) stained with Hoechst 33342 and detected in the DAPI channel.
+b. Interphase cells: The total number of cells less the number of Apoptotic cells, Dead cells, and Mitotic cells.
+c. Apoptotic cells: The cells stained with NucView.
+d. Dead cells: The “late-stage” dead cells with blurry DAPI morphology that do not stain with either NucView or LysoTracker Red.
+e. Mitotic cells: The cells that stain brightly with LysoTracker Red and that have a rounded morphology.
+
+Reference for NucView:
+Cen H, Mao F, Aronchik I, Fuentes RJ, Firestone GL. DEVD-NucView488: a novel class of enzyme substrates for real-time detection of caspase-3 activity in live cells. FASEB J. 2008 Jul;22(7):2243-52.' 
+check_errs $? "create screen fails"
+
+./run.sh edu.harvard.med.screensaver.io.screenresults.ScreenResultImporter \
+-AE $ECOMMONS_ADMIN \
+-f $DATA_DIRECTORY/screen/tang_MitoApop2_Cal51.xls \
+-s 10052 -i
+check_errs $? "create screen result import fails"
+
+./run.sh edu.harvard.med.screensaver.io.screens.ScreenCreator \
+-AE $ECOMMONS_ADMIN  \
+-st SMALL_MOLECULE  \
+-hf $LAB_HEAD_FIRST -hl $LAB_HEAD_LAST -he $LAB_HEAD_EMAIL -lf $LEAD_SCREENER_FIRST -ll $LEAD_SCREENER_LAST -le $LEAD_SCREENER_EMAIL \
+-t 'Tang Mitosis/Apoptosis ver.II: Calu-1 cells.'  \
+-i 10053 \
+--summary "Tang Mitosis/Apoptosis ver.II: Calu-1 cells. Dose response of anti-mitotic compounds in human cancer cell line Calu-1 at 24, 48 and 72 hours to determine effect on apoptosis, mitosis and cell death. 
+
+In screening for small-molecule compounds that are effective at killing cancer cells, one-dimensional readout GI50, which is the EC50 value of growth inhibition, is usually used as the only criterion. A major problem with this one-readout approach is that other useful information is discarded, which could be critical for understanding the action of the compounds. In this screen, we use a single-cell-based imaging assay that can report multi-dimensional physiological responses in cells treated with small molecule kinase inhibitors." \
+-p 'Protocol:
+1. On Day 1, seed ~3000 cells in 30 uL of growth medium into each well of a 384-well clear-bottom black assay plate (Corning 3712), using a WellMate plate filler in a cell culture hood. 
+
+2. On Day 2, pin transfer performed by an ICCB-Longwood Screening Facility staff member using an Epson robot system. The pin transfer adds 100nL of each diluted compound from the 384-well compound library plate to each well of the assay plate.
+
+3. On each day of Day 3, 4, and 5 (24, 48, and 72 hrs after pin transfer), perform the following:
+(A) Prepare a cocktail of reagents in PBS that has 4ug/mL Hoechst33342 (Sigma B2261), 4uM LysoTracker-Red (Invitrogen L7528), and 2uM DEVD-NucView488 (Biotium 10403).
+(B) Add 10uL of the reagent cocktail to each well of the assay plate using benchtop WellMate plate filler, so that the final concentration of Hoechst33342 is 1ug/mL, LysoTracker-Red is 1uM, and DEVD-NucView488 is 500nM.
+(C) Incubate cells in a tissue culture incubator at 37C, 5% CO2 for 1.5 hrs.
+(D) Prepare 2% formaldehyde in PBS and pre-warm it in 37C water bath. 
+(E) Add 40uL of the pre-warmed formaldehyde to each well of cells using benchtop WellMate, so that the final concentration of formaldehyde is 1%. Then immediately centrifuge the plates at 1000rpm at room temperature for 20 minutes, in a plate centrifuge, while the cells are being fixed. 
+(F) After 20 mins of fixation and centrifugation, seal the plates with adhesive plate seals. 
+(G) Image the plates, ideally within the same day, using the ImageXpress Micro screening microscope (Molecular Devices) and the 10x objective lens. Image 4 sites/per well.
+
+Filter information:
+DAPI [Excitation 377/50; Emission 447/60]
+FITC [Excitation 482/35; Emission 536/40]
+Texas Red [Excitation 562/40; Emission 624/40]
+
+4. After image acquisition, image analysis is done using a customized Matlab program developed by Dr. Tiao Xie (Harvard Medical School). The program does segmentation on the DAPI channel to identify all nuclei, then it counts the bright, rounded cells in the Texas Red channel (LysoTracker-Red) to score mitotic cells. Finally it detects bright spots in the FITC channel (NucView) to score apoptotic cells. We also identify a population of late-stage dead cells with a “blurry” DAPI morphology, and no NucView Signal or LysoTracker Red signal.
+
+5. When reporting data, 5 parameters are reported for each replicate for each cell line and compound condition:
+a. Cell Count: The total number of cells (nuclei) stained with Hoechst 33342 and detected in the DAPI channel.
+b. Interphase cells: The total number of cells less the number of Apoptotic cells, Dead cells, and Mitotic cells.
+c. Apoptotic cells: The cells stained with NucView.
+d. Dead cells: The “late-stage” dead cells with blurry DAPI morphology that do not stain with either NucView or LysoTracker Red.
+e. Mitotic cells: The cells that stain brightly with LysoTracker Red and that have a rounded morphology.
+
+Reference for NucView:
+Cen H, Mao F, Aronchik I, Fuentes RJ, Firestone GL. DEVD-NucView488: a novel class of enzyme substrates for real-time detection of caspase-3 activity in live cells. FASEB J. 2008 Jul;22(7):2243-52.' 
+check_errs $? "create screen fails"
+
+./run.sh edu.harvard.med.screensaver.io.screenresults.ScreenResultImporter \
+-AE $ECOMMONS_ADMIN \
+-f $DATA_DIRECTORY/screen/tang_MitoApop2_Calu-1.xls \
+-s 10053 -i
+check_errs $? "create screen result import fails"
+
+./run.sh edu.harvard.med.screensaver.io.screens.ScreenCreator \
+-AE $ECOMMONS_ADMIN  \
+-st SMALL_MOLECULE  \
+-hf $LAB_HEAD_FIRST -hl $LAB_HEAD_LAST -he $LAB_HEAD_EMAIL -lf $LEAD_SCREENER_FIRST -ll $LEAD_SCREENER_LAST -le $LEAD_SCREENER_EMAIL \
+-t 'Tang Mitosis/Apoptosis ver.II: FU97 cells.'  \
+-i 10054 \
+--summary "Tang Mitosis/Apoptosis ver.II: FU97 cells. Dose response of anti-mitotic compounds in human cancer cell line FU97 at 24, 48 and 72 hours to determine effect on apoptosis, mitosis and cell death. 
+
+In screening for small-molecule compounds that are effective at killing cancer cells, one-dimensional readout GI50, which is the EC50 value of growth inhibition, is usually used as the only criterion. A major problem with this one-readout approach is that other useful information is discarded, which could be critical for understanding the action of the compounds. In this screen, we use a single-cell-based imaging assay that can report multi-dimensional physiological responses in cells treated with small molecule kinase inhibitors." \
+-p 'Protocol:
+1. On Day 1, seed ~3000 cells in 30 uL of growth medium into each well of a 384-well clear-bottom black assay plate (Corning 3712), using a WellMate plate filler in a cell culture hood. 
+
+2. On Day 2, pin transfer performed by an ICCB-Longwood Screening Facility staff member using an Epson robot system. The pin transfer adds 100nL of each diluted compound from the 384-well compound library plate to each well of the assay plate.
+
+3. On each day of Day 3, 4, and 5 (24, 48, and 72 hrs after pin transfer), perform the following:
+(A) Prepare a cocktail of reagents in PBS that has 4ug/mL Hoechst33342 (Sigma B2261), 4uM LysoTracker-Red (Invitrogen L7528), and 2uM DEVD-NucView488 (Biotium 10403).
+(B) Add 10uL of the reagent cocktail to each well of the assay plate using benchtop WellMate plate filler, so that the final concentration of Hoechst33342 is 1ug/mL, LysoTracker-Red is 1uM, and DEVD-NucView488 is 500nM.
+(C) Incubate cells in a tissue culture incubator at 37C, 5% CO2 for 1.5 hrs.
+(D) Prepare 2% formaldehyde in PBS and pre-warm it in 37C water bath. 
+(E) Add 40uL of the pre-warmed formaldehyde to each well of cells using benchtop WellMate, so that the final concentration of formaldehyde is 1%. Then immediately centrifuge the plates at 1000rpm at room temperature for 20 minutes, in a plate centrifuge, while the cells are being fixed. 
+(F) After 20 mins of fixation and centrifugation, seal the plates with adhesive plate seals. 
+(G) Image the plates, ideally within the same day, using the ImageXpress Micro screening microscope (Molecular Devices) and the 10x objective lens. Image 4 sites/per well.
+
+Filter information:
+DAPI [Excitation 377/50; Emission 447/60]
+FITC [Excitation 482/35; Emission 536/40]
+Texas Red [Excitation 562/40; Emission 624/40]
+
+4. After image acquisition, image analysis is done using a customized Matlab program developed by Dr. Tiao Xie (Harvard Medical School). The program does segmentation on the DAPI channel to identify all nuclei, then it counts the bright, rounded cells in the Texas Red channel (LysoTracker-Red) to score mitotic cells. Finally it detects bright spots in the FITC channel (NucView) to score apoptotic cells. We also identify a population of late-stage dead cells with a “blurry” DAPI morphology, and no NucView Signal or LysoTracker Red signal.
+
+5. When reporting data, 5 parameters are reported for each replicate for each cell line and compound condition:
+a. Cell Count: The total number of cells (nuclei) stained with Hoechst 33342 and detected in the DAPI channel.
+b. Interphase cells: The total number of cells less the number of Apoptotic cells, Dead cells, and Mitotic cells.
+c. Apoptotic cells: The cells stained with NucView.
+d. Dead cells: The “late-stage” dead cells with blurry DAPI morphology that do not stain with either NucView or LysoTracker Red.
+e. Mitotic cells: The cells that stain brightly with LysoTracker Red and that have a rounded morphology.
+
+Reference for NucView:
+Cen H, Mao F, Aronchik I, Fuentes RJ, Firestone GL. DEVD-NucView488: a novel class of enzyme substrates for real-time detection of caspase-3 activity in live cells. FASEB J. 2008 Jul;22(7):2243-52.' 
+check_errs $? "create screen fails"
+
+./run.sh edu.harvard.med.screensaver.io.screenresults.ScreenResultImporter \
+-AE $ECOMMONS_ADMIN \
+-f $DATA_DIRECTORY/screen/tang_MitoApop2_FU97.xls \
+-s 10054 -i
+check_errs $? "create screen result import fails"
+
+./run.sh edu.harvard.med.screensaver.io.screens.ScreenCreator \
+-AE $ECOMMONS_ADMIN  \
+-st SMALL_MOLECULE  \
+-hf $LAB_HEAD_FIRST -hl $LAB_HEAD_LAST -he $LAB_HEAD_EMAIL -lf $LEAD_SCREENER_FIRST -ll $LEAD_SCREENER_LAST -le $LEAD_SCREENER_EMAIL \
+-t 'Tang Mitosis/Apoptosis ver.II: HLF cells.'  \
+-i 10055 \
+--summary "Tang Mitosis/Apoptosis ver.II: HLF cells. Dose response of anti-mitotic compounds in human cancer cell line HLF at 24, 48 and 72 hours to determine effect on apoptosis, mitosis and cell death. 
+
+In screening for small-molecule compounds that are effective at killing cancer cells, one-dimensional readout GI50, which is the EC50 value of growth inhibition, is usually used as the only criterion. A major problem with this one-readout approach is that other useful information is discarded, which could be critical for understanding the action of the compounds. In this screen, we use a single-cell-based imaging assay that can report multi-dimensional physiological responses in cells treated with small molecule kinase inhibitors." \
+-p 'Protocol:
+1. On Day 1, seed ~3000 cells in 30 uL of growth medium into each well of a 384-well clear-bottom black assay plate (Corning 3712), using a WellMate plate filler in a cell culture hood. 
+
+2. On Day 2, pin transfer performed by an ICCB-Longwood Screening Facility staff member using an Epson robot system. The pin transfer adds 100nL of each diluted compound from the 384-well compound library plate to each well of the assay plate.
+
+3. On each day of Day 3, 4, and 5 (24, 48, and 72 hrs after pin transfer), perform the following:
+(A) Prepare a cocktail of reagents in PBS that has 4ug/mL Hoechst33342 (Sigma B2261), 4uM LysoTracker-Red (Invitrogen L7528), and 2uM DEVD-NucView488 (Biotium 10403).
+(B) Add 10uL of the reagent cocktail to each well of the assay plate using benchtop WellMate plate filler, so that the final concentration of Hoechst33342 is 1ug/mL, LysoTracker-Red is 1uM, and DEVD-NucView488 is 500nM.
+(C) Incubate cells in a tissue culture incubator at 37C, 5% CO2 for 1.5 hrs.
+(D) Prepare 2% formaldehyde in PBS and pre-warm it in 37C water bath. 
+(E) Add 40uL of the pre-warmed formaldehyde to each well of cells using benchtop WellMate, so that the final concentration of formaldehyde is 1%. Then immediately centrifuge the plates at 1000rpm at room temperature for 20 minutes, in a plate centrifuge, while the cells are being fixed. 
+(F) After 20 mins of fixation and centrifugation, seal the plates with adhesive plate seals. 
+(G) Image the plates, ideally within the same day, using the ImageXpress Micro screening microscope (Molecular Devices) and the 10x objective lens. Image 4 sites/per well.
+
+Filter information:
+DAPI [Excitation 377/50; Emission 447/60]
+FITC [Excitation 482/35; Emission 536/40]
+Texas Red [Excitation 562/40; Emission 624/40]
+
+4. After image acquisition, image analysis is done using a customized Matlab program developed by Dr. Tiao Xie (Harvard Medical School). The program does segmentation on the DAPI channel to identify all nuclei, then it counts the bright, rounded cells in the Texas Red channel (LysoTracker-Red) to score mitotic cells. Finally it detects bright spots in the FITC channel (NucView) to score apoptotic cells. We also identify a population of late-stage dead cells with a “blurry” DAPI morphology, and no NucView Signal or LysoTracker Red signal.
+
+5. When reporting data, 5 parameters are reported for each replicate for each cell line and compound condition:
+a. Cell Count: The total number of cells (nuclei) stained with Hoechst 33342 and detected in the DAPI channel.
+b. Interphase cells: The total number of cells less the number of Apoptotic cells, Dead cells, and Mitotic cells.
+c. Apoptotic cells: The cells stained with NucView.
+d. Dead cells: The “late-stage” dead cells with blurry DAPI morphology that do not stain with either NucView or LysoTracker Red.
+e. Mitotic cells: The cells that stain brightly with LysoTracker Red and that have a rounded morphology.
+
+Reference for NucView:
+Cen H, Mao F, Aronchik I, Fuentes RJ, Firestone GL. DEVD-NucView488: a novel class of enzyme substrates for real-time detection of caspase-3 activity in live cells. FASEB J. 2008 Jul;22(7):2243-52.' 
+check_errs $? "create screen fails"
+
+./run.sh edu.harvard.med.screensaver.io.screenresults.ScreenResultImporter \
+-AE $ECOMMONS_ADMIN \
+-f $DATA_DIRECTORY/screen/tang_MitoApop2_HLF.xls \
+-s 10055 -i
+check_errs $? "create screen result import fails"
+
+./run.sh edu.harvard.med.screensaver.io.screens.ScreenCreator \
+-AE $ECOMMONS_ADMIN  \
+-st SMALL_MOLECULE  \
+-hf $LAB_HEAD_FIRST -hl $LAB_HEAD_LAST -he $LAB_HEAD_EMAIL -lf $LEAD_SCREENER_FIRST -ll $LEAD_SCREENER_LAST -le $LEAD_SCREENER_EMAIL \
+-t 'Tang Mitosis/Apoptosis ver.II: Ishikawa cells.'  \
+-i 10056 \
+--summary "Tang Mitosis/Apoptosis ver.II: Ishikawa cells. Dose response of anti-mitotic compounds in human cancer cell line Ishikawa at 24, 48 and 72 hours to determine effect on apoptosis, mitosis and cell death. 
+
+In screening for small-molecule compounds that are effective at killing cancer cells, one-dimensional readout GI50, which is the EC50 value of growth inhibition, is usually used as the only criterion. A major problem with this one-readout approach is that other useful information is discarded, which could be critical for understanding the action of the compounds. In this screen, we use a single-cell-based imaging assay that can report multi-dimensional physiological responses in cells treated with small molecule kinase inhibitors." \
+-p 'Protocol:
+1. On Day 1, seed ~3000 cells in 30 uL of growth medium into each well of a 384-well clear-bottom black assay plate (Corning 3712), using a WellMate plate filler in a cell culture hood. 
+
+2. On Day 2, pin transfer performed by an ICCB-Longwood Screening Facility staff member using an Epson robot system. The pin transfer adds 100nL of each diluted compound from the 384-well compound library plate to each well of the assay plate.
+
+3. On each day of Day 3, 4, and 5 (24, 48, and 72 hrs after pin transfer), perform the following:
+(A) Prepare a cocktail of reagents in PBS that has 4ug/mL Hoechst33342 (Sigma B2261), 4uM LysoTracker-Red (Invitrogen L7528), and 2uM DEVD-NucView488 (Biotium 10403).
+(B) Add 10uL of the reagent cocktail to each well of the assay plate using benchtop WellMate plate filler, so that the final concentration of Hoechst33342 is 1ug/mL, LysoTracker-Red is 1uM, and DEVD-NucView488 is 500nM.
+(C) Incubate cells in a tissue culture incubator at 37C, 5% CO2 for 1.5 hrs.
+(D) Prepare 2% formaldehyde in PBS and pre-warm it in 37C water bath. 
+(E) Add 40uL of the pre-warmed formaldehyde to each well of cells using benchtop WellMate, so that the final concentration of formaldehyde is 1%. Then immediately centrifuge the plates at 1000rpm at room temperature for 20 minutes, in a plate centrifuge, while the cells are being fixed. 
+(F) After 20 mins of fixation and centrifugation, seal the plates with adhesive plate seals. 
+(G) Image the plates, ideally within the same day, using the ImageXpress Micro screening microscope (Molecular Devices) and the 10x objective lens. Image 4 sites/per well.
+
+Filter information:
+DAPI [Excitation 377/50; Emission 447/60]
+FITC [Excitation 482/35; Emission 536/40]
+Texas Red [Excitation 562/40; Emission 624/40]
+
+4. After image acquisition, image analysis is done using a customized Matlab program developed by Dr. Tiao Xie (Harvard Medical School). The program does segmentation on the DAPI channel to identify all nuclei, then it counts the bright, rounded cells in the Texas Red channel (LysoTracker-Red) to score mitotic cells. Finally it detects bright spots in the FITC channel (NucView) to score apoptotic cells. We also identify a population of late-stage dead cells with a “blurry” DAPI morphology, and no NucView Signal or LysoTracker Red signal.
+
+5. When reporting data, 5 parameters are reported for each replicate for each cell line and compound condition:
+a. Cell Count: The total number of cells (nuclei) stained with Hoechst 33342 and detected in the DAPI channel.
+b. Interphase cells: The total number of cells less the number of Apoptotic cells, Dead cells, and Mitotic cells.
+c. Apoptotic cells: The cells stained with NucView.
+d. Dead cells: The “late-stage” dead cells with blurry DAPI morphology that do not stain with either NucView or LysoTracker Red.
+e. Mitotic cells: The cells that stain brightly with LysoTracker Red and that have a rounded morphology.
+
+Reference for NucView:
+Cen H, Mao F, Aronchik I, Fuentes RJ, Firestone GL. DEVD-NucView488: a novel class of enzyme substrates for real-time detection of caspase-3 activity in live cells. FASEB J. 2008 Jul;22(7):2243-52.' 
+check_errs $? "create screen fails"
+
+./run.sh edu.harvard.med.screensaver.io.screenresults.ScreenResultImporter \
+-AE $ECOMMONS_ADMIN \
+-f $DATA_DIRECTORY/screen/tang_MitoApop2_Ishikawa.xls \
+-s 10056 -i
+check_errs $? "create screen result import fails"
+
+./run.sh edu.harvard.med.screensaver.io.screens.ScreenCreator \
+-AE $ECOMMONS_ADMIN  \
+-st SMALL_MOLECULE  \
+-hf $LAB_HEAD_FIRST -hl $LAB_HEAD_LAST -he $LAB_HEAD_EMAIL -lf $LEAD_SCREENER_FIRST -ll $LEAD_SCREENER_LAST -le $LEAD_SCREENER_EMAIL \
+-t 'Tang Mitosis/Apoptosis ver.II: KMRC-20 cells.'  \
+-i 10057 \
+--summary "Tang Mitosis/Apoptosis ver.II: KMRC-20 cells. Dose response of anti-mitotic compounds in human cancer cell line KMRC-20 at 24, 48 and 72 hours to determine effect on apoptosis, mitosis and cell death. 
+
+In screening for small-molecule compounds that are effective at killing cancer cells, one-dimensional readout GI50, which is the EC50 value of growth inhibition, is usually used as the only criterion. A major problem with this one-readout approach is that other useful information is discarded, which could be critical for understanding the action of the compounds. In this screen, we use a single-cell-based imaging assay that can report multi-dimensional physiological responses in cells treated with small molecule kinase inhibitors." \
+-p 'Protocol:
+1. On Day 1, seed ~3000 cells in 30 uL of growth medium into each well of a 384-well clear-bottom black assay plate (Corning 3712), using a WellMate plate filler in a cell culture hood. 
+
+2. On Day 2, pin transfer performed by an ICCB-Longwood Screening Facility staff member using an Epson robot system. The pin transfer adds 100nL of each diluted compound from the 384-well compound library plate to each well of the assay plate.
+
+3. On each day of Day 3, 4, and 5 (24, 48, and 72 hrs after pin transfer), perform the following:
+(A) Prepare a cocktail of reagents in PBS that has 4ug/mL Hoechst33342 (Sigma B2261), 4uM LysoTracker-Red (Invitrogen L7528), and 2uM DEVD-NucView488 (Biotium 10403).
+(B) Add 10uL of the reagent cocktail to each well of the assay plate using benchtop WellMate plate filler, so that the final concentration of Hoechst33342 is 1ug/mL, LysoTracker-Red is 1uM, and DEVD-NucView488 is 500nM.
+(C) Incubate cells in a tissue culture incubator at 37C, 5% CO2 for 1.5 hrs.
+(D) Prepare 2% formaldehyde in PBS and pre-warm it in 37C water bath. 
+(E) Add 40uL of the pre-warmed formaldehyde to each well of cells using benchtop WellMate, so that the final concentration of formaldehyde is 1%. Then immediately centrifuge the plates at 1000rpm at room temperature for 20 minutes, in a plate centrifuge, while the cells are being fixed. 
+(F) After 20 mins of fixation and centrifugation, seal the plates with adhesive plate seals. 
+(G) Image the plates, ideally within the same day, using the ImageXpress Micro screening microscope (Molecular Devices) and the 10x objective lens. Image 4 sites/per well.
+
+Filter information:
+DAPI [Excitation 377/50; Emission 447/60]
+FITC [Excitation 482/35; Emission 536/40]
+Texas Red [Excitation 562/40; Emission 624/40]
+
+4. After image acquisition, image analysis is done using a customized Matlab program developed by Dr. Tiao Xie (Harvard Medical School). The program does segmentation on the DAPI channel to identify all nuclei, then it counts the bright, rounded cells in the Texas Red channel (LysoTracker-Red) to score mitotic cells. Finally it detects bright spots in the FITC channel (NucView) to score apoptotic cells. We also identify a population of late-stage dead cells with a “blurry” DAPI morphology, and no NucView Signal or LysoTracker Red signal.
+
+5. When reporting data, 5 parameters are reported for each replicate for each cell line and compound condition:
+a. Cell Count: The total number of cells (nuclei) stained with Hoechst 33342 and detected in the DAPI channel.
+b. Interphase cells: The total number of cells less the number of Apoptotic cells, Dead cells, and Mitotic cells.
+c. Apoptotic cells: The cells stained with NucView.
+d. Dead cells: The “late-stage” dead cells with blurry DAPI morphology that do not stain with either NucView or LysoTracker Red.
+e. Mitotic cells: The cells that stain brightly with LysoTracker Red and that have a rounded morphology.
+
+Reference for NucView:
+Cen H, Mao F, Aronchik I, Fuentes RJ, Firestone GL. DEVD-NucView488: a novel class of enzyme substrates for real-time detection of caspase-3 activity in live cells. FASEB J. 2008 Jul;22(7):2243-52.' 
+check_errs $? "create screen fails"
+
+./run.sh edu.harvard.med.screensaver.io.screenresults.ScreenResultImporter \
+-AE $ECOMMONS_ADMIN \
+-f $DATA_DIRECTORY/screen/tang_MitoApop2_KMRC-20.xls \
+-s 10057 -i
+check_errs $? "create screen result import fails"
+
+./run.sh edu.harvard.med.screensaver.io.screens.ScreenCreator \
+-AE $ECOMMONS_ADMIN  \
+-st SMALL_MOLECULE  \
+-hf $LAB_HEAD_FIRST -hl $LAB_HEAD_LAST -he $LAB_HEAD_EMAIL -lf $LEAD_SCREENER_FIRST -ll $LEAD_SCREENER_LAST -le $LEAD_SCREENER_EMAIL \
+-t 'Tang Mitosis/Apoptosis ver.II: Kyse-140 cells.'  \
+-i 10058 \
+--summary "Tang Mitosis/Apoptosis ver.II: Kyse-140 cells. Dose response of anti-mitotic compounds in human cancer cell line Kyse-140 at 24, 48 and 72 hours to determine effect on apoptosis, mitosis and cell death. 
+
+In screening for small-molecule compounds that are effective at killing cancer cells, one-dimensional readout GI50, which is the EC50 value of growth inhibition, is usually used as the only criterion. A major problem with this one-readout approach is that other useful information is discarded, which could be critical for understanding the action of the compounds. In this screen, we use a single-cell-based imaging assay that can report multi-dimensional physiological responses in cells treated with small molecule kinase inhibitors." \
+-p 'Protocol:
+1. On Day 1, seed ~3000 cells in 30 uL of growth medium into each well of a 384-well clear-bottom black assay plate (Corning 3712), using a WellMate plate filler in a cell culture hood. 
+
+2. On Day 2, pin transfer performed by an ICCB-Longwood Screening Facility staff member using an Epson robot system. The pin transfer adds 100nL of each diluted compound from the 384-well compound library plate to each well of the assay plate.
+
+3. On each day of Day 3, 4, and 5 (24, 48, and 72 hrs after pin transfer), perform the following:
+(A) Prepare a cocktail of reagents in PBS that has 4ug/mL Hoechst33342 (Sigma B2261), 4uM LysoTracker-Red (Invitrogen L7528), and 2uM DEVD-NucView488 (Biotium 10403).
+(B) Add 10uL of the reagent cocktail to each well of the assay plate using benchtop WellMate plate filler, so that the final concentration of Hoechst33342 is 1ug/mL, LysoTracker-Red is 1uM, and DEVD-NucView488 is 500nM.
+(C) Incubate cells in a tissue culture incubator at 37C, 5% CO2 for 1.5 hrs.
+(D) Prepare 2% formaldehyde in PBS and pre-warm it in 37C water bath. 
+(E) Add 40uL of the pre-warmed formaldehyde to each well of cells using benchtop WellMate, so that the final concentration of formaldehyde is 1%. Then immediately centrifuge the plates at 1000rpm at room temperature for 20 minutes, in a plate centrifuge, while the cells are being fixed. 
+(F) After 20 mins of fixation and centrifugation, seal the plates with adhesive plate seals. 
+(G) Image the plates, ideally within the same day, using the ImageXpress Micro screening microscope (Molecular Devices) and the 10x objective lens. Image 4 sites/per well.
+
+Filter information:
+DAPI [Excitation 377/50; Emission 447/60]
+FITC [Excitation 482/35; Emission 536/40]
+Texas Red [Excitation 562/40; Emission 624/40]
+
+4. After image acquisition, image analysis is done using a customized Matlab program developed by Dr. Tiao Xie (Harvard Medical School). The program does segmentation on the DAPI channel to identify all nuclei, then it counts the bright, rounded cells in the Texas Red channel (LysoTracker-Red) to score mitotic cells. Finally it detects bright spots in the FITC channel (NucView) to score apoptotic cells. We also identify a population of late-stage dead cells with a “blurry” DAPI morphology, and no NucView Signal or LysoTracker Red signal.
+
+5. When reporting data, 5 parameters are reported for each replicate for each cell line and compound condition:
+a. Cell Count: The total number of cells (nuclei) stained with Hoechst 33342 and detected in the DAPI channel.
+b. Interphase cells: The total number of cells less the number of Apoptotic cells, Dead cells, and Mitotic cells.
+c. Apoptotic cells: The cells stained with NucView.
+d. Dead cells: The “late-stage” dead cells with blurry DAPI morphology that do not stain with either NucView or LysoTracker Red.
+e. Mitotic cells: The cells that stain brightly with LysoTracker Red and that have a rounded morphology.
+
+Reference for NucView:
+Cen H, Mao F, Aronchik I, Fuentes RJ, Firestone GL. DEVD-NucView488: a novel class of enzyme substrates for real-time detection of caspase-3 activity in live cells. FASEB J. 2008 Jul;22(7):2243-52.' 
+check_errs $? "create screen fails"
+
+./run.sh edu.harvard.med.screensaver.io.screenresults.ScreenResultImporter \
+-AE $ECOMMONS_ADMIN \
+-f $DATA_DIRECTORY/screen/tang_MitoApop2_Kyse-140.xls \
+-s 10058 -i
+check_errs $? "create screen result import fails"
+
+./run.sh edu.harvard.med.screensaver.io.screens.ScreenCreator \
+-AE $ECOMMONS_ADMIN  \
+-st SMALL_MOLECULE  \
+-hf $LAB_HEAD_FIRST -hl $LAB_HEAD_LAST -he $LAB_HEAD_EMAIL -lf $LEAD_SCREENER_FIRST -ll $LEAD_SCREENER_LAST -le $LEAD_SCREENER_EMAIL \
+-t 'Tang Mitosis/Apoptosis ver.II: SW527 cells.'  \
+-i 10059 \
+--summary "Tang Mitosis/Apoptosis ver.II: SW527 cells. Dose response of anti-mitotic compounds in human cancer cell line SW527 at 24, 48 and 72 hours to determine effect on apoptosis, mitosis and cell death. 
+
+In screening for small-molecule compounds that are effective at killing cancer cells, one-dimensional readout GI50, which is the EC50 value of growth inhibition, is usually used as the only criterion. A major problem with this one-readout approach is that other useful information is discarded, which could be critical for understanding the action of the compounds. In this screen, we use a single-cell-based imaging assay that can report multi-dimensional physiological responses in cells treated with small molecule kinase inhibitors." \
+-p 'Protocol:
+1. On Day 1, seed ~3000 cells in 30 uL of growth medium into each well of a 384-well clear-bottom black assay plate (Corning 3712), using a WellMate plate filler in a cell culture hood. 
+
+2. On Day 2, pin transfer performed by an ICCB-Longwood Screening Facility staff member using an Epson robot system. The pin transfer adds 100nL of each diluted compound from the 384-well compound library plate to each well of the assay plate.
+
+3. On each day of Day 3, 4, and 5 (24, 48, and 72 hrs after pin transfer), perform the following:
+(A) Prepare a cocktail of reagents in PBS that has 4ug/mL Hoechst33342 (Sigma B2261), 4uM LysoTracker-Red (Invitrogen L7528), and 2uM DEVD-NucView488 (Biotium 10403).
+(B) Add 10uL of the reagent cocktail to each well of the assay plate using benchtop WellMate plate filler, so that the final concentration of Hoechst33342 is 1ug/mL, LysoTracker-Red is 1uM, and DEVD-NucView488 is 500nM.
+(C) Incubate cells in a tissue culture incubator at 37C, 5% CO2 for 1.5 hrs.
+(D) Prepare 2% formaldehyde in PBS and pre-warm it in 37C water bath. 
+(E) Add 40uL of the pre-warmed formaldehyde to each well of cells using benchtop WellMate, so that the final concentration of formaldehyde is 1%. Then immediately centrifuge the plates at 1000rpm at room temperature for 20 minutes, in a plate centrifuge, while the cells are being fixed. 
+(F) After 20 mins of fixation and centrifugation, seal the plates with adhesive plate seals. 
+(G) Image the plates, ideally within the same day, using the ImageXpress Micro screening microscope (Molecular Devices) and the 10x objective lens. Image 4 sites/per well.
+
+Filter information:
+DAPI [Excitation 377/50; Emission 447/60]
+FITC [Excitation 482/35; Emission 536/40]
+Texas Red [Excitation 562/40; Emission 624/40]
+
+4. After image acquisition, image analysis is done using a customized Matlab program developed by Dr. Tiao Xie (Harvard Medical School). The program does segmentation on the DAPI channel to identify all nuclei, then it counts the bright, rounded cells in the Texas Red channel (LysoTracker-Red) to score mitotic cells. Finally it detects bright spots in the FITC channel (NucView) to score apoptotic cells. We also identify a population of late-stage dead cells with a “blurry” DAPI morphology, and no NucView Signal or LysoTracker Red signal.
+
+5. When reporting data, 5 parameters are reported for each replicate for each cell line and compound condition:
+a. Cell Count: The total number of cells (nuclei) stained with Hoechst 33342 and detected in the DAPI channel.
+b. Interphase cells: The total number of cells less the number of Apoptotic cells, Dead cells, and Mitotic cells.
+c. Apoptotic cells: The cells stained with NucView.
+d. Dead cells: The “late-stage” dead cells with blurry DAPI morphology that do not stain with either NucView or LysoTracker Red.
+e. Mitotic cells: The cells that stain brightly with LysoTracker Red and that have a rounded morphology.
+
+Reference for NucView:
+Cen H, Mao F, Aronchik I, Fuentes RJ, Firestone GL. DEVD-NucView488: a novel class of enzyme substrates for real-time detection of caspase-3 activity in live cells. FASEB J. 2008 Jul;22(7):2243-52.' 
+check_errs $? "create screen fails"
+
+./run.sh edu.harvard.med.screensaver.io.screenresults.ScreenResultImporter \
+-AE $ECOMMONS_ADMIN \
+-f $DATA_DIRECTORY/screen/tang_MitoApop2_SW527.xls \
+-s 10059 -i
+check_errs $? "create screen result import fails"
+
+./run.sh edu.harvard.med.screensaver.io.screens.ScreenCreator \
+-AE $ECOMMONS_ADMIN  \
+-st SMALL_MOLECULE  \
+-hf $LAB_HEAD_FIRST -hl $LAB_HEAD_LAST -he $LAB_HEAD_EMAIL -lf $LEAD_SCREENER_FIRST -ll $LEAD_SCREENER_LAST -le $LEAD_SCREENER_EMAIL \
+-t 'Tang Mitosis/Apoptosis ver.II: SW620 cells.'  \
+-i 10060 \
+--summary "Tang Mitosis/Apoptosis ver.II: SW620 cells. Dose response of anti-mitotic compounds in human cancer cell line SW620 at 24, 48 and 72 hours to determine effect on apoptosis, mitosis and cell death. 
+
+In screening for small-molecule compounds that are effective at killing cancer cells, one-dimensional readout GI50, which is the EC50 value of growth inhibition, is usually used as the only criterion. A major problem with this one-readout approach is that other useful information is discarded, which could be critical for understanding the action of the compounds. In this screen, we use a single-cell-based imaging assay that can report multi-dimensional physiological responses in cells treated with small molecule kinase inhibitors." \
+-p 'Protocol:
+1. On Day 1, seed ~3000 cells in 30 uL of growth medium into each well of a 384-well clear-bottom black assay plate (Corning 3712), using a WellMate plate filler in a cell culture hood. 
+
+2. On Day 2, pin transfer performed by an ICCB-Longwood Screening Facility staff member using an Epson robot system. The pin transfer adds 100nL of each diluted compound from the 384-well compound library plate to each well of the assay plate.
+
+3. On each day of Day 3, 4, and 5 (24, 48, and 72 hrs after pin transfer), perform the following:
+(A) Prepare a cocktail of reagents in PBS that has 4ug/mL Hoechst33342 (Sigma B2261), 4uM LysoTracker-Red (Invitrogen L7528), and 2uM DEVD-NucView488 (Biotium 10403).
+(B) Add 10uL of the reagent cocktail to each well of the assay plate using benchtop WellMate plate filler, so that the final concentration of Hoechst33342 is 1ug/mL, LysoTracker-Red is 1uM, and DEVD-NucView488 is 500nM.
+(C) Incubate cells in a tissue culture incubator at 37C, 5% CO2 for 1.5 hrs.
+(D) Prepare 2% formaldehyde in PBS and pre-warm it in 37C water bath. 
+(E) Add 40uL of the pre-warmed formaldehyde to each well of cells using benchtop WellMate, so that the final concentration of formaldehyde is 1%. Then immediately centrifuge the plates at 1000rpm at room temperature for 20 minutes, in a plate centrifuge, while the cells are being fixed. 
+(F) After 20 mins of fixation and centrifugation, seal the plates with adhesive plate seals. 
+(G) Image the plates, ideally within the same day, using the ImageXpress Micro screening microscope (Molecular Devices) and the 10x objective lens. Image 4 sites/per well.
+
+Filter information:
+DAPI [Excitation 377/50; Emission 447/60]
+FITC [Excitation 482/35; Emission 536/40]
+Texas Red [Excitation 562/40; Emission 624/40]
+
+4. After image acquisition, image analysis is done using a customized Matlab program developed by Dr. Tiao Xie (Harvard Medical School). The program does segmentation on the DAPI channel to identify all nuclei, then it counts the bright, rounded cells in the Texas Red channel (LysoTracker-Red) to score mitotic cells. Finally it detects bright spots in the FITC channel (NucView) to score apoptotic cells. We also identify a population of late-stage dead cells with a “blurry” DAPI morphology, and no NucView Signal or LysoTracker Red signal.
+
+5. When reporting data, 5 parameters are reported for each replicate for each cell line and compound condition:
+a. Cell Count: The total number of cells (nuclei) stained with Hoechst 33342 and detected in the DAPI channel.
+b. Interphase cells: The total number of cells less the number of Apoptotic cells, Dead cells, and Mitotic cells.
+c. Apoptotic cells: The cells stained with NucView.
+d. Dead cells: The “late-stage” dead cells with blurry DAPI morphology that do not stain with either NucView or LysoTracker Red.
+e. Mitotic cells: The cells that stain brightly with LysoTracker Red and that have a rounded morphology.
+
+Reference for NucView:
+Cen H, Mao F, Aronchik I, Fuentes RJ, Firestone GL. DEVD-NucView488: a novel class of enzyme substrates for real-time detection of caspase-3 activity in live cells. FASEB J. 2008 Jul;22(7):2243-52.' 
+check_errs $? "create screen fails"
+
+./run.sh edu.harvard.med.screensaver.io.screenresults.ScreenResultImporter \
+-AE $ECOMMONS_ADMIN \
+-f $DATA_DIRECTORY/screen/tang_MitoApop2_SW620.xls \
+-s 10060 -i
+check_errs $? "create screen result import fails"
+
 ## Create the studies
 
 LAB_HEAD_FIRST="Nathanael"
@@ -3272,6 +3893,385 @@ check_errs $? "create study fails"
 --summary "`cat $DATA_DIRECTORY/study/cmt_protocol.txt`"
 check_errs $? "create study fails"
 
+LAB_HEAD_FIRST="Nathanael"
+LAB_HEAD_LAST="Gray"
+LAB_HEAD_EMAIL="nathanael_gray@dfci.harvard.edu"
+LEAD_SCREENER_FIRST="Qingsong"
+LEAD_SCREENER_LAST="Liu"
+LEAD_SCREENER_EMAIL="qingsong_liu@hms.harvard.edu"
+
+./run.sh edu.harvard.med.screensaver.io.screens.StudyCreator \
+-AE $ECOMMONS_ADMIN -annotationNamesInCol1  \
+-y SMALL_MOLECULE -yy IN_VITRO \
+-hf $LAB_HEAD_FIRST -hl $LAB_HEAD_LAST -he $LAB_HEAD_EMAIL -lf $LEAD_SCREENER_FIRST -ll $LEAD_SCREENER_LAST -le $LEAD_SCREENER_EMAIL \
+-keyByFacilityId \
+--replace -f $DATA_DIRECTORY/study/HMSL10002_ALW-II-38-3_kinomescan.xls \
+-t 'ALW-II-38-3 KINOMEscan'  \
+-i 300063 \
+--parseLincsSpecificFacilityID \
+--summary "`cat $DATA_DIRECTORY/study/ambit_protocol.txt`"
+check_errs $? "create study fails"
+
+./run.sh edu.harvard.med.screensaver.io.screens.StudyCreator \
+-AE $ECOMMONS_ADMIN -annotationNamesInCol1  \
+-y SMALL_MOLECULE -yy IN_VITRO \
+-hf $LAB_HEAD_FIRST -hl $LAB_HEAD_LAST -he $LAB_HEAD_EMAIL -lf $LEAD_SCREENER_FIRST -ll $LEAD_SCREENER_LAST -le $LEAD_SCREENER_EMAIL \
+-keyByFacilityId \
+--replace -f $DATA_DIRECTORY/study/HMSL10003_ALW-II-49-7_kinomescan.xls \
+-t 'ALW-II-49-7 KINOMEscan'  \
+-i 300064 \
+--parseLincsSpecificFacilityID \
+--summary "`cat $DATA_DIRECTORY/study/ambit_protocol.txt`"
+check_errs $? "create study fails"
+
+./run.sh edu.harvard.med.screensaver.io.screens.StudyCreator \
+-AE $ECOMMONS_ADMIN -annotationNamesInCol1  \
+-y SMALL_MOLECULE -yy IN_VITRO \
+-hf $LAB_HEAD_FIRST -hl $LAB_HEAD_LAST -he $LAB_HEAD_EMAIL -lf $LEAD_SCREENER_FIRST -ll $LEAD_SCREENER_LAST -le $LEAD_SCREENER_EMAIL \
+-keyByFacilityId \
+--replace -f $DATA_DIRECTORY/study/HMSL10015_HG-5-113-01_kinomescan.xls \
+-t 'HG-5-113-01 KINOMEscan'  \
+-i 300065 \
+--parseLincsSpecificFacilityID \
+--summary "`cat $DATA_DIRECTORY/study/ambit_protocol.txt`"
+check_errs $? "create study fails"
+
+./run.sh edu.harvard.med.screensaver.io.screens.StudyCreator \
+-AE $ECOMMONS_ADMIN -annotationNamesInCol1  \
+-y SMALL_MOLECULE -yy IN_VITRO \
+-hf $LAB_HEAD_FIRST -hl $LAB_HEAD_LAST -he $LAB_HEAD_EMAIL -lf $LEAD_SCREENER_FIRST -ll $LEAD_SCREENER_LAST -le $LEAD_SCREENER_EMAIL \
+-keyByFacilityId \
+--replace -f $DATA_DIRECTORY/study/HMSL10016_HG-5-88-01_kinomescan.xls \
+-t 'HG-5-88-01 KINOMEscan'  \
+-i 300066 \
+--parseLincsSpecificFacilityID \
+--summary "`cat $DATA_DIRECTORY/study/ambit_protocol.txt`"
+check_errs $? "create study fails"
+
+./run.sh edu.harvard.med.screensaver.io.screens.StudyCreator \
+-AE $ECOMMONS_ADMIN -annotationNamesInCol1  \
+-y SMALL_MOLECULE -yy IN_VITRO \
+-hf $LAB_HEAD_FIRST -hl $LAB_HEAD_LAST -he $LAB_HEAD_EMAIL -lf $LEAD_SCREENER_FIRST -ll $LEAD_SCREENER_LAST -le $LEAD_SCREENER_EMAIL \
+-keyByFacilityId \
+--replace -f $DATA_DIRECTORY/study/HMSL10018_HKI-272_kinomescan.xls \
+-t 'HKI-272 KINOMEscan'  \
+-i 300067 \
+--parseLincsSpecificFacilityID \
+--summary "`cat $DATA_DIRECTORY/study/ambit_protocol.txt`"
+check_errs $? "create study fails"
+
+./run.sh edu.harvard.med.screensaver.io.screens.StudyCreator \
+-AE $ECOMMONS_ADMIN -annotationNamesInCol1  \
+-y SMALL_MOLECULE -yy IN_VITRO \
+-hf $LAB_HEAD_FIRST -hl $LAB_HEAD_LAST -he $LAB_HEAD_EMAIL -lf $LEAD_SCREENER_FIRST -ll $LEAD_SCREENER_LAST -le $LEAD_SCREENER_EMAIL \
+-keyByFacilityId \
+--replace -f $DATA_DIRECTORY/study/HMSL10022_GNF2_kinomescan.xls \
+-t 'GNF2 KINOMEscan'  \
+-i 300068 \
+--parseLincsSpecificFacilityID \
+--summary "`cat $DATA_DIRECTORY/study/ambit_protocol.txt`"
+check_errs $? "create study fails"
+
+./run.sh edu.harvard.med.screensaver.io.screens.StudyCreator \
+-AE $ECOMMONS_ADMIN -annotationNamesInCol1  \
+-y SMALL_MOLECULE -yy IN_VITRO \
+-hf $LAB_HEAD_FIRST -hl $LAB_HEAD_LAST -he $LAB_HEAD_EMAIL -lf $LEAD_SCREENER_FIRST -ll $LEAD_SCREENER_LAST -le $LEAD_SCREENER_EMAIL \
+-keyByFacilityId \
+--replace -f $DATA_DIRECTORY/study/HMSL10025_CGP60474_kinomescan.xls \
+-t 'CGP60474 KINOMEscan'  \
+-i 300069 \
+--parseLincsSpecificFacilityID \
+--summary "`cat $DATA_DIRECTORY/study/ambit_protocol.txt`"
+check_errs $? "create study fails"
+
+./run.sh edu.harvard.med.screensaver.io.screens.StudyCreator \
+-AE $ECOMMONS_ADMIN -annotationNamesInCol1  \
+-y SMALL_MOLECULE -yy IN_VITRO \
+-hf $LAB_HEAD_FIRST -hl $LAB_HEAD_LAST -he $LAB_HEAD_EMAIL -lf $LEAD_SCREENER_FIRST -ll $LEAD_SCREENER_LAST -le $LEAD_SCREENER_EMAIL \
+-keyByFacilityId \
+--replace -f $DATA_DIRECTORY/study/HMSL10026_PD173074_kinomescan.xls \
+-t 'PD173074 KINOMEscan'  \
+-i 300070 \
+--parseLincsSpecificFacilityID \
+--summary "`cat $DATA_DIRECTORY/study/ambit_protocol.txt`"
+check_errs $? "create study fails"
+
+./run.sh edu.harvard.med.screensaver.io.screens.StudyCreator \
+-AE $ECOMMONS_ADMIN -annotationNamesInCol1  \
+-y SMALL_MOLECULE -yy IN_VITRO \
+-hf $LAB_HEAD_FIRST -hl $LAB_HEAD_LAST -he $LAB_HEAD_EMAIL -lf $LEAD_SCREENER_FIRST -ll $LEAD_SCREENER_LAST -le $LEAD_SCREENER_EMAIL \
+-keyByFacilityId \
+--replace -f $DATA_DIRECTORY/study/HMSL10039_WH-4-025_kinomescan.xls \
+-t 'WH-4-025 KINOMEscan'  \
+-i 300071 \
+--parseLincsSpecificFacilityID \
+--summary "`cat $DATA_DIRECTORY/study/ambit_protocol.txt`"
+check_errs $? "create study fails"
+
+./run.sh edu.harvard.med.screensaver.io.screens.StudyCreator \
+-AE $ECOMMONS_ADMIN -annotationNamesInCol1  \
+-y SMALL_MOLECULE -yy IN_VITRO \
+-hf $LAB_HEAD_FIRST -hl $LAB_HEAD_LAST -he $LAB_HEAD_EMAIL -lf $LEAD_SCREENER_FIRST -ll $LEAD_SCREENER_LAST -le $LEAD_SCREENER_EMAIL \
+-keyByFacilityId \
+--replace -f $DATA_DIRECTORY/study/HMSL10041_BI-2536_kinomescan.xls \
+-t 'BI-2536 KINOMEscan'  \
+-i 300072 \
+--parseLincsSpecificFacilityID \
+--summary "`cat $DATA_DIRECTORY/study/ambit_protocol.txt`"
+check_errs $? "create study fails"
+
+./run.sh edu.harvard.med.screensaver.io.screens.StudyCreator \
+-AE $ECOMMONS_ADMIN -annotationNamesInCol1  \
+-y SMALL_MOLECULE -yy IN_VITRO \
+-hf $LAB_HEAD_FIRST -hl $LAB_HEAD_LAST -he $LAB_HEAD_EMAIL -lf $LEAD_SCREENER_FIRST -ll $LEAD_SCREENER_LAST -le $LEAD_SCREENER_EMAIL \
+-keyByFacilityId \
+--replace -f $DATA_DIRECTORY/study/HMSL10043_KIN001-127_kinomescan.xls \
+-t 'KIN001-127 KINOMEscan'  \
+-i 300073 \
+--parseLincsSpecificFacilityID \
+--summary "`cat $DATA_DIRECTORY/study/ambit_protocol.txt`"
+check_errs $? "create study fails"
+
+./run.sh edu.harvard.med.screensaver.io.screens.StudyCreator \
+-AE $ECOMMONS_ADMIN -annotationNamesInCol1  \
+-y SMALL_MOLECULE -yy IN_VITRO \
+-hf $LAB_HEAD_FIRST -hl $LAB_HEAD_LAST -he $LAB_HEAD_EMAIL -lf $LEAD_SCREENER_FIRST -ll $LEAD_SCREENER_LAST -le $LEAD_SCREENER_EMAIL \
+-keyByFacilityId \
+--replace -f $DATA_DIRECTORY/study/HMSL10045_A443644_kinomescan.xls \
+-t 'A443644 KINOMEscan'  \
+-i 300074 \
+--parseLincsSpecificFacilityID \
+--summary "`cat $DATA_DIRECTORY/study/ambit_protocol.txt`"
+check_errs $? "create study fails"
+
+./run.sh edu.harvard.med.screensaver.io.screens.StudyCreator \
+-AE $ECOMMONS_ADMIN -annotationNamesInCol1  \
+-y SMALL_MOLECULE -yy IN_VITRO \
+-hf $LAB_HEAD_FIRST -hl $LAB_HEAD_LAST -he $LAB_HEAD_EMAIL -lf $LEAD_SCREENER_FIRST -ll $LEAD_SCREENER_LAST -le $LEAD_SCREENER_EMAIL \
+-keyByFacilityId \
+--replace -f $DATA_DIRECTORY/study/HMSL10047_GDC-0941_kinomescan.xls \
+-t 'GDC-0941 KINOMEscan'  \
+-i 300075 \
+--parseLincsSpecificFacilityID \
+--summary "`cat $DATA_DIRECTORY/study/ambit_protocol.txt`"
+check_errs $? "create study fails"
+
+./run.sh edu.harvard.med.screensaver.io.screens.StudyCreator \
+-AE $ECOMMONS_ADMIN -annotationNamesInCol1  \
+-y SMALL_MOLECULE -yy IN_VITRO \
+-hf $LAB_HEAD_FIRST -hl $LAB_HEAD_LAST -he $LAB_HEAD_EMAIL -lf $LEAD_SCREENER_FIRST -ll $LEAD_SCREENER_LAST -le $LEAD_SCREENER_EMAIL \
+-keyByFacilityId \
+--replace -f $DATA_DIRECTORY/study/HMSL10070_NPK76-II-72-1_kinomescan.xls \
+-t 'NPK76-II-72-1 KINOMEscan'  \
+-i 300076 \
+--parseLincsSpecificFacilityID \
+--summary "`cat $DATA_DIRECTORY/study/ambit_protocol.txt`"
+check_errs $? "create study fails"
+
+./run.sh edu.harvard.med.screensaver.io.screens.StudyCreator \
+-AE $ECOMMONS_ADMIN -annotationNamesInCol1  \
+-y SMALL_MOLECULE -yy IN_VITRO \
+-hf $LAB_HEAD_FIRST -hl $LAB_HEAD_LAST -he $LAB_HEAD_EMAIL -lf $LEAD_SCREENER_FIRST -ll $LEAD_SCREENER_LAST -le $LEAD_SCREENER_EMAIL \
+-keyByFacilityId \
+--replace -f $DATA_DIRECTORY/study/HMSL10075_QL-X-138_kinomescan.xls \
+-t 'QL-X-138 KINOMEscan'  \
+-i 300077 \
+--parseLincsSpecificFacilityID \
+--summary "`cat $DATA_DIRECTORY/study/ambit_protocol.txt`"
+check_errs $? "create study fails"
+
+./run.sh edu.harvard.med.screensaver.io.screens.StudyCreator \
+-AE $ECOMMONS_ADMIN -annotationNamesInCol1  \
+-y SMALL_MOLECULE -yy IN_VITRO \
+-hf $LAB_HEAD_FIRST -hl $LAB_HEAD_LAST -he $LAB_HEAD_EMAIL -lf $LEAD_SCREENER_FIRST -ll $LEAD_SCREENER_LAST -le $LEAD_SCREENER_EMAIL \
+-keyByFacilityId \
+--replace -f $DATA_DIRECTORY/study/HMSL10076_QL-XI-92_kinomescan.xls \
+-t 'QL-XI-92 KINOMEscan'  \
+-i 300078 \
+--parseLincsSpecificFacilityID \
+--summary "`cat $DATA_DIRECTORY/study/ambit_protocol.txt`"
+check_errs $? "create study fails"
+
+./run.sh edu.harvard.med.screensaver.io.screens.StudyCreator \
+-AE $ECOMMONS_ADMIN -annotationNamesInCol1  \
+-y SMALL_MOLECULE -yy IN_VITRO \
+-hf $LAB_HEAD_FIRST -hl $LAB_HEAD_LAST -he $LAB_HEAD_EMAIL -lf $LEAD_SCREENER_FIRST -ll $LEAD_SCREENER_LAST -le $LEAD_SCREENER_EMAIL \
+-keyByFacilityId \
+--replace -f $DATA_DIRECTORY/study/HMSL10079_Torin1_kinomescan.xls \
+-t 'Torin1 KINOMEscan'  \
+-i 300079 \
+--parseLincsSpecificFacilityID \
+--summary "`cat $DATA_DIRECTORY/study/ambit_protocol.txt`"
+check_errs $? "create study fails"
+
+./run.sh edu.harvard.med.screensaver.io.screens.StudyCreator \
+-AE $ECOMMONS_ADMIN -annotationNamesInCol1  \
+-y SMALL_MOLECULE -yy IN_VITRO \
+-hf $LAB_HEAD_FIRST -hl $LAB_HEAD_LAST -he $LAB_HEAD_EMAIL -lf $LEAD_SCREENER_FIRST -ll $LEAD_SCREENER_LAST -le $LEAD_SCREENER_EMAIL \
+-keyByFacilityId \
+--replace -f $DATA_DIRECTORY/study/HMSL10080_Torin2_kinomescan.xls \
+-t 'Torin2 KINOMEscan'  \
+-i 300080 \
+--parseLincsSpecificFacilityID \
+--summary "`cat $DATA_DIRECTORY/study/ambit_protocol.txt`"
+check_errs $? "create study fails"
+
+./run.sh edu.harvard.med.screensaver.io.screens.StudyCreator \
+-AE $ECOMMONS_ADMIN -annotationNamesInCol1  \
+-y SMALL_MOLECULE -yy IN_VITRO \
+-hf $LAB_HEAD_FIRST -hl $LAB_HEAD_LAST -he $LAB_HEAD_EMAIL -lf $LEAD_SCREENER_FIRST -ll $LEAD_SCREENER_LAST -le $LEAD_SCREENER_EMAIL \
+-keyByFacilityId \
+--replace -f $DATA_DIRECTORY/study/HMSL10082_WZ-4-145_kinomescan.xls \
+-t 'WZ-4-145 KINOMEscan'  \
+-i 300081 \
+--parseLincsSpecificFacilityID \
+--summary "`cat $DATA_DIRECTORY/study/ambit_protocol.txt`"
+check_errs $? "create study fails"
+
+./run.sh edu.harvard.med.screensaver.io.screens.StudyCreator \
+-AE $ECOMMONS_ADMIN -annotationNamesInCol1  \
+-y SMALL_MOLECULE -yy IN_VITRO \
+-hf $LAB_HEAD_FIRST -hl $LAB_HEAD_LAST -he $LAB_HEAD_EMAIL -lf $LEAD_SCREENER_FIRST -ll $LEAD_SCREENER_LAST -le $LEAD_SCREENER_EMAIL \
+-keyByFacilityId \
+--replace -f $DATA_DIRECTORY/study/HMSL10083_WZ-7043_kinomescan.xls \
+-t 'WZ-7043 KINOMEscan'  \
+-i 300082 \
+--parseLincsSpecificFacilityID \
+--summary "`cat $DATA_DIRECTORY/study/ambit_protocol.txt`"
+check_errs $? "create study fails"
+
+./run.sh edu.harvard.med.screensaver.io.screens.StudyCreator \
+-AE $ECOMMONS_ADMIN -annotationNamesInCol1  \
+-y SMALL_MOLECULE -yy IN_VITRO \
+-hf $LAB_HEAD_FIRST -hl $LAB_HEAD_LAST -he $LAB_HEAD_EMAIL -lf $LEAD_SCREENER_FIRST -ll $LEAD_SCREENER_LAST -le $LEAD_SCREENER_EMAIL \
+-keyByFacilityId \
+--replace -f $DATA_DIRECTORY/study/HMSL10084_WZ3105_kinomescan.xls \
+-t 'WZ3105 KINOMEscan'  \
+-i 300083 \
+--parseLincsSpecificFacilityID \
+--summary "`cat $DATA_DIRECTORY/study/ambit_protocol.txt`"
+check_errs $? "create study fails"
+
+./run.sh edu.harvard.med.screensaver.io.screens.StudyCreator \
+-AE $ECOMMONS_ADMIN -annotationNamesInCol1  \
+-y SMALL_MOLECULE -yy IN_VITRO \
+-hf $LAB_HEAD_FIRST -hl $LAB_HEAD_LAST -he $LAB_HEAD_EMAIL -lf $LEAD_SCREENER_FIRST -ll $LEAD_SCREENER_LAST -le $LEAD_SCREENER_EMAIL \
+-keyByFacilityId \
+--replace -f $DATA_DIRECTORY/study/HMSL10085_WZ4002_kinomescan.xls \
+-t 'WZ4002 KINOMEscan'  \
+-i 300084 \
+--parseLincsSpecificFacilityID \
+--summary "`cat $DATA_DIRECTORY/study/ambit_protocol.txt`"
+check_errs $? "create study fails"
+
+./run.sh edu.harvard.med.screensaver.io.screens.StudyCreator \
+-AE $ECOMMONS_ADMIN -annotationNamesInCol1  \
+-y SMALL_MOLECULE -yy IN_VITRO \
+-hf $LAB_HEAD_FIRST -hl $LAB_HEAD_LAST -he $LAB_HEAD_EMAIL -lf $LEAD_SCREENER_FIRST -ll $LEAD_SCREENER_LAST -le $LEAD_SCREENER_EMAIL \
+-keyByFacilityId \
+--replace -f $DATA_DIRECTORY/study/HMSL10086_XMD11-50_kinomescan.xls \
+-t 'XMD11-50 KINOMEscan'  \
+-i 300085 \
+--parseLincsSpecificFacilityID \
+--summary "`cat $DATA_DIRECTORY/study/ambit_protocol.txt`"
+check_errs $? "create study fails"
+
+./run.sh edu.harvard.med.screensaver.io.screens.StudyCreator \
+-AE $ECOMMONS_ADMIN -annotationNamesInCol1  \
+-y SMALL_MOLECULE -yy IN_VITRO \
+-hf $LAB_HEAD_FIRST -hl $LAB_HEAD_LAST -he $LAB_HEAD_EMAIL -lf $LEAD_SCREENER_FIRST -ll $LEAD_SCREENER_LAST -le $LEAD_SCREENER_EMAIL \
+-keyByFacilityId \
+--replace -f $DATA_DIRECTORY/study/HMSL10087_XMD11-85h_kinomescan.xls \
+-t 'XMD11-85h KINOMEscan'  \
+-i 300086 \
+--parseLincsSpecificFacilityID \
+--summary "`cat $DATA_DIRECTORY/study/ambit_protocol.txt`"
+check_errs $? "create study fails"
+
+./run.sh edu.harvard.med.screensaver.io.screens.StudyCreator \
+-AE $ECOMMONS_ADMIN -annotationNamesInCol1  \
+-y SMALL_MOLECULE -yy IN_VITRO \
+-hf $LAB_HEAD_FIRST -hl $LAB_HEAD_LAST -he $LAB_HEAD_EMAIL -lf $LEAD_SCREENER_FIRST -ll $LEAD_SCREENER_LAST -le $LEAD_SCREENER_EMAIL \
+-keyByFacilityId \
+--replace -f $DATA_DIRECTORY/study/HMSL10088_XMD13-2_kinomescan.xls \
+-t 'XMD13-2 KINOMEscan'  \
+-i 300087 \
+--parseLincsSpecificFacilityID \
+--summary "`cat $DATA_DIRECTORY/study/ambit_protocol.txt`"
+check_errs $? "create study fails"
+
+./run.sh edu.harvard.med.screensaver.io.screens.StudyCreator \
+-AE $ECOMMONS_ADMIN -annotationNamesInCol1  \
+-y SMALL_MOLECULE -yy IN_VITRO \
+-hf $LAB_HEAD_FIRST -hl $LAB_HEAD_LAST -he $LAB_HEAD_EMAIL -lf $LEAD_SCREENER_FIRST -ll $LEAD_SCREENER_LAST -le $LEAD_SCREENER_EMAIL \
+-keyByFacilityId \
+--replace -f $DATA_DIRECTORY/study/HMSL10089_XMD14-99_kinomescan.xls \
+-t 'XMD14-99 KINOMEscan'  \
+-i 300088 \
+--parseLincsSpecificFacilityID \
+--summary "`cat $DATA_DIRECTORY/study/ambit_protocol.txt`"
+check_errs $? "create study fails"
+
+./run.sh edu.harvard.med.screensaver.io.screens.StudyCreator \
+-AE $ECOMMONS_ADMIN -annotationNamesInCol1  \
+-y SMALL_MOLECULE -yy IN_VITRO \
+-hf $LAB_HEAD_FIRST -hl $LAB_HEAD_LAST -he $LAB_HEAD_EMAIL -lf $LEAD_SCREENER_FIRST -ll $LEAD_SCREENER_LAST -le $LEAD_SCREENER_EMAIL \
+-keyByFacilityId \
+--replace -f $DATA_DIRECTORY/study/HMSL10090_XMD15-27_kinomescan.xls \
+-t 'XMD15-27 KINOMEscan'  \
+-i 300089 \
+--parseLincsSpecificFacilityID \
+--summary "`cat $DATA_DIRECTORY/study/ambit_protocol.txt`"
+check_errs $? "create study fails"
+
+./run.sh edu.harvard.med.screensaver.io.screens.StudyCreator \
+-AE $ECOMMONS_ADMIN -annotationNamesInCol1  \
+-y SMALL_MOLECULE -yy IN_VITRO \
+-hf $LAB_HEAD_FIRST -hl $LAB_HEAD_LAST -he $LAB_HEAD_EMAIL -lf $LEAD_SCREENER_FIRST -ll $LEAD_SCREENER_LAST -le $LEAD_SCREENER_EMAIL \
+-keyByFacilityId \
+--replace -f $DATA_DIRECTORY/study/HMSL10091_XMD16-144_kinomescan.xls \
+-t 'XMD16-144 KINOMEscan'  \
+-i 300090 \
+--parseLincsSpecificFacilityID \
+--summary "`cat $DATA_DIRECTORY/study/ambit_protocol.txt`"
+check_errs $? "create study fails"
+
+./run.sh edu.harvard.med.screensaver.io.screens.StudyCreator \
+-AE $ECOMMONS_ADMIN -annotationNamesInCol1  \
+-y SMALL_MOLECULE -yy IN_VITRO \
+-hf $LAB_HEAD_FIRST -hl $LAB_HEAD_LAST -he $LAB_HEAD_EMAIL -lf $LEAD_SCREENER_FIRST -ll $LEAD_SCREENER_LAST -le $LEAD_SCREENER_EMAIL \
+-keyByFacilityId \
+--replace -f $DATA_DIRECTORY/study/HMSL10093_XMD8-85_kinomescan.xls \
+-t 'XMD8-85 KINOMEscan'  \
+-i 300091 \
+--parseLincsSpecificFacilityID \
+--summary "`cat $DATA_DIRECTORY/study/ambit_protocol.txt`"
+check_errs $? "create study fails"
+
+./run.sh edu.harvard.med.screensaver.io.screens.StudyCreator \
+-AE $ECOMMONS_ADMIN -annotationNamesInCol1  \
+-y SMALL_MOLECULE -yy IN_VITRO \
+-hf $LAB_HEAD_FIRST -hl $LAB_HEAD_LAST -he $LAB_HEAD_EMAIL -lf $LEAD_SCREENER_FIRST -ll $LEAD_SCREENER_LAST -le $LEAD_SCREENER_EMAIL \
+-keyByFacilityId \
+--replace -f $DATA_DIRECTORY/study/HMSL10094_XMD8-92_kinomescan.xls \
+-t 'XMD8-92 KINOMEscan'  \
+-i 300092 \
+--parseLincsSpecificFacilityID \
+--summary "`cat $DATA_DIRECTORY/study/ambit_protocol.txt`"
+check_errs $? "create study fails"
+
+./run.sh edu.harvard.med.screensaver.io.screens.StudyCreator \
+-AE $ECOMMONS_ADMIN -annotationNamesInCol1  \
+-y SMALL_MOLECULE -yy IN_VITRO \
+-hf $LAB_HEAD_FIRST -hl $LAB_HEAD_LAST -he $LAB_HEAD_EMAIL -lf $LEAD_SCREENER_FIRST -ll $LEAD_SCREENER_LAST -le $LEAD_SCREENER_EMAIL \
+-keyByFacilityId \
+--replace -f $DATA_DIRECTORY/study/HMSL10095_ZG-10_kinomescan.xls \
+-t 'ZG-10 KINOMEscan'  \
+-i 300093 \
+--parseLincsSpecificFacilityID \
+--summary "`cat $DATA_DIRECTORY/study/ambit_protocol.txt`"
+check_errs $? "create study fails"
+
 ## [#3110] Track data received date, data publicized date for compounds, studies, screens
 
 psql -q -U $DB_USER $DB -f $DATA_DIRECTORY/adjust_dates_received.sql -v ON_ERROR_STOP=1
@@ -3856,6 +4856,106 @@ check_errs $? "attachment import fails"
 
 ./run.sh edu.harvard.med.lincs.screensaver.io.libraries.ReagentAttachmentImporter \
 -f $DATA_DIRECTORY/qc/HPLC_HMSL10101.101.01.pdf -i HMSL10101 -sid 101 -bid 1 -type QC-HPLC
+check_errs $? "attachment import fails"
+
+./run.sh edu.harvard.med.lincs.screensaver.io.libraries.ReagentAttachmentImporter \
+-f $DATA_DIRECTORY/qc/NMR_HMSL10116.101.01.pdf -i HMSL10116 -sid 101 -bid 1 -type QC-NMR
+check_errs $? "attachment import fails"
+
+./run.sh edu.harvard.med.lincs.screensaver.io.libraries.ReagentAttachmentImporter \
+-f $DATA_DIRECTORY/qc/LCMS_HMSL10116.101.01.pdf -i HMSL10116 -sid 101 -bid 1 -type QC-LCMS
+check_errs $? "attachment import fails"
+
+./run.sh edu.harvard.med.lincs.screensaver.io.libraries.ReagentAttachmentImporter \
+-f $DATA_DIRECTORY/qc/NMR_HMSL10117.101.01.pdf -i HMSL10117 -sid 101 -bid 1 -type QC-NMR
+check_errs $? "attachment import fails"
+
+./run.sh edu.harvard.med.lincs.screensaver.io.libraries.ReagentAttachmentImporter \
+-f $DATA_DIRECTORY/qc/LCMS_HMSL10117.101.01.pdf -i HMSL10117 -sid 101 -bid 1 -type QC-LCMS
+check_errs $? "attachment import fails"
+
+./run.sh edu.harvard.med.lincs.screensaver.io.libraries.ReagentAttachmentImporter \
+-f $DATA_DIRECTORY/qc/HPLC_HMSL10117.101.01.pdf -i HMSL10117 -sid 101 -bid 1 -type QC-HPLC
+check_errs $? "attachment import fails"
+
+./run.sh edu.harvard.med.lincs.screensaver.io.libraries.ReagentAttachmentImporter \
+-f $DATA_DIRECTORY/qc/NMR_HMSL10118.101.01.pdf -i HMSL10118 -sid 101 -bid 1 -type QC-NMR
+check_errs $? "attachment import fails"
+
+./run.sh edu.harvard.med.lincs.screensaver.io.libraries.ReagentAttachmentImporter \
+-f $DATA_DIRECTORY/qc/HPLC_HMSL10118.101.01.pdf -i HMSL10118 -sid 101 -bid 1 -type QC-HPLC
+check_errs $? "attachment import fails"
+
+./run.sh edu.harvard.med.lincs.screensaver.io.libraries.ReagentAttachmentImporter \
+-f $DATA_DIRECTORY/qc/NMR_HMSL10119.101.01.pdf -i HMSL10119 -sid 101 -bid 1 -type QC-NMR
+check_errs $? "attachment import fails"
+
+./run.sh edu.harvard.med.lincs.screensaver.io.libraries.ReagentAttachmentImporter \
+-f $DATA_DIRECTORY/qc/HPLC_HMSL10119.101.01.pdf -i HMSL10119 -sid 101 -bid 1 -type QC-HPLC
+check_errs $? "attachment import fails"
+
+./run.sh edu.harvard.med.lincs.screensaver.io.libraries.ReagentAttachmentImporter \
+-f $DATA_DIRECTORY/qc/NMR_HMSL10120.102.01.pdf -i HMSL10120 -sid 102 -bid 1 -type QC-NMR
+check_errs $? "attachment import fails"
+
+./run.sh edu.harvard.med.lincs.screensaver.io.libraries.ReagentAttachmentImporter \
+-f $DATA_DIRECTORY/qc/HPLC_HMSL10120.102.01.pdf -i HMSL10120 -sid 102 -bid 1 -type QC-HPLC
+check_errs $? "attachment import fails"
+
+./run.sh edu.harvard.med.lincs.screensaver.io.libraries.ReagentAttachmentImporter \
+-f $DATA_DIRECTORY/qc/NMR_HMSL10121.101.01.pdf -i HMSL10121 -sid 101 -bid 1 -type QC-NMR
+check_errs $? "attachment import fails"
+
+./run.sh edu.harvard.med.lincs.screensaver.io.libraries.ReagentAttachmentImporter \
+-f $DATA_DIRECTORY/qc/HPLC_HMSL10121.101.01.pdf -i HMSL10121 -sid 101 -bid 1 -type QC-HPLC
+check_errs $? "attachment import fails"
+
+./run.sh edu.harvard.med.lincs.screensaver.io.libraries.ReagentAttachmentImporter \
+-f $DATA_DIRECTORY/qc/NMR_HMSL10122.101.01.pdf -i HMSL10122 -sid 101 -bid 1 -type QC-NMR
+check_errs $? "attachment import fails"
+
+./run.sh edu.harvard.med.lincs.screensaver.io.libraries.ReagentAttachmentImporter \
+-f $DATA_DIRECTORY/qc/HPLC_HMSL10122.101.01.pdf -i HMSL10122 -sid 101 -bid 1 -type QC-HPLC
+check_errs $? "attachment import fails"
+
+./run.sh edu.harvard.med.lincs.screensaver.io.libraries.ReagentAttachmentImporter \
+-f $DATA_DIRECTORY/qc/NMR_HMSL10123.101.01.pdf -i HMSL10123 -sid 101 -bid 1 -type QC-NMR
+check_errs $? "attachment import fails"
+
+./run.sh edu.harvard.med.lincs.screensaver.io.libraries.ReagentAttachmentImporter \
+-f $DATA_DIRECTORY/qc/LCMS_HMSL10123.101.01.pdf -i HMSL10123 -sid 101 -bid 1 -type QC-LCMS
+check_errs $? "attachment import fails"
+
+./run.sh edu.harvard.med.lincs.screensaver.io.libraries.ReagentAttachmentImporter \
+-f $DATA_DIRECTORY/qc/NMR_HMSL10124.101.01.pdf -i HMSL10124 -sid 101 -bid 1 -type QC-NMR
+check_errs $? "attachment import fails"
+
+./run.sh edu.harvard.med.lincs.screensaver.io.libraries.ReagentAttachmentImporter \
+-f $DATA_DIRECTORY/qc/HPLC_HMSL10124.101.01.pdf -i HMSL10124 -sid 101 -bid 1 -type QC-HPLC
+check_errs $? "attachment import fails"
+
+./run.sh edu.harvard.med.lincs.screensaver.io.libraries.ReagentAttachmentImporter \
+-f $DATA_DIRECTORY/qc/NMR_HMSL10125.101.01.pdf -i HMSL10125 -sid 101 -bid 1 -type QC-NMR
+check_errs $? "attachment import fails"
+
+./run.sh edu.harvard.med.lincs.screensaver.io.libraries.ReagentAttachmentImporter \
+-f $DATA_DIRECTORY/qc/HPLC_HMSL10125.101.01.pdf -i HMSL10125 -sid 101 -bid 1 -type QC-HPLC
+check_errs $? "attachment import fails"
+
+./run.sh edu.harvard.med.lincs.screensaver.io.libraries.ReagentAttachmentImporter \
+-f $DATA_DIRECTORY/qc/NMR_HMSL10126.101.01.pdf -i HMSL10126 -sid 101 -bid 1 -type QC-NMR
+check_errs $? "attachment import fails"
+
+./run.sh edu.harvard.med.lincs.screensaver.io.libraries.ReagentAttachmentImporter \
+-f $DATA_DIRECTORY/qc/HPLC_HMSL10126.101.01.pdf -i HMSL10126 -sid 101 -bid 1 -type QC-HPLC
+check_errs $? "attachment import fails"
+
+./run.sh edu.harvard.med.lincs.screensaver.io.libraries.ReagentAttachmentImporter \
+-f $DATA_DIRECTORY/qc/NMR_HMSL10127.101.01.pdf -i HMSL10127 -sid 101 -bid 1 -type QC-NMR
+check_errs $? "attachment import fails"
+
+./run.sh edu.harvard.med.lincs.screensaver.io.libraries.ReagentAttachmentImporter \
+-f $DATA_DIRECTORY/qc/LCMS_HMSL10127.101.01.pdf -i HMSL10127 -sid 101 -bid 1 -type QC-LCMS
 check_errs $? "attachment import fails"
 
 # "Study-File" Attached files, for viewing in the study viewer
