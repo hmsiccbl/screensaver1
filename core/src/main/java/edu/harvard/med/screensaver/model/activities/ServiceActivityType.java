@@ -22,6 +22,7 @@ public enum ServiceActivityType implements VocabularyTerm
   INFORMATICS("Informatics"),
   AUTOMATION("Automation"),
   ASSAY_DEV_CONSULT("Assay Dev Consult"),
+  IMAGE_ANALYSIS("Image Analysis"),
   OTHER("Other");
 
   public Predicate<ServiceActivity> isValuePredicate()
