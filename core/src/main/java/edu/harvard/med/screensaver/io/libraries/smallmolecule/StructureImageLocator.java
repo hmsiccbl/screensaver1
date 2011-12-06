@@ -9,12 +9,12 @@
 
 package edu.harvard.med.screensaver.io.libraries.smallmolecule;
 
-import edu.harvard.med.iccbl.screensaver.io.ImageProvider;
+import edu.harvard.med.screensaver.io.image.ImageLocator;
 import edu.harvard.med.screensaver.model.libraries.SmallMoleculeReagent;
 
 /**
  * Type-safe tag interface for services that can provide images of small molecule structures.
  */
-public interface StructureImageProvider extends ImageProvider<SmallMoleculeReagent>
+public interface StructureImageLocator extends ImageLocator<SmallMoleculeReagent>
 {
 }

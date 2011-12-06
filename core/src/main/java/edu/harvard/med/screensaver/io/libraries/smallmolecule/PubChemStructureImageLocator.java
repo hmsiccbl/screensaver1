@@ -16,9 +16,9 @@ import org.apache.log4j.Logger;
 
 import edu.harvard.med.screensaver.model.libraries.SmallMoleculeReagent;
 
-public class PubChemStructureImageProvider implements StructureImageProvider
+public class PubChemStructureImageLocator implements StructureImageLocator
 {
-  private static Logger log = Logger.getLogger(PubChemStructureImageProvider.class);
+  private static Logger log = Logger.getLogger(PubChemStructureImageLocator.class);
   
   private static final String IMAGE_URL_PREFIX =
     "http://pubchem.ncbi.nlm.nih.gov/image/imagefly.cgi?width=300&height=300&cid=";

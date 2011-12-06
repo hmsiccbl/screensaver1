@@ -19,21 +19,21 @@ import java.util.Map;
 import java.util.Set;
 import java.util.SortedSet;
 
-import org.apache.log4j.Logger;
-import org.hibernate.Session;
 import com.google.common.base.Function;
 import com.google.common.base.Joiner;
 import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.Iterables;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Sets;
+import org.apache.log4j.Logger;
+import org.hibernate.Session;
 
 import edu.harvard.med.lincs.screensaver.LincsScreensaverConstants;
 import edu.harvard.med.screensaver.db.Criterion;
+import edu.harvard.med.screensaver.db.Criterion.Operator;
 import edu.harvard.med.screensaver.db.GenericEntityDAO;
 import edu.harvard.med.screensaver.db.LibrariesDAO;
 import edu.harvard.med.screensaver.db.Query;
-import edu.harvard.med.screensaver.db.Criterion.Operator;
 import edu.harvard.med.screensaver.db.datafetcher.DataFetcher;
 import edu.harvard.med.screensaver.db.datafetcher.DataFetcherUtil;
 import edu.harvard.med.screensaver.db.datafetcher.Tuple;
@@ -41,8 +41,9 @@ import edu.harvard.med.screensaver.db.datafetcher.TupleDataFetcher;
 import edu.harvard.med.screensaver.db.hqlbuilder.HqlBuilder;
 import edu.harvard.med.screensaver.db.hqlbuilder.JoinType;
 import edu.harvard.med.screensaver.io.DataExporter;
+import edu.harvard.med.screensaver.io.image.ImageLocatorUtil;
 import edu.harvard.med.screensaver.io.libraries.smallmolecule.LibraryContentsVersionReference;
-import edu.harvard.med.screensaver.io.libraries.smallmolecule.StructureImageProvider;
+import edu.harvard.med.screensaver.io.libraries.smallmolecule.StructureImageLocator;
 import edu.harvard.med.screensaver.model.Entity;
 import edu.harvard.med.screensaver.model.MolarConcentration;
 import edu.harvard.med.screensaver.model.Volume;
@@ -199,7 +200,7 @@ public abstract class WellSearchResults extends TupleBasedEntitySearchResults<We
   private LibrariesDAO _librariesDao;
   private EntityViewPolicy<Entity> _entityViewPolicy;
   private LibraryViewer _libraryViewer;
-  protected StructureImageProvider _structureImageProvider;
+  protected StructureImageLocator _structureImageLocator;
   private LibraryContentsVersionReference _libraryContentsVersionRef;
 
   private WellSearchResultMode _mode;
@@ -236,7 +237,7 @@ public abstract class WellSearchResults extends TupleBasedEntitySearchResults<We
                            EntityViewPolicy entityViewPolicy,
                            LibraryViewer libraryViewer,
                            WellViewer wellViewer,
-                           StructureImageProvider structureImageProvider,
+                           StructureImageLocator structureImageLocator,
                            LibraryContentsVersionReference libraryContentsVersionRef,
                            List<DataExporter<Tuple<String>>> dataExporters)
   {
@@ -246,7 +247,7 @@ public abstract class WellSearchResults extends TupleBasedEntitySearchResults<We
     _librariesDao = librariesDao;
     _entityViewPolicy = entityViewPolicy;
     _libraryViewer = libraryViewer;
-    _structureImageProvider = structureImageProvider;
+    _structureImageLocator = structureImageLocator;
     _libraryContentsVersionRef = libraryContentsVersionRef;
   }
 
@@ -698,14 +699,12 @@ public abstract class WellSearchResults extends TupleBasedEntitySearchResults<We
       @Override
       public String getCellValue(Tuple<String> tuple)
       {
-        if (_structureImageProvider != null) {
+        if (_structureImageLocator != null) {
           Integer reagentId = (Integer) tuple.getProperty(TupleDataFetcher.makePropertyKey(reagentIdPropertyPath));
           if (reagentId != null) {
             SmallMoleculeReagent smallMoleculeReagent = _dao.findEntityById(SmallMoleculeReagent.class, reagentId, true, Reagent.well.castToSubtype(SmallMoleculeReagent.class));
-            URL url = _structureImageProvider.getImageUrl(smallMoleculeReagent);
-            if (url != null) {
-              return url.toString();
-            }
+            URL url = _structureImageLocator.getImageUrl(smallMoleculeReagent);
+            return NullSafeUtils.toString(ImageLocatorUtil.toExtantContentUrl(url), "");
           }
         }
         return null;

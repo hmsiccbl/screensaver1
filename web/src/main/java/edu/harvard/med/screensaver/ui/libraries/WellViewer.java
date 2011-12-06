@@ -35,7 +35,7 @@ import edu.harvard.med.screensaver.db.LibrariesDAO;
 import edu.harvard.med.screensaver.db.datafetcher.Tuple;
 import edu.harvard.med.screensaver.io.libraries.WellsSdfDataExporter;
 import edu.harvard.med.screensaver.io.libraries.smallmolecule.LibraryContentsVersionReference;
-import edu.harvard.med.screensaver.io.libraries.smallmolecule.StructureImageProvider;
+import edu.harvard.med.screensaver.io.libraries.smallmolecule.StructureImageLocator;
 import edu.harvard.med.screensaver.io.screenresults.ScreenResultReporter;
 import edu.harvard.med.screensaver.io.screenresults.ScreenResultReporter.ConfirmationReport;
 import edu.harvard.med.screensaver.model.libraries.Gene;
@@ -79,7 +79,7 @@ public class WellViewer extends SearchResultContextEntityViewerBackingBean<Well,
   private LibraryViewer _libraryViewer;
   private LibrariesDAO _librariesDao;
   private EntityViewPolicy _entityViewPolicy;
-  private StructureImageProvider _structureImageProvider;
+  private StructureImageLocator _structureImageLocator;
 
   private List<SimpleCell> _annotationNameValueTable;
   private StudyViewer _studyViewer;
@@ -106,7 +106,7 @@ public class WellViewer extends SearchResultContextEntityViewerBackingBean<Well,
                     LibrariesDAO librariesDAO,
                     EntityViewPolicy entityViewPolicy,
                     LibraryViewer libraryViewer,
-                    StructureImageProvider structureImageProvider,
+                    StructureImageLocator structureImageLocator,
                     StudyViewer studyViewer,
                     WellsSdfDataExporter wellsSdfDataExporter,
                     LibraryContentsVersionReference libraryContentsVersionRef,
@@ -122,7 +122,7 @@ public class WellViewer extends SearchResultContextEntityViewerBackingBean<Well,
     _librariesDao = librariesDAO;
     _entityViewPolicy = entityViewPolicy;
     _libraryViewer = libraryViewer;
-    _structureImageProvider = structureImageProvider;
+    _structureImageLocator = structureImageLocator;
     _studyViewer = studyViewer;
     _wellsSdfDataExporter = wellsSdfDataExporter;
     _libraryContentsVersionRef = libraryContentsVersionRef == null ? new LibraryContentsVersionReference()
@@ -361,7 +361,7 @@ public class WellViewer extends SearchResultContextEntityViewerBackingBean<Well,
 
   public String getCompoundImageUrl()
   {
-    URL url = _structureImageProvider.getImageUrl((SmallMoleculeReagent) getRestrictedReagent());
+    URL url = _structureImageLocator.getImageUrl((SmallMoleculeReagent) getRestrictedReagent());
     return url == null ? null : url.toString();
   }
 

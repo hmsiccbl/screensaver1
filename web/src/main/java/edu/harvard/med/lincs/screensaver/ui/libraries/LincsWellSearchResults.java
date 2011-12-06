@@ -23,7 +23,7 @@ import edu.harvard.med.screensaver.db.datafetcher.TupleDataFetcher;
 import edu.harvard.med.screensaver.db.hqlbuilder.HqlBuilder;
 import edu.harvard.med.screensaver.io.DataExporter;
 import edu.harvard.med.screensaver.io.libraries.smallmolecule.LibraryContentsVersionReference;
-import edu.harvard.med.screensaver.io.libraries.smallmolecule.StructureImageProvider;
+import edu.harvard.med.screensaver.io.libraries.smallmolecule.StructureImageLocator;
 import edu.harvard.med.screensaver.model.libraries.Well;
 import edu.harvard.med.screensaver.model.meta.PropertyPath;
 import edu.harvard.med.screensaver.policy.EntityViewPolicy;
@@ -58,11 +58,11 @@ public class LincsWellSearchResults extends WellSearchResults
                                 EntityViewPolicy entityViewPolicy,
                                 LibraryViewer libraryViewer,
                                 WellViewer wellViewer,
-                                StructureImageProvider structureImageProvider,
+                                StructureImageLocator structureImageLocator,
                                 LibraryContentsVersionReference libraryContentsVersionRef,
                                 List<DataExporter<Tuple<String>>> dataExporters)
   {
-    super(dao, librariesDao, entityViewPolicy, libraryViewer, wellViewer, structureImageProvider, libraryContentsVersionRef, dataExporters);
+    super(dao, librariesDao, entityViewPolicy, libraryViewer, wellViewer, structureImageLocator, libraryContentsVersionRef, dataExporters);
     _dao = dao;
     _librariesDao = librariesDao;
   }

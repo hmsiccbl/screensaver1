@@ -15,26 +15,23 @@ import java.net.URL;
 
 import org.apache.log4j.Logger;
 
-import edu.harvard.med.screensaver.io.screens.StudyImageProvider;
+import edu.harvard.med.screensaver.io.screens.StudyImageLocator;
 import edu.harvard.med.screensaver.model.screens.Screen;
 
 /**
  * ImageProvider that looks up a study image by study facility ID.
  */
-public class StudyFacilityIdStudyImageProvider implements StudyImageProvider<Screen>
+public class StudyFacilityIdStudyImageLocator implements StudyImageLocator<Screen>
 {
   private static final String IMAGE_FILE_EXTENSION = ".png";
 
-  private static Logger log = Logger.getLogger(StudyFacilityIdStudyImageProvider.class);
+  private static Logger log = Logger.getLogger(StudyFacilityIdStudyImageLocator.class);
 
   private String _baseUrl;
 
-  //private ImageProviderServlet _imageProviderServlet;
-
-  public StudyFacilityIdStudyImageProvider(String baseUrl/* , ImageProviderServlet imageProviderServlet */)
+  public StudyFacilityIdStudyImageLocator(String baseUrl)
   {
     _baseUrl = baseUrl;
-    //_imageProviderServlet = imageProviderServlet;
   }
 
   @Override
@@ -60,12 +57,6 @@ public class StudyFacilityIdStudyImageProvider implements StudyImageProvider<Scr
       if (log.isDebugEnabled()) {
         log.debug("image URL for screen " + screen + ": " + url);
       }
-      /*
-       * if (!_imageProviderServlet.canFindImage(url) ){
-       * log.info("image not available from the url: " + url);
-       * return null;
-       * }
-       */
       return url;
     }
     catch (MalformedURLException e) {

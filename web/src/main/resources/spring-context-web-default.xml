@@ -78,12 +78,12 @@
   </bean>
  
   <bean id="structureImageProvider"
-        class="edu.harvard.med.iccbl.screensaver.io.libraries.smallmolecule.PlateWellStructureImageProvider">
+        class="edu.harvard.med.iccbl.screensaver.io.libraries.smallmolecule.PlateWellStructureImageLocator">
     <constructor-arg value="#{screensaverProperties.map['screensaver.images.base_url']}/structure_images/" />
   </bean>
   
   <bean id="studyImageProvider"
-        class="edu.harvard.med.screensaver.io.screens.NoOpStudyImageProvider">
+        class="edu.harvard.med.screensaver.io.screens.NoOpStudyImageLocator">
   </bean>
 
   <bean

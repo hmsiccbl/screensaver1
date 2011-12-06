@@ -26,7 +26,7 @@ import jxl.write.biff.RowsExceededException;
 import org.apache.commons.io.IOUtils;
 import org.apache.log4j.Logger;
 
-import edu.harvard.med.screensaver.io.libraries.smallmolecule.StructureImageProvider;
+import edu.harvard.med.screensaver.io.libraries.smallmolecule.StructureImageLocator;
 import edu.harvard.med.screensaver.io.workbook2.Workbook2Utils;
 import edu.harvard.med.screensaver.ui.arch.datatable.TableDataExporter;
 import edu.harvard.med.screensaver.ui.arch.datatable.column.ColumnType;
@@ -48,7 +48,7 @@ public class ExcelWorkbookDataExporter<T> implements TableDataExporter<T>
   private String _dataTypeName;
   private List<TableColumn<T,?>> _columns;
 
-  private StructureImageProvider _structureImageProvider;
+  private StructureImageLocator _structureImageLocator;
 
 
   public ExcelWorkbookDataExporter(String dataTypeName)

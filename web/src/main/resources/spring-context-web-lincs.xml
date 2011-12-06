@@ -41,16 +41,16 @@
   </bean>
     
   <bean id="structureImageProvider"
-        class="edu.harvard.med.iccbl.screensaver.io.libraries.smallmolecule.RestrictedStructureImageProviderDecorator">
+        class="edu.harvard.med.iccbl.screensaver.io.libraries.smallmolecule.RestrictedStructureImageLocatorDecorator">
     <constructor-arg>
-      <bean class="edu.harvard.med.lincs.screensaver.io.libraries.smallmolecule.SmallMoleculeReagentFacilitySaltIdStructureImageProvider">
+      <bean class="edu.harvard.med.lincs.screensaver.io.libraries.smallmolecule.SmallMoleculeReagentFacilitySaltIdStructureImageLocator">
         <constructor-arg value="#{screensaverProperties.map['screensaver.images.base_url']}/compound-images-by-facility-salt-id/" />
       </bean>
     </constructor-arg>
   </bean>
   
   <bean id="studyImageProvider"
-        class="edu.harvard.med.lincs.screensaver.io.screens.StudyFacilityIdStudyImageProvider">
+        class="edu.harvard.med.lincs.screensaver.io.screens.StudyFacilityIdStudyImageLocator">
     <constructor-arg value="#{screensaverProperties.map['screensaver.images.base_url']}/screen-images-by-facility-id/" />
   </bean>
 
@@ -175,7 +175,7 @@
     <constructor-arg ref="annotationsBrowser" />
     <constructor-arg ref="screenResultReporter" />
     <constructor-arg>
-      <bean class="edu.harvard.med.lincs.screensaver.io.screens.SmallMoleculeReagentFacilitySaltIdStudyImageProvider">
+      <bean class="edu.harvard.med.lincs.screensaver.io.screens.SmallMoleculeReagentFacilitySaltIdStudyImageLocator">
         <constructor-arg value="#{screensaverProperties.map['screensaver.images.base_url']}/ambit-study-compound-images-by-facility-salt-id/" />
       </bean>
     </constructor-arg>

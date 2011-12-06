@@ -15,17 +15,17 @@ import java.net.URL;
 import java.util.ArrayList;
 import java.util.SortedSet;
 
-import org.apache.log4j.Logger;
 import com.google.common.base.Predicate;
 import com.google.common.collect.Sets;
+import org.apache.log4j.Logger;
 
 import edu.harvard.med.lincs.screensaver.LincsScreensaverConstants;
 import edu.harvard.med.screensaver.ScreensaverConstants;
 import edu.harvard.med.screensaver.db.GenericEntityDAO;
-import edu.harvard.med.screensaver.io.screens.StudyImageProvider;
+import edu.harvard.med.screensaver.io.image.ImageLocatorUtil;
+import edu.harvard.med.screensaver.io.screens.StudyImageLocator;
 import edu.harvard.med.screensaver.model.AttachedFile;
 import edu.harvard.med.screensaver.model.AttachedFileType;
-import edu.harvard.med.screensaver.model.libraries.Reagent;
 import edu.harvard.med.screensaver.model.libraries.SmallMoleculeReagent;
 import edu.harvard.med.screensaver.model.libraries.Well;
 import edu.harvard.med.screensaver.model.screenresults.AnnotationType;
@@ -38,6 +38,7 @@ import edu.harvard.med.screensaver.ui.arch.util.AttachedFiles;
 import edu.harvard.med.screensaver.ui.arch.view.SearchResultContextEntityViewerBackingBean;
 import edu.harvard.med.screensaver.ui.libraries.AnnotationSearchResults;
 import edu.harvard.med.screensaver.ui.libraries.WellSearchResults;
+import edu.harvard.med.screensaver.util.NullSafeUtils;
 
 public class StudyViewer<E extends Study> extends SearchResultContextEntityViewerBackingBean<E,E>
 {
@@ -47,7 +48,7 @@ public class StudyViewer<E extends Study> extends SearchResultContextEntityViewe
   private AnnotationTypesTable _annotationTypesTable;
   private WellSearchResults _wellSearchResults;
   private WellSearchResults _reagentsBrowser;
-  private StudyImageProvider _studyImageProvider; // LINCS-only feature
+  private StudyImageLocator _studyImageLocator; // LINCS-only feature
   private AnnotationSearchResults _annotationSearchResults;
   private AttachedFiles _attachedFiles;
 
@@ -64,7 +65,7 @@ public class StudyViewer<E extends Study> extends SearchResultContextEntityViewe
                      AnnotationTypesTable annotationTypesTable,
                      WellSearchResults wellSearchResults,
                      AnnotationSearchResults annotationSearchResults,
-                     StudyImageProvider studyImageProvider,
+                     StudyImageLocator studyImageLocator,
                      AttachedFiles attachedFiles)
   {
     super(thisProxy,
@@ -76,7 +77,7 @@ public class StudyViewer<E extends Study> extends SearchResultContextEntityViewe
     _studyDetailViewer = studyDetailViewer;
     _annotationTypesTable = annotationTypesTable;
     _wellSearchResults = wellSearchResults;
-    _studyImageProvider = studyImageProvider;
+    _studyImageLocator = studyImageLocator;
     _annotationSearchResults = annotationSearchResults;
     _attachedFiles = attachedFiles;
 
@@ -121,10 +122,10 @@ public class StudyViewer<E extends Study> extends SearchResultContextEntityViewe
 
   public String getStudyImageUrl()
   {
-    if (_studyImageProvider == null) return null;
+    if (_studyImageLocator == null) return null;
 
-    URL url = _studyImageProvider.getImageUrl((Screen) getEntity());
-    return url == null ? null : url.toString();
+    URL url = _studyImageLocator.getImageUrl((Screen) getEntity());
+    return NullSafeUtils.toString(ImageLocatorUtil.toExtantContentUrl(url), "");
   }
 
   @Override

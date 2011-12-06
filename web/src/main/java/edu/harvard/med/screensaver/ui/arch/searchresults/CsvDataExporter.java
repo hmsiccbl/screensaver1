@@ -23,7 +23,7 @@ import java.util.List;
 import org.apache.commons.io.IOUtils;
 import org.apache.log4j.Logger;
 
-import edu.harvard.med.screensaver.io.libraries.smallmolecule.StructureImageProvider;
+import edu.harvard.med.screensaver.io.libraries.smallmolecule.StructureImageLocator;
 import edu.harvard.med.screensaver.ui.arch.datatable.TableDataExporter;
 import edu.harvard.med.screensaver.ui.arch.datatable.column.TableColumn;
 import edu.harvard.med.screensaver.util.CSVPrintWriter;
@@ -40,7 +40,7 @@ public class CsvDataExporter<T> implements TableDataExporter<T>
   private String _dataTypeName;
   private List<TableColumn<T,?>> _columns;
 
-  private StructureImageProvider _structureImageProvider;
+  private StructureImageLocator _structureImageLocator;
 
 
   public CsvDataExporter(String dataTypeName)

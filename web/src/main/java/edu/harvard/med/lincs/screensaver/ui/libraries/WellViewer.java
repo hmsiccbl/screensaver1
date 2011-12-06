@@ -10,11 +10,12 @@ import org.apache.log4j.Logger;
 import edu.harvard.med.screensaver.ScreensaverConstants;
 import edu.harvard.med.screensaver.db.GenericEntityDAO;
 import edu.harvard.med.screensaver.db.LibrariesDAO;
+import edu.harvard.med.screensaver.io.image.ImageLocatorUtil;
 import edu.harvard.med.screensaver.io.libraries.WellsSdfDataExporter;
 import edu.harvard.med.screensaver.io.libraries.smallmolecule.LibraryContentsVersionReference;
-import edu.harvard.med.screensaver.io.libraries.smallmolecule.StructureImageProvider;
+import edu.harvard.med.screensaver.io.libraries.smallmolecule.StructureImageLocator;
 import edu.harvard.med.screensaver.io.screenresults.ScreenResultReporter;
-import edu.harvard.med.screensaver.io.screens.StudyImageProvider;
+import edu.harvard.med.screensaver.io.screens.StudyImageLocator;
 import edu.harvard.med.screensaver.model.AttachedFile;
 import edu.harvard.med.screensaver.model.AttachedFileType;
 import edu.harvard.med.screensaver.model.libraries.Reagent;
@@ -27,13 +28,14 @@ import edu.harvard.med.screensaver.ui.libraries.AnnotationSearchResults;
 import edu.harvard.med.screensaver.ui.libraries.LibraryViewer;
 import edu.harvard.med.screensaver.ui.libraries.WellSearchResults;
 import edu.harvard.med.screensaver.ui.screens.StudyViewer;
+import edu.harvard.med.screensaver.util.NullSafeUtils;
 
 public class WellViewer extends edu.harvard.med.screensaver.ui.libraries.WellViewer
 {
   private static final Logger log = Logger.getLogger(WellViewer.class);
 
   private AttachedFiles _attachedFiles;
-  private StudyImageProvider _studyImageProvider; // for [#2417] NOTE: this is a LINCS-only feature
+  private StudyImageLocator _studyImageLocator; // for [#2417] NOTE: this is a LINCS-only feature
   /**
    * @motivation for CGLIB2
    */
@@ -45,13 +47,13 @@ public class WellViewer extends edu.harvard.med.screensaver.ui.libraries.WellVie
                     LibrariesDAO librariesDAO,
                     EntityViewPolicy entityViewPolicy,
                     LibraryViewer libraryViewer,
-                    StructureImageProvider structureImageProvider,
+                    StructureImageLocator structureImageLocator,
                     StudyViewer studyViewer,
                     WellsSdfDataExporter wellsSdfDataExporter,
                     LibraryContentsVersionReference libraryContentsVersionRef,
                     AnnotationSearchResults annotationSearchResults,
                     ScreenResultReporter screenResultReporter,
-                    StudyImageProvider studyImageProvider,
+                    StudyImageLocator studyImageLocator,
                     AttachedFiles attachedFiles)
   {
     super(thisProxy,
@@ -60,14 +62,14 @@ public class WellViewer extends edu.harvard.med.screensaver.ui.libraries.WellVie
           librariesDAO,
           entityViewPolicy,
           libraryViewer,
-          structureImageProvider,
+          structureImageLocator,
           studyViewer,
           wellsSdfDataExporter,
           libraryContentsVersionRef,
           annotationSearchResults,
           screenResultReporter);
     _attachedFiles = attachedFiles;
-    _studyImageProvider = studyImageProvider;
+    _studyImageLocator = studyImageLocator;
     getIsPanelCollapsedMap().put("annotations", Boolean.FALSE);
   }
 
@@ -140,10 +142,10 @@ public class WellViewer extends edu.harvard.med.screensaver.ui.libraries.WellVie
 
   public String getStudyImageUrl()
   {
-    if (_studyImageProvider == null) return null;
+    if (_studyImageLocator == null) return null;
 
-    URL url = _studyImageProvider.getImageUrl((SmallMoleculeReagent) getRestrictedReagent());
-    return url == null ? null : url.toString();
+    URL url = _studyImageLocator.getImageUrl((SmallMoleculeReagent) getRestrictedReagent());
+    return NullSafeUtils.toString(ImageLocatorUtil.toExtantContentUrl(url), "");
   }
 
 }

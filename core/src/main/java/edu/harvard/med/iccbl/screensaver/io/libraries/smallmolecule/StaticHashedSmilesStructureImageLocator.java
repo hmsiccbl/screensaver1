@@ -16,7 +16,7 @@ import java.net.URL;
 
 import org.apache.log4j.Logger;
 
-import edu.harvard.med.screensaver.io.libraries.smallmolecule.StructureImageProvider;
+import edu.harvard.med.screensaver.io.libraries.smallmolecule.StructureImageLocator;
 import edu.harvard.med.screensaver.model.libraries.SmallMoleculeReagent;
 import edu.harvard.med.screensaver.util.CryptoUtils;
 
@@ -32,32 +32,22 @@ import edu.harvard.med.screensaver.util.CryptoUtils;
  * @author <a mailto="andrew_tolopko@hms.harvard.edu">Andrew Tolopko</a>
  * @see SmallMoleculeLibraryStructureImageGenerator
  */
-public class StaticHashedSmilesStructureImageProvider implements StructureImageProvider
+public class StaticHashedSmilesStructureImageLocator implements StructureImageLocator
 {
-  private static Logger log = Logger.getLogger(StaticHashedSmilesStructureImageProvider.class);
+  private static Logger log = Logger.getLogger(StaticHashedSmilesStructureImageLocator.class);
 
   private String _baseUrl;
 
-  //private ImageProviderServlet _imageProviderServlet;
-
-  public StaticHashedSmilesStructureImageProvider(String baseUrl/* , ImageProviderServlet imageProviderServlet */)
+  public StaticHashedSmilesStructureImageLocator(String baseUrl)
   {
     _baseUrl = baseUrl;
-    //_imageProviderServlet = imageProviderServlet;
   }
 
   @Override
   public URL getImageUrl(SmallMoleculeReagent reagent)
   {
     try {
-      URL url = new URL(_baseUrl + makeRelativeImageFilePath(reagent.getSmiles()));
-      /*
-       * if (!_imageProviderServlet.canFindImage(url) ){
-       * log.info("image not available from the url: " + url);
-       * return null;
-       * }
-       */
-      return url;
+      return new URL(_baseUrl + makeRelativeImageFilePath(reagent.getSmiles()));
     }
     catch (MalformedURLException e) {
       return null;

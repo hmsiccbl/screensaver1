@@ -16,7 +16,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 
 import edu.harvard.med.screensaver.db.DAOTransaction;
 import edu.harvard.med.screensaver.db.LibrariesDAO;
-import edu.harvard.med.screensaver.io.libraries.smallmolecule.StructureImageProvider;
+import edu.harvard.med.screensaver.io.libraries.smallmolecule.StructureImageLocator;
 import edu.harvard.med.screensaver.model.AttachedFile;
 import edu.harvard.med.screensaver.model.libraries.Reagent;
 import edu.harvard.med.screensaver.model.libraries.SmallMoleculeReagent;
@@ -31,7 +31,7 @@ public class WellConverter extends RestConverter
   private LibrariesDAO librariesDao;
 
   @Autowired
-  private StructureImageProvider structureImageProvider;
+  private StructureImageLocator structureImageLocator;
 
   public boolean canConvert(Class clazz)
   {
@@ -63,7 +63,7 @@ public class WellConverter extends RestConverter
           util.writeNode(smr.getFacilityBatchId(), "hmsLincsFacilityBatchId");
           util.writeNode(smr.getPrimaryCompoundName(), "primaryCompoundName");
           util.writeNodes(smr.getCompoundNames(), "compoundNames", "compoundName");
-          util.writeNode(structureImageProvider.getImageUrl(smr), "compoundStructureImageUrl");
+          util.writeNode(structureImageLocator.getImageUrl(smr), "compoundStructureImageUrl");
           util.writeNode(smr.getSmiles(), "smiles");
           util.writeNode(smr.getInchi(), "inChi");
         }

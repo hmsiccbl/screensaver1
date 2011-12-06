@@ -4,17 +4,17 @@ import java.net.URL;
 
 import org.apache.log4j.Logger;
 
-import edu.harvard.med.iccbl.screensaver.io.ImageProvider;
-import edu.harvard.med.screensaver.io.libraries.smallmolecule.StructureImageProvider;
+import edu.harvard.med.screensaver.io.image.ImageLocator;
+import edu.harvard.med.screensaver.io.libraries.smallmolecule.StructureImageLocator;
 import edu.harvard.med.screensaver.model.libraries.SmallMoleculeReagent;
 
-public class RestrictedStructureImageProviderDecorator implements StructureImageProvider
+public class RestrictedStructureImageLocatorDecorator implements StructureImageLocator
 {
-  private static final Logger log = Logger.getLogger(RestrictedStructureImageProviderDecorator.class);
+  private static final Logger log = Logger.getLogger(RestrictedStructureImageLocatorDecorator.class);
 
-  private ImageProvider<SmallMoleculeReagent> _delegate;
+  private ImageLocator<SmallMoleculeReagent> _delegate;
 
-  public RestrictedStructureImageProviderDecorator(ImageProvider<SmallMoleculeReagent> delegate)
+  public RestrictedStructureImageLocatorDecorator(ImageLocator<SmallMoleculeReagent> delegate)
   {
     _delegate = delegate;
   }

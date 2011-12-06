@@ -9,9 +9,6 @@
 
 package edu.harvard.med.screensaver.ui.arch.util.servlet;
 
-import java.awt.Graphics;
-import java.awt.Image;
-import java.awt.Toolkit;
 import java.awt.image.BufferedImage;
 import java.io.BufferedOutputStream;
 import java.io.File;
@@ -25,11 +22,10 @@ import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
-import org.apache.commons.io.IOUtils;
-import org.apache.log4j.Logger;
-
 import com.sun.image.codec.jpeg.JPEGCodec;
 import com.sun.image.codec.jpeg.JPEGImageEncoder;
+import org.apache.commons.io.IOUtils;
+import org.apache.log4j.Logger;
 
 import edu.harvard.med.screensaver.ScreensaverConstants;
 import edu.harvard.med.screensaver.ui.ApplicationInfo;

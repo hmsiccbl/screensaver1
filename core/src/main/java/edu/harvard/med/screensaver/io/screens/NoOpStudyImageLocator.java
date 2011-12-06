@@ -4,7 +4,7 @@ import java.net.URL;
 
 import edu.harvard.med.screensaver.model.Entity;
 
-public class NoOpStudyImageProvider implements StudyImageProvider<Entity>
+public class NoOpStudyImageLocator implements StudyImageLocator<Entity>
 {
   @Override
   public URL getImageUrl(Entity entity)
