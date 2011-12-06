@@ -32,6 +32,7 @@ public enum AdministrativeActivityType implements VocabularyTerm
   LIBRARY_CONTENTS_VERSION_RELEASE("Library Contents Version Release", ScreensaverUserRole.LAB_HEADS_ADMIN),
   SCREEN_RESULT_DATA_LOADING("Screen Result Data Loading", ScreensaverUserRole.SCREEN_RESULTS_ADMIN),
   SCREEN_RESULT_DATA_DELETION("Screen Result Data Deletion", ScreensaverUserRole.SCREEN_RESULTS_ADMIN),
+  PLATE_RAW_DATA_TRANSFORMATION("Plate Raw Data Transformation", ScreensaverUserRole.SCREEN_RESULTS_ADMIN),
   PLATE_LOCATION_TRANSFER("Plate Location Transfer", ScreensaverUserRole.LIBRARY_COPIES_ADMIN),
   PLATE_STATUS_UPDATE("Plate Status Update", ScreensaverUserRole.LIBRARY_COPIES_ADMIN),
   PLATE_VOLUME_CORRECTION("Plate Volume Correction", ScreensaverUserRole.LIBRARY_COPIES_ADMIN),

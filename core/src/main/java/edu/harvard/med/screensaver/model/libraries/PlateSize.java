@@ -50,12 +50,12 @@ public enum PlateSize implements VocabularyTerm
     _columns = columns;
     _rows = rows;
     _columnLabels = new ArrayList<String>();
-    for (int i = 0; i <= _columns; i++) {
+    for (int i = 0; i < _columns; i++) {
       _columnLabels.add(WellName.getColumnLabel(i));
     }
     _columnLabels = ImmutableList.copyOf(_columnLabels);
     _rowLabels = new ArrayList<String>();
-    for (int i = 0; i <= _rows; i++) {
+    for (int i = 0; i < _rows; i++) {
       _rowLabels.add(WellName.getRowLabel(i));
     }
     _rowLabels = ImmutableList.copyOf(_rowLabels);

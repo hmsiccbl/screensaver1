@@ -3,17 +3,17 @@ package edu.harvard.med.iccbl.platereader.parser;
 import scala.util.parsing.combinator.JavaTokenParsers
 import scala.util.parsing.combinator.RegexParsers
 import scala.util.parsing.input.CharSequenceReader
-
 import org.apache.commons.io.IOUtils
-
 import edu.harvard.med.iccbl.platereader.PlateMatrix
+import java.io.StringReader
+import scala.util.parsing.input.Reader
 
 class TabDelimitedPlateReaderRawDataParser(rows: Int, cols: Int) extends RegexParsers with JavaTokenParsers with PlateReaderRawDataParser {
 
   class MetaDataLineParser extends Parser[String] {
     type Elem = Char
 
-    // note: '(?m)' sets MULTILINE regex option, allowing the expression to match all newline types ("\n", "\r\n", etc.)
+    // note: '(?m)' sets MULTILINE regex option, allowing the '^' and '$' to match after/before any type of newline ("\n", "\r\n", etc.)
     def metaDataLine: Parser[String] = """(?m)^.*$""".r
 
     def apply(in: Input) =
@@ -36,10 +36,7 @@ class TabDelimitedPlateReaderRawDataParser(rows: Int, cols: Int) extends RegexPa
   def rowHeaderLabel: Parser[Any] = "[A-Z]".r
   def datum: Parser[BigDecimal] = floatingPointNumber ^^ { BigDecimal(_) }
 
-  def apply(in: Input) = {
-    //println(in.source)
-    parseAll(plateMatrices, in)
-  }
+  def apply(in: Input) = parseAll(plateMatrices, EnvisionRawDataCleaner.clean(in))
 
   class ParseException(result: ParseResult[Any]) extends RuntimeException
 
@@ -52,5 +49,17 @@ class TabDelimitedPlateReaderRawDataParser(rows: Int, cols: Int) extends RegexPa
     val result = this(new CharSequenceReader(s))
     if (result.successful) result.get
     else throw new RuntimeException(result.toString)
+  }
+}
+
+/** For Envision plate reader, eliminate the postscript, as it contains a dummy plate matrix that otherwise confuses the parser */
+object EnvisionRawDataCleaner extends RawDataCleaner {
+  val postscriptPrefix = "Basic assay information";
+  def clean(in: Reader[Char]) = {
+    val s = in.source.toString
+    if (s.contains(postscriptPrefix))
+      new CharSequenceReader(s.substring(0, s.indexOf(postscriptPrefix)), 0)
+    else
+      in
   }
 }

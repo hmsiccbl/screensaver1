@@ -11,6 +11,7 @@ package edu.harvard.med.screensaver.model.screenresults;
 
 import edu.harvard.med.screensaver.model.VocabularyTerm;
 import edu.harvard.med.screensaver.model.VocabularyUserType;
+import edu.harvard.med.screensaver.model.libraries.LibraryWellType;
 
 /**
  * The assay well type vocabulary.  
@@ -71,5 +72,10 @@ public enum AssayWellControlType implements VocabularyTerm
   public String toString()
   {
     return getValue();
+  }
+
+  public static boolean isControlAllowed(LibraryWellType libraryWellType)
+  {
+    return libraryWellType == LibraryWellType.EMPTY || libraryWellType == LibraryWellType.DMSO;
   }
 }

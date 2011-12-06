@@ -1,7 +1,6 @@
 package edu.harvard.med.iccbl.platereader.parser
 
-import java.io.InputStream;
-
+import java.io.InputStream
 import org.scalatest.junit.AssertionsForJUnit
 import org.junit.Test
 import scala.util.parsing.input.CharSequenceReader
@@ -14,7 +13,13 @@ class TabDelimitedRawPlateReaderDataParserTest extends AssertionsForJUnit {
       "A\t1.0\t1.1\t1.2\t1.3\r\n" +
       "B\t2.0\t-2.1\t2.2\t2.3\r\n" +
       "C\t3.0\t3.1\t3.2\t3.33E1\r\n"
-  val postscriptInput = "Basic Assay Information\r\nHum Drum Hum Drum\r\nHum Drum Hum\r\n\r\n"
+  val postscriptInput = "Hum Drum Hum Drum\r\nHum Drum Hum\r\n\r\n"
+  val envisionPostscriptInput = "\r\n\r\nBasic assay information\r\nHum Drum Hum Drum\r\nHum Drum Hum\r\n\r\n" +
+    "\t1\t2\t3\t4\r\n" +
+    "A\t-\t-\t-\t-\r\n" +
+    "B\t-\t-\t-\t-\r\n" +
+    "C\t-\t-\t-\t-\r\n" +
+    "Hum Drum Hum Drum\r\nHum Drum Hum\r\n\r\n"
   val plate1RecordInput = plateHeaderInput + plate1MatrixInput
   val plate1DataParsed = new PlateMatrix(List(
     List[BigDecimal](1.0, 1.1, 1.2, 1.3),
@@ -63,17 +68,19 @@ class TabDelimitedRawPlateReaderDataParserTest extends AssertionsForJUnit {
     }
   }
 
-  @Test
-  def parseMultiplePlatesWithMetadataAndPostscript() {
+  private def parseMultiplePlatesWithMetadataAndPostscript(postScript: String) {
     val n = 3
     val multipleRecords = Seq.fill(n) { plate1RecordInput }.mkString("\r\n\r\n")
-    val result = parser(new CharSequenceReader(multipleRecords + "\r\n" + postscriptInput))
+    val result = parser(new CharSequenceReader(multipleRecords + "\r\n" + postScript))
     assert(result successful)
     expect(3) { result.get.size }
     for (i <- 0 until n) {
       expect(plate1DataParsed) { result.get(i) }
     }
   }
+
+  @Test def parseMultiplePlatesWithMetadataAndPostscript { parseMultiplePlatesWithMetadataAndPostscript(postscriptInput) }
+  @Test def parseMultiplePlatesWithMetadataAndEnvisionPostscript { parseMultiplePlatesWithMetadataAndPostscript(envisionPostscriptInput) }
 
   import collection.JavaConversions._
 

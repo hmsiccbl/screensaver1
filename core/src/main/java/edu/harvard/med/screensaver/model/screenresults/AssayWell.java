@@ -32,6 +32,7 @@ import edu.harvard.med.screensaver.model.AbstractEntityVisitor;
 import edu.harvard.med.screensaver.model.DataModelViolationException;
 import edu.harvard.med.screensaver.model.annotations.ContainedEntity;
 import edu.harvard.med.screensaver.model.annotations.ToOne;
+import edu.harvard.med.screensaver.model.libraries.AssayWellControlTypeException;
 import edu.harvard.med.screensaver.model.libraries.LibraryWellType;
 import edu.harvard.med.screensaver.model.libraries.Well;
 import edu.harvard.med.screensaver.model.meta.Cardinality;
@@ -235,9 +236,8 @@ public class AssayWell extends AbstractEntity<Integer> implements Comparable<Ass
   {
     if (!isHibernateCaller() &&
       assayWellControlType != null &&
-      _libraryWell.getLibraryWellType() != LibraryWellType.EMPTY &&
-      _libraryWell.getLibraryWellType() != LibraryWellType.DMSO) {
-      throw new DataModelViolationException("assay well control type can only be defined if the library well type is 'empty' or 'DMSO'");
+      !AssayWellControlType.isControlAllowed(_libraryWell.getLibraryWellType())) {
+      throw new AssayWellControlTypeException(_libraryWell.getWellKey());
     }
     _assayWellControlType = assayWellControlType;
   }

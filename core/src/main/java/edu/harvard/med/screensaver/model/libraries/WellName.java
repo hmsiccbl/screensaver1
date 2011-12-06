@@ -16,6 +16,8 @@ import javax.persistence.Column;
 import javax.persistence.Embeddable;
 import javax.persistence.Transient;
 
+import com.google.common.base.Predicate;
+
 import edu.harvard.med.screensaver.util.AlphabeticCounter;
 
 @Embeddable
@@ -24,6 +26,16 @@ public class WellName implements Comparable<WellName>
   // static members
 
   Pattern WELL_NAME_PATTERN = Pattern.compile("([A-Z]+)([0-9]+)", Pattern.CASE_INSENSITIVE);
+
+  public static final Predicate<WellName> makeIsNonExtantWellNamePredicate(final PlateSize plateSize)
+  {
+    return new Predicate<WellName>() {
+      public boolean apply(WellName w)
+      {
+        return w.getRowIndex() >= plateSize.getRows() || w.getColumnIndex() >= plateSize.getColumns();
+      }
+    };
+  }
 
   public static String toString(int rowIndex, int columnIndex)
   {
@@ -147,6 +159,11 @@ public class WellName implements Comparable<WellName>
   public String getName()
   {
     return _wellName;
+  }
+
+  public boolean isValidForPlateSize(PlateSize plateSize)
+  {
+    return makeIsNonExtantWellNamePredicate(plateSize).apply(this);
   }
 
   public String toString()

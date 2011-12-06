@@ -57,6 +57,19 @@ public class JSFUtils
                               mimeType);
   }
 
+  public static void handleUserFileDownloadRequest(FacesContext facesContext,
+                                                   File file,
+                                                   String suggestedFileName,
+                                                   String mimeType)
+    throws IOException
+  {
+    InputStream in = new FileInputStream(file);
+    handleUserDownloadRequest(facesContext,
+                              in,
+                              suggestedFileName,
+                              mimeType);
+  }
+
   /**
    * Performs the necessary steps to return server-side data, provided as an
    * InputStream, to an HTTP client. Must be called within a JSF-enabled servlet

@@ -47,13 +47,11 @@
                 action="#{screenDetailViewer.addLibraryScreening}"
                 rendered="#{screenDetailViewer.editable}"
                 styleClass="command" />
-              <ui:remove>
               <t:commandButton
                 action="#{plateReaderRawDataTransformer.view}"
-                value="Transform Raw Data" styleClass="command"
+                value="Transform Raw Data..." styleClass="command"
                 rendered="#{screenViewer.screensaverUser.isUserInRoleOfNameMap['screenResultsAdmin']}"
                 title="Transform plate reader raw data into intermediate screen result format" />
-              </ui:remove>
               <t:commandButton
                 action="#{screenResultImporter.importScreenResultData}"
                 value="Load Data" styleClass="command"

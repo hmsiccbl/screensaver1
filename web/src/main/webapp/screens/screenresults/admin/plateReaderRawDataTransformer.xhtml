@@ -14,46 +14,158 @@
 
   <ui:define name="body">
 
-    <h:form id="uploadRawDataFileForm" enctype="multipart/form-data"
+    <h:form id="inputForm" enctype="multipart/form-data"
       rendered="#{plateReaderRawDataTransformer.screensaverUser.isUserInRoleOfNameMap['screenResultsAdmin']}">
-      <h:panelGrid columns="1">
-        <t:panelGrid id="screeningSummaryPropertiesPanel" columns="2"
+      <t:panelGrid id="screeningSummaryPropertiesPanel" columns="2"
+        columnClasses="propertyLabelColumn,column"
+        styleClass="layoutPanel">
+        <ss:property id="plateNumbers" label="Plate Numbers"
+          description="Specify the ordered set of plate numbers for which data is being uploaded and transformed using individual plate numbers and/or ranges (e.g. &quot;90, 92, 98-103&quot;)"
+          editable="true"
+          value="#{plateReaderRawDataTransformer.formOne.plates}"
+          type="Textarea" editWidth="20" edithHeight="10"
+          required="true" />
+        <ss:property id="outputFileName" label="Output File Name"
+          description="The name of the Excel file that will be generated and downloaded (leave empty for default naming)"
+          editable="true"
+          value="#{plateReaderRawDataTransformer.formOne.outputFileName}"
+          type="Text" editWidth="60" />
+        <ss:property id="outputFormat" label="Output Format"
+          description="Specify whether to output one plate per worksheet or all plates to a single worksheet"
+          editable="true"
+          value="#{plateReaderRawDataTransformer.formOne.outputFormat.value}"
+          type="Vocabulary"
+          selectItems="#{plateReaderRawDataTransformer.formOne.outputFormat.selectItems}"/>
+        <ss:property id="positiveControls"
+          label="Positive Control Wells"
+          description="Specify positive controls wells using well names, rows, columns, and/or blocks (e.g. &quot;A22, C23-N24, P&quot;)"
+          editable="true"
+          value="#{plateReaderRawDataTransformer.formOne.positiveControls}"
+          type="Textarea" editWidth="20" edithHeight="10" />
+        <ss:property id="negativeControls"
+          label="Negative Control Wells"
+          description="Specify negative controls wells using well names, rows, columns, and/or blocks (e.g. &quot;A22, C23-N24, P&quot;)"
+          editable="true"
+          value="#{plateReaderRawDataTransformer.formOne.negativeControls}"
+          type="Textarea" editWidth="20" edithHeight="10" />
+        <ss:property id="otherControls"
+          label="Other Control Wells"
+          description="Specify other controls wells using well names, rows, columns, and/or blocks (e.g. &quot;A22, C23-N24, P&quot;)"
+          editable="true"
+          value="#{plateReaderRawDataTransformer.formOne.otherControls}"
+          type="Textarea" editWidth="20" edithHeight="10" />
+
+        <ss:property id="controlWellsMap"
+          label="Control Wells Plate Map"
+          description="Verify your control well input by examining this handy-dandy plate-based visualization"
+          rendered="true">
+          <ui:define name="data">
+            <t:dataTable id="controlWellsTable"
+              value="#{plateReaderRawDataTransformer.formOne.controlWellsModel}"
+              var="plateRow" rowIndexVar="plateRowIndex"
+              styleClass="controlWellsTable"
+              headerClass="controlWellsTableHeader"
+              footerClass="controlWellsTableHeader"
+              preserveDataModel="false">
+              <t:column styleClass="controlWellsTableHeader">
+                <f:facet name="header">
+                </f:facet>
+                <t:outputText
+                  value="#{plateReaderRawDataTransformer.formOne.plateRowLabels[plateRowIndex]}" />
+              </t:column>
+              <t:columns
+                value="#{plateReaderRawDataTransformer.formOne.plateColumns}"
+                var="columnLabel" styleClass="controlWellCell"
+                style="background-color: #{plateRow[columnLabel].abbreviation == 'P' ? 'blue' : plateRow[columnLabel].abbreviation == 'N' ? 'red' : plateRow[columnLabel].abbreviation == 'O' ? 'gray' : ''}; color: #{plateRow[columnLabel].abbreviation == 'P' ? 'white' : plateRow[columnLabel].abbreviation == 'N' ? 'black' : ''}">
+                <f:facet name="header">
+                  <t:outputText value="#{columnLabel}"
+                    styleClass="keyColumn" />
+                </f:facet>
+                <f:facet name="footer">
+                  <t:outputText value="#{columnLabel}"
+                    styleClass="keyColumn" />
+                </f:facet>
+                <t:outputText
+                  value="#{plateRow[columnLabel].abbreviation}"
+                  escape="false" />
+              </t:columns>
+              <t:column styleClass="controlWellsTableHeader">
+                <f:facet name="header">
+                </f:facet>
+                <t:outputText
+                  value="#{plateReaderRawDataTransformer.formOne.plateRowLabels[plateRowIndex]}" />
+              </t:column>
+            </t:dataTable>
+          </ui:define>
+        </ss:property>
+
+        <ss:property id="comments" label="Comments" editable="true"
+          value="#{plateReaderRawDataTransformer.comments}"
+          type="Textarea" editWidth="80" editHeight="5"
+          description="Comments to be recorded for this activity" />
+
+      </t:panelGrid>
+
+      <t:dataList id="inputFiles" var="inputFile"
+        value="#{plateReaderRawDataTransformer.inputFiles}"
+        rowIndexVar="rowIndex" rowCountVar="rowCount">
+        <hr />
+        <t:panelGrid id="propertiesPanel" columns="2"
           columnClasses="propertyLabelColumn,column"
           styleClass="layoutPanel">
           <t:outputLabel for="uploadPlateReaderRawDataFile"
-            value="Upload plate reader raw data file:"
-            styleClass="label" />
-          <t:inputFileUpload id="uploadPlateReaderRawDataFile"
-            value="#{plateReaderRawDataTransformer.uploadedFile}"
-            storage="file" accept="application/vnd.ms-excel"
-            required="true" styleClass="inputText" />
-          <ss:property id="plates" label="Plates" editable="true"
-            value="#{plateReaderRawDataTransformer.plates}"
-            type="Textarea" editWidth="20" edithHeight="10" />
-          <ss:property id="readoutTypes" label="Readout Types"
-            editable="true"
-            value="#{plateReaderRawDataTransformer.readoutTypes.value}"
-            type="Vocabulary"
-            selectItems="#{plateReaderRawDataTransformer.readoutTypes.selectItems}" />
-          <ss:property id="conditions" label="Conditions" editable="true"
-            value="#{plateReaderRawDataTransformer.conditions}"
+            value="Plate reader raw data file:" styleClass="label" />
+          <t:panelGrid columns="2">
+            <t:outputText value="#{inputFile.uploadedFile.name}"
+              rendered="#{inputFile.fileUploaded}" />
+            <t:inputFileUpload id="uploadPlateReaderRawDataFile"
+              value="#{inputFile.uploadedFile}" storage="file"
+              accept="application/vnd.ms-excel"
+              required="#{!inputFile.fileUploaded}"
+              styleClass="inputText" />
+          </t:panelGrid>
+          <ss:property id="expectedPlateMatrixCount"
+            label="Plate Matrices Expected/Uploaded"
+            value="#{inputFile.expectedPlateMatrixCount} / #{inputFile.uploadedPlateMatrixCount}"
+            rendered="#{!empty inputFile.expectedPlateMatrixCount}" />
+          <ss:property id="collationOrder" label="Collation order"
+            editable="true" type="Vocabulary"
+            value="#{inputFile.collationOrder.value}"
+            selectItems="#{inputFile.collationOrder.selectItems}" />
+          <ss:property id="readoutType" label="Readout Type"
+            editable="true" value="#{inputFile.readoutType.value}"
+            required="true" type="Vocabulary"
+            selectItems="#{inputFile.readoutType.selectItems}" />
+          <ss:property id="conditions" label="Conditions"
+            editable="true" value="#{inputFile.conditions}"
             type="Textarea" editWidth="80" edithHeight="3" />
-          <ss:property id="replicates" label="Replicates"
-            editable="true"
-            value="#{plateReaderRawDataTransformer.replicates}"
-            type="Integer"/>
-          <ss:property id="comments" label="Comments" editable="true"
-            value="#{plateReaderRawDataTransformer.comments}"
-            type="Textarea" editWidth="80" editHeight="5"
-            description="Comments to be recorded for this activity" />
+          <ss:property id="replicates" label="# Replicates"
+            editable="true" value="#{inputFile.replicates}"
+            type="Integer" />
+          <ss:property id="readoutNames" label="Readout Names"
+            editable="true" value="#{inputFile.readouts}"
+            type="Textarea" editWidth="80" edithHeight="3" />
         </t:panelGrid>
-        <t:commandButton value="Transform Raw Data"
-          action="#{plateReaderRawDataTransformer.transform}"
-          styleClass="command" />
-        <t:commandButton id="done"
-          action="#{plateReaderRawDataTransformer.cancel}"
-          immediate="true" value="Done" styleClass="command" />
-      </h:panelGrid>
+        <t:commandButton id="deleteFile" value="Delete"
+          action="#{plateReaderRawDataTransformer.deleteInputFile}"
+          immediate="true" rendered="#{rowCount &gt; 1}"
+          onclick="javascript: return confirm('Are you sure you want to delete this input file?');" />
+      </t:dataList>
+      <hr />
+      <t:commandButton id="addInputFileCommand" value="Add Input File"
+        action="#{plateReaderRawDataTransformer.addInputFile}" />
+      <t:commandButton value="Upload!"
+        action="#{plateReaderRawDataTransformer.transform}"
+        title="Uploads and validates the raw data files and input parameters"
+        styleClass="command" />
+      <t:commandButton id="downloadFile" value="Download!"
+        title="Downloads the transformed plate reader data, saves the input parameters, and records the transformation activity"
+        action="#{plateReaderRawDataTransformer.download}"
+        disabled="#{empty plateReaderRawDataTransformer.result || plateReaderRawDataTransformer.result.plateMatricesProcessedCount == 0}"
+        immediate="true" styleClass="command" />
+      <t:commandButton id="done"
+        action="#{plateReaderRawDataTransformer.cancel}"
+        immediate="true" value="Done" styleClass="command" />
     </h:form>
   </ui:define>
 

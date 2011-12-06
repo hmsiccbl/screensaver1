@@ -11,12 +11,11 @@ package edu.harvard.med.screensaver.model.libraries;
 
 import java.util.Set;
 
-import junit.framework.TestCase;
-
-import org.apache.log4j.Logger;
-
 import com.google.common.base.Predicate;
+import com.google.common.collect.ImmutableList;
 import com.google.common.collect.Iterables;
+import junit.framework.TestCase;
+import org.apache.log4j.Logger;
 
 public class PlateSizeTest extends TestCase
 {
@@ -41,5 +40,13 @@ public class PlateSizeTest extends TestCase
         w.getColumnIndex() < 3 || w.getColumnIndex() >= PlateSize.WELLS_96.getColumns() - 3;
       }
     }));
+  }
+
+  public void testLabels()
+  {
+    assertEquals(ImmutableList.of("01", "02", "03", "04", "05", "06", "07", "08", "09", "10", "11", "12"),
+                 PlateSize.WELLS_96.getColumnsLabels());
+    assertEquals(ImmutableList.of("A", "B", "C", "D", "E", "F", "G", "H"),
+                 PlateSize.WELLS_96.getRowsLabels());
   }
 }

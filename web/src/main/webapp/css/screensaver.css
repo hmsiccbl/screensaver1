@@ -181,6 +181,22 @@ a.heatMapValue:link,a.heatMapValue:visited {
   vertical-align: bottom;
 }
 
+.controlWellsTable {
+  border-style: none;
+  /* controls space between cells */
+  border-spacing: 0px;
+  font-size: 6pt;
+  text-align: center;
+}
+
+.controlWellCell {
+  border-style: none;
+  width: 10px;
+  height: 10px;
+  /* must match border width for control cells; see HeatMapCell.getStyle() */
+  padding: 0px;
+}
+
 .dataText,.inputText,.label,.inverseLabel,.propertyValue,.subduedPropertyValue,.propertyLabel,.subduedLabel,.dataHeader
   {
   font-size: small;
@@ -327,7 +343,7 @@ a.heatMapValue:link,a.heatMapValue:visited {
   text-decoration: line-through;
 }
 
-.tableHeader,.heatMapTableHeader,.confirmationTableHeader {
+.tableHeader,.heatMapTableHeader,.confirmationTableHeader,.controlWellsTableHeader {
   font-size: small;
   font-weight: bold;
   color: black;
@@ -335,6 +351,11 @@ a.heatMapValue:link,a.heatMapValue:visited {
   padding-left: 1px;
   padding-right: 1px;
   vertical-align: top;
+}
+
+.controlWellsTableHeader {
+  font-size: 6pt;
+  padding: 0px;
 }
 
 .tableHeader,.confirmationTableHeader {
