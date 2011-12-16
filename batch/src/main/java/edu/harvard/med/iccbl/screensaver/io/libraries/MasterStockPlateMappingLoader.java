@@ -90,12 +90,9 @@ public class MasterStockPlateMappingLoader extends CommandLineApplication
           ++copiesUpdated;
         }
       }
-      if(copiesUpdated == 0) {
+      if (copiesUpdated == 0) {
         throw new IllegalArgumentException("plate " + masterStockPlateNumber +
           " has no master stock plate copies, according to the copy usage types found");
-      }else if(copiesUpdated > 1) {
-        throw new IllegalArgumentException("Plate: " + masterStockPlateNumber + 
-          " has more than the allowed (1) master stock plate copies - redesignate one of the copies and retry."); 
       }
       ++nPlateNumbersUpdated;
     }
