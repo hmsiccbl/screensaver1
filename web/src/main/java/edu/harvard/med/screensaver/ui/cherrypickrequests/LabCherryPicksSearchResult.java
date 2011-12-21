@@ -32,6 +32,7 @@ import edu.harvard.med.screensaver.model.libraries.Well;
 import edu.harvard.med.screensaver.model.libraries.WellCopy;
 import edu.harvard.med.screensaver.model.libraries.WellVolumeAdjustment;
 import edu.harvard.med.screensaver.model.meta.RelationshipPath;
+import edu.harvard.med.screensaver.model.screens.ScreenType;
 import edu.harvard.med.screensaver.model.users.AdministratorUser;
 import edu.harvard.med.screensaver.model.users.ScreensaverUserRole;
 import edu.harvard.med.screensaver.service.cherrypicks.CherryPickRequestAllocator;
@@ -213,6 +214,30 @@ public class LabCherryPicksSearchResult extends EntityBasedEntitySearchResults<L
           }
       }));
     //Iterables.getLast(labCherryPicksTableColumns).setVisible(false);
+    
+    if (_cherryPickRequest.getScreen().getScreenType() == ScreenType.RNAI) {
+      labCherryPicksTableColumns.add(new TextEntityColumn<LabCherryPick>(LabCherryPick.screenerCherryPick.to(ScreenerCherryPick.screenedWell).to(Well.latestReleasedReagent),
+                                                                         "Pool Reagent Vendor ID",
+                                                                         "The vendor-assigned identifier of the associated pool for the duplex reagent in this well",
+                                                                         TableColumn.UNGROUPED) {
+        @Override
+        public String getCellValue(LabCherryPick lcp)
+        {
+
+          Well screenedWell = lcp.getScreenerCherryPick().getScreenedWell();
+          if (screenedWell.getLibrary().isPool()) {
+            Reagent reagent = screenedWell.getLatestReleasedReagent();
+            if (reagent != null && reagent instanceof SilencingReagent) {
+              SilencingReagent silencingReagent = (SilencingReagent) reagent;
+              return silencingReagent.getVendorId().getVendorIdentifier();
+            }
+          }
+          return null;
+        }
+      });
+      ((HasFetchPaths<LabCherryPick>) Iterables.getLast(labCherryPicksTableColumns)).addRelationshipPath(LabCherryPick.screenerCherryPick.to(ScreenerCherryPick.screenedWell).to(Well.library));
+    }
+    
 
     labCherryPicksTableColumns.add(new LabCherryPickReagentEntityColumn<SilencingReagent,String>(
       SilencingReagent.class,
