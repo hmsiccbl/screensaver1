@@ -85,7 +85,8 @@ public interface ScreensaverConstants
   public static final String BROWSE_SCREENERS = "browseScreeners";
   public static final String BROWSE_STAFF = "browseStaff";
   public static final String VIEW_USER = "viewUser";
-  public static final String UPDATE_USER_AGREEMENT = "updateUserAgreement";
+  public static final String SM_UPDATE_USER_AGREEMENT = "smUpdateUserAgreement";
+  public static final String RNAI_UPDATE_USER_AGREEMENT = "rnaiUpdateUserAgreement";
   public static final String RUN_CELLHTS2 = "runCellHTS2";
   public static final String BROWSE_LIBRARY_PLATES_SCREENED = "browseLibraryPlatesScreened";
   public static final String BROWSE_ENTITY_UPDATE_HISTORY = "browseEntityUpdateHistory";

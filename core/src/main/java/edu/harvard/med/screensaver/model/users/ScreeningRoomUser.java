@@ -106,6 +106,7 @@ public class ScreeningRoomUser extends ScreensaverUser implements AttachedFilesE
   private String _comsCrhbaPermitNumber;
   private String _comsCrhbaPermitPrincipalInvestigator;
   private ChecklistItemEvent _lastNotifiedSMUAChecklistItemEvent;
+  private ChecklistItemEvent _lastNotifiedRNAiUAChecklistItemEvent;
   private SortedSet<ServiceActivity> _serviceActivities;
 
   private LabHead _labHead;
@@ -626,13 +627,15 @@ public class ScreeningRoomUser extends ScreensaverUser implements AttachedFilesE
   }
 
   /**
-   * Get the ChecklistItemEvent of the successful notification, if any, that was sent to this User 
-   * for the Small Molecule User Agreement expiration.<p>
-   * This is an ICCB-specific property, which should not be part of the Screensaver domain model, but is currently, for practical reasons  .
+   * Get the ChecklistItemEvent of the successful notification, if any, that was sent to this User
+   * for the Small Molecule User Agreement expiration.
+   * <p>
+   * This is an ICCB-specific property, which should not be part of the Screensaver domain model, but is currently, for
+   * practical reasons.
    */
   @OneToOne(fetch = FetchType.LAZY)
   @JoinColumn(name = "lastNotifiedSmuaChecklistItemEventId", nullable = true)
-  @org.hibernate.annotations.ForeignKey(name = "fk_screening_room_user_to_notified_checklist_item_event")
+  @org.hibernate.annotations.ForeignKey(name = "fk_screening_room_user_to_notified_smua_checklist_item_event")
   @ToOne(hasNonconventionalSetterMethod=true /* this is only set under special circumstances */)
   public ChecklistItemEvent getLastNotifiedSMUAChecklistItemEvent()
   {
@@ -642,6 +645,27 @@ public class ScreeningRoomUser extends ScreensaverUser implements AttachedFilesE
   public void setLastNotifiedSMUAChecklistItemEvent(ChecklistItemEvent lastExpiredSMUAChecklistItemEvent)
   {
     _lastNotifiedSMUAChecklistItemEvent = lastExpiredSMUAChecklistItemEvent;
+  }
+
+  /**
+   * Get the ChecklistItemEvent of the successful notification, if any, that was sent to this User
+   * for the Small Molecule User Agreement expiration.
+   * <p>
+   * This is an ICCB-specific property, which should not be part of the Screensaver domain model, but is currently, for
+   * practical reasons.
+   */
+  @OneToOne(fetch = FetchType.LAZY)
+  @JoinColumn(name = "lastNotifiedRnaiuaChecklistItemEventId", nullable = true)
+  @org.hibernate.annotations.ForeignKey(name = "fk_screening_room_user_to_notified_rnaiua_checklist_item_event")
+  @ToOne(hasNonconventionalSetterMethod = true /* this is only set under special circumstances */)
+  public ChecklistItemEvent getLastNotifiedRNAiUAChecklistItemEvent()
+  {
+    return _lastNotifiedRNAiUAChecklistItemEvent;
+  }
+
+  public void setLastNotifiedRNAiUAChecklistItemEvent(ChecklistItemEvent lastExpiredRNAiUAChecklistItemEvent)
+  {
+    _lastNotifiedRNAiUAChecklistItemEvent = lastExpiredRNAiUAChecklistItemEvent;
   }
 
   @Transient

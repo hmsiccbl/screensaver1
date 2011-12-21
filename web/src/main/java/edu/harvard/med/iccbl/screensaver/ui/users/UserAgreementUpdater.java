@@ -9,13 +9,16 @@
 
 package edu.harvard.med.iccbl.screensaver.ui.users;
 
-
 import java.io.IOException;
+import java.util.SortedSet;
 
+import com.google.common.collect.Sets;
 import org.apache.log4j.Logger;
 import org.apache.myfaces.custom.fileupload.UploadedFile;
 
+import edu.harvard.med.iccbl.screensaver.IccblScreensaverConstants;
 import edu.harvard.med.iccbl.screensaver.policy.DataSharingLevelMapper;
+import edu.harvard.med.screensaver.model.screens.ScreenType;
 import edu.harvard.med.screensaver.model.users.AdministratorUser;
 import edu.harvard.med.screensaver.model.users.LabHead;
 import edu.harvard.med.screensaver.model.users.ScreeningRoomUser;
@@ -36,6 +39,8 @@ public class UserAgreementUpdater extends AbstractBackingBean
   private UserViewer _userViewer;
   private edu.harvard.med.iccbl.screensaver.service.users.UserAgreementUpdater _userAgreementUpdater;
 
+  private ScreenType _screenType;
+
   protected UserAgreementUpdater() {}
 
   public boolean isEnabled()
@@ -44,10 +49,22 @@ public class UserAgreementUpdater extends AbstractBackingBean
   }
 
   public UserAgreementUpdater(UserViewer userViewer,
+                              ScreenType screenType,
                               edu.harvard.med.iccbl.screensaver.service.users.UserAgreementUpdater userAgreementUpdater)
   {
     _userViewer = userViewer;
+    _screenType = screenType;
     _userAgreementUpdater = userAgreementUpdater;
+  }
+
+  public ScreenType getScreenType()
+  {
+    return _screenType;
+  }
+
+  public void setScreenType(ScreenType screenType)
+  {
+    _screenType = screenType;
   }
 
   public void setUserAgreementUploadedFile(UploadedFile uploadedFile)
@@ -62,7 +79,8 @@ public class UserAgreementUpdater extends AbstractBackingBean
   
   public String getCurrentDataSharingLevelRoleName()
   {
-    return edu.harvard.med.iccbl.screensaver.service.users.UserAgreementUpdater.getCurrentDataSharingLevelRoleName(_userViewer.getScreeningRoomUser());
+    ScreensaverUserRole dslRole = DataSharingLevelMapper.getPrimaryDataSharingLevelRoleForUser(getScreenType(), _userViewer.getScreeningRoomUser());
+    return dslRole == null ? "<none>" : dslRole.getDisplayableRoleName();
   }
   
   public String getLabHeadDataSharingLevelRoleName()
@@ -74,7 +92,8 @@ public class UserAgreementUpdater extends AbstractBackingBean
     if (labHead == null) {
       return "<no lab head specified>";
     }
-    return edu.harvard.med.iccbl.screensaver.service.users.UserAgreementUpdater.getCurrentDataSharingLevelRoleName(labHead);
+    ScreensaverUserRole dslRole = DataSharingLevelMapper.getPrimaryDataSharingLevelRoleForUser(getScreenType(), labHead);
+    return dslRole == null ? "<none>" : dslRole.getDisplayableRoleName();
   }
   
   public boolean isScreensaverUser()
@@ -85,9 +104,16 @@ public class UserAgreementUpdater extends AbstractBackingBean
   public UISelectOneBean<ScreensaverUserRole> getNewDataSharingLevel()
   {
     if (_dataSharingLevel == null) {
-      _dataSharingLevel = new UISelectOneBean<ScreensaverUserRole>(DataSharingLevelMapper.UserSmDslRoles,
-        edu.harvard.med.iccbl.screensaver.service.users.UserAgreementUpdater.getCurrentDataSharingLevelRole(_userViewer.getScreeningRoomUser()),
-        false) {
+      SortedSet<ScreensaverUserRole> candidateDslRoles = Sets.newTreeSet(DataSharingLevelMapper.UserDslRoles.get(getScreenType()));
+      // At ICCB-L, the RNAi DSL 2 role is not an option, so we hide it at the UI level; we maintain it in our model for consistency with the SM DSL roles
+      // TODO: refactor to share this logic with similar code in UserViewer.getNewUserRole()
+      if (getApplicationProperties().isFacility(IccblScreensaverConstants.FACILITY_KEY)) {
+        candidateDslRoles.remove(ScreensaverUserRole.RNAI_DSL_LEVEL2_MUTUAL_POSITIVES);
+      }
+
+      _dataSharingLevel = new UISelectOneBean<ScreensaverUserRole>(candidateDslRoles,
+                                                                   DataSharingLevelMapper.getPrimaryDataSharingLevelRoleForUser(getScreenType(), _userViewer.getScreeningRoomUser()),
+                                                                   false) {
         @Override
         protected String makeLabel(ScreensaverUserRole t)
         {
@@ -104,6 +130,7 @@ public class UserAgreementUpdater extends AbstractBackingBean
     ScreeningRoomUser user = _userViewer.getScreeningRoomUser();
     _userAgreementUpdater.updateUser(user,
                                      getNewDataSharingLevel().getSelection(), 
+                                     getScreenType(),
                                      getUserAgreementUploadedFile().getName(),
                                      getUserAgreementUploadedFile().getInputStream(),
                                      (AdministratorUser) getScreensaverUser());
@@ -126,10 +153,4 @@ public class UserAgreementUpdater extends AbstractBackingBean
   {
     _userAgreementUpdater = userAgreementUpdater;
   }
-
-  public void setDataSharingLevel(UISelectOneBean<ScreensaverUserRole> dataSharingLevel)
-  {
-    _dataSharingLevel = dataSharingLevel;
-  }
-
 }

@@ -1,0 +1,36 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+<html xmlns="http://www.w3.org/1999/xhtml"
+  xmlns:ui="http://java.sun.com/jsf/facelets"
+  xmlns:h="http://java.sun.com/jsf/html"
+  xmlns:f="http://java.sun.com/jsf/core"
+  xmlns:t="http://myfaces.apache.org/tomahawk"
+  xmlns:s="http://myfaces.apache.org/sandbox"
+  xmlns:ss="http://screensaver.med.harvard.edu/ui">
+
+<ui:composition template="/main/template.xhtml">
+
+  <ui:param name="pageTitle" value="Small Molecule User Agreement Updater" />
+  <ui:param name="hideMenu" value="true" />
+
+  <ui:define name="body">
+
+    <ui:include src="userAgreementUpdater.xhtml">
+      <ui:param name="userAgreementUpdaterUi" value="#{smUserAgreementUpdaterUi}"/>
+      <ui:define name="instructions">
+        <t:div styleClass="">
+          This form will update the user as follows:
+          <ul>
+            <li>Set the Small Molecule Data Sharing Level</li>
+            <li>Attach the ICCB-L/NSRB Small Molecule User Agreement file</li>
+            <li>Activate the "Current Small Molecule User Agreement activated" checklist item</li>
+            <li>Add login privileges</li>
+          </ul>
+        </t:div>
+      </ui:define>
+    </ui:include>
+  </ui:define>
+</ui:composition>
+
+</html>
+

@@ -14,51 +14,45 @@ package edu.harvard.med.iccbl.screensaver.io.users;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
-import java.io.IOException;
 import java.io.InputStream;
-import java.io.PrintWriter;
-import java.io.StringWriter;
 import java.text.MessageFormat;
-import java.util.Collection;
 import java.util.List;
 import java.util.Scanner;
-import java.util.Set;
 
 import javax.mail.MessagingException;
-import javax.mail.internet.InternetAddress;
 
 import com.google.common.collect.Lists;
 import org.apache.commons.cli.OptionBuilder;
-import org.apache.commons.cli.ParseException;
 import org.apache.log4j.Logger;
 import org.joda.time.LocalDate;
 
 import edu.harvard.med.iccbl.screensaver.io.AdminEmailApplication;
+import edu.harvard.med.iccbl.screensaver.policy.DataSharingLevelMapper;
 import edu.harvard.med.iccbl.screensaver.service.users.UserAgreementUpdater;
 import edu.harvard.med.screensaver.db.DAOTransaction;
 import edu.harvard.med.screensaver.db.DAOTransactionRollbackException;
 import edu.harvard.med.screensaver.db.GenericEntityDAO;
 import edu.harvard.med.screensaver.model.activities.AdministrativeActivity;
-import edu.harvard.med.screensaver.model.users.AdministratorUser;
+import edu.harvard.med.screensaver.model.screens.ScreenType;
 import edu.harvard.med.screensaver.model.users.ChecklistItemEvent;
 import edu.harvard.med.screensaver.model.users.ScreeningRoomUser;
-import edu.harvard.med.screensaver.model.users.ScreensaverUser;
-import edu.harvard.med.screensaver.service.EmailService;
 import edu.harvard.med.screensaver.service.OperationRestrictedException;
 import edu.harvard.med.screensaver.util.Pair;
 
 /**
- * Locates the _not yet expired_ users who have a SMUA with an activation on or before the date given, and it expires
+ * Locates the _not yet expired_ users who have a UA with an activation on or before the date given, and it expires
  * them.<br/>
  * The date will be 2 years before the current time.<br/>
- * see {@link UserAgreementUpdater#findUsersWithOldSMAgreements(LocalDate)}
+ * see {@link UserAgreementUpdater#findUsersWithOldUserAgreements(LocalDate)}
  */
-public class SmallMoleculeUserExpirationUpdater extends AdminEmailApplication
+public class UserAgreementExpirationUpdater extends AdminEmailApplication
 {
-
   UserAgreementUpdater _userAgreementUpdater = null;
 
-  public SmallMoleculeUserExpirationUpdater(String[] cmdLineArgs)
+  private ScreenType _screenType;
+
+
+  public UserAgreementExpirationUpdater(String[] cmdLineArgs)
   {
     super(cmdLineArgs);
     // NOTE: do NOT put spring bean initialization in the constructor, as this will obviate any database connection settings since it 
@@ -71,13 +65,22 @@ public class SmallMoleculeUserExpirationUpdater extends AdminEmailApplication
     _userAgreementUpdater = (UserAgreementUpdater) getSpringBean("userAgreementUpdater");
   }
 
-  private static Logger log = Logger.getLogger(SmallMoleculeUserExpirationUpdater.class);
+  private static Logger log = Logger.getLogger(UserAgreementExpirationUpdater.class);
 
   private static final String EXPIRATION_MESSAGE_TXT_LOCATION = "../../../../../../../userAgreementPrivacyExpirationMessage.txt";
   private static final int DEFAULT_EXPIRATION_TIME_DAYS = 730;
 
+  public static final String[] SCREEN_TYPE_OPTION =
+  {
+    "st",
+    "screen type",
+    "screen-type",
+    "the screen type of the user agreements to be processed (RNAi or Small Molecule)"
+  };
+
   public static final String[] NOTIFY_DAYS_AHEAD_OPTION =
-  { "notifyonlyindays",
+  {
+    "notifyonlyindays",
     "days",
     "notify-only-days-ahead",
     "specify this option to notify only, # days ahead of the expiration date"
@@ -88,7 +91,7 @@ public class SmallMoleculeUserExpirationUpdater extends AdminEmailApplication
     "expireindays",
     "days",
     "expire-in-days",
-    "(optional) time, in days, for the Small Molecule User Agreement to expire (using date of activation value).  Default value is " +
+    "(optional) time, in days, for the User Agreement to expire (using date of activation value).  Default value is " +
       DEFAULT_EXPIRATION_TIME_DAYS + " days."
   };
 
@@ -97,7 +100,7 @@ public class SmallMoleculeUserExpirationUpdater extends AdminEmailApplication
     "expire",
     "",
     "expire-user-roles",
-    "specify this option to expire the users who's Small Molecule User Agreement is dated more than " +
+    "specify this option to expire the users who's User Agreement is dated more than " +
       EXPIRATION_TIME_OPTION[LONG_OPTION_INDEX] + " days in the past."
   };
 
@@ -119,7 +122,13 @@ public class SmallMoleculeUserExpirationUpdater extends AdminEmailApplication
   @SuppressWarnings("static-access")
   public static void main(String[] args)
   {
-    final SmallMoleculeUserExpirationUpdater app = new SmallMoleculeUserExpirationUpdater(args);
+    final UserAgreementExpirationUpdater app = new UserAgreementExpirationUpdater(args);
+
+    app.addCommandLineOption(OptionBuilder.hasArg().isRequired()
+                             .withArgName(SCREEN_TYPE_OPTION[ARG_INDEX])
+                             .withDescription(SCREEN_TYPE_OPTION[DESCRIPTION_INDEX])
+                             .withLongOpt(SCREEN_TYPE_OPTION[LONG_OPTION_INDEX])
+                             .create(SCREEN_TYPE_OPTION[SHORT_OPTION_INDEX]));
 
     app.addCommandLineOption(OptionBuilder.hasArg()
                              .withArgName(NOTIFY_DAYS_AHEAD_OPTION[ARG_INDEX])
@@ -151,7 +160,7 @@ public class SmallMoleculeUserExpirationUpdater extends AdminEmailApplication
 
     app.processOptions(true, true);
 
-    log.info("==== Running SmallMoleculeUserExpirationUpdater: " + app.toString() + "======");
+    log.info("==== Running UserAgreementExpirationUpdater: " + app.toString() + "======");
 
     final GenericEntityDAO dao = (GenericEntityDAO) app.getSpringBean("genericEntityDao");
     app.init();
@@ -159,15 +168,13 @@ public class SmallMoleculeUserExpirationUpdater extends AdminEmailApplication
     dao.doInTransaction(new DAOTransaction() {
       public void runTransaction()
       {
-
+        app.setScreenType(app.getCommandLineOptionEnumValue(SCREEN_TYPE_OPTION[SHORT_OPTION_INDEX], ScreenType.class));
         int timeToExpireDays = DEFAULT_EXPIRATION_TIME_DAYS;
         if (app.isCommandLineFlagSet(EXPIRATION_TIME_OPTION[SHORT_OPTION_INDEX])) {
           timeToExpireDays = app.getCommandLineOptionValue(EXPIRATION_TIME_OPTION[SHORT_OPTION_INDEX], Integer.class);
         }
-        try
-        {
-          try
-          {
+        try {
+          try {
             if (app.isCommandLineFlagSet(NOTIFY_DAYS_AHEAD_OPTION[SHORT_OPTION_INDEX]))
             {
               Integer daysAheadToNotify = app.getCommandLineOptionValue(NOTIFY_DAYS_AHEAD_OPTION[SHORT_OPTION_INDEX],
@@ -200,7 +207,12 @@ public class SmallMoleculeUserExpirationUpdater extends AdminEmailApplication
         }
       }
     });
-    log.info("==== finishedSmallMoleculeUserExpirationUpdater ======");
+    log.info("==== finished UserAgreementExpirationUpdater ======");
+  }
+
+  private void setScreenType(ScreenType screenType) // 
+  {
+    _screenType = screenType;
   }
 
   private void notifyAhead(final Integer daysToNotify, final int ageInDays)
@@ -210,10 +222,10 @@ public class SmallMoleculeUserExpirationUpdater extends AdminEmailApplication
     LocalDate maxPerformedDate = expireDate.minusDays(ageInDays);
 
     List<Pair<ScreeningRoomUser,ChecklistItemEvent>> pairList =
-      _userAgreementUpdater.findUsersWithOldSMAgreements(maxPerformedDate, false);
+      _userAgreementUpdater.findUsersWithOldUserAgreements(maxPerformedDate, false, _screenType);
 
     if (pairList.isEmpty()) {
-      String subject = getMessages().getMessage("admin.users.smallMoleculeUserAgreementExpiration.warningNotification.noaction.subject");
+      String subject = getMessages().getMessage("admin.users.userAgreementExpiration.warningNotification.noaction.subject");
       String msg = "No Users have agreements (that haven't already been notified) dated earlier than the specified cutoff date: " +
         maxPerformedDate
                +
@@ -227,13 +239,14 @@ public class SmallMoleculeUserExpirationUpdater extends AdminEmailApplication
     }
     else {
       // send Admin summary email
-      String subject = getMessages().getMessage("admin.users.smallMoleculeUserAgreementExpiration.warningNotification.subject",
+      String subject = getMessages().getMessage("admin.users.userAgreementExpiration.warningNotification.subject",
                                                 pairList.size(),
                                                 daysToNotify);
       StringBuilder msg =
-        new StringBuilder(getMessages().getMessage("admin.users.smallMoleculeUserAgreementExpiration.warningNotification.messageBoilerplate",
+        new StringBuilder(getMessages().getMessage("admin.users.userAgreementExpiration.warningNotification.messageBoilerplate",
                                                    pairList.size(),
-                                                   daysToNotify));
+                                                   daysToNotify,
+                                                   _screenType.getValue()));
 
       if (isAdminEmailOnly()) msg.append("\n----NOTE: sending email only to data sharing level admins ---");
       if (isCommandLineFlagSet(TEST_ONLY[SHORT_OPTION_INDEX])) {
@@ -250,6 +263,7 @@ public class SmallMoleculeUserExpirationUpdater extends AdminEmailApplication
       Pair<String,String> notificationSubjectAndMessage = getExpireNotificationSubjectMessage();
       
       String exampleMessage = MessageFormat.format(notificationSubjectAndMessage.getSecond(),
+                                                   _screenType.getValue(),
                                                    EXPIRE_DATE_FORMATTER.print(expireDate),
                                                    "[user's primary data sharing level]" );
       msg.append("\n\n[example email]\n");
@@ -262,18 +276,17 @@ public class SmallMoleculeUserExpirationUpdater extends AdminEmailApplication
         ( isCommandLineFlagSet(TEST_ONLY[SHORT_OPTION_INDEX]) && ! isCommandLineFlagSet(TEST_EMAIL_ONLY[SHORT_OPTION_INDEX]) )) {
         for (Pair<ScreeningRoomUser,ChecklistItemEvent> pair : pairList) {
           // set the flag so that we don't notify for this CIE again.
-          _userAgreementUpdater.setLastNotifiedSMUAChecklistItemEvent(pair.getFirst(), pair.getSecond());
+          _userAgreementUpdater.setLastNotifiedUserAgreementChecklistItemEvent(pair.getFirst(), pair.getSecond(), _screenType);
         }
       }
       else {
         // send user an email
         for (Pair<ScreeningRoomUser,ChecklistItemEvent> pair : pairList) {
-          String message = MessageFormat.format(
-                                              notificationSubjectAndMessage.getSecond(), 
-                                              EXPIRE_DATE_FORMATTER.print(expireDate),
-                                              _userAgreementUpdater.findPrimaryDataSharingLevelRole(pair.getFirst()).getDisplayableRoleName());
+          String message = MessageFormat.format(notificationSubjectAndMessage.getSecond(),
+                                                EXPIRE_DATE_FORMATTER.print(expireDate),
+                                                DataSharingLevelMapper.getPrimaryDataSharingLevelRoleForUser(_screenType, pair.getFirst()).getDisplayableRoleName());
           if(sendEmail(notificationSubjectAndMessage.getFirst(), message, pair.getFirst())) {
-            _userAgreementUpdater.setLastNotifiedSMUAChecklistItemEvent(pair.getFirst(), pair.getSecond());
+            _userAgreementUpdater.setLastNotifiedUserAgreementChecklistItemEvent(pair.getFirst(), pair.getSecond(), _screenType);
           }
         }
       }
@@ -287,24 +300,24 @@ public class SmallMoleculeUserExpirationUpdater extends AdminEmailApplication
 
     List<Pair<ScreeningRoomUser,List<AdministrativeActivity>>> updates = Lists.newLinkedList();
     List<Pair<ScreeningRoomUser,ChecklistItemEvent>> pairList =
-      _userAgreementUpdater.findUsersWithOldSMAgreements(expireDate, true);
+      _userAgreementUpdater.findUsersWithOldUserAgreements(expireDate, true, _screenType);
 
     for (Pair<ScreeningRoomUser,ChecklistItemEvent> pair : pairList) {
-      updates.add(new Pair<ScreeningRoomUser,List<AdministrativeActivity>>(
-                                                                           pair.getFirst(), _userAgreementUpdater.expireUser(pair.getFirst(), findAdministratorUser())));
+      updates.add(new Pair<ScreeningRoomUser,List<AdministrativeActivity>>(pair.getFirst(),
+                                                                           _userAgreementUpdater.expireUser(pair.getFirst(), findAdministratorUser(), _screenType)));
     }
 
     if (updates.isEmpty()) {
-      String subject = getMessages().getMessage("admin.users.smallMoleculeUserAgreementExpiration.expiration.noaction.subject");
+      String subject = getMessages().getMessage("admin.users.userAgreementExpiration.expiration.noaction.subject");
       String msg = "No Users have (non expired) agreements dated earlier than the specified cutoff date: " + expireDate;
       sendAdminEmails(subject, msg);
     }
     else {
       //Send a summary email to the admin and the recipient list
-      String subject = getMessages().getMessage("admin.users.smallMoleculeUserAgreementExpiration.expiration.subject",
+      String subject = getMessages().getMessage("admin.users.userAgreementExpiration.expiration.subject",
                                                 updates.size());
       StringBuilder msg =
-        new StringBuilder(getMessages().getMessage("admin.users.smallMoleculeUserAgreementExpiration.expiration.messageBoilerplate",
+        new StringBuilder(getMessages().getMessage("admin.users.userAgreementExpiration.expiration.messageBoilerplate",
                                                    updates.size(),
                                                    timeToExpireDays));
       if (isCommandLineFlagSet(TEST_ONLY[SHORT_OPTION_INDEX])) {
@@ -341,18 +354,17 @@ public class SmallMoleculeUserExpirationUpdater extends AdminEmailApplication
         in = new FileInputStream(new File(getCommandLineOptionValue(EXPIRATION_EMAIL_MESSAGE_LOCATION[SHORT_OPTION_INDEX])));
       }
       catch (FileNotFoundException e) {
-        sendErrorMail("Operation not completed for SmallMoleculeUserExpirationUpdater, could not locate expiration message", toString(), e);
+        sendErrorMail("Operation not completed for UserAgreementExpirationUpdater, could not locate expiration message", toString(), e);
         throw new DAOTransactionRollbackException(e);
       }
     }
     else {
-      in = this.getClass()
-               .getResourceAsStream(EXPIRATION_MESSAGE_TXT_LOCATION);
+      in = this.getClass().getResourceAsStream(EXPIRATION_MESSAGE_TXT_LOCATION);
     }
     Scanner scanner = new Scanner(in);
     try {
       StringBuilder builder = new StringBuilder();
-      String subject = scanner.nextLine(); // first line is the subject
+      String subject = scanner.nextLine();
       while (scanner.hasNextLine()) {
         builder.append(scanner.nextLine()).append("\n");
       }

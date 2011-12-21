@@ -11,6 +11,7 @@ package edu.harvard.med.screensaver.ui.screens;
 
 import org.apache.log4j.Logger;
 
+import edu.harvard.med.iccbl.screensaver.policy.DataSharingLevelMapper;
 import edu.harvard.med.screensaver.ScreensaverConstants;
 import edu.harvard.med.screensaver.db.GenericEntityDAO;
 import edu.harvard.med.screensaver.db.Criterion.Operator;
@@ -134,26 +135,15 @@ public class ScreenViewer extends StudyViewer<Screen>
     getDao().needReadOnly(screen, Screen.pinTransferApprovalActivity.to(Activity.performedBy));
   }
 
-
-  // TODO: move logic to edu.harvard.med.iccbl.screensaver.policy
   private void warnAdminOnMismatchedDataSharingLevel(Screen screen)
   {
-    if (screen.getScreenType() == ScreenType.SMALL_MOLECULE) {
-      if (isReadAdmin()) {
-        if (screen.getLabHead() != null) {
-          boolean dslTooRestrictive = false;
-          ScreensaverUserRole labHeadDsl = null;
-          if (screen.getLabHead().getScreensaverUserRoles().contains(ScreensaverUserRole.SM_DSL_LEVEL1_MUTUAL_SCREENS) && screen.getDataSharingLevel().compareTo(ScreenDataSharingLevel.MUTUAL_SCREENS) > 0) {
-            labHeadDsl = ScreensaverUserRole.SM_DSL_LEVEL1_MUTUAL_SCREENS;
-            dslTooRestrictive = true;
-          }
-          else if (screen.getLabHead().getScreensaverUserRoles().contains(ScreensaverUserRole.SM_DSL_LEVEL2_MUTUAL_POSITIVES) && screen.getDataSharingLevel().compareTo(ScreenDataSharingLevel.MUTUAL_POSITIVES) > 0) {
-            labHeadDsl = ScreensaverUserRole.SM_DSL_LEVEL2_MUTUAL_POSITIVES;
-            dslTooRestrictive = true;
-          }
-          if (dslTooRestrictive) {
-            showMessage("screens.dataSharingLevelTooRestrictive", screen.getDataSharingLevel().toString(), labHeadDsl.getDisplayableRoleName());
-          }
+    if (isReadAdmin()) {
+      if (screen.getLabHead() != null) {
+        ScreenDataSharingLevel screenDslForLabHead = DataSharingLevelMapper.getScreenDataSharingLevelForUser(screen.getScreenType(), screen.getLabHead());
+        if (screen.getDataSharingLevel().compareTo(screenDslForLabHead) > 0) {
+          showMessage("screens.dataSharingLevelTooRestrictive",
+                      screen.getDataSharingLevel().toString(),
+                      DataSharingLevelMapper.getPrimaryDataSharingLevelRoleForUser(screen.getScreenType(), screen.getLabHead()));
         }
       }
     }

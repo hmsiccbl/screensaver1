@@ -28,16 +28,17 @@ import javax.faces.model.DataModel;
 import javax.faces.model.ListDataModel;
 import javax.faces.model.SelectItem;
 
-import org.apache.log4j.Logger;
-import org.apache.myfaces.custom.fileupload.UploadedFile;
-import org.joda.time.LocalDate;
-import org.springframework.transaction.annotation.Transactional;
 import com.google.common.base.Predicate;
 import com.google.common.collect.ImmutableSortedSet;
 import com.google.common.collect.Iterables;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Sets;
+import org.apache.log4j.Logger;
+import org.apache.myfaces.custom.fileupload.UploadedFile;
+import org.joda.time.LocalDate;
+import org.springframework.transaction.annotation.Transactional;
 
+import edu.harvard.med.iccbl.screensaver.IccblScreensaverConstants;
 import edu.harvard.med.screensaver.ScreensaverConstants;
 import edu.harvard.med.screensaver.db.GenericEntityDAO;
 import edu.harvard.med.screensaver.db.NoSuchEntityException;
@@ -49,7 +50,6 @@ import edu.harvard.med.screensaver.model.BusinessRuleViolationException;
 import edu.harvard.med.screensaver.model.MolarConcentration;
 import edu.harvard.med.screensaver.model.MolarUnit;
 import edu.harvard.med.screensaver.model.RequiredPropertyException;
-import edu.harvard.med.screensaver.model.Volume;
 import edu.harvard.med.screensaver.model.cherrypicks.CherryPickRequest;
 import edu.harvard.med.screensaver.model.screens.BillingItem;
 import edu.harvard.med.screensaver.model.screens.CellLine;
@@ -67,7 +67,6 @@ import edu.harvard.med.screensaver.model.screens.Species;
 import edu.harvard.med.screensaver.model.screens.StatusItem;
 import edu.harvard.med.screensaver.model.screens.TransfectionAgent;
 import edu.harvard.med.screensaver.model.users.AdministratorUser;
-import edu.harvard.med.screensaver.model.users.LabAffiliation;
 import edu.harvard.med.screensaver.model.users.LabHead;
 import edu.harvard.med.screensaver.model.users.ScreeningRoomUser;
 import edu.harvard.med.screensaver.model.users.ScreensaverUser;
@@ -85,7 +84,6 @@ import edu.harvard.med.screensaver.ui.arch.util.UISelectOneEntityBean;
 import edu.harvard.med.screensaver.ui.arch.view.EditResult;
 import edu.harvard.med.screensaver.ui.arch.view.aspects.UICommand;
 import edu.harvard.med.screensaver.ui.cherrypickrequests.CherryPickRequestDetailViewer;
-import edu.harvard.med.screensaver.util.NullSafeComparator;
 import edu.harvard.med.screensaver.util.NullSafeUtils;
 import edu.harvard.med.screensaver.util.StringUtils;
 import edu.harvard.med.screensaver.util.eutils.EutilsException;
@@ -729,8 +727,7 @@ public class ScreenDetailViewer extends AbstractStudyDetailViewer<Screen>
     }
 
     boolean valid = true;
-    if(!getPerturbagenMolarConcentrationSelector().isEmpty())
-    {
+    if(!getPerturbagenMolarConcentrationSelector().isEmpty()) {
       try {
        MolarConcentration.makeConcentration(getPerturbagenMolarConcentrationSelector().getValue().toString(),
                                              getPerturbagenMolarConcentrationSelector().getSelectorBean().getSelection());
@@ -742,6 +739,16 @@ public class ScreenDetailViewer extends AbstractStudyDetailViewer<Screen>
       catch (Exception e) {
         showFieldInputError("Molar Concentration", StringUtils.isEmpty(e.getMessage())? e.getClass().getName() : e.getMessage() ); 
         valid = false;
+      }
+    }
+
+    // At ICCB-L, the screen DSL 2 is not an option, so we hide it at the UI level; we maintain it in our model for consistency with the SM screen DSLs
+    if (getApplicationProperties().isFacility(IccblScreensaverConstants.FACILITY_KEY)) {
+      if (screen.getScreenType() == ScreenType.RNAI) {
+        if (screen.getDataSharingLevel() == ScreenDataSharingLevel.MUTUAL_POSITIVES) {
+          showMessage("screens.illegalDataSharingLevel", screen.getDataSharingLevel(), "for RNAi screens");
+          valid = false;
+        }
       }
     }
 

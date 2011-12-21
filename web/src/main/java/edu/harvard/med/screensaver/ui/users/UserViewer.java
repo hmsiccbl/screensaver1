@@ -258,9 +258,9 @@ public class UserViewer extends SearchResultContextEditableEntityViewerBackingBe
   protected void initializeViewer(ScreeningRoomUser user)
   {
     if (!!!user.isTransient()) {
-      if (user instanceof ScreeningRoomUser) {
-        warnAdminOnMismatchedDataSharingLevel((ScreeningRoomUser) user);
-      }
+      warnAdminOnMismatchedLabMemberDataSharingLevel(user, ScreenType.SMALL_MOLECULE);
+      warnAdminOnMismatchedLabMemberDataSharingLevel(user, ScreenType.RNAI);
+      warnAdminOnLabHeadScreensTooRestrictive(user);
     }
 
     _userRolesDataModel = null;
@@ -461,6 +461,7 @@ public class UserViewer extends SearchResultContextEditableEntityViewerBackingBe
       }
 
       // At ICCB-L, the RNAi DSL 2 role is not an option, so we hide it at the UI level; we maintain it in our model for consistency with the SM DSL roles
+      // TODO: refactor to share this logic with similar code in UserAgreementUpdater.getNewDataSharingLevel()
       if (getApplicationProperties().isFacility(IccblScreensaverConstants.FACILITY_KEY)) {
         candidateNewUserRoles.remove(ScreensaverUserRole.RNAI_DSL_LEVEL2_MUTUAL_POSITIVES);
       }
@@ -590,37 +591,36 @@ public class UserViewer extends SearchResultContextEditableEntityViewerBackingBe
     }
   }
 
-  // TODO: move logic to edu.harvard.med.iccbl.screensaver.policy
-  private void warnAdminOnMismatchedDataSharingLevel(ScreeningRoomUser user)
+  private void warnAdminOnMismatchedLabMemberDataSharingLevel(ScreeningRoomUser user, ScreenType screenType)
   {
     if (isReadAdmin()) {
       if (!!!user.isHeadOfLab()) {
-        user = getDao().reloadEntity(user, true, 
-                                     ScreeningRoomUser.LabHead.to(ScreeningRoomUser.roles));
-        getDao().needReadOnly(user, ScreeningRoomUser.roles);
         if (user.getLab().getLabHead() != null) {
-          SortedSet<ScreensaverUserRole> labHeadSmDslRoles = Sets.newTreeSet(Sets.intersection(DataSharingLevelMapper.UserSmDslRoles, user.getLab().getLabHead().getScreensaverUserRoles()));
-          SortedSet<ScreensaverUserRole> userSmDslRoles = Sets.newTreeSet(Sets.intersection(DataSharingLevelMapper.UserSmDslRoles, user.getScreensaverUserRoles()));
-          if (!!!labHeadSmDslRoles.isEmpty() && !!!userSmDslRoles.isEmpty()) {
-            ScreensaverUserRole labHeadLeastRestrictiveRole = labHeadSmDslRoles.last();
-            ScreensaverUserRole userLeastRestrictiveRole = userSmDslRoles.last();
-            if (labHeadLeastRestrictiveRole.compareTo(userLeastRestrictiveRole) > 0) {
-              showMessage("users.dataSharingLevelTooRestrictive", userLeastRestrictiveRole.getDisplayableRoleName(), labHeadLeastRestrictiveRole.getDisplayableRoleName());
-            }
-            else if (labHeadLeastRestrictiveRole.compareTo(userLeastRestrictiveRole) < 0) {
-              showMessage("users.dataSharingLevelTooLoose", userLeastRestrictiveRole.getDisplayableRoleName(), labHeadLeastRestrictiveRole.getDisplayableRoleName());
+          ScreensaverUserRole labHeadLeastRestrictiveRole = DataSharingLevelMapper.getPrimaryDataSharingLevelRoleForUser(screenType, user.getLab().getLabHead());
+          if (labHeadLeastRestrictiveRole != null) {
+            ScreensaverUserRole userLeastRestrictiveRole = DataSharingLevelMapper.getPrimaryDataSharingLevelRoleForUser(screenType, user);
+            if (userLeastRestrictiveRole != null) {
+              if (labHeadLeastRestrictiveRole.compareTo(userLeastRestrictiveRole) > 0) {
+                showMessage("users.dataSharingLevelTooRestrictive", userLeastRestrictiveRole.getDisplayableRoleName(), labHeadLeastRestrictiveRole.getDisplayableRoleName());
+              }
+              else if (labHeadLeastRestrictiveRole.compareTo(userLeastRestrictiveRole) < 0) {
+                showMessage("users.dataSharingLevelTooLoose", userLeastRestrictiveRole.getDisplayableRoleName(), labHeadLeastRestrictiveRole.getDisplayableRoleName());
+              }
             }
           }
         }
       }
-      else {
+    }
+  }
+
+  private void warnAdminOnLabHeadScreensTooRestrictive(ScreeningRoomUser user)
+  {
+    if (isReadAdmin()) {
+      if (user.isHeadOfLab()) {
         LabHead labHead = (LabHead) user;
         for (Screen screen : labHead.getScreensHeaded()) {
-          if (screen.getScreenType() == ScreenType.SMALL_MOLECULE) {
-            if ((labHead.getScreensaverUserRoles().contains(ScreensaverUserRole.SM_DSL_LEVEL1_MUTUAL_SCREENS) && screen.getDataSharingLevel().compareTo(ScreenDataSharingLevel.MUTUAL_SCREENS) > 0) ||
-              (labHead.getScreensaverUserRoles().contains(ScreensaverUserRole.SM_DSL_LEVEL2_MUTUAL_POSITIVES) && screen.getDataSharingLevel().compareTo(ScreenDataSharingLevel.MUTUAL_POSITIVES) > 0)) {
-              showMessage("users.labHeadScreenTooRestrictive", screen.getFacilityId(), screen.getDataSharingLevel());
-            }
+          if (screen.getDataSharingLevel().compareTo(DataSharingLevelMapper.getScreenDataSharingLevelForUser(screen.getScreenType(), labHead)) > 0) {
+            showMessage("users.labHeadScreenTooRestrictive", screen.getFacilityId(), screen.getDataSharingLevel());
           }
         }
       }

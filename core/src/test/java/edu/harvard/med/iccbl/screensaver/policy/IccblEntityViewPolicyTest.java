@@ -89,7 +89,7 @@ public class IccblEntityViewPolicyTest extends AbstractSpringPersistenceTest
   private Screen othersLevel3ScreenWithNonOverlappingHits;
   private Screen othersLevel3ScreenWithOverlappingHits;
 
-  private void initializeDataForDataSharingLevelTests() 
+  private void initializeDataForDataSharingLevelTests(ScreenType screenType)
   {
     initializeMe();
 
@@ -98,26 +98,26 @@ public class IccblEntityViewPolicyTest extends AbstractSpringPersistenceTest
     genericEntityDao.persistEntity(affiliate);
     genericEntityDao.persistEntity(stranger);
     
-    Library libForMutualPositives = MakeDummyEntities.makeDummyLibrary(1, ScreenType.SMALL_MOLECULE, 1);
+    Library libForMutualPositives = MakeDummyEntities.makeDummyLibrary(1, screenType, 1);
     genericEntityDao.persistEntity(libForMutualPositives);
-    Library libForNonMutualPositives = MakeDummyEntities.makeDummyLibrary(2, ScreenType.SMALL_MOLECULE, 1);
+    Library libForNonMutualPositives = MakeDummyEntities.makeDummyLibrary(2, screenType, 1);
     genericEntityDao.persistEntity(libForNonMutualPositives);
     
     // note: "my" screens will be associated with the "me" user in individual test methods
     
-    myLevel0Screen = MakeDummyEntities.makeDummyScreen(0, ScreenType.SMALL_MOLECULE);
+    myLevel0Screen = MakeDummyEntities.makeDummyScreen(0, screenType);
     MakeDummyEntities.makeDummyScreenResult(myLevel0Screen, libForMutualPositives);
     myLevel0Screen.setDataSharingLevel(ScreenDataSharingLevel.SHARED);
 
-    myLevel1Screen = MakeDummyEntities.makeDummyScreen(1, ScreenType.SMALL_MOLECULE);
+    myLevel1Screen = MakeDummyEntities.makeDummyScreen(1, screenType);
     MakeDummyEntities.makeDummyScreenResult(myLevel1Screen, libForMutualPositives);
     myLevel1Screen.setDataSharingLevel(ScreenDataSharingLevel.MUTUAL_SCREENS);
 
-    myLevel2Screen = MakeDummyEntities.makeDummyScreen(2, ScreenType.SMALL_MOLECULE);
+    myLevel2Screen = MakeDummyEntities.makeDummyScreen(2, screenType);
     MakeDummyEntities.makeDummyScreenResult(myLevel2Screen, libForMutualPositives);
     myLevel2Screen.setDataSharingLevel(ScreenDataSharingLevel.MUTUAL_POSITIVES);
 
-    myLevel3Screen = MakeDummyEntities.makeDummyScreen(3, ScreenType.SMALL_MOLECULE);
+    myLevel3Screen = MakeDummyEntities.makeDummyScreen(3, screenType);
     MakeDummyEntities.makeDummyScreenResult(myLevel3Screen, libForMutualPositives);
     myLevel3Screen.setDataSharingLevel(ScreenDataSharingLevel.PRIVATE);
     
@@ -126,37 +126,37 @@ public class IccblEntityViewPolicyTest extends AbstractSpringPersistenceTest
     genericEntityDao.persistEntity(myLevel2Screen);
     genericEntityDao.persistEntity(myLevel3Screen);
 
-    othersLevel0ScreenWithNonOverlappingHits = MakeDummyEntities.makeDummyScreen(100, ScreenType.SMALL_MOLECULE);
+    othersLevel0ScreenWithNonOverlappingHits = MakeDummyEntities.makeDummyScreen(100, screenType);
     MakeDummyEntities.makeDummyScreenResult(othersLevel0ScreenWithNonOverlappingHits, libForNonMutualPositives);
     othersLevel0ScreenWithNonOverlappingHits.setDataSharingLevel(ScreenDataSharingLevel.SHARED);
     genericEntityDao.persistEntity(othersLevel0ScreenWithNonOverlappingHits);
 
-    othersLevel1ScreenWithNonOverlappingHits = MakeDummyEntities.makeDummyScreen(110, ScreenType.SMALL_MOLECULE);
+    othersLevel1ScreenWithNonOverlappingHits = MakeDummyEntities.makeDummyScreen(110, screenType);
     MakeDummyEntities.makeDummyScreenResult(othersLevel1ScreenWithNonOverlappingHits, libForNonMutualPositives);
     othersLevel1ScreenWithNonOverlappingHits.setDataSharingLevel(ScreenDataSharingLevel.MUTUAL_SCREENS);
     genericEntityDao.persistEntity(othersLevel1ScreenWithNonOverlappingHits);
 
-    othersLevel1ScreenWithOverlappingHits = MakeDummyEntities.makeDummyScreen(111, ScreenType.SMALL_MOLECULE);
+    othersLevel1ScreenWithOverlappingHits = MakeDummyEntities.makeDummyScreen(111, screenType);
     MakeDummyEntities.makeDummyScreenResult(othersLevel1ScreenWithOverlappingHits, libForMutualPositives);
     othersLevel1ScreenWithOverlappingHits.setDataSharingLevel(ScreenDataSharingLevel.MUTUAL_SCREENS);
     genericEntityDao.persistEntity(othersLevel1ScreenWithOverlappingHits);
 
-    othersLevel2ScreenWithNonOverlappingHits = MakeDummyEntities.makeDummyScreen(120, ScreenType.SMALL_MOLECULE);
+    othersLevel2ScreenWithNonOverlappingHits = MakeDummyEntities.makeDummyScreen(120, screenType);
     MakeDummyEntities.makeDummyScreenResult(othersLevel2ScreenWithNonOverlappingHits, libForNonMutualPositives);
     othersLevel2ScreenWithNonOverlappingHits.setDataSharingLevel(ScreenDataSharingLevel.MUTUAL_POSITIVES);
     genericEntityDao.persistEntity(othersLevel2ScreenWithNonOverlappingHits);
 
-    othersLevel2ScreenWithOverlappingHits = MakeDummyEntities.makeDummyScreen(121, ScreenType.SMALL_MOLECULE);
+    othersLevel2ScreenWithOverlappingHits = MakeDummyEntities.makeDummyScreen(121, screenType);
     MakeDummyEntities.makeDummyScreenResult(othersLevel2ScreenWithOverlappingHits, libForMutualPositives);
     othersLevel2ScreenWithOverlappingHits.setDataSharingLevel(ScreenDataSharingLevel.MUTUAL_POSITIVES);
     genericEntityDao.persistEntity(othersLevel2ScreenWithOverlappingHits);
 
-    othersLevel3ScreenWithNonOverlappingHits = MakeDummyEntities.makeDummyScreen(130, ScreenType.SMALL_MOLECULE);
+    othersLevel3ScreenWithNonOverlappingHits = MakeDummyEntities.makeDummyScreen(130, screenType);
     MakeDummyEntities.makeDummyScreenResult(othersLevel3ScreenWithNonOverlappingHits, libForNonMutualPositives);
     othersLevel3ScreenWithNonOverlappingHits.setDataSharingLevel(ScreenDataSharingLevel.PRIVATE);
     genericEntityDao.persistEntity(othersLevel3ScreenWithNonOverlappingHits);
 
-    othersLevel3ScreenWithOverlappingHits = MakeDummyEntities.makeDummyScreen(131, ScreenType.SMALL_MOLECULE);
+    othersLevel3ScreenWithOverlappingHits = MakeDummyEntities.makeDummyScreen(131, screenType);
     MakeDummyEntities.makeDummyScreenResult(othersLevel3ScreenWithOverlappingHits, libForMutualPositives);
     othersLevel3ScreenWithOverlappingHits.setDataSharingLevel(ScreenDataSharingLevel.PRIVATE);
     genericEntityDao.persistEntity(othersLevel3ScreenWithOverlappingHits);
@@ -232,20 +232,27 @@ public class IccblEntityViewPolicyTest extends AbstractSpringPersistenceTest
     }
   }
 
-  public void testRnaiScreenPermissions()
+  /**
+   * Tests basic entity viewing permissions of screens:
+   * <ul>
+   * <li>for Small Molecule and RNAi screens</li>
+   * <li>for public and private DSLs (level 0 and 3, not levels 1 and 2, which are more thoroughly tested elsewhere)</li>
+   * <li>for users with DSL 3 roles that are invalid and valid for screen's screen type</li>
+   * <li>screens' child entities (screen result, lab activities, cprs)</li>
+   * <ul>
+   * There is overlap between this test and the more substantial tests for screens of level 1 and 3, but no harm in that
+   */
+  public void testScreenPermissions()
   {
-    initializeMe();
-    me.addScreensaverUserRole(ScreensaverUserRole.RNAI_DSL_LEVEL3_SHARED_SCREENS);
-    
-    ScreeningRoomUser rnaiUser = makeUserWithRoles(false, ScreensaverUserRole.RNAI_DSL_LEVEL3_SHARED_SCREENS);
-    ScreeningRoomUser smallMoleculeUser = makeUserWithRoles(false, ScreensaverUserRole.SM_DSL_LEVEL3_SHARED_SCREENS);
-    ScreeningRoomUser smallMoleculeRnaiUser = makeUserWithRoles(false, ScreensaverUserRole.SM_DSL_LEVEL3_SHARED_SCREENS, ScreensaverUserRole.RNAI_DSL_LEVEL3_SHARED_SCREENS);
+    ScreeningRoomUser rnaiScreener = makeUserWithRoles(false, ScreensaverUserRole.RNAI_DSL_LEVEL3_SHARED_SCREENS);
+    ScreeningRoomUser smallMoleculeScreener = makeUserWithRoles(false, ScreensaverUserRole.SM_DSL_LEVEL3_SHARED_SCREENS);
+    ScreeningRoomUser smallMoleculeRnaiScreener = makeUserWithRoles(false, ScreensaverUserRole.SM_DSL_LEVEL3_SHARED_SCREENS, ScreensaverUserRole.RNAI_DSL_LEVEL3_SHARED_SCREENS);
 
     Screen rnaiScreen = MakeDummyEntities.makeDummyScreen(1, ScreenType.RNAI);
     rnaiScreen.setDataSharingLevel(ScreenDataSharingLevel.PRIVATE);
     rnaiScreen.createScreenResult();
     rnaiScreen.createCherryPickRequest((AdministratorUser) rnaiScreen.getCreatedBy());
-    rnaiScreen.createLibraryScreening((AdministratorUser) rnaiScreen.getCreatedBy(), rnaiUser, new LocalDate());
+    rnaiScreen.createLibraryScreening((AdministratorUser) rnaiScreen.getCreatedBy(), rnaiScreener, new LocalDate());
 
     Screen publicRnaiScreen = MakeDummyEntities.makeDummyScreen(10, ScreenType.RNAI);
     publicRnaiScreen.setDataSharingLevel(ScreenDataSharingLevel.SHARED);
@@ -254,112 +261,71 @@ public class IccblEntityViewPolicyTest extends AbstractSpringPersistenceTest
     Screen smallMoleculeScreen = MakeDummyEntities.makeDummyScreen(2, ScreenType.SMALL_MOLECULE);
     smallMoleculeScreen.createScreenResult();
     smallMoleculeScreen.createCherryPickRequest((AdministratorUser) smallMoleculeScreen.getCreatedBy());
-    smallMoleculeScreen.createLibraryScreening((AdministratorUser) rnaiScreen.getCreatedBy(), rnaiUser, new LocalDate());
+    smallMoleculeScreen.createLibraryScreening((AdministratorUser) rnaiScreen.getCreatedBy(), rnaiScreener, new LocalDate());
 
     Screen publicSmallMoleculeScreen = MakeDummyEntities.makeDummyScreen(20, ScreenType.SMALL_MOLECULE);
     publicSmallMoleculeScreen.setDataSharingLevel(ScreenDataSharingLevel.SHARED);
     publicSmallMoleculeScreen.createScreenResult();
     
-    rnaiScreen.setLeadScreener(rnaiUser);
-    smallMoleculeScreen.setLeadScreener(smallMoleculeUser);
-    rnaiScreen.addCollaborator(smallMoleculeRnaiUser);
-    smallMoleculeScreen.addCollaborator(smallMoleculeRnaiUser);
+    rnaiScreen.setLeadScreener(rnaiScreener);
+    smallMoleculeScreen.setLeadScreener(smallMoleculeScreener);
+    rnaiScreen.addCollaborator(smallMoleculeRnaiScreener);
+    smallMoleculeScreen.addCollaborator(smallMoleculeRnaiScreener);
     
-    genericEntityDao.saveOrUpdateEntity(me);
-    genericEntityDao.saveOrUpdateEntity(rnaiUser);
-    genericEntityDao.saveOrUpdateEntity(smallMoleculeUser);
-    genericEntityDao.saveOrUpdateEntity(smallMoleculeRnaiUser);
+    genericEntityDao.saveOrUpdateEntity(rnaiScreener);
+    genericEntityDao.saveOrUpdateEntity(smallMoleculeScreener);
+    genericEntityDao.saveOrUpdateEntity(smallMoleculeRnaiScreener);
     genericEntityDao.saveOrUpdateEntity(rnaiScreen);
     genericEntityDao.saveOrUpdateEntity(publicRnaiScreen);
     genericEntityDao.saveOrUpdateEntity(smallMoleculeScreen);
     genericEntityDao.saveOrUpdateEntity(publicSmallMoleculeScreen);
     genericEntityDao.flush();
     
-    // TODO: we should follow the comprehensive testing pattern we use for SM screens
-    
-    // TODO: RNAi screeners can only see other non-public RNAi screens if they have deposited data
-    
-    setCurrentUser(rnaiUser);
+    setCurrentUser(rnaiScreener);
     assertNotNull("rnai user is not restricted from own rnai screen", entityViewPolicy.visit(rnaiScreen));
     assertNotNull("rnai user is not restricted from own rnai screen result", entityViewPolicy.visit(rnaiScreen.getScreenResult()));
     assertNotNull("rnai user is not restricted from own rnai screen CPRs", entityViewPolicy.visit((RNAiCherryPickRequest) rnaiScreen.getCherryPickRequests().iterator().next()));
     assertNotNull("rnai user is not restricted from own rnai screen lab activities", entityViewPolicy.visit((LibraryScreening) rnaiScreen.getLabActivities().iterator().next()));
-    setCurrentUser(me);
-    assertNotNull("rnai user is not restricted from others' rnai screen", entityViewPolicy.visit(rnaiScreen));
-    assertNull("rnai user is restricted from others' rnai screen result", entityViewPolicy.visit(rnaiScreen.getScreenResult()));
-    assertNull("rnai user is restricted from others' rnai screen CPRs", entityViewPolicy.visit((RNAiCherryPickRequest) rnaiScreen.getCherryPickRequests().iterator().next()));
-    assertNull("rnai user is restricted from others' rnai screen lab activities", entityViewPolicy.visit((LibraryScreening) rnaiScreen.getLabActivities().iterator().next()));
-    assertNull("rnai user is restricted from others' public small molecule screen", entityViewPolicy.visit(publicSmallMoleculeScreen));
-    assertNull("rnai user is restricted from others' public small molecule screen result", entityViewPolicy.visit(publicSmallMoleculeScreen.getScreenResult()));
+    assertNull("rnai user is restricted from others' private small molecule screen", entityViewPolicy.visit(smallMoleculeScreen));
+    assertNull("rnai user is restricted from others' private small molecule screen result", entityViewPolicy.visit(smallMoleculeScreen.getScreenResult()));
+    assertNull("rnai user is restricted from others' private small molecule screen CPRs", entityViewPolicy.visit((SmallMoleculeCherryPickRequest) smallMoleculeScreen.getCherryPickRequests().iterator().next()));
+    assertNull("rnai user is restricted from others' private small molecule screen lab activities", entityViewPolicy.visit((LibraryScreening) smallMoleculeScreen.getLabActivities().iterator().next())); // 
     assertNotNull("rnai user is not restricted from others' public rnai screen", entityViewPolicy.visit(publicRnaiScreen));
     assertNotNull("rnai user is not restricted from others' public rnai screen result", entityViewPolicy.visit(publicRnaiScreen.getScreenResult()));
-    setCurrentUser(smallMoleculeUser);
-    assertNull("small molecule user is restricted from others' rnai screen", entityViewPolicy.visit(rnaiScreen));
-    assertNull("small molecule user is restricted from others' rnai screen result", entityViewPolicy.visit(rnaiScreen.getScreenResult()));
-    assertNull("small molecule user is restricted from rnai others' rnai screen CPRs", entityViewPolicy.visit((RNAiCherryPickRequest) rnaiScreen.getCherryPickRequests().iterator().next()));
-    assertNull("small molecule user is restricted from rnai others' rnai screen lab activities", entityViewPolicy.visit((LibraryScreening) rnaiScreen.getLabActivities().iterator().next()));
-    // note: next 2 assertions have nothing to do with RNAi tests, and are redundant with the more comprehensive SM tests, elsewhere, but we include anyway
+    assertNull("rnai user is restricted from others' public small molecule screen", entityViewPolicy.visit(publicSmallMoleculeScreen));
+    assertNull("rnai user is restricted from others' public small molecule screen result", entityViewPolicy.visit(publicSmallMoleculeScreen.getScreenResult()));
+    setCurrentUser(smallMoleculeScreener);
+    assertNotNull("small molecule user is not restricted from own small molecule screen", entityViewPolicy.visit(smallMoleculeScreen));
+    assertNotNull("small molecule user is not restricted from own small molecule screen result", entityViewPolicy.visit(smallMoleculeScreen.getScreenResult()));
+    assertNotNull("small molecule user is not restricted from own small molecule screen CPRs", entityViewPolicy.visit((SmallMoleculeCherryPickRequest) smallMoleculeScreen.getCherryPickRequests().iterator().next()));
+    assertNotNull("small molecule user is not restricted from own small molecule screen lab activities", entityViewPolicy.visit((LibraryScreening) smallMoleculeScreen.getLabActivities().iterator().next()));
+    assertNull("small molecule user is restricted from others' private rnai screen", entityViewPolicy.visit(rnaiScreen));
+    assertNull("small molecule user is restricted from others' private rnai screen result", entityViewPolicy.visit(rnaiScreen.getScreenResult()));
+    assertNull("small molecule user is restricted from others' private rnai screen CPRs", entityViewPolicy.visit((RNAiCherryPickRequest) rnaiScreen.getCherryPickRequests().iterator().next()));
+    assertNull("small molecule user is restricted from others' private rnai screen lab activities", entityViewPolicy.visit((LibraryScreening) rnaiScreen.getLabActivities().iterator().next()));
     assertNotNull("small molecule user is not restricted from others' public small molecule screen", entityViewPolicy.visit(publicSmallMoleculeScreen));
     assertNotNull("small molecule user is not restricted from others' public small molecule screen result", entityViewPolicy.visit(publicSmallMoleculeScreen.getScreenResult()));
     assertNull("small molecule user is restricted from others' public rnai screen", entityViewPolicy.visit(publicRnaiScreen));
     assertNull("small molecule user is restricted from others' public rnai screen result", entityViewPolicy.visit(publicRnaiScreen.getScreenResult()));
-    setCurrentUser(smallMoleculeRnaiUser);
+    setCurrentUser(smallMoleculeRnaiScreener);
     assertNotNull("small molecule+rnai user is not restricted from own rnai screen", entityViewPolicy.visit(rnaiScreen));
     assertNotNull("small molecule+rnai user is not restricted from own rnai screen result", entityViewPolicy.visit(rnaiScreen.getScreenResult()));
-    assertNotNull("small molecule+rnai user is not restricted from rnai own screen CPRs", entityViewPolicy.visit((RNAiCherryPickRequest) rnaiScreen.getCherryPickRequests().iterator().next()));
-    assertNotNull("small molecule+rnai user is not restricted from rnai own screen lab activities", entityViewPolicy.visit((LibraryScreening) rnaiScreen.getLabActivities().iterator().next()));
-    assertNotNull("small molecule+rnai user is not restricted from rnai own screen CPRs", entityViewPolicy.visit((RNAiCherryPickRequest) rnaiScreen.getCherryPickRequests().iterator().next()));
-    assertNotNull("small molecule+rnai user is not restricted from rnai own screen lab activities", entityViewPolicy.visit((LibraryScreening) rnaiScreen.getLabActivities().iterator().next()));
+    assertNotNull("small molecule+rnai user is not restricted from own rnai screen CPRs", entityViewPolicy.visit((RNAiCherryPickRequest) rnaiScreen.getCherryPickRequests().iterator().next()));
+    assertNotNull("small molecule+rnai user is not restricted from own rnai screen lab activities", entityViewPolicy.visit((LibraryScreening) rnaiScreen.getLabActivities().iterator().next()));
+    assertNotNull("small molecule+rnai user is not restricted from own rnai screen CPRs", entityViewPolicy.visit((RNAiCherryPickRequest) rnaiScreen.getCherryPickRequests().iterator().next()));
+    assertNotNull("small molecule+rnai user is not restricted from own rnai screen lab activities", entityViewPolicy.visit((LibraryScreening) rnaiScreen.getLabActivities().iterator().next()));
     assertNotNull("small molecule+rnai user is not restricted from others' public small molecule screen", entityViewPolicy.visit(publicSmallMoleculeScreen));
     assertNotNull("small molecule+rnai user is not restricted from others' public small molecule screen result", entityViewPolicy.visit(publicSmallMoleculeScreen.getScreenResult()));
     assertNotNull("small molecule+rnai user is not restricted from others' public rnai screen", entityViewPolicy.visit(publicRnaiScreen));
     assertNotNull("small molecule+rnai user is not restricted from others' public rnai screen result", entityViewPolicy.visit(publicRnaiScreen.getScreenResult()));
-  }
-  
-  public void testMarcusAdminRestrictions()
-  {
-    AdministratorUser dataEntryAdmin = new AdministratorUser("DataEntry", "Admin");
-    AdministratorUser marcusAdmin = new AdministratorUser("Marcus", "Admin");
-    marcusAdmin.addScreensaverUserRole(ScreensaverUserRole.MARCUS_ADMIN);
-    AdministratorUser normalAdmin = new AdministratorUser("Normal", "Admin");
-    normalAdmin.addScreensaverUserRole(ScreensaverUserRole.READ_EVERYTHING_ADMIN);
-    Screen nonMarcusScreen = MakeDummyEntities.makeDummyScreen(2);
-    nonMarcusScreen.createCherryPickRequest((AdministratorUser) nonMarcusScreen.getCreatedBy());
-    nonMarcusScreen.createLibraryScreening(dataEntryAdmin, nonMarcusScreen.getLeadScreener(), new LocalDate());
-    nonMarcusScreen.createScreenResult();
-    Screen marcusScreen = MakeDummyEntities.makeDummyScreen(1);
-    FundingSupport marcusFundingSupport = new FundingSupport(IccblEntityViewPolicy.MARCUS_LIBRARY_SCREEN_FUNDING_SUPPORT_NAME);
-    marcusScreen.addFundingSupport(marcusFundingSupport);
-    marcusScreen.createCherryPickRequest((AdministratorUser) marcusScreen.getCreatedBy());
-    marcusScreen.createLibraryScreening(dataEntryAdmin, marcusScreen.getLeadScreener(), new LocalDate());
-    marcusScreen.createScreenResult();
-    genericEntityDao.persistEntity(marcusFundingSupport);
-    genericEntityDao.persistEntity(marcusAdmin);
-    genericEntityDao.persistEntity(normalAdmin);
-    genericEntityDao.persistEntity(marcusScreen);
-    genericEntityDao.persistEntity(nonMarcusScreen);
+    smallMoleculeScreen.removeCollaborator(smallMoleculeRnaiScreener);
+    rnaiScreen.removeCollaborator(smallMoleculeRnaiScreener);
     genericEntityDao.flush();
-
-    
-    setCurrentUser(marcusAdmin);
-    assertNotNull(entityViewPolicy.visit(marcusScreen));
-    assertNotNull(entityViewPolicy.visit(marcusScreen.getScreenResult()));
-    assertNotNull(entityViewPolicy.visit((LibraryScreening) marcusScreen.getLabActivities().iterator().next()));
-    assertNotNull(entityViewPolicy.visit((SmallMoleculeCherryPickRequest) marcusScreen.getCherryPickRequests().iterator().next()));
-    assertNull(entityViewPolicy.visit(nonMarcusScreen));
-    assertNull(entityViewPolicy.visit(nonMarcusScreen.getScreenResult()));
-    assertNull(entityViewPolicy.visit((LibraryScreening) nonMarcusScreen.getLabActivities().iterator().next()));
-    assertNull(entityViewPolicy.visit((SmallMoleculeCherryPickRequest) nonMarcusScreen.getCherryPickRequests().iterator().next()));
-
-    setCurrentUser(normalAdmin);
-    assertNotNull(entityViewPolicy.visit(marcusScreen));
-    assertNotNull(entityViewPolicy.visit(marcusScreen.getScreenResult()));
-    assertNotNull(entityViewPolicy.visit((LibraryScreening) marcusScreen.getLabActivities().iterator().next()));
-    assertNotNull(entityViewPolicy.visit((SmallMoleculeCherryPickRequest) marcusScreen.getCherryPickRequests().iterator().next()));
-    assertNotNull(entityViewPolicy.visit(nonMarcusScreen));
-    assertNotNull(entityViewPolicy.visit(nonMarcusScreen.getScreenResult()));
-    assertNotNull(entityViewPolicy.visit((LibraryScreening) nonMarcusScreen.getLabActivities().iterator().next()));
-    assertNotNull(entityViewPolicy.visit((SmallMoleculeCherryPickRequest) nonMarcusScreen.getCherryPickRequests().iterator().next()));
+    setCurrentUser(smallMoleculeRnaiScreener);
+    assertNull("small molecule+rnai user is restricted from others' private small molecule screen", entityViewPolicy.visit(smallMoleculeScreen));
+    assertNull("small molecule+rnai user is restricted from others' private small molecule screen result", entityViewPolicy.visit(smallMoleculeScreen.getScreenResult()));
+    assertNull("small molecule+rnai user is restricted from others' private rnai screen", entityViewPolicy.visit(rnaiScreen));
+    assertNull("small molecule+rnai user is restricted from others' private rnai screen result", entityViewPolicy.visit(rnaiScreen.getScreenResult()));
   }
   
   public void testGrayAdminRestrictions()
@@ -470,8 +436,18 @@ public class IccblEntityViewPolicyTest extends AbstractSpringPersistenceTest
   
   public void testSmallMoleculeUserLevel1ScreenPermissions()
   {
-    initializeDataForDataSharingLevelTests();
-    me.addScreensaverUserRole(ScreensaverUserRole.SM_DSL_LEVEL1_MUTUAL_SCREENS);
+    doTestUserLevel1ScreenPermissions(ScreenType.SMALL_MOLECULE);
+  }
+
+  public void testRNAiUserLevel1ScreenPermissions()
+  {
+    doTestUserLevel1ScreenPermissions(ScreenType.RNAI);
+  }
+
+  private void doTestUserLevel1ScreenPermissions(ScreenType screenType)
+  {
+    initializeDataForDataSharingLevelTests(screenType);
+    me.addScreensaverUserRole(DataSharingLevelMapper.getUserDslRoleForScreenTypeAndLevel(screenType, 1));
 
     makeMeHaveNoScreens();
     assertAllOthersNonPublicScreensNotVisible();
@@ -479,28 +455,28 @@ public class IccblEntityViewPolicyTest extends AbstractSpringPersistenceTest
 
     // all of my screens have screen result data
     makeMeLabHeadOfMyScreens();
-    assertLevel1Or2UserScreenPermissions();
+    assertLevel1Or2UserScreenPermissions(screenType);
     makeMeLeadScreenerOfMyScreens();
-    assertLevel1Or2UserScreenPermissions();
+    assertLevel1Or2UserScreenPermissions(screenType);
     makeMeCollaboratorOfMyScreens();
-    assertLevel1Or2UserScreenPermissions();
+    assertLevel1Or2UserScreenPermissions(screenType);
 
     // assert that a level 1 user without deposited data in level 0 or 1 screens is to be treated same as a level 3 user
     // note: only my level 0 and level 1 screens's data count as "deposited data"
     // TODO: should test in reverse order, too
     screenResultsDao.deleteScreenResult(myLevel1Screen.getScreenResult());
     makeMeLabHeadOfMyScreens();
-    assertLevel1Or2UserScreenPermissions();
+    assertLevel1Or2UserScreenPermissions(screenType);
     makeMeLeadScreenerOfMyScreens();
-    assertLevel1Or2UserScreenPermissions();
+    assertLevel1Or2UserScreenPermissions(screenType);
     makeMeCollaboratorOfMyScreens();
-    assertLevel1Or2UserScreenPermissions();
+    assertLevel1Or2UserScreenPermissions(screenType);
 
     screenResultsDao.deleteScreenResult(myLevel0Screen.getScreenResult());
     genericEntityDao.flush();
     entityViewPolicy.update();
     // now "I" have no more deposited data in level 0/1 screens, but still do in my level 2/3 screens
-    doTestSmallMoleculeUserLevel3ScreenPermissions();
+    doTestUserLevel3ScreenPermissionsPostInit(screenType);
 
     screenResultsDao.deleteScreenResult(myLevel3Screen.getScreenResult());
     screenResultsDao.deleteScreenResult(myLevel2Screen.getScreenResult());
@@ -512,35 +488,60 @@ public class IccblEntityViewPolicyTest extends AbstractSpringPersistenceTest
     // see theirs. This is okay, since this situation should never really
     // happen, since my level 2 screen should have been moved to level 1 when
     // my user level changed from from 2 to 1)
-    doTestSmallMoleculeUserLevel3ScreenPermissions();
+    doTestUserLevel3ScreenPermissionsPostInit(screenType);
   }
 
   public void testSmallMoleculeUserLevel2ScreenPermissions()
   {
-    initializeDataForDataSharingLevelTests();
-    me.addScreensaverUserRole(ScreensaverUserRole.SM_DSL_LEVEL2_MUTUAL_POSITIVES);
+    doTestUserLevel2ScreenPermissions(ScreenType.SMALL_MOLECULE);
+  }
+
+  public void testRNAiUserLevel2ScreenPermissions()
+  {
+    doTestUserLevel2ScreenPermissions(ScreenType.RNAI);
+  }
+
+  private void doTestUserLevel2ScreenPermissions(ScreenType screenType)
+  {
+    initializeDataForDataSharingLevelTests(screenType);
+    me.addScreensaverUserRole(DataSharingLevelMapper.getUserDslRoleForScreenTypeAndLevel(screenType, 2));
     
     makeMeHaveNoScreens();
     assertAllOthersNonPublicScreensNotVisible();
     assertOthersPublicScreensVisible();
 
     makeMeLabHeadOfMyScreens();
-    assertLevel1Or2UserScreenPermissions();
+    assertLevel1Or2UserScreenPermissions(screenType);
     makeMeLeadScreenerOfMyScreens();
-    assertLevel1Or2UserScreenPermissions();
+    assertLevel1Or2UserScreenPermissions(screenType);
     makeMeCollaboratorOfMyScreens();
-    assertLevel1Or2UserScreenPermissions();
+    assertLevel1Or2UserScreenPermissions(screenType);
   }
   
   public void testSmallMoleculeUserLevel3ScreenPermissions()
   {
-    initializeDataForDataSharingLevelTests();
-    me.addScreensaverUserRole(ScreensaverUserRole.SM_DSL_LEVEL3_SHARED_SCREENS);
-    
-    doTestSmallMoleculeUserLevel3ScreenPermissions();
+    doTestUserLevel3ScreenPermissions(ScreenType.SMALL_MOLECULE);
   }
 
-  private void doTestSmallMoleculeUserLevel3ScreenPermissions()
+  public void testRNAiUserLevel3ScreenPermissions()
+  {
+    doTestUserLevel3ScreenPermissions(ScreenType.RNAI);
+  }
+
+  private void doTestUserLevel3ScreenPermissions(ScreenType screenType)
+  {
+    initializeDataForDataSharingLevelTests(screenType);
+    me.addScreensaverUserRole(DataSharingLevelMapper.getUserDslRoleForScreenTypeAndLevel(screenType, 3));
+    
+    doTestUserLevel3ScreenPermissionsPostInit(screenType);
+  }
+
+  /**
+   * @motivation allow testing of assertions for user DSL 3, when user is actually DSL 1, to handle the special case of
+   *             the "user dsl 1 w/o deposited data = dsl 3"; called by doTestUserLevel1ScreenPermissions(), which will
+   *             have already initialized the test data; thus the "PostInit" prefix of the method name
+   */
+  private void doTestUserLevel3ScreenPermissionsPostInit(ScreenType screenType)
   {
     makeMeHaveNoScreens();
     assertOthersPublicScreensVisible();
@@ -556,30 +557,42 @@ public class IccblEntityViewPolicyTest extends AbstractSpringPersistenceTest
     assertLevel3UserScreenPermissions();
   }
 
-  private void assertLevel1Or2UserScreenPermissions()
+  /** Tests requirements of ICCB-L SM User Agreement sec. 1.1.b, and 1.2.b */
+  private void assertLevel1Or2UserScreenPermissions(ScreenType screenType)
   {
     assertMyScreensVisible();
     assertOthersPublicScreensVisible();
     
     // level 1 screeners can see details of other level 1 screens, regardless of overlapping hits
-    boolean expectedVisible = me.getScreensaverUserRoles().contains(ScreensaverUserRole.SM_DSL_LEVEL1_MUTUAL_SCREENS);
-    
+    boolean expectedVisible = me.getScreensaverUserRoles().contains(DataSharingLevelMapper.getUserDslRoleForScreenTypeAndLevel(screenType, 1));
+
     assertNotNull("others' level 1 screen with non-overlapping hits visibility", entityViewPolicy.visit(othersLevel1ScreenWithNonOverlappingHits));
     assertEquals("others' level 1 screen with non-overlapping hits, details visibility", expectedVisible, entityViewPolicy.isAllowedAccessToScreenDetails(othersLevel1ScreenWithNonOverlappingHits));
-    // TODO: we also need to test DataColumn access permissions
+    assertEquals("others' level 1 screen with non-overlapping hits, screen result visibility", expectedVisible, entityViewPolicy.visit(othersLevel1ScreenWithNonOverlappingHits.getScreenResult()) != null);
     assertEquals("others' level 1 screen with non-overlapping hits, non-overlapping hits visibility", expectedVisible, entityViewPolicy.visit(findSomePositive(othersLevel1ScreenWithNonOverlappingHits)) != null);
+    assertEquals("others' level 1 screen with non-overlapping hits, positives data column visibility", expectedVisible, entityViewPolicy.visit(findSomePositive(othersLevel1ScreenWithNonOverlappingHits).getDataColumn()) != null);
+    assertEquals("others' level 1 screen with non-overlapping hits, non-positives data column visibility", expectedVisible, entityViewPolicy.visit(findNonPositivesDataColumn(othersLevel1ScreenWithNonOverlappingHits)) != null);
 
     assertNotNull("others' level 1 screen with overlapping hits visible", entityViewPolicy.visit(othersLevel1ScreenWithOverlappingHits));
     assertEquals("others' level 1 screen with overlapping hits, details visibility", expectedVisible, entityViewPolicy.isAllowedAccessToScreenDetails(othersLevel1ScreenWithOverlappingHits));
+    assertEquals("others' level 1 screen with overlapping hits, screen result visibility", expectedVisible, entityViewPolicy.visit(othersLevel1ScreenWithOverlappingHits.getScreenResult()) != null);
     assertNotNull("others' level 1 screen with overlapping hits, overlapping hits visible", entityViewPolicy.visit(findSomePositive(othersLevel1ScreenWithOverlappingHits)));
+    assertNotNull("others' level 1 screen with overlapping hits, positives data column visible", entityViewPolicy.visit(findSomePositive(othersLevel1ScreenWithOverlappingHits).getDataColumn()));
+    assertEquals("others' level 1 screen with overlapping hits, non-positives data column visibility", expectedVisible, entityViewPolicy.visit(findNonPositivesDataColumn(othersLevel1ScreenWithOverlappingHits)) != null);
 
     assertNotNull("others' level 2 screen with non-overlapping hits visible", entityViewPolicy.visit(othersLevel2ScreenWithNonOverlappingHits));
     assertFalse("others' level 2 screen with non-overlapping hits visible, but not details", entityViewPolicy.isAllowedAccessToScreenDetails(othersLevel2ScreenWithNonOverlappingHits));
+    assertNull("others' level 2 screen with non-overlapping hits, screen result not visible", entityViewPolicy.visit(othersLevel2ScreenWithNonOverlappingHits.getScreenResult()));
     assertNull("others' level 2 screen with non-overlapping hits, non-overlapping hits not visible", entityViewPolicy.visit(findSomePositive(othersLevel2ScreenWithNonOverlappingHits)));
+    assertNull("others' level 2 screen with non-overlapping hits, positives data column not visible", entityViewPolicy.visit(findSomePositive(othersLevel2ScreenWithNonOverlappingHits).getDataColumn()));
+    assertNull("others' level 2 screen with non-overlapping hits, non-positives data column not visible", entityViewPolicy.visit(findNonPositivesDataColumn(othersLevel2ScreenWithNonOverlappingHits)));
 
     assertNotNull("others' level 2 screen with overlapping hits visible", entityViewPolicy.visit(othersLevel2ScreenWithOverlappingHits));
     assertFalse("others' level 2 screen with overlapping hits visible, but not details", entityViewPolicy.isAllowedAccessToScreenDetails(othersLevel2ScreenWithOverlappingHits));
+    assertNull("others' level 2 screen with overlapping hits, screen result not visible", entityViewPolicy.visit(othersLevel2ScreenWithOverlappingHits.getScreenResult()));
     assertNotNull("others' level 2 screen with overlapping hits, overlapping hits visible", entityViewPolicy.visit(findSomePositive(othersLevel2ScreenWithOverlappingHits)));
+    assertNotNull("others' level 2 screen with overlapping hits, positives data column visible", entityViewPolicy.visit(findSomePositive(othersLevel2ScreenWithOverlappingHits).getDataColumn()));
+    assertNull("others' level 2 screen with overlapping hits, non-positives data column not visible", entityViewPolicy.visit(findNonPositivesDataColumn(othersLevel2ScreenWithOverlappingHits)));
     
     // my level 0, 1 and 2 screens count towards overlapping hit viewing, but not my level 3 screens
     // TODO: this is NOT testing what it purports to test, since othersLevel2ScreenWithOverlappingHits also overlaps my 0,1,2 screens!
@@ -601,6 +614,13 @@ public class IccblEntityViewPolicyTest extends AbstractSpringPersistenceTest
       }
     }
     throw new IllegalStateException("bad test data: expected at least one 'positive' result value in screen result");
+  }
+
+  private DataColumn findNonPositivesDataColumn(Screen screen)
+  {
+    DataColumn col = screen.getScreenResult().getDataColumns().first();
+    assert !col.isPositiveIndicator();
+    return col;
   }
 
   private void assertLevel3UserScreenPermissions()
@@ -794,13 +814,25 @@ public class IccblEntityViewPolicyTest extends AbstractSpringPersistenceTest
   {
     assertNull("others' level 1 screens not visible", entityViewPolicy.visit(othersLevel1ScreenWithOverlappingHits));
     assertNull("others' level 1 screens not visible", entityViewPolicy.visit(othersLevel1ScreenWithNonOverlappingHits));
-    assertNull("others' level 1 screens overlapping hits not visible", entityViewPolicy.visit(findSomePositive(othersLevel1ScreenWithOverlappingHits)));
+    ResultValue level1ScreenPositive = findSomePositive(othersLevel1ScreenWithOverlappingHits);
+    assertNull("others' level 1 screens overlapping hits not visible", entityViewPolicy.visit(level1ScreenPositive));
+    assertNull("others' level 1 screens overlapping hits data column not visible", entityViewPolicy.visit(level1ScreenPositive.getDataColumn()));
+    // TODO: test non-positives data column
+    assertNull("others' level 1 screens overlapping hits screen result not visible", entityViewPolicy.visit(level1ScreenPositive.getDataColumn().getScreenResult()));
+
     assertNull("others' level 2 screens not visible", entityViewPolicy.visit(othersLevel2ScreenWithOverlappingHits));
     assertNull("others' level 2 screens not visible", entityViewPolicy.visit(othersLevel2ScreenWithNonOverlappingHits));
-    assertNull("others' level 2 screens overlapping hits not visible", entityViewPolicy.visit(findSomePositive(othersLevel2ScreenWithOverlappingHits)));
+    ResultValue level2ScreenPositive = findSomePositive(othersLevel2ScreenWithOverlappingHits);
+    assertNull("others' level 2 screens overlapping hits not visible", entityViewPolicy.visit(level2ScreenPositive));
+    assertNull("others' level 2 screens overlapping hits data column not visible", entityViewPolicy.visit(level2ScreenPositive.getDataColumn()));
+    assertNull("others' level 2 screens overlapping hits screen result not visible", entityViewPolicy.visit(level2ScreenPositive.getDataColumn().getScreenResult()));
+
     assertNull("others' level 3 screens not visible", entityViewPolicy.visit(othersLevel3ScreenWithOverlappingHits));
     assertNull("others' level 3 screens not visible", entityViewPolicy.visit(othersLevel3ScreenWithNonOverlappingHits));
-    assertNull("others' level 3 screens overlapping hits not visible", entityViewPolicy.visit(findSomePositive(othersLevel3ScreenWithOverlappingHits)));
+    ResultValue level3ScreenPositive = findSomePositive(othersLevel3ScreenWithOverlappingHits);
+    assertNull("others' level 3 screens overlapping hits not visible", entityViewPolicy.visit(level3ScreenPositive));
+    assertNull("others' level 3 screens overlapping hits data column not visible", entityViewPolicy.visit(level3ScreenPositive.getDataColumn()));
+    assertNull("others' level 3 screens overlapping hits screen result not visible", entityViewPolicy.visit(level3ScreenPositive.getDataColumn().getScreenResult()));
   }
 
   private void setCurrentUser(ScreensaverUser user)

@@ -278,8 +278,13 @@ Config 1.1//EN" "http://java.sun.com/dtd/web-facesconfig_1_1.dtd">
       <redirect/>
     </navigation-case>
     <navigation-case>
-      <from-outcome>updateUserAgreement</from-outcome>
-      <to-view-id>/users/admin/userAgreementUpdater</to-view-id>
+      <from-outcome>smUpdateUserAgreement</from-outcome>
+      <to-view-id>/users/admin/smUserAgreementUpdater</to-view-id>
+      <redirect/>
+    </navigation-case>
+    <navigation-case>
+      <from-outcome>rnaiUpdateUserAgreement</from-outcome>
+      <to-view-id>/users/admin/rnaiUserAgreementUpdater</to-view-id>
       <redirect/>
     </navigation-case>
 

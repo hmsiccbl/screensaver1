@@ -417,7 +417,7 @@ public class ScreenPrivacyExpirationUpdater extends AdminEmailApplication
       Pair<String,String> subjectMessage = getScreenExpireNotificationSubjectMessage(); // Note: nothing to replace
       String notificationMessage = MessageFormat.format(subjectMessage.getSecond(),
                                                         "---",
-                                                        "[-- a Small Molecule Screen Title]",
+                                                        "[-- a Screen Title]",
                                                         "[current screen data sharing level]",
                                                        EXPIRE_DATE_FORMATTER.print(expireDate));
       msg.append("\n\n[example email]\n");
@@ -458,7 +458,7 @@ public class ScreenPrivacyExpirationUpdater extends AdminEmailApplication
 
     if (results.isEmpty()) {
       String subject = getMessages().getMessage("admin.screens.dataPrivacyExpiration.dataPrivacyExpirattion.notification.noaction.subject");
-      String msg = "No Small Molecule Screens with SDSL > 1 have agreements dated on or before: " + expireDate;
+      String msg = "No Screens with SDSL > 1 have agreements dated on or before: " + expireDate;
       sendAdminEmails(subject, msg);
     }
     else {
@@ -547,8 +547,7 @@ public class ScreenPrivacyExpirationUpdater extends AdminEmailApplication
       }
     }
     else {
-      in = this.getClass()
-               .getResourceAsStream(EXPIRATION_MESSAGE_TXT_LOCATION);
+      in = this.getClass().getResourceAsStream(EXPIRATION_MESSAGE_TXT_LOCATION);
     }
     Scanner scanner = new Scanner(in);
     try {

@@ -27,9 +27,13 @@
       id="addServiceActivityCommand" value="Add Service Activity..."
       rendered="#{userViewer.screensaverUser.isUserInRoleOfNameMap['serviceActivityAdmin']  &amp;&amp; !userViewer.editMode &amp;&amp; userViewer.screeningRoomUserViewMode}"
       styleClass="command" />
-    <t:commandButton action="updateUserAgreement"
-      id="updateUserAgreement" value="Update User Agreement..."
-      rendered="#{userAgreementUpdaterUi.enabled &amp;&amp; userViewer.editable &amp;&amp; !userViewer.editMode &amp;&amp; userViewer.screeningRoomUserViewMode}"
+    <t:commandButton action="smUpdateUserAgreement"
+      id="smUpdateUserAgreement" value="Update SM User Agreement..."
+      rendered="#{smUserAgreementUpdaterUi.enabled &amp;&amp; userViewer.editable &amp;&amp; !userViewer.editMode &amp;&amp; userViewer.screeningRoomUserViewMode}"
+      styleClass="command" />
+    <t:commandButton action="rnaiUpdateUserAgreement"
+      id="rnaiUpdateUserAgreement" value="Update RNAi User Agreement..."
+      rendered="#{rnaiUserAgreementUpdaterUi.enabled &amp;&amp; userViewer.editable &amp;&amp; !userViewer.editMode &amp;&amp; userViewer.screeningRoomUserViewMode}"
       styleClass="command" />
 	</ui:define>
 

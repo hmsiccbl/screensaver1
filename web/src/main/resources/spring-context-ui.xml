@@ -958,12 +958,32 @@
   </bean>
   
   <bean
-    id="userAgreementUpdaterUi"
+    id="smUserAgreementUpdaterUi"
     parent="uiBean"
     scope="session"
     class="edu.harvard.med.iccbl.screensaver.ui.users.UserAgreementUpdater">
     <constructor-arg ref="userViewer" />
     <constructor-arg ref="userAgreementUpdater" />
+    <constructor-arg>
+      <bean class="org.springframework.beans.factory.config.FieldRetrievingFactoryBean">
+       <property name="staticField" value="edu.harvard.med.screensaver.model.screens.ScreenType.SMALL_MOLECULE"/>
+      </bean>
+    </constructor-arg>
+    <aop:scoped-proxy/>
+  </bean>
+
+  <bean
+    id="rnaiUserAgreementUpdaterUi"
+    parent="uiBean"
+    scope="session"
+    class="edu.harvard.med.iccbl.screensaver.ui.users.UserAgreementUpdater">
+    <constructor-arg ref="userViewer" />
+    <constructor-arg ref="userAgreementUpdater" />
+    <constructor-arg>
+      <bean class="org.springframework.beans.factory.config.FieldRetrievingFactoryBean">
+       <property name="staticField" value="edu.harvard.med.screensaver.model.screens.ScreenType.RNAI"/>
+      </bean>
+    </constructor-arg>
     <aop:scoped-proxy/>
   </bean>
 

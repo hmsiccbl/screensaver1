@@ -9,6 +9,9 @@
 
 package edu.harvard.med.iccbl.screensaver.service.users;
 
+import static edu.harvard.med.screensaver.model.screens.ScreenType.RNAI;
+import static edu.harvard.med.screensaver.model.screens.ScreenType.SMALL_MOLECULE;
+
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.io.InputStream;
@@ -25,6 +28,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 import edu.harvard.med.screensaver.model.AttachedFileType;
 import edu.harvard.med.screensaver.model.BusinessRuleViolationException;
+import edu.harvard.med.screensaver.model.screens.ScreenType;
 import edu.harvard.med.screensaver.model.users.AdministratorUser;
 import edu.harvard.med.screensaver.model.users.ChecklistItem;
 import edu.harvard.med.screensaver.model.users.ChecklistItemEvent;
@@ -75,12 +79,12 @@ public class UserAgreementUpdaterTest extends AbstractSpringPersistenceTest
     initializeData();
 
     // create the UA CLI
-    ChecklistItem checklistItem = new ChecklistItem(UserAgreementUpdater.USER_AGREEMENT_CHECKLIST_ITEM_NAME, 
+    ChecklistItem checklistItem = new ChecklistItem(UserAgreementUpdater.USER_AGREEMENT_CHECKLIST_ITEM_NAME.get(SMALL_MOLECULE),
                                                     true, ChecklistItemGroup.FORMS, 0);
     genericEntityDao.persistEntity(checklistItem);
 
     // create the attachment
-    AttachedFileType attachedFileType = new UserAttachedFileType(UserAgreementUpdater.USER_AGREEMENT_ATTACHED_FILE_TYPE);
+    AttachedFileType attachedFileType = new UserAttachedFileType(UserAgreementUpdater.USER_AGREEMENT_ATTACHED_FILE_TYPE.get(SMALL_MOLECULE));
     genericEntityDao.persistEntity(attachedFileType);
 
     // create one entity that will be dated now (default)
@@ -108,8 +112,7 @@ public class UserAgreementUpdaterTest extends AbstractSpringPersistenceTest
     flushAndClear();
 
     // check that not yet "old" - there are no events yet!
-    List<Pair<ScreeningRoomUser, ChecklistItemEvent>> expiredSet 
-        = userAgreementUpdater.findUsersWithOldSMAgreements(new LocalDate(), false);
+    List<Pair<ScreeningRoomUser,ChecklistItemEvent>> expiredSet = userAgreementUpdater.findUsersWithOldUserAgreements(new LocalDate(), false, SMALL_MOLECULE);
     assertTrue(expiredSet.isEmpty());
 
     flushAndClear();
@@ -123,6 +126,7 @@ public class UserAgreementUpdaterTest extends AbstractSpringPersistenceTest
     InputStream inputStream = new ByteArrayInputStream("contents".getBytes());
     userAgreementUpdater.updateUser(user1, 
                                     ScreensaverUserRole.SM_DSL_LEVEL1_MUTUAL_SCREENS, 
+                                    SMALL_MOLECULE,
                                     "user_agreement.pdf", 
                                     inputStream, admin);
 
@@ -146,7 +150,7 @@ public class UserAgreementUpdaterTest extends AbstractSpringPersistenceTest
     
     // first find the user with the old event first
     LocalDate findDate = new LocalDate();
-    expiredSet = userAgreementUpdater.findUsersWithOldSMAgreements(findDate, false);
+    expiredSet = userAgreementUpdater.findUsersWithOldUserAgreements(findDate, false, SMALL_MOLECULE);
     
     assertFalse("expiredSet is empty", expiredSet.isEmpty());
     assertTrue(contains(user1, expiredSet));
@@ -156,7 +160,7 @@ public class UserAgreementUpdaterTest extends AbstractSpringPersistenceTest
     
     // now move the date out 
     findDate = findDate.plusYears(2);
-    expiredSet = userAgreementUpdater.findUsersWithOldSMAgreements(findDate, false);
+    expiredSet = userAgreementUpdater.findUsersWithOldUserAgreements(findDate, false, SMALL_MOLECULE);
     
     assertFalse(expiredSet.isEmpty());
     assertTrue(contains(user1, expiredSet));
@@ -172,7 +176,7 @@ public class UserAgreementUpdaterTest extends AbstractSpringPersistenceTest
 
     // Now find again, not that only user 1 is found
     
-    expiredSet = userAgreementUpdater.findUsersWithOldSMAgreements(findDate, false);
+    expiredSet = userAgreementUpdater.findUsersWithOldUserAgreements(findDate, false, SMALL_MOLECULE);
     
     assertFalse(expiredSet.isEmpty());
     assertTrue(contains(user1, expiredSet));
@@ -190,11 +194,11 @@ public class UserAgreementUpdaterTest extends AbstractSpringPersistenceTest
     initializeData();
 
     // create the UA CLI
-    ChecklistItem checklistItem = new ChecklistItem(UserAgreementUpdater.USER_AGREEMENT_CHECKLIST_ITEM_NAME, true, ChecklistItemGroup.FORMS, 0);
+    ChecklistItem checklistItem = new ChecklistItem(UserAgreementUpdater.USER_AGREEMENT_CHECKLIST_ITEM_NAME.get(SMALL_MOLECULE), true, ChecklistItemGroup.FORMS, 0);
     genericEntityDao.persistEntity(checklistItem);
 
     // create the attachment
-    AttachedFileType attachedFileType = new UserAttachedFileType(UserAgreementUpdater.USER_AGREEMENT_ATTACHED_FILE_TYPE);
+    AttachedFileType attachedFileType = new UserAttachedFileType(UserAgreementUpdater.USER_AGREEMENT_ATTACHED_FILE_TYPE.get(SMALL_MOLECULE));
     genericEntityDao.persistEntity(attachedFileType);
 
     // create one entity that will be expired
@@ -212,7 +216,7 @@ public class UserAgreementUpdaterTest extends AbstractSpringPersistenceTest
 
     // check that not yet "old" - there are no events yet!
     List<Pair<ScreeningRoomUser,ChecklistItemEvent>> expiredSet 
-        = userAgreementUpdater.findUsersWithOldSMAgreements(new LocalDate(), true);
+ = userAgreementUpdater.findUsersWithOldUserAgreements(new LocalDate(), true, SMALL_MOLECULE);
     assertTrue(expiredSet.isEmpty());
 
     flushAndClear();
@@ -222,7 +226,7 @@ public class UserAgreementUpdaterTest extends AbstractSpringPersistenceTest
     user2 = genericEntityDao.reloadEntity(user2);
     admin = genericEntityDao.reloadEntity(admin);
     InputStream inputStream = new ByteArrayInputStream("contents".getBytes());
-    userAgreementUpdater.updateUser(user, ScreensaverUserRole.SM_DSL_LEVEL1_MUTUAL_SCREENS, "user_agreement.pdf", inputStream, admin);
+    userAgreementUpdater.updateUser(user, ScreensaverUserRole.SM_DSL_LEVEL1_MUTUAL_SCREENS, SMALL_MOLECULE, "user_agreement.pdf", inputStream, admin);
 
     // set the other user to the future (have to do this manually)
     LocalDate date2 = new LocalDate();
@@ -233,7 +237,7 @@ public class UserAgreementUpdaterTest extends AbstractSpringPersistenceTest
 
     // first find the user with the old event first
     LocalDate findDate = new LocalDate();
-    expiredSet = userAgreementUpdater.findUsersWithOldSMAgreements(findDate, true);
+    expiredSet = userAgreementUpdater.findUsersWithOldUserAgreements(findDate, true, SMALL_MOLECULE);
     
     assertFalse(expiredSet.isEmpty());
     assertTrue(contains(user, expiredSet));
@@ -242,7 +246,7 @@ public class UserAgreementUpdaterTest extends AbstractSpringPersistenceTest
     
     // now move the date out 
     findDate = findDate.plusYears(2);
-    expiredSet = userAgreementUpdater.findUsersWithOldSMAgreements(findDate, true);
+    expiredSet = userAgreementUpdater.findUsersWithOldUserAgreements(findDate, true, SMALL_MOLECULE);
     
     assertFalse(expiredSet.isEmpty());
     assertTrue(contains(user, expiredSet));
@@ -251,10 +255,10 @@ public class UserAgreementUpdaterTest extends AbstractSpringPersistenceTest
     
     //TODO: this next section is testing the expiration.  Might want to move to another test...
     // Expire the first user
-    userAgreementUpdater.expireUser(user, admin);
+    userAgreementUpdater.expireUser(user, admin, SMALL_MOLECULE);
     //date2 = date2.plusYears(2);
     // query again, to see if the expired user still shows up
-    expiredSet = userAgreementUpdater.findUsersWithOldSMAgreements(findDate, true);
+    expiredSet = userAgreementUpdater.findUsersWithOldUserAgreements(findDate, true, SMALL_MOLECULE);
     
     assertFalse(expiredSet.isEmpty());
     assertFalse(contains(user, expiredSet));
@@ -266,8 +270,8 @@ public class UserAgreementUpdaterTest extends AbstractSpringPersistenceTest
   {
     initializeData();
 
-    ChecklistItem checklistItem = new ChecklistItem(UserAgreementUpdater.USER_AGREEMENT_CHECKLIST_ITEM_NAME, true, ChecklistItemGroup.FORMS, 0);
-    AttachedFileType attachedFileType = new UserAttachedFileType(UserAgreementUpdater.USER_AGREEMENT_ATTACHED_FILE_TYPE);
+    ChecklistItem checklistItem = new ChecklistItem(UserAgreementUpdater.USER_AGREEMENT_CHECKLIST_ITEM_NAME.get(SMALL_MOLECULE), true, ChecklistItemGroup.FORMS, 0);
+    AttachedFileType attachedFileType = new UserAttachedFileType(UserAgreementUpdater.USER_AGREEMENT_ATTACHED_FILE_TYPE.get(SMALL_MOLECULE));
     ScreeningRoomUser user = new ScreeningRoomUser("Test", "User");
 //    AdministratorUser admin = new AdministratorUser("Test", "Admin", "", "", "", "", "", "");
 //    admin.addScreensaverUserRole(ScreensaverUserRole.USERS_ADMIN);
@@ -282,7 +286,7 @@ public class UserAgreementUpdaterTest extends AbstractSpringPersistenceTest
     user = genericEntityDao.reloadEntity(user);
     admin = genericEntityDao.reloadEntity(admin);
     InputStream inputStream = new ByteArrayInputStream("contents".getBytes());
-    userAgreementUpdater.updateUser(user, ScreensaverUserRole.SM_DSL_LEVEL1_MUTUAL_SCREENS, "user_agreement.pdf", inputStream, admin);
+    userAgreementUpdater.updateUser(user, ScreensaverUserRole.SM_DSL_LEVEL1_MUTUAL_SCREENS, SMALL_MOLECULE, "user_agreement.pdf", inputStream, admin);
 
     flushAndClear();
     
@@ -303,7 +307,7 @@ public class UserAgreementUpdaterTest extends AbstractSpringPersistenceTest
     admin = genericEntityDao.reloadEntity(admin);
     inputStream = new ByteArrayInputStream("contents".getBytes());
     try {
-      userAgreementUpdater.updateUser(user, ScreensaverUserRole.SM_DSL_LEVEL3_SHARED_SCREENS, "user_agreement.pdf", inputStream, admin);
+      userAgreementUpdater.updateUser(user, ScreensaverUserRole.SM_DSL_LEVEL3_SHARED_SCREENS, SMALL_MOLECULE, "user_agreement.pdf", inputStream, admin);
       fail("expected exception");
     }
     catch (BusinessRuleViolationException e) { 
@@ -321,7 +325,7 @@ public class UserAgreementUpdaterTest extends AbstractSpringPersistenceTest
     user = genericEntityDao.reloadEntity(user);
     admin = genericEntityDao.reloadEntity(admin);
     inputStream = new ByteArrayInputStream("contents".getBytes());
-    userAgreementUpdater.updateUser(user, ScreensaverUserRole.SM_DSL_LEVEL3_SHARED_SCREENS, "user_agreement.pdf", inputStream, admin);
+    userAgreementUpdater.updateUser(user, ScreensaverUserRole.SM_DSL_LEVEL3_SHARED_SCREENS, SMALL_MOLECULE, "user_agreement.pdf", inputStream, admin);
     
     flushAndClear();
 

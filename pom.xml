@@ -201,8 +201,32 @@
   <build>
   
     <finalName>${project.artifactId}-${facility}-${project.version}</finalName>
+    
+      <plugins>
+        <plugin>
+          <groupId>org.codehaus.mojo</groupId>
+          <artifactId>cobertura-maven-plugin</artifactId>
+          <version>2.5.1</version>
+          <configuration>
+            <instrumentation>
+              <ignores>
+              </ignores>
+              <excludes>
+              </excludes>
+            </instrumentation>
+          </configuration>
+          <executions>
+            <execution>
+              <goals>
+                <goal>clean</goal>
+              </goals>
+            </execution>
+          </executions>
+        </plugin>
+      </plugins>
   
     <pluginManagement>
+
       <plugins>
 
         <plugin>
@@ -225,10 +249,19 @@
       
       </plugins>
     </pluginManagement>
-    
+
   </build>
   
-  
+  <reporting>
+    <plugins>
+      <plugin>
+        <groupId>org.codehaus.mojo</groupId>
+        <artifactId>cobertura-maven-plugin</artifactId>
+        <version>2.5.1</version>
+      </plugin>
+    </plugins>
+  </reporting>
+    
   <modules>
     <module>core</module>
     <module>test</module>

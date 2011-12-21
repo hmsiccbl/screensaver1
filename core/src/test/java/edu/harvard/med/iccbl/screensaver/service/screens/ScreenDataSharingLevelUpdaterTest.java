@@ -440,12 +440,12 @@ public class ScreenDataSharingLevelUpdaterTest extends AbstractSpringPersistence
     assertTrue("screen3Expired should be expired: ", screens.contains(screen3Expired));
     assertTrue("screen9ExpiredMaxDatePassed should be expired: ", screens.contains(screen9ExpiredMaxDatePassed));
 
-    assertFalse("screen4Default should not be expired: ", screens.contains(screen4Default));
-    assertFalse("screen1NotExpired should not be expired: ", screens.contains(screen1NotExpired));
-    assertFalse("screen5RnaiExpired should not be expired: ", screens.contains(screen5RnaiExpired));
-    assertFalse("screen6ExpiredNoResults should not be expired: ", screens.contains(screen6ExpiredNoResults));
-    assertFalse("screen7ExpiredDropped should not be expired: ", screens.contains(screen7ExpiredDropped));
-    assertFalse("screen8ExpiredTransferred should not be expired: ", screens.contains(screen8ExpiredTransferred));
+    assertFalse("screen4Default should not be expired", screens.contains(screen4Default));
+    assertFalse("screen1NotExpired should not be expired", screens.contains(screen1NotExpired));
+    assertTrue("screen5RnaiExpired should be expired", screens.contains(screen5RnaiExpired));
+    assertFalse("screen6ExpiredNoResults should not be expired", screens.contains(screen6ExpiredNoResults));
+    assertFalse("screen7ExpiredDropped should not be expired", screens.contains(screen7ExpiredDropped));
+    assertFalse("screen8ExpiredTransferred should not be expired", screens.contains(screen8ExpiredTransferred));
     
     
     // just a little test here to see if we get a null or an empty list, find none
@@ -492,23 +492,23 @@ public class ScreenDataSharingLevelUpdaterTest extends AbstractSpringPersistence
     screen4Default = genericEntityDao.reloadEntity(screen4Default);
     screen5RnaiExpired = genericEntityDao.reloadEntity(screen5RnaiExpired);
 
-    assertTrue("screen2Expired should be expired: ", screens.contains(screen2Expired));
-    assertTrue("screen2Expired should be public: ", screen2Expired.getDataSharingLevel() == ScreenDataSharingLevel.MUTUAL_SCREENS );
+    assertTrue("screen2Expired should be expired", screens.contains(screen2Expired));
+    assertTrue("screen2Expired should be shared", screen2Expired.getDataSharingLevel() == ScreenDataSharingLevel.MUTUAL_SCREENS);
 
-    assertTrue("screen3Expired should be expired: ", screens.contains(screen3Expired));
-    assertTrue("screen3Expired should be public: ", screen3Expired.getDataSharingLevel() == ScreenDataSharingLevel.MUTUAL_SCREENS );
+    assertTrue("screen3Expired should be expired", screens.contains(screen3Expired));
+    assertTrue("screen3Expired should be shared", screen3Expired.getDataSharingLevel() == ScreenDataSharingLevel.MUTUAL_SCREENS);
     
-    assertFalse("screen4Default should not be expired: ", screens.contains(screen4Default));
-    assertTrue("screen4Default should not be public: ", screen4Default.getDataSharingLevel() != ScreenDataSharingLevel.MUTUAL_SCREENS );
+    assertFalse("screen4Default should not be expired", screens.contains(screen4Default));
+    assertTrue("screen4Default should not be shared", screen4Default.getDataSharingLevel() != ScreenDataSharingLevel.MUTUAL_SCREENS);
 
-    assertFalse("screen1NotExpired should be expired: ", screens.contains(screen1NotExpired));
-    assertTrue("screen1NotExpired should not be public: ", screen1NotExpired.getDataSharingLevel() != ScreenDataSharingLevel.MUTUAL_SCREENS );
+    assertFalse("screen1NotExpired should be expired", screens.contains(screen1NotExpired));
+    assertTrue("screen1NotExpired should not be shared", screen1NotExpired.getDataSharingLevel() != ScreenDataSharingLevel.MUTUAL_SCREENS);
     
-    assertFalse("screen5RnaiExpired should not be expired: ", screens.contains(screen5RnaiExpired));
-    assertTrue("screen5RnaiExpired should not be public: ", screen5RnaiExpired.getDataSharingLevel() != ScreenDataSharingLevel.MUTUAL_SCREENS );
+    assertTrue("screen5RnaiExpired should be expired", screens.contains(screen5RnaiExpired));
+    assertTrue("screen5RnaiExpired should be shared", screen5RnaiExpired.getDataSharingLevel() == ScreenDataSharingLevel.MUTUAL_SCREENS);
     
-    assertTrue("screen9ExpiredMaxDatePassed should be expired: ", screens.contains(screen9ExpiredMaxDatePassed));
-    assertTrue("screen9ExpiredMaxDatePassed should be public: ", screen9ExpiredMaxDatePassed.getDataSharingLevel() == ScreenDataSharingLevel.MUTUAL_SCREENS );
+    assertTrue("screen9ExpiredMaxDatePassed should be expired", screens.contains(screen9ExpiredMaxDatePassed));
+    assertTrue("screen9ExpiredMaxDatePassed should be shared", screen9ExpiredMaxDatePassed.getDataSharingLevel() == ScreenDataSharingLevel.MUTUAL_SCREENS);
   }
 
   /**

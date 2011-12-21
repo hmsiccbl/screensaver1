@@ -139,6 +139,12 @@ public class Screen extends Study implements AttachedFilesEntity<ScreenAttachedF
       return s.getFacilityId();
     }
   };
+  public static final Function<Screen,ScreenDataSharingLevel> ToDataSharingLevel = new Function<Screen,ScreenDataSharingLevel>() {
+    public ScreenDataSharingLevel apply(Screen s)
+    {
+      return s.getDataSharingLevel();
+    }
+  };
 
   // private instance data
 

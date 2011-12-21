@@ -8,79 +8,66 @@
   xmlns:s="http://myfaces.apache.org/sandbox"
   xmlns:ss="http://screensaver.med.harvard.edu/ui">
 
-<ui:composition template="/main/template.xhtml">
+<ui:component>
 
-  <ui:param name="pageTitle" value="User Agreement Updater" />
-  <ui:param name="hideMenu" value="true" />
+  <ui:insert name="instructions" />
 
-  <ui:define name="body">
-  
-    <t:div styleClass="">
-    This form will update the user as follows:
-    <ul>
-      <li>Set the Small Molecule Data Sharing Level</li>
-      <li>Attach the ICCB-L/NSRB Small Molecule User Agreement file</li>
-      <li>Activate the "Current Small Molecule User Agreement activated" checklist item</li>
-      <li>Add login privileges</li>
-    </ul>
-    </t:div>
-    <h:form id="userSummaryForm">
-      <t:panelGrid id="userSummaryPanel" columns="2"
-        columnClasses="propertyLabelColumn,column"
-        styleClass="layoutPanel">
-        <t:outputLabel value="User" styleClass="label" />
-        <ss:user id="userToUpdate"
-          user="#{userViewer.screeningRoomUser}" showEmail="false" />
+  <h:form id="userSummaryForm">
+    <t:panelGrid id="userSummaryPanel" columns="2"
+      columnClasses="propertyLabelColumn,column"
+      styleClass="layoutPanel">
+      <t:outputLabel value="User" styleClass="label" />
+      <ss:user id="userToUpdate" user="#{userViewer.screeningRoomUser}"
+        showEmail="false" />
 
-        <ss:property id="currentDataSharingLevel"
-          label="Current Data Sharing Level" styleClass="label"
-          value="#{userAgreementUpdaterUi.currentDataSharingLevelRoleName}" />
+      <ss:property id="currentDataSharingLevel"
+        label="Current Data Sharing Level" styleClass="label"
+        value="#{userAgreementUpdaterUi.currentDataSharingLevelRoleName}" />
 
-        <ss:property id="labHeadDataSharingLevel"
-          label="Lab Head Data Sharing Level" styleClass="label"
-          value="#{userAgreementUpdaterUi.labHeadDataSharingLevelRoleName}" />
+      <ss:property id="labHeadDataSharingLevel"
+        label="Lab Head Data Sharing Level" styleClass="label"
+        value="#{userAgreementUpdaterUi.labHeadDataSharingLevelRoleName}" />
 
-        <ss:property id="hasLoginPrivileges"
-          label="Screensaver User Login Privileges" styleClass="label"
-          value="#{userAgreementUpdaterUi.screensaverUser ? 'Yes' : 'No'}" />
-      </t:panelGrid>
-    </h:form>
+      <ss:property id="hasLoginPrivileges"
+        label="Screensaver User Login Privileges" styleClass="label"
+        value="#{userAgreementUpdaterUi.screensaverUser ? 'Yes' : 'No'}" />
+    </t:panelGrid>
+  </h:form>
 
-    <h:form id="userAgreementUpdaterForm" enctype="multipart/form-data"
-      rendered="#{!userViewer.readOnly}">
+  <h:form id="userAgreementUpdaterForm" enctype="multipart/form-data"
+    rendered="#{!userViewer.readOnly}">
 
-      <t:panelGrid id="propertiesPanel" columns="2"
-        columnClasses="propertyLabelColumn,column"
-        styleClass="layoutPanel">
+    <t:panelGrid id="propertiesPanel" columns="2"
+      columnClasses="propertyLabelColumn,column"
+      styleClass="layoutPanel">
 
-        <t:outputLabel id="newDataSharingLevel" 
-          value="New Data Sharing Level" styleClass="label" />
-        <t:selectOneMenu id="newDataSharingLevelMenu"
-          value="#{userAgreementUpdaterUi.newDataSharingLevel.value}"
-          styleClass="inputText selectMenu">
-          <f:selectItems
-            value="#{userAgreementUpdaterUi.newDataSharingLevel.selectItems}" />
-        </t:selectOneMenu>
+      <t:outputLabel id="newDataSharingLevel"
+        value="New Data Sharing Level" styleClass="label" />
+      <t:selectOneMenu id="newDataSharingLevelMenu"
+        value="#{userAgreementUpdaterUi.newDataSharingLevel.value}"
+        styleClass="inputText selectMenu">
+        <f:selectItems
+          value="#{userAgreementUpdaterUi.newDataSharingLevel.selectItems}" />
+      </t:selectOneMenu>
 
-        <t:outputLabel for="uploadUserAgreementFile"
-          value="Small Molecule User Agreement file (pdf)" styleClass="label" />
-        <t:inputFileUpload id="uploadUserAgreementFile"
-          value="#{userAgreementUpdaterUi.userAgreementUploadedFile}"
-          storage="file" accept="application/pdf" required="true"
-          styleClass="inputText" />
-      </t:panelGrid>
+      <t:outputLabel for="uploadUserAgreementFile"
+        value="Small Molecule User Agreement file (pdf)"
+        styleClass="label" />
+      <t:inputFileUpload id="uploadUserAgreementFile"
+        value="#{userAgreementUpdaterUi.userAgreementUploadedFile}"
+        storage="file" accept="application/pdf" required="true"
+        styleClass="inputText" />
+    </t:panelGrid>
 
-      <t:panelGroup styleClass="commandPanel">
-        <t:commandButton value="Update User"
-          action="#{userAgreementUpdaterUi.updateUser}"
-          styleClass="command" />
-        <t:commandButton value="Cancel" immediate="true"
-          action="#{userAgreementUpdaterUi.cancel}" styleClass="command" />
-      </t:panelGroup>
-    </h:form>
-  </ui:define>
-
-</ui:composition>
+    <t:panelGroup styleClass="commandPanel">
+      <t:commandButton value="Update User"
+        action="#{userAgreementUpdaterUi.updateUser}"
+        styleClass="command" />
+      <t:commandButton value="Cancel" immediate="true"
+        action="#{userAgreementUpdaterUi.cancel}" styleClass="command" />
+    </t:panelGroup>
+  </h:form>
+</ui:component>
 
 </html>
 
