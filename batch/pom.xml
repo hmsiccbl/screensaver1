@@ -11,7 +11,7 @@
   </parent>
   <groupId>edu.harvard.med</groupId>
   <artifactId>screensaver-batch</artifactId>
-  <version>2011-12-06</version>
+  <version>2011-12-16</version>
   <packaging>jar</packaging>
   <name>Screensaver Batch</name>
   <description>Screensaver command-line applications for batch I/O</description>
