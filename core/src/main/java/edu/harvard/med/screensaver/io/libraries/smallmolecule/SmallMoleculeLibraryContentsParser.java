@@ -68,11 +68,11 @@ public class SmallMoleculeLibraryContentsParser extends LibraryContentsParser<Sm
       throw new ParseException(new ParseError("well is required", _sdRecordParser.getLineNumber()));
     }
     if (record.getSmiles() == null && record.getLibraryWellType() == LibraryWellType.EXPERIMENTAL) {
-      log.warn(new ParseError("smiles is required for 'experimental' well", _sdRecordParser.getLineNumber()).toString());
+      log.warn(new ParseError("smiles is missing for 'experimental' well", _sdRecordParser.getLineNumber()).toString());
       //[#2037] throw new ParseException(new ParseError("smiles is required for 'experimental' well", _sdRecordParser.getLineNumber()));
     }
     if (record.getInChi() == null && record.getLibraryWellType() == LibraryWellType.EXPERIMENTAL) {
-      log.warn(new ParseError("inchi is required for 'experimental' well", _sdRecordParser.getLineNumber()).toString());
+      log.warn(new ParseError("inchi is missing for 'experimental' well", _sdRecordParser.getLineNumber()).toString());
       //[#2037] throw new ParseException(new ParseError("inchi is required for 'experimental' well", _sdRecordParser.getLineNumber()));
     }
     if(record.getMgMlConcentration() == null && record.getMolarConcentration() == null && record.getLibraryWellType() == LibraryWellType.EXPERIMENTAL)
