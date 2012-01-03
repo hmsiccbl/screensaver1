@@ -36,23 +36,16 @@ import edu.harvard.med.screensaver.model.libraries.WellKey;
  */
 public class ICCBLPlateWellToINBioLQMapper
 {
-
-  // static fields
   
   private static Logger log = Logger.getLogger(ICCBLPlateWellToINBioLQMapper.class);
   private static String _mappingFilename = "ICCB-L Plate-Well to INBio LQ Mapping.xls";
-  
-  
-  // instance fields
   
   private Sheet _mappingWorksheet;
   private Set<Integer> _mappedPlates = new HashSet<Integer>();
   private Map<WellKey,String> _wellKeyToLQMap = new HashMap<WellKey,String>();
   
   
-  // public constructor and instance methods
-  
-  public ICCBLPlateWellToINBioLQMapper() throws BiffException
+  public ICCBLPlateWellToINBioLQMapper() throws BiffException, IOException
   {
     initializeMappingWorksheet();
     populateWellKeyToLQMap();
@@ -68,18 +61,16 @@ public class ICCBLPlateWellToINBioLQMapper
     return _wellKeyToLQMap.get(wellKey);
   }
   
-  
-  // private instance methods
-  
-  private void initializeMappingWorksheet() throws BiffException
+  private void initializeMappingWorksheet() throws BiffException, IOException
   {
+    File mappingFile = new File(_mappingFilename);
     try {
-      File mappingFile = new File(_mappingFilename);
       Workbook workbook = Workbook.getWorkbook(mappingFile);
       _mappingWorksheet = workbook.getSheet(0);
     }
     catch (IOException e) {
-      log.error("could not read workbook: " + e.getMessage());
+      log.error("could not read workbook: " + mappingFile.getAbsolutePath());
+      throw e;
     }
   }
   
