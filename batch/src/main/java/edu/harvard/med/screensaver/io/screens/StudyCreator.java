@@ -143,19 +143,11 @@ public class StudyCreator
 
           // import
 
-          boolean keyByWellId = false;
-          boolean keyByFacilityId = false;
-          boolean keyByCompoundName = false;
-          if (app.isCommandLineFlagSet("keyByWellId")) keyByWellId = true;
-          if (app.isCommandLineFlagSet("keyByFacilityId")) keyByFacilityId = true;
-          if (app.isCommandLineFlagSet("keyByCompoundName")) keyByCompoundName = true;
-          if (((keyByFacilityId ? 1 : 0) + (keyByWellId ? 1 : 0) + (keyByCompoundName ? 1 : 0)) != 1) {
-            throw new IllegalArgumentException("must specify either \"keyByWellId\" or \"keyByFacilityId\" or \"keyByCompoundName\" ");
-          }
           StudyAnnotationParser.KEY_COLUMN keyColumn = StudyAnnotationParser.KEY_COLUMN.RVI; // keyByReagentVendorId is the default
-          if (keyByWellId) keyColumn = KEY_COLUMN.WELL_ID;
-          if (keyByFacilityId) keyColumn = KEY_COLUMN.FACILITY_ID;
-          if (keyByCompoundName) keyColumn = KEY_COLUMN.COMPOUND_NAME;
+          if (app.isCommandLineFlagSet("keyByWellId")) keyColumn = KEY_COLUMN.WELL_ID;
+          if (app.isCommandLineFlagSet("keyByFacilityId")) keyColumn = KEY_COLUMN.FACILITY_ID;
+          if (app.isCommandLineFlagSet("keyByCompoundName")) keyColumn = KEY_COLUMN.COMPOUND_NAME;
+          
           boolean annotationNamesInCol1 = app.isCommandLineFlagSet("annotationNamesInCol1");
 
           File screenResultFile = null;
