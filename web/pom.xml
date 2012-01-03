@@ -2,7 +2,7 @@
   <modelVersion>4.0.0</modelVersion>
   <parent>
     <artifactId>screensaver</artifactId>
-    <version>2011-12-06</version>
+    <version>2012-01-03</version>
     <groupId>edu.harvard.med</groupId>
     <relativePath>../pom.xml</relativePath>
   </parent>
@@ -171,7 +171,7 @@
   	<dependency>
   		<groupId>edu.harvard.med</groupId>
   		<artifactId>screensaver-core</artifactId>
-  		<version>2011-12-06</version>
+  		<version>2012-01-03</version>
   	</dependency>
 
     <dependency>
@@ -183,7 +183,7 @@
     <dependency>
       <groupId>edu.harvard.med</groupId>
       <artifactId>screensaver-test</artifactId>
-      <version>2011-12-06</version>
+      <version>2012-01-03</version>
       <scope>test</scope>
     </dependency>
 
