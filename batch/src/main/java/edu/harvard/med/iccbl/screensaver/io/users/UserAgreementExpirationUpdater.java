@@ -225,8 +225,8 @@ public class UserAgreementExpirationUpdater extends AdminEmailApplication
       _userAgreementUpdater.findUsersWithOldUserAgreements(maxPerformedDate, false, _screenType);
 
     if (pairList.isEmpty()) {
-      String subject = getMessages().getMessage("admin.users.userAgreementExpiration.warningNotification.noaction.subject");
-      String msg = "No Users have agreements (that haven't already been notified) dated earlier than the specified cutoff date: " +
+      String subject = getMessages().getMessage("admin.users.userAgreementExpiration.warningNotification.noaction.subject", _screenType);
+      String msg = "No " + _screenType + " Users have agreements (that haven't already been notified) dated earlier than the specified cutoff date: " +
         maxPerformedDate
                +
         ", or (now - ageInDaysToExpire + daysToNotify): (" +
@@ -241,10 +241,12 @@ public class UserAgreementExpirationUpdater extends AdminEmailApplication
       // send Admin summary email
       String subject = getMessages().getMessage("admin.users.userAgreementExpiration.warningNotification.subject",
                                                 pairList.size(),
+                                                _screenType,
                                                 daysToNotify);
       StringBuilder msg =
         new StringBuilder(getMessages().getMessage("admin.users.userAgreementExpiration.warningNotification.messageBoilerplate",
                                                    pairList.size(),
+                                                   _screenType,
                                                    daysToNotify,
                                                    _screenType.getValue()));
 
@@ -283,9 +285,10 @@ public class UserAgreementExpirationUpdater extends AdminEmailApplication
         // send user an email
         for (Pair<ScreeningRoomUser,ChecklistItemEvent> pair : pairList) {
           String message = MessageFormat.format(notificationSubjectAndMessage.getSecond(),
+                                                _screenType,
                                                 EXPIRE_DATE_FORMATTER.print(expireDate),
                                                 DataSharingLevelMapper.getPrimaryDataSharingLevelRoleForUser(_screenType, pair.getFirst()).getDisplayableRoleName());
-          if(sendEmail(notificationSubjectAndMessage.getFirst(), message, pair.getFirst())) {
+          if(sendEmail(notificationSubjectAndMessage.getFirst().replace("{0}", _screenType.getValue()), message, pair.getFirst())) {
             _userAgreementUpdater.setLastNotifiedUserAgreementChecklistItemEvent(pair.getFirst(), pair.getSecond(), _screenType);
           }
         }
@@ -308,17 +311,19 @@ public class UserAgreementExpirationUpdater extends AdminEmailApplication
     }
 
     if (updates.isEmpty()) {
-      String subject = getMessages().getMessage("admin.users.userAgreementExpiration.expiration.noaction.subject");
-      String msg = "No Users have (non expired) agreements dated earlier than the specified cutoff date: " + expireDate;
+      String subject = getMessages().getMessage("admin.users.userAgreementExpiration.expiration.noaction.subject", _screenType);
+      String msg = "No " + _screenType + " Users have (non expired) agreements dated earlier than the specified cutoff date: " + expireDate;
       sendAdminEmails(subject, msg);
     }
     else {
       //Send a summary email to the admin and the recipient list
       String subject = getMessages().getMessage("admin.users.userAgreementExpiration.expiration.subject",
-                                                updates.size());
+                                                updates.size(),
+                                                _screenType);
       StringBuilder msg =
         new StringBuilder(getMessages().getMessage("admin.users.userAgreementExpiration.expiration.messageBoilerplate",
                                                    updates.size(),
+                                                   _screenType,
                                                    timeToExpireDays));
       if (isCommandLineFlagSet(TEST_ONLY[SHORT_OPTION_INDEX])) {
         subject = "Testing: " + subject;
