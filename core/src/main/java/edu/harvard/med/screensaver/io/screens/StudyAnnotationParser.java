@@ -218,7 +218,7 @@ public class StudyAnnotationParser
         reagents = getReagents(keyColumn, key);
       }
       catch (UnrecoverableParseException e) {
-        throw new UnrecoverableParseException("WellKey in cell: " + row.getCell(0) + " is invalid.", e);
+        throw new UnrecoverableParseException("Key in cell: " + row.getCell(0) + " is invalid.", e);
       }
 
       for (Reagent reagent : reagents) {
