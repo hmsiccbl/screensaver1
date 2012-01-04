@@ -79,7 +79,7 @@ public class ScreenDataSharingLevelUpdater
   }
 
   /**
-   * Returns a unique list of Screens that:
+   * Returns a unique list of Small Molecule Screens that:
    * <ul>
    * <li>have ScreenResults
    * <li>have ScreenDataSharingLevel that is more restrictive than {@link ScreenDataSharingLevel#MUTUAL_SCREENS}
@@ -97,6 +97,7 @@ public class ScreenDataSharingLevelUpdater
         " where" +
         " s.dataPrivacyExpirationDate <= ? " +
         " and s.dataSharingLevel > ? " +
+        " and s.screenType = ? " +
         " and s.dataPrivacyExpirationNotifiedDate is null" +
       //        " and s.screenId not in (select s.screenId from Screen s join s.statusItems si where si.status in ( ?, ? ) and si.screen = s ) "
       " and s.screenId not in (select s2.screenId from Screen s2 join s2.statusItems si where si.status in ( ?, ? ) and s2=s ) "
@@ -105,6 +106,7 @@ public class ScreenDataSharingLevelUpdater
     List<Screen> list = _dao.findEntitiesByHql(Screen.class, hql, 
                                                expireDate,
                                                ScreenDataSharingLevel.MUTUAL_SCREENS,
+                                               ScreenType.SMALL_MOLECULE,
                                                ScreenStatus.DROPPED_TECHNICAL,
                                                ScreenStatus.TRANSFERRED_TO_BROAD_INSTITUTE);
     log.info("Hql: " + hql + ", " + list.size());
@@ -118,12 +120,14 @@ public class ScreenDataSharingLevelUpdater
         " where" +
         " s.dataPrivacyExpirationDate <= ? " +
         " and s.dataSharingLevel > ? " +
+        " and s.screenType = ? " +
       " and s.screenId not in (select s2.screenId from Screen s2 join s2.statusItems si where si.status in ( ?, ? ) and s2=s ) "
       +
         " order by s.screenId";
     List<Screen> list = _dao.findEntitiesByHql(Screen.class, hql, 
                                   expireDate, 
                                   ScreenDataSharingLevel.MUTUAL_SCREENS, 
+                                  ScreenType.SMALL_MOLECULE ,
                                   ScreenStatus.DROPPED_TECHNICAL, 
                                   ScreenStatus.TRANSFERRED_TO_BROAD_INSTITUTE
                                   );
@@ -194,13 +198,13 @@ public class ScreenDataSharingLevelUpdater
         " join s.screenResult sr " +
     		" inner join s.labActivities la " +
     		" where " +
-        " s.dataSharingLevel > ? "
-      +
-      " and s.screenId not in (select s2.screenId from Screen s2 join s2.statusItems si where si.status in ( ?, ? ) and s2=s ) "
-      +
+        " s.screenType = ? " +
+        " and s.dataSharingLevel > ? " +
+        " and s.screenId not in (select s2.screenId from Screen s2 join s2.statusItems si where si.status in ( ?, ? ) and s2=s ) "+
         " order by s.screenId";
 
     List<Screen> screens = _dao.findEntitiesByHql(Screen.class, hql, 
+                                                  ScreenType.SMALL_MOLECULE, 
                                                   ScreenDataSharingLevel.MUTUAL_SCREENS,
                                                   ScreenStatus.DROPPED_TECHNICAL,
                                                   ScreenStatus.TRANSFERRED_TO_BROAD_INSTITUTE);
@@ -302,11 +306,13 @@ public class ScreenDataSharingLevelUpdater
     		" join s.publications " +
         " join s.screenResult sr " +
     		" where s.dataSharingLevel > ? " +
+        " and s.screenType = ? " +
         " and s.screenId not in (select s2.screenId from Screen s2 join s2.statusItems si where si.status in ( ?, ? ) and s2=s ) "
       +
         " order by s.screenId";
     return _dao.findEntitiesByHql(Screen.class, hql, 
                                   ScreenDataSharingLevel.SHARED, 
+                                  ScreenType.SMALL_MOLECULE,
                                   ScreenStatus.DROPPED_TECHNICAL, 
                                   ScreenStatus.TRANSFERRED_TO_BROAD_INSTITUTE);
   }
