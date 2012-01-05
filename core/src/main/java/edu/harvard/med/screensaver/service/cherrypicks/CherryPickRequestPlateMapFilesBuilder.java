@@ -45,6 +45,7 @@ import edu.harvard.med.screensaver.model.VolumeUnit;
 import edu.harvard.med.screensaver.model.cherrypicks.CherryPickAssayPlate;
 import edu.harvard.med.screensaver.model.cherrypicks.CherryPickRequest;
 import edu.harvard.med.screensaver.model.cherrypicks.LabCherryPick;
+import edu.harvard.med.screensaver.model.cherrypicks.LabCherryPick.LabCherryPickStatus;
 import edu.harvard.med.screensaver.model.libraries.Copy;
 import edu.harvard.med.screensaver.model.libraries.Plate;
 import edu.harvard.med.screensaver.model.libraries.PlateType;
@@ -140,7 +141,7 @@ public class CherryPickRequestPlateMapFilesBuilder
     ZipOutputStream zipOut = new ZipOutputStream(zipOutRaw);
     MultiMap/*<String,SortedSet<CherryPick>>*/ files2CherryPicks = buildCherryPickFiles(cherryPickRequest, forPlates);
     buildReadme(cherryPickRequest, zipOut);
-    buildDistinctPlateCopyFile(cherryPickRequest, zipOut);
+    buildDistinctPlateCopyFile(cherryPickRequest, forPlates, zipOut);
     PrintWriter out = new CSVPrintWriter(new OutputStreamWriter(zipOut), NEWLINE);
     for (Iterator iter = files2CherryPicks.keySet().iterator(); iter.hasNext();) {
       String fileName = (String) iter.next();
@@ -235,7 +236,9 @@ public class CherryPickRequestPlateMapFilesBuilder
   /**
    * for  [#3206] Generate a distinct plate/copy list for CPR download file
    */
-  private void buildDistinctPlateCopyFile(CherryPickRequest cherryPickRequest, ZipOutputStream zipOut) throws IOException
+  private void buildDistinctPlateCopyFile(CherryPickRequest cherryPickRequest,
+                                          Set<CherryPickAssayPlate> forPlates, 
+                                          ZipOutputStream zipOut) throws IOException
   {
     PrintWriter out = new CSVPrintWriter(new OutputStreamWriter(zipOut), NEWLINE);
     zipOut.putNextEntry(new ZipEntry(DISTINCT_PLATE_COPY_LIST_FILE_NAME));
@@ -246,8 +249,14 @@ public class CherryPickRequestPlateMapFilesBuilder
 
     // TODO: consider caching this while building the CPR
     Set<Plate> sourcePlates = Sets.newHashSet();
-    for(LabCherryPick lcp:cherryPickRequest.getLabCherryPicks()) {
-      sourcePlates.add(librariesDao.findPlate(lcp.getSourceWell().getPlateNumber(), lcp.getSourceCopy().getName()));
+
+    for(CherryPickAssayPlate plate: forPlates)
+    {
+      for(LabCherryPick lcp:plate.getLabCherryPicks())
+      {
+        lcp = genericEntityDao.reloadEntity(lcp, true);
+        sourcePlates.add(librariesDao.findPlate(lcp.getSourceWell().getPlateNumber(), lcp.getSourceCopy().getName()));
+      }
     }
     // sort by plate/copy/location
     List<Plate> list = Lists.newArrayList(sourcePlates);
@@ -294,7 +303,7 @@ public class CherryPickRequestPlateMapFilesBuilder
     // set membership; we can't rely upon CPAP.equals(), since we're comparing
     // non-managed entities with managed entities, and therefore we do not have
     // the guarantee of instance equality for entities with the same ID
-    Set<Serializable> forPlateIds = new HashSet<Serializable>(forPlates.size());
+    Set<Serializable> forPlateIds = new HashSet<Serializable>( forPlates .size());
     for (CherryPickAssayPlate cpap : forPlates) {
       if (cpap.getEntityId() == null) {
         throw new IllegalArgumentException("all members of 'forPlates' must already be persisted and have a database identifier");
