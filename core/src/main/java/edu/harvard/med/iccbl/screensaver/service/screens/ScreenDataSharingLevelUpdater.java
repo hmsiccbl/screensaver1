@@ -306,13 +306,11 @@ public class ScreenDataSharingLevelUpdater
     		" join s.publications " +
         " join s.screenResult sr " +
     		" where s.dataSharingLevel > ? " +
-        " and s.screenType = ? " +
         " and s.screenId not in (select s2.screenId from Screen s2 join s2.statusItems si where si.status in ( ?, ? ) and s2=s ) "
       +
         " order by s.screenId";
     return _dao.findEntitiesByHql(Screen.class, hql, 
                                   ScreenDataSharingLevel.SHARED, 
-                                  ScreenType.SMALL_MOLECULE,
                                   ScreenStatus.DROPPED_TECHNICAL, 
                                   ScreenStatus.TRANSFERRED_TO_BROAD_INSTITUTE);
   }
