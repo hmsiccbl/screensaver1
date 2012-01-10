@@ -30,6 +30,9 @@ import edu.harvard.med.screensaver.model.meta.PropertyPath;
 import edu.harvard.med.screensaver.model.meta.RelationshipPath;
 import edu.harvard.med.screensaver.util.StringUtils;
 
+// TODO: would be beneficial to refactor this class such that query args are not permanently
+// set in the query that is built; instead the built query should allow different arg values
+// to be applied each time toQuery() is invoked
 public class HqlBuilder
 {
   // static members
