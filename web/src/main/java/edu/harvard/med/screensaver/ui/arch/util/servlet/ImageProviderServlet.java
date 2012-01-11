@@ -9,6 +9,8 @@
 
 package edu.harvard.med.screensaver.ui.arch.util.servlet;
 
+import java.awt.Color;
+import java.awt.Graphics2D;
 import java.awt.image.BufferedImage;
 import java.io.BufferedOutputStream;
 import java.io.File;
@@ -142,11 +144,14 @@ public class ImageProviderServlet extends HttpServlet
       }
       if(!file.exists()) {
         log.warn("image file not found: " + file);
-        BufferedImage image  = new BufferedImage(1, 1, BufferedImage.TYPE_INT_ARGB );
-        BufferedOutputStream bos=new BufferedOutputStream(resp.getOutputStream()); 
-        JPEGImageEncoder encoder= JPEGCodec.createJPEGEncoder(bos);
-        encoder.encode(image);
-        return;
+        //        BufferedImage image  = new BufferedImage(1, 1, BufferedImage.TYPE_INT_RGB );
+        //        Graphics2D    graphics = image.createGraphics();
+        //        graphics.setPaint ( Color.WHITE ); // it is better to use a white image
+        //        graphics.fillRect ( 0, 0, image.getWidth(), image.getHeight() );  
+        //        BufferedOutputStream bos=new BufferedOutputStream(resp.getOutputStream()); 
+        //        JPEGImageEncoder encoder= JPEGCodec.createJPEGEncoder(bos);
+        //        encoder.encode(image);
+        throw new IOException("image file not found: " + file);
       }
       
       // note, allow IOException to be thrown if not found. (will print to the log)
