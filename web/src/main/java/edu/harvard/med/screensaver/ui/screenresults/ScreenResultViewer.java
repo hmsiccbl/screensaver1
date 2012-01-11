@@ -255,6 +255,7 @@ public class ScreenResultViewer extends EntityViewerBackingBean<ScreenResult>
         Map<PropertyPath<Well>,List<? extends Criterion<?>>> criteria =
           FetchPaths.<Well,Tuple<String>>getFilteringCriteria(getWellSearchResults().getColumnManager().getVisibleColumns());
         PropertyPathDataFetcher.addFilteringRestrictions(hql, Maps.<RelationshipPath<Well>,String>newHashMap(), criteria);
+        // TODO: to implement [#2372], add the same filtering criteria (HQL where clauses) that were used to filter the WellSearchResult, to the hql object here
       }
     };
 
