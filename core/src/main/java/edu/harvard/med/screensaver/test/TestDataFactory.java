@@ -536,12 +536,12 @@ public class TestDataFactory
         BigDecimal val = null;
         // TODO: we should be able to generalize these special case BigDecimal builders by inspecting the model annotations for precision and scale and then construct a BigDecimal that is appropriate for the test
         if (callStack.contains("MlConcentration")) {
-          // mgMlConcentration has a max precision 5, scale 3
+          // mgMlConcentration has a max precision 3, scale 5
           val = new BigDecimal((TestDataFactory.this.newInstance(Double.class)).doubleValue() / _doubleTestValue);
           val = val.setScale(3, RoundingMode.HALF_UP);
         }
         else if (callStack.contains("dilution")) {
-          // dilution factor has a max precision 2, scale 8
+          // dilution factor has a max precision 8, scale 2
           val = new BigDecimal((TestDataFactory.this.newInstance(Double.class)).doubleValue() / (_doubleTestValue / 10));
           val = val.setScale(2, RoundingMode.HALF_UP);
         }
