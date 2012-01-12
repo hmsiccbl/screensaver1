@@ -960,7 +960,7 @@ public abstract class WellSearchResults extends TupleBasedEntitySearchResults<We
         @Override
         protected boolean isResultValueRestricted(Tuple<String> tuple)
         {
-          if (_entityViewPolicy.isAllowedAccessToDataColumnDueToMutualPositives(dataColumn)) {
+          if (_entityViewPolicy.isAllowedAccessToDataColumnDueToMutualPositives(dataColumn)) { // only perform result value visibility checks if we're dealing with the special case of a data column that reveals only the subset of mutual positive wells
             Boolean isPositive = (Boolean) tuple.getProperty(_positivePropertyKey);
             return !!!_entityViewPolicy.isAllowedAccessToResultValueDueToMutualPositive(isPositive == null ? false : isPositive.booleanValue(),
                                                                                         dataColumn.getScreenResult().getScreen(),

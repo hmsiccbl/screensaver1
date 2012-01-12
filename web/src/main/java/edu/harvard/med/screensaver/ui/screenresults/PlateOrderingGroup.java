@@ -4,5 +4,6 @@ public enum PlateOrderingGroup {
   Plates,
   Conditions,
   Replicates,
+  Quadrants,
   Readouts;
 }

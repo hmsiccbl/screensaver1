@@ -16,18 +16,18 @@ class PlateMatrixTest extends AssertionsForJUnit {
 
   @Test
   def badMatrix {
-    intercept[IllegalArgumentException] { new PlateMatrix(List(List(1, 2, 3), List(3, 4), List(7, 8, 9))) }
+    intercept[IllegalArgumentException] { PlateMatrix(List(List(1, 2, 3), List(3, 4), List(7, 8, 9))) }
   }
 
   @Test
   def smallestMatrix {
-    val plate = new PlateMatrix(List(List(1)));
+    val plate = PlateMatrix(List(List(1)));
     expect(1) { plate.well(0, 0) }
   }
 
   @Test
   def fullMatrix {
-    val plate = new PlateMatrix(List(List(1, 2, 3), List(3, 4, 5)))
+    val plate = PlateMatrix(List(List(1, 2, 3), List(3, 4, 5)))
     expect(2) { plate.height }
     expect(3) { plate.width }
     expect(BigDecimal(1)) { plate.well(0, 0) }
@@ -36,7 +36,7 @@ class PlateMatrixTest extends AssertionsForJUnit {
 
   @Test
   def emptyMatrix {
-    val plate = new PlateMatrix(16, 24)
+    val plate = new PlateMatrix(PlateDim(24, 16))
     expect(16) { plate.height }
     expect(24) { plate.width }
     expect(BigDecimal(0)) { plate.well(0, 0) }
@@ -50,13 +50,13 @@ class PlateMatrixTest extends AssertionsForJUnit {
 
   @Test
   def wellIteratorIsRowMajor {
-    val plate = new PlateMatrix(List(List(1, 2, 3), List(4, 5, 6)))
+    val plate = PlateMatrix(List(List(1, 2, 3), List(4, 5, 6)))
     expect(List(1, 2, 3, 4, 5, 6)) { plate.dataIterator.toList }
   }
 
   @Test
   def wellNames {
-    val plate = new PlateMatrix(2, 3)
+    val plate = new PlateMatrix(PlateDim(3, 2))
     expect(List("A01", "A02", "A03", "B01", "B02", "B03")) { plate.wellNames.toList }
   }
 }

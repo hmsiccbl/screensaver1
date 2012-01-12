@@ -14,24 +14,21 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.SequenceInputStream;
-import java.io.StringReader;
-import java.util.HashMap;
-import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Scanner;
-import java.util.regex.Pattern;
+import java.util.Set;
 
 import javax.faces.model.DataModel;
 import javax.faces.model.ListDataModel;
 
+import com.google.common.base.Function;
 import com.google.common.base.Joiner;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.Iterables;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
 import com.google.common.collect.Sets;
-import org.apache.commons.io.IOUtils;
 import org.apache.log4j.Logger;
 import org.apache.myfaces.custom.fileupload.UploadedFile;
 import org.codehaus.jackson.map.ObjectMapper;
@@ -46,10 +43,15 @@ import edu.harvard.med.iccbl.platereader.parser.SimplePlateOrdering;
 import edu.harvard.med.screensaver.ScreensaverConstants;
 import edu.harvard.med.screensaver.db.GenericEntityDAO;
 import edu.harvard.med.screensaver.io.ParseError;
+import edu.harvard.med.screensaver.io.libraries.ControlWell;
+import edu.harvard.med.screensaver.io.libraries.ControlWellsParser;
+import edu.harvard.med.screensaver.io.libraries.LibraryControlWellsParser;
 import edu.harvard.med.screensaver.io.libraries.PlateNumbersParser;
-import edu.harvard.med.screensaver.io.libraries.PlateWellNamesParser;
+import edu.harvard.med.screensaver.io.libraries.WellMetaData;
+import edu.harvard.med.screensaver.io.libraries.WellNameLabel;
 import edu.harvard.med.screensaver.io.workbook2.Workbook;
 import edu.harvard.med.screensaver.model.activities.AdministrativeActivityType;
+import edu.harvard.med.screensaver.model.libraries.PlateSize;
 import edu.harvard.med.screensaver.model.libraries.WellName;
 import edu.harvard.med.screensaver.model.screenresults.AssayWellControlType;
 import edu.harvard.med.screensaver.model.screens.AssayReadoutType;
@@ -60,6 +62,9 @@ import edu.harvard.med.screensaver.ui.arch.util.JSFUtils;
 import edu.harvard.med.screensaver.ui.arch.util.UISelectOneBean;
 import edu.harvard.med.screensaver.ui.arch.view.AbstractBackingBean;
 import edu.harvard.med.screensaver.ui.arch.view.aspects.UICommand;
+import edu.harvard.med.screensaver.ui.screenresults.PlateReaderRawDataTransformer.FormOne;
+import edu.harvard.med.screensaver.ui.screenresults.PlateReaderRawDataTransformer.InputFileParams;
+import edu.harvard.med.screensaver.ui.screenresults.PlateReaderRawDataTransformer.OutputFormat;
 import edu.harvard.med.screensaver.ui.screens.ScreenViewer;
 import edu.harvard.med.screensaver.util.DevelopmentException;
 import edu.harvard.med.screensaver.util.NullSafeUtils;
@@ -69,7 +74,14 @@ public class PlateReaderRawDataTransformer extends AbstractBackingBean
 {
   private static final Logger log = Logger.getLogger(PlateReaderRawDataTransformer.class);
   private static final String ACTIVITY_INPUT_PARAMS_DELIMITER = ";";
-
+  
+  private static final Function<ControlWell,WellName> toWellName = new Function<ControlWell,WellName>() {
+    public WellName apply(ControlWell cw)
+    {
+      return cw.wellName();
+    }
+  };
+  
   public enum OutputFormat {
     PlatePerWorksheet("Plate per worksheet"),
     AllPlatesInSingleWorksheet("All plates in single worksheet");
@@ -89,12 +101,19 @@ public class PlateReaderRawDataTransformer extends AbstractBackingBean
   public static class FormOne
   {
     private String _plates;
+    private UISelectOneBean<PlateSize> _plateSize = new UISelectOneBean<PlateSize>(Lists.newArrayList(PlateSize.values()), ScreensaverConstants.DEFAULT_PLATE_SIZE) {
+      @Override
+      protected String makeLabel(PlateSize p)
+      {
+        return p.getValue().toString();
+      }
+    };
     private String _outputFileName;
-    private String _negativeControls;
-    private String _positiveControls;
-    private String _otherControls;
-    private transient DataModel _controlWellsModel;
-    private transient PlateWellNamesParser _wellNamesParser = new PlateWellNamesParser(ScreensaverConstants.DEFAULT_PLATE_SIZE);
+    private String _assayNegativeControls;
+    private String _assayPositiveControls;
+    private String _assayOtherControls;
+    private String _libraryControls;
+    private transient DataModel _assayControlWellsModel;
     private UISelectOneBean<OutputFormat> _outputFormat = new UISelectOneBean<OutputFormat>(Lists.newArrayList(OutputFormat.values())) {
       @Override
       protected String makeLabel(OutputFormat t)
@@ -110,11 +129,13 @@ public class PlateReaderRawDataTransformer extends AbstractBackingBean
     {
       FormOne tmp = deserialize(serialized);
       _plates = tmp._plates;
+      _plateSize.setSelection(tmp._plateSize.getSelection());
       _outputFileName = tmp._outputFileName;
       _outputFormat.setSelection(tmp._outputFormat.getSelection());
-      _negativeControls = tmp._negativeControls;
-      _positiveControls = tmp._positiveControls;
-      _otherControls = tmp._otherControls;
+      _assayNegativeControls = tmp._assayNegativeControls;
+      _assayPositiveControls = tmp._assayPositiveControls;
+      _assayOtherControls = tmp._assayOtherControls;
+      _libraryControls = tmp._libraryControls;
     }
 
     public String getPlates()
@@ -127,6 +148,43 @@ public class PlateReaderRawDataTransformer extends AbstractBackingBean
       _plates = plates;
     }
 
+    public UISelectOneBean<PlateSize> getAssayPlateSizeSelections()
+    {
+      return _plateSize;
+    }
+
+    /**
+     * @motivation for serialization
+     */
+    public PlateSize getAssayPlateSize()
+    {
+      return _plateSize.getSelection();
+    }
+
+    /**
+     * @motivation for deserialization
+     */
+    public void setAssayPlateSize(PlateSize assayPlateSize)
+    {
+      _plateSize.setSelection(assayPlateSize);
+    }
+
+
+    public PlateSize getLibraryPlateSize()
+    {
+      return DEFAULT_PLATE_SIZE;
+    }
+
+    private ControlWellsParser getAssayControlWellsParser(AssayWellControlType controlType)
+    {
+      return new ControlWellsParser(getAssayPlateSize(), controlType);
+    }
+
+    private LibraryControlWellsParser getLibraryControlWellsParser()
+    {
+      return new LibraryControlWellsParser(getLibraryPlateSize());
+    }
+
     public String getOutputFileName()
     {
       return _outputFileName;
@@ -137,119 +195,112 @@ public class PlateReaderRawDataTransformer extends AbstractBackingBean
       _outputFileName = outputFileName;
     }
 
-    public UISelectOneBean<OutputFormat> getOutputFormat()
+    public UISelectOneBean<OutputFormat> getOutputFormatSelections()
     {
       return _outputFormat;
-    }
-
-    public void setOutputFormat(UISelectOneBean<OutputFormat> outputFormat)
-    {
-      _outputFormat = outputFormat;
     }
 
     /**
      * @return
      * @motivation for serialization
      */
-    public OutputFormat getOutputFormatSelection()
+    public OutputFormat getOutputFormat()
     {
       return _outputFormat.getSelection();
     }
 
-    /** @motivation for serialization */
-    public void setOutputFormatSelection(OutputFormat of)
+    /** @motivation for deserialization */
+    public void setOutputFormat(OutputFormat of)
     {
       _outputFormat.setSelection(of);
     }
 
-    public String getNegativeControls()
+    public String getAssayNegativeControls()
     {
-      return _negativeControls;
+      return _assayNegativeControls;
     }
 
-    public void setNegativeControls(String negativeControls)
+    public void setAssayNegativeControls(String negativeControls)
     {
-      if (!NullSafeUtils.nullSafeEquals(_negativeControls, negativeControls)) {
-        _controlWellsModel = null; // reset
+      if (!NullSafeUtils.nullSafeEquals(_assayNegativeControls, negativeControls)) {
+        _assayControlWellsModel = null; // reset
       }
-      _negativeControls = negativeControls;
+      _assayNegativeControls = negativeControls;
     }
 
-    public String getPositiveControls()
+    public String getAssayPositiveControls()
     {
-      return _positiveControls;
+      return _assayPositiveControls;
     }
 
-    public void setPositiveControls(String positiveControls)
+    public void setAssayPositiveControls(String positiveControls)
     {
-      if (!NullSafeUtils.nullSafeEquals(_positiveControls, positiveControls)) {
-        _controlWellsModel = null; // reset
+      if (!NullSafeUtils.nullSafeEquals(_assayPositiveControls, positiveControls)) {
+        _assayControlWellsModel = null; // reset
       }
-      _positiveControls = positiveControls;
+      _assayPositiveControls = positiveControls;
     }
 
-    public void setOtherControls(String otherControls)
+    public void setAssayOtherControls(String otherControls)
     {
-      _otherControls = otherControls;
+      _assayOtherControls = otherControls;
     }
 
-    public String getOtherControls()
+    public String getAssayOtherControls()
     {
-      return _otherControls;
+      return _assayOtherControls;
     }
 
-    public DataModel getControlWellsModel()
+    public String getLibraryControls()
     {
-      if (_controlWellsModel == null) {
-        HashSet<WellName> negControls = Sets.newHashSet(_wellNamesParser.parse_Java(NullSafeUtils.value(getNegativeControls(), "")));
-        HashSet<WellName> posControls = Sets.newHashSet(_wellNamesParser.parse_Java(NullSafeUtils.value(getPositiveControls(), "")));
-        HashSet<WellName> otherControls = Sets.newHashSet(_wellNamesParser.parse_Java(NullSafeUtils.value(getOtherControls(), "")));
+      return _libraryControls;
+    }
+
+    public void setLibraryControls(String libraryControls)
+    {
+      _libraryControls = libraryControls;
+    }
+
+    public DataModel getAssayControlWellsModel()
+    {
+      if (_assayControlWellsModel == null) {
+        Map<WellName,ControlWell> controls = Maps.uniqueIndex(parseAssayControls(), toWellName);
         List<Map<String,AssayWellControlType>> model = Lists.newArrayList();
-        for (int r = 0; r < ScreensaverConstants.DEFAULT_PLATE_SIZE.getRows(); ++r) {
+        for (int r = 0; r < getAssayPlateSize().getRows(); ++r) {
           Map<String,AssayWellControlType> row = Maps.newHashMap();
           model.add(row);
-          for (int c = 0; c < ScreensaverConstants.DEFAULT_PLATE_SIZE.getColumns(); ++c) {
+          for (int c = 0; c < getAssayPlateSize().getColumns(); ++c) {
             WellName wellName = new WellName(r, c);
-            if (negControls.contains(wellName)) {
-              row.put(wellName.getColumnLabel(), AssayWellControlType.ASSAY_CONTROL);
-            }
-            else if (posControls.contains(wellName)) {
-              row.put(wellName.getColumnLabel(), AssayWellControlType.ASSAY_POSITIVE_CONTROL);
-            }
-            else if (otherControls.contains(wellName)) {
-              row.put(wellName.getColumnLabel(), AssayWellControlType.OTHER_CONTROL);
-            }
-            else {
-              row.put(wellName.getColumnLabel(), null);
+            ControlWell controlWell = controls.get(wellName);
+            if (controlWell != null) {
+              row.put(wellName.getColumnLabel(), controlWell.controlType());
             }
           }
         }
-        _controlWellsModel = new ListDataModel(model);
+        _assayControlWellsModel = new ListDataModel(model);
       }
-      return _controlWellsModel;
+      return _assayControlWellsModel;
     }
 
-    public void invalidateControlWellsModel()
+    public void invalidateAssayControlWellsModel()
     {
-      _controlWellsModel = null;
+      _assayControlWellsModel = null;
     }
 
-    private Map<WellName,AssayWellControlType> parseControls()
+    private Set<ControlWell> parseAssayControls()
     {
-      HashMap<WellName,AssayWellControlType> controls = Maps.<WellName,AssayWellControlType>newHashMap();
-      _wellNamesParser = new PlateWellNamesParser(ScreensaverConstants.DEFAULT_PLATE_SIZE);
-      for (WellName wellName : _wellNamesParser.parse_Java(getNegativeControls())) {
-        controls.put(wellName, AssayWellControlType.ASSAY_CONTROL);
-      }
-      for (WellName wellName : _wellNamesParser.parse_Java(getPositiveControls())) {
-        controls.put(wellName, AssayWellControlType.ASSAY_POSITIVE_CONTROL);
-      }
-      for (WellName wellName : _wellNamesParser.parse_Java(getOtherControls())) {
-        controls.put(wellName, AssayWellControlType.OTHER_CONTROL);
-      }
+      Set<ControlWell> controls = Sets.newHashSet();
+      controls.addAll(getAssayControlWellsParser(AssayWellControlType.ASSAY_CONTROL).parse_Java(NullSafeUtils.value(getAssayNegativeControls(), "")));
+      controls.addAll(getAssayControlWellsParser(AssayWellControlType.ASSAY_POSITIVE_CONTROL).parse_Java(NullSafeUtils.value(getAssayPositiveControls(), "")));
+      controls.addAll(getAssayControlWellsParser(AssayWellControlType.OTHER_CONTROL).parse_Java(NullSafeUtils.value(getAssayOtherControls(), "")));
       return controls;
     }
 
+    private Set<WellNameLabel> parseLibraryControls()
+    {
+      return Sets.newHashSet(getLibraryControlWellsParser().parse_Java(NullSafeUtils.value(getLibraryControls(), "")));
+    }
+    
     public boolean validate(PlateReaderRawDataTransformer parent)
     {
       boolean result = true;
@@ -258,33 +309,39 @@ public class PlateReaderRawDataTransformer extends AbstractBackingBean
         parent.showMessage("invalidUserInput", "Plates", plateParseResult);
         result = false;
       }
-      ParseResult parseResult1 = _wellNamesParser.validate_Java(getNegativeControls());
+      ParseResult parseResult1 = getAssayControlWellsParser(AssayWellControlType.ASSAY_CONTROL).validate_Java(getAssayNegativeControls());
       if (!parseResult1.successful()) {
         parent.showMessage("invalidUserInput", "Negative Control Wells", parseResult1);
         result = false;
       }
-      ParseResult parseResult2 = _wellNamesParser.validate_Java(getPositiveControls());
+      ParseResult parseResult2 = getAssayControlWellsParser(AssayWellControlType.ASSAY_POSITIVE_CONTROL).validate_Java(getAssayPositiveControls());
       if (!parseResult2.successful()) {
         parent.showMessage("invalidUserInput", "Positive Control Wells", parseResult2);
         result = false;
       }
-      ParseResult parseResult3 = _wellNamesParser.validate_Java(getOtherControls());
+      ParseResult parseResult3 = getAssayControlWellsParser(AssayWellControlType.OTHER_CONTROL).validate_Java(getAssayOtherControls());
       if (!parseResult3.successful()) {
         parent.showMessage("invalidUserInput", "Other Control Wells", parseResult3);
         result = false;
       }
-      HashSet<WellName> negControls = Sets.newHashSet(_wellNamesParser.parse_Java(getNegativeControls()));
-      HashSet<WellName> posControls = Sets.newHashSet(_wellNamesParser.parse_Java(getPositiveControls()));
-      HashSet<WellName> otherControls = Sets.newHashSet(_wellNamesParser.parse_Java(getOtherControls()));
-      Iterable<WellName> nonExtantWellNames = Iterables.filter(Sets.union(negControls, posControls), WellName.makeIsNonExtantWellNamePredicate(ScreensaverConstants.DEFAULT_PLATE_SIZE));
+      Set<ControlWell> controls = parseAssayControls();
+      Set<WellName> controlWellNames = Sets.newHashSet(Iterables.transform(controls, toWellName));
+      Iterable<WellName> nonExtantWellNames = Iterables.filter(controlWellNames, WellName.makeIsNonExtantWellNamePredicate(getAssayPlateSize()));
       if (nonExtantWellNames.iterator().hasNext()) {
         parent.showMessage("invalidUserInput", "Control Wells", "invalid well names " + Joiner.on(", ").join(nonExtantWellNames));
         result = false;
       }
-      if (Sets.union(Sets.union(negControls, posControls), otherControls).size() < negControls.size() + posControls.size() + otherControls.size()) {
-        parent.showMessage("invalidUserInput", "Control Wells", "a well can only be used as one type of control");
+      if (controlWellNames.size() < controls.size()) {
+        parent.showMessage("invalidUserInput", "Control Wells", "a well can only be specified once across all control types");
         result = false;
       }
+
+      ParseResult parseResult4 = getLibraryControlWellsParser().validate_Java(getLibraryControls());
+      if (!parseResult4.successful()) {
+        parent.showMessage("invalidUserInput", "Library Control Wells", parseResult4);
+        result = false;
+      }
+      // TODO: validate that well names specified in library control wells field are within plate extents and are in fact library control wells
 
       return result;
     }
@@ -292,13 +349,13 @@ public class PlateReaderRawDataTransformer extends AbstractBackingBean
     /** @motivation for control wells plate map UI dataTable */
     public List<String> getPlateRowLabels()
     {
-      return ScreensaverConstants.DEFAULT_PLATE_SIZE.getRowsLabels();
+      return _plateSize.getSelection().getRowsLabels();
     }
 
     /** @motivation for control wells plate map UI dataTable */
     public DataModel getPlateColumns()
     {
-      return new ListDataModel(ScreensaverConstants.DEFAULT_PLATE_SIZE.getColumnsLabels());
+      return new ListDataModel(_plateSize.getSelection().getColumnsLabels());
     }
 
     /**
@@ -312,11 +369,13 @@ public class PlateReaderRawDataTransformer extends AbstractBackingBean
       ObjectMapper mapper = new ObjectMapper();
       FilterProvider filters = new SimpleFilterProvider().addFilter("savedForm1Properties",
                                                                     SimpleBeanPropertyFilter.filterOutAllExcept("plates",
+                                                                                                                "assayPlateSize",
                                                                                                                 "outputFileName",
-                                                                                                                "outputFormatSelection",
-                                                                                                                "positiveControls",
-                                                                                                                "negativeControls",
-                                                                                                                "otherControls"));
+                                                                                                                "outputFormat",
+                                                                                                                "assayPositiveControls",
+                                                                                                                "assayNegativeControls",
+                                                                                                                "assayOtherControls",
+                                                                                                                "libraryControls"));
       return mapper.writer(filters).writeValueAsString(this);
     }
 
@@ -349,12 +408,12 @@ public class PlateReaderRawDataTransformer extends AbstractBackingBean
     private Integer _replicates;
     private String _readouts;
     private UISelectOneBean<CollationOrder> _collationOrder =
-      new UISelectOneBean<CollationOrder>(ImmutableList.of(new CollationOrder(ImmutableList.of(PlateOrderingGroup.Plates, PlateOrderingGroup.Conditions, PlateOrderingGroup.Replicates, PlateOrderingGroup.Readouts)),
-                                                           new CollationOrder(ImmutableList.of(PlateOrderingGroup.Plates, PlateOrderingGroup.Replicates, PlateOrderingGroup.Conditions, PlateOrderingGroup.Readouts)),
-                                                           new CollationOrder(ImmutableList.of(PlateOrderingGroup.Conditions, PlateOrderingGroup.Plates, PlateOrderingGroup.Replicates, PlateOrderingGroup.Readouts)),
-                                                           new CollationOrder(ImmutableList.of(PlateOrderingGroup.Conditions, PlateOrderingGroup.Replicates, PlateOrderingGroup.Plates, PlateOrderingGroup.Readouts)),
-                                                           new CollationOrder(ImmutableList.of(PlateOrderingGroup.Replicates, PlateOrderingGroup.Plates, PlateOrderingGroup.Conditions, PlateOrderingGroup.Readouts)),
-                                                           new CollationOrder(ImmutableList.of(PlateOrderingGroup.Replicates, PlateOrderingGroup.Conditions, PlateOrderingGroup.Plates, PlateOrderingGroup.Readouts))));
+      new UISelectOneBean<CollationOrder>(ImmutableList.of(new CollationOrder(ImmutableList.of(PlateOrderingGroup.Plates, PlateOrderingGroup.Quadrants, PlateOrderingGroup.Conditions, PlateOrderingGroup.Replicates, PlateOrderingGroup.Readouts)),
+                                                           new CollationOrder(ImmutableList.of(PlateOrderingGroup.Plates, PlateOrderingGroup.Quadrants, PlateOrderingGroup.Replicates, PlateOrderingGroup.Conditions, PlateOrderingGroup.Readouts)),
+                                                           new CollationOrder(ImmutableList.of(PlateOrderingGroup.Conditions, PlateOrderingGroup.Plates, PlateOrderingGroup.Quadrants, PlateOrderingGroup.Replicates, PlateOrderingGroup.Readouts)),
+                                                           new CollationOrder(ImmutableList.of(PlateOrderingGroup.Conditions, PlateOrderingGroup.Replicates, PlateOrderingGroup.Plates, PlateOrderingGroup.Quadrants, PlateOrderingGroup.Readouts)),
+                                                           new CollationOrder(ImmutableList.of(PlateOrderingGroup.Replicates, PlateOrderingGroup.Plates, PlateOrderingGroup.Quadrants, PlateOrderingGroup.Conditions, PlateOrderingGroup.Readouts)),
+                                                           new CollationOrder(ImmutableList.of(PlateOrderingGroup.Replicates, PlateOrderingGroup.Conditions, PlateOrderingGroup.Plates, PlateOrderingGroup.Quadrants, PlateOrderingGroup.Readouts))));
     private Integer _expectedPlateMatrixCount;
     private Integer _uploadedPlateMatrixCount;
 
@@ -667,7 +726,7 @@ public class PlateReaderRawDataTransformer extends AbstractBackingBean
   public String transform() throws IOException
   {
     _result = null;
-    getFormOne().invalidateControlWellsModel();
+    getFormOne().invalidateAssayControlWellsModel();
     if (!validate()) {
       return REDISPLAY_PAGE_ACTION_RESULT;
     }
@@ -688,9 +747,11 @@ public class PlateReaderRawDataTransformer extends AbstractBackingBean
                                              null,
                                              true,
                                              getScreen(),
-                                             DEFAULT_PLATE_SIZE,
+                                             getFormOne().getAssayPlateSize(),
+                                             getFormOne().getAssayPlateSize(),
                                              simplePlateOrdering,
-                                             getFormOne().parseControls());
+                                             getFormOne().parseAssayControls(),
+                                             getFormOne().parseLibraryControls());
       inputFile.setExpectedPlateMatrixCount(simplePlateOrdering.iterator().size());
       inputFile.setUploadedPlateMatrixCount(result.getPlateMatricesProcessedCount());
     }
@@ -701,15 +762,17 @@ public class PlateReaderRawDataTransformer extends AbstractBackingBean
     File outputFile = File.createTempFile(getScreen().getFacilityId(), ".xls");
     _result = _transformer.transform(new InputStreamReader(multiFileInputStream),
                                      outputFile,
-                                     getFormOne().getOutputFormat().getSelection() == OutputFormat.PlatePerWorksheet,
+                                     getFormOne().getOutputFormat() == OutputFormat.PlatePerWorksheet,
                                      getScreen(),
-                                     DEFAULT_PLATE_SIZE,
+                                     getFormOne().getAssayPlateSize(),
+                                     getFormOne().getLibraryPlateSize(),
                                      ordering,
-                                     getFormOne().parseControls());
+                                     getFormOne().parseAssayControls(),
+                                     getFormOne().parseLibraryControls());
 
     showMessage("screens.rawDataTranformationResult",
                 _result.plateMatricesProcessedCount(), ordering.iterator().size(),
-                _result.platesProcessedCount(), PlateNumbersParser.parse_Java(getFormOne().getPlates()).size());
+                _result.libraryPlatesProcessedCount(), PlateNumbersParser.parse_Java(getFormOne().getPlates()).size());
 
     return REDISPLAY_PAGE_ACTION_RESULT;
   }
@@ -788,6 +851,13 @@ public class PlateReaderRawDataTransformer extends AbstractBackingBean
       case Replicates:
         if (inputFile.getReplicates() != null) {
           ordering.addReplicates(inputFile.getReplicates());
+        }
+        break;
+      case Quadrants:
+        int multiple = getFormOne().getLibraryPlateSize().getWellCount() / getFormOne().getAssayPlateSize().getWellCount();
+        assert multiple % 4 == 0;
+        if (multiple > 1) {
+          ordering.addQuadrants(multiple);
         }
         break;
       case Readouts:

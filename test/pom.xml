@@ -8,12 +8,12 @@
   <parent>
     <artifactId>screensaver</artifactId>
     <groupId>edu.harvard.med</groupId>
-    <version>2012-01-03</version>
+    <version>2012-01-12</version>
   </parent>
 
   <groupId>edu.harvard.med</groupId>
   <artifactId>screensaver-test</artifactId>
-  <version>2012-01-03</version>
+  <version>2012-01-12</version>
   <name>Screensaver Test</name>
 
   <properties>

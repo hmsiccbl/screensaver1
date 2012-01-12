@@ -33,35 +33,41 @@
         <ss:property id="outputFormat" label="Output Format"
           description="Specify whether to output one plate per worksheet or all plates to a single worksheet"
           editable="true"
-          value="#{plateReaderRawDataTransformer.formOne.outputFormat.value}"
+          value="#{plateReaderRawDataTransformer.formOne.outputFormatSelections.value}"
           type="Vocabulary"
-          selectItems="#{plateReaderRawDataTransformer.formOne.outputFormat.selectItems}"/>
-        <ss:property id="positiveControls"
-          label="Positive Control Wells"
-          description="Specify positive controls wells using well names, rows, columns, and/or blocks (e.g. &quot;A22, C23-N24, P&quot;)"
+          selectItems="#{plateReaderRawDataTransformer.formOne.outputFormatSelections.selectItems}"/>
+        <ss:property id="assayPlateSize" label="Assay Plate Size"
+          description="Specify the size of the assay plates for which data is being uploaded and transformed"
           editable="true"
-          value="#{plateReaderRawDataTransformer.formOne.positiveControls}"
-          type="Textarea" editWidth="20" edithHeight="10" />
-        <ss:property id="negativeControls"
-          label="Negative Control Wells"
-          description="Specify negative controls wells using well names, rows, columns, and/or blocks (e.g. &quot;A22, C23-N24, P&quot;)"
+          value="#{plateReaderRawDataTransformer.formOne.assayPlateSizeSelections.value}"
+          selectItems="#{plateReaderRawDataTransformer.formOne.assayPlateSizeSelections.selectItems}"
+          type="Vocabulary"
+          required="true" />
+        <ss:property id="assayPositiveControls"
+          label="Assay Positive Control Wells"
+          description="Specify assay positive controls wells using well names, rows, columns, and/or blocks (e.g. &quot;A22, C23-N24, P&quot;). Append pre-loaded control well contents to well, row, column or block by appending =&quot;&lt;contents&gt;&quot;"
           editable="true"
-          value="#{plateReaderRawDataTransformer.formOne.negativeControls}"
-          type="Textarea" editWidth="20" edithHeight="10" />
-        <ss:property id="otherControls"
-          label="Other Control Wells"
-          description="Specify other controls wells using well names, rows, columns, and/or blocks (e.g. &quot;A22, C23-N24, P&quot;)"
+          value="#{plateReaderRawDataTransformer.formOne.assayPositiveControls}"
+          type="Textarea" editWidth="60" edithHeight="10" />
+        <ss:property id="assayNegativeControls"
+          label="Assay Negative Control Wells"
+          description="Specify negative controls wells using well names, rows, columns, and/or blocks (e.g. &quot;A22, C23-N24, P&quot;). Append pre-loaded control well contents to well, row, column or block by appending =&quot;&lt;contents&gt;&quot;"
           editable="true"
-          value="#{plateReaderRawDataTransformer.formOne.otherControls}"
-          type="Textarea" editWidth="20" edithHeight="10" />
-
-        <ss:property id="controlWellsMap"
-          label="Control Wells Plate Map"
-          description="Verify your control well input by examining this handy-dandy plate-based visualization"
+          value="#{plateReaderRawDataTransformer.formOne.assayNegativeControls}"
+          type="Textarea" editWidth="60" edithHeight="10" />
+        <ss:property id="assayOtherControls"
+          label="Assay Other Control Wells"
+          description="Specify assay 'other' controls wells using well names, rows, columns, and/or blocks (e.g. &quot;A22, C23-N24, P&quot;). Append pre-loaded control well contents to well, row, column or block by appending =&quot;&lt;contents&gt;&quot;"
+          editable="true"
+          value="#{plateReaderRawDataTransformer.formOne.assayOtherControls}"
+          type="Textarea" editWidth="60" edithHeight="10" />
+        <ss:property id="assayControlWellsMap"
+          label="Assay Control Wells Plate Map"
+          description="Verify your assay control well input by examining this handy-dandy plate-based visualization"
           rendered="true">
           <ui:define name="data">
             <t:dataTable id="controlWellsTable"
-              value="#{plateReaderRawDataTransformer.formOne.controlWellsModel}"
+              value="#{plateReaderRawDataTransformer.formOne.assayControlWellsModel}"
               var="plateRow" rowIndexVar="plateRowIndex"
               styleClass="controlWellsTable"
               headerClass="controlWellsTableHeader"
@@ -89,7 +95,7 @@
                   value="#{plateRow[columnLabel].abbreviation}"
                   escape="false" />
               </t:columns>
-              <t:column styleClass="controlWellsTableHeader">
+              <t:column styleClass="controlsWellsTableHeader">
                 <f:facet name="header">
                 </f:facet>
                 <t:outputText
@@ -98,6 +104,18 @@
             </t:dataTable>
           </ui:define>
         </ss:property>
+
+        <ss:property id="libraryPlateSize" label="Library Plate Size"
+          description="The size of the library plates for which data is being uploaded and transformed"
+          editable="false"
+          value="#{plateReaderRawDataTransformer.formOne.libraryPlateSize}"
+          type="Integer" />
+        <ss:property id="libraryControls"
+          label="Library Control Wells"
+          description="Specify library controls wells using well names, rows, columns, and/or blocks (e.g. &quot;A22, C23-N24, P&quot;). Append pre-loaded control well contents to well, row, column or block by appending =&quot;&lt;contents&gt;&quot;"
+          editable="true"
+          value="#{plateReaderRawDataTransformer.formOne.libraryControls}"
+          type="Textarea" editWidth="60" edithHeight="10" />
 
         <ss:property id="comments" label="Comments" editable="true"
           value="#{plateReaderRawDataTransformer.comments}"

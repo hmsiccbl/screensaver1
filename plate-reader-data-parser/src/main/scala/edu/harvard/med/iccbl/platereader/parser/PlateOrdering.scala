@@ -10,8 +10,10 @@ case class PlateMetaData(plate: Option[Int] = None,
                          readoutType: Option[AssayReadoutType] = None,
                          replicate: Int = 1,
                          condition: Option[String] = None,
-                         readout: Option[String] = None) {
+                         readout: Option[String] = None,
+                         quadrant: Int = 0) {
   if (replicate < 1) throw new IllegalArgumentException("replicate must be >= 1")
+  if (quadrant < 0) throw new IllegalArgumentException("quadrant must be >= 0")
 }
 
 object PlateMetaDataBuilder {
@@ -20,6 +22,7 @@ object PlateMetaDataBuilder {
   def forReplicate(pmd: PlateMetaData, r: Int) = { pmd.copy(replicate = r) }
   def forCondition(pmd: PlateMetaData, c: String) = { pmd.copy(condition = Some(c)) }
   def forReadout(pmd: PlateMetaData, ro: String) = { pmd.copy(readout = Some(ro)) }
+  def forQuadrant(pmd: PlateMetaData, q: Int) = { pmd.copy(quadrant = q) }
 }
 
 /**
@@ -68,6 +71,7 @@ class SimplePlateOrdering extends PlateOrdering {
   def addConditions(conditions: Seq[String]) = { generators += new Generator[String](conditions, forCondition); this }
   def addReadoutTypes(readoutTypes: Seq[AssayReadoutType]) = { generators += new Generator[AssayReadoutType](readoutTypes, forReadoutType); this }
   def addReadouts(readouts: Seq[String]) = { generators += new Generator[String](readouts, forReadout); this }
+  def addQuadrants(quadrants: Int) = { generators += new Generator[Int](0 until quadrants, forQuadrant); this }
   def iterator = build(List(new PlateMetaData()), generators).iterator
   /** Creates a map that associates a PlateMetaData with each element of the input data sequence, using the ordering of PlateMetaData that is defined in this PlateOrdering */
   override def collate[T](data: Seq[T]) = iterator.zip(data.iterator).toMap

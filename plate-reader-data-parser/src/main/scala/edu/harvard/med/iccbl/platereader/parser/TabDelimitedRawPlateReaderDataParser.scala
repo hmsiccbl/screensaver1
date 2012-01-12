@@ -7,8 +7,9 @@ import org.apache.commons.io.IOUtils
 import edu.harvard.med.iccbl.platereader.PlateMatrix
 import java.io.StringReader
 import scala.util.parsing.input.Reader
+import edu.harvard.med.iccbl.platereader.PlateDim
 
-class TabDelimitedPlateReaderRawDataParser(rows: Int, cols: Int) extends RegexParsers with JavaTokenParsers with PlateReaderRawDataParser {
+class TabDelimitedPlateReaderRawDataParser(dim: PlateDim) extends RegexParsers with JavaTokenParsers with PlateReaderRawDataParser {
 
   class MetaDataLineParser extends Parser[String] {
     type Elem = Char
@@ -29,10 +30,10 @@ class TabDelimitedPlateReaderRawDataParser(rows: Int, cols: Int) extends RegexPa
   def plateRecord: Parser[PlateMatrix] = metadata ~> plateMatrix
   def metadata: Parser[Any] = rep(new MetaDataLineParser())
   def plateMatrix: Parser[PlateMatrix] = plateColumnHeaders ~> plateDataRows ^^ { new PlateMatrix(_) }
-  def plateColumnHeaders: Parser[Any] = repN(cols, columnHeaderLabel)
+  def plateColumnHeaders: Parser[Any] = repN(dim.w, columnHeaderLabel)
   def columnHeaderLabel: Parser[Any] = wholeNumber
-  def plateDataRows: Parser[List[List[BigDecimal]]] = repN(rows, plateDataRow)
-  def plateDataRow: Parser[List[BigDecimal]] = rowHeaderLabel ~> repN(cols, datum)
+  def plateDataRows: Parser[List[List[BigDecimal]]] = repN(dim.h, plateDataRow)
+  def plateDataRow: Parser[List[BigDecimal]] = rowHeaderLabel ~> repN(dim.w, datum)
   def rowHeaderLabel: Parser[Any] = "[A-Z]".r
   def datum: Parser[BigDecimal] = floatingPointNumber ^^ { BigDecimal(_) }
 
@@ -52,14 +53,22 @@ class TabDelimitedPlateReaderRawDataParser(rows: Int, cols: Int) extends RegexPa
   }
 }
 
-/** For Envision plate reader, eliminate the postscript, as it contains a dummy plate matrix that otherwise confuses the parser */
 object EnvisionRawDataCleaner extends RawDataCleaner {
   val postscriptPrefix = "Basic assay information";
+  val postscriptSuffix = "Exported with EnVision Workstation version 1.12";
   def clean(in: Reader[Char]) = {
+    // TOOD: this may be all we need for this function 
+    // new CharSequenceReader(r.replaceAllIn(in.source.toString, ""))
+
     val s = in.source.toString
-    if (s.contains(postscriptPrefix))
-      new CharSequenceReader(s.substring(0, s.indexOf(postscriptPrefix)), 0)
-    else
+    if (s.contains(postscriptPrefix)) {
+      if (s.contains(postscriptSuffix))
+        clean(new CharSequenceReader(s.substring(0, s.indexOf(postscriptPrefix)) + s.substring(s.indexOf(postscriptSuffix) + postscriptSuffix.length())))
+      else {
+        // warn the user, since failure to locate the suffix may mean that the wrong version of Envision input file is being used, and multiple file information is lost as well - sde4
+        new CharSequenceReader(s.substring(0, s.indexOf(postscriptPrefix)))
+      }
+    } else
       in
   }
 }
