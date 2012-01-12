@@ -1,7 +1,16 @@
+
 package edu.harvard.med.screensaver.io.image;
 
+import java.io.FileInputStream;
+import java.io.FileOutputStream;
 import java.io.IOException;
+import java.io.InputStream;
+import java.io.InputStreamReader;
 import java.net.URL;
+
+import javax.net.ssl.HostnameVerifier;
+import javax.net.ssl.HttpsURLConnection;
+import javax.net.ssl.SSLSession;
 
 import org.apache.log4j.Logger;
 
@@ -17,6 +26,13 @@ public class ImageLocatorUtil
   {
     if (url != null) {
       try {
+        // Override the HostNameChecker so that any ole SSL (including our lowly dev box) will pass, and we can move on to verify this URL
+        HttpsURLConnection.setDefaultHostnameVerifier(new HostnameVerifier() {
+          public boolean verify(String hostname, SSLSession session)
+          {
+            return true;
+          }
+        });
         Object content = url.getContent();
         if (content != null) {
           return url;
@@ -24,7 +40,7 @@ public class ImageLocatorUtil
       }
       catch (IOException e) {}
     }
-    log.debug("image not available: " + url);
+    log.info("image not available: " + url);
     return null;
   }
 
