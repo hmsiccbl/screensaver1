@@ -685,6 +685,7 @@
         user_classification text not null,
         screensaver_user_id int4 not null,
         lab_head_id int4,
+        last_notified_rnaiua_checklist_item_event_id int4,
         last_notified_smua_checklist_item_event_id int4,
         primary key (screensaver_user_id)
     );
@@ -1427,7 +1428,12 @@
         references screensaver_user;
 
     alter table screening_room_user 
-        add constraint fk_screening_room_user_to_notified_checklist_item_event 
+        add constraint fk_screening_room_user_to_notified_rnaiua_checklist_item_event 
+        foreign key (last_notified_rnaiua_checklist_item_event_id) 
+        references checklist_item_event;
+
+    alter table screening_room_user 
+        add constraint fk_screening_room_user_to_notified_smua_checklist_item_event 
         foreign key (last_notified_smua_checklist_item_event_id) 
         references checklist_item_event;
 
