@@ -164,7 +164,6 @@ public abstract class EditableEntityViewerBackingBean<E extends Entity<? extends
    * @param newEntity a transient or detached entity, with all relationships initialized that will be needed by the
    *          viewer; the entity will be directly modified and later persisted, so the object network must contain
    *          distinct instances of any entity that is reachable from multiple relationships
-   * @return
    */
   @UICommand
   // TODO: determine if this propagation setting is necessary for safety

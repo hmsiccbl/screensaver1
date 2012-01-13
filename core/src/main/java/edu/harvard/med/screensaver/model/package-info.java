@@ -42,8 +42,7 @@
  * way. DAO methods {@link
  * edu.harvard.med.screensaver.db.GenericEntityDAO#reattachEntity(Entity)}, {@link
  * edu.harvard.med.screensaver.db.GenericEntityDAO#reloadEntity(Entity)}, and {@link
- * edu.harvard.med.screensaver.db.GenericEntityDAO#reloadEntity(Entity, boolean,
- * String[])} may be found useful for
+ * edu.harvard.med.screensaver.db.GenericEntityDAO#reloadEntity(Entity, boolean, edu.harvard.med.screensaver.model.meta.RelationshipPath)} may be found useful for
  * looking up a version of an entity that lives in the current session.
  * 
  * <li>Use a <i>semantic id</i>, or <i>business key</i>, as an id for the entity. In this

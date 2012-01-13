@@ -209,7 +209,6 @@ public class AdminEmailApplication extends CommandLineApplication
    * 
    * @param subject
    * @param msg
-   * @return 
    * @throws MessagingException
    */
   public boolean sendEmails(String subject, String msg, Collection<? extends ScreensaverUser> users) throws MessagingException

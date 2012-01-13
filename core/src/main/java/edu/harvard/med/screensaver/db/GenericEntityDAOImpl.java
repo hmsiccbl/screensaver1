@@ -220,7 +220,7 @@ public class GenericEntityDAOImpl extends AbstractDAO implements GenericEntityDA
   }
 
   /**
-   * Deletes the entity. The entity is first reloaded ({@link #reloadEntity(Entity)) to ensure that is attached to the
+   * Deletes the entity. The entity is first reloaded ({@link #reloadEntity(Entity) } to ensure that is attached to the
    * current session; this is necessary when this method is called outside of an active session. If the method is called
    * within an active session, and the entity is already managed, the reloadEntity call has no effect.
    */

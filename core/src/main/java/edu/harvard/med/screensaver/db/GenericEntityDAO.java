@@ -143,7 +143,7 @@ public interface GenericEntityDAO
    * @param <E>
    * @param entity the entity to be reloaded
    * @param readOnly see class-level documentation of {@link GenericEntityDAO}
-   * @param relationshipL the related entity or entities to be eagerly fetched
+   * @param relationship the related entity or entities to be eagerly fetched
    * @return a new Hibernate-managed instance of the specified entity
    */
   public <E extends Entity> E reloadEntity(E entity,

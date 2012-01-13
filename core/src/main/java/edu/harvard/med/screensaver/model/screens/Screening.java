@@ -152,8 +152,6 @@ public abstract class Screening extends LabActivity
    * the {@link LabActivity#getVolumeTransferredPerWellFromLibraryPlates() volumeTransferredPerWellFromLibraryPlates},
    * but can differ in cases where the transfer is indirect and uses an intermediate plating step (e.g. to adjust the
    * dilution).
-   * 
-   * @return
    */
   @Column(precision = ScreensaverConstants.VOLUME_PRECISION, scale = ScreensaverConstants.VOLUME_SCALE)
   @org.hibernate.annotations.Type(type = "edu.harvard.med.screensaver.db.usertypes.VolumeType")

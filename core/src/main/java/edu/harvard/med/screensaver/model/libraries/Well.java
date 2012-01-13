@@ -549,7 +549,6 @@ public class Well extends SemanticIDAbstractEntity<String> implements Comparable
   
   /**
    * Concentration, in nanoMolar units
-   * @return
    */
   @Column(precision = ScreensaverConstants.MOLAR_CONCENTRATION_PRECISION, scale = ScreensaverConstants.MOLAR_CONCENTRATION_SCALE)
   @org.hibernate.annotations.Type(type = "edu.harvard.med.screensaver.db.usertypes.MolarConcentrationType")

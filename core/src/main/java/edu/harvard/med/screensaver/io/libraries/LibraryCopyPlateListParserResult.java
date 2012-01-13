@@ -66,8 +66,6 @@ public class LibraryCopyPlateListParserResult
 
   /**
    * Get all the numerical plates specified, as ranges, where single values are ranges with first=second.
-   * 
-   * @return
    */
   public Set<Pair<Integer,Integer>> getCompletePlateRanges()
   {

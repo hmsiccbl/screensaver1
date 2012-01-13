@@ -151,8 +151,8 @@ public class UserAgreementUpdater
    * <li>creating an &quot;expiration&quot; ChecklistItemEvent 
    * {@link ChecklistItemEvent#createChecklistItemExpirationEvent(LocalDate, AdministratorUser)}
    * for the last ChecklistItemEvent for that user (provided it is not already an expiration).
-   * <li>removing the role returned as the {@link UserAgreementUpdater#findPrimaryDataSharingLevelRole(ScreeningRoomUser)}
-   * <li>removing the {@link ScreensaverUserRole#SCREENSAVER_USER} role if the user is not also a {@link ScreensaverUserRole#RNAI_SCREENS} user.
+   * <li>removing the role returned as the {@link DataSharingLevelMapper#getPrimaryDataSharingLevelRoleForUser(ScreenType, ScreensaverUser)}
+   * <li>removing the {@link ScreensaverUserRole#SCREENSAVER_USER} role if the user has no other data sharing level roles in place (i.e. for another {@link ScreenType } ).
    * </ul>
    * @return a List of the activities performed.
    */
@@ -213,7 +213,6 @@ public class UserAgreementUpdater
    * <ul>
    * <li>ChecklistItemEvent is active now
    * <li>Remove current Data Sharing role(s) and add the passed in dataSharingRole to the user.
-   * {@link UserAgreementUpdater#getCurrentDataSharingLevelRoleName(ScreeningRoomUser)}
    * <li>Create the attached file containing the UA, referenced to the User.
    * </ul>
    * 
@@ -222,7 +221,6 @@ public class UserAgreementUpdater
    * @param userAgreementFileName
    * @param userAgreementFileContents
    * @param recordedBy
-   * @return
    * @throws IOException
    */
   @Transactional

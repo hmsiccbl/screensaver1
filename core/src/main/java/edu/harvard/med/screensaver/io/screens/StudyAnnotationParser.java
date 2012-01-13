@@ -71,8 +71,6 @@ public class StudyAnnotationParser
   /**
    * @param study
    * @param parseLincsSpecificFacilityID
-   * @param workbookIn
-   * @param keyByWellId true to key by wellID, false to key by ReagentVendorIdentifier
    */
   @Transactional(readOnly = true)
   public void parse(Screen study,

@@ -20,7 +20,7 @@ import edu.harvard.med.screensaver.model.AbstractEntityVisitor;
  * classes (i.e., <i>abstract</i> entity classes should not be visitable). This
  * ensures that each <i>concrete</i> <code>AbstractEntity</code> class that
  * extends a subclass of {@link AbstractEntity} can provide its own
- * {@link AbstractEntity#acceptVisitor(EntityUriGenerator)} method
+ * {@link AbstractEntity#acceptVisitor(AbstractEntityVisitor)} method
  * implementation.
  *
  */

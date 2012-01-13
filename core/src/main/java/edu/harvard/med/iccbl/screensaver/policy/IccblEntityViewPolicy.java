@@ -540,7 +540,7 @@ public class IccblEntityViewPolicy extends DefaultEntityViewPolicy
    * Determine whether the current user can see the Status Items, Lab
    * Activities, and Cherry Pick Requests tables. These are considered more
    * private than the screen details (see
-   * {@link #isAllowedAccessToScreenDetails()}).
+   * {@link IccblEntityViewPolicy#isAllowedAccessToScreenDetails(Screen)}).
    */
   public boolean isAllowedAccessToScreenActivity(Screen screen)
   {

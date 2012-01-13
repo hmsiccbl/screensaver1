@@ -43,7 +43,7 @@ import edu.harvard.med.screensaver.util.Pair;
  * Locates the _not yet expired_ users who have a UA with an activation on or before the date given, and it expires
  * them.<br/>
  * The date will be 2 years before the current time.<br/>
- * see {@link UserAgreementUpdater#findUsersWithOldUserAgreements(LocalDate)}
+ * see {@link UserAgreementUpdater#findUsersWithOldUserAgreements(LocalDate, boolean, ScreenType)}
  */
 public class UserAgreementExpirationUpdater extends AdminEmailApplication
 {

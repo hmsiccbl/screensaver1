@@ -30,7 +30,6 @@ import edu.harvard.med.screensaver.util.CryptoUtils;
  * SHA5 hash of the reagent's smiles identifier.
  * 
  * @author <a mailto="andrew_tolopko@hms.harvard.edu">Andrew Tolopko</a>
- * @see SmallMoleculeLibraryStructureImageGenerator
  */
 public class StaticHashedSmilesStructureImageLocator implements StructureImageLocator
 {

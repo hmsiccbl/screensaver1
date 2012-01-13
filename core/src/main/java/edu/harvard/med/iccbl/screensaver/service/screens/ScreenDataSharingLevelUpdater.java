@@ -298,7 +298,6 @@ public class ScreenDataSharingLevelUpdater
    * <li>have a {@link Screen#getDataPrivacyExpirationDate()} on or before the expireDate
    * <li>do not have a status of {@link ScreenStatus#DROPPED_TECHNICAL} or {@link ScreenStatus#TRANSFERRED_TO_BROAD_INSTITUTE}
    * </ul>
-   * @return
    */
   public List<Screen> findNewPublishedPrivate()
   {
