@@ -176,8 +176,8 @@ public class LibrariesDAOImpl extends AbstractDAO implements LibrariesDAO
    * Delete the reagents of the specified contents version, as well the contents
    * version record itself. The contents version must not have been previously
    * "released" (see
-   * {@link LibraryContentsVersion#release(edu.harvard.med.screensaver.model.AdministrativeActivity)}
-   * ). Converts each well in the library back to an undefined well if there are
+   * {@link LibraryContentsVersion#release(edu.harvard.med.screensaver.model.activities.AdministrativeActivity)} ).
+   * Converts each well in the library back to an undefined well if there are
    * no contents versions remaining after the deletion.
    */
   public void deleteLibraryContentsVersion(LibraryContentsVersion libraryContentsVersionIn)
@@ -362,7 +362,6 @@ public class LibrariesDAOImpl extends AbstractDAO implements LibrariesDAO
    * @param firstPlateNumber
    * @param secondPlateNumber
    * @param copyName if null return all plates in the range across all copies
-   * @return
    */
   private Set<Plate> findPlateRangeFromCopyCaseInsensitive(int firstPlateNumber, int secondPlateNumber, final String copyName)
   {
@@ -656,9 +655,6 @@ public class LibrariesDAOImpl extends AbstractDAO implements LibrariesDAO
    * NOTE: LINCS-only feature
    * Find Wells containing Small Molecule Reagents where one of the compound names matches the compoundSearchName,
    * case insensitive, greedy match.
-   * 
-   * @param compoundSearchName
-   * @return
    */
   @SuppressWarnings("unchecked")
   @Override
@@ -736,9 +732,6 @@ public class LibrariesDAOImpl extends AbstractDAO implements LibrariesDAO
    * NOTE: LINCS-only feature
    * Find Wells containing Small Molecule Reagents where one of the compound names matches the compoundSearchName,
    * case insensitive, greedy match.
-   * 
-   * @param compoundSearchName
-   * @return
    */
   @Override
   public Set<WellKey> findWellKeysForReagentVendorIDList(final Collection<String> facilityVendorIdInputList)
