@@ -13,6 +13,11 @@ import java.awt.Color;
 
 import edu.harvard.med.screensaver.model.libraries.PlateSize;
 
+/**
+ * Although nothing in life or software is constant, here are the constants for the Screensaver application.
+ * 
+ * @author <a mailto="andrew_tolopko@hms.harvard.edu">Andrew Tolopko</a>
+ */
 public interface ScreensaverConstants
 {
   /**
