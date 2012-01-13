@@ -33,6 +33,7 @@ import edu.harvard.med.screensaver.ScreensaverConstants;
 import edu.harvard.med.screensaver.db.GenericEntityDAO;
 import edu.harvard.med.screensaver.db.LibrariesDAO;
 import edu.harvard.med.screensaver.db.datafetcher.Tuple;
+import edu.harvard.med.screensaver.io.image.ImageLocatorUtil;
 import edu.harvard.med.screensaver.io.libraries.WellsSdfDataExporter;
 import edu.harvard.med.screensaver.io.libraries.smallmolecule.LibraryContentsVersionReference;
 import edu.harvard.med.screensaver.io.libraries.smallmolecule.StructureImageLocator;
@@ -58,6 +59,7 @@ import edu.harvard.med.screensaver.ui.arch.view.SearchResultContextEntityViewerB
 import edu.harvard.med.screensaver.ui.arch.view.aspects.UICommand;
 import edu.harvard.med.screensaver.ui.screens.AnnotationHeaderColumn;
 import edu.harvard.med.screensaver.ui.screens.StudyViewer;
+import edu.harvard.med.screensaver.util.NullSafeUtils;
 import edu.harvard.med.screensaver.util.StringUtils;
 
 public class WellViewer extends SearchResultContextEntityViewerBackingBean<Well,Tuple<String>>
@@ -362,6 +364,7 @@ public class WellViewer extends SearchResultContextEntityViewerBackingBean<Well,
   public String getCompoundImageUrl()
   {
     URL url = _structureImageLocator.getImageUrl((SmallMoleculeReagent) getRestrictedReagent());
+    // TODO: consider using: return NullSafeUtils.toString(ImageLocatorUtil.toExtantContentUrl(url), "");
     return url == null ? null : url.toString();
   }
 
