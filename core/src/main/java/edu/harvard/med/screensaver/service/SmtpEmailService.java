@@ -56,7 +56,6 @@ public class SmtpEmailService implements EmailService
    * @param host mail server host i.e. smtp.cl.med.harvard.edu
    * @param username mail account name
    * @param password password, can be blank if unnecessary
-   * @param useSmtps in order to use smtp.gmail.com (for testing)
    * @throws AddressException 
    */
   public SmtpEmailService(String host, String username, String replyTos, String password) throws AddressException
