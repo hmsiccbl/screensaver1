@@ -45,13 +45,13 @@ public class LibraryCreator
     _libraryContentsLoader = libraryContentLoader;
   }
 
-  
   /**
-   * Prepare and create the Library specified. see {@link LibrariesDAO#loadOrCreateWellsForLibrary(Library)}
+   * Prepare and create the Library specified.
+   * 
    * @throws IllegalArgumentException if the specified Library has already been persisted to the Database
-   * @param newLibrary Library entity that has not been persisted to the database
-   *        <br>-Library Name cannot be reused.
-   *        <br>-Short Name cannot be reused.
+   * @param newLibrary Library entity that has not been persisted to the database <br>
+   *          -Library Name cannot be reused. <br>
+   *          -Short Name cannot be reused.
    */
 //TODO: also create copies
 //TODO: we need serializable isolation, to ensure that plate range is not taken about another process (we need a table-level lock)

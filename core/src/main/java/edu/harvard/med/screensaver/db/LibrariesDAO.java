@@ -52,12 +52,6 @@ public interface LibrariesDAO
 
   /**
    * NOTE: this is a LINCS-only feature
-   * 
-   * @param facilityId
-   * @param saltId
-   * @param batchId
-   * @param latestReleasedVersionsOnly
-   * @return
    */
   public Set<SmallMoleculeReagent> findReagents(String facilityId,
                                                 Integer saltId,
@@ -98,9 +92,6 @@ public interface LibrariesDAO
   /**
    * Find Wells containing Reagents where the items in the list match either the reagent's compound names 
    * (using case insensitive, greedy match); or the facility id, or a vendor reagent id matches the items.
-   * 
-   * @param nameFacilityVendorIDInputList
-   * @return
    */
   public Set<WellKey> findWellKeysForCompoundNameList(Collection<String> compoundNameList);
 

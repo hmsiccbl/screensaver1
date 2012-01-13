@@ -201,7 +201,6 @@ public class PlateReaderRawDataTransformer extends AbstractBackingBean
     }
 
     /**
-     * @return
      * @motivation for serialization
      */
     public OutputFormat getOutputFormat()

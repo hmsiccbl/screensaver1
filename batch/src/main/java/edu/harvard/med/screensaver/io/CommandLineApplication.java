@@ -50,7 +50,7 @@ import edu.harvard.med.screensaver.model.users.AdministratorUser;
  * .
  * <p>
  * Normally, a screensaver distribution will use the database connection settings specified in
- * "classpath:screensaver.properties". However, if {@link #processOptions(boolean, boolean, boolean)} is called with
+ * "classpath:screensaver.properties". However, if {@link #processOptions} is called with
  * acceptDatabaseOptions=true, the command line options 'dbhost', 'dbport', 'dbname', 'dbuser', and 'dbpassword' will be
  * used to configure the database connection settings.
  * 

@@ -415,9 +415,11 @@ public class ModelIntrospectionUtil
   /**
    * Check whether a method with the given name adheres to its existence requirement.
    * 
-   * @return the method, if it exists and is allowed to exist; null if method does not exist and its existence is not required
-   * @throw DevelopmentException if method existence is required and no such method exists OR if method existence is not
-   *        allowed and the method exists
+   * @return the method, if it exists and is allowed to exist; null if method does not exist and its existence is not
+   *         required
+   * @throws DevelopmentException if method existence is required and no such method exists OR if method existence is
+   *           not
+   *           allowed and the method exists
    */
   public static Method findAndCheckMethod(Class<? extends AbstractEntity> beanClass,
                                           String methodName,
@@ -429,9 +431,11 @@ public class ModelIntrospectionUtil
   /**
    * Check whether a method with the given name and specified parameter types adheres to its existence requirement.
    * 
-   * @return the method, if it exists and is allowed to exist; null if method does not exist and its existence is not required
-   * @throw DevelopmentException if method existence is required and no such method exists OR if method existence is not
-   *        allowed and the method exists
+   * @return the method, if it exists and is allowed to exist; null if method does not exist and its existence is not
+   *         required
+   * @throws DevelopmentException if method existence is required and no such method exists OR if method existence is
+   *           not
+   *           allowed and the method exists
    */
   public static Method findAndCheckMethod(Class<? extends AbstractEntity> beanClass,
                                           String methodName, 

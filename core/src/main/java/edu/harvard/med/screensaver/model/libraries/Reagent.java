@@ -291,9 +291,8 @@ public abstract class Reagent extends AbstractEntity<Integer> implements Compara
   }
 
   /**
-   * Create and return a new attached file for the screen. Use {@link Publication#createAttachedFile} to create an
-   * attached file that is
-   * associated with a Publication.
+   * Create and return a new attached file for the screen. Use {@link Publication#setAttachedFile} to create an
+   * attached file that is associated with a Publication.
    * 
    * @param filename the filename
    * @param fileType the file type

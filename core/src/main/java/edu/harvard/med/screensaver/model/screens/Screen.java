@@ -996,9 +996,7 @@ public class Screen extends Study implements AttachedFilesEntity<ScreenAttachedF
   }
 
   /**
-   * Create and return a new attached file for the screen. Use
-   * {@link Publication#createAttachedFile} to create an attached file that is
-   * associated with a Publication.
+   * Create and return a new attached file for the screen.
    * 
    * @param filename the filename
    * @param fileType the file type

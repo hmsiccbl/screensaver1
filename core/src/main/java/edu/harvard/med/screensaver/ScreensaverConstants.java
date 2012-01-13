@@ -17,8 +17,7 @@ public interface ScreensaverConstants
 {
   /**
    * The name of the Java system property that specified the location (path and file name) of the screensaver.properties
-   * file, which can take on any name. If this property is not defined, the default file location, as provided via the
-   * {@link ScreensaverProperties#ScreensaverProperties(String)} constructor, will be used.
+   * file, which can take on any name.
    */
   public static final String SCREENSAVER_PROPERTIES_FILE_PROPERTY_NAME = "screensaver.properties.file";
   public static final String VERSION_PROPERTIES_RESOURCE = "/version.properties";

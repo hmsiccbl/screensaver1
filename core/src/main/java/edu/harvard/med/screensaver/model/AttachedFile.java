@@ -238,8 +238,10 @@ public class AttachedFile extends AuditedAbstractEntity<Integer> implements Comp
   /**
    * Construct an initialized <code>AttachedFile</code>. Intended only for use
    * by {@link Screen}; use
-   * {@link Screen#createAttachedFile(String, CellLine, InputStream)} or
-   * {@link Screen#createAttachedFile(String, CellLine, String)}.
+   * {@link Screen#createAttachedFile(String, edu.harvard.med.screensaver.model.screens.ScreenAttachedFileType, LocalDate, InputStream)}
+   * or
+   * {@link Screen#createAttachedFile(String, edu.harvard.med.screensaver.model.screens.ScreenAttachedFileType, LocalDate, String)}
+   * .
    * 
    * @param screen the screen
    * @param filename the filename
@@ -266,8 +268,10 @@ public class AttachedFile extends AuditedAbstractEntity<Integer> implements Comp
   /**
    * Construct an initialized <code>AttachedFile</code>. Intended only for use
    * by {@link ScreeningRoomUser}; use
-   * {@link ScreeningRoomUser#createAttachedFile(String, CellLine, InputStream)} or
-   * {@link ScreeningRoomUser#createAttachedFile(String, CellLine, String)}.
+   * {@link ScreeningRoomUser#createAttachedFile(String, edu.harvard.med.screensaver.model.users.UserAttachedFileType, LocalDate, InputStream)}
+   * or
+   * {@link ScreeningRoomUser#createAttachedFile(String, edu.harvard.med.screensaver.model.users.UserAttachedFileType, LocalDate, String)}
+   * .
    * 
    * @param screeningRoomUser the screening room user
    * @param filename the filename
@@ -293,8 +297,11 @@ public class AttachedFile extends AuditedAbstractEntity<Integer> implements Comp
 
   /**
    * Construct an initialized <code>AttachedFile</code>. Intended only for use
-   * by {@link Reagent}; use {@link Reagent#createAttachedFile(String, CellLine, InputStream)} or
-   * {@link Reagent#createAttachedFile(String, CellLine, String)}.
+   * by {@link Reagent}; use
+   * {@link Reagent#createAttachedFile(String, edu.harvard.med.screensaver.model.libraries.ReagentAttachedFileType, LocalDate, InputStream)}
+   * or
+   * {@link Reagent#createAttachedFile(String, edu.harvard.med.screensaver.model.libraries.ReagentAttachedFileType, LocalDate, String)}
+   * .
    * 
    * @param reagent the reagent
    * @param filename the filename
