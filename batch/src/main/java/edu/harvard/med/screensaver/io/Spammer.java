@@ -1,5 +1,5 @@
-// $HeadURL: http://forge.abcd.harvard.edu/svn/screensaver/trunk/core/src/main/java/edu/harvard/med/iccbl/screensaver/service/SmtpEmailService.java $
-// $Id: SmtpEmailService.java 6535 2011-10-04 17:29:21Z seanderickson1 $
+// $HeadURL$
+// $Id$
 //
 // Copyright © 2006, 2010, 2011, 2012 by the President and Fellows of Harvard College.
 // 

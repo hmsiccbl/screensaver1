@@ -1,5 +1,5 @@
-// $HeadURL: $
-// $Id: VolumeConverter.java 4960 2010-11-08 14:53:52Z atolopko $
+// $HeadURL$
+// $Id$
 //
 // Copyright © 2006, 2010, 2011, 2012 by the President and Fellows of Harvard College.
 //

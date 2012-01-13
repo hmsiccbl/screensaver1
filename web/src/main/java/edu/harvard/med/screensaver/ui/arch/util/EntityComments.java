@@ -1,5 +1,5 @@
-// $HeadURL: $
-// $Id: $
+// $HeadURL$
+// $Id$
 //
 
 // 

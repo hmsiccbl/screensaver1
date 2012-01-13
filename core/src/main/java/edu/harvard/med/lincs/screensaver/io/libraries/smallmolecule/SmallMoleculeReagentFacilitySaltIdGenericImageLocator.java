@@ -1,5 +1,5 @@
-// $HeadURL: http://seanderickson1@forge.abcd.harvard.edu/svn/screensaver/branches/go/2.2.3-dev/src/edu/harvard/med/iccbl/screensaver/io/libraries/smallmolecule/PrimaryCompoundNameStructureImageProvider.java $
-// $Id: PrimaryCompoundNameStructureImageProvider.java 5269 2011-02-02 22:47:10Z seanderickson1 $
+// $HeadURL$
+// $Id$
 //
 // Copyright © 2006, 2010, 2011, 2012 by the President and Fellows of Harvard College.
 // 

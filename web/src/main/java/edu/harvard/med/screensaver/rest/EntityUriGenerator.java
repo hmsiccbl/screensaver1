@@ -1,5 +1,5 @@
-// $HeadURL: http://seanderickson1@forge.abcd.harvard.edu/svn/screensaver/branches/iccbl/rest/core/src/main/java/edu/harvard/med/screensaver/model/EntityUriGenerator.java $
-// $Id: EntityUriGenerator.java 6434 2011-09-14 22:48:43Z seanderickson1 $
+// $HeadURL$
+// $Id$
 //
 // Copyright © 2006, 2010, 2011, 2012 by the President and Fellows of Harvard College.
 //

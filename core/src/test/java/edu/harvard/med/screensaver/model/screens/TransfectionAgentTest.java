@@ -1,5 +1,5 @@
-// $HeadURL: http://seanderickson1@forge.abcd.harvard.edu/svn/screensaver/trunk/core/src/test/java/edu/harvard/med/screensaver/model/screens/FundingSupportTest.java $
-// $Id: FundingSupportTest.java 5492 2011-03-11 20:39:01Z atolopko $
+// $HeadURL$
+// $Id$
 //
 // Copyright © 2006, 2010, 2011, 2012 by the President and Fellows of Harvard College.
 //

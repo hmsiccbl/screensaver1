@@ -1,5 +1,5 @@
-// $HeadURL: http://forge.abcd.harvard.edu/svn/screensaver/branches/iccbl/2.3.2-dev/core/src/main/java/edu/harvard/med/screensaver/ui/activities/ActivitySearchResults.java $
-// $Id: ActivitySearchResults.java 5158 2011-01-06 14:26:53Z atolopko $
+// $HeadURL$
+// $Id$
 
 // Copyright © 2006, 2010, 2011, 2012 by the President and Fellows of Harvard College.
 

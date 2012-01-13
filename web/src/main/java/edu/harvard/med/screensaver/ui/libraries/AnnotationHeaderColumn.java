@@ -1,5 +1,5 @@
-// $HeadURL:  $
-// $Id: AnnotationHeaderColumn.java 4502 2010-08-10 20:38:25Z seanderickson1 $
+// $HeadURL$
+// $Id$
 //
 // Copyright © 2006, 2010, 2011, 2012 by the President and Fellows of Harvard College.
 // 

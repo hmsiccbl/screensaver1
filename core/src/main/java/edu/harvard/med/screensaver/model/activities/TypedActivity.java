@@ -1,7 +1,7 @@
 // $HeadURL:
 // http://forge.abcd.harvard.edu/svn/screensaver/branches/atolopko/2189/core/src/main/java/edu/harvard/med/screensaver/model/activities/AT.java
 // $
-// $Id: AT.java 6042 2011-06-22 13:39:27Z atolopko $
+// $Id$
 //
 // Copyright © 2006, 2010, 2011, 2012 by the President and Fellows of Harvard College.
 //

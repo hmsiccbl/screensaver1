@@ -1,5 +1,5 @@
-// $HeadURL: http://forge.abcd.harvard.edu/svn/screensaver/branches/iccbl/2.1.0-dev/src/edu/harvard/med/screensaver/model/annotations/ElementCollection.java $
-// $Id: ElementCollection.java 4510 2010-08-12 15:36:10Z atolopko $
+// $HeadURL$
+// $Id$
 //
 // Copyright © 2006, 2010, 2011, 2012 by the President and Fellows of Harvard College.
 // 

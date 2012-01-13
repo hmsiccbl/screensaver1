@@ -1,5 +1,5 @@
-// $HeadURL: http://seanderickson1@forge.abcd.harvard.edu/svn/screensaver/branches/iccbl/2.2.2-dev/src/edu/harvard/med/screensaver/ui/arch/searchresults/EntityUpdateSearchResults.java $
-// $Id: EntityUpdateSearchResults.java 5093 2010-12-03 19:47:55Z atolopko $
+// $HeadURL$
+// $Id$
 //
 // Copyright © 2006, 2010, 2011, 2012 by the President and Fellows of Harvard College.
 // 

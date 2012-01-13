@@ -1,5 +1,5 @@
-// $HeadURL: http://seanderickson1@forge.abcd.harvard.edu/svn/screensaver/branches/go/trunk/src/edu/harvard/med/screensaver/ui/table/column/entity/DateTupleColumn.java $
-// $Id: DateTupleColumn.java 4405 2010-07-15 16:15:38Z seanderickson1 $
+// $HeadURL$
+// $Id$
 //
 // Copyright © 2006, 2010, 2011, 2012 by the President and Fellows of Harvard College.
 //

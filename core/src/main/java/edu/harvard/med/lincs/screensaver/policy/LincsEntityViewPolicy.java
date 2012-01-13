@@ -1,7 +1,7 @@
 // $HeadURL:
 // http://forge.abcd.harvard.edu/svn/screensaver/branches/iccbl/2.3.2-dev/core/src/main/java/edu/harvard/med/iccbl/screensaver/policy/IccblEntityViewPolicy.java
 // $
-// $Id: IccblEntityViewPolicy.java 5551 2011-03-24 19:39:31Z seanderickson1 $
+// $Id$
 //
 // Copyright © 2006, 2010, 2011, 2012 by the President and Fellows of Harvard College.
 //

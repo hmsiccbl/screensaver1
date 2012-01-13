@@ -1,5 +1,5 @@
-// $HeadURL: $
-// $Id: WellSearchResults.java 4405 2010-07-15 16:15:38Z seanderickson1 $
+// $HeadURL$
+// $Id$
 
 // Copyright © 2006, 2010, 2011, 2012 by the President and Fellows of Harvard College.
 

@@ -1,5 +1,5 @@
-// $HeadURL: http://forge.abcd.harvard.edu/svn/screensaver/branches/atolopko/2189/core/src/test/java/edu/harvard/med/screensaver/model/AdministrativeActivityTest.java $
-// $Id: AdministrativeActivityTest.java 6042 2011-06-22 13:39:27Z atolopko $
+// $HeadURL$
+// $Id$
 //
 // Copyright © 2006, 2010, 2011, 2012 by the President and Fellows of Harvard College.
 // 

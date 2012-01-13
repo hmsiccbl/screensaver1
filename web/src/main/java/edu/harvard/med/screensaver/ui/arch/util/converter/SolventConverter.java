@@ -1,7 +1,7 @@
 // $HeadURL:
 // http://forge.abcd.harvard.edu/svn/screensaver/branches/iccbl/2.2.2-dev/src/edu/harvard/med/screensaver/ui/util/SolventConverter.java
 // $
-// $Id: SolventConverter.java 3968 2010-04-08 17:04:35Z atolopko $
+// $Id$
 //
 // Copyright © 2006, 2010, 2011, 2012 by the President and Fellows of Harvard College.
 //

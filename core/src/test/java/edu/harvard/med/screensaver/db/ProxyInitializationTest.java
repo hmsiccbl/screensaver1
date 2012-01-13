@@ -1,5 +1,5 @@
-// $HeadURL: http://forge.abcd.harvard.edu/svn/screensaver/branches/iccbl/2.1.0-dev/test/edu/harvard/med/screensaver/db/GenericEntityDAOTest.java $
-// $Id: GenericEntityDAOTest.java 4486 2010-08-04 19:52:03Z atolopko $
+// $HeadURL$
+// $Id$
 //
 // Copyright © 2006, 2010, 2011, 2012 by the President and Fellows of Harvard College.
 //

@@ -1,5 +1,5 @@
-// $HeadURL: http://forge.abcd.harvard.edu/svn/screensaver/branches/iccbl/infrastructure-upgrade/test/edu/harvard/med/screensaver/ui/users/UserViewerTest.java $
-// $Id: UserViewerTest.java 5202 2011-01-21 22:16:57Z atolopko $
+// $HeadURL$
+// $Id$
 //
 // Copyright © 2006, 2010, 2011, 2012 by the President and Fellows of Harvard College.
 // 

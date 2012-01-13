@@ -3,8 +3,8 @@
     "http://www.springframework.org/dtd/spring-beans-2.0.dtd">
 
 <!--
-   $HeadURL: http://forge.abcd.harvard.edu/svn/screensaver/branches/iccbl/infrastructure-upgrade/test/spring-context-test.xml $
-   $Id: spring-context-test.xml 5276 2011-02-08 17:23:10Z atolopko $
+   $HeadURL$
+   $Id$
 
    Copyright © 2006, 2010, 2011, 2012 by the President and Fellows of Harvard College.
 

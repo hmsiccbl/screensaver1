@@ -1,5 +1,5 @@
-// $HeadURL: http://forge.abcd.harvard.edu/svn/screensaver/branches/go/trunk-reintegrate/core/src/test/java/edu/harvard/med/screensaver/model/screens/ScreenAttachedFileTypeTest.java $
-// $Id: ScreenAttachedFileTypeTest.java 5492 2011-03-11 20:39:01Z atolopko $
+// $HeadURL$
+// $Id$
 //
 // Copyright © 2006, 2010, 2011, 2012 by the President and Fellows of Harvard College.
 // 

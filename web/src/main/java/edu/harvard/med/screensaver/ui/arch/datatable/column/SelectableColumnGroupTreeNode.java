@@ -1,5 +1,5 @@
-// $HeadURL: http://forge.abcd.harvard.edu/svn/screensaver/branches/serickson/lincs-3107/core/src/main/java/edu/harvard/med/screensaver/ui/arch/datatable/column/SelectableColumnTreeNode.java $
-// $Id: SelectableColumnTreeNode.java 5158 2011-01-06 14:26:53Z atolopko $
+// $HeadURL$
+// $Id$
 //
 // Copyright © 2006, 2010, 2011, 2012 by the President and Fellows of Harvard College.
 // 

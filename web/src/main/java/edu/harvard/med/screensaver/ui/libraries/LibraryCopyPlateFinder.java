@@ -1,7 +1,7 @@
 // $HeadURL:
 // http://forge.abcd.harvard.edu/svn/screensaver/branches/iccbl/2.2.2-dev/src/edu/harvard/med/screensaver/ui/users/ScreenerFinder.java
 // $
-// $Id: ScreenerFinder.java 4689 2010-09-24 18:40:57Z atolopko $
+// $Id$
 //
 // Copyright © 2006, 2010, 2011, 2012 by the President and Fellows of Harvard College.
 //

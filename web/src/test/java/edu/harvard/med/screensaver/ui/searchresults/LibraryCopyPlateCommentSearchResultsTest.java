@@ -1,5 +1,5 @@
-// $HeadURL: http://seanderickson1@forge.abcd.harvard.edu/svn/screensaver/branches/iccbl/2.2.2-dev/test/edu/harvard/med/screensaver/ui/searchresults/LibraryCopyPlateSearchResultsTest.java $
-// $Id: LibraryCopyPlateSearchResultsTest.java 5072 2010-11-29 17:26:27Z seanderickson1 $
+// $HeadURL$
+// $Id$
 //
 // Copyright © 2010 by the President and Fellows of Harvard College.
 // 
