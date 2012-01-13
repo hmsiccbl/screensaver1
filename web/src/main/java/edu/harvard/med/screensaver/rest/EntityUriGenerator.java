@@ -1,7 +1,7 @@
 // $HeadURL: http://seanderickson1@forge.abcd.harvard.edu/svn/screensaver/branches/iccbl/rest/core/src/main/java/edu/harvard/med/screensaver/model/EntityUriGenerator.java $
 // $Id: EntityUriGenerator.java 6434 2011-09-14 22:48:43Z seanderickson1 $
 //
-// Copyright © 2006, 2010 by the President and Fellows of Harvard College.
+// Copyright © 2006, 2010, 2011, 2012 by the President and Fellows of Harvard College.
 //
 // Screensaver is an open-source project developed by the ICCB-L and NSRB labs
 // at Harvard Medical School. This software is distributed under the terms of

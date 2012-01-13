@@ -1,7 +1,7 @@
 // $HeadURL: http://forge.abcd.harvard.edu/svn/screensaver/branches/atolopko/2189/core/src/main/java/edu/harvard/med/screensaver/ui/screenresults/ScreenResultImporter.java $
 // $Id: ScreenResultImporter.java 5492 2011-03-11 20:39:01Z atolopko $
 //
-// Copyright © 2006, 2010 by the President and Fellows of Harvard College.
+// Copyright © 2006, 2010, 2011, 2012 by the President and Fellows of Harvard College.
 //
 // Screensaver is an open-source project developed by the ICCB-L and NSRB labs
 // at Harvard Medical School. This software is distributed under the terms of

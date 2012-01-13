@@ -1,7 +1,7 @@
 // $HeadURL: $
 // $Id: WellSearchResults.java 4405 2010-07-15 16:15:38Z seanderickson1 $
 
-// Copyright © 2006, 2010 by the President and Fellows of Harvard College.
+// Copyright © 2006, 2010, 2011, 2012 by the President and Fellows of Harvard College.
 
 // Screensaver is an open-source project developed by the ICCB-L and NSRB labs
 // at Harvard Medical School. This software is distributed under the terms of

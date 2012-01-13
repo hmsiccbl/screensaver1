@@ -1,7 +1,7 @@
 // $HeadURL: http://seanderickson1@forge.abcd.harvard.edu/svn/screensaver/branches/go/2.2.3-dev/src/edu/harvard/med/iccbl/screensaver/io/libraries/smallmolecule/PrimaryCompoundNameStructureImageProvider.java $
 // $Id: PrimaryCompoundNameStructureImageProvider.java 5269 2011-02-02 22:47:10Z seanderickson1 $
 //
-// Copyright © 2006, 2010 by the President and Fellows of Harvard College.
+// Copyright © 2006, 2010, 2011, 2012 by the President and Fellows of Harvard College.
 // 
 // Screensaver is an open-source project developed by the ICCB-L and NSRB labs
 // at Harvard Medical School. This software is distributed under the terms of
