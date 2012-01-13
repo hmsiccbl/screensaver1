@@ -134,7 +134,8 @@ public class RNAiLibraryContentsParser extends WorkbookLibraryContentsParser<Sil
     }
 
     if (!well.getLibrary().equals(getLibrary())) {
-      throw new ParseException(new ParseError("Well: " + well.getLibrary().getLibraryName() + " does not match specified input library " + getLibrary().getLibraryName()));
+      throw new ParseException(new ParseError("Well: " + well.getWellKey() + " does not belong to the library " +
+        getLibrary().getLibraryName()));
     }
     LibraryWellType wellType = WELL_TYPE.getValue(row);
     well.setLibraryWellType(wellType);
