@@ -173,7 +173,7 @@ public class ScreenDataSharingLevelUpdaterTest extends AbstractSpringPersistence
     int ageToExpireFromActivityDateInDays = 760;
 
     ScreenDataSharingLevelUpdater.DataPrivacyAdjustment adjustment = screenDataSharingLevelUpdater
-        .adjustDataPrivacyExpirationByActivities(ageToExpireFromActivityDateInDays, admin);
+        .adjustDataPrivacyExpirationByActivities(ageToExpireFromActivityDateInDays, admin, ScreenType.SMALL_MOLECULE);
 
     flushAndClear();
     
@@ -295,7 +295,7 @@ public class ScreenDataSharingLevelUpdaterTest extends AbstractSpringPersistence
     screen3Mutual = genericEntityDao.reloadEntity(screen3Mutual);
     screen4Private = genericEntityDao.reloadEntity(screen4Private);
     
-    Set<Screen> publishedScreens = Sets.newHashSet(screenDataSharingLevelUpdater.findNewPublishedPrivate());
+    Set<Screen> publishedScreens = Sets.newHashSet(screenDataSharingLevelUpdater.findNewPublishedPrivate(ScreenType.SMALL_MOLECULE));  // TODO: Test RNAi as well
     assertNotNull(publishedScreens);
     assertEquals(Sets.newHashSet(screen2Published, screen3Mutual, screen4Private), publishedScreens);
   }
@@ -419,7 +419,7 @@ public class ScreenDataSharingLevelUpdaterTest extends AbstractSpringPersistence
       log.info("allScreens: " + screen.getTitle() + " , expires: " + screen.getDataPrivacyExpirationDate() );
     }
     
-    List<Screen> screens = screenDataSharingLevelUpdater.findNewExpiredNotNotified(date);
+    List<Screen> screens = screenDataSharingLevelUpdater.findNewExpiredNotNotified(date, ScreenType.SMALL_MOLECULE);
     for(Screen screen:screens)
     {
       log.info("expiredScreens: " + screen.getTitle() + " , expires: " + screen.getDataPrivacyExpirationDate() );
@@ -442,17 +442,22 @@ public class ScreenDataSharingLevelUpdaterTest extends AbstractSpringPersistence
 
     assertFalse("screen4Default should not be expired", screens.contains(screen4Default));
     assertFalse("screen1NotExpired should not be expired", screens.contains(screen1NotExpired));
-    assertTrue("screen5RnaiExpired should be expired", screens.contains(screen5RnaiExpired));
+    assertFalse("screen5RnaiExpired should NOT be expired (unless setting screenType=RNAi)", screens.contains(screen5RnaiExpired));
     assertFalse("screen6ExpiredNoResults should not be expired", screens.contains(screen6ExpiredNoResults));
     assertFalse("screen7ExpiredDropped should not be expired", screens.contains(screen7ExpiredDropped));
     assertFalse("screen8ExpiredTransferred should not be expired", screens.contains(screen8ExpiredTransferred));
     
     
     // just a little test here to see if we get a null or an empty list, find none
-    screens = screenDataSharingLevelUpdater.findNewExpiredNotNotified(date.minusYears(20));
+    screens = screenDataSharingLevelUpdater.findNewExpiredNotNotified(date.minusYears(20), ScreenType.SMALL_MOLECULE);
     log.info("empty result: " + screens);
     assertNotNull(screens);
     assertTrue(screens.isEmpty());
+    
+    screens = screenDataSharingLevelUpdater.findNewExpiredNotNotified(date, ScreenType.RNAI);
+    assertFalse("no expired screens", screens.isEmpty());
+    assertTrue("only the RNAi screen should be returned (no Small Molecule): " + screens, screens.size()==1);
+    assertTrue("screen5RnaiExpired should NOT be expired (unless setting screenType=RNAi)", screens.contains(screen5RnaiExpired));
   }
   
   /**
@@ -478,7 +483,7 @@ public class ScreenDataSharingLevelUpdaterTest extends AbstractSpringPersistence
     screen8ExpiredTransferred = genericEntityDao.reloadEntity(screen8ExpiredTransferred);
     screen9ExpiredMaxDatePassed = genericEntityDao.reloadEntity(screen9ExpiredMaxDatePassed);
     
-    List<Pair<Screen,AdministrativeActivity>> results = screenDataSharingLevelUpdater.expireScreenDataSharingLevels(date, admin);
+    List<Pair<Screen,AdministrativeActivity>> results = screenDataSharingLevelUpdater.expireScreenDataSharingLevels(date, admin, ScreenType.SMALL_MOLECULE);
     //TODO: Do some checking of the activities as well.
     Set<Screen> screens = Sets.newLinkedHashSet();
     for(Pair<Screen,AdministrativeActivity> result:results)
@@ -504,11 +509,21 @@ public class ScreenDataSharingLevelUpdaterTest extends AbstractSpringPersistence
     assertFalse("screen1NotExpired should be expired", screens.contains(screen1NotExpired));
     assertTrue("screen1NotExpired should not be shared", screen1NotExpired.getDataSharingLevel() != ScreenDataSharingLevel.MUTUAL_SCREENS);
     
-    assertTrue("screen5RnaiExpired should be expired", screens.contains(screen5RnaiExpired));
-    assertTrue("screen5RnaiExpired should be shared", screen5RnaiExpired.getDataSharingLevel() == ScreenDataSharingLevel.MUTUAL_SCREENS);
+    assertFalse("screen5RnaiExpired should NOT be expired (unless setting the screenType=RNAi)", screens.contains(screen5RnaiExpired));
+    assertTrue("screen5RnaiExpired NOT should be shared", screen5RnaiExpired.getDataSharingLevel() != ScreenDataSharingLevel.MUTUAL_SCREENS);
     
     assertTrue("screen9ExpiredMaxDatePassed should be expired", screens.contains(screen9ExpiredMaxDatePassed));
     assertTrue("screen9ExpiredMaxDatePassed should be shared", screen9ExpiredMaxDatePassed.getDataSharingLevel() == ScreenDataSharingLevel.MUTUAL_SCREENS);
+
+    //TODO: Do some checking of the activities as well.
+
+    // RNAi
+    results = screenDataSharingLevelUpdater.expireScreenDataSharingLevels(date, admin, ScreenType.RNAI);
+    screen5RnaiExpired = genericEntityDao.reloadEntity(screen5RnaiExpired);
+    assertFalse(results.isEmpty());
+    assertTrue("should only return the 1 RNAI screen: " + results, results.size() == 1);
+    assertTrue("screen5RnaiExpired should be expired (setting the screenType=RNAi)", results.get(0).getFirst().equals((screen5RnaiExpired)));
+    assertTrue("screen5RnaiExpired should be shared", screen5RnaiExpired.getDataSharingLevel() == ScreenDataSharingLevel.MUTUAL_SCREENS);
   }
 
   /**

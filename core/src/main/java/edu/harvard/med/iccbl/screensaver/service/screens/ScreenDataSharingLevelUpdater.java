@@ -90,7 +90,7 @@ public class ScreenDataSharingLevelUpdater
    * @param expireDate
    * @return not null, empty Set if nothing is found
    */
-  public List<Screen> findNewExpiredNotNotified(LocalDate expireDate)
+  public List<Screen> findNewExpiredNotNotified(LocalDate expireDate, ScreenType screenType)
   {
     String hql = "select distinct(s) from Screen s " + 
         " join s.screenResult sr " +
@@ -106,14 +106,14 @@ public class ScreenDataSharingLevelUpdater
     List<Screen> list = _dao.findEntitiesByHql(Screen.class, hql, 
                                                expireDate,
                                                ScreenDataSharingLevel.MUTUAL_SCREENS,
-                                               ScreenType.SMALL_MOLECULE,
+                                               screenType,
                                                ScreenStatus.DROPPED_TECHNICAL,
                                                ScreenStatus.TRANSFERRED_TO_BROAD_INSTITUTE);
     log.info("Hql: " + hql + ", " + list.size());
     return list;
   }
   
-  public List<Screen> findExpired(LocalDate expireDate)
+  public List<Screen> findExpired(LocalDate expireDate, ScreenType screenType)
   {
     String hql = "select distinct(s) from Screen s " + 
         " join s.screenResult sr " +
@@ -127,7 +127,7 @@ public class ScreenDataSharingLevelUpdater
     List<Screen> list = _dao.findEntitiesByHql(Screen.class, hql, 
                                   expireDate, 
                                   ScreenDataSharingLevel.MUTUAL_SCREENS, 
-                                  ScreenType.SMALL_MOLECULE ,
+                                  screenType ,
                                   ScreenStatus.DROPPED_TECHNICAL, 
                                   ScreenStatus.TRANSFERRED_TO_BROAD_INSTITUTE
                                   );
@@ -149,10 +149,10 @@ public class ScreenDataSharingLevelUpdater
    * @return Screens updated
    */
   @Transactional
-  public List<Pair<Screen,AdministrativeActivity>> expireScreenDataSharingLevels(LocalDate date, AdministratorUser recordedBy)
+  public List<Pair<Screen,AdministrativeActivity>> expireScreenDataSharingLevels(LocalDate date, AdministratorUser recordedBy, ScreenType screenType)
   {
     verifyOperationPermitted(recordedBy);
-    List<Screen> screens = findExpired(date);
+    List<Screen> screens = findExpired(date, screenType);
     List<Pair<Screen,AdministrativeActivity>> results = Lists.newLinkedList();
     for(Screen screen:screens)
     {
@@ -191,7 +191,7 @@ public class ScreenDataSharingLevelUpdater
    */
   @Transactional
   public DataPrivacyAdjustment
-    adjustDataPrivacyExpirationByActivities(int ageToExpireFromActivityDateInDays, AdministratorUser admin)
+    adjustDataPrivacyExpirationByActivities(int ageToExpireFromActivityDateInDays, AdministratorUser admin, ScreenType screenType)
   {
     admin = _dao.reloadEntity(admin);
     String hql = "select distinct(s) from Screen as s " +
@@ -204,7 +204,7 @@ public class ScreenDataSharingLevelUpdater
         " order by s.screenId";
 
     List<Screen> screens = _dao.findEntitiesByHql(Screen.class, hql, 
-                                                  ScreenType.SMALL_MOLECULE, 
+                                                  screenType, 
                                                   ScreenDataSharingLevel.MUTUAL_SCREENS,
                                                   ScreenStatus.DROPPED_TECHNICAL,
                                                   ScreenStatus.TRANSFERRED_TO_BROAD_INSTITUTE);
@@ -299,17 +299,19 @@ public class ScreenDataSharingLevelUpdater
    * <li>do not have a status of {@link ScreenStatus#DROPPED_TECHNICAL} or {@link ScreenStatus#TRANSFERRED_TO_BROAD_INSTITUTE}
    * </ul>
    */
-  public List<Screen> findNewPublishedPrivate()
+  public List<Screen> findNewPublishedPrivate(ScreenType screenType)
   {
     String hql = "select distinct (s) from Screen as s " +
     		" join s.publications " +
         " join s.screenResult sr " +
     		" where s.dataSharingLevel > ? " +
+    		" and s.screenType = ? " + 
         " and s.screenId not in (select s2.screenId from Screen s2 join s2.statusItems si where si.status in ( ?, ? ) and s2=s ) "
       +
         " order by s.screenId";
     return _dao.findEntitiesByHql(Screen.class, hql, 
                                   ScreenDataSharingLevel.SHARED, 
+                                  screenType,
                                   ScreenStatus.DROPPED_TECHNICAL, 
                                   ScreenStatus.TRANSFERRED_TO_BROAD_INSTITUTE);
   }

@@ -1,0 +1,50 @@
+# m h  dom month dow   command
+MAILTO=sean.erickson.hms@gmail.com
+# Testing
+0 * * * * echo "running crontab from user:`whoami` date: `date`" >> /groups/screensaver/test.log
+
+# Screen data privacy expiration: 
+# modes:
+# -adjustexpiration <days> 	- scans all screens, adjusts the DPED out the number of days from the last activity
+# --notifyofoverrides 		- send admins a count of dataPrivacyExpirationDate changes that were supressed by the "Min/Max" AllowedDataPrivacyExpirationDate values
+# --notify-privacy-expiration 	- send a notification to the screen admins only
+# -notifyofpublications 	- notify the admins when a publication has been added to a screeen
+# -expireprivacy 		- expire any screens with a DPED dated later than today
+0 1 * * *  /groups/screensaver/batch/screensaver/batch_runner.sh prod edu.harvard.med.iccbl.screensaver.io.screens.ScreenPrivacyExpirationUpdater -st SMALL_MOLECULE -AL sde_EDIT -notifyofoverrides -adjustexpiration 790 
+15 1 * * * /groups/screensaver/batch/screensaver/batch_runner.sh prod edu.harvard.med.iccbl.screensaver.io.screens.ScreenPrivacyExpirationUpdater -st SMALL_MOLECULE -AL sde_EDIT --notify-privacy-expiration 60 
+30 1 * * 0 /groups/screensaver/batch/screensaver/batch_runner.sh prod edu.harvard.med.iccbl.screensaver.io.screens.ScreenPrivacyExpirationUpdater -st SMALL_MOLECULE -AL sde_EDIT -notifyofpublications 
+31 1 * * 0 /groups/screensaver/batch/screensaver/batch_runner.sh prod edu.harvard.med.iccbl.screensaver.io.screens.ScreenPrivacyExpirationUpdater -st RNAI -AL sde_EDIT -notifyofpublications 
+45 1 * * * /groups/screensaver/batch/screensaver/batch_runner.sh prod edu.harvard.med.iccbl.screensaver.io.screens.ScreenPrivacyExpirationUpdater -st SMALL_MOLECULE -AL sde_EDIT -expireprivacy
+
+# Small molecule user agreement expiration:
+# -notifyonlyindays <days>	- notify small molecule users if their SMUA expires in the next <days> 
+# -expireindays <days>		- expire (remove Screensaverlogin, SMSDL3 roles) for screeners with SMUA's dated more than <days> before the present.
+0 2 * * * /groups/screensaver/batch/screensaver/batch_runner.sh prod edu.harvard.med.iccbl.screensaver.io.users.UserAgreementExpirationUpdater -AL sde_EDIT -notifyonlyindays 14 -st SMALL_MOLECULE
+15 2 * * * /groups/screensaver/batch/screensaver/batch_runner.sh prod edu.harvard.med.iccbl.screensaver.io.users.UserAgreementExpirationUpdater -AL sde_EDIT -expire -expireindays 730 -st SMALL_MOLECULE
+
+# RNAi user agreement expiration:
+# NOTE: this has been disabled as of 2012-01-04, per discussion with CES,Su,Jen,Andrew, will wait for confirmation before reinstating
+5 2 * * * /groups/screensaver/batch/screensaver/batch_runner.sh prod edu.harvard.med.iccbl.screensaver.io.users.UserAgreementExpirationUpdater -AL sde_EDIT -notifyonlyindays 14 -st RNAI
+20 2 * * * /groups/screensaver/batch/screensaver/batch_runner.sh prod edu.harvard.med.iccbl.screensaver.io.users.UserAgreementExpirationUpdater -AL sde_EDIT -expire -expireindays 730 -st RNAI
+
+# Screen positives count study creator: 
+# create a study showing the number of positives, and the cross-screen positives for each screen
+# -typernai, -typesm 		- specify the type (sm or rnai) to consider
+30 2 * * * /groups/screensaver/batch/screensaver/batch_runner.sh prod edu.harvard.med.iccbl.screensaver.io.screens.ScreenPositivesCountStudyCreator -AL sde_EDIT -typernai --replace-if-exists
+45 2 * * * /groups/screensaver/batch/screensaver/batch_runner.sh prod edu.harvard.med.iccbl.screensaver.io.screens.ScreenPositivesCountStudyCreator -AL sde_EDIT -typesm --replace-if-exists
+# Note: ScreenPositivesCountStudyCreator for SmallMolecule is taking 22 minutes, as of 2011-08-29; therefore, it overlaps the ConfirmedPositivesStudyCreator and 
+# causes an OptimisticLockException.  To fix, make sure to start the CPSC later, at 3:15 - sde4
+
+# Confirmed positives study creator:
+# create a study annotating each reagent that has a confirmed positive
+15 3 * * * /groups/screensaver/batch/screensaver/batch_runner.sh prod edu.harvard.med.iccbl.screensaver.io.screens.ConfirmedPositivesStudyCreator -AL sde_EDIT --replace-if-exists
+
+# Copy freeze thaw report:
+3 0 * * 6 echo "The copy freeze thaw report is available at https://screensaver.med.harvard.edu/screensaver/libraries/copyFreezeThawReportSearchResults.jsf" | mail -s "Copy Freeze Thaw Report" sean.erickson.hms@gmail.com,katrina_rudnicki@hms.harvard.edu
+
+
+
+# do some simple greps for errors and send them to me
+0 4 * * * /groups/screensaver/batch/scripts/loggrep.sh
+### stage tests ###
+

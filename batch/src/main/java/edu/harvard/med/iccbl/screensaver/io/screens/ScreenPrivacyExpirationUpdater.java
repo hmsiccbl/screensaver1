@@ -45,6 +45,7 @@ import edu.harvard.med.screensaver.db.GenericEntityDAO;
 import edu.harvard.med.screensaver.model.activities.AdministrativeActivity;
 import edu.harvard.med.screensaver.model.screens.Screen;
 import edu.harvard.med.screensaver.model.screens.ScreenDataSharingLevel;
+import edu.harvard.med.screensaver.model.screens.ScreenType;
 import edu.harvard.med.screensaver.model.users.AdministratorUser;
 import edu.harvard.med.screensaver.model.users.ScreensaverUser;
 import edu.harvard.med.screensaver.service.EmailService;
@@ -67,6 +68,8 @@ public class ScreenPrivacyExpirationUpdater extends AdminEmailApplication
 
   private ScreenDataSharingLevelUpdater _privacyUpdater = null;
 
+  private ScreenType _screenType;
+
   public ScreenPrivacyExpirationUpdater(String[] cmdLineArgs)
   {
     super(cmdLineArgs);
@@ -78,6 +81,14 @@ public class ScreenPrivacyExpirationUpdater extends AdminEmailApplication
   }
 
   private static Logger log = Logger.getLogger(ScreenPrivacyExpirationUpdater.class);
+  
+  public static final String[] SCREEN_TYPE_OPTION =
+  {
+    "st",
+    "screen type",
+    "screen-type",
+    "the screen type of the user agreements to be processed (RNAi or Small Molecule)"
+  };
 
   public static final String[] ADJUST_DATA_PRIVACY_EXPIRATION_DATE_BASED_ON_ACTIVITY = {
     "adjustexpiration", "days",
@@ -138,6 +149,12 @@ public class ScreenPrivacyExpirationUpdater extends AdminEmailApplication
     final ScreenPrivacyExpirationUpdater app = new ScreenPrivacyExpirationUpdater(args);
     // TODO: allow this to be optional and glean the eCommons ID from the
     // environment - sde4
+
+    app.addCommandLineOption(OptionBuilder.hasArg().isRequired()
+                             .withArgName(SCREEN_TYPE_OPTION[ARG_INDEX])
+                             .withDescription(SCREEN_TYPE_OPTION[DESCRIPTION_INDEX])
+                             .withLongOpt(SCREEN_TYPE_OPTION[LONG_OPTION_INDEX])
+                             .create(SCREEN_TYPE_OPTION[SHORT_OPTION_INDEX]));
 
     app.addCommandLineOption(OptionBuilder.hasArg()
                              .withArgName(ADJUST_DATA_PRIVACY_EXPIRATION_DATE_BASED_ON_ACTIVITY[ARG_INDEX])
@@ -209,6 +226,7 @@ public class ScreenPrivacyExpirationUpdater extends AdminEmailApplication
               ", " + ADJUST_DATA_PRIVACY_EXPIRATION_DATE_BASED_ON_ACTIVITY[SHORT_OPTION_INDEX]);
             System.exit(1);
           }
+        app.setScreenType(app.getCommandLineOptionEnumValue(SCREEN_TYPE_OPTION[SHORT_OPTION_INDEX], ScreenType.class));
 
           try {
             if (app.isCommandLineFlagSet(NOTIFY_PRIVACY_EXPIRATION[SHORT_OPTION_INDEX]))
@@ -254,9 +272,14 @@ public class ScreenPrivacyExpirationUpdater extends AdminEmailApplication
 
   }
 
+  private void setScreenType(ScreenType screenType) // 
+  {
+    _screenType = screenType;
+  }
+
   private void notifyOfPublications() throws MessagingException
   {
-    List<Screen> publishedScreens = _privacyUpdater.findNewPublishedPrivate();
+    List<Screen> publishedScreens = _privacyUpdater.findNewPublishedPrivate(_screenType);
 
     if (publishedScreens.isEmpty()) {
       String subject = getMessages().getMessage("admin.screens.dataPrivacyExpiration.publicationNotification.noaction.subject");
@@ -288,7 +311,7 @@ public class ScreenPrivacyExpirationUpdater extends AdminEmailApplication
 
   private void adjustDataPrivacyExpirationByActivities(Integer ageToExpireFromActivityDateInDays) throws MessagingException
   {
-    ScreenDataSharingLevelUpdater.DataPrivacyAdjustment adjustment = _privacyUpdater.adjustDataPrivacyExpirationByActivities(ageToExpireFromActivityDateInDays, findAdministratorUser());
+    ScreenDataSharingLevelUpdater.DataPrivacyAdjustment adjustment = _privacyUpdater.adjustDataPrivacyExpirationByActivities(ageToExpireFromActivityDateInDays, findAdministratorUser(), _screenType);
     if (adjustment.isEmpty(isCommandLineFlagSet(NOTIFY_OF_OVERRIDES[SHORT_OPTION_INDEX]))) {
       String subject = getMessages().getMessage("admin.screens.dataPrivacyExpiration.dataPrivacyExpirationdate.adjustment.noaction.subject");
       String msg = "No Screens with Activities to adjust the dataPrivacyExpirationDate";
@@ -370,7 +393,7 @@ public class ScreenPrivacyExpirationUpdater extends AdminEmailApplication
   {
     LocalDate expireDate = new LocalDate().plusDays(daysAheadToNotify);
 
-    List<Screen> oldScreens = new ArrayList<Screen>(_privacyUpdater.findNewExpiredNotNotified(expireDate));
+    List<Screen> oldScreens = new ArrayList<Screen>(_privacyUpdater.findNewExpiredNotNotified(expireDate, _screenType));
     // sort by DPED
     Collections.sort(oldScreens, new Comparator<Screen>() {
       public int compare(Screen o1, Screen o2)
@@ -454,7 +477,7 @@ public class ScreenPrivacyExpirationUpdater extends AdminEmailApplication
     throws MessagingException
   {
     LocalDate expireDate = new LocalDate();
-    List<Pair<Screen,AdministrativeActivity>> results = _privacyUpdater.expireScreenDataSharingLevels(expireDate, findAdministratorUser());
+    List<Pair<Screen,AdministrativeActivity>> results = _privacyUpdater.expireScreenDataSharingLevels(expireDate, findAdministratorUser(), _screenType);
 
     if (results.isEmpty()) {
       String subject = getMessages().getMessage("admin.screens.dataPrivacyExpiration.dataPrivacyExpirattion.notification.noaction.subject");

@@ -32,6 +32,10 @@
       <source>src/main/resources/log4j.properties.iccbl-cron</source>
       <outputDirectory>/resources</outputDirectory>
       <destName>log4j.properties</destName>
+    </file>    
+    <file>
+      <source>src/main/resources/crontab.txt</source>
+      <outputDirectory>/resources</outputDirectory>
     </file>
   </files>  
 
