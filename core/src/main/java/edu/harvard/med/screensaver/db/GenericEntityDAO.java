@@ -143,7 +143,7 @@ public interface GenericEntityDAO
    * @param <E>
    * @param entity the entity to be reloaded
    * @param readOnly see class-level documentation of {@link GenericEntityDAO}
-   * @param relationship the related entity or entities to be eagerly fetched
+   * @param relationshipL the related entity or entities to be eagerly fetched
    * @return a new Hibernate-managed instance of the specified entity
    */
   public <E extends Entity> E reloadEntity(E entity,
@@ -171,7 +171,7 @@ public interface GenericEntityDAO
    * read-only entities.
    * 
    * @param entity the root entity
-   * @param relationships the relationships to be loaded, relative to the root entity
+   * @param relationship the relationships to be loaded, relative to the root entity
    */
   public <E extends Entity> void needReadOnly(E entity,
                                               RelationshipPath<E> relationship);
@@ -192,7 +192,7 @@ public interface GenericEntityDAO
    * @param <E> the type of the entity to retrieve
    * @param entityClass the class of the entity to retrieve
    * @param readOnly see class-level documentation of {@link GenericEntityDAO}
-   * @param relationships the relationships to be loaded, relative to the root entity
+   * @param relationship the relationship to be loaded, relative to the root entity
    * @return a list of the entities of the specified type
    */
   public <E extends Entity> List<E> findAllEntitiesOfType(Class<E> entityClass,
@@ -319,7 +319,7 @@ public interface GenericEntityDAO
    * See @{@link #findEntitiesByProperty(Class, String, Object)}.
    * 
    * @param readOnly see class-level documentation of {@link GenericEntityDAO}
-   * @param relationships the relationships to be loaded, relative to the root entity
+   * @param relationship the relationship to be loaded, relative to the root entity
    */
   public <E extends Entity> List<E> findEntitiesByProperty(Class<E> entityClass,
                                                            String propertyName,

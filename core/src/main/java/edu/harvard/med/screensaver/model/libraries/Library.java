@@ -87,7 +87,7 @@ import edu.harvard.med.screensaver.util.DevelopmentException;
  * updated/corrected well contents data becomes available.
  * <li>Library is defined, but without related Wells, and thus without Reagents. It is recommended that Library's
  * {@link Well wells} always be created at the same time a Library is created, even if the Wells are initially all
- * {@link LibraryWellType#EMPTY empty}. See {@link LibrariesDAO#loadOrCreateWellsForLibrary(Library)}.
+ * {@link LibraryWellType#EMPTY empty}.
  * </ul>
  * 
  * @author <a mailto="john_sullivan@hms.harvard.edu">John Sullivan</a>
@@ -762,7 +762,6 @@ public class Library extends AuditedAbstractEntity<Integer>
    * released by calling
    * {@link #setLatestReleasedContentsVersion(LibraryContentsVersion)}.
    *
-   * @param loadingAdminActivity
    * @return the new {@link LibraryContentsVersion}
    */
   public LibraryContentsVersion createContentsVersion(AdministratorUser recordedBy)

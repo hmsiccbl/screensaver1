@@ -131,14 +131,13 @@ public class GenericEntityDAOImpl extends AbstractDAO implements GenericEntityDA
    * <p>
    * Any relationships that may have been initialized in the passed-in entity (network) <i>cannot</i> be expected to be
    * pre-initialized (eagerly fetched) in the new, returned entity instance. However, you may specify relationships that
-   * need to be eagerly fetched by making subsequent calls to {@link #need(Entity, RelationshipPath<E>)} or {@link
-   * #needReadOnly(Entity, RelationshipPath<E>)}.
+   * need to be eagerly fetched by making subsequent calls to {@link #need(Entity, RelationshipPath)} or
+   * {@link #needReadOnly(Entity, RelationshipPath)}.
    * </p>
    * 
    * @param entity the entity to be reloaded
    * @return a new Hibernate-managed instance of the specified entity
    */
-  @SuppressWarnings("unchecked")
   public <E extends Entity> E reloadEntity(E entity)
   {
     // TODO: throw exception if entity already exists in the session
@@ -158,8 +157,8 @@ public class GenericEntityDAOImpl extends AbstractDAO implements GenericEntityDA
    * Any relationships that may have been initialized in the passed-in entity (network) <i>cannot</i> be expected to be
    * pre-initialized (eagerly fetched) in the new, returned entity instance. However, you may specify a relationship
    * that needs to be eagerly fetched via the <code>relationship</code> arg and you may eager fetch additional
-   * collection relationships by making subsequent calls to {@link #need(Entity, RelationshipPath<E>)} or {@link
-   * #needReadOnly(Entity, RelationshipPath<E>)}.
+   * collection relationships by making subsequent calls to {@link #need(Entity, RelationshipPath)} or
+   * {@link #needReadOnly(Entity, RelationshipPath)}.
    * </p>
    * 
    * @param <E>
