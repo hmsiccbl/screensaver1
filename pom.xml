@@ -22,20 +22,25 @@
   </issueManagement>
   <developers>
     <developer>
-      <name>Andrew Tolopko</name>
-      <id>atolopko</id>
-      <organization>Harvard Medical School, ICCB-Longwood/NSRB</organization>
-    </developer>
-    <developer>
       <name>Sean Erickson</name>
       <id>seanderickson1</id>
       <organization>Harvard Medical School, ICCB-Longwood/NSRB</organization>
+      <properties><activeDeveloper>true</activeDeveloper></properties>
+    </developer>
+    <developer>
+      <name>Andrew Tolopko</name>
+      <id>atolopko</id>
+      <organization>Harvard Medical School, ICCB-Longwood/NSRB</organization>
+      <properties><activeDeveloper>false</activeDeveloper></properties>
+    </developer>
+    <developer>
+      <name>John Sullivan</name>
+      <id>jsull</id>
+      <organization>Harvard Medical School, ICCB-Longwood/NSRB</organization>
+      <properties><activeDeveloper>false</activeDeveloper></properties>
     </developer>
   </developers>
   <contributors>
-    <contributor>
-      <name>John Sullivan</name>
-    </contributor>
     <contributor>
       <name>Cor Lieftink</name>
     </contributor>
