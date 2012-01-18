@@ -34,7 +34,7 @@
       <destName>log4j.properties</destName>
     </file>    
     <file>
-      <source>src/main/resources/crontab.txt</source>
+      <source>src/main/scripts/iccbl-cron/crontab.txt</source>
       <outputDirectory>/resources</outputDirectory>
     </file>
   </files>  
