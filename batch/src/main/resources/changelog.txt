@@ -1,0 +1,7 @@
+Screensaver-batch release notes
+
+Version 2012-01-12-maint1
+
+[#3356] StudyCreator out of memory error 
+see: http://forge.abcd.harvard.edu/gf/project/screensaver/tracker/?action=TrackerItemEdit&tracker_item_id=3356&start=0
+detail: Memory performance fix to StudyAnnotationParser to populate the Study-Reagent link table outside of HQL
