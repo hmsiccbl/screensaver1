@@ -31,6 +31,7 @@ import com.google.common.base.Function;
 import org.apache.log4j.Logger;
 import org.hibernate.annotations.OptimisticLock;
 
+import edu.harvard.med.screensaver.db.ScreenDAO;
 import edu.harvard.med.screensaver.model.AbstractEntity;
 import edu.harvard.med.screensaver.model.AbstractEntityVisitor;
 import edu.harvard.med.screensaver.model.annotations.ToMany;
@@ -38,6 +39,7 @@ import edu.harvard.med.screensaver.model.libraries.Reagent;
 import edu.harvard.med.screensaver.model.meta.Cardinality;
 import edu.harvard.med.screensaver.model.meta.RelationshipPath;
 import edu.harvard.med.screensaver.model.screens.Screen;
+import edu.harvard.med.screensaver.model.screens.Study;
 
 /**
  * Annotation type on a reagent.
@@ -172,16 +174,25 @@ public class AnnotationType extends AbstractEntity<Integer> implements MetaDataT
     return _values;
   }
 
+  public AnnotationValue createAnnotationValue(
+      Reagent reagent,
+      String value)
+  {
+  	return createAnnotationValue(reagent, value, true);
+  }
   /**
    * Create and return an annotation value for the annotation type.
    * 
    * @param reagent the reagent
    * @param value the value
+   * @param populateStudyReagentLink if set to false, the annotation value will be created without populating 
+   * 		the {@link Study#getReagents()} and the {@link Reagent#getStudies() } links.
+   * 		if this is done, then {@ ScreenDAO#populateStudyReagentLinkTable(int) } must be called after creating the study.
    * @return the new annotation value
    */
   public AnnotationValue createAnnotationValue(
     Reagent reagent,
-    String value)
+    String value, boolean populateStudyReagentLink )
   {
     if (_values.containsKey(reagent)) {
       AnnotationValue extantAnnotValue = _values.get(reagent);
@@ -200,11 +211,11 @@ public class AnnotationType extends AbstractEntity<Integer> implements MetaDataT
       value,
       _isNumeric && value != null ? new Double(value) : null);
 
-    //TODO: may have to lazily make this connection, re: large studies, [#2268] -sde4  
-    reagent.getAnnotationValues().put(this, annotationValue);
+    // lazily make this connection, re: large studies, [#2268] -sde4  
+    if(populateStudyReagentLink) reagent.getAnnotationValues().put(this, annotationValue);
     
-    //TODO: may have to lazily make this connection, re: large studies, [#2268] -sde4  
-    getStudy().addReagent(reagent);
+    // lazily make this connection, re: large studies, [#2268] -sde4  
+    if(populateStudyReagentLink) getStudy().addReagent(reagent);
     _values.put(reagent, annotationValue);
     return annotationValue;
   }

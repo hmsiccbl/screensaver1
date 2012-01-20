@@ -22,6 +22,7 @@ import org.apache.log4j.Logger;
 import edu.harvard.med.screensaver.db.DAOTransaction;
 import edu.harvard.med.screensaver.db.DAOTransactionRollbackException;
 import edu.harvard.med.screensaver.db.GenericEntityDAO;
+import edu.harvard.med.screensaver.db.ScreenDAO;
 import edu.harvard.med.screensaver.db.UsersDAO;
 import edu.harvard.med.screensaver.io.CommandLineApplication;
 import edu.harvard.med.screensaver.io.screens.StudyAnnotationParser.KEY_COLUMN;
@@ -84,9 +85,7 @@ public class StudyCreator
 
     app.addCommandLineOption(OptionBuilder.withArgName("parseLincsSpecificFacilityID")
                              .withLongOpt("parseLincsSpecificFacilityID").create("parseLincsSpecificFacilityID"));
-
     app.processOptions(/* acceptDatabaseOptions= */true, /* acceptAdminUserOptions= */true);
-
     execute(app);
   }
 
@@ -95,18 +94,6 @@ public class StudyCreator
     final GenericEntityDAO dao = (GenericEntityDAO) app.getSpringBean("genericEntityDao");
     final UsersDAO usersDAO = (UsersDAO) app.getSpringBean("usersDao");
     final String facilityId = app.getCommandLineOptionValue("i");
-
-    boolean replace = app.isCommandLineFlagSet("r");
-    Screen screen = dao.findEntityByProperty(Screen.class, "facilityId", facilityId);
-    if (screen != null) {
-      if (!replace) {
-        log.error("screen " + facilityId + " already exists (use --replace flag to delete existing screen first)");
-        return;
-      }
-      dao.deleteEntity(screen);
-      log.error("deleted existing screen " + facilityId);
-    }
-
     dao.doInTransaction(new DAOTransaction() {
       @Override
       public void runTransaction()
@@ -133,12 +120,26 @@ public class StudyCreator
             leadScreener.setLab(labHead.getLab());
             log.info("set lab head for lead screener");
           }
-          Screen screen = new Screen(app.findAdministratorUser(), facilityId, leadScreener, labHead, screenType, studyType, ProjectPhase.ANNOTATION, app.getCommandLineOptionValue("t"));
+          boolean replace = app.isCommandLineFlagSet("r");
+          Screen screen = dao.findEntityByProperty(Screen.class, "facilityId", facilityId);
+          if (screen != null) {
+            if (!replace) {
+              log.error("study " + facilityId + " already exists (use --replace flag to delete existing screen first)");
+              return;
+            }
+            log.info("study " + facilityId + " exists, deleting...");
+            ((ScreenDAO) app.getSpringBean("screenDao")).deleteStudy(screen);
+            log.error("deleted existing study " + facilityId);
+          }
+
+          screen = new Screen(app.findAdministratorUser(), facilityId, leadScreener, labHead, screenType, studyType, ProjectPhase.ANNOTATION, app.getCommandLineOptionValue("t"));
           screen.setDataSharingLevel(ScreenDataSharingLevel.SHARED);
           screen.setSummary(app.getCommandLineOptionValue("s"));
           if (app.isCommandLineFlagSet("p")) {
             screen.setPublishableProtocol(app.getCommandLineOptionValue("p"));
           }
+          dao.persistEntity(screen);
+          
           boolean parseLincsSpecificFacilityID = app.isCommandLineFlagSet("parseLincsSpecificFacilityID");
 
           // import
@@ -149,15 +150,15 @@ public class StudyCreator
           if (app.isCommandLineFlagSet("keyByCompoundName")) keyColumn = KEY_COLUMN.COMPOUND_NAME;
           
           boolean annotationNamesInCol1 = app.isCommandLineFlagSet("annotationNamesInCol1");
-
           File screenResultFile = null;
           if (app.isCommandLineFlagSet("f")) {
             screenResultFile = app.getCommandLineOptionValue("f", File.class);
             if (!screenResultFile.exists()) throw new IllegalArgumentException("File does not exist: " +
               screenResultFile.getAbsolutePath());
             StudyAnnotationParser parser = (StudyAnnotationParser) app.getSpringBean("studyAnnotationParser");
+            log.info("call parser");
             parser.parse(screen, new Workbook(screenResultFile), keyColumn, annotationNamesInCol1, parseLincsSpecificFacilityID);
-            dao.persistEntity(screen);
+//            dao.persistEntity(screen);
           }
           else {
             log.info("no file specified for import");

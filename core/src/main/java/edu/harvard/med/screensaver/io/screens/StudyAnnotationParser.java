@@ -22,11 +22,14 @@ import com.google.common.base.Function;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
 import org.apache.commons.lang.StringUtils;
+import org.apache.log4j.Appender;
 import org.apache.log4j.Logger;
 import org.springframework.transaction.annotation.Transactional;
 
+import edu.harvard.med.screensaver.db.AbstractDAO;
 import edu.harvard.med.screensaver.db.GenericEntityDAO;
 import edu.harvard.med.screensaver.db.LibrariesDAO;
+import edu.harvard.med.screensaver.db.ScreenDAO;
 import edu.harvard.med.screensaver.io.UnrecoverableParseException;
 import edu.harvard.med.screensaver.io.workbook2.Cell;
 import edu.harvard.med.screensaver.io.workbook2.Row;
@@ -38,6 +41,7 @@ import edu.harvard.med.screensaver.model.libraries.SmallMoleculeReagent;
 import edu.harvard.med.screensaver.model.libraries.Well;
 import edu.harvard.med.screensaver.model.libraries.WellKey;
 import edu.harvard.med.screensaver.model.screenresults.AnnotationType;
+import edu.harvard.med.screensaver.model.screenresults.AnnotationValue;
 import edu.harvard.med.screensaver.model.screens.Screen;
 
 public class StudyAnnotationParser
@@ -49,6 +53,7 @@ public class StudyAnnotationParser
 
   private GenericEntityDAO _dao;
   private LibrariesDAO _librariesDao;
+  private ScreenDAO _screenDao;
 
   public static enum KEY_COLUMN {
     RVI,
@@ -61,11 +66,13 @@ public class StudyAnnotationParser
   protected StudyAnnotationParser()
   {}
 
-  public StudyAnnotationParser(GenericEntityDAO dao, 
-                               LibrariesDAO librariesDao)
+  public StudyAnnotationParser(GenericEntityDAO dao,
+                               LibrariesDAO librariesDao, 
+                               ScreenDAO screenDao)
   {
     _dao = dao;
     _librariesDao = librariesDao;
+    _screenDao = screenDao;
   }
 
   /**
@@ -111,10 +118,10 @@ public class StudyAnnotationParser
     Row annotationNames = sheet.getRow(0);
     for (int i = 0; i < annotationNames.getColumns(); i++) {
       new AnnotationType(study,
-                           sheet.getCell(i, 0, true).getString(),
-                           sheet.getCell(i, 1, true).getString(),
-                           i,
-                           sheet.getCell(i, 2, true).getBoolean());
+                         sheet.getCell(i, 0, true).getString(),
+                         sheet.getCell(i, 1, true).getString(),
+                         i,
+                         sheet.getCell(i, 2, true).getBoolean());
     }
   }
 
@@ -185,8 +192,9 @@ public class StudyAnnotationParser
   {
     int annotation_count = 0;
     int sheetAnnotationCount = study.getAnnotationTypes().size();
-
-    int i = 0;
+    long startTime = System.currentTimeMillis();
+    long loopTime = startTime;
+    log.info("begin parsing: " + sheet.getName() + ", annotations: " + sheetAnnotationCount);
     for (Row row : sheet) {
       Cell cell = row.getCell(0);
       String originalKey = cell.getString();
@@ -198,19 +206,20 @@ public class StudyAnnotationParser
 
       if (parseLincsSpecificFacilityID && KEY_COLUMN.FACILITY_ID == keyColumn) {
         Well wellStudied = getWellStudied(originalKey);
-        
+
         if (wellStudied == null) {
           throw new IllegalArgumentException("No canonical reagent well found for the input key: " + originalKey);
         }
         key = wellStudied.getFacilityId();
 
-        if (i == 0) {
+        if (row.getRow() == 0) {
           study.setWellStudied(wellStudied);
-        } else {
+        }
+        else {
           study.setWellStudied(null);
         }
       }
-      
+
       Collection<Reagent> reagents = null;
       try {
         reagents = getReagents(keyColumn, key);
@@ -220,17 +229,118 @@ public class StudyAnnotationParser
       }
 
       for (Reagent reagent : reagents) {
-        _dao.needReadOnly(reagent, Reagent.annotationValues);
-        study.addReagent(reagent);
         for (int iAnnot = 0; iAnnot < sheetAnnotationCount; ++iAnnot) {
           int iCol = iAnnot + 1;
           AnnotationType annotationType = annotationTypes.get(iAnnot);
-          annotationType.createAnnotationValue(reagent, row.getCell(iCol).getString());
+          // Note: for memory performance, set populateStudyReagentLink to false and do that at the end of the creation
+          // TODO: consider making this a settable property, and/or, 
+          // consider making the Study.reagents link transient, and populate on load so that this issue goes away - sde4
+          boolean populateStudyReagentLink = false;
+          annotationType.createAnnotationValue(reagent, row.getCell(iCol).getString(), populateStudyReagentLink);
           annotation_count++;
+					if (annotation_count % (AbstractDAO.ROWS_TO_CACHE * 100) == 0) {
+						long time = System.currentTimeMillis();
+						long cumulativeTime = time - startTime;
+						log.info("annotation count: " + annotation_count
+								+ ", cumulative time: " + (double) cumulativeTime
+								/ (double) 60000 + " min, avg time per annotation: "
+								+ (double) cumulativeTime / (double) annotation_count
+								+ ", loopTime: " + (time - loopTime));
+						loopTime = time;
+					}
         }
       }
-       i++;
     }
+    log.info("save the study, sheet reagent rows read: " + sheet.getRows());
+    // Note, as a result of memory optimization, it is unnecessary to explicitly persist the study, since it is already persisted in the session,
+    // and the reagents will be linked by the populateStudyReagentLinkTable - sde4
+    // _dao.mergeEntity(study);
+    _dao.flush();
+    log.info("populateStudyReagentLinkTable");
+    int reagentCount = _screenDao.populateStudyReagentLinkTable(study.getScreenId());
+    log.info("study saved, reagents linked to the study: " + reagentCount);
+    return annotation_count;
+  }
+
+  /**
+   * annotation values in columns, well_id's/RVI's in column1, by rows
+   * 
+   * @param parseLincsSpecificFacilityID
+   */
+  private int parseAnnotationValuesWithReagentKeysInRow1(Screen study,
+                                                         KEY_COLUMN keyColumn,
+                                                         List<AnnotationType> annotationTypes,
+                                                         Worksheet sheet, boolean parseLincsSpecificFacilityID) throws UnrecoverableParseException
+  {
+    int annotation_count = 0;
+    int sheetAnnotationCount = study.getAnnotationTypes().size();
+    long startTime = System.currentTimeMillis();
+    long loopTime = startTime;
+
+    for (int i = 0; i < sheet.getColumns(); i++) {
+      Cell cell = sheet.getCell(i, 0, true);
+      String originalKey = cell.getString();
+      String key = originalKey;
+      if (StringUtils.isEmpty(key)) {
+        log.warn("Key in cell: " + cell + " is empty, skip the rest of the sheet: " + sheet);
+        break;
+      }
+
+      if (parseLincsSpecificFacilityID && KEY_COLUMN.FACILITY_ID == keyColumn) {
+        Well wellStudied = getWellStudied(originalKey);
+
+        if (wellStudied == null) {
+          throw new IllegalArgumentException("No canonical reagent well found for the input key: " + originalKey);
+        }
+        key = wellStudied.getFacilityId();
+
+        if (i == 0) {
+          study.setWellStudied(wellStudied);
+        }
+        else {
+          study.setWellStudied(null);
+        }
+      }
+
+      Collection<Reagent> reagents = null;
+      try {
+        reagents = getReagents(keyColumn, key);
+      }
+      catch (UnrecoverableParseException e) {
+        throw new UnrecoverableParseException("WellKey in cell: " + sheet.getCell(i, 0) + " is invalid.", e);
+      }
+
+      for (Reagent reagent : reagents) {
+        for (int iAnnot = 0; iAnnot < sheetAnnotationCount; ++iAnnot) {
+          int iRow = iAnnot + 1;
+          AnnotationType annotationType = annotationTypes.get(iAnnot);
+          // Note: for memory performance, set populateStudyReagentLink to false and do that at the end of the creation
+          // TODO: consider making this a settable property, and/or, 
+          // consider making the Study.reagents link transient, and populate on load so that this issue goes away - sde4
+          boolean populateStudyReagentLink = false;
+          annotationType.createAnnotationValue(reagent, sheet.getCell(i, iRow).getString(), populateStudyReagentLink);
+          annotation_count++;
+					if (annotation_count % (AbstractDAO.ROWS_TO_CACHE * 100) == 0) {
+						long time = System.currentTimeMillis();
+						long cumulativeTime = time - startTime;
+						log.info("annotation count: " + annotation_count
+								+ ", cumulative time: " + (double) cumulativeTime
+								/ (double) 60000 + " min, avg time per annotation: "
+								+ (double) cumulativeTime / (double) annotation_count
+								+ ", loopTime: " + (time - loopTime));
+						loopTime = time;
+					}
+        }
+      }
+    }
+    log.info("save the study, sheet reagent columns read: " + sheet.getColumns());
+    // Note, as a result of memory optimization, it is unnecessary to explicitly persist the study, since it is already persisted in the session,
+    // and the reagents will be linked by the populateStudyReagentLinkTable - sde4
+    // _dao.mergeEntity(study);
+    _dao.flush();
+    log.info("populateStudyReagentLinkTable");
+    int reagentCount = _screenDao.populateStudyReagentLinkTable(study.getScreenId());
+    log.info("study saved, reagents linked to the study: " + reagentCount);
     return annotation_count;
   }
 
@@ -265,65 +375,6 @@ public class StudyAnnotationParser
     return wellStudied;
   }
 
-  /**
-   * annotation values in columns, well_id's/RVI's in column1, by rows
-   * 
-   * @param parseLincsSpecificFacilityID
-   */
-  private int parseAnnotationValuesWithReagentKeysInRow1(Screen study,
-                                                         KEY_COLUMN keyColumn,
-                                                         List<AnnotationType> annotationTypes,
-                                                         Worksheet sheet, boolean parseLincsSpecificFacilityID) throws UnrecoverableParseException
-  {
-    int annotation_count = 0;
-    int sheetAnnotationCount = study.getAnnotationTypes().size();
-
-    for (int i = 0; i < sheet.getColumns(); i++) {
-      Cell cell = sheet.getCell(i, 0, true);
-      String originalKey = cell.getString();
-      String key = originalKey;
-      if (StringUtils.isEmpty(key)) {
-        log.warn("Key in cell: " + cell + " is empty, skip the rest of the sheet: " + sheet);
-        break;
-      }
-
-      if (parseLincsSpecificFacilityID && KEY_COLUMN.FACILITY_ID == keyColumn) {
-        Well wellStudied = getWellStudied(originalKey);
-        
-        if (wellStudied == null) {
-          throw new IllegalArgumentException("No canonical reagent well found for the input key: " + originalKey);
-        }
-        key = wellStudied.getFacilityId();
-
-        if (i == 0) {
-          study.setWellStudied(wellStudied);
-        } else {
-          study.setWellStudied(null);
-        }
-      }
-
-      Collection<Reagent> reagents = null;
-      try {
-        reagents = getReagents(keyColumn, key);
-      }
-      catch (UnrecoverableParseException e) {
-        throw new UnrecoverableParseException("WellKey in cell: " + sheet.getCell(i, 0) + " is invalid.", e);
-      }
-
-      for (Reagent reagent : reagents) {
-        _dao.needReadOnly(reagent, Reagent.annotationValues);
-        study.addReagent(reagent);
-        for (int iAnnot = 0; iAnnot < sheetAnnotationCount; ++iAnnot) {
-          int iRow = iAnnot + 1;
-          AnnotationType annotationType = annotationTypes.get(iAnnot);
-          annotationType.createAnnotationValue(reagent, sheet.getCell(i, iRow).getString());
-          annotation_count++;
-        }
-      }
-    }
-    return annotation_count;
-  }
-
   private Collection<Reagent> getReagents(KEY_COLUMN keyColumn, String key) throws UnrecoverableParseException
   {
     Collection<Reagent> reagents = Lists.newArrayList();
@@ -335,10 +386,17 @@ public class StudyAnnotationParser
         Map<String,Object> queryProps = Maps.newHashMap();
         queryProps.put(Reagent.vendorIdentifier.getPath(), rvi.getVendorIdentifier());
         queryProps.put(Reagent.vendorName.getPath(), rvi.getVendorName());
-        reagents = _dao.findEntitiesByProperties(Reagent.class,
-                                                 queryProps,
-                                                 true,
-                                                 Reagent.studies);
+        reagents = _dao.findEntitiesByProperties(Reagent.class, queryProps);
+
+        // NOTE: removing the eager fetching of relationships, because:
+        // Reagent-Study link will be done by ScreenDAO.populateReagentStudyLink, and 
+        // AnnotationType->annotationValues (Map[Reagent,AnnotationValue]) is a one-to-many relationship, managed by the AV, and
+        // Reagent->annotationValues (Map[AnnotationType,AnnotationValue]) is also a one-to-many reln, also managed by the AV
+        // (so AV is essentially the link table)
+        //        reagents = _dao.findEntitiesByProperties(Reagent.class,
+        // queryProps,
+        // true,
+        // Reagent.annotationValues);
         break;
       case FACILITY_ID:
         List<Well> wells = _dao.findEntitiesByProperty(Well.class, "facilityId", key);
@@ -369,5 +427,5 @@ public class StudyAnnotationParser
     }
     return reagents;
   }
-  
+
 }

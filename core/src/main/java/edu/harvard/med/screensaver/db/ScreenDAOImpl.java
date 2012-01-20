@@ -23,6 +23,8 @@ import org.hibernate.Session;
 import edu.harvard.med.screensaver.db.Criterion.Operator;
 import edu.harvard.med.screensaver.db.hqlbuilder.HqlBuilder;
 import edu.harvard.med.screensaver.model.DataModelViolationException;
+import edu.harvard.med.screensaver.model.libraries.Reagent;
+import edu.harvard.med.screensaver.model.screenresults.AnnotationType;
 import edu.harvard.med.screensaver.model.screens.LabActivity;
 import edu.harvard.med.screensaver.model.screens.ProjectPhase;
 import edu.harvard.med.screensaver.model.screens.Screen;
@@ -203,4 +205,40 @@ public class ScreenDAOImpl extends AbstractDAO implements ScreenDAO
     query.setParameter("screen", screen);
     return ((Long) query.getSingleResult()).intValue();
   }
+
+  @Override
+  public int populateStudyReagentLinkTable(final int screenId)
+  {
+    final int[] result = new int[1];
+    _dao.runQuery(new edu.harvard.med.screensaver.db.Query() {
+      public List<?> execute(Session session)
+      {
+        String sql =
+          "insert into study_reagent_link " +
+            "(study_id,reagent_id) " +
+            "select :studyId as study_id, " +
+            "reagent_id from " +
+            "(select distinct(reagent_id) " +
+            "from reagent " +
+            "join annotation_value using(reagent_id) " +
+            "join annotation_type using(annotation_type_id) " +
+            "where study_id = :studyId ) a";
+
+        log.debug("sql: " + sql);
+
+        Query query = session.createSQLQuery(sql);
+        query.setParameter("studyId", screenId);
+        int rows = query.executeUpdate();
+        if (rows == 0) {
+          log.warn("No rows were updated: " +
+            query.getQueryString());
+        }
+        log.info("study_reagent_link updated: " + rows);
+        result[0] = rows;
+        return null;
+      }
+    });
+    return result[0];
+  }
+  
 }

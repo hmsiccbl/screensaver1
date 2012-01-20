@@ -32,6 +32,7 @@ import org.springframework.transaction.annotation.Transactional;
 import edu.harvard.med.screensaver.db.AbstractDAO;
 import edu.harvard.med.screensaver.db.Criterion.Operator;
 import edu.harvard.med.screensaver.db.GenericEntityDAO;
+import edu.harvard.med.screensaver.db.ScreenDAO;
 import edu.harvard.med.screensaver.db.hqlbuilder.HqlBuilder;
 import edu.harvard.med.screensaver.db.hqlbuilder.JoinType;
 import edu.harvard.med.screensaver.model.libraries.Library;
@@ -94,13 +95,15 @@ public class ScreenResultReporter
   private static Logger log = Logger.getLogger(ScreenResultReporter.class);
 
   private GenericEntityDAO _dao;
+  private ScreenDAO _screenDao;
 
   public ScreenResultReporter()
   {}
 
-  public ScreenResultReporter(GenericEntityDAO dao)
+  public ScreenResultReporter(GenericEntityDAO dao, ScreenDAO screenDao)
   {
     _dao = dao;
+    _screenDao = screenDao;
   }
 
   /**
@@ -231,7 +234,7 @@ public class ScreenResultReporter
 
     log.info("countOfDuplexReagentsConfirmed: " + countOfDuplexReagentsConfirmed);
     log.info("populateStudyReagentLinkTable");
-    populateStudyReagentLinkTable(study.getScreenId());
+    _screenDao.populateStudyReagentLinkTable(study.getScreenId());
     log.info("Study created: " + study.getTitle() + ", reagents: " + countOfDuplexReagentsConfirmed);
     return countOfDuplexReagentsConfirmed;
   }
@@ -390,55 +393,9 @@ public class ScreenResultReporter
     // _dao.mergeEntity(study);
     _dao.flush();
     log.info("populateStudyReagentLinkTable");
-    int reagentCount = populateStudyReagentLinkTable(study.getScreenId());
+    int reagentCount = _screenDao.populateStudyReagentLinkTable(study.getScreenId());
     log.info("done: positives: " + positivesMap.size() + ", reagents: " + overallCount);
     return reagentCount;
-  }
-
-  /**
-   * Use SQL to populate the Study-to-Reagent link table: <br>
-   * Reagents can be added to the study in java-hibernate, (using the standard
-   * {@link AnnotationType#createAnnotationValue(Reagent, String)}) however, when
-   * this is done, the AnnotationType will maintain a collection of AnnotationTypes in
-   * memory.<br>
-   * <br>
-   * <b>
-   * NOTE: do not use this method if creating the Annotations through the
-   * {@link AnnotationType#createAnnotationValue(Reagent, String)} method.
-   * </b>
-   */
-  private int populateStudyReagentLinkTable(final int screenId)
-  {
-    final int[] result = new int[1];
-    _dao.runQuery(new edu.harvard.med.screensaver.db.Query() {
-      public List<?> execute(Session session)
-      {
-        String sql =
-          "insert into study_reagent_link " +
-            "(study_id,reagent_id) " +
-            "select :studyId as study_id, " +
-            "reagent_id from " +
-            "(select distinct(reagent_id) " +
-            "from reagent " +
-            "join annotation_value using(reagent_id) " +
-            "join annotation_type using(annotation_type_id) " +
-            "where study_id = :studyId ) a";
-
-        log.debug("sql: " + sql);
-
-        Query query = session.createSQLQuery(sql);
-        query.setParameter("studyId", screenId);
-        int rows = query.executeUpdate();
-        if (rows == 0) {
-          log.warn("No rows were updated: " +
-            query.getQueryString());
-        }
-        log.info("study_reagent_link updated: " + rows);
-        result[0] = rows;
-        return null;
-      }
-    });
-    return result[0];
   }
 
   public static class ConfirmationReport

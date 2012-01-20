@@ -74,6 +74,7 @@
     scope="prototype">
     <constructor-arg ref="genericEntityDao"/>
     <constructor-arg ref="librariesDao"/>
+    <constructor-arg ref="screenDao"/>
   </bean>
 
   <bean
@@ -188,6 +189,7 @@
         class="edu.harvard.med.screensaver.io.screenresults.ScreenResultReporter"
         scope="singleton"  >
     <constructor-arg ref="genericEntityDao"/>
+    <constructor-arg ref="screenDao"/>
   </bean>
   
   <bean
