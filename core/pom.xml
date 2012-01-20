@@ -11,7 +11,7 @@
 
   <groupId>edu.harvard.med</groupId>
   <artifactId>screensaver-core</artifactId>
-  <version>2012-01-12</version>
+  <version>2012-01-12-maint1</version>
   <name>Screensaver Core</name>
 
   <packaging>jar</packaging>

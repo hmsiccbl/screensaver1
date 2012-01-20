@@ -11,7 +11,7 @@
   </parent>
   <groupId>edu.harvard.med</groupId>
   <artifactId>screensaver-batch</artifactId>
-  <version>2012-01-12</version>
+  <version>2012-01-12-maint1</version>
   <packaging>jar</packaging>
   <name>Screensaver Batch</name>
   <description>Screensaver command-line applications for batch I/O</description>
@@ -55,21 +55,47 @@
   </build>
 
   <profiles>
+  <!-- to build iccbl flavors of the batch module use:
+  	mvn package -Dfacility=iccbl -DbatchType=iccbl-utils
+   -->
     <profile>
-      <id>iccbl-cron</id>
+      <id>iccbl</id>
       <activation>
         <property>
           <name>facility</name>
+          <value>iccbl</value>
+        </property>
+      </activation>
+      <properties>
+        <spring.context.cmdline.file>spring-context-cmdline-iccbl.xml</spring.context.cmdline.file>
+      </properties>
+    </profile>    
+    <profile>
+      <id>cron</id>
+      <activation>
+        <property>
+          <name>batchType</name>
           <value>iccbl-cron</value>
         </property>
       </activation>
       <properties>
-        <spring.context.cmdline.file>spring-context-cmdline-iccbl-cron.xml</spring.context.cmdline.file>
         <assembly-type>iccbl-cron</assembly-type>
+      </properties>
+    </profile>     
+    <profile>
+      <id>utils</id>
+      <activation>
+        <property>
+          <name>batchType</name>
+          <value>iccbl-utils</value>
+        </property>
+      </activation>
+      <properties>
+        <assembly-type>iccbl-utils</assembly-type>
       </properties>
     </profile>    
     <profile>
-      <id>lincs</id>
+      <id>lincsBatch</id>
       <activation>
         <property>
           <name>facility</name>
@@ -104,7 +130,7 @@
     <dependency>
       <groupId>edu.harvard.med</groupId>
       <artifactId>screensaver-core</artifactId>
-      <version>2012-01-12</version>
+      <version>2012-01-12-maint1</version>
       <scope>compile</scope>
       <type>jar</type>
     </dependency>
