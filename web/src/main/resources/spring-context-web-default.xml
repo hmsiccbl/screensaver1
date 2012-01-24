@@ -77,9 +77,16 @@
    class="edu.harvard.med.iccbl.screensaver.policy.cherrypicks.IccblCherryPickPlateSourceWellMinimumVolumePolicy">
   </bean>
  
+  <bean id="urlEncrypter"
+        class="edu.harvard.med.screensaver.util.DesUrlEncrypter">
+      <constructor-arg value="#{screensaverProperties.map['screensaver.url_encrypter.password']}" />
+      <constructor-arg value="IMAGE" />
+  </bean>
+  
   <bean id="structureImageProvider"
         class="edu.harvard.med.iccbl.screensaver.io.libraries.smallmolecule.PlateWellStructureImageLocator">
     <constructor-arg value="#{screensaverProperties.map['screensaver.images.base_url']}/structure_images/" />
+    <constructor-arg ref="urlEncrypter" />
   </bean>
   
   <bean id="studyImageProvider"

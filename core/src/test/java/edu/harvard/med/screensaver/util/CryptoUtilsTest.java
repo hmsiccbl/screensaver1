@@ -9,10 +9,16 @@
 
 package edu.harvard.med.screensaver.util;
 
+import javax.crypto.KeyGenerator;
+
+import org.apache.log4j.Logger;
+
 import junit.framework.TestCase;
 
 public class CryptoUtilsTest extends TestCase
 {
+  private static final Logger log = Logger.getLogger(CryptoUtilsTest.class);
+
   private static String INPUT = "Security is of the utmost importance!";
   /**
    * Expected SHA1 hash value, as calculated by the trusty Digest::SHA1 perl package with the following code:
@@ -39,4 +45,36 @@ public class CryptoUtilsTest extends TestCase
     assertEquals(EXPECTED_HASH,
                  CryptoUtils.digest(INPUT.getBytes()));
   }
+  
+  public void testDesEncryptDecrypt()
+  {
+  	String secretKey = "tellNo1";
+  	String testPhrase = "HMSL10001";
+  	CryptoUtils.DesEncrypter encrypter = new CryptoUtils.DesEncrypter(secretKey);
+  	
+  	String encryptedPhrase = encrypter.encrypt(testPhrase);
+  	log.info("original: " + testPhrase + ", encrypted: " + encryptedPhrase);
+  	
+  	assertFalse("encrypted phrase equals original", testPhrase.equals(encryptedPhrase));
+  	
+  	String decryptedPhrase = encrypter.decrypt(encryptedPhrase);
+  	
+  	assertTrue("decrypted phrase not equal to the original: " + decryptedPhrase, testPhrase.equals(decryptedPhrase));
+  	
+  }
+  
+  public void testURLEncryptDecrypt()
+  {
+  	String secretKey = "tellNo1";
+  	String testPhrase = "HMSL10001";
+  	CryptoUtils.DesEncrypter encrypter = new CryptoUtils.DesEncrypter(secretKey);
+
+  	String urlEncryptedPhrase = encrypter.urlEncrypt(testPhrase);
+  	
+  	log.info("original: " + testPhrase + ", encrypted: " + urlEncryptedPhrase);
+  	assertFalse("url encrypted phrase equals original", testPhrase.equals(urlEncryptedPhrase));
+  	String urlDecryptedPhrase = encrypter.urlDecrypt(urlEncryptedPhrase);
+  	assertTrue("url decrypted phrase not equal to the original: " + urlDecryptedPhrase, testPhrase.equals(urlDecryptedPhrase));
+  }
+  
 }

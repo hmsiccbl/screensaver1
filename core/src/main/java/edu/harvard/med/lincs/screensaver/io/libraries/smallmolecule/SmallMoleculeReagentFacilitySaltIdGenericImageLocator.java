@@ -16,6 +16,7 @@ import org.apache.log4j.Logger;
 import edu.harvard.med.lincs.screensaver.LincsScreensaverConstants;
 import edu.harvard.med.screensaver.io.libraries.smallmolecule.StructureImageLocator;
 import edu.harvard.med.screensaver.model.libraries.SmallMoleculeReagent;
+import edu.harvard.med.screensaver.util.UrlEncrypter;
 
 public abstract class SmallMoleculeReagentFacilitySaltIdGenericImageLocator implements StructureImageLocator
 {
@@ -24,10 +25,17 @@ public abstract class SmallMoleculeReagentFacilitySaltIdGenericImageLocator impl
   private static Logger log = Logger.getLogger(SmallMoleculeReagentFacilitySaltIdGenericImageLocator.class);
   
   private String _baseUrl;
-
+	private UrlEncrypter _urlEncrypter;
+	
   public SmallMoleculeReagentFacilitySaltIdGenericImageLocator(String baseUrl)
   {
     _baseUrl = baseUrl;
+  }
+  
+  public SmallMoleculeReagentFacilitySaltIdGenericImageLocator(String baseUrl, UrlEncrypter urlEncrypter)
+  {
+    _baseUrl = baseUrl;
+    _urlEncrypter = urlEncrypter;
   }
 
   @Override
@@ -41,7 +49,10 @@ public abstract class SmallMoleculeReagentFacilitySaltIdGenericImageLocator impl
       if (name.equals(LincsScreensaverConstants.FACILITY_ID_SEPARATOR)) {
         return null;
       }
-
+      if(_urlEncrypter != null) {
+      	// NOTE: do not encrypt the baseUrl, as this is required by the web.xml to identify the image locator servlet
+    	name = _urlEncrypter.encryptUrl(name);
+      }
       name = name + IMAGE_FILE_EXTENSION;
       URL url = new URL(_baseUrl + name);
       if (log.isDebugEnabled()) {

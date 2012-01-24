@@ -33,12 +33,15 @@ public class ImageLocatorUtil
             return true;
           }
         });
+        log.info("url:" + url);
         Object content = url.getContent();
         if (content != null) {
           return url;
         }
       }
-      catch (IOException e) {}
+      catch (IOException e) {
+      	log.error(e);
+      }
     }
     log.info("image not available: " + url);
     return null;

@@ -15,8 +15,11 @@ import java.awt.image.BufferedImage;
 import java.io.BufferedOutputStream;
 import java.io.File;
 import java.io.FileInputStream;
+import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.net.URL;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 import javax.servlet.Servlet;
 import javax.servlet.ServletException;
@@ -32,6 +35,7 @@ import org.apache.log4j.Logger;
 import edu.harvard.med.screensaver.ScreensaverConstants;
 import edu.harvard.med.screensaver.ui.ApplicationInfo;
 import edu.harvard.med.screensaver.util.StringUtils;
+import edu.harvard.med.screensaver.util.UrlEncrypter;
 
 /**
  * This servlet allows access to images located outside the web application directory on the server.<br>
@@ -65,6 +69,8 @@ public class ImageProviderServlet extends HttpServlet
 
   private String _imagesFileSystemPath;
   private ApplicationInfo _appInfo;
+	private UrlEncrypter _urlEncrypter;
+//	private Pattern filenamePattern = Pattern.compile("(.*\\/)?((.+?)(\\.[^.]*$|$))");
 
   /**
    * @throws IllegalStateException if the application property
@@ -79,6 +85,11 @@ public class ImageProviderServlet extends HttpServlet
       throw new IllegalStateException("The application property: " + ScreensaverConstants.IMAGES_BASE_DIR + " must be defined.");
     }
     log.debug("ImageProviderServlet: \"" + ScreensaverConstants.IMAGES_BASE_DIR + "\": " + _imagesFileSystemPath);
+  }
+  
+  public ImageProviderServlet(ApplicationInfo appInfo, UrlEncrypter urlEncrypter) {
+  	this(appInfo);
+  	_urlEncrypter = urlEncrypter;
   }
 
 
@@ -101,7 +112,7 @@ public class ImageProviderServlet extends HttpServlet
    * @throws IOException if the image file cannot be found
    */
   @Override
-  protected void service(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException
+  protected void service(HttpServletRequest req, HttpServletResponse resp) throws ServletException
   {
     if (log.isDebugEnabled()) {
       log.debug("ImageProviderServlet: \"" + ScreensaverConstants.IMAGES_BASE_DIR + "\": " + _imagesFileSystemPath);
@@ -127,35 +138,57 @@ public class ImageProviderServlet extends HttpServlet
     }
 
     if (pathInfo != null) {
-      String temp = _imagesFileSystemPath;
-      // make a relative path if its not absolute, this is not uber-useful, 
-      // but it allows a *default* screensaver.properties to specify a valid system file path 
-      // as simply a relative one, the actual deployment should specify absolute system paths, however.
-      File file = new File(temp);
-      if (!file.isAbsolute())
-      {
-        temp = req.getSession().getServletContext().getRealPath("/") + temp;
-        file = new File(temp);
-      }
+      try {
+				String temp = _imagesFileSystemPath;
+				// make a relative path if its not absolute, this is not uber-useful, 
+				// but it allows a *default* screensaver.properties to specify a valid system file path 
+				// as simply a relative one, the actual deployment should specify absolute system paths, however.
+				File file = new File(temp);
+				if (!file.isAbsolute())
+				{
+				  temp = req.getSession().getServletContext().getRealPath("/") + temp;
+				  file = new File(temp);
+				}
+				
+				if(_urlEncrypter != null)
+				{
+					Pattern filenamePattern = Pattern.compile("(.*)" + _urlEncrypter.getDelimiter() + "(.*)" + _urlEncrypter.getDelimiter() + "(.*)");
+					String name = pathInfo;
+					Matcher m = filenamePattern.matcher(pathInfo);
+					if(m.matches())
+					{
+						if(log.isDebugEnabled()) log.debug("path: " + m.group(1) + ", filename: " + m.group(2) + ", ext: " + m.group(3));
+						name = m.group(1) + _urlEncrypter.decryptUrl(m.group(2));
+						name += m.group(3);
+					}else {
+						name = _urlEncrypter.decryptUrl(name);
+					}
+					if(log.isDebugEnabled()) log.info("pathInfo decrypted from: " + pathInfo + " to " + name);
+					pathInfo = name;
+				}
 
-      file = new File(file, pathInfo);
-      if (log.isDebugEnabled()) {
-        log.debug("retrieve the image: " + file.getAbsolutePath());
-      }
-      if(!file.exists()) {
-        log.warn("image file not found: " + file);
-        //        BufferedImage image  = new BufferedImage(1, 1, BufferedImage.TYPE_INT_RGB );
-        //        Graphics2D    graphics = image.createGraphics();
-        //        graphics.setPaint ( Color.WHITE ); // it is better to use a white image
-        //        graphics.fillRect ( 0, 0, image.getWidth(), image.getHeight() );  
-        //        BufferedOutputStream bos=new BufferedOutputStream(resp.getOutputStream()); 
-        //        JPEGImageEncoder encoder= JPEGCodec.createJPEGEncoder(bos);
-        //        encoder.encode(image);
-        throw new IOException("image file not found: " + file);
-      }
-      
-      // note, allow IOException to be thrown if not found. (will print to the log)
-      resp.getOutputStream().write(IOUtils.toByteArray(new FileInputStream(file)));
+				file = new File(file, pathInfo);
+				if (log.isDebugEnabled()) {
+				  log.debug("retrieve the image: " + file.getAbsolutePath());
+				}
+				if(!file.exists()) {
+				  log.warn("image file not found: " + file);
+				  //        BufferedImage image  = new BufferedImage(1, 1, BufferedImage.TYPE_INT_RGB );
+				  //        Graphics2D    graphics = image.createGraphics();
+				  //        graphics.setPaint ( Color.WHITE ); // it is better to use a white image
+				  //        graphics.fillRect ( 0, 0, image.getWidth(), image.getHeight() );  
+				  //        BufferedOutputStream bos=new BufferedOutputStream(resp.getOutputStream()); 
+				  //        JPEGImageEncoder encoder= JPEGCodec.createJPEGEncoder(bos);
+				  //        encoder.encode(image);
+				  // throw new ServletException("image file not found");
+				}
+				
+				// note, allow IOException to be thrown if not found. (will print to the log)
+				resp.getOutputStream().write(IOUtils.toByteArray(new FileInputStream(file)));
+			} catch (Exception e) {
+				log.error("on serving the image for req: " + req.getPathInfo() + ", interpreted as: " + pathInfo, e);
+				throw new ServletException("Error retrieving the image");
+    	}
     }
     else {
       throw new ServletException("No image pathInfo specified");

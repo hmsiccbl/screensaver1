@@ -3,6 +3,7 @@ package edu.harvard.med.screensaver.io.image;
 import java.net.URL;
 
 import edu.harvard.med.screensaver.model.Entity;
+import edu.harvard.med.screensaver.util.UrlEncrypter;
 
 /** SPI for determining the URL of an image for a given {@link Entity} */
 public interface ImageLocator<T extends Entity>

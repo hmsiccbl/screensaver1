@@ -18,6 +18,7 @@ import org.apache.log4j.Logger;
 import edu.harvard.med.screensaver.io.libraries.smallmolecule.StructureImageLocator;
 import edu.harvard.med.screensaver.model.libraries.SmallMoleculeReagent;
 import edu.harvard.med.screensaver.model.libraries.WellKey;
+import edu.harvard.med.screensaver.util.UrlEncrypter;
 
 /**
  * @author <a mailto="andrew_tolopko@hms.harvard.edu">Andrew Tolopko</a>
@@ -30,9 +31,17 @@ public class PlateWellStructureImageLocator implements StructureImageLocator
   
   private String _baseUrl;
 
+	private UrlEncrypter _urlEncrypter;
+
   public PlateWellStructureImageLocator(String baseUrl)
   {
     _baseUrl = baseUrl;
+  }
+  
+  public PlateWellStructureImageLocator(String baseUrl, UrlEncrypter urlEncrypter)
+  {
+    _baseUrl = baseUrl;
+    _urlEncrypter = urlEncrypter;
   }
 
   public URL getImageUrl(SmallMoleculeReagent reagent)
@@ -43,9 +52,13 @@ public class PlateWellStructureImageLocator implements StructureImageLocator
       }
       WellKey wellKey = reagent.getWell().getWellKey();
       String plateNumberLabel = WellKey.getPlateNumberLabel(wellKey.getPlateNumber());
-      File relativeLocation = new File(WellKey.getPlateNumberLabel(wellKey.getPlateNumber()),
-                                       plateNumberLabel + wellKey.getWellName() + IMAGE_FILE_EXTENSION);
-      URL url = new URL(_baseUrl + relativeLocation);
+      String relativeLocation = (new File(WellKey.getPlateNumberLabel(wellKey.getPlateNumber()),
+                                       plateNumberLabel + wellKey.getWellName() )).toString();
+      if(_urlEncrypter != null) {
+      	// NOTE: do not encrypt the baseUrl, as this is required by the web.xml to identify the image locator servlet
+      	relativeLocation = _urlEncrypter.encryptUrl(relativeLocation);
+      }
+      URL url = new URL(_baseUrl + relativeLocation+ IMAGE_FILE_EXTENSION);
       if (log.isDebugEnabled()) {
         log.debug("image URL for reagent " + reagent + ": " + url);
       }

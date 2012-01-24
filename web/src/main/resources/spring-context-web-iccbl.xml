@@ -73,6 +73,7 @@
     <constructor-arg>
       <bean class="edu.harvard.med.iccbl.screensaver.io.libraries.smallmolecule.PlateWellStructureImageLocator">
         <constructor-arg value="#{screensaverProperties.map['screensaver.images.base_url']}/structure-images/" />
+		    <constructor-arg ref="urlEncrypter" />
       </bean>
     </constructor-arg>
   </bean>
