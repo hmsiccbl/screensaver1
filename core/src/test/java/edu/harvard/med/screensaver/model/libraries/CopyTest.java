@@ -25,6 +25,7 @@ public class CopyTest extends AbstractEntityInstanceTest<Copy>
   public CopyTest()
   {
     super(Copy.class);
+    dataFactory.resetToDefaults();
   }
   
   @SuppressWarnings("deprecation")
