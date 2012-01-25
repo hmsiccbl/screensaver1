@@ -1,7 +1,7 @@
 #!/bin/bash
 # runs the batch jobs for the Screensaver ICCBL databases
 
-DIR=/groups/screensaver/batch/screensaver/
+DIR=.
 
 export JAVA_HOME=/usr/lib/jvm/java-6-sun/
 
