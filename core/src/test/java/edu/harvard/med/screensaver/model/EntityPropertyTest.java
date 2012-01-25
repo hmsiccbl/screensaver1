@@ -104,6 +104,11 @@ public class EntityPropertyTest<E extends AbstractEntity> extends AbstractSpring
   //@IfProfileValue(name = "never.to.be.run.explicitly", value = "never.to.be.run.explicitly")
   public void testEntityProperty() throws Throwable
   {
+  	if(propertyDescriptor == null)
+  	{
+  		log.error(new Exception("propertyDescriptor was null here"));
+  		return;  // TODO: this implies that this test method is being run explicitly, so skip -sde4
+  	}
     log.info("testing entity property " + fullPropName(propertyDescriptor));
 
     Method getter = propertyDescriptor.getReadMethod();
