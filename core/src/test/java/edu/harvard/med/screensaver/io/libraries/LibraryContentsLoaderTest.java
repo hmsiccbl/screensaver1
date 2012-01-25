@@ -487,7 +487,7 @@ public class LibraryContentsLoaderTest extends AbstractSpringPersistenceTest
         catch (ParseErrorsException e)
         {
           log.warn(e.getErrors());
-          fail("input file has errors");
+          fail("input file has errors: " + e.getErrors());
         }
         catch (IOException e) {
           log.error(e);
