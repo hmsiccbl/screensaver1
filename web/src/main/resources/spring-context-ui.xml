@@ -902,14 +902,6 @@
     class="edu.harvard.med.screensaver.ui.arch.auth.servlet.CellHTS2ReportAuthorizationFilter">
     <constructor-arg ref="genericEntityDao" />
   </bean>
-
-
-  <bean 
-    id="imageProviderServlet" 
-    class="edu.harvard.med.screensaver.ui.arch.util.servlet.ImageProviderServlet">
-    <constructor-arg ref="appInfo" />
-    <constructor-arg ref="urlEncrypter" />
-  </bean>
   
   <!-- === users backing beans === -->
 

@@ -93,6 +93,13 @@
         class="edu.harvard.med.screensaver.io.screens.NoOpStudyImageLocator">
   </bean>
 
+  <bean 
+    id="imageProviderServlet" 
+    class="edu.harvard.med.screensaver.ui.arch.util.servlet.ImageProviderServlet">
+    <constructor-arg ref="appInfo" />
+    <constructor-arg ref="urlEncrypter" />
+  </bean>
+
   <bean
     id="plateFacilityIdInitializer"
     class="edu.harvard.med.screensaver.service.libraries.DefaultPlateFacilityIdInitializer">
