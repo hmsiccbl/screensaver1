@@ -80,8 +80,13 @@ public class ScreensaverProperties implements ScreensaverConstants
 
   public void initializeVersionProperties() throws IOException
   {
-    log.info("loading version properties from resource " + ScreensaverConstants.VERSION_PROPERTIES_RESOURCE);
-    InputStream versionPropertiesInputStream = ScreensaverProperties.class.getResourceAsStream(ScreensaverConstants.VERSION_PROPERTIES_RESOURCE);
+  	setVersionProperties(ScreensaverConstants.VERSION_PROPERTIES_RESOURCE);
+  }
+  
+  public void setVersionProperties(String propertiesFile) throws IOException
+  {
+    log.info("loading version properties from resource " + propertiesFile);
+    InputStream versionPropertiesInputStream = ScreensaverProperties.class.getResourceAsStream(propertiesFile);
     _versionProperties.load(versionPropertiesInputStream);
     logProperties("Version properties", _versionProperties);
   }

@@ -33,6 +33,7 @@
     <constructor-arg>
       <bean class="edu.harvard.med.screensaver.db.ScreensaverPropertiesDatabaseConnectionSettingsResolver" />
     </constructor-arg>
+    <property name="versionProperties" value="/version.properties.lincs.testing" />
   </bean>
 
   <bean
