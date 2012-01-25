@@ -397,6 +397,8 @@ public class LibraryCopyDetailViewerTest extends AbstractBackingBeanTest
     assertNotNull(_copy2);
     assertNull(_copy2.getPrimaryWellMolarConcentration());
 
+    libraryCopyDetail.getMessages().getMessagesAndDequeue(); // clear any messages on the viewer
+    
     libraryCopyDetail.setEntity(_copy2);
     //    // on plate = 100 MicroMolar, actual = 333 NanoMolar, or .333 MicroMolar, pdf = 300.300300... pdf_rounded = 300.30, rounded, on plate: .330 uM, actual .333000333000333... uM
     BigDecimal pdf_rounded = new BigDecimal("300.30");
