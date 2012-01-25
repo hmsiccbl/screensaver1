@@ -540,7 +540,7 @@ public class TestDataFactory
           val = new BigDecimal((TestDataFactory.this.newInstance(Double.class)).doubleValue() / _doubleTestValue);
           val = val.setScale(3, RoundingMode.HALF_UP);
         }
-        else if (callStack.contains("dilution")) {
+        else if (callStack.contains("Dilution")) {
           // dilution factor has a max precision 8, scale 2
           val = new BigDecimal((TestDataFactory.this.newInstance(Double.class)).doubleValue() / (_doubleTestValue / 10));
           val = val.setScale(2, RoundingMode.HALF_UP);
