@@ -23,6 +23,7 @@ import java.util.TreeSet;
 import javax.faces.component.UIData;
 import javax.faces.model.DataModel;
 
+import com.google.common.base.Joiner;
 import com.google.common.base.Predicates;
 import com.google.common.collect.ImmutableSortedSet;
 import com.google.common.collect.Iterables;
@@ -475,7 +476,12 @@ public class WellSearchResultsTest extends AbstractBackingBeanTest
       R rowData = (R) dataModel.getRowData();
       assertNotNull("row data not null for row " + i + ", column " + sortColumn,
                     rowData);
-      actualSortedValues.add((Comparable) sortColumn.getCellValue(rowData));
+      Object o = sortColumn.getCellValue(rowData);
+      if(o != null && (o instanceof Set)) {  // Hack to handle TextSetColumns -sde4
+        actualSortedValues.add(Joiner.on(',').join((Set)o));
+      }else {
+        actualSortedValues.add((Comparable) o);
+      }
     }
     expectedSortedValues.addAll(actualSortedValues);
     Collections.sort(expectedSortedValues, NullSafeComparator.NULLS_HIGH);
