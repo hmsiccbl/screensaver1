@@ -9,11 +9,16 @@
 
 package edu.harvard.med.screensaver.model.libraries;
 
+import java.math.BigDecimal;
+import java.math.RoundingMode;
+
 import com.google.common.collect.Sets;
 import junit.framework.TestSuite;
 
 import edu.harvard.med.screensaver.model.AbstractEntityInstanceTest;
 import edu.harvard.med.screensaver.model.Volume;
+import edu.harvard.med.screensaver.test.TestDataFactory;
+import edu.harvard.med.screensaver.test.TestDataFactory.AbstractBuilder;
 
 public class CopyTest extends AbstractEntityInstanceTest<Copy>
 {
@@ -25,7 +30,6 @@ public class CopyTest extends AbstractEntityInstanceTest<Copy>
   public CopyTest()
   {
     super(Copy.class);
-    dataFactory.resetToDefaults();
   }
   
   @SuppressWarnings("deprecation")
