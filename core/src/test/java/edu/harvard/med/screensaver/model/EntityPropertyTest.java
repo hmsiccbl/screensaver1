@@ -192,68 +192,74 @@ public class EntityPropertyTest<E extends AbstractEntity> extends AbstractSpring
    */
   private void doTestMutableProperty(final PropertyDescriptor propertyDescriptor)
   {
-    final Method getter = propertyDescriptor.getReadMethod();
-    final Method setter = propertyDescriptor.getWriteMethod();
-    
-    if (ModelIntrospectionUtil.isPropertyWithNonconventionalSetterMethod(propertyDescriptor)) {
-      log.warn("skipping testing setter of mutable property " + fullPropName(propertyDescriptor) + ": has non-conventional setter method");
-      return;
-    }
-    if (ModelIntrospectionUtil.isDerivedProperty(propertyDescriptor)) {
-      log.warn("skipping testing setter of derived property " + fullPropName(propertyDescriptor));
-      return;
-    }
+    try {
+			final Method getter = propertyDescriptor.getReadMethod();
+			final Method setter = propertyDescriptor.getWriteMethod();
+			
+			if (ModelIntrospectionUtil.isPropertyWithNonconventionalSetterMethod(propertyDescriptor)) {
+			  log.warn("skipping testing setter of mutable property " + fullPropName(propertyDescriptor) + ": has non-conventional setter method");
+			  return;
+			}
+			if (ModelIntrospectionUtil.isDerivedProperty(propertyDescriptor)) {
+			  log.warn("skipping testing setter of derived property " + fullPropName(propertyDescriptor));
+			  return;
+			}
 
-    assertNotNull("setter exists for property " + propertyDescriptor.getName(), setter);
+			assertNotNull("setter exists for property " + propertyDescriptor.getName(), setter);
 
-    initTestEntity();
-    Object testValue;
-    int attemptsToFindDifferingTestValue = 2;
-    do {
-      testValue = dataFactory.newInstance(getter.getReturnType(), testName);
-      try {
-        Object existingValue = getter.invoke(entity);
-        // test would be inconsequential if existing property value is same as new value...find another value!
-        if (!testValue.equals(existingValue)) {
-          break;
-        }
-      }
-      catch (Exception e) {
-        throw new DomainModelDefinitionException(e);
-      }
-    } while (--attemptsToFindDifferingTestValue > 0);
+			initTestEntity();
+			Object testValue;
+			int attemptsToFindDifferingTestValue = 2;
+			do {
+			  testValue = dataFactory.newInstance(getter.getReturnType(), testName);
+			  try {
+			    Object existingValue = getter.invoke(entity);
+			    // test would be inconsequential if existing property value is same as new value...find another value!
+			    if (!testValue.equals(existingValue)) {
+			      break;
+			    }
+			  }
+			  catch (Exception e) {
+			    throw new DomainModelDefinitionException(e);
+			  }
+			} while (--attemptsToFindDifferingTestValue > 0);
 
-    // call the setter
-    assert !(testValue instanceof AbstractEntity) : "doTestMutableProperty() should only be called for non-relationship properties (non-entity types); see doTestToOneRelationship()";
-    log.info("calling setter " + setter + " on bean " + entity + " with test value " + testValue);
-    final Object finalTestValue = testValue; 
-    doTestBeanInTransaction(entity, new BeanTester() {
-      public void testEntity(AbstractEntity bean) { 
-        try {
-          setter.invoke(bean, finalTestValue); 
-        }
-        catch (Exception e) {
-          throw new DomainModelDefinitionException(e);
-        }
-      }
-    });
+			// call the setter
+			assert !(testValue instanceof AbstractEntity) : "doTestMutableProperty() should only be called for non-relationship properties (non-entity types); see doTestToOneRelationship()";
+			log.info("calling setter " + setter + " on bean " + entity + " with test value " + testValue);
+			final Object finalTestValue = testValue; 
+			doTestBeanInTransaction(entity, new BeanTester() {
+			  public void testEntity(AbstractEntity bean) { 
+			    try {
+			      setter.invoke(bean, finalTestValue); 
+			    }
+			    catch (Exception e) {
+			      throw new DomainModelDefinitionException(e);
+			    }
+			  }
+			});
 
-    // call the getter
-    doTestBeanInTransaction(entity, new BeanTester() {
-      public void testEntity(AbstractEntity bean) {       
-        Object actualValue;
-        try {
-          actualValue = getter.invoke(bean);
-        }
-        catch (Exception e) {
-          throw new DomainModelDefinitionException(e);
-        }
-        assertPropertyValuesEquals("getter returns what setter set for " +
-                                   fullPropName(propertyDescriptor),
-                                   finalTestValue,
-                                   actualValue);
-      }
-    });
+			// call the getter
+			doTestBeanInTransaction(entity, new BeanTester() {
+			  public void testEntity(AbstractEntity bean) {       
+			    Object actualValue;
+			    try {
+			      actualValue = getter.invoke(bean);
+			    }
+			    catch (Exception e) {
+			      throw new DomainModelDefinitionException(e);
+			    }
+			    assertPropertyValuesEquals("getter returns what setter set for " +
+			                               fullPropName(propertyDescriptor),
+			                               finalTestValue,
+			                               actualValue);
+			  }
+			});
+		} catch (Exception e) {
+			log.error("error while testing: " + propertyDescriptor);
+			log.error(e);
+			throw new RuntimeException(e);
+		}
   }
   
 
