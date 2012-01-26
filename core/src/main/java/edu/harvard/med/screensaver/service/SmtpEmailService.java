@@ -28,6 +28,9 @@ import javax.mail.internet.MimeMessage;
 import javax.mail.internet.MimeMultipart;
 
 import com.google.common.collect.Sets;
+
+import edu.harvard.med.screensaver.util.StringUtils;
+
 import org.apache.commons.cli.OptionBuilder;
 import org.apache.log4j.Logger;
 
@@ -78,7 +81,7 @@ public class SmtpEmailService implements EmailService
       String[] sreplyTos = replyTos.split(",");
       Set<InternetAddress> set = Sets.newHashSet();
       for(String s:sreplyTos) {
-        set.add(new InternetAddress(s));
+      	if(!StringUtils.isEmpty(s)) set.add(new InternetAddress(s));
       }
       this.replyTos = set.toArray(new InternetAddress[] {} );
     }
