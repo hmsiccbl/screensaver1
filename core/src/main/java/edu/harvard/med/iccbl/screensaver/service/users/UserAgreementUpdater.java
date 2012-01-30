@@ -93,7 +93,7 @@ public class UserAgreementUpdater
     List<Pair<ScreeningRoomUser,ChecklistItemEvent>> expiredSet = Lists.newLinkedList();
     for(ScreeningRoomUser user:users)
     {
-      log.debug("test: " + user);
+      log.debug("test: " + user.getFullNameFirstLast());
       ChecklistItemEvent checklistItemEvent = user.getChecklistItemEvents(userAgreementChecklistItem).last();
       if (checklistItemEvent.isExpiration()) {
         if(log.isDebugEnabled())
@@ -189,7 +189,10 @@ public class UserAgreementUpdater
                                                           ", checklist item: " + cie.getChecklistItemEventId() +
                                                           ", datePerformed: " + cie.getDatePerformed()));
       removeRole(DataSharingLevelMapper.getPrimaryDataSharingLevelRoleForUser(screenType, user), user, recordedBy, activitiesPerformed);
-      if (!!!user.getScreensaverUserRoles().contains(ScreensaverUserRole.RNAI_DSL_LEVEL3_SHARED_SCREENS)) {
+      if (screenType == ScreenType.SMALL_MOLECULE && !!!user.getScreensaverUserRoles().contains(ScreensaverUserRole.RNAI_DSL_LEVEL3_SHARED_SCREENS)) {
+        removeRole(ScreensaverUserRole.SCREENSAVER_USER, user, recordedBy, activitiesPerformed);
+      }
+      else if (screenType == ScreenType.RNAI && !!!user.getScreensaverUserRoles().contains(ScreensaverUserRole.SM_DSL_LEVEL3_SHARED_SCREENS)) {
         removeRole(ScreensaverUserRole.SCREENSAVER_USER, user, recordedBy, activitiesPerformed);
       }
     }

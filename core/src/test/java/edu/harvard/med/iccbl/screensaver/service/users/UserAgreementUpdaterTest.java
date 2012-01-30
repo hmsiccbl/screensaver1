@@ -189,82 +189,110 @@ public class UserAgreementUpdaterTest extends AbstractSpringPersistenceTest
     return false;
   }
   
-  public void testFindUsersWithOldSMUAgreementsAndExpire() throws IOException
-  {
-    initializeData();
+	public void testFindUsersWithOldSMUAgreementsAndExpire() throws IOException {
+		initializeData();
 
-    // create the UA CLI
-    ChecklistItem checklistItem = new ChecklistItem(UserAgreementUpdater.USER_AGREEMENT_CHECKLIST_ITEM_NAME.get(SMALL_MOLECULE), true, ChecklistItemGroup.FORMS, 0);
-    genericEntityDao.persistEntity(checklistItem);
+		// create the UA CLI
+		ChecklistItem checklistItem = new ChecklistItem(
+				UserAgreementUpdater.USER_AGREEMENT_CHECKLIST_ITEM_NAME.get(SMALL_MOLECULE), true, ChecklistItemGroup.FORMS, 0);
+		genericEntityDao.persistEntity(checklistItem);
+		ChecklistItem checklistItemRNAi = new ChecklistItem(
+				UserAgreementUpdater.USER_AGREEMENT_CHECKLIST_ITEM_NAME.get(RNAI), true, ChecklistItemGroup.FORMS, 1);
+		genericEntityDao.persistEntity(checklistItemRNAi);
 
-    // create the attachment
-    AttachedFileType attachedFileType = new UserAttachedFileType(UserAgreementUpdater.USER_AGREEMENT_ATTACHED_FILE_TYPE.get(SMALL_MOLECULE));
-    genericEntityDao.persistEntity(attachedFileType);
+		// create the attachment
+		AttachedFileType attachedFileType = new UserAttachedFileType(
+				UserAgreementUpdater.USER_AGREEMENT_ATTACHED_FILE_TYPE.get(SMALL_MOLECULE));
+		genericEntityDao.persistEntity(attachedFileType);		
+		AttachedFileType attachedFileTypeRNAI = new UserAttachedFileType(
+				UserAgreementUpdater.USER_AGREEMENT_ATTACHED_FILE_TYPE.get(RNAI));
+		genericEntityDao.persistEntity(attachedFileTypeRNAI);
 
-    // create one entity that will be expired
-    ScreeningRoomUser user = new ScreeningRoomUser("Test", "User");
-    user.setEmail("testuser1@screensaver.med.harvard.edu");
-    genericEntityDao.persistEntity(user);
-    
+		// create one entity that will be expired
+		ScreeningRoomUser user = new ScreeningRoomUser("Test", "User");
+		user.setEmail("testuser1@screensaver.med.harvard.edu");
+		genericEntityDao.persistEntity(user);
+		
+		// create another user that will be expired, but will still have a screensaverUserLogin role, because we are going to add RNAi levels to them
+		ScreeningRoomUser user1a = new ScreeningRoomUser("Test", "User1a");
+		user1a.setEmail("testuser1@screensaver.med.harvard.edu");
+		genericEntityDao.persistEntity(user1a);
 
-    // create another entity that will not be expired
-    ScreeningRoomUser user2 = new ScreeningRoomUser("Test", "User2");
-    user2.setEmail("testuser2@screensaver.med.harvard.edu");
-    genericEntityDao.persistEntity(user2);
+		// create another entity that will not be expired
+		ScreeningRoomUser user2 = new ScreeningRoomUser("Test", "User2");
+		user2.setEmail("testuser2@screensaver.med.harvard.edu");
+		genericEntityDao.persistEntity(user2);
 
-    flushAndClear();
+		flushAndClear();
 
-    // check that not yet "old" - there are no events yet!
-    List<Pair<ScreeningRoomUser,ChecklistItemEvent>> expiredSet 
- = userAgreementUpdater.findUsersWithOldUserAgreements(new LocalDate(), true, SMALL_MOLECULE);
-    assertTrue(expiredSet.isEmpty());
+		// check that not yet "old" - there are no events yet!
+		List<Pair<ScreeningRoomUser, ChecklistItemEvent>> expiredSet = userAgreementUpdater.findUsersWithOldUserAgreements(
+				new LocalDate(), true, SMALL_MOLECULE);
+		assertTrue(expiredSet.isEmpty());
 
-    flushAndClear();
+		flushAndClear();
 
-    // add a checklist item and event to the user
-    user = genericEntityDao.reloadEntity(user);
-    user2 = genericEntityDao.reloadEntity(user2);
-    admin = genericEntityDao.reloadEntity(admin);
-    InputStream inputStream = new ByteArrayInputStream("contents".getBytes());
-    userAgreementUpdater.updateUser(user, ScreensaverUserRole.SM_DSL_LEVEL1_MUTUAL_SCREENS, SMALL_MOLECULE, "user_agreement.pdf", inputStream, admin);
+		// add a checklist item and event to the user
+		user = genericEntityDao.reloadEntity(user);
+		user1a = genericEntityDao.reloadEntity(user1a);
+		user2 = genericEntityDao.reloadEntity(user2);
+		admin = genericEntityDao.reloadEntity(admin);
+		InputStream inputStream = new ByteArrayInputStream("contents".getBytes());
+		userAgreementUpdater.updateUser(user, ScreensaverUserRole.SM_DSL_LEVEL1_MUTUAL_SCREENS, SMALL_MOLECULE,
+				"user_agreement.pdf", inputStream, admin);
+		userAgreementUpdater.updateUser(user1a, ScreensaverUserRole.SM_DSL_LEVEL1_MUTUAL_SCREENS, SMALL_MOLECULE,
+				"user_agreement.pdf", inputStream, admin);
+		userAgreementUpdater.updateUser(user1a, ScreensaverUserRole.RNAI_DSL_LEVEL1_MUTUAL_SCREENS, RNAI,
+				"user_agreement.pdf", inputStream, admin);  // add the RNAI role to this user, to test whether "small molecule" expiring a user who has RNAi roles, will leave the ScreensaverUserLogin role alone
 
-    // set the other user to the future (have to do this manually)
-    LocalDate date2 = new LocalDate();
-    date2 = date2.plusYears(1);
-    user2.createChecklistItemActivationEvent(checklistItem, date2, admin);
+		// set the other user to the future (have to do this manually)
+		LocalDate date2 = new LocalDate();
+		date2 = date2.plusYears(1);
+		user2.createChecklistItemActivationEvent(checklistItem, date2, admin);
 
-    flushAndClear();
+		flushAndClear();
 
-    // first find the user with the old event first
-    LocalDate findDate = new LocalDate();
-    expiredSet = userAgreementUpdater.findUsersWithOldUserAgreements(findDate, true, SMALL_MOLECULE);
-    
-    assertFalse(expiredSet.isEmpty());
-    assertTrue(contains(user, expiredSet));
-    assertFalse(contains(user2, expiredSet));
-    assertEquals(1,expiredSet.size());
-    
-    // now move the date out 
-    findDate = findDate.plusYears(2);
-    expiredSet = userAgreementUpdater.findUsersWithOldUserAgreements(findDate, true, SMALL_MOLECULE);
-    
-    assertFalse(expiredSet.isEmpty());
-    assertTrue(contains(user, expiredSet));
-    assertTrue(contains(user2, expiredSet));
-    assertEquals(2,expiredSet.size());
-    
-    //TODO: this next section is testing the expiration.  Might want to move to another test...
-    // Expire the first user
-    userAgreementUpdater.expireUser(user, admin, SMALL_MOLECULE);
-    //date2 = date2.plusYears(2);
-    // query again, to see if the expired user still shows up
-    expiredSet = userAgreementUpdater.findUsersWithOldUserAgreements(findDate, true, SMALL_MOLECULE);
-    
-    assertFalse(expiredSet.isEmpty());
-    assertFalse(contains(user, expiredSet));
-    assertTrue(contains(user2, expiredSet));
-    assertEquals(1,expiredSet.size());
-  }
+		// first find the user with the old event first
+		LocalDate findDate = new LocalDate();
+		expiredSet = userAgreementUpdater.findUsersWithOldUserAgreements(findDate, true, SMALL_MOLECULE);
+
+		assertFalse(expiredSet.isEmpty());
+		assertTrue(contains(user, expiredSet));
+		assertTrue(contains(user1a, expiredSet));
+		assertFalse(contains(user2, expiredSet));
+		assertEquals(2, expiredSet.size());
+
+		// now move the date out
+		findDate = findDate.plusYears(2);
+		expiredSet = userAgreementUpdater.findUsersWithOldUserAgreements(findDate, true, SMALL_MOLECULE);
+
+		assertFalse(expiredSet.isEmpty());
+		assertTrue(contains(user, expiredSet));
+		assertTrue(contains(user1a, expiredSet));
+		assertTrue(contains(user2, expiredSet));
+		assertEquals(3, expiredSet.size());
+
+		// TODO: this next section is testing the expiration.
+
+		// Expire the first user
+		userAgreementUpdater.expireUser(user, admin, SMALL_MOLECULE);
+		userAgreementUpdater.expireUser(user1a, admin, SMALL_MOLECULE);
+		// query again, to see if the expired user still shows up
+		expiredSet = userAgreementUpdater.findUsersWithOldUserAgreements(findDate, true, SMALL_MOLECULE);
+
+		assertFalse(expiredSet.isEmpty());
+		assertFalse(contains(user, expiredSet));
+		assertFalse(contains(user1a, expiredSet));
+		assertTrue(contains(user2, expiredSet));
+		assertEquals(1, expiredSet.size());
+
+		// find out if user1a still has the login role
+		flushAndClear();
+		user = genericEntityDao.reloadEntity(user);
+		user1a = genericEntityDao.reloadEntity(user1a);
+		assertTrue(user1a.getScreensaverUserRoles().contains(ScreensaverUserRole.SCREENSAVER_USER));
+		assertFalse(user.getScreensaverUserRoles().contains(ScreensaverUserRole.SCREENSAVER_USER));
+	}
   
   public void testUserAgreementUpdater() throws IOException, SQLException
   {
@@ -273,9 +301,6 @@ public class UserAgreementUpdaterTest extends AbstractSpringPersistenceTest
     ChecklistItem checklistItem = new ChecklistItem(UserAgreementUpdater.USER_AGREEMENT_CHECKLIST_ITEM_NAME.get(SMALL_MOLECULE), true, ChecklistItemGroup.FORMS, 0);
     AttachedFileType attachedFileType = new UserAttachedFileType(UserAgreementUpdater.USER_AGREEMENT_ATTACHED_FILE_TYPE.get(SMALL_MOLECULE));
     ScreeningRoomUser user = new ScreeningRoomUser("Test", "User");
-//    AdministratorUser admin = new AdministratorUser("Test", "Admin", "", "", "", "", "", "");
-//    admin.addScreensaverUserRole(ScreensaverUserRole.USERS_ADMIN);
-//    admin.addScreensaverUserRole(ScreensaverUserRole.USER_ROLES_ADMIN);
     genericEntityDao.persistEntity(checklistItem);
     genericEntityDao.persistEntity(attachedFileType);
     genericEntityDao.persistEntity(user);
@@ -357,4 +382,111 @@ public class UserAgreementUpdaterTest extends AbstractSpringPersistenceTest
     assertTrue("admins should contain the ", admins.contains(otherUserAgreementAdmin) );
     assertTrue("admins should contain the ", admins.contains(nonAdminUser) );
   }
+
+	public void testFindUsersWithOldRNAIUAgreementsAndExpire() throws IOException {
+			initializeData();
+	
+			// create the UA CLI
+			ChecklistItem checklistItem = new ChecklistItem(
+					UserAgreementUpdater.USER_AGREEMENT_CHECKLIST_ITEM_NAME.get(SMALL_MOLECULE), true, ChecklistItemGroup.FORMS, 0);
+			genericEntityDao.persistEntity(checklistItem);
+			ChecklistItem checklistItemRNAi = new ChecklistItem(
+					UserAgreementUpdater.USER_AGREEMENT_CHECKLIST_ITEM_NAME.get(RNAI), true, ChecklistItemGroup.FORMS, 1);
+			genericEntityDao.persistEntity(checklistItemRNAi);
+	
+			// create the attachment
+			AttachedFileType attachedFileType = new UserAttachedFileType(
+					UserAgreementUpdater.USER_AGREEMENT_ATTACHED_FILE_TYPE.get(SMALL_MOLECULE));
+			genericEntityDao.persistEntity(attachedFileType);		
+			AttachedFileType attachedFileTypeRNAI = new UserAttachedFileType(
+					UserAgreementUpdater.USER_AGREEMENT_ATTACHED_FILE_TYPE.get(RNAI));
+			genericEntityDao.persistEntity(attachedFileTypeRNAI);
+	
+			// create one entity that will be expired
+			ScreeningRoomUser user = new ScreeningRoomUser("Test", "User");
+			user.setEmail("testuser1@screensaver.med.harvard.edu");
+			genericEntityDao.persistEntity(user);
+			
+			// create another user that will be expired, but will still have a screensaverUserLogin role, because we are going to add RNAi levels to them
+			ScreeningRoomUser user1a = new ScreeningRoomUser("Test", "User1a");
+			user1a.setEmail("testuser1@screensaver.med.harvard.edu");
+			genericEntityDao.persistEntity(user1a);
+	
+			// create another entity that will not be expired
+			ScreeningRoomUser user2 = new ScreeningRoomUser("Test", "User2");
+			user2.setEmail("testuser2@screensaver.med.harvard.edu");
+			genericEntityDao.persistEntity(user2);
+	
+			flushAndClear();
+	
+			// check that not yet "old" - there are no events yet!
+			List<Pair<ScreeningRoomUser, ChecklistItemEvent>> expiredSet = userAgreementUpdater.findUsersWithOldUserAgreements(
+					new LocalDate(), true, RNAI);
+			assertTrue(expiredSet.isEmpty());
+	
+			flushAndClear();
+	
+			// add a checklist item and event to the user
+			user = genericEntityDao.reloadEntity(user);
+			user1a = genericEntityDao.reloadEntity(user1a);
+			user2 = genericEntityDao.reloadEntity(user2);
+			admin = genericEntityDao.reloadEntity(admin);
+			InputStream inputStream = new ByteArrayInputStream("contents".getBytes());
+			userAgreementUpdater.updateUser(user, ScreensaverUserRole.RNAI_DSL_LEVEL1_MUTUAL_SCREENS, RNAI,
+					"user_agreement.pdf", inputStream, admin);
+			userAgreementUpdater.updateUser(user1a, ScreensaverUserRole.RNAI_DSL_LEVEL1_MUTUAL_SCREENS, RNAI,
+					"user_agreement.pdf", inputStream, admin);
+			userAgreementUpdater.updateUser(user1a, ScreensaverUserRole.SM_DSL_LEVEL1_MUTUAL_SCREENS, SMALL_MOLECULE,
+					"user_agreement.pdf", inputStream, admin);  // add the RNAI role to this user, to test whether "RNAI" expiring a user who has SM roles, will leave the ScreensaverUserLogin role alone
+	
+			// set the other user to the future (have to do this manually)
+			LocalDate date2 = new LocalDate();
+			date2 = date2.plusYears(1);
+			user2.createChecklistItemActivationEvent(checklistItemRNAi, date2, admin);
+	
+			flushAndClear();
+	
+			// first find the user with the old event first
+			LocalDate findDate = new LocalDate();
+			expiredSet = userAgreementUpdater.findUsersWithOldUserAgreements(findDate, true, RNAI);
+	
+			assertFalse(expiredSet.isEmpty());
+			assertTrue(contains(user, expiredSet));
+			assertTrue(contains(user1a, expiredSet));
+			assertFalse(contains(user2, expiredSet));
+			assertEquals(2, expiredSet.size());
+	
+			// now move the date out
+			findDate = findDate.plusYears(2);
+			expiredSet = userAgreementUpdater.findUsersWithOldUserAgreements(findDate, true, RNAI);
+	
+			assertFalse(expiredSet.isEmpty());
+			assertTrue(contains(user, expiredSet));
+			assertTrue(contains(user1a, expiredSet));
+			assertTrue(contains(user2, expiredSet));
+			assertEquals(3, expiredSet.size());
+	
+			// TODO: this next section is testing the expiration.
+	
+			// Expire the first user
+			userAgreementUpdater.expireUser(user, admin, RNAI);
+			userAgreementUpdater.expireUser(user1a, admin, RNAI);
+			// query again, to see if the expired user still shows up
+			expiredSet = userAgreementUpdater.findUsersWithOldUserAgreements(findDate, true, RNAI);
+	
+			assertFalse(expiredSet.isEmpty());
+			assertFalse(contains(user, expiredSet));
+			assertFalse(contains(user1a, expiredSet));
+			assertTrue(contains(user2, expiredSet));
+			assertEquals(1, expiredSet.size());
+	
+			// find out if user1a still has the login role
+			flushAndClear();
+			user = genericEntityDao.reloadEntity(user);
+			user1a = genericEntityDao.reloadEntity(user1a);
+			assertTrue(user1a.getScreensaverUserRoles().contains(ScreensaverUserRole.SCREENSAVER_USER));
+			assertFalse(user.getScreensaverUserRoles().contains(ScreensaverUserRole.SCREENSAVER_USER));
+		}
+
+	
 }
