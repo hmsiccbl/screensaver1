@@ -74,6 +74,21 @@
 				<f:selectItems value="#{libraryDetailViewer.screenTypeSelectItems}" />
 			</t:selectOneMenu>
 		</t:panelGroup>
+	
+		<t:outputText id="plateSizeLabel" value="Plate Size"
+				description="select the plate size used for this library" escape="false" styleClass="label" />
+		<t:panelGroup rendered="#{!libraryDetailViewer.editMode}">
+			<t:outputText id="plateSizeOutput"
+				value="#{libraryDetailViewer.entity.plateSize}" escape="false"
+				converter="#{plateSizeConverter}" styleClass="propertyValue" />
+		</t:panelGroup>
+		<t:panelGroup rendered="#{libraryDetailViewer.editMode}">
+			<t:selectOneMenu id="plateSize" styleClass="inputText selectMenu"
+				required="true" value="#{libraryDetailViewer.entity.plateSize}"
+				converter="#{plateSizeConverter}">
+				<f:selectItems value="#{libraryDetailViewer.plateSizeSelectItems}" />
+			</t:selectOneMenu>
+		</t:panelGroup>
 
     <ss:property id="solvent" label="Solvent"
       description="Solvent used in the library wells"

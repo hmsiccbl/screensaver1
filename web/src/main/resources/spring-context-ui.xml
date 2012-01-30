@@ -1089,6 +1089,8 @@
 
   <bean id="screenTypeConverter" class="edu.harvard.med.screensaver.ui.arch.util.converter.ScreenTypeConverter" />
 
+  <bean id="plateSizeConverter" class="edu.harvard.med.screensaver.ui.arch.util.converter.PlateSizeConverter" />
+
   <bean id="solventConverter" class="edu.harvard.med.screensaver.ui.arch.util.converter.SolventConverter" />
 
   <bean id="copyUsageTypeConverter" class="edu.harvard.med.screensaver.ui.arch.util.converter.CopyUsageTypeConverter" />

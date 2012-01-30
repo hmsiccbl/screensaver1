@@ -23,6 +23,7 @@ import edu.harvard.med.screensaver.model.activities.Activity;
 import edu.harvard.med.screensaver.model.libraries.Library;
 import edu.harvard.med.screensaver.model.libraries.LibraryScreeningStatus;
 import edu.harvard.med.screensaver.model.libraries.LibraryType;
+import edu.harvard.med.screensaver.model.libraries.PlateSize;
 import edu.harvard.med.screensaver.model.libraries.Solvent;
 import edu.harvard.med.screensaver.model.screens.ScreenType;
 import edu.harvard.med.screensaver.model.users.ScreeningRoomUser;
@@ -92,6 +93,15 @@ public class LibraryDetailViewer extends EditableEntityViewerBackingBean<Library
   {
     List<ScreenType> values = Arrays.asList(ScreenType.values());
     if (getEntity().getScreenType() == null) {
+      return JSFUtils.createUISelectItemsWithEmptySelection(values, REQUIRED_VOCAB_FIELD_PROMPT);
+    }
+    return JSFUtils.createUISelectItems(values);
+  }
+
+  public List<SelectItem> getPlateSizeSelectItems()
+  {
+    List<PlateSize> values = Arrays.asList(PlateSize.values());
+    if (getEntity().getPlateSize() == null) {
       return JSFUtils.createUISelectItemsWithEmptySelection(values, REQUIRED_VOCAB_FIELD_PROMPT);
     }
     return JSFUtils.createUISelectItems(values);
