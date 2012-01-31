@@ -1,12 +1,12 @@
 #!/bin/bash
 
-# This script will recreate the LINCS database
+# This script will recreate the HMS LINCS database
 
 DIR=/groups/pharmacoresponse/
 DATA_DIRECTORY=${DIR}/data/current
 
 if [[ $# -lt 1 ]]
-then
+then 
   echo "Usage: $0 { local <local data dir> <properties file> [<db name> [<db user>]] | dev | stage | prod }"
   exit $WRONG_ARGS
 fi
