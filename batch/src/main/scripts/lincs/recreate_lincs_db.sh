@@ -86,17 +86,20 @@ psql -q -U $DB_USER $DB -f $DATA_DIRECTORY/lincs-users.sql -v ON_ERROR_STOP=1
 check_errs $? "lincs-users.sql fails"
 
 ## Create the library
-LIBRARY_1_SHORTNAME="R-LINCS-1"
-LIBRARY_2_SHORTNAME="R-Anti-mitotics1"
+LIBRARY_1_SHORTNAME="R-HMS-LINCS"
+LIBRARY_2_SHORTNAME="R-Anti-Mitotics"
 LIBRARY_3_SHORTNAME="P-LINCS-1"
 LIBRARY_4_SHORTNAME="P-Anti-mitotics5"
 LIBRARY_5_SHORTNAME="P-Anti-mitotics6"
 LIBRARY_6_SHORTNAME="P-Mario-1"
 LIBRARY_7_SHORTNAME="R-CMT-1"
+LIBRARY_8_SHORTNAME="P-LINCS-2"
+LIBRARY_9_SHORTNAME="P-LINCS-3"
+LIBRARY_10_SHORTNAME="P-Mario-2"
 
 set -x 
 ./run.sh edu.harvard.med.screensaver.io.libraries.LibraryCreator \
--n "HMS LINCS-1 BATCH 001" -s $LIBRARY_1_SHORTNAME -lt "commercial" \
+-n "HMS-LINCS-1 BATCH 001" -s $LIBRARY_1_SHORTNAME -lt "commercial" \
 -lp "Qingsong Liu" -st SMALL_MOLECULE -sp 1 -ep 1 -AE $ECOMMONS_ADMIN 
 check_errs $? "create library fails"
 
@@ -107,7 +110,7 @@ check_errs $? "create library fails"
 check_errs $? "library contents loading fails"
 
 ./run.sh edu.harvard.med.screensaver.io.libraries.LibraryCreator \
--n "LINCS Anti-mitotics-1" -s $LIBRARY_2_SHORTNAME -lt "commercial" \
+-n "HMS-LINCS Anti-Mitotics" -s $LIBRARY_2_SHORTNAME -lt "commercial" \
 -lp "Nate Moerke" -st SMALL_MOLECULE -sp 2 -ep 2 -AE $ECOMMONS_ADMIN 
 check_errs $? "create library fails"
 
@@ -118,7 +121,7 @@ check_errs $? "create library fails"
 check_errs $? "library contents loading fails"
 
 ./run.sh edu.harvard.med.screensaver.io.libraries.LibraryCreator \
--n "HMS LINCS-1 Batch 001 Stock Plates" -s $LIBRARY_3_SHORTNAME -ps WELLS_96 -lt "commercial" \
+-n "HMS-LINCS-1 Stock Plates" -s $LIBRARY_3_SHORTNAME -ps WELLS_96 -lt "commercial" \
 -lp "Qingsong Liu" -st SMALL_MOLECULE -sp 3 -ep 4 -AE $ECOMMONS_ADMIN -ds 2011-05-20
 check_errs $? "create library fails"
 
@@ -129,7 +132,7 @@ check_errs $? "create library fails"
 check_errs $? "library contents loading fails"
 
 ./run.sh edu.harvard.med.screensaver.io.libraries.LibraryCreator \
--n "LINCS Anti-mitotics Plate 5" -s $LIBRARY_4_SHORTNAME -lt "commercial" \
+-n "HMS-LINCS Anti-Mitotics Plate 5" -s $LIBRARY_4_SHORTNAME -lt "commercial" \
 -lp "Nate Moerke" -st SMALL_MOLECULE -sp 5 -ep 5 -AE $ECOMMONS_ADMIN -ds 2010-06-01
 check_errs $? "create library fails"
 
@@ -140,7 +143,7 @@ check_errs $? "create library fails"
 check_errs $? "library contents loading fails"
 
 ./run.sh edu.harvard.med.screensaver.io.libraries.LibraryCreator \
--n "LINCS Anti-mitotics Plate 6" -s $LIBRARY_5_SHORTNAME -lt "commercial" \
+-n "HMS-LINCS Anti-Mitotics Plate 6" -s $LIBRARY_5_SHORTNAME -lt "commercial" \
 -lp "Nate Moerke" -st SMALL_MOLECULE -sp 6 -ep 6 -AE $ECOMMONS_ADMIN -ds 2010-11-01
 check_errs $? "create library fails"
 
@@ -170,6 +173,39 @@ check_errs $? "create library fails"
 --release-library-contents-version \
 -l $LIBRARY_7_SHORTNAME \
 -f $DATA_DIRECTORY/HMS_LINCS-7.sdf -AE $ECOMMONS_ADMIN
+check_errs $? "library contents loading fails"
+
+./run.sh edu.harvard.med.screensaver.io.libraries.LibraryCreator \
+-n "HMS-LINCS-2 Stock Plates" -s $LIBRARY_8_SHORTNAME -ps WELLS_96 -lt "commercial" \
+-lp "Qingsong Liu" -st SMALL_MOLECULE -sp 9 -ep 10 -AE $ECOMMONS_ADMIN -ds 2011-12-15
+check_errs $? "create library fails"
+
+./run.sh edu.harvard.med.screensaver.io.libraries.LibraryContentsLoader \
+--release-library-contents-version \
+-l $LIBRARY_8_SHORTNAME \
+-f $DATA_DIRECTORY/HMS_LINCS-8.sdf -AE $ECOMMONS_ADMIN
+check_errs $? "library contents loading fails"
+
+./run.sh edu.harvard.med.screensaver.io.libraries.LibraryCreator \
+-n "HMS-LINCS-3 Stock Plates" -s $LIBRARY_9_SHORTNAME -ps WELLS_96 -lt "commercial" \
+-lp "Qingsong Liu" -st SMALL_MOLECULE -sp 11 -ep 13 -AE $ECOMMONS_ADMIN -ds 2011-12-15
+check_errs $? "create library fails"
+
+./run.sh edu.harvard.med.screensaver.io.libraries.LibraryContentsLoader \
+--release-library-contents-version \
+-l $LIBRARY_9_SHORTNAME \
+-f $DATA_DIRECTORY/HMS_LINCS-9.sdf -AE $ECOMMONS_ADMIN
+check_errs $? "library contents loading fails"
+
+./run.sh edu.harvard.med.screensaver.io.libraries.LibraryCreator \
+-n "P-Mario-2 (ICCB-L 3295)" -s $LIBRARY_10_SHORTNAME -lt "commercial" \
+-lp "Mario Niepel/Qingsong Liu" -st SMALL_MOLECULE -sp 14 -ep 14 -AE $ECOMMONS_ADMIN -ds 2012-01-05
+check_errs $? "create library fails"
+
+./run.sh edu.harvard.med.screensaver.io.libraries.LibraryContentsLoader \
+--release-library-contents-version \
+-l $LIBRARY_10_SHORTNAME \
+-f $DATA_DIRECTORY/HMS_LINCS-10.sdf -AE $ECOMMONS_ADMIN
 check_errs $? "library contents loading fails"
 
 ## Restrict reagents
@@ -4956,6 +4992,106 @@ check_errs $? "attachment import fails"
 
 ./run.sh edu.harvard.med.lincs.screensaver.io.libraries.ReagentAttachmentImporter \
 -f $DATA_DIRECTORY/qc/LCMS_HMSL10127.101.01.pdf -i HMSL10127 -sid 101 -bid 1 -type QC-LCMS
+check_errs $? "attachment import fails"
+
+./run.sh edu.harvard.med.lincs.screensaver.io.libraries.ReagentAttachmentImporter \
+-f $DATA_DIRECTORY/qc/NMR_HMSL10128.101.01.pdf -i HMSL10128 -sid 101 -bid 1 -type QC-NMR
+check_errs $? "attachment import fails"
+
+./run.sh edu.harvard.med.lincs.screensaver.io.libraries.ReagentAttachmentImporter \
+-f $DATA_DIRECTORY/qc/HPLC_HMSL10128.101.01.pdf -i HMSL10128 -sid 101 -bid 1 -type QC-HPLC
+check_errs $? "attachment import fails"
+
+./run.sh edu.harvard.med.lincs.screensaver.io.libraries.ReagentAttachmentImporter \
+-f $DATA_DIRECTORY/qc/NMR_HMSL10129.101.01.pdf -i HMSL10129 -sid 101 -bid 1 -type QC-NMR
+check_errs $? "attachment import fails"
+
+./run.sh edu.harvard.med.lincs.screensaver.io.libraries.ReagentAttachmentImporter \
+-f $DATA_DIRECTORY/qc/HPLC_HMSL10129.101.01.pdf -i HMSL10129 -sid 101 -bid 1 -type QC-HPLC
+check_errs $? "attachment import fails"
+
+./run.sh edu.harvard.med.lincs.screensaver.io.libraries.ReagentAttachmentImporter \
+-f $DATA_DIRECTORY/qc/NMR_HMSL10130.101.01.pdf -i HMSL10130 -sid 101 -bid 1 -type QC-NMR
+check_errs $? "attachment import fails"
+
+./run.sh edu.harvard.med.lincs.screensaver.io.libraries.ReagentAttachmentImporter \
+-f $DATA_DIRECTORY/qc/LCMS_HMSL10130.101.01.pdf -i HMSL10130 -sid 101 -bid 1 -type QC-LCMS
+check_errs $? "attachment import fails"
+
+./run.sh edu.harvard.med.lincs.screensaver.io.libraries.ReagentAttachmentImporter \
+-f $DATA_DIRECTORY/qc/HPLC_HMSL10130.101.01.pdf -i HMSL10130 -sid 101 -bid 1 -type QC-HPLC
+check_errs $? "attachment import fails"
+
+./run.sh edu.harvard.med.lincs.screensaver.io.libraries.ReagentAttachmentImporter \
+-f $DATA_DIRECTORY/qc/NMR_HMSL10131.101.01.pdf -i HMSL10131 -sid 101 -bid 1 -type QC-NMR
+check_errs $? "attachment import fails"
+
+./run.sh edu.harvard.med.lincs.screensaver.io.libraries.ReagentAttachmentImporter \
+-f $DATA_DIRECTORY/qc/LCMS_HMSL10131.101.01.pdf -i HMSL10131 -sid 101 -bid 1 -type QC-LCMS
+check_errs $? "attachment import fails"
+
+./run.sh edu.harvard.med.lincs.screensaver.io.libraries.ReagentAttachmentImporter \
+-f $DATA_DIRECTORY/qc/HPLC_HMSL10131.101.01.pdf -i HMSL10131 -sid 101 -bid 1 -type QC-HPLC
+check_errs $? "attachment import fails"
+
+./run.sh edu.harvard.med.lincs.screensaver.io.libraries.ReagentAttachmentImporter \
+-f $DATA_DIRECTORY/qc/NMR_HMSL10132.101.01.pdf -i HMSL10132 -sid 101 -bid 1 -type QC-NMR
+check_errs $? "attachment import fails"
+
+./run.sh edu.harvard.med.lincs.screensaver.io.libraries.ReagentAttachmentImporter \
+-f $DATA_DIRECTORY/qc/HPLC_HMSL10132.101.01.pdf -i HMSL10132 -sid 101 -bid 1 -type QC-HPLC
+check_errs $? "attachment import fails"
+
+./run.sh edu.harvard.med.lincs.screensaver.io.libraries.ReagentAttachmentImporter \
+-f $DATA_DIRECTORY/qc/NMR_HMSL10133.101.01.pdf -i HMSL10133 -sid 101 -bid 1 -type QC-NMR
+check_errs $? "attachment import fails"
+
+./run.sh edu.harvard.med.lincs.screensaver.io.libraries.ReagentAttachmentImporter \
+-f $DATA_DIRECTORY/qc/HPLC_HMSL10133.101.01.pdf -i HMSL10133 -sid 101 -bid 1 -type QC-HPLC
+check_errs $? "attachment import fails"
+
+./run.sh edu.harvard.med.lincs.screensaver.io.libraries.ReagentAttachmentImporter \
+-f $DATA_DIRECTORY/qc/NMR_HMSL10134.101.01.pdf -i HMSL10134 -sid 101 -bid 1 -type QC-NMR
+check_errs $? "attachment import fails"
+
+./run.sh edu.harvard.med.lincs.screensaver.io.libraries.ReagentAttachmentImporter \
+-f $DATA_DIRECTORY/qc/LCMS_HMSL10134.101.01.pdf -i HMSL10134 -sid 101 -bid 1 -type QC-LCMS
+check_errs $? "attachment import fails"
+
+./run.sh edu.harvard.med.lincs.screensaver.io.libraries.ReagentAttachmentImporter \
+-f $DATA_DIRECTORY/qc/HPLC_HMSL10134.101.01.pdf -i HMSL10134 -sid 101 -bid 1 -type QC-HPLC
+check_errs $? "attachment import fails"
+
+./run.sh edu.harvard.med.lincs.screensaver.io.libraries.ReagentAttachmentImporter \
+-f $DATA_DIRECTORY/qc/NMR_HMSL10135.101.01.pdf -i HMSL10135 -sid 101 -bid 1 -type QC-NMR
+check_errs $? "attachment import fails"
+
+./run.sh edu.harvard.med.lincs.screensaver.io.libraries.ReagentAttachmentImporter \
+-f $DATA_DIRECTORY/qc/LCMS_HMSL10135.101.01.pdf -i HMSL10135 -sid 101 -bid 1 -type QC-LCMS
+check_errs $? "attachment import fails"
+
+./run.sh edu.harvard.med.lincs.screensaver.io.libraries.ReagentAttachmentImporter \
+-f $DATA_DIRECTORY/qc/HPLC_HMSL10135.101.01.pdf -i HMSL10135 -sid 101 -bid 1 -type QC-HPLC
+check_errs $? "attachment import fails"
+
+./run.sh edu.harvard.med.lincs.screensaver.io.libraries.ReagentAttachmentImporter \
+-f $DATA_DIRECTORY/qc/NMR_HMSL10136.101.01.pdf -i HMSL10136 -sid 101 -bid 1 -type QC-NMR
+check_errs $? "attachment import fails"
+
+./run.sh edu.harvard.med.lincs.screensaver.io.libraries.ReagentAttachmentImporter \
+-f $DATA_DIRECTORY/qc/LCMS_HMSL10136.101.01.pdf -i HMSL10136 -sid 101 -bid 1 -type QC-LCMS
+check_errs $? "attachment import fails"
+
+./run.sh edu.harvard.med.lincs.screensaver.io.libraries.ReagentAttachmentImporter \
+-f $DATA_DIRECTORY/qc/HPLC_HMSL10136.101.01.pdf -i HMSL10136 -sid 101 -bid 1 -type QC-HPLC
+check_errs $? "attachment import fails"
+
+./run.sh edu.harvard.med.lincs.screensaver.io.libraries.ReagentAttachmentImporter \
+-f $DATA_DIRECTORY/qc/NMR_HMSL10137.101.01.pdf -i HMSL10137 -sid 101 -bid 1 -type QC-NMR
+check_errs $? "attachment import fails"
+
+./run.sh edu.harvard.med.lincs.screensaver.io.libraries.ReagentAttachmentImporter \
+-f $DATA_DIRECTORY/qc/HPLC_HMSL10137.101.01.pdf -i HMSL10137 -sid 101 -bid 1 -type QC-HPLC
 check_errs $? "attachment import fails"
 
 # "Study-File" Attached files, for viewing in the study viewer
