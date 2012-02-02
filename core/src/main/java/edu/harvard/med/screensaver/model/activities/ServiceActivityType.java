@@ -23,6 +23,18 @@ public enum ServiceActivityType implements VocabularyTerm
   AUTOMATION("Automation"),
   ASSAY_DEV_CONSULT("Assay Dev Consult"),
   IMAGE_ANALYSIS("Image Analysis"),
+  TRAINING_CELLWORX("Training - CellWoRx"),
+  TRAINING_IXM("Training - IXM"),
+  TRAINING_VELOS("Training - Velos"),
+  TRAINING_QPCR_ABI("Training - QPCR-ABI"),
+  TRAINING_QPCR_ROCHE("Training - QPCR-Roche"),
+  TRAINING_WELLMATE("Training - Wellmate"),
+  TRAINING_ENVISION("Training - Envision"),
+  TRAINING_BIOMEKFX("Training - BiomekFX"),
+  TRAINING_CYBIO("Training - CyBio"),
+  TRAINING_FLEXSTATION_III("Training - Flexstation III"),
+  TRAINING_M5("Training - M5"),
+  TRAINING_OTHER("Training - Other"),
   OTHER("Other");
 
   public Predicate<ServiceActivity> isValuePredicate()
