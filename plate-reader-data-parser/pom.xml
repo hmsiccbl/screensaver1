@@ -4,7 +4,7 @@
   <parent>
         <artifactId>screensaver</artifactId>
         <groupId>edu.harvard.med</groupId>
-        <version>2012-01-26</version>
+        <version>2012-02-01</version>
   </parent>
   <groupId>edu.harvard.med.iccbl</groupId>
   <artifactId>plate-reader-data-parser</artifactId>
@@ -45,7 +45,7 @@
     <dependency>
       <groupId>edu.harvard.med</groupId>
       <artifactId>screensaver-core</artifactId>
-      <version>2012-01-26</version>
+      <version>2012-02-01</version>
       <scope>compile</scope>
       <type>jar</type>
     </dependency>
@@ -140,5 +140,6 @@
       </plugin>
  -->
      </plugins>
+
   </build>
 </project>
