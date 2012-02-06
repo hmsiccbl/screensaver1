@@ -4,7 +4,7 @@ INSERT INTO schema_history (screensaver_revision, date_updated, comment)
 SELECT
 4978,
 current_timestamp,
-'make plate_location fields non-nullable, using special '<not specified>' instead';
+'make plate_location fields non-nullable, using special "<not specified>" instead';
 
 alter table plate_location drop constraint plate_location_room_key;
 
@@ -25,4 +25,4 @@ alter table plate_location alter column bin set not null;
 
 alter table plate_location add constraint plate_location_room_key unique (room, freezer, shelf, bin); 
 
-COMMIT;
+#COMMIT;
