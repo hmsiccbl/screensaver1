@@ -18,115 +18,120 @@ import edu.harvard.med.screensaver.ui.arch.datatable.column.TableColumn;
 
 /**
  * Simple abstraction for a cell in a JSF DataTable
+ * 
+ * NOTE: cannot use an anonymous inner class with er-ri-1.0.jar, (due to
+ * reflection limitations), so must create a public inner class implementing
+ * {@link SimpleCell#cellAction() } <br/>
+ * For: [#3220] Study link in Well Viewer Annotation table is broken
+ * TODO: why is this working for {@link TableColumn}?
+ * 
+ * @see <a
+ *      href=http://stackoverflow.com/questions/2998745/how-to-invoke-jsf-action
+ *      -on-an-anonymous-class-el-cannot-access-it>link</a>
+ * @return facelets nav
+ * 
  * @see TableColumn for more robust implementation
  */
-public class SimpleCell
-{
-  private String _title;
-  private Object _value;
-  private String _description;
-  private String _groupId;
-  private String _style;
-  private String _styleClass;
-  private Object _linkValue;
-  // a secondary table of simple cells to provide grouping/summary information (optional)
-  private List<SimpleCell> _metaInformation;
-  
-  public SimpleCell(String title, Object value, String description, List<SimpleCell> metaInformation)
-  {
-    _title = title;
-    _value = value;
-    _description = description;
-    _metaInformation = metaInformation;
-  }
+public class SimpleCell {
+	private String _title;
+	private Object _value;
+	private String _description;
+	private String _groupId;
+	private String _style;
+	private String _styleClass;
+	private Object _linkValue;
+	// a secondary table of simple cells to provide grouping/summary information
+	// (optional)
+	private List<SimpleCell> _metaInformation;
 
-  public SimpleCell(String title, Object value, String description)
-  {
-    this(title, value, description, (List<SimpleCell>) null);
-  }
-  
-  public SimpleCell withStyle(String style)
-  {
-    _style = style;
-    return this;
-  }
+	public SimpleCell(String title, Object value, String description, List<SimpleCell> metaInformation) {
+		_title = title;
+		_value = value;
+		_description = description;
+		_metaInformation = metaInformation;
+	}
 
-  public SimpleCell withLinkValue(Object value)
-  {
-    _linkValue = value;
-    return this;
-  }
+	public SimpleCell(String title, Object value, String description) {
+		this(title, value, description, (List<SimpleCell>) null);
+	}
 
-  public SimpleCell withStyleClass(String style)
-  {
-    _styleClass = style;
-    return this;
-  }
+	public SimpleCell withStyle(String style) {
+		_style = style;
+		return this;
+	}
 
-  public String getStyle()
-  {
-    return _style;
-  }
+	public SimpleCell withLinkValue(Object value) {
+		_linkValue = value;
+		return this;
+	}
 
-  public String getStyleClass()
-  {
-    return _styleClass;
-  }
+	public SimpleCell withStyleClass(String style) {
+		_styleClass = style;
+		return this;
+	}
 
-  public Object getLinkValue()
-  {
-    return _linkValue;
-  }
+	public String getStyle() {
+		return _style;
+	}
 
-  public String getTitle()
-  {
-    return _title;
-  }
-  
-  public Object getValue()
-  {
-    return _value;
-  }
-  
-  public Object cellAction()
-  {
-    return null;
-  }
+	public String getStyleClass() {
+		return _styleClass;
+	}
 
-  public boolean isCommandLink()
-  {
-    return false;
-  }
-  
-  public String getDescription()
-  {
-    return _description;
-  }
-  
-  public String getGroupId()
-  {
-    return _groupId;
-  }
-  
-  public SimpleCell setGroupId(String groupId)
-  {
-    _groupId = groupId;
-    return this;
-  }
-  
-  public DataModel getMetaInformation()
-  {
-    return new ListDataModel(_metaInformation);
-  }
+	public Object getLinkValue() {
+		return _linkValue;
+	}
 
-  public boolean isMetaInformationAvailable()
-  {
-    return _metaInformation != null && !_metaInformation.isEmpty();
-  }
+	public String getTitle() {
+		return _title;
+	}
 
-  public String toString()
-  {
-    return "" + getValue();
-  }
+	public Object getValue() {
+		return _value;
+	}
+
+	/**
+	 * NOTE: cannot use an anonymous inner class with er-ri-1.0.jar, (due to
+	 * reflection limitations), so must create a public inner class implementing
+	 * {@link SimpleCell#cellAction() } <br/>
+	 * For: [#3220] Study link in Well Viewer Annotation table is broken
+	 * 
+	 * @see <a
+	 *      href=http://stackoverflow.com/questions/2998745/how-to-invoke-jsf-action
+	 *      -on-an-anonymous-class-el-cannot-access-it>link</a>
+	 * @return facelets nav
+	 */
+	public Object cellAction() {
+		return null;
+	}
+
+	public boolean isCommandLink() {
+		return false;
+	}
+
+	public String getDescription() {
+		return _description;
+	}
+
+	public String getGroupId() {
+		return _groupId;
+	}
+
+	public SimpleCell setGroupId(String groupId) {
+		_groupId = groupId;
+		return this;
+	}
+
+	public DataModel getMetaInformation() {
+		return new ListDataModel(_metaInformation);
+	}
+
+	public boolean isMetaInformationAvailable() {
+		return _metaInformation != null && !_metaInformation.isEmpty();
+	}
+
+	public String toString() {
+		return "" + getValue();
+	}
 
 }

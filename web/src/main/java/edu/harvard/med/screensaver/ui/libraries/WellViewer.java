@@ -53,6 +53,7 @@ import edu.harvard.med.screensaver.model.screens.Publication;
 import edu.harvard.med.screensaver.model.screens.Screen;
 import edu.harvard.med.screensaver.model.screens.Study;
 import edu.harvard.med.screensaver.policy.EntityViewPolicy;
+import edu.harvard.med.screensaver.ui.arch.datatable.column.TableColumn;
 import edu.harvard.med.screensaver.ui.arch.util.JSFUtils;
 import edu.harvard.med.screensaver.ui.arch.util.SimpleCell;
 import edu.harvard.med.screensaver.ui.arch.view.SearchResultContextEntityViewerBackingBean;
@@ -241,37 +242,38 @@ public class WellViewer extends SearchResultContextEntityViewerBackingBean<Well,
     _annotationNameValueTable = new ArrayList<SimpleCell>(annotationValues.size());
 
     // Create the top level list of AV's
-    for (AnnotationValue value : annotationValues) {
-      // for each AV, create Meta "grouping" information 
-      // - this is all of the study information
-      List<SimpleCell> metaInformation = new ArrayList<SimpleCell>();
-      for (AnnotationHeaderColumn headerColumn : EnumSet.allOf(AnnotationHeaderColumn.class)) {
-        String headerValue = headerColumn.getValue(value.getReagent(), value.getAnnotationType());
-        if (!StringUtils.isEmpty(headerValue)) {
-          final Study study = value.getAnnotationType().getStudy();
-          if (headerColumn == AnnotationHeaderColumn.STUDY_NAME) {
-            SimpleCell cell =
-              new SimpleCell(headerColumn.getColName(), headerValue, headerColumn.getDescription())
-              {
-              @Override
-              public boolean isCommandLink()
-                            {
-                return true;
-              }
-
-              @Override
-              public Object cellAction()
-                            {
-                return _studyViewer.viewEntity(study);
-              }
-            };
-            metaInformation.add(cell);
-          }
-          else {
-            metaInformation.add(new SimpleCell(headerColumn.getColName(), headerValue, headerColumn.getDescription()));
-          }
-        }
-      }
+		for (AnnotationValue value : annotationValues) {
+			// for each AV, create Meta "grouping" information
+			// - this is all of the study information
+			List<SimpleCell> metaInformation = new ArrayList<SimpleCell>();
+			for (AnnotationHeaderColumn headerColumn : EnumSet.allOf(AnnotationHeaderColumn.class)) {
+				String headerValue = headerColumn.getValue(value.getReagent(), value.getAnnotationType());
+				if (!StringUtils.isEmpty(headerValue)) {
+					final Study study = value.getAnnotationType().getStudy();
+					if (headerColumn == AnnotationHeaderColumn.STUDY_NAME) {
+						
+						// Fix for bug [#3220] Study link in Well Viewer Annotation table is broken
+						// Note: cannot use an anonymous inner class with er-ri-1.0.jar 
+						// FYI: http://stackoverflow.com/questions/2998745/how-to-invoke-jsf-action-on-an-anonymous-class-el-cannot-access-it
+						// TODO: why is this working for TableColumn?
+						//						SimpleCell cell = new SimpleCell(headerColumn.getColName(), headerValue, headerColumn.getDescription()) {
+						//							@Override
+						//							public boolean isCommandLink() {
+						//								return true;
+						//							}
+						//
+						//							@Override
+						//							public Object cellAction() {
+						//								return _studyViewer.viewEntity(study);
+						//							}
+						//						};
+						StudyCell cell = new StudyCell(headerColumn.getColName(), headerValue, headerColumn.getDescription(), study);
+						metaInformation.add(cell);
+					} else {
+						metaInformation.add(new SimpleCell(headerColumn.getColName(), headerValue, headerColumn.getDescription()));
+					}
+				}
+			}
       String textValue = value.getAnnotationType().isNumeric() ? "" + value.getNumericValue() : value.getValue();
       _annotationNameValueTable.add(
         new SimpleCell(
@@ -282,6 +284,26 @@ public class WellViewer extends SearchResultContextEntityViewerBackingBean<Well,
         .setGroupId("" + value.getAnnotationType().getStudy().getFacilityId()));
 
     }
+  }
+  
+	// Fix for bug [#3220] Study link in Well Viewer Annotation table is broken
+	// Note: cannot use an anonymous inner class with er-ri-1.0.jar 
+	// FYI: http://stackoverflow.com/questions/2998745/how-to-invoke-jsf-action-on-an-anonymous-class-el-cannot-access-it
+  public class StudyCell extends SimpleCell
+  {
+  	Study study;
+		public StudyCell(String title, Object value, String description, Study study) {
+			super(title, value, description);
+			this.study = study;
+		}
+  	@Override
+  	public Object cellAction() {
+			return _studyViewer.viewEntity(study);
+  	}
+  	@Override
+  	public boolean isCommandLink() {
+  		return true;
+  	}
   }
 
   @Override
