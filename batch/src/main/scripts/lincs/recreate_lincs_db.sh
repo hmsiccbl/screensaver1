@@ -1,6 +1,6 @@
 #!/bin/bash
 
-# This script will recreate the HMS LINCS database
+# This script will recreate the HMS LINCS database 
 
 DIR=/groups/pharmacoresponse/
 DATA_DIRECTORY=${DIR}/data/current
