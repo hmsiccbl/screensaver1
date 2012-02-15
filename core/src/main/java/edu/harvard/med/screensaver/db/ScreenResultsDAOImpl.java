@@ -58,36 +58,30 @@ public class ScreenResultsDAOImpl extends AbstractDAO implements ScreenResultsDA
     _dao = dao;
   }
 
-  public Map<WellKey,ResultValue> findResultValuesByPlate(final Integer plateNumber,
-                                                          final DataColumn col)
-  {
-    List<ResultValue> result = runQuery(new edu.harvard.med.screensaver.db.Query() {
-      public List<?> execute(Session session)
-      {
-        String hql = "select r from ResultValue r " +
-          "left join fetch r.well w " +
-          "where r.dataColumn.id = :colId and w.id >= :firstWellInclusive " +
-          "and w.id < :lastWellExclusive";
-        Query query = session.createQuery(hql);
-        query.setParameter("colId", col.getEntityId());
-        query.setParameter("firstWellInclusive", new WellKey(plateNumber, 0, 0).toString());
-        query.setParameter("lastWellExclusive", new WellKey(plateNumber + 1, 0, 0).toString());
-        return query.list();
-      }
-    });
-    Map<WellKey,ResultValue> result2 =
-      CollectionUtils.indexCollection(result,
-                                      // note: calling rv.getWell().getWellId() does *not* require a db hit, since a proxy can return its ID w/o forcing Hibernate to access the db;
-                                      // so we use the id to instantiate the WellKey
-    new Transformer() {
-      public Object transform(Object rv)
-                                            {
-        return new WellKey(((ResultValue) rv).getWell().getWellId());
-      }
-    },
-                                      WellKey.class, ResultValue.class);
-    return result2;
-  }
+	public Map<WellKey, ResultValue> findResultValuesByPlate(final Integer plateNumber, final DataColumn col) {
+		List<ResultValue> result = runQuery(new edu.harvard.med.screensaver.db.Query() {
+			public List<?> execute(Session session) {
+				// NOTE: added fetch of the library into the session to fix lazy update problem when calling rv.isEdgeWell()->well.isEdgeWell() which needs the library see: [#1376]- sde4
+				String hql = "select r from ResultValue r " + "left join fetch r.well w join fetch w.library l "
+						+ "where r.dataColumn.id = :colId and w.id >= :firstWellInclusive " + "and w.id < :lastWellExclusive";
+				Query query = session.createQuery(hql);
+				query.setParameter("colId", col.getEntityId());
+				query.setParameter("firstWellInclusive", new WellKey(plateNumber, 0, 0).toString());
+				query.setParameter("lastWellExclusive", new WellKey(plateNumber + 1, 0, 0).toString());
+				return query.list();
+			}
+		});
+		Map<WellKey, ResultValue> result2 = CollectionUtils.indexCollection(result,
+		// note: calling rv.getWell().getWellId() does *not* require a db hit, since
+		// a proxy can return its ID w/o forcing Hibernate to access the db;
+		// so we use the id to instantiate the WellKey
+				new Transformer() {
+					public Object transform(Object rv) {
+						return new WellKey(((ResultValue) rv).getWell().getWellId());
+					}
+				}, WellKey.class, ResultValue.class);
+		return result2;
+	}
 
   public List<DataColumn> findMutualPositiveColumns(final ScreenResult screenResult)
   {
