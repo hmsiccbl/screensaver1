@@ -9,6 +9,7 @@
 
 package edu.harvard.med.screensaver.ui.arch.util.converter;
 
+import javax.faces.application.FacesMessage;
 import javax.faces.component.UIComponent;
 import javax.faces.context.FacesContext;
 import javax.faces.convert.Converter;
@@ -23,7 +24,8 @@ import org.joda.time.format.DateTimeFormatterBuilder;
 public class LocalDateConverter implements Converter
 {
 
-  private static final DateTimeFormatter formatter = DateTimeFormat.forPattern("MM/dd/yyyy");
+  private static final String MM_DD_YYYY = "MM/dd/yyyy";
+	private static final DateTimeFormatter formatter = DateTimeFormat.forPattern(MM_DD_YYYY);
   private static final DateTimeFormatter parser = 
     new DateTimeFormatterBuilder().
     append(DateTimeFormat.forPattern("MM/dd")).
@@ -40,7 +42,7 @@ public class LocalDateConverter implements Converter
       return parser.parseDateTime(arg2).toLocalDate();
     }
     catch (Exception e) {
-      throw new ConverterException("invalid date format: " + e.getMessage());
+      throw new ConverterException(new FacesMessage(e.getMessage(), "Valid format is: \"" + MM_DD_YYYY + "\""));
     }
   }
 
