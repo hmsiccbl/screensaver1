@@ -378,6 +378,12 @@ public abstract class WellSearchResults extends TupleBasedEntitySearchResults<We
         }
       }
       
+      // hide SM/RNAi columns depending on the screen type
+      if(screenResult.getScreen().getScreenType() == ScreenType.RNAI)
+      {
+      	getColumnManager().getColumn("Compound Names").setVisible(false);
+      }
+      
       if (isLINCS()) {
         getColumnManager().getColumn("Compound Names").setVisible(true);
         ((Criterion<LibraryWellType>) getColumnManager().getColumn("Compound Names").resetCriteria()).setOperator(Operator.NOT_EMPTY);
