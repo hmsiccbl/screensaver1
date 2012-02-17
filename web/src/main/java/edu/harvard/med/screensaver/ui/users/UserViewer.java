@@ -218,6 +218,7 @@ public class UserViewer extends SearchResultContextEditableEntityViewerBackingBe
   protected void initializeEntity(ScreeningRoomUser user)
   {
     getDao().need(user, ScreeningRoomUser.roles);
+    getDao().need(user, ScreensaverUser.updateActivities);
     getDao().need(user, ScreensaverUser.activitiesPerformed.to(Activity.performedBy));
     getDao().need(user, ScreeningRoomUser.serviceActivities.to(Activity.performedBy));
     // note: no cross-product problem with dual labMembers associations, since only one will have size > 0

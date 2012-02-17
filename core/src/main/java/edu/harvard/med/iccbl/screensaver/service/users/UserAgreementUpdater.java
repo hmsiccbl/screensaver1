@@ -177,7 +177,7 @@ public class UserAgreementUpdater
       log.debug("User has no checklist item events: " + user + ", so no action will be taken");
       return activitiesPerformed;
     }
-    if (events.last().isExpiration()) {
+    if (events.last().isExpiration()) {  
       log.debug("User's last checklistItemEvent was already expired");
       return activitiesPerformed;
     }
@@ -260,10 +260,10 @@ public class UserAgreementUpdater
       throw new BusinessRuleViolationException("attached file type '" + userAgreementAttachedFileTypeName + "' does not exist");
     }
     
-    user.createChecklistItemActivationEvent(userAgreementChecklistItem, new LocalDate(), recordedBy);
+    ChecklistItemEvent cie = user.createChecklistItemActivationEvent(userAgreementChecklistItem, new LocalDate(), recordedBy);
     ScreensaverUserRole oldDataSharingLevelRole = DataSharingLevelMapper.getPrimaryDataSharingLevelRoleForUser(screenType, user);
 
-    user.createUpdateActivity(recordedBy, "activated '" + checklistItemName + "' checklist item");
+    user.createUpdateActivity(recordedBy, "UserAgreementUpdater Service: activated '" + checklistItemName + "' checklist item with date performed: " + cie.getDatePerformed());
 
     user.removeScreensaverUserRole(oldDataSharingLevelRole);
     user.addScreensaverUserRole(dataSharingLevelRole);

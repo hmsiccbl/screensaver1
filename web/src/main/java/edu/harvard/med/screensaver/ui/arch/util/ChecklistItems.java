@@ -148,9 +148,12 @@ public class ChecklistItems<CIE extends ChecklistItemsEntity<Integer>> extends E
   {
     Map.Entry<ChecklistItem,ChecklistItemEvent> entry = (Map.Entry<ChecklistItem,ChecklistItemEvent>) getRequestMap().get("element");
     assert entry.getKey().isExpirable() && (entry.getValue() == null || entry.getValue().isExpiration());
-    getEntity().createChecklistItemActivationEvent(entry.getKey(),
+    ChecklistItemEvent cie = getEntity().createChecklistItemActivationEvent(entry.getKey(),
                                                getNewChecklistItemDatePerformed().get(entry.getKey()),
                                                (AdministratorUser) getScreensaverUser());
+    
+    cie.getScreeningRoomUser().createUpdateActivity((AdministratorUser) getScreensaverUser(), "activated: '" + cie.getChecklistItem().getItemName() + "' checklist item with date performed: " + cie.getDatePerformed());
+
     _checklistItemDataModelMap = null;
     return REDISPLAY_PAGE_ACTION_RESULT;
   }
@@ -160,8 +163,10 @@ public class ChecklistItems<CIE extends ChecklistItemsEntity<Integer>> extends E
   {
     Map.Entry<ChecklistItem,ChecklistItemEvent> entry = (Map.Entry<ChecklistItem,ChecklistItemEvent>) getRequestMap().get("element");
     assert entry.getKey().isExpirable() && entry.getValue() != null && !entry.getValue().isExpiration();
-    entry.getValue().createChecklistItemExpirationEvent(getNewChecklistItemDatePerformed().get(entry.getKey()),
+    ChecklistItemEvent cie = entry.getValue().createChecklistItemExpirationEvent(getNewChecklistItemDatePerformed().get(entry.getKey()),
                                                         (AdministratorUser) getScreensaverUser());
+    cie.getScreeningRoomUser().createUpdateActivity((AdministratorUser) getScreensaverUser(), "deactivated: '" + cie.getChecklistItem().getItemName() + "' checklist item with date performed: " + cie.getDatePerformed());
+
     _checklistItemDataModelMap = null;
     return REDISPLAY_PAGE_ACTION_RESULT;
   }
@@ -171,9 +176,11 @@ public class ChecklistItems<CIE extends ChecklistItemsEntity<Integer>> extends E
   {
     Map.Entry<ChecklistItem,ChecklistItemEvent> entry = (Map.Entry<ChecklistItem,ChecklistItemEvent>) getRequestMap().get("element");
     assert !entry.getKey().isExpirable() && entry.getValue() == null;
-    getEntity().createChecklistItemActivationEvent(entry.getKey(),
+    ChecklistItemEvent cie = getEntity().createChecklistItemActivationEvent(entry.getKey(),
                                                    getNewChecklistItemDatePerformed().get(entry.getKey()),
                                                    (AdministratorUser) getScreensaverUser());
+
+    cie.getScreeningRoomUser().createUpdateActivity((AdministratorUser) getScreensaverUser(), "marked completed: '" + cie.getChecklistItem().getItemName() + "' checklist item with date performed: " + cie.getDatePerformed());
     _checklistItemDataModelMap = null;
     return REDISPLAY_PAGE_ACTION_RESULT;
   }
@@ -186,9 +193,11 @@ public class ChecklistItems<CIE extends ChecklistItemsEntity<Integer>> extends E
       (Map.Entry<ChecklistItem,ChecklistItemEvent>) getRequestMap().get("element");
 
     assert entry.getValue() == null || entry.getKey().isExpirable() || entry.getValue().isExpiration();
-    getEntity().createChecklistItemNotApplicableEvent(entry.getKey(),
+    ChecklistItemEvent cie = getEntity().createChecklistItemNotApplicableEvent(entry.getKey(),
                                                   getNewChecklistItemDatePerformed().get(entry.getKey()),
                                                   (AdministratorUser) getScreensaverUser());
+    cie.getScreeningRoomUser().createUpdateActivity((AdministratorUser) getScreensaverUser(), "marked n/a: '" + cie.getChecklistItem().getItemName() + "' checklist item with date performed: " + cie.getDatePerformed());
+    
     _checklistItemDataModelMap = null;
     return REDISPLAY_PAGE_ACTION_RESULT;
   }

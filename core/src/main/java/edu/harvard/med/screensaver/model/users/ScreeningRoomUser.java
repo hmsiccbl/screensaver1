@@ -197,7 +197,11 @@ public class ScreeningRoomUser extends ScreensaverUser implements AttachedFilesE
         throw new DataModelViolationException("cannot add checklist item activation when checklist item is already activated");
       }
       if (datePerformed.compareTo(checklistItemEvents.last().getDatePerformed()) < 0) {
-        throw new DataModelViolationException("checklist item activation date must be on or after the previous expiration date");
+        // throw new DataModelViolationException("checklist item activation date must be on or after the previous expiration date");
+      	log.info("Note: setting ChecklistItemEvent to a date that is on or before the previous expiration date:\n" + 
+      			"UserId: " + getEntityId() + 
+      			"\nOld date: " + checklistItemEvents.last().getDatePerformed() + 
+      			"\nNew date: " + datePerformed );      	
       }
     }
     ChecklistItemEvent checklistItemEvent =
