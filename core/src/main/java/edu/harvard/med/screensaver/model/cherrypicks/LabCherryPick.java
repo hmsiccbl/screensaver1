@@ -387,6 +387,10 @@ public class LabCherryPick extends AbstractEntity<Integer>
     if (isMapped() || isPlated()) {
       throw new BusinessRuleViolationException("cannot map a cherry pick to an assay plate if it has already been mapped or plated");
     }
+// TODO: for  [#3380] Implement manual edit of Lab Cherry Picks: Cherry pick assay plate destination well
+//    if (isPlated()) {
+//      throw new BusinessRuleViolationException("cannot map a cherry pick to an assay plate if it has already been plated");
+//    }
     _assayPlate = assayPlate;
     _assayPlate.getLabCherryPicks().add(this);
     _assayPlateRow = assayPlateRow;
