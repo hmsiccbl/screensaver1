@@ -33,7 +33,6 @@ public class ImageLocatorUtil
             return true;
           }
         });
-        log.info("url:" + url);
         Object content = url.getContent();
         if (content != null) {
           return url;
