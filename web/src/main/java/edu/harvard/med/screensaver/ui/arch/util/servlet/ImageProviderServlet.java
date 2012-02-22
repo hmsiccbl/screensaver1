@@ -186,7 +186,7 @@ public class ImageProviderServlet extends HttpServlet
 				// note, allow IOException to be thrown if not found. (will print to the log)
 				resp.getOutputStream().write(IOUtils.toByteArray(new FileInputStream(file)));
 			} catch (Exception e) {
-				log.error("on serving the image for req: " + req.getPathInfo() + ", interpreted as: " + pathInfo, e);
+				log.error("on serving the image for req: " + req.getPathInfo() + ", interpreted as: " + pathInfo + ", " + e.getMessage());
 				throw new ServletException("Error retrieving the image");
     	}
     }
