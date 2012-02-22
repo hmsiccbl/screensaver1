@@ -69,7 +69,7 @@ public class UICommandExceptionHandlerAspect extends OrderedAspect implements Or
       return handleException(joinPoint, e, "businessError", e.getMessage());
     }
     catch (Throwable e) {
-      log.error(e);
+      log.error("",e);
       return handleException(joinPoint, e, "systemError", e.getMessage());
     }
   }

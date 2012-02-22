@@ -16,9 +16,14 @@ import java.util.Collection;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.SortedSet;
 import java.util.TreeSet;
 
 import javax.persistence.TypedQuery;
+
+import org.apache.log4j.Logger;
+import org.hibernate.Session;
+import org.joda.time.LocalDate;
 
 import com.google.common.base.Function;
 import com.google.common.base.Functions;
@@ -26,9 +31,6 @@ import com.google.common.collect.Iterables;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
 import com.google.common.collect.Sets;
-import org.apache.log4j.Logger;
-import org.hibernate.Session;
-import org.joda.time.LocalDate;
 
 import edu.harvard.med.screensaver.ScreensaverConstants;
 import edu.harvard.med.screensaver.db.Criterion.Operator;
@@ -651,32 +653,13 @@ public class LibrariesDAOImpl extends AbstractDAO implements LibrariesDAO
     }
   }
   
-  /**
-   * NOTE: LINCS-only feature
-   * Find Wells containing Small Molecule Reagents where one of the compound names matches the compoundSearchName,
-   * case insensitive, greedy match.
-   */
-  @SuppressWarnings("unchecked")
   @Override
-  public Set<WellKey> findWellKeysForCompoundNameList(final Collection<String> nameList)
+  public SortedSet<WellKey> findWellKeysForCompoundName(final String compoundSearchName, final int limitSize)
   {
-    Set<WellKey> keys = Sets.newHashSet();
-    for(String name:nameList)
-    {
-      keys.addAll(findWellKeysForCompoundName(name));
-    }
-    return keys;
-  }
-  
-  @Override
-  public Set<WellKey> findWellKeysForCompoundName(final String compoundSearchName)
-  {
-    if (log.isDebugEnabled()) {
-      log.debug("findWellKeysForCompoundName: " + compoundSearchName);
-    }
+    log.info("findWellKeysForCompoundName: " + compoundSearchName + ", limitSize: " + limitSize);
     List<SmallMoleculeReagent> reagents = null;
 
-    if (StringUtils.isEmpty(compoundSearchName)) {  // then return all
+    if (StringUtils.isEmpty(compoundSearchName)) {  // NOTE: for large databases, this may exceed the heap size!
       reagents = _dao.runQuery(new Query<SmallMoleculeReagent>() {
         public List<SmallMoleculeReagent> execute(Session session)
         {
@@ -684,7 +667,9 @@ public class LibrariesDAOImpl extends AbstractDAO implements LibrariesDAO
           hql.from(SmallMoleculeReagent.class, "r").
             from("r", SmallMoleculeReagent.well, "w", JoinType.LEFT_FETCH);
           hql.select("r");
-          return hql.toQuery(session, true).list();
+          org.hibernate.Query q = hql.toQuery(session, true);
+          q.setMaxResults(limitSize);
+          return q.list();
         }
       });
     }
@@ -696,7 +681,7 @@ public class LibrariesDAOImpl extends AbstractDAO implements LibrariesDAO
       runQuery(new edu.harvard.med.screensaver.db.Query() {
         public List<?> execute(Session session)
         {
-          String sql = "select reagent_id from small_molecule_compound_name where lower(compound_name) like :name";
+          String sql = "select reagent_id from small_molecule_compound_name where lower(compound_name) like :name LIMIT " + limitSize;
           org.hibernate.Query query = session.createSQLQuery(sql);
           query.setParameter("name", "%" + compoundSearchName.toLowerCase() + "%");
           result[0] = query.list();
@@ -717,32 +702,17 @@ public class LibrariesDAOImpl extends AbstractDAO implements LibrariesDAO
       });
     }
 
-    Set<WellKey> wellKeys = Sets.newHashSet(Lists.transform(reagents, new Function<SmallMoleculeReagent,WellKey>() {
+    SortedSet<WellKey> wellKeys = Sets.newTreeSet(Lists.transform(reagents, new Function<SmallMoleculeReagent,WellKey>() {
       @Override
       public WellKey apply(SmallMoleculeReagent from)
       {
         return from.getWell().getWellKey();
       }
     }));
+    log.info("keys found: " + wellKeys.size());
     return wellKeys;
   } 
    
-   
-   /**
-   * NOTE: LINCS-only feature
-   * Find Wells containing Small Molecule Reagents where one of the compound names matches the compoundSearchName,
-   * case insensitive, greedy match.
-   */
-  @Override
-  public Set<WellKey> findWellKeysForReagentVendorIDList(final Collection<String> facilityVendorIdInputList)
-  {
-    Set<WellKey> keys = Sets.newHashSet();
-    for(String nameFacilityVendorIDInput:facilityVendorIdInputList)
-    {
-      keys.addAll(findWellKeysForReagentVendorID(nameFacilityVendorIDInput));
-    }
-    return keys;
-  }
 
 //  public Set<WellKey> findWellKeysForReagentVendorID(final String facilityVendorId)
 //  {
@@ -795,11 +765,10 @@ public class LibrariesDAOImpl extends AbstractDAO implements LibrariesDAO
 //    
 //  }  
   
-  public Set<WellKey> findWellKeysForReagentVendorID(final String facilityVendorId)
+  @Override
+  public Set<WellKey> findWellKeysForReagentVendorID(final String facilityVendorId, int limitSize)
   {
-    if (log.isDebugEnabled()) {
-      log.debug("findWellKeysForReagentVendorID: " + facilityVendorId);
-    }
+    log.info("findWellKeysForReagentVendorID: " + facilityVendorId + ", limitSize: " + limitSize);
     if (facilityVendorId == null) return null; 
 
     String sql =
@@ -808,9 +777,9 @@ public class LibrariesDAOImpl extends AbstractDAO implements LibrariesDAO
         "join reagent r on(w.latest_released_reagent_id=r.reagent_id) " +
         "join small_molecule_reagent smr using(reagent_id) " +
         "where strpos(w.facility_id || '-' || coalesce(''||smr.salt_form_id,'') || '-' || coalesce(''||r.facility_batch_id,''), :searchString ) > 0" +
-        " or r.vendor_identifier like :searchString2";
+        " or r.vendor_identifier like :searchString2 LIMIT " + limitSize;
     if (log.isDebugEnabled()) {
-      log.info("sql: " + sql);
+      log.debug("sql: " + sql);
     }
     javax.persistence.Query query = getEntityManager().createNativeQuery(sql);
     
@@ -824,6 +793,7 @@ public class LibrariesDAOImpl extends AbstractDAO implements LibrariesDAO
     for(Object[] id: wellIds) {
       keys.add( new WellKey((Integer)id[0], (String)id[1]));
     }
+    log.info("keys found: " + keys.size());
     return keys;
   }
   

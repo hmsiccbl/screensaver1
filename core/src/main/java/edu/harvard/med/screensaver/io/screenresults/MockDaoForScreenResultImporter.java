@@ -500,20 +500,14 @@ public class MockDaoForScreenResultImporter implements GenericEntityDAO, ScreenR
     return Sets.newHashSet();
   }
 
-  @Override
-  public Set<WellKey> findWellKeysForCompoundNameList(Collection<String> compoundSearchName)
-  {
-    return Sets.newHashSet();
-  }
+	@Override
+	public Set<WellKey> findWellKeysForReagentVendorID(String facilityVendorId, int limitSize) {
+		// TODO Auto-generated method stub
+		return null;
+	}
 
   @Override
-  public Set<WellKey> findWellKeysForReagentVendorIDList(Collection<String> facilityVendorIdInputList)
-  {
-    return Sets.newHashSet();
-  }
-  
-  @Override
-  public Set<WellKey> findWellKeysForCompoundName(final String compoundSearchName)
+  public Set<WellKey> findWellKeysForCompoundName(final String compoundSearchName, int limitSize)
   {
     return Sets.newHashSet();
   }

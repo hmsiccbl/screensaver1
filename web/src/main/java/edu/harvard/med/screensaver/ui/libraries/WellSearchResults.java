@@ -207,7 +207,8 @@ public abstract class WellSearchResults extends TupleBasedEntitySearchResults<We
   private Set<ScreenType> _screenTypes;
   private ScreenResult _screenResult;
   private Study _study;
-  
+  private List<AnnotationType> _validAnnotationTypes = null;
+
   /** flag to indicate that this instantiation of WSR is for the LINCS project **/
   // TODO: refactor code so that all LINCS-related code is placed into LincsWellSearchResults
   private Boolean _isLINCS;
@@ -492,6 +493,7 @@ public abstract class WellSearchResults extends TupleBasedEntitySearchResults<We
     _screenResult = null;
     _libraryContentsVersionRef.setValue(null);
     _screenTypes = Sets.newHashSet(ScreenType.values());
+    _validAnnotationTypes = null;
   }
 
   protected abstract void initialize(DataFetcher<Tuple<String>,String,PropertyPath<Well>> dataFetcher);
@@ -897,12 +899,20 @@ public abstract class WellSearchResults extends TupleBasedEntitySearchResults<We
                                                  "Why the well has been deprecated",
                                                  WELL_COLUMNS_GROUP));
     columns.get(columns.size() - 1).setVisible(false);
+    
+    
+    // TODO: for  [#3382] Library contents view should show the concentrations for the screening copies
+		//    columns.add(new MolarConcentrationTupleColumn<Well,String>(RelationshipPath.from(Well.class).toProperty("molarConcentration"),
+		//                                                               "Copy Concentrations",
+		//                                                               "The molar concentration of the screening copies",
+		//                                                               WELL_COLUMNS_GROUP));
+		//    Iterables.getLast(columns).setVisible(_mode != WellSearchResultMode.SCREEN_RESULT_WELLS);    
 
     columns.add(new MolarConcentrationTupleColumn<Well,String>(RelationshipPath.from(Well.class).toProperty("molarConcentration"),
                                                                "Molar Concentration",
                                                                "The molar concentration of the library well",
                                                                WELL_COLUMNS_GROUP));
-    Iterables.getLast(columns).setVisible(_mode != WellSearchResultMode.SCREEN_RESULT_WELLS);
+    Iterables.getLast(columns).setVisible(_mode != WellSearchResultMode.SCREEN_RESULT_WELLS);    
 
     columns.add(new FixedDecimalTupleColumn<Well,String>(RelationshipPath.from(Well.class).toProperty("mgMlConcentration"),
                                                          "mg/mL Concentration",
@@ -1157,24 +1167,28 @@ public abstract class WellSearchResults extends TupleBasedEntitySearchResults<We
       }
     });
   }
-
+  	
   private List<AnnotationType> findValidAnnotationTypes()
   {
-    return _dao.runQuery(new Query() {
-      public List<AnnotationType> execute(Session session)
-      {
-        HqlBuilder hql = new HqlBuilder();
-        hql.select("at").distinctProjectionValues().
-          from(AnnotationType.class, "at").from("at", AnnotationType.study, "s", JoinType.LEFT_FETCH).
-        whereIn("s", "screenType", _screenTypes).
-          orderBy("s", Screen.facilityId.getPropertyName()).orderBy("at", "ordinal");
-        if (log.isDebugEnabled()) {
-          log.debug("findValidAnnotationTypes query: " + hql.toHql());
+  	if(_validAnnotationTypes == null) {
+    	log.info("entering findValidAnnotationTypes");
+      _validAnnotationTypes = _dao.runQuery(new Query() {
+        public List<AnnotationType> execute(Session session)
+        {
+          HqlBuilder hql = new HqlBuilder();
+          hql.select("at").distinctProjectionValues().
+            from(AnnotationType.class, "at").from("at", AnnotationType.study, "s", JoinType.LEFT_FETCH).
+          whereIn("s", "screenType", _screenTypes).
+            orderBy("s", Screen.facilityId.getPropertyName()).orderBy("at", "ordinal");
+          if (log.isDebugEnabled()) {
+            log.debug("findValidAnnotationTypes query: " + hql.toHql());
+          }
+          Iterable<AnnotationType> annotTypes = hql.toQuery(session, true).list();
+          return Lists.newArrayList(Iterables.filter(annotTypes, Entity.NotRestricted));
         }
-        Iterable<AnnotationType> annotTypes = hql.toQuery(session, true).list();
-        return Lists.newArrayList(Iterables.filter(annotTypes, Entity.NotRestricted));
-      }
-    });
+      });
+  	}
+  	return _validAnnotationTypes;
   }
 
   protected void buildAnnotationTypeColumns(List<TableColumn<Tuple<String>,?>> columns)

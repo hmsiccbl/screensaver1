@@ -12,6 +12,7 @@ package edu.harvard.med.screensaver.ui.libraries;
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.StringReader;
+import java.util.Collection;
 import java.util.Set;
 import java.util.SortedSet;
 import java.util.regex.Matcher;
@@ -76,11 +77,12 @@ public class ReagentFinder extends AbstractBackingBean
     SortedSet<String> reagentIdentifiers = parseReagentIdentifier();
     SortedSet<String> keysToShow = reagentIdentifiers;
     if(reagentIdentifiers.size() > getMaxQueryInputItems()) {
-      showMessage("maxQueryInputSizeReached", reagentIdentifiers.size(), getMaxQueryInputItems());
+      showMessage("maxQueryReached", reagentIdentifiers.size(), getMaxQueryInputItems());
       int i=0;
       for(String key:reagentIdentifiers) {
         if(++i > getMaxQueryInputItems()) {
           keysToShow = reagentIdentifiers.headSet(key);
+          break;
         }
       }
     }
@@ -139,13 +141,25 @@ public class ReagentFinder extends AbstractBackingBean
     getCurrentScreensaverUser().logActivity("searching for wells by compound name, facility ID, vendor ID: " +
       Joiner.on(", ").join(nameFacilityVendorIDInputList));
 
-    Set<WellKey> wellKeys = _librariesDao.findWellKeysForCompoundNameList(nameFacilityVendorIDInputList);
-    wellKeys.addAll(_librariesDao.findWellKeysForReagentVendorIDList(nameFacilityVendorIDInputList));
-    
+    SortedSet<WellKey> wellKeys = findWellKeysForCompoundNameList(nameFacilityVendorIDInputList, getMaxQueryInputItems() +1);  // send 1 extra to determine if limit reached
+    wellKeys.addAll(findWellKeysForReagentVendorIDList(nameFacilityVendorIDInputList, getMaxQueryInputItems() +1)); // send 1 extra to determine if limit reached
+   
+    SortedSet<WellKey> keysToShow = wellKeys;
+    if(wellKeys.size() > getMaxQueryInputItems()) {
+      showMessage("maxQueryReached", (wellKeys.size()==(getMaxQueryInputItems()+1)*2) ? ("> "+getMaxQueryInputItems()) : wellKeys.size(), getMaxQueryInputItems());
+      int i=0;
+      for(WellKey key:wellKeys) {
+        if(++i > getMaxQueryInputItems()) {
+          keysToShow = wellKeys.headSet(key);
+          break;
+        }
+      }
+    }    
+    log.info("keysToShow: " + keysToShow.size());
     String titleSuffix = StringUtils.isEmpty(_nameFacilityVendorIDInput) ?
       " Browser" :
       (" with compound name, facility ID, or vendor ID matching '" + _nameFacilityVendorIDInput + "'");
-    _wellsBrowser.searchWells(wellKeys, "Wells" + titleSuffix);
+    _wellsBrowser.searchWells(keysToShow, "Wells" + titleSuffix);
 
     if (_wellsBrowser.getRowCount() == 1) {
       _wellsBrowser.getRowsPerPageSelector().setSelection(1);
@@ -194,6 +208,25 @@ public class ReagentFinder extends AbstractBackingBean
     }
     return values;
   }
+
+  private SortedSet<WellKey> findWellKeysForCompoundNameList(final Collection<String> nameList, int maxQueryInputItems)
+  {
+    SortedSet<WellKey> keys = Sets.newTreeSet();
+    for(String name:nameList)
+    {
+      keys.addAll(_librariesDao.findWellKeysForCompoundName(name, maxQueryInputItems));
+    }
+    return keys;
+  }
+  
+	private SortedSet<WellKey> findWellKeysForReagentVendorIDList(final Collection<String> facilityVendorIdInputList,
+			int maxQueryInputItems) {
+		SortedSet<WellKey> keys = Sets.newTreeSet();
+		for (String nameFacilityVendorIDInput : facilityVendorIdInputList) {
+			keys.addAll(_librariesDao.findWellKeysForReagentVendorID(nameFacilityVendorIDInput, maxQueryInputItems));
+		}
+		return keys;
+	}
 
   private void resetSearchFields()
   {

@@ -12,6 +12,7 @@ package edu.harvard.med.screensaver.db;
 import java.util.Collection;
 import java.util.Map;
 import java.util.Set;
+import java.util.SortedSet;
 
 import edu.harvard.med.screensaver.io.libraries.LibraryCopyPlateListParserResult;
 import edu.harvard.med.screensaver.model.Volume;
@@ -91,13 +92,16 @@ public interface LibrariesDAO
 
   /**
    * Find Wells containing Reagents where the items in the list match either the reagent's compound names 
-   * (using case insensitive, greedy match); or the facility id, or a vendor reagent id matches the items.
+   * (using case insensitive, greedy match).
+   * @param limitSize imposes a LIMIT clause on the underlying SQL
    */
-  public Set<WellKey> findWellKeysForCompoundNameList(Collection<String> compoundNameList);
-
-  public Set<WellKey> findWellKeysForCompoundName(final String compoundSearchName);
-
-  public Set<WellKey> findWellKeysForReagentVendorIDList(Collection<String> facilityVendorIdInputList);
+  public Set<WellKey> findWellKeysForCompoundName(final String compoundSearchName, int limitSize);
+  
+  /**
+   * Find Wells containing Reagents where the vendor reagent id matches the items.
+   * @param limitSize imposes a LIMIT clause on the underlying SQL
+   */
+  public Set<WellKey> findWellKeysForReagentVendorID(final String facilityVendorId, int limitSize);
 
   public void calculatePlateScreeningStatistics(Collection<Plate> plates);
 

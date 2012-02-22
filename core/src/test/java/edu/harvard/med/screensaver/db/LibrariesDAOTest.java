@@ -714,20 +714,28 @@ public class LibrariesDAOTest extends AbstractSpringPersistenceTest
 
     Set<Library> inLibraries = Sets.newHashSet(genericEntityDao.findAllEntitiesOfType(Library.class));
 
-    Set<WellKey> wellKeys = librariesDao.findWellKeysForCompoundName("xyz");
+    int limitSize = 1000;
+    
+    Set<WellKey> wellKeys = librariesDao.findWellKeysForCompoundName("xyz", limitSize);
     assertFalse(wellKeys.isEmpty());
     assertEquals(2, wellKeys.size());
 
-    wellKeys = librariesDao.findWellKeysForCompoundName("XYZ");
+    wellKeys = librariesDao.findWellKeysForCompoundName("XYZ", limitSize);
     assertFalse(wellKeys.isEmpty());
     assertEquals(2, wellKeys.size());
 
-    wellKeys = librariesDao.findWellKeysForCompoundName("naME");
+    wellKeys = librariesDao.findWellKeysForCompoundName("naME", limitSize);
     assertFalse(wellKeys.isEmpty());
     assertEquals(3, wellKeys.size());
 
-    wellKeys = librariesDao.findWellKeysForCompoundName("jkl");
+    wellKeys = librariesDao.findWellKeysForCompoundName("jkl", limitSize);
     assertTrue(wellKeys.isEmpty());
+
+    // Test the limit size
+    limitSize = 2;  
+    wellKeys = librariesDao.findWellKeysForCompoundName("naME", limitSize);
+    assertFalse(wellKeys.isEmpty());
+    assertEquals(limitSize, wellKeys.size());
   }
 
   public void testFindCanonicalReagent()
