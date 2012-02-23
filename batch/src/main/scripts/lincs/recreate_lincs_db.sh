@@ -268,9 +268,9 @@ check_errs $? "create screen result import fails"
 -AE $ECOMMONS_ADMIN  \
 -st SMALL_MOLECULE  \
 -hf $LAB_HEAD_FIRST -hl $LAB_HEAD_LAST -he $LAB_HEAD_EMAIL -lf $LEAD_SCREENER_FIRST -ll $LEAD_SCREENER_LAST -le $LEAD_SCREENER_EMAIL \
--t 'Moerke 2 Color Apoptosis: IS-MELI cells.'  \
+-t 'Moerke 2 Color Apoptosis: IST-MEL1 cells.'  \
 -i 10002 \
---summary "Moerke 2 Color Apoptosis: IS-MELI cells. Dose response of anti-mitotic compounds in human cancer cell lines at 24, 48, and 72 hours to determine their effects on apoptosis.  In this assay, the cell-permeable DNA dye Hoechst 33342 is used to stain the nuclei of all cells.  The fluorescent caspase 3 reporter NucView488 stains the nuclei of cells undergoing apoptosis (in which caspase 3 is active)." \
+--summary "Moerke 2 Color Apoptosis: IST-MEL1 cells. Dose response of anti-mitotic compounds in human cancer cell lines at 24, 48, and 72 hours to determine their effects on apoptosis.  In this assay, the cell-permeable DNA dye Hoechst 33342 is used to stain the nuclei of all cells.  The fluorescent caspase 3 reporter NucView488 stains the nuclei of cells undergoing apoptosis (in which caspase 3 is active)." \
 -p 'Day 1: Seed cells in 384-well assay plates, at approximately 2000 cells/well (the exact density varies by cell line), with 3 plates per cell line (one each for a 24 hr, 48 hr and 72 hr time point).  Add 30 uL cell suspension per well.
 Day 2: Add compounds to plates by pin transfer.
 Day 3: Prepare cells for 24 hr timepoint.
@@ -310,9 +310,9 @@ check_errs $? "create screen result import fails"
 -AE $ECOMMONS_ADMIN  \
 -st SMALL_MOLECULE  \
 -hf $LAB_HEAD_FIRST -hl $LAB_HEAD_LAST -he $LAB_HEAD_EMAIL -lf $LEAD_SCREENER_FIRST -ll $LEAD_SCREENER_LAST -le $LEAD_SCREENER_EMAIL \
--t 'Moerke 2 Color Apoptosis: NCI-1648 cells.'  \
+-t 'Moerke 2 Color Apoptosis: NCI-H1648 cells.'  \
 -i 10003 \
---summary "Moerke 2 Color Apoptosis: NCI-1648 cells. Dose response of anti-mitotic compounds in human cancer cell lines at 24 hours to determine their effects on apoptosis.  In this assay, the cell-permeable DNA dye Hoechst 33342 is used to stain the nuclei of all cells.  The fluorescent caspase 3 reporter NucView488 stains the nuclei of cells undergoing apoptosis (in which caspase 3 is active)." \
+--summary "Moerke 2 Color Apoptosis: NCI-H1648 cells. Dose response of anti-mitotic compounds in human cancer cell lines at 24 hours to determine their effects on apoptosis.  In this assay, the cell-permeable DNA dye Hoechst 33342 is used to stain the nuclei of all cells.  The fluorescent caspase 3 reporter NucView488 stains the nuclei of cells undergoing apoptosis (in which caspase 3 is active)." \
 -p 'Day 1: Seed cells in 384-well assay plates, at approximately 2000 cells/well (the exact density varies by cell line), with 3 plates per cell line (one each for 24 hr time point).  Add 30 uL cell suspension per well.
 Day 2: Add compounds to plates by pin transfer.
 Day 3: Prepare cells for 24 hr timepoint.
@@ -392,9 +392,9 @@ check_errs $? "create screen result import fails"
 -AE $ECOMMONS_ADMIN  \
 -st SMALL_MOLECULE  \
 -hf $LAB_HEAD_FIRST -hl $LAB_HEAD_LAST -he $LAB_HEAD_EMAIL -lf $LEAD_SCREENER_FIRST -ll $LEAD_SCREENER_LAST -le $LEAD_SCREENER_EMAIL \
--t 'Moerke 2 Color Apoptosis: SK-LM31 cells.'  \
+-t 'Moerke 2 Color Apoptosis: SK-LMS-1 cells.'  \
 -i 10005 \
---summary "Moerke 2 Color Apoptosis: SK-LM31 cells. Dose response of anti-mitotic compounds in human cancer cell lines at 24 and 48 hours to determine their effects on apoptosis.  In this assay, the cell-permeable DNA dye Hoechst 33342 is used to stain the nuclei of all cells.  The fluorescent caspase 3 reporter NucView488 stains the nuclei of cells undergoing apoptosis (in which caspase 3 is active)." \
+--summary "Moerke 2 Color Apoptosis: SK-LMS-1 cells. Dose response of anti-mitotic compounds in human cancer cell lines at 24 and 48 hours to determine their effects on apoptosis.  In this assay, the cell-permeable DNA dye Hoechst 33342 is used to stain the nuclei of all cells.  The fluorescent caspase 3 reporter NucView488 stains the nuclei of cells undergoing apoptosis (in which caspase 3 is active)." \
 -p 'Day 1: Seed cells in 384-well assay plates, at approximately 2000 cells/well (the exact density varies by cell line), with 3 plates per cell line (one each for a 24 hr and 48 hr time point).  Add 30 uL cell suspension per well.
 Day 2: Add compounds to plates by pin transfer.
 Day 3: Prepare cells for 24 hr timepoint.
@@ -515,9 +515,9 @@ check_errs $? "create screen result import fails"
 -AE $ECOMMONS_ADMIN  \
 -st SMALL_MOLECULE  \
 -hf $LAB_HEAD_FIRST -hl $LAB_HEAD_LAST -he $LAB_HEAD_EMAIL -lf $LEAD_SCREENER_FIRST -ll $LEAD_SCREENER_LAST -le $LEAD_SCREENER_EMAIL \
--t 'Moerke 3 Color Apoptosis: H810 cells.'  \
+-t 'Moerke 3 Color Apoptosis: NCI-H810 cells.'  \
 -i 10008 \
---summary "Moerke 3 Color Apoptosis: H810 cells. Dose response of anti-mitotic compounds in human cancer cell lines at 24 hours to determine their effects on apoptosis and cell death.  In this assay, the cell-permeable DNA dye Hoechst 33342 is used to stain the nuclei of all cells.  The fluorescent caspase 3 reporter NucView488 stains the nuclei of cells undergoing apoptosis (in which caspase 3 is active), and the cell-impermeable DNA dye TO-PRO3 stains only the nuclei of dead or dying cells in which membrane integrity is compromised." \
+--summary "Moerke 3 Color Apoptosis: NCI-H810 cells. Dose response of anti-mitotic compounds in human cancer cell lines at 24 hours to determine their effects on apoptosis and cell death.  In this assay, the cell-permeable DNA dye Hoechst 33342 is used to stain the nuclei of all cells.  The fluorescent caspase 3 reporter NucView488 stains the nuclei of cells undergoing apoptosis (in which caspase 3 is active), and the cell-impermeable DNA dye TO-PRO3 stains only the nuclei of dead or dying cells in which membrane integrity is compromised." \
 -p 'Day 1: Seed cells in 384-well assay plates at approximately 2000 cells/well (the exact density varies by cell line), with 3 plates per cell line (one each for a 24 hr time point).  Add 30 uL cell suspension per well.
 Day 2: Add compounds to plates by pin transfer.
 Day 3: Process cells for 24 hr timepoint. 
@@ -641,9 +641,9 @@ LEAD_SCREENER_EMAIL="yangzhong_tang@hms.harvard.edu"
 -AE $ECOMMONS_ADMIN  \
 -st SMALL_MOLECULE  \
 -hf $LAB_HEAD_FIRST -hl $LAB_HEAD_LAST -he $LAB_HEAD_EMAIL -lf $LEAD_SCREENER_FIRST -ll $LEAD_SCREENER_LAST -le $LEAD_SCREENER_EMAIL \
--t 'Tang Mitosis/Apoptosis ver.II: A375S2 cells.'  \
+-t 'Tang Mitosis/Apoptosis ver.II: A375.S2 cells.'  \
 -i 10011 \
---summary "Tang Mitosis/Apoptosis ver.II: A375S2 cells. Dose response of anti-mitotic compounds in human cancer cell line A375S2 at 24 and 48 hours to determine effect on apoptosis, mitosis and cell death. 
+--summary "Tang Mitosis/Apoptosis ver.II: A375.S2 cells. Dose response of anti-mitotic compounds in human cancer cell line A375.S2 at 24 and 48 hours to determine effect on apoptosis, mitosis and cell death. 
 
 In screening for small-molecule compounds that are effective at killing cancer cells, one-dimensional readout GI50, which is the EC50 value of growth inhibition, is usually used as the only criterion. A major problem with this one-readout approach is that other useful information is discarded, which could be critical for understanding the action of the compounds. In this screen, we use a single-cell-based imaging assay that can report multi-dimensional physiological responses in cells treated with small molecule kinase inhibitors." \
 -p 'Protocol:
@@ -782,9 +782,9 @@ check_errs $? "create screen result import fails"
 -AE $ECOMMONS_ADMIN  \
 -st SMALL_MOLECULE  \
 -hf $LAB_HEAD_FIRST -hl $LAB_HEAD_LAST -he $LAB_HEAD_EMAIL -lf $LEAD_SCREENER_FIRST -ll $LEAD_SCREENER_LAST -le $LEAD_SCREENER_EMAIL \
--t 'Tang Mitosis/Apoptosis ver.II: Caski cells.'  \
+-t 'Tang Mitosis/Apoptosis ver.II: Ca Ski cells.'  \
 -i 10014 \
---summary "Tang Mitosis/Apoptosis ver.II: Caski cells. Dose response of anti-mitotic compounds in human cancer cell line Caski at 24 and 48 hours to determine effect on apoptosis, mitosis and cell death. 
+--summary "Tang Mitosis/Apoptosis ver.II: Ca Ski cells. Dose response of anti-mitotic compounds in human cancer cell line Ca Ski at 24 and 48 hours to determine effect on apoptosis, mitosis and cell death. 
 
 In screening for small-molecule compounds that are effective at killing cancer cells, one-dimensional readout GI50, which is the EC50 value of growth inhibition, is usually used as the only criterion. A major problem with this one-readout approach is that other useful information is discarded, which could be critical for understanding the action of the compounds. In this screen, we use a single-cell-based imaging assay that can report multi-dimensional physiological responses in cells treated with small molecule kinase inhibitors." \
 -p 'Protocol:
@@ -923,9 +923,9 @@ check_errs $? "create screen result import fails"
 -AE $ECOMMONS_ADMIN  \
 -st SMALL_MOLECULE  \
 -hf $LAB_HEAD_FIRST -hl $LAB_HEAD_LAST -he $LAB_HEAD_EMAIL -lf $LEAD_SCREENER_FIRST -ll $LEAD_SCREENER_LAST -le $LEAD_SCREENER_EMAIL \
--t 'Tang Mitosis/Apoptosis ver.II: Ishikawa-02-ER cells.'  \
+-t 'Tang Mitosis/Apoptosis ver.II: Ishikawa (Heraklio) 02 ER- cells.'  \
 -i 10017 \
---summary "Tang Mitosis/Apoptosis ver.II: Ishikawa-02-ER cells. Dose response of anti-mitotic compounds in human cancer cell line Ishikawa-02-ER at 24, 48 and 72 hours to determine effect on apoptosis, mitosis and cell death. 
+--summary "Tang Mitosis/Apoptosis ver.II: Ishikawa (Heraklio) 02 ER- cells. Dose response of anti-mitotic compounds in human cancer cell line Ishikawa (Heraklio) 02 ER- at 24, 48 and 72 hours to determine effect on apoptosis, mitosis and cell death. 
 
 In screening for small-molecule compounds that are effective at killing cancer cells, one-dimensional readout GI50, which is the EC50 value of growth inhibition, is usually used as the only criterion. A major problem with this one-readout approach is that other useful information is discarded, which could be critical for understanding the action of the compounds. In this screen, we use a single-cell-based imaging assay that can report multi-dimensional physiological responses in cells treated with small molecule kinase inhibitors." \
 -p 'Protocol:
@@ -1252,9 +1252,9 @@ check_errs $? "create screen result import fails"
 -AE $ECOMMONS_ADMIN  \
 -st SMALL_MOLECULE  \
 -hf $LAB_HEAD_FIRST -hl $LAB_HEAD_LAST -he $LAB_HEAD_EMAIL -lf $LEAD_SCREENER_FIRST -ll $LEAD_SCREENER_LAST -le $LEAD_SCREENER_EMAIL \
--t 'Tang Mitosis/Apoptosis ver.II: NCI-1651 cells.'  \
+-t 'Tang Mitosis/Apoptosis ver.II: NCI-H1651 cells.'  \
 -i 10024 \
---summary "Tang Mitosis/Apoptosis ver.II: NCI-1651 cells. Dose response of anti-mitotic compounds in human cancer cell line NCI-1651 at 24, 48 and 72 hours to determine effect on apoptosis, mitosis and cell death. 
+--summary "Tang Mitosis/Apoptosis ver.II: NCI-H1651 cells. Dose response of anti-mitotic compounds in human cancer cell line NCI-H1651 at 24, 48 and 72 hours to determine effect on apoptosis, mitosis and cell death. 
 
 In screening for small-molecule compounds that are effective at killing cancer cells, one-dimensional readout GI50, which is the EC50 value of growth inhibition, is usually used as the only criterion. A major problem with this one-readout approach is that other useful information is discarded, which could be critical for understanding the action of the compounds. In this screen, we use a single-cell-based imaging assay that can report multi-dimensional physiological responses in cells treated with small molecule kinase inhibitors." \
 -p 'Protocol:
@@ -1393,9 +1393,9 @@ check_errs $? "create screen result import fails"
 -AE $ECOMMONS_ADMIN  \
 -st SMALL_MOLECULE  \
 -hf $LAB_HEAD_FIRST -hl $LAB_HEAD_LAST -he $LAB_HEAD_EMAIL -lf $LEAD_SCREENER_FIRST -ll $LEAD_SCREENER_LAST -le $LEAD_SCREENER_EMAIL \
--t 'Tang Mitosis/Apoptosis ver.II: PE-CA-PJ15 cells.'  \
+-t 'Tang Mitosis/Apoptosis ver.II: PE/CA-PJ15 cells.'  \
 -i 10027 \
---summary "Tang Mitosis/Apoptosis ver.II: PE-CA-PJ15 cells. Dose response of anti-mitotic compounds in human cancer cell line PE-CA-PJ15 at 24, 48 and 72 hours to determine effect on apoptosis, mitosis and cell death. 
+--summary "Tang Mitosis/Apoptosis ver.II: PE/CA-PJ15 cells. Dose response of anti-mitotic compounds in human cancer cell line PE/CA-PJ15 at 24, 48 and 72 hours to determine effect on apoptosis, mitosis and cell death. 
 
 In screening for small-molecule compounds that are effective at killing cancer cells, one-dimensional readout GI50, which is the EC50 value of growth inhibition, is usually used as the only criterion. A major problem with this one-readout approach is that other useful information is discarded, which could be critical for understanding the action of the compounds. In this screen, we use a single-cell-based imaging assay that can report multi-dimensional physiological responses in cells treated with small molecule kinase inhibitors." \
 -p 'Protocol:
@@ -1440,9 +1440,9 @@ check_errs $? "create screen result import fails"
 -AE $ECOMMONS_ADMIN  \
 -st SMALL_MOLECULE  \
 -hf $LAB_HEAD_FIRST -hl $LAB_HEAD_LAST -he $LAB_HEAD_EMAIL -lf $LEAD_SCREENER_FIRST -ll $LEAD_SCREENER_LAST -le $LEAD_SCREENER_EMAIL \
--t 'Tang Mitosis/Apoptosis ver.II: PL-4 cells.'  \
+-t 'Tang Mitosis/Apoptosis ver.II: PL4 cells.'  \
 -i 10028 \
---summary "Tang Mitosis/Apoptosis ver.II: PL-4 cells. Dose response of anti-mitotic compounds in human cancer cell line PL-4 at 24, 48 and 72 hours to determine effect on apoptosis, mitosis and cell death. 
+--summary "Tang Mitosis/Apoptosis ver.II: PL4 cells. Dose response of anti-mitotic compounds in human cancer cell line PL4 at 24, 48 and 72 hours to determine effect on apoptosis, mitosis and cell death. 
 
 In screening for small-molecule compounds that are effective at killing cancer cells, one-dimensional readout GI50, which is the EC50 value of growth inhibition, is usually used as the only criterion. A major problem with this one-readout approach is that other useful information is discarded, which could be critical for understanding the action of the compounds. In this screen, we use a single-cell-based imaging assay that can report multi-dimensional physiological responses in cells treated with small molecule kinase inhibitors." \
 -p 'Protocol:
@@ -1487,9 +1487,9 @@ check_errs $? "create screen result import fails"
 -AE $ECOMMONS_ADMIN  \
 -st SMALL_MOLECULE  \
 -hf $LAB_HEAD_FIRST -hl $LAB_HEAD_LAST -he $LAB_HEAD_EMAIL -lf $LEAD_SCREENER_FIRST -ll $LEAD_SCREENER_LAST -le $LEAD_SCREENER_EMAIL \
--t 'Tang Mitosis/Apoptosis ver.II: SKOV3 cells.'  \
+-t 'Tang Mitosis/Apoptosis ver.II: SK-OV-3 cells.'  \
 -i 10029 \
---summary "Tang Mitosis/Apoptosis ver.II: SKOV3 cells. Dose response of anti-mitotic compounds in human cancer cell line SKOV3 at 24 and 48 hours to determine effect on apoptosis, mitosis and cell death. 
+--summary "Tang Mitosis/Apoptosis ver.II: SK-OV-3 cells. Dose response of anti-mitotic compounds in human cancer cell line SK-OV-3 at 24 and 48 hours to determine effect on apoptosis, mitosis and cell death. 
 
 In screening for small-molecule compounds that are effective at killing cancer cells, one-dimensional readout GI50, which is the EC50 value of growth inhibition, is usually used as the only criterion. A major problem with this one-readout approach is that other useful information is discarded, which could be critical for understanding the action of the compounds. In this screen, we use a single-cell-based imaging assay that can report multi-dimensional physiological responses in cells treated with small molecule kinase inhibitors." \
 -p 'Protocol:
@@ -1685,9 +1685,9 @@ check_errs $? "create screen result import fails"
 -AE $ECOMMONS_ADMIN  \
 -st SMALL_MOLECULE  \
 -hf $LAB_HEAD_FIRST -hl $LAB_HEAD_LAST -he $LAB_HEAD_EMAIL -lf $LEAD_SCREENER_FIRST -ll $LEAD_SCREENER_LAST -le $LEAD_SCREENER_EMAIL \
--t 'Tang Proliferation/Mitosis: BTH-1 cells.'  \
+-t 'Tang Proliferation/Mitosis: BPH-1 cells.'  \
 -i 10033 \
---summary "Tang Proliferation/Mitosis: BTH-1 cells. Dose response of anti-mitotic compounds in human cancer cell line BTH-1 at 24, 48 and 72 hours to determine effect on cell proliferation and mitosis." \
+--summary "Tang Proliferation/Mitosis: BPH-1 cells. Dose response of anti-mitotic compounds in human cancer cell line BPH-1 at 24, 48 and 72 hours to determine effect on cell proliferation and mitosis." \
 -p '1. On Day 1, seed ~2000-3000 cells in 30 uL of growth medium into each well of a 384-well clear-bottom black assay plate (Corning 3712), using a WellMate plate filler in a cell culture hood. 
 
 2. On Day 2, pin transfer performed by an ICCB-Longwood Screening Facility staff member using an Epson robot system. The pin transfer adds 100nL of each diluted compound from the 384-well compound library plate to each well of the assay plate.
@@ -1742,9 +1742,9 @@ check_errs $? "create screen result import fails"
 -AE $ECOMMONS_ADMIN  \
 -st SMALL_MOLECULE  \
 -hf $LAB_HEAD_FIRST -hl $LAB_HEAD_LAST -he $LAB_HEAD_EMAIL -lf $LEAD_SCREENER_FIRST -ll $LEAD_SCREENER_LAST -le $LEAD_SCREENER_EMAIL \
--t 'Tang Proliferation/Mitosis: Colo-800 cells.'  \
+-t 'Tang Proliferation/Mitosis: COLO-800 cells.'  \
 -i 10034 \
---summary "Tang Proliferation/Mitosis: Colo-800 cells. Dose response of anti-mitotic compounds in human cancer cell line Colo-800 at 24, 48 and 72 hours to determine effect on cell proliferation and mitosis." \
+--summary "Tang Proliferation/Mitosis: COLO-800 cells. Dose response of anti-mitotic compounds in human cancer cell line COLO-800 at 24, 48 and 72 hours to determine effect on cell proliferation and mitosis." \
 -p '1. On Day 1, seed ~2000-3000 cells in 30 uL of growth medium into each well of a 384-well clear-bottom black assay plate (Corning 3712), using a WellMate plate filler in a cell culture hood. 
 
 2. On Day 2, pin transfer performed by an ICCB-Longwood Screening Facility staff member using an Epson robot system. The pin transfer adds 100nL of each diluted compound from the 384-well compound library plate to each well of the assay plate.
@@ -1799,9 +1799,9 @@ check_errs $? "create screen result import fails"
 -AE $ECOMMONS_ADMIN  \
 -st SMALL_MOLECULE  \
 -hf $LAB_HEAD_FIRST -hl $LAB_HEAD_LAST -he $LAB_HEAD_EMAIL -lf $LEAD_SCREENER_FIRST -ll $LEAD_SCREENER_LAST -le $LEAD_SCREENER_EMAIL \
--t 'Tang Proliferation/Mitosis: HuTu-80 cells.'  \
+-t 'Tang Proliferation/Mitosis: HUTU-80 cells.'  \
 -i 10035 \
---summary "Tang Proliferation/Mitosis: HuTu-80 cells. Dose response of anti-mitotic compounds in human cancer cell line HuTu-80 at 24, 48 and 72 hours to determine effect on cell proliferation and mitosis." \
+--summary "Tang Proliferation/Mitosis: HUTU-80 cells. Dose response of anti-mitotic compounds in human cancer cell line HUTU-80 at 24, 48 and 72 hours to determine effect on cell proliferation and mitosis." \
 -p '1. On Day 1, seed ~2000-3000 cells in 30 uL of growth medium into each well of a 384-well clear-bottom black assay plate (Corning 3712), using a WellMate plate filler in a cell culture hood. 
 
 2. On Day 2, pin transfer performed by an ICCB-Longwood Screening Facility staff member using an Epson robot system. The pin transfer adds 100nL of each diluted compound from the 384-well compound library plate to each well of the assay plate.
@@ -1913,9 +1913,9 @@ check_errs $? "create screen result import fails"
 -AE $ECOMMONS_ADMIN  \
 -st SMALL_MOLECULE  \
 -hf $LAB_HEAD_FIRST -hl $LAB_HEAD_LAST -he $LAB_HEAD_EMAIL -lf $LEAD_SCREENER_FIRST -ll $LEAD_SCREENER_LAST -le $LEAD_SCREENER_EMAIL \
--t 'Tang Proliferation/Mitosis: IS-MEL1 cells.'  \
+-t 'Tang Proliferation/Mitosis: IST-MEL1 cells.'  \
 -i 10037 \
---summary "Tang Proliferation/Mitosis: IS-MEL1 cells. Dose response of anti-mitotic compounds in human cancer cell line IS-MEL1 at 24, 48 and 72 hours to determine effect on cell proliferation and mitosis." \
+--summary "Tang Proliferation/Mitosis: IST-MEL1 cells. Dose response of anti-mitotic compounds in human cancer cell line IST-MEL1 at 24, 48 and 72 hours to determine effect on cell proliferation and mitosis." \
 -p '1. On Day 1, seed ~2000-3000 cells in 30 uL of growth medium into each well of a 384-well clear-bottom black assay plate (Corning 3712), using a WellMate plate filler in a cell culture hood. 
 
 2. On Day 2, pin transfer performed by an ICCB-Longwood Screening Facility staff member using an Epson robot system. The pin transfer adds 100nL of each diluted compound from the 384-well compound library plate to each well of the assay plate.
@@ -1970,9 +1970,9 @@ check_errs $? "create screen result import fails"
 -AE $ECOMMONS_ADMIN  \
 -st SMALL_MOLECULE  \
 -hf $LAB_HEAD_FIRST -hl $LAB_HEAD_LAST -he $LAB_HEAD_EMAIL -lf $LEAD_SCREENER_FIRST -ll $LEAD_SCREENER_LAST -le $LEAD_SCREENER_EMAIL \
--t 'Tang Proliferation/Mitosis: KATO-III cells.'  \
+-t 'Tang Proliferation/Mitosis: KATO III cells.'  \
 -i 10038 \
---summary "Tang Proliferation/Mitosis: KATO-III cells. Dose response of anti-mitotic compounds in human cancer cell line KATO-III at 24, 48 and 72 hours to determine effect on cell proliferation and mitosis." \
+--summary "Tang Proliferation/Mitosis: KATO III cells. Dose response of anti-mitotic compounds in human cancer cell line KATO III at 24, 48 and 72 hours to determine effect on cell proliferation and mitosis." \
 -p '1. On Day 1, seed ~2000-3000 cells in 30 uL of growth medium into each well of a 384-well clear-bottom black assay plate (Corning 3712), using a WellMate plate filler in a cell culture hood. 
 
 2. On Day 2, pin transfer performed by an ICCB-Longwood Screening Facility staff member using an Epson robot system. The pin transfer adds 100nL of each diluted compound from the 384-well compound library plate to each well of the assay plate.
@@ -2369,9 +2369,9 @@ check_errs $? "create screen result import fails"
 -AE $ECOMMONS_ADMIN  \
 -st SMALL_MOLECULE  \
 -hf $LAB_HEAD_FIRST -hl $LAB_HEAD_LAST -he $LAB_HEAD_EMAIL -lf $LEAD_SCREENER_FIRST -ll $LEAD_SCREENER_LAST -le $LEAD_SCREENER_EMAIL \
--t 'Tang Proliferation/Mitosis: SK-LMS1 cells.'  \
+-t 'Tang Proliferation/Mitosis: SK-LMS-1 cells.'  \
 -i 10045 \
---summary "Tang Proliferation/Mitosis: SK-LMS1 cells. Dose response of anti-mitotic compounds in human cancer cell line SK-LMS1 at 24, 48 and 72 hours to determine effect on cell proliferation and mitosis." \
+--summary "Tang Proliferation/Mitosis: SK-LMS-1 cells. Dose response of anti-mitotic compounds in human cancer cell line SK-LMS-1 at 24, 48 and 72 hours to determine effect on cell proliferation and mitosis." \
 -p '1. On Day 1, seed ~2000-3000 cells in 30 uL of growth medium into each well of a 384-well clear-bottom black assay plate (Corning 3712), using a WellMate plate filler in a cell culture hood. 
 
 2. On Day 2, pin transfer performed by an ICCB-Longwood Screening Facility staff member using an Epson robot system. The pin transfer adds 100nL of each diluted compound from the 384-well compound library plate to each well of the assay plate.
@@ -2738,9 +2738,9 @@ check_errs $? "create screen result import fails"
 -AE $ECOMMONS_ADMIN  \
 -st SMALL_MOLECULE  \
 -hf $LAB_HEAD_FIRST -hl $LAB_HEAD_LAST -he $LAB_HEAD_EMAIL -lf $LEAD_SCREENER_FIRST -ll $LEAD_SCREENER_LAST -le $LEAD_SCREENER_EMAIL \
--t 'Tang Mitosis/Apoptosis ver.II: Cal51 cells.'  \
+-t 'Tang Mitosis/Apoptosis ver.II: CAL-51 cells.'  \
 -i 10052 \
---summary "Tang Mitosis/Apoptosis ver.II: Cal51 cells. Dose response of anti-mitotic compounds in human cancer cell line Cal51 at 24, 48 and 72 hours to determine effect on apoptosis, mitosis and cell death. 
+--summary "Tang Mitosis/Apoptosis ver.II: CAL-51 cells. Dose response of anti-mitotic compounds in human cancer cell line CAL-51 at 24, 48 and 72 hours to determine effect on apoptosis, mitosis and cell death. 
 
 In screening for small-molecule compounds that are effective at killing cancer cells, one-dimensional readout GI50, which is the EC50 value of growth inhibition, is usually used as the only criterion. A major problem with this one-readout approach is that other useful information is discarded, which could be critical for understanding the action of the compounds. In this screen, we use a single-cell-based imaging assay that can report multi-dimensional physiological responses in cells treated with small molecule kinase inhibitors." \
 -p 'Protocol:
@@ -5139,6 +5139,302 @@ check_errs $? "attachment import fails"
 
 ./run.sh edu.harvard.med.lincs.screensaver.io.libraries.ReagentAttachmentImporter \
 -f $DATA_DIRECTORY/qc/HPLC_HMSL10142.101.01.pdf -i HMSL10142 -sid 101 -bid 1 -type QC-HPLC
+check_errs $? "attachment import fails"
+
+./run.sh edu.harvard.med.lincs.screensaver.io.libraries.ReagentAttachmentImporter \
+-f $DATA_DIRECTORY/qc/NMR_HMSL10143.101.01.pdf -i HMSL10143 -sid 101 -bid 1 -type QC-NMR
+check_errs $? "attachment import fails"
+
+./run.sh edu.harvard.med.lincs.screensaver.io.libraries.ReagentAttachmentImporter \
+-f $DATA_DIRECTORY/qc/HPLC_HMSL10143.101.01.pdf -i HMSL10143 -sid 101 -bid 1 -type QC-HPLC
+check_errs $? "attachment import fails"
+
+./run.sh edu.harvard.med.lincs.screensaver.io.libraries.ReagentAttachmentImporter \
+-f $DATA_DIRECTORY/qc/NMR_HMSL10144.101.01.pdf -i HMSL10144 -sid 101 -bid 1 -type QC-NMR
+check_errs $? "attachment import fails"
+
+./run.sh edu.harvard.med.lincs.screensaver.io.libraries.ReagentAttachmentImporter \
+-f $DATA_DIRECTORY/qc/HPLC_HMSL10144.101.01.pdf -i HMSL10144 -sid 101 -bid 1 -type QC-HPLC
+check_errs $? "attachment import fails"
+
+./run.sh edu.harvard.med.lincs.screensaver.io.libraries.ReagentAttachmentImporter \
+-f $DATA_DIRECTORY/qc/NMR_HMSL10145.102.01.pdf -i HMSL10145 -sid 102 -bid 1 -type QC-NMR
+check_errs $? "attachment import fails"
+
+./run.sh edu.harvard.med.lincs.screensaver.io.libraries.ReagentAttachmentImporter \
+-f $DATA_DIRECTORY/qc/LCMS_HMSL10145.102.01.pdf -i HMSL10145 -sid 102 -bid 1 -type QC-LCMS
+check_errs $? "attachment import fails"
+
+./run.sh edu.harvard.med.lincs.screensaver.io.libraries.ReagentAttachmentImporter \
+-f $DATA_DIRECTORY/qc/HPLC_HMSL10145.102.01.pdf -i HMSL10145 -sid 102 -bid 1 -type QC-HPLC
+check_errs $? "attachment import fails"
+
+./run.sh edu.harvard.med.lincs.screensaver.io.libraries.ReagentAttachmentImporter \
+-f $DATA_DIRECTORY/qc/NMR_HMSL10146.101.01.pdf -i HMSL10146 -sid 101 -bid 1 -type QC-NMR
+check_errs $? "attachment import fails"
+
+./run.sh edu.harvard.med.lincs.screensaver.io.libraries.ReagentAttachmentImporter \
+-f $DATA_DIRECTORY/qc/LCMS_HMSL10146.101.01.pdf -i HMSL10146 -sid 101 -bid 1 -type QC-LCMS
+check_errs $? "attachment import fails"
+
+./run.sh edu.harvard.med.lincs.screensaver.io.libraries.ReagentAttachmentImporter \
+-f $DATA_DIRECTORY/qc/HPLC_HMSL10146.101.01.pdf -i HMSL10146 -sid 101 -bid 1 -type QC-HPLC
+check_errs $? "attachment import fails"
+
+./run.sh edu.harvard.med.lincs.screensaver.io.libraries.ReagentAttachmentImporter \
+-f $DATA_DIRECTORY/qc/NMR_HMSL10147.101.01.pdf -i HMSL10147 -sid 101 -bid 1 -type QC-NMR
+check_errs $? "attachment import fails"
+
+./run.sh edu.harvard.med.lincs.screensaver.io.libraries.ReagentAttachmentImporter \
+-f $DATA_DIRECTORY/qc/LCMS_HMSL10147.101.01.pdf -i HMSL10147 -sid 101 -bid 1 -type QC-LCMS
+check_errs $? "attachment import fails"
+
+./run.sh edu.harvard.med.lincs.screensaver.io.libraries.ReagentAttachmentImporter \
+-f $DATA_DIRECTORY/qc/HPLC_HMSL10147.101.01.pdf -i HMSL10147 -sid 101 -bid 1 -type QC-HPLC
+check_errs $? "attachment import fails"
+
+./run.sh edu.harvard.med.lincs.screensaver.io.libraries.ReagentAttachmentImporter \
+-f $DATA_DIRECTORY/qc/NMR_HMSL10148.101.01.pdf -i HMSL10148 -sid 101 -bid 1 -type QC-NMR
+check_errs $? "attachment import fails"
+
+./run.sh edu.harvard.med.lincs.screensaver.io.libraries.ReagentAttachmentImporter \
+-f $DATA_DIRECTORY/qc/LCMS_HMSL10148.101.01.pdf -i HMSL10148 -sid 101 -bid 1 -type QC-LCMS
+check_errs $? "attachment import fails"
+
+./run.sh edu.harvard.med.lincs.screensaver.io.libraries.ReagentAttachmentImporter \
+-f $DATA_DIRECTORY/qc/HPLC_HMSL10148.101.01.pdf -i HMSL10148 -sid 101 -bid 1 -type QC-HPLC
+check_errs $? "attachment import fails"
+
+./run.sh edu.harvard.med.lincs.screensaver.io.libraries.ReagentAttachmentImporter \
+-f $DATA_DIRECTORY/qc/NMR_HMSL10149.102.01.pdf -i HMSL10149 -sid 102 -bid 1 -type QC-NMR
+check_errs $? "attachment import fails"
+
+./run.sh edu.harvard.med.lincs.screensaver.io.libraries.ReagentAttachmentImporter \
+-f $DATA_DIRECTORY/qc/LCMS_HMSL10149.102.01.pdf -i HMSL10149 -sid 102 -bid 1 -type QC-LCMS
+check_errs $? "attachment import fails"
+
+./run.sh edu.harvard.med.lincs.screensaver.io.libraries.ReagentAttachmentImporter \
+-f $DATA_DIRECTORY/qc/HPLC_HMSL10149.102.01.pdf -i HMSL10149 -sid 102 -bid 1 -type QC-HPLC
+check_errs $? "attachment import fails"
+
+./run.sh edu.harvard.med.lincs.screensaver.io.libraries.ReagentAttachmentImporter \
+-f $DATA_DIRECTORY/qc/NMR_HMSL10150.101.01.pdf -i HMSL10150 -sid 101 -bid 1 -type QC-NMR
+check_errs $? "attachment import fails"
+
+./run.sh edu.harvard.med.lincs.screensaver.io.libraries.ReagentAttachmentImporter \
+-f $DATA_DIRECTORY/qc/LCMS_HMSL10150.101.01.pdf -i HMSL10150 -sid 101 -bid 1 -type QC-LCMS
+check_errs $? "attachment import fails"
+
+./run.sh edu.harvard.med.lincs.screensaver.io.libraries.ReagentAttachmentImporter \
+-f $DATA_DIRECTORY/qc/HPLC_HMSL10150.101.01.pdf -i HMSL10150 -sid 101 -bid 1 -type QC-HPLC
+check_errs $? "attachment import fails"
+
+./run.sh edu.harvard.med.lincs.screensaver.io.libraries.ReagentAttachmentImporter \
+-f $DATA_DIRECTORY/qc/NMR_HMSL10151.101.01.pdf -i HMSL10151 -sid 101 -bid 1 -type QC-NMR
+check_errs $? "attachment import fails"
+
+./run.sh edu.harvard.med.lincs.screensaver.io.libraries.ReagentAttachmentImporter \
+-f $DATA_DIRECTORY/qc/LCMS_HMSL10151.101.01.pdf -i HMSL10151 -sid 101 -bid 1 -type QC-LCMS
+check_errs $? "attachment import fails"
+
+./run.sh edu.harvard.med.lincs.screensaver.io.libraries.ReagentAttachmentImporter \
+-f $DATA_DIRECTORY/qc/HPLC_HMSL10151.101.01.pdf -i HMSL10151 -sid 101 -bid 1 -type QC-HPLC
+check_errs $? "attachment import fails"
+
+./run.sh edu.harvard.med.lincs.screensaver.io.libraries.ReagentAttachmentImporter \
+-f $DATA_DIRECTORY/qc/NMR_HMSL10152.101.01.pdf -i HMSL10152 -sid 101 -bid 1 -type QC-NMR
+check_errs $? "attachment import fails"
+
+./run.sh edu.harvard.med.lincs.screensaver.io.libraries.ReagentAttachmentImporter \
+-f $DATA_DIRECTORY/qc/LCMS_HMSL10152.101.01.pdf -i HMSL10152 -sid 101 -bid 1 -type QC-LCMS
+check_errs $? "attachment import fails"
+
+./run.sh edu.harvard.med.lincs.screensaver.io.libraries.ReagentAttachmentImporter \
+-f $DATA_DIRECTORY/qc/HPLC_HMSL10152.101.01.pdf -i HMSL10152 -sid 101 -bid 1 -type QC-HPLC
+check_errs $? "attachment import fails"
+
+./run.sh edu.harvard.med.lincs.screensaver.io.libraries.ReagentAttachmentImporter \
+-f $DATA_DIRECTORY/qc/NMR_HMSL10153.101.01.pdf -i HMSL10153 -sid 101 -bid 1 -type QC-NMR
+check_errs $? "attachment import fails"
+
+./run.sh edu.harvard.med.lincs.screensaver.io.libraries.ReagentAttachmentImporter \
+-f $DATA_DIRECTORY/qc/LCMS_HMSL10153.101.01.pdf -i HMSL10153 -sid 101 -bid 1 -type QC-LCMS
+check_errs $? "attachment import fails"
+
+./run.sh edu.harvard.med.lincs.screensaver.io.libraries.ReagentAttachmentImporter \
+-f $DATA_DIRECTORY/qc/HPLC_HMSL10153.101.01.pdf -i HMSL10153 -sid 101 -bid 1 -type QC-HPLC
+check_errs $? "attachment import fails"
+
+./run.sh edu.harvard.med.lincs.screensaver.io.libraries.ReagentAttachmentImporter \
+-f $DATA_DIRECTORY/qc/NMR_HMSL10154.101.01.pdf -i HMSL10154 -sid 101 -bid 1 -type QC-NMR
+check_errs $? "attachment import fails"
+
+./run.sh edu.harvard.med.lincs.screensaver.io.libraries.ReagentAttachmentImporter \
+-f $DATA_DIRECTORY/qc/HPLC_HMSL10154.101.01.pdf -i HMSL10154 -sid 101 -bid 1 -type QC-HPLC
+check_errs $? "attachment import fails"
+
+./run.sh edu.harvard.med.lincs.screensaver.io.libraries.ReagentAttachmentImporter \
+-f $DATA_DIRECTORY/qc/NMR_HMSL10155.101.01.pdf -i HMSL10155 -sid 101 -bid 1 -type QC-NMR
+check_errs $? "attachment import fails"
+
+./run.sh edu.harvard.med.lincs.screensaver.io.libraries.ReagentAttachmentImporter \
+-f $DATA_DIRECTORY/qc/HPLC_HMSL10155.101.01.pdf -i HMSL10155 -sid 101 -bid 1 -type QC-HPLC
+check_errs $? "attachment import fails"
+
+./run.sh edu.harvard.med.lincs.screensaver.io.libraries.ReagentAttachmentImporter \
+-f $DATA_DIRECTORY/qc/NMR_HMSL10156.101.01.pdf -i HMSL10156 -sid 101 -bid 1 -type QC-NMR
+check_errs $? "attachment import fails"
+
+./run.sh edu.harvard.med.lincs.screensaver.io.libraries.ReagentAttachmentImporter \
+-f $DATA_DIRECTORY/qc/HPLC_HMSL10156.101.01.pdf -i HMSL10156 -sid 101 -bid 1 -type QC-HPLC
+check_errs $? "attachment import fails"
+
+./run.sh edu.harvard.med.lincs.screensaver.io.libraries.ReagentAttachmentImporter \
+-f $DATA_DIRECTORY/qc/NMR_HMSL10157.101.01.pdf -i HMSL10157 -sid 101 -bid 1 -type QC-NMR
+check_errs $? "attachment import fails"
+
+./run.sh edu.harvard.med.lincs.screensaver.io.libraries.ReagentAttachmentImporter \
+-f $DATA_DIRECTORY/qc/HPLC_HMSL10157.101.01.pdf -i HMSL10157 -sid 101 -bid 1 -type QC-HPLC
+check_errs $? "attachment import fails"
+
+./run.sh edu.harvard.med.lincs.screensaver.io.libraries.ReagentAttachmentImporter \
+-f $DATA_DIRECTORY/qc/NMR_HMSL10158.101.01.pdf -i HMSL10158 -sid 101 -bid 1 -type QC-NMR
+check_errs $? "attachment import fails"
+
+./run.sh edu.harvard.med.lincs.screensaver.io.libraries.ReagentAttachmentImporter \
+-f $DATA_DIRECTORY/qc/HPLC_HMSL10158.101.01.pdf -i HMSL10158 -sid 101 -bid 1 -type QC-HPLC
+check_errs $? "attachment import fails"
+
+./run.sh edu.harvard.med.lincs.screensaver.io.libraries.ReagentAttachmentImporter \
+-f $DATA_DIRECTORY/qc/NMR_HMSL10159.101.01.pdf -i HMSL10159 -sid 101 -bid 1 -type QC-NMR
+check_errs $? "attachment import fails"
+
+./run.sh edu.harvard.med.lincs.screensaver.io.libraries.ReagentAttachmentImporter \
+-f $DATA_DIRECTORY/qc/HPLC_HMSL10159.101.01.pdf -i HMSL10159 -sid 101 -bid 1 -type QC-HPLC
+check_errs $? "attachment import fails"
+
+./run.sh edu.harvard.med.lincs.screensaver.io.libraries.ReagentAttachmentImporter \
+-f $DATA_DIRECTORY/qc/NMR_HMSL10160.101.01.pdf -i HMSL10160 -sid 101 -bid 1 -type QC-NMR
+check_errs $? "attachment import fails"
+
+./run.sh edu.harvard.med.lincs.screensaver.io.libraries.ReagentAttachmentImporter \
+-f $DATA_DIRECTORY/qc/HPLC_HMSL10160.101.01.pdf -i HMSL10160 -sid 101 -bid 1 -type QC-HPLC
+check_errs $? "attachment import fails"
+
+./run.sh edu.harvard.med.lincs.screensaver.io.libraries.ReagentAttachmentImporter \
+-f $DATA_DIRECTORY/qc/NMR_HMSL10161.101.01.pdf -i HMSL10161 -sid 101 -bid 1 -type QC-NMR
+check_errs $? "attachment import fails"
+
+./run.sh edu.harvard.med.lincs.screensaver.io.libraries.ReagentAttachmentImporter \
+-f $DATA_DIRECTORY/qc/HPLC_HMSL10161.101.01.pdf -i HMSL10161 -sid 101 -bid 1 -type QC-HPLC
+check_errs $? "attachment import fails"
+
+./run.sh edu.harvard.med.lincs.screensaver.io.libraries.ReagentAttachmentImporter \
+-f $DATA_DIRECTORY/qc/NMR_HMSL10162.101.01.pdf -i HMSL10162 -sid 101 -bid 1 -type QC-NMR
+check_errs $? "attachment import fails"
+
+./run.sh edu.harvard.med.lincs.screensaver.io.libraries.ReagentAttachmentImporter \
+-f $DATA_DIRECTORY/qc/HPLC_HMSL10162.101.01.pdf -i HMSL10162 -sid 101 -bid 1 -type QC-HPLC
+check_errs $? "attachment import fails"
+
+./run.sh edu.harvard.med.lincs.screensaver.io.libraries.ReagentAttachmentImporter \
+-f $DATA_DIRECTORY/qc/NMR_HMSL10163.101.01.pdf -i HMSL10163 -sid 101 -bid 1 -type QC-NMR
+check_errs $? "attachment import fails"
+
+./run.sh edu.harvard.med.lincs.screensaver.io.libraries.ReagentAttachmentImporter \
+-f $DATA_DIRECTORY/qc/HPLC_HMSL10163.101.01.pdf -i HMSL10163 -sid 101 -bid 1 -type QC-HPLC
+check_errs $? "attachment import fails"
+
+./run.sh edu.harvard.med.lincs.screensaver.io.libraries.ReagentAttachmentImporter \
+-f $DATA_DIRECTORY/qc/NMR_HMSL10164.101.01.pdf -i HMSL10164 -sid 101 -bid 1 -type QC-NMR
+check_errs $? "attachment import fails"
+
+./run.sh edu.harvard.med.lincs.screensaver.io.libraries.ReagentAttachmentImporter \
+-f $DATA_DIRECTORY/qc/HPLC_HMSL10164.101.01.pdf -i HMSL10164 -sid 101 -bid 1 -type QC-HPLC
+check_errs $? "attachment import fails"
+
+./run.sh edu.harvard.med.lincs.screensaver.io.libraries.ReagentAttachmentImporter \
+-f $DATA_DIRECTORY/qc/NMR_HMSL10165.101.01.pdf -i HMSL10165 -sid 101 -bid 1 -type QC-NMR
+check_errs $? "attachment import fails"
+
+./run.sh edu.harvard.med.lincs.screensaver.io.libraries.ReagentAttachmentImporter \
+-f $DATA_DIRECTORY/qc/HPLC_HMSL10165.101.01.pdf -i HMSL10165 -sid 101 -bid 1 -type QC-HPLC
+check_errs $? "attachment import fails"
+
+./run.sh edu.harvard.med.lincs.screensaver.io.libraries.ReagentAttachmentImporter \
+-f $DATA_DIRECTORY/qc/NMR_HMSL10166.101.01.pdf -i HMSL10166 -sid 101 -bid 1 -type QC-NMR
+check_errs $? "attachment import fails"
+
+./run.sh edu.harvard.med.lincs.screensaver.io.libraries.ReagentAttachmentImporter \
+-f $DATA_DIRECTORY/qc/LCMS_HMSL10166.101.01.pdf -i HMSL10166 -sid 101 -bid 1 -type QC-LCMS
+check_errs $? "attachment import fails"
+
+./run.sh edu.harvard.med.lincs.screensaver.io.libraries.ReagentAttachmentImporter \
+-f $DATA_DIRECTORY/qc/HPLC_HMSL10166.101.01.pdf -i HMSL10166 -sid 101 -bid 1 -type QC-HPLC
+check_errs $? "attachment import fails"
+
+./run.sh edu.harvard.med.lincs.screensaver.io.libraries.ReagentAttachmentImporter \
+-f $DATA_DIRECTORY/qc/NMR_HMSL10167.101.01.pdf -i HMSL10167 -sid 101 -bid 1 -type QC-NMR
+check_errs $? "attachment import fails"
+
+./run.sh edu.harvard.med.lincs.screensaver.io.libraries.ReagentAttachmentImporter \
+-f $DATA_DIRECTORY/qc/HPLC_HMSL10167.101.01.pdf -i HMSL10167 -sid 101 -bid 1 -type QC-HPLC
+check_errs $? "attachment import fails"
+
+./run.sh edu.harvard.med.lincs.screensaver.io.libraries.ReagentAttachmentImporter \
+-f $DATA_DIRECTORY/qc/NMR_HMSL10168.101.01.pdf -i HMSL10168 -sid 101 -bid 1 -type QC-NMR
+check_errs $? "attachment import fails"
+
+./run.sh edu.harvard.med.lincs.screensaver.io.libraries.ReagentAttachmentImporter \
+-f $DATA_DIRECTORY/qc/HPLC_HMSL10168.101.01.pdf -i HMSL10168 -sid 101 -bid 1 -type QC-HPLC
+check_errs $? "attachment import fails"
+
+./run.sh edu.harvard.med.lincs.screensaver.io.libraries.ReagentAttachmentImporter \
+-f $DATA_DIRECTORY/qc/NMR_HMSL10169.101.01.pdf -i HMSL10169 -sid 101 -bid 1 -type QC-NMR
+check_errs $? "attachment import fails"
+
+./run.sh edu.harvard.med.lincs.screensaver.io.libraries.ReagentAttachmentImporter \
+-f $DATA_DIRECTORY/qc/HPLC_HMSL10169.101.01.pdf -i HMSL10169 -sid 101 -bid 1 -type QC-HPLC
+check_errs $? "attachment import fails"
+
+./run.sh edu.harvard.med.lincs.screensaver.io.libraries.ReagentAttachmentImporter \
+-f $DATA_DIRECTORY/qc/NMR_HMSL10170.101.01.pdf -i HMSL10170 -sid 101 -bid 1 -type QC-NMR
+check_errs $? "attachment import fails"
+
+./run.sh edu.harvard.med.lincs.screensaver.io.libraries.ReagentAttachmentImporter \
+-f $DATA_DIRECTORY/qc/HPLC_HMSL10170.101.01.pdf -i HMSL10170 -sid 101 -bid 1 -type QC-HPLC
+check_errs $? "attachment import fails"
+
+./run.sh edu.harvard.med.lincs.screensaver.io.libraries.ReagentAttachmentImporter \
+-f $DATA_DIRECTORY/qc/NMR_HMSL10171.101.01.pdf -i HMSL10171 -sid 101 -bid 1 -type QC-NMR
+check_errs $? "attachment import fails"
+
+./run.sh edu.harvard.med.lincs.screensaver.io.libraries.ReagentAttachmentImporter \
+-f $DATA_DIRECTORY/qc/HPLC_HMSL10171.101.01.pdf -i HMSL10171 -sid 101 -bid 1 -type QC-HPLC
+check_errs $? "attachment import fails"
+
+./run.sh edu.harvard.med.lincs.screensaver.io.libraries.ReagentAttachmentImporter \
+-f $DATA_DIRECTORY/qc/NMR_HMSL10172.101.01.pdf -i HMSL10172 -sid 101 -bid 1 -type QC-NMR
+check_errs $? "attachment import fails"
+
+./run.sh edu.harvard.med.lincs.screensaver.io.libraries.ReagentAttachmentImporter \
+-f $DATA_DIRECTORY/qc/HPLC_HMSL10172.101.01.pdf -i HMSL10172 -sid 101 -bid 1 -type QC-HPLC
+check_errs $? "attachment import fails"
+
+./run.sh edu.harvard.med.lincs.screensaver.io.libraries.ReagentAttachmentImporter \
+-f $DATA_DIRECTORY/qc/NMR_HMSL10173.101.01.pdf -i HMSL10173 -sid 101 -bid 1 -type QC-NMR
+check_errs $? "attachment import fails"
+
+./run.sh edu.harvard.med.lincs.screensaver.io.libraries.ReagentAttachmentImporter \
+-f $DATA_DIRECTORY/qc/HPLC_HMSL10173.101.01.pdf -i HMSL10173 -sid 101 -bid 1 -type QC-HPLC
+check_errs $? "attachment import fails"
+
+./run.sh edu.harvard.med.lincs.screensaver.io.libraries.ReagentAttachmentImporter \
+-f $DATA_DIRECTORY/qc/NMR_HMSL10174.101.01.pdf -i HMSL10174 -sid 101 -bid 1 -type QC-NMR
+check_errs $? "attachment import fails"
+
+./run.sh edu.harvard.med.lincs.screensaver.io.libraries.ReagentAttachmentImporter \
+-f $DATA_DIRECTORY/qc/HPLC_HMSL10174.101.01.pdf -i HMSL10174 -sid 101 -bid 1 -type QC-HPLC
 check_errs $? "attachment import fails"
 
 # "Study-File" Attached files, for viewing in the study viewer
