@@ -42,7 +42,7 @@ public class LocalDateConverter implements Converter
       return parser.parseDateTime(arg2).toLocalDate();
     }
     catch (Exception e) {
-      throw new ConverterException(new FacesMessage(e.getMessage(), "Valid format is: \"" + MM_DD_YYYY + "\""));
+      throw new ConverterException(new FacesMessage(e.getMessage(), "Valid format is: \"MM/DD/YY\""));
     }
   }
 
