@@ -109,7 +109,7 @@ import edu.harvard.med.screensaver.util.ValueReference;
  */
 public abstract class WellSearchResults extends TupleBasedEntitySearchResults<Well,String>
 {
-  private static final Logger log = Logger.getLogger(WellSearchResults.class);
+	private static final Logger log = Logger.getLogger(WellSearchResults.class);
 
   private static final String WELL_COLUMNS_GROUP = "Well Columns";
   private static final String SILENCING_REAGENT_COLUMNS_GROUP = "Silencing Reagent Columns";
@@ -119,6 +119,7 @@ public abstract class WellSearchResults extends TupleBasedEntitySearchResults<We
   private static final String OTHER_DATA_COLUMNS_GROUP = "Screen Result Data Columns (Other Screen Results)";
   private static final String OTHER_ANNOTATION_TYPES_COLUMN_GROUP = "Study Annotations (Other Studies)";
   private static final String OUR_ANNOTATION_TYPES_COLUMN_GROUP = "Study Annotations";
+  private static final String COLUMN_COMPOUND_NAMES = "Compound Names";
 
   private static String COLUMN_REAGENT_ID = "Vendor Reagent ID";
 
@@ -319,6 +320,12 @@ public abstract class WellSearchResults extends TupleBasedEntitySearchResults<We
     };
     initialize(dataFetcher);
 
+    // hide SM/RNAi columns depending on the screen type
+    if(library.getScreenType() != ScreenType.SMALL_MOLECULE)
+    {
+    	getColumnManager().getColumn(COLUMN_COMPOUND_NAMES).setVisible(false);
+    }
+    
     if (isLINCS()) {
       getColumnManager().getColumn("Library Well Type").setVisible(true);
       ((Criterion<LibraryWellType>) getColumnManager().getColumn("Library Well Type").resetCriteria()).setOperatorAndValue(Operator.EQUAL, LibraryWellType.EXPERIMENTAL);
@@ -343,6 +350,11 @@ public abstract class WellSearchResults extends TupleBasedEntitySearchResults<We
     };
     initialize(dataFetcher);
 
+    // hide SM/RNAi columns depending on the screen type
+    if(lcv.getLibrary().getScreenType() != ScreenType.SMALL_MOLECULE)
+    {
+    	getColumnManager().getColumn(COLUMN_COMPOUND_NAMES).setVisible(false);
+    }
     // start with search panel closed
     setTableFilterMode(false);
   }
@@ -385,14 +397,14 @@ public abstract class WellSearchResults extends TupleBasedEntitySearchResults<We
       }
       
       // hide SM/RNAi columns depending on the screen type
-      if(screenResult.getScreen().getScreenType() == ScreenType.RNAI)
+      if(screenResult.getScreen().getScreenType() != ScreenType.SMALL_MOLECULE)
       {
-      	getColumnManager().getColumn("Compound Names").setVisible(false);
+      	getColumnManager().getColumn(COLUMN_COMPOUND_NAMES).setVisible(false);
       }
       
       if (isLINCS()) {
-        getColumnManager().getColumn("Compound Names").setVisible(true);
-        ((Criterion<LibraryWellType>) getColumnManager().getColumn("Compound Names").resetCriteria()).setOperator(Operator.NOT_EMPTY);
+        getColumnManager().getColumn(COLUMN_COMPOUND_NAMES).setVisible(true);
+        ((Criterion<LibraryWellType>) getColumnManager().getColumn(COLUMN_COMPOUND_NAMES).resetCriteria()).setOperator(Operator.NOT_EMPTY);
       }      
 
       // start with search panel closed
@@ -770,7 +782,7 @@ public abstract class WellSearchResults extends TupleBasedEntitySearchResults<We
     columns.get(columns.size() - 1).setVisible(false);
 
     columns.add(new TextSetTupleColumn<Well,String>(relPath.to(SmallMoleculeReagent.compoundNames),
-                                                    "Compound Names",
+                                                    COLUMN_COMPOUND_NAMES,
                                                     "The names of the compound in the well",
                                                     COMPOUND_COLUMNS_GROUP));
     columns.get(columns.size() - 1).setVisible(true);
