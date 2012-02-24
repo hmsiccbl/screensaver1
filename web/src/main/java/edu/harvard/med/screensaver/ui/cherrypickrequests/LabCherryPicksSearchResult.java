@@ -337,34 +337,6 @@ public class LabCherryPicksSearchResult extends EntityBasedEntitySearchResults<L
 				return lcp.isMapped() ? new Integer(lcp.getAssayPlate().getPlateOrdinal() + 1) : null;
 			}
 
-// TODO: for  [#3380] Implement manual edit of Lab Cherry Picks: Cherry pick assay plate destination well
-//			@Override
-//			public void setCellValue(LabCherryPick lcp, Integer plateOrdinal) {
-//				// find the assay plate
-//				if (plateOrdinal == null) return;
-//				if(lcp.getSourceCopy() == null ) {
-//					throw new IllegalArgumentException("Source copy must be set first");
-//				}
-//				CherryPickAssayPlate cpap = null;
-//				for(CherryPickAssayPlate ap:_cherryPickRequest.getActiveCherryPickAssayPlates())
-//				{
-//					if(ap.getPlateOrdinal().equals(plateOrdinal-1)) {
-//						cpap = ap;
-//						break;
-//					}
-//				}
-//				if(cpap != null) {
-//					lcpNewMapping.put(lcp, Pair.newPair(cpap, (String)null));
-//				}else {
-//					throw new IllegalArgumentException("No plate found for ordinal: " + plateOrdinal);
-//				}
-//			}
-//
-//			@Override
-//			public boolean isEditable() {
-//				return _cherryPickRequest.isMapped() && getScreensaverUser().isUserInRole(ScreensaverUserRole.CHERRY_PICK_REQUESTS_ADMIN);
-//			}
-
 		});
     
     
@@ -381,26 +353,6 @@ public class LabCherryPicksSearchResult extends EntityBasedEntitySearchResults<L
       @Override
       public String getCellValue(LabCherryPick lcp) { return lcp.isMapped() ? lcp.getAssayPlateWellName().toString() : null; }
       
-// TODO: for  [#3380] Implement manual edit of Lab Cherry Picks: Cherry pick assay plate destination well
-//			@Override
-//			public void setCellValue(LabCherryPick lcp, String wellId) {
-//				if(StringUtils.isEmpty(wellId)) return;
-//				if(lcp.getSourceCopy() == null ) {
-//					throw new IllegalArgumentException("Source copy must be set first");
-//				}
-//				// find the entry in the mapping table
-//				
-//				if(!  lcpNewMapping.containsKey(lcp)) {
-//					throw new IllegalArgumentException("must set the plate ordinal at the same time");
-//				}
-//				lcpNewMapping.get(lcp).setSecond(wellId);
-//			}
-//
-//			@Override
-//			public boolean isEditable() {
-//				
-//				return _cherryPickRequest.isMapped() && getScreensaverUser().isUserInRole(ScreensaverUserRole.CHERRY_PICK_REQUESTS_ADMIN);
-//			}
     });
 
     return labCherryPicksTableColumns;
@@ -473,14 +425,11 @@ public class LabCherryPicksSearchResult extends EntityBasedEntitySearchResults<L
   }
 
   Map<LabCherryPick,String> lcpNewSourceCopies = Maps.newHashMap();
-  // for  [#3380] Implement manual edit of Lab Cherry Picks: Cherry pick assay plate destination well
-  //  Map<LabCherryPick,Pair<CherryPickAssayPlate,String>> lcpNewMapping = Maps.newHashMap(); // maps source well to destination plate/well
   
   @Override
   protected void doEdit()
   {
     lcpNewSourceCopies = Maps.newHashMap();
-    // lcpNewMapping = Maps.newHashMap();
   }
 
   @Override
@@ -502,29 +451,6 @@ public class LabCherryPicksSearchResult extends EntityBasedEntitySearchResults<L
     catch (NoSuchEntityException e) {
       showMessage("libraries.noSuchCopyForPlate", e.getPropertyValues().get("copy"), e.getPropertyValues().get("plate").toString());
     }
-//    TODO: for  [#3380] Implement manual edit of Lab Cherry Picks: Cherry pick assay plate destination well
-//    if(!lcpNewMapping.isEmpty())
-//    {
-//    	// check if cpap, well is free/valid
-//    	
-//    	for(Map.Entry<LabCherryPick, Pair<CherryPickAssayPlate,String>> entry:lcpNewMapping.entrySet()) {
-//    		String wellId = entry.getValue().getSecond();
-//    		WellName wellName = new WellName(wellId);
-//    		CherryPickAssayPlate cpap = _dao.reloadEntity(entry.getValue().getFirst(), false, CherryPickAssayPlate.labCherryPicks);
-//    		for(LabCherryPick lcp:cpap.getLabCherryPicks()) {
-//    			if(lcp.getAssayPlateWellName().equals(wellName)) {
-//    				if(!lcp.equals(entry.getKey())) throw new IllegalArgumentException("Well is already allocated: " + wellName);
-//    			}
-//    		}
-//    		if(cpap.getAssayPlateType().getPlateSize().getWellCount() == cpap.getLabCherryPicks().size())
-//    		{
-//    			throw new IllegalArgumentException("no free wells on assay plate");
-//    		}
-//    		
-//    		entry.getKey().setMapped(cpap, wellName.getRowIndex(), wellName.getColumnIndex());
-//    		_dao.mergeEntity(entry.getKey());  // TODO: this takes a LONG time (one minute for two AP's) - sde4
-//    	}
-//    }
     if (getNestedIn() != null) {
       getNestedIn().reload();
     }
