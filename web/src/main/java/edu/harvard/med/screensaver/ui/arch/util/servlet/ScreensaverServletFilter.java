@@ -78,7 +78,7 @@ public class ScreensaverServletFilter extends OncePerRequestFilter
       else {
         caughtException = e;
       }
-      log.error("caught exception during invocation of servlet filter chain:" + e);
+      log.error("caught exception during invocation of servlet filter chain:", e);
       caughtException.printStackTrace();
     }
     finally {
