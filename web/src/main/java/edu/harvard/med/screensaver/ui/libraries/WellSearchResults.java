@@ -21,14 +21,17 @@ import java.util.SortedSet;
 
 import com.google.common.base.Function;
 import com.google.common.base.Joiner;
+import com.google.common.collect.Collections2;
 import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.Iterables;
 import com.google.common.collect.Lists;
+import com.google.common.collect.Maps;
 import com.google.common.collect.Sets;
 import org.apache.log4j.Logger;
 import org.hibernate.Session;
 
 import edu.harvard.med.lincs.screensaver.LincsScreensaverConstants;
+import edu.harvard.med.screensaver.ScreensaverConstants;
 import edu.harvard.med.screensaver.db.Criterion;
 import edu.harvard.med.screensaver.db.Criterion.Operator;
 import edu.harvard.med.screensaver.db.GenericEntityDAO;
@@ -47,6 +50,8 @@ import edu.harvard.med.screensaver.io.libraries.smallmolecule.StructureImageLoca
 import edu.harvard.med.screensaver.model.Entity;
 import edu.harvard.med.screensaver.model.MolarConcentration;
 import edu.harvard.med.screensaver.model.Volume;
+import edu.harvard.med.screensaver.model.libraries.Copy;
+import edu.harvard.med.screensaver.model.libraries.CopyUsageType;
 import edu.harvard.med.screensaver.model.libraries.Gene;
 import edu.harvard.med.screensaver.model.libraries.Library;
 import edu.harvard.med.screensaver.model.libraries.LibraryContentsVersion;
@@ -494,6 +499,7 @@ public abstract class WellSearchResults extends TupleBasedEntitySearchResults<We
     _libraryContentsVersionRef.setValue(null);
     _screenTypes = Sets.newHashSet(ScreenType.values());
     _validAnnotationTypes = null;
+    screeningCopyDilutionFactors = null;
   }
 
   protected abstract void initialize(DataFetcher<Tuple<String>,String,PropertyPath<Well>> dataFetcher);
@@ -711,6 +717,7 @@ public abstract class WellSearchResults extends TupleBasedEntitySearchResults<We
           Integer reagentId = (Integer) tuple.getProperty(TupleDataFetcher.makePropertyKey(reagentIdPropertyPath));
           if (reagentId != null) {
             SmallMoleculeReagent smallMoleculeReagent = _dao.findEntityById(SmallMoleculeReagent.class, reagentId, true, Reagent.well.castToSubtype(SmallMoleculeReagent.class));
+            if(smallMoleculeReagent == null) return ""; // for [#3395]
             URL url = _structureImageLocator.getImageUrl(smallMoleculeReagent);
             return NullSafeUtils.toString(ImageLocatorUtil.toExtantContentUrl(url), "");
           }
@@ -901,26 +908,92 @@ public abstract class WellSearchResults extends TupleBasedEntitySearchResults<We
     columns.get(columns.size() - 1).setVisible(false);
     
     
-    // TODO: for  [#3382] Library contents view should show the concentrations for the screening copies
-		//    columns.add(new MolarConcentrationTupleColumn<Well,String>(RelationshipPath.from(Well.class).toProperty("molarConcentration"),
-		//                                                               "Copy Concentrations",
-		//                                                               "The molar concentration of the screening copies",
-		//                                                               WELL_COLUMNS_GROUP));
-		//    Iterables.getLast(columns).setVisible(_mode != WellSearchResultMode.SCREEN_RESULT_WELLS);    
+    // For [#3382] Library contents view should show the concentrations for the screening copies
+		columns.add(new TextTupleColumn<Well, String>(RelationshipPath.from(Well.class).toProperty("molarConcentration"),
+				"Screening Copy Concentration range (mg/mL)", "The mg/mL concentration of the screening copies", WELL_COLUMNS_GROUP) {
+			@Override
+			public String getCellValue(Tuple<String> tuple) {
+				Well well = _dao.findEntityById(Well.class, tuple.getKey(), true, Well.library.to(Library.copies));
+				SortedSet<BigDecimal> values = getScreeningCopyConcentrations(well);
+				if(values.isEmpty()) return null;
+				else if (values.size() == 1) return values.first().toString();
+				else return values.first().toString() + "-" + values.last().toString();
+			}
+		});
+		// TODO: unhide this column to finish [#3382]
+		//Iterables.getLast(columns).setVisible(_mode != WellSearchResultMode.SCREEN_RESULT_WELLS);
+		Iterables.getLast(columns).setVisible(false);
+
+		columns.add(new TextTupleColumn<Well, String>(RelationshipPath.from(Well.class).toProperty("molarConcentration"),
+				"Screening Copy Concentration range (molar)", "The molar concentration of the screening copies", WELL_COLUMNS_GROUP) {
+			@Override
+			public String getCellValue(Tuple<String> tuple) {
+				Well well = _dao.findEntityById(Well.class, tuple.getKey(), true, Well.library.to(Library.copies));
+				SortedSet<MolarConcentration> values = getScreeningCopyMolarConcentrations(well);
+				if(values.isEmpty()) return null;
+				else if (values.size() == 1) return values.first().toString();
+				else return values.first().toString() + "-" + values.last().toString();
+			}
+		});
+		// TODO: unhide this column to finish [#3382]
+		//Iterables.getLast(columns).setVisible(_mode != WellSearchResultMode.SCREEN_RESULT_WELLS);
+		Iterables.getLast(columns).setVisible(false);
 
     columns.add(new MolarConcentrationTupleColumn<Well,String>(RelationshipPath.from(Well.class).toProperty("molarConcentration"),
                                                                "Molar Concentration",
                                                                "The molar concentration of the library well",
                                                                WELL_COLUMNS_GROUP));
-    Iterables.getLast(columns).setVisible(_mode != WellSearchResultMode.SCREEN_RESULT_WELLS);    
+    Iterables.getLast(columns).setVisible(false);    
 
     columns.add(new FixedDecimalTupleColumn<Well,String>(RelationshipPath.from(Well.class).toProperty("mgMlConcentration"),
                                                          "mg/mL Concentration",
                                                          "The mg/mL concentration of the library well",
                                                          WELL_COLUMNS_GROUP));
-    Iterables.getLast(columns).setVisible(_mode != WellSearchResultMode.SCREEN_RESULT_WELLS);
+    Iterables.getLast(columns).setVisible(false);
   }
-
+  
+  private Map<Library,Set<BigDecimal>> screeningCopyDilutionFactors;  // cache
+  private Set<BigDecimal> getScreeningCopyDilutions(Library l)
+  {
+  	if(screeningCopyDilutionFactors == null)
+  	{
+  		screeningCopyDilutionFactors = Maps.newHashMap();
+  	}
+  	if(!screeningCopyDilutionFactors.containsKey(l)) {
+			Set<BigDecimal> values = Sets.newHashSet();
+  		for(Copy c:l.getCopies()) {
+  			if(c.getUsageType() == CopyUsageType.LIBRARY_SCREENING_PLATES)
+  			{
+  				values.add(c.getWellConcentrationDilutionFactor());
+  			}
+  		}
+  		screeningCopyDilutionFactors.put(l, values);
+  	}
+  	return screeningCopyDilutionFactors.get(l);
+  }
+  
+  private SortedSet<BigDecimal> getScreeningCopyConcentrations(Well w)
+  {
+  	SortedSet<BigDecimal> values = Sets.newTreeSet();
+  	for(BigDecimal df:getScreeningCopyDilutions(w.getLibrary())){
+  		if(w.getMgMlConcentration() != null) values.add(w.getMgMlConcentration().divide(df,ScreensaverConstants.PLATE_DILUTION_FACTOR_SCALE, RoundingMode.HALF_UP));
+  	}
+  	return values;
+  }  
+  
+	private SortedSet<MolarConcentration> getScreeningCopyMolarConcentrations(Well w) {
+		SortedSet<MolarConcentration> values = Sets.newTreeSet();
+		for (BigDecimal df : getScreeningCopyDilutions(w.getLibrary())) {
+			if (w.getMolarConcentration() != null) {
+				BigDecimal value = w.getMolarConcentration().getValue()
+						.divide(df, ScreensaverConstants.PLATE_DILUTION_FACTOR_SCALE, RoundingMode.HALF_UP);
+				values.add(MolarConcentration.makeConcentration(value.toString(), w.getMolarConcentration().getUnits(),
+						RoundingMode.HALF_UP));
+			}
+		}
+		return values;
+	}
+  
   private void buildDataColumns(List<TableColumn<Tuple<String>,?>> columns, List<DataColumn> dataColumns)
   {
     List<TableColumn<Tuple<String>,?>> otherColumns = Lists.newArrayList();
