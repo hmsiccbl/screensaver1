@@ -22,6 +22,8 @@ import javax.faces.model.DataModel;
 import javax.faces.model.ListDataModel;
 
 import com.google.common.collect.Lists;
+import com.google.common.collect.Sets;
+
 import org.apache.log4j.Logger;
 import org.joda.time.LocalDate;
 import org.springframework.transaction.annotation.Transactional;
@@ -497,7 +499,19 @@ public class CherryPickRequestViewer extends SearchResultContextEntityViewerBack
   {
     return doViewCherryPickRequestWellVolumes(true);
   }
-
+  
+  private boolean isSomeUnfulfilled() {
+  	for(LabCherryPick lcp:getEntity().getLabCherryPicks())
+  	{
+  		if(lcp.isUnfulfilled()) return true;
+  	}
+  	return false;
+	}
+  
+  public String getUnfulfilledPrompt() {
+  	return isSomeUnfulfilled() ? "javascript: return confirm('"+ getMessage("cherryPicks.someCherryPicksUnfulfillable.overridePrompt") + "');" : "";
+  }
+  
   @UICommand
   public String allocateCherryPicks()
   {
