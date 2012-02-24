@@ -500,18 +500,20 @@ public class CherryPickRequestViewer extends SearchResultContextEntityViewerBack
     return doViewCherryPickRequestWellVolumes(true);
   }
   
-  private boolean isSomeUnfulfilled() {
-  	for(LabCherryPick lcp:getEntity().getLabCherryPicks())
-  	{
-  		if(lcp.isUnfulfilled()) return true;
-  	}
-  	return false;
-	}
-  
-  public String getUnfulfilledPrompt() {
-  	return isSomeUnfulfilled() ? "javascript: return confirm('"+ getMessage("cherryPicks.someCherryPicksUnfulfillable.overridePrompt") + "');" : "";
-  }
-  
+	//  private boolean isSomeUnfulfilled() {
+	//  	for(LabCherryPick lcp:getEntity().getLabCherryPicks())
+	//  	{
+	//  		if(lcp.isUnfulfilled()) return true;
+	//  	}
+	//  	return false;
+	//	}
+	//  
+  // TODO: For  [#3380] Add prompt to manually assign unreserved source copies before mapping in the Cherry Pick Request workflow 
+  //  add to CPRViewerBody.xhtml             onclick="#{cherryPickRequestViewer.unfulfilledPrompt}"
+	//  public String getUnfulfilledPrompt() {
+	//  	return isSomeUnfulfilled() ? "javascript: return confirm('"+ getMessage("cherryPicks.someCherryPicksUnfulfillable.overridePrompt") + "');" : "";
+	//  }
+
   @UICommand
   public String allocateCherryPicks()
   {
