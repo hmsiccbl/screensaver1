@@ -503,7 +503,7 @@ public class LibraryCopySearchResults extends EntityBasedEntitySearchResults<Cop
     
     columns.add(new TextEntityColumn<Copy>(PropertyPath.from(Copy.class).toProperty("minMolarConcentration"),
                                                           "Minimum Well Molar Concentration",
-                                                          "The minimum molar concentration of the wells of the copy's plates",
+                                                          "The minimum molar concentration (diluted) of the wells of the copy's plates",
                                                           COLUMN_GROUP_CONCENTRATION) {
       @Override
       public String getCellValue(Copy copy)
@@ -516,7 +516,7 @@ public class LibraryCopySearchResults extends EntityBasedEntitySearchResults<Cop
 
     columns.add(new TextEntityColumn<Copy>(PropertyPath.from(Copy.class).toProperty("maxMolarConcentration"),
                                                           "Maximum Well Molar Concentration",
-                                                          "The maximum molar concentration of the wells of the copy's plates",
+                                                          "The maximum molar concentration (diluted) of the wells of the copy's plates",
                                                           COLUMN_GROUP_CONCENTRATION) {
       @Override
       public String getCellValue(Copy copy)
@@ -529,7 +529,7 @@ public class LibraryCopySearchResults extends EntityBasedEntitySearchResults<Cop
     
     columns.add(new TextEntityColumn<Copy>(PropertyPath.from(Copy.class).toProperty("primaryWellMolarConcentration"),
                                                           "Primary Well Molar Concentration",
-                                                          "The value of the most frequent plate well molar concentration",
+                                                          "The value of the most frequent plate well molar concentration (diluted)",
                                                           COLUMN_GROUP_CONCENTRATION) {
       @Override
       public String getCellValue(Copy copy)
@@ -544,7 +544,7 @@ public class LibraryCopySearchResults extends EntityBasedEntitySearchResults<Cop
     
     columns.add(new TextEntityColumn<Copy>(PropertyPath.from(Copy.class).toProperty("minMgMlConcentration"),
                                                     "Minimum Well Concentration (mg/mL)",
-                                                    "The minimum mg/mL concentration of the wells of the copy's plates",
+                                                    "The minimum mg/mL concentration (diluted) of the wells of the copy's plates",
                                                     COLUMN_GROUP_CONCENTRATION) {
       @Override
       public String getCellValue(Copy copy)
@@ -557,7 +557,7 @@ public class LibraryCopySearchResults extends EntityBasedEntitySearchResults<Cop
     
     columns.add(new TextEntityColumn<Copy>(PropertyPath.from(Copy.class).toProperty("maxMgMlConcentration"),
                                                     "Maximum Well Concentration (mg/mL)",
-                                                    "The minimum mg/mL concentration of the wells of the copy's plates",
+                                                    "The minimum mg/mL concentration (diluted) of the wells of the copy's plates",
                                                     COLUMN_GROUP_CONCENTRATION) {
       @Override
       public String getCellValue(Copy copy)
@@ -570,7 +570,7 @@ public class LibraryCopySearchResults extends EntityBasedEntitySearchResults<Cop
     
     columns.add(new TextEntityColumn<Copy>(PropertyPath.from(Copy.class).toProperty("primaryWellMgMlConcentration"),
                                                     "Primary Well Concentration (mg/mL)",
-                                                    "The value of the most frequent plate well mg/mL concentration",
+                                                    "The value of the most frequent plate well mg/mL concentration (diluted)",
                                                     COLUMN_GROUP_CONCENTRATION) {
       @Override
       public String getCellValue(Copy copy)
