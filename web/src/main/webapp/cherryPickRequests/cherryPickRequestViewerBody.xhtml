@@ -126,6 +126,7 @@
               value="Map to Plates"
               action="#{cherryPickRequestViewer.plateMapCherryPicks}"
               disabled="#{!cherryPickRequestViewer.entity.allocated || cherryPickRequestViewer.entity.mapped}"
+              onclick="#{cherryPickRequestViewer.unfulfilledPrompt}"
               styleClass="command"
               title="Choose plate number and destination well for the cherry picks" />
             <t:commandButton id="createCherryPickRequestForUnfulfilled"
