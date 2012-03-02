@@ -19,6 +19,7 @@ import java.util.Observable;
 import java.util.Observer;
 
 import javax.faces.convert.Converter;
+import javax.faces.model.SelectItem;
 
 import org.apache.log4j.Logger;
 
@@ -53,7 +54,7 @@ public abstract class TableColumn<R,T> extends Observable implements Observer
   private boolean _isMultiValued;
   private List<Criterion<T>> _criteria = new ArrayList<Criterion<T>>();
   private Converter _converter = NoOpStringConverter.getInstance();
-
+  private List<SelectItem> _selectItems = null;
 
 
   // public constructors and methods
@@ -423,5 +424,18 @@ public abstract class TableColumn<R,T> extends Observable implements Observer
   public int hashCode()
   {
     return _name.hashCode();
+  }
+  
+  /**
+   * Return a list of valid options to be used on input
+   * 
+   * @return a list of select items.
+   */
+  public List<SelectItem> getSelectItems() {
+	  return _selectItems;
+  }
+  
+  public void setSelectItems(List<SelectItem> selectItems) {
+	_selectItems = selectItems;
   }
 }

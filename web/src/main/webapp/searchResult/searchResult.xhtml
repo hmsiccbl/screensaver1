@@ -158,15 +158,21 @@
 							</t:panelGrid>
 						</f:facet>
 						<t:panelStack
-							selectedPanel="#{searchResults.rowRestricted ? 'restricted' : column.editable &amp;&amp; searchResults.editMode ? 'input' : 'output'}">
+							selectedPanel="#{searchResults.rowRestricted ? 'restricted' : column.editable &amp;&amp; searchResults.editMode ? (column.selectItems != null ? 'select' : 'input') : 'output'}">
 							<!-- this restricted field is a "last line of defense" against displaying data
                  that should not be viewable by the user; in general, a search result should
                  never contain restricted data to begin with -->
               <t:outputText id="restricted" value="- - -"
                 styleClass="dataText" />
               <!-- note: for editable input columns, we set tabindex to ensure tab behavior only moves between input fields (and not links in other non-editable columns) -->
+							<t:selectOneMenu id="select" value="#{searchResults.cellValue}"
+								rendered="#{column.editable &amp;&amp; searchResults.editMode and column.selectItems != null}"
+								immediate="true" converter="#{column.converter}" styleClass="inputText"
+								tabindex="#{rowIndex + searchResults.columnManager.currentColumnIndex + 1}">
+								<f:selectItems value="#{column.selectItems}" />
+							</t:selectOneMenu>
 							<t:inputText id="input" value="#{searchResults.cellValue}"
-								rendered="#{column.editable &amp;&amp; searchResults.editMode}"
+								rendered="#{column.editable &amp;&amp; searchResults.editMode and column.selectItems == null}"
 								immediate="true" converter="#{column.converter}" styleClass="inputText"
 								tabindex="#{rowIndex + searchResults.columnManager.currentColumnIndex + 1}" />
 							<!-- both single-valued and collection column types are displayed in dataList -->
