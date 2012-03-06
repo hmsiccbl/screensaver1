@@ -15,7 +15,7 @@ class RNAiColumnsWriter(findSilencingReagent: FindSilencingReagent) extends Colu
   def writeValues(sheet: WritableSheet, wellKey: WellKey, iRow: Int, fromCol: Int) = {
     val reagent = Option(findSilencingReagent(wellKey))
     val gene = reagent map { _.getFacilityGene }
-    val geneSymbol = gene map { _.getEntrezgeneSymbols } map { _.headOption } filter { _.isDefined } map { _.get }
+    val geneSymbol = gene map { _.getEntrezgeneSymbols } filter { !_.isEmpty() } map { _.get(0) }  
     if (geneSymbol.isDefined) sheet.addCell(new jxl.write.Label(fromCol, iRow, geneSymbol.get));
     val entrezGeneId = gene map { _.getEntrezgeneId } filter { _ != null } map { _.toDouble }
     if (entrezGeneId.isDefined) sheet.addCell(new jxl.write.Number(fromCol + 1, iRow, entrezGeneId.get))

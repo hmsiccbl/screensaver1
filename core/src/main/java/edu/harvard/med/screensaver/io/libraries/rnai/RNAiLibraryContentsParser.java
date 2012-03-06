@@ -11,6 +11,7 @@
 package edu.harvard.med.screensaver.io.libraries.rnai;
 
 import java.io.InputStream;
+import java.util.List;
 import java.util.Set;
 
 import org.apache.log4j.Logger;
@@ -23,6 +24,7 @@ import edu.harvard.med.screensaver.io.parseutil.CsvConcentrationColumn;
 import edu.harvard.med.screensaver.io.parseutil.CsvIntegerColumn;
 import edu.harvard.med.screensaver.io.parseutil.CsvSetColumn;
 import edu.harvard.med.screensaver.io.parseutil.CsvTextColumn;
+import edu.harvard.med.screensaver.io.parseutil.CsvTextListColumn;
 import edu.harvard.med.screensaver.io.parseutil.CsvTextSetColumn;
 import edu.harvard.med.screensaver.model.libraries.Gene;
 import edu.harvard.med.screensaver.model.libraries.Library;
@@ -94,12 +96,12 @@ public class RNAiLibraryContentsParser extends WorkbookLibraryContentsParser<Sil
   };
   private CsvTextColumn SEQUENCES = new CsvTextColumn("Sequences", AlphabeticCounter.toIndex("I"), false);
   private CsvIntegerColumn VENDOR_ENTREZGENE_ID = new CsvIntegerColumn("Vendor Entrezgene ID", AlphabeticCounter.toIndex("J"), false);
-  private CsvTextSetColumn VENDOR_ENTREZGENE_SYMBOLS = new CsvTextSetColumn("Vendor Entrezgene Symbols", AlphabeticCounter.toIndex("K"), false);
+  private CsvTextListColumn VENDOR_ENTREZGENE_SYMBOLS = new CsvTextListColumn("Vendor Entrezgene Symbols", AlphabeticCounter.toIndex("K"), false);
   private CsvTextColumn VENDOR_GENE_NAME = new CsvTextColumn("Vendor Gene Name", AlphabeticCounter.toIndex("L"), false);
   private CsvTextSetColumn VENDOR_GENBANK_ACCESSION_NUMBERS = new CsvTextSetColumn("Vendor Genbank Accession Numbers", AlphabeticCounter.toIndex("M"), false);
   private CsvTextColumn VENDOR_SPECIES = new CsvTextColumn("Vendor Species", AlphabeticCounter.toIndex("N"), false);
   private CsvIntegerColumn FACILITY_ENTREZGENE_ID = new CsvIntegerColumn("Vendor Entrezgene ID", AlphabeticCounter.toIndex("O"), false);
-  private CsvTextSetColumn FACILITY_ENTREZGENE_SYMBOLS = new CsvTextSetColumn("Vendor Entrezgene Symbols", AlphabeticCounter.toIndex("P"), false);
+  private CsvTextListColumn FACILITY_ENTREZGENE_SYMBOLS = new CsvTextListColumn("Vendor Entrezgene Symbols", AlphabeticCounter.toIndex("P"), false);
   private CsvTextColumn FACILITY_GENE_NAME = new CsvTextColumn("Vendor Gene Name", AlphabeticCounter.toIndex("Q"), false);
   private CsvTextSetColumn FACILITY_GENBANK_ACCESSION_NUMBERS = new CsvTextSetColumn("Vendor Genbank Accession Numbers", AlphabeticCounter.toIndex("R"), false);
   private CsvTextColumn FACILITY_SPECIES = new CsvTextColumn("Vendor Species", AlphabeticCounter.toIndex("S"), false);
@@ -236,7 +238,7 @@ public class RNAiLibraryContentsParser extends WorkbookLibraryContentsParser<Sil
                           Integer entrezGeneId,
                           String geneName,
                           String speciesName,
-                          Set<String> entrezSymbols,
+                          List<String> entrezSymbols,
                           Set<String> accessionNumbers)
   {
     gene.withEntrezgeneId(entrezGeneId).withGeneName(geneName).withSpeciesName(speciesName);

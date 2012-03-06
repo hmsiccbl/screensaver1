@@ -9,6 +9,7 @@
 
 package edu.harvard.med.screensaver.model.libraries;
 
+import java.util.List;
 import java.util.Set;
 
 import javax.persistence.Column;
@@ -20,8 +21,10 @@ import javax.persistence.Id;
 import javax.persistence.JoinColumn;
 import javax.persistence.JoinTable;
 
+import com.google.common.collect.Lists;
 import com.google.common.collect.Sets;
 import org.hibernate.annotations.Immutable;
+import org.hibernate.annotations.IndexColumn;
 
 import edu.harvard.med.screensaver.model.AbstractEntity;
 import edu.harvard.med.screensaver.model.AbstractEntityVisitor;
@@ -51,7 +54,7 @@ public class Gene extends AbstractEntity<Integer>
 
   private String _geneName;
   private Integer _entrezgeneId;
-  private Set<String> _entrezgeneSymbols = Sets.newHashSet();
+  private List<String> _entrezgeneSymbols = Lists.newArrayList();
   private Set<String> _genbankAccessionNumbers = Sets.newHashSet();
   private String _speciesName;
 
@@ -131,19 +134,20 @@ public class Gene extends AbstractEntity<Integer>
     setGeneName(geneName);
     return this;
   }
-
+  
   @ElementCollection
   @edu.harvard.med.screensaver.model.annotations.ElementCollection(hasNonconventionalMutation = true)
-  @Column(name="entrezgeneSymbol", nullable=false)
+  @Column(name="entrezgeneSymbol", nullable=false, unique = false)
   @JoinTable(name="geneSymbol", joinColumns=@JoinColumn(name="geneId"))
+  @IndexColumn(name = "ordinal")
   @org.hibernate.annotations.Type(type="text")
   @org.hibernate.annotations.ForeignKey(name="fk_gene_symbol_to_gene")
-  public Set<String> getEntrezgeneSymbols()
+  public List<String> getEntrezgeneSymbols()
   {
     return _entrezgeneSymbols;
   }
 
-  private void setEntrezgeneSymbols(Set<String> entrezgeneSymbols)
+  private void setEntrezgeneSymbols(List<String> entrezgeneSymbols)
   {
     _entrezgeneSymbols = entrezgeneSymbols;
   }

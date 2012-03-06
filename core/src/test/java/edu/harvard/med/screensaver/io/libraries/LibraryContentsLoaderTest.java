@@ -11,7 +11,6 @@
 
 package edu.harvard.med.screensaver.io.libraries;
 
-import java.io.File;
 import java.io.IOException;
 import java.math.BigDecimal;
 import java.util.List;
@@ -21,6 +20,8 @@ import org.apache.log4j.Logger;
 import org.joda.time.LocalDate;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.io.ClassPathResource;
+
+import com.google.common.collect.Lists;
 import com.google.common.collect.Sets;
 
 import edu.harvard.med.screensaver.db.DAOTransaction;
@@ -197,7 +198,7 @@ public class LibraryContentsLoaderTest extends AbstractSpringPersistenceTest
         Gene gene = sr.getVendorGene();
         assertEquals(new Integer(22848),gene.getEntrezgeneId() );
         assertTrue("actual: " + gene.getEntrezgeneSymbols() + ", expected: " + Sets.newHashSet("AAK1","AAK2") 
-                   , Sets.newHashSet("AAK1","AAK2").containsAll(gene.getEntrezgeneSymbols()));
+                   , Lists.newArrayList("AAK1","AAK2").equals(gene.getEntrezgeneSymbols()));
         assertEquals("VendorGeneNameX", gene.getGeneName());
         assertTrue("actual: " + gene.getGenbankAccessionNumbers() + ", expected: " + Sets.newHashSet("NM_014911","NM_014912")
                    , Sets.newHashSet("NM_014911","NM_014912").containsAll(gene.getGenbankAccessionNumbers()));
@@ -205,8 +206,8 @@ public class LibraryContentsLoaderTest extends AbstractSpringPersistenceTest
 
         gene = sr.getFacilityGene();
         assertEquals(new Integer(1111),gene.getEntrezgeneId() );
-        assertTrue("Set is:" + gene.getEntrezgeneSymbols(), 
-                   Sets.newHashSet("AAK3","AAK4").containsAll(gene.getEntrezgeneSymbols()));
+        assertTrue("List is:" + gene.getEntrezgeneSymbols(), 
+        					Lists.newArrayList("AAK3","AAK4").equals(gene.getEntrezgeneSymbols()));
         assertEquals("FacilityGeneNameX", gene.getGeneName());
         assertTrue(Sets.newHashSet("F_014911", "F_014914").containsAll(gene.getGenbankAccessionNumbers()));
         assertEquals("FacilitySpeciesX", gene.getSpeciesName());
