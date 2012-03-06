@@ -238,9 +238,9 @@ Prepare the 4X apoptosis reagent mixture fresh in PBS
 (2) Hoechst 33342:  2 ug/mL
 For 4 384-well plates, 25 mL of this mixture will be sufficient and allow plenty of dead volume.
 For 25 mL of mixture add 25 uL of DEVD-NucView488 substrate (from refrigerator) and 50 uL of Hoechst 33342 (from freezer).
-Use WellMate (hood or bench is fine) to add the mixture, using the designated manifold (labeled â€œNucViewâ€?).  Add 10 uL per well, skipping the 1st 2 and last 2 columns.  Spin plates briefly at 1000 rpm in plate centrifuge and put in incubator for 90 minutes.
+Use WellMate (hood or bench is fine) to add the mixture, using the designated manifold (labeled "NucView").  Add 10 uL per well, skipping the 1st 2 and last 2 columns.  Spin plates briefly at 1000 rpm in plate centrifuge and put in incubator for 90 minutes.
 Prepare 2X fixative solution: 2 % formaldehyde in PBS.  Dilute a 36-36.5% formaldehyde stock bottle 1:20 in PBS.  100 mL fixative total is sufficient for 4 plates; add 5 mL formaldehyde stock to 95 mL PBS.
-After 90 minutes, use benchtop (not hood) WellMate to add fixative to plates.  Use the manifold labeled â€œFixativeâ€?  Add 40 uL per well (again skipping first 2 and last 2 columns).  Spin plates briefly as before.  Let fix 20-30 minutes at RT, then seal with metal foil, and image right away or store in the cold room until you are ready to image.
+After 90 minutes, use benchtop (not hood) WellMate to add fixative to plates.  Use the manifold labeled "Fixative".  Add 40 uL per well (again skipping first 2 and last 2 columns).  Spin plates briefly as before.  Let fix 20-30 minutes at RT, then seal with metal foil, and image right away or store in the cold room until you are ready to image.
 Day 4: Repeat for 48 hr time point
 Day 5: Repeat for 72 hr time point
 
@@ -280,9 +280,9 @@ Prepare the 4X apoptosis reagent mixture fresh in PBS
 (2) Hoechst 33342:  2 ug/mL
 For 4 384-well plates, 25 mL of this mixture will be sufficient and allow plenty of dead volume.
 For 25 mL of mixture add 25 uL of DEVD-NucView488 substrate (from refrigerator) and 50 uL of Hoechst 33342 (from freezer).
-Use WellMate (hood or bench is fine) to add the mixture, using the designated manifold (labeled â€œNucViewâ€?).  Add 10 uL per well, skipping the 1st 2 and last 2 columns.  Spin plates briefly at 1000 rpm in plate centrifuge and put in incubator for 90 minutes.
+Use WellMate (hood or bench is fine) to add the mixture, using the designated manifold (labeled "NucView").  Add 10 uL per well, skipping the 1st 2 and last 2 columns.  Spin plates briefly at 1000 rpm in plate centrifuge and put in incubator for 90 minutes.
 Prepare 2X fixative solution: 2 % formaldehyde in PBS.  Dilute a 36-36.5% formaldehyde stock bottle 1:20 in PBS.  100 mL fixative total is sufficient for 4 plates; add 5 mL formaldehyde stock to 95 mL PBS.
-After 90 minutes, use benchtop (not hood) WellMate to add fixative to plates.  Use the manifold labeled â€œFixativeâ€?  Add 40 uL per well (again skipping first 2 and last 2 columns).  Spin plates briefly as before.  Let fix 20-30 minutes at RT, then seal with metal foil, and image right away or store in the cold room until you are ready to image.
+After 90 minutes, use benchtop (not hood) WellMate to add fixative to plates.  Use the manifold labeled "Fixative".  Add 40 uL per well (again skipping first 2 and last 2 columns).  Spin plates briefly as before.  Let fix 20-30 minutes at RT, then seal with metal foil, and image right away or store in the cold room until you are ready to image.
 Day 4: Repeat for 48 hr time point
 Day 5: Repeat for 72 hr time point
 
@@ -322,9 +322,9 @@ Prepare the 4X apoptosis reagent mixture fresh in PBS
 (2) Hoechst 33342:  2 ug/mL
 For 4 384-well plates, 25 mL of this mixture will be sufficient and allow plenty of dead volume.
 For 25 mL of mixture add 25 uL of DEVD-NucView488 substrate (from refrigerator) and 50 uL of Hoechst 33342 (from freezer).
-Use WellMate (hood or bench is fine) to add the mixture, using the designated manifold (labeled â€œNucViewâ€?).  Add 10 uL per well, skipping the 1st 2 and last 2 columns.  Spin plates briefly at 1000 rpm in plate centrifuge and put in incubator for 90 minutes.
+Use WellMate (hood or bench is fine) to add the mixture, using the designated manifold (labeled "NucView").  Add 10 uL per well, skipping the 1st 2 and last 2 columns.  Spin plates briefly at 1000 rpm in plate centrifuge and put in incubator for 90 minutes.
 Prepare 2X fixative solution: 2 % formaldehyde in PBS.  Dilute a 36-36.5% formaldehyde stock bottle 1:20 in PBS.  100 mL fixative total is sufficient for 4 plates; add 5 mL formaldehyde stock to 95 mL PBS.
-After 90 minutes, use benchtop (not hood) WellMate to add fixative to plates.  Use the manifold labeled â€œFixativeâ€?  Add 40 uL per well (again skipping first 2 and last 2 columns).  Spin plates briefly as before.  Let fix 20-30 minutes at RT, then seal with metal foil, and image right away or store in the cold room until you are ready to image.
+After 90 minutes, use benchtop (not hood) WellMate to add fixative to plates.  Use the manifold labeled "Fixative".  Add 40 uL per well (again skipping first 2 and last 2 columns).  Spin plates briefly as before.  Let fix 20-30 minutes at RT, then seal with metal foil, and image right away or store in the cold room until you are ready to image.
 
 Plates are imaged on the ImageXpress Micro screening microscope (Molecular Devices).  4 images are collected per well of the plate at 10X magnification, using the DAPI and FITC filter sets of this instrument.
 Images are analyzed using MetaXpress software.  The multiwavelength cell scoring module of the software is used to detect all cells using the DAPI channel and score cells as apoptotic cells (NucView 488 positive) using the FITC channel.  The analysis produces for each well the total cell count and the % of cells in the well that are apoptotic.
@@ -362,9 +362,9 @@ Prepare the 4X apoptosis reagent mixture fresh in PBS
 (2) Hoechst 33342:  2 ug/mL
 For 4 384-well plates, 25 mL of this mixture will be sufficient and allow plenty of dead volume.
 For 25 mL of mixture add 25 uL of DEVD-NucView488 substrate (from refrigerator) and 50 uL of Hoechst 33342 (from freezer).
-Use WellMate (hood or bench is fine) to add the mixture, using the designated manifold (labeled â€œNucViewâ€?).  Add 10 uL per well, skipping the 1st 2 and last 2 columns.  Spin plates briefly at 1000 rpm in plate centrifuge and put in incubator for 90 minutes.
+Use WellMate (hood or bench is fine) to add the mixture, using the designated manifold (labeled "NucView").  Add 10 uL per well, skipping the 1st 2 and last 2 columns.  Spin plates briefly at 1000 rpm in plate centrifuge and put in incubator for 90 minutes.
 Prepare 2X fixative solution: 2 % formaldehyde in PBS.  Dilute a 36-36.5% formaldehyde stock bottle 1:20 in PBS.  100 mL fixative total is sufficient for 4 plates; add 5 mL formaldehyde stock to 95 mL PBS.
-After 90 minutes, use benchtop (not hood) WellMate to add fixative to plates.  Use the manifold labeled â€œFixativeâ€?  Add 40 uL per well (again skipping first 2 and last 2 columns).  Spin plates briefly as before.  Let fix 20-30 minutes at RT, then seal with metal foil, and image right away or store in the cold room until you are ready to image.
+After 90 minutes, use benchtop (not hood) WellMate to add fixative to plates.  Use the manifold labeled "Fixative".  Add 40 uL per well (again skipping first 2 and last 2 columns).  Spin plates briefly as before.  Let fix 20-30 minutes at RT, then seal with metal foil, and image right away or store in the cold room until you are ready to image.
 Day 4: Repeat for 48 hr time point
 Day 5: Repeat for 72 hr time point
 
@@ -404,9 +404,9 @@ Prepare the 4X apoptosis reagent mixture fresh in PBS
 (2) Hoechst 33342:  2 ug/mL
 For 4 384-well plates, 25 mL of this mixture will be sufficient and allow plenty of dead volume.
 For 25 mL of mixture add 25 uL of DEVD-NucView488 substrate (from refrigerator) and 50 uL of Hoechst 33342 (from freezer).
-Use WellMate (hood or bench is fine) to add the mixture, using the designated manifold (labeled â€œNucViewâ€?).  Add 10 uL per well, skipping the 1st 2 and last 2 columns.  Spin plates briefly at 1000 rpm in plate centrifuge and put in incubator for 90 minutes.
+Use WellMate (hood or bench is fine) to add the mixture, using the designated manifold (labeled "NucView").  Add 10 uL per well, skipping the 1st 2 and last 2 columns.  Spin plates briefly at 1000 rpm in plate centrifuge and put in incubator for 90 minutes.
 Prepare 2X fixative solution: 2 % formaldehyde in PBS.  Dilute a 36-36.5% formaldehyde stock bottle 1:20 in PBS.  100 mL fixative total is sufficient for 4 plates; add 5 mL formaldehyde stock to 95 mL PBS.
-After 90 minutes, use benchtop (not hood) WellMate to add fixative to plates.  Use the manifold labeled â€œFixativeâ€?  Add 40 uL per well (again skipping first 2 and last 2 columns).  Spin plates briefly as before.  Let fix 20-30 minutes at RT, then seal with metal foil, and image right away or store in the cold room until you are ready to image.
+After 90 minutes, use benchtop (not hood) WellMate to add fixative to plates.  Use the manifold labeled "Fixative".  Add 40 uL per well (again skipping first 2 and last 2 columns).  Spin plates briefly as before.  Let fix 20-30 minutes at RT, then seal with metal foil, and image right away or store in the cold room until you are ready to image.
 Day 4: Repeat for 48 hr time point
 
 Plates are imaged on the ImageXpress Micro screening microscope (Molecular Devices).  4 images are collected per well of the plate at 10X magnification, using the DAPI and FITC filter sets of this instrument.
@@ -652,11 +652,11 @@ In screening for small-molecule compounds that are effective at killing cancer c
 2. On Day 2, pin transfer performed by an ICCB-Longwood Screening Facility staff member using an Epson robot system. The pin transfer adds 100nL of each diluted compound from the 384-well compound library plate to each well of the assay plate.
 
 3. On each day of Day 3, 4, and 5 (24, 48, and 72 hrs after pin transfer), perform the following:
-(A) Prepare a cocktail of reagents in PBS that has 4ï?­g/mL Hoechst33342 (Sigma B2261), 4ï?­M LysoTracker-Red (Invitrogen L7528), and 2ï?­M DEVD-NucView488 (Biotium 10403).
-(B) Add 10ï?­L of the reagent cocktail to each well of the assay plate using benchtop WellMate plate filler, so that the final concentration of Hoechst33342 is 1ï?­g/mL, LysoTracker-Red is 1ï?­M, and DEVD-NucView488 is 500nM.
+(A) Prepare a cocktail of reagents in PBS that has 4ug/mL Hoechst33342 (Sigma B2261), 4uM LysoTracker-Red (Invitrogen L7528), and 2uM DEVD-NucView488 (Biotium 10403).
+(B) Add 10uL of the reagent cocktail to each well of the assay plate using benchtop WellMate plate filler, so that the final concentration of Hoechst33342 is 1ug/mL, LysoTracker-Red is 1uM, and DEVD-NucView488 is 500nM.
 (C) Incubate cells in a tissue culture incubator at 37C, 5% CO2 for 1.5 hrs.
 (D) Prepare 2% formaldehyde in PBS and pre-warm it in 37C water bath. 
-(E) Add 40ï?­L of the pre-warmed formaldehyde to each well of cells using benchtop WellMate, so that the final concentration of formaldehyde is 1%. Then immediately centrifuge the plates at 1000rpm at room temperature for 20 minutes, in a plate centrifuge, while the cells are being fixed. 
+(E) Add 40uL of the pre-warmed formaldehyde to each well of cells using benchtop WellMate, so that the final concentration of formaldehyde is 1%. Then immediately centrifuge the plates at 1000rpm at room temperature for 20 minutes, in a plate centrifuge, while the cells are being fixed. 
 (F) After 20 mins of fixation and centrifugation, seal the plates with adhesive plate seals. 
 (G) Image the plates, ideally within the same day, using the ImageXpress Micro screening microscope (Molecular Devices) and the 10x objective lens. Image 4 sites/per well
 
@@ -665,13 +665,13 @@ DAPI [Excitation 377/50; Emission 447/60]
 FITC [Excitation 482/35; Emission 536/40]
 Texas Red [Excitation 562/40; Emission 624/40]
 
-4. After image acquisition, image analysis is done using a customized Matlab program developed by Dr. Tiao Xie (Harvard Medical School). The program does segmentation on the DAPI channel to identify all nuclei, then it counts the bright, rounded cells in the Texas Red channel (LysoTracker-Red) to score mitotic cells. Finally it detects bright spots in the FITC channel (NucView) to score apoptotic cells. We also identify a population of late-stage dead cells with a â€œblurryâ€? DAPI morphology, and no NucView Signal or LysoTracker Red signal.
+4. After image acquisition, image analysis is done using a customized Matlab program developed by Dr. Tiao Xie (Harvard Medical School). The program does segmentation on the DAPI channel to identify all nuclei, then it counts the bright, rounded cells in the Texas Red channel (LysoTracker-Red) to score mitotic cells. Finally it detects bright spots in the FITC channel (NucView) to score apoptotic cells. We also identify a population of late-stage dead cells with a "blurry" DAPI morphology, and no NucView Signal or LysoTracker Red signal.
 
 5. When reporting data, 5 parameters are reported for each replicate for each cell line and compound condition:
 a. Cell Count: The total number of cells (nuclei) stained with Hoechst 33342 and detected in the DAPI channel.
 b. Interphase cells: The total number of cells less the number of Apoptotic cells, Dead cells, and Mitotic cells.
 c. Apoptotic cells: The cells stained with NucView.
-d. Dead cells: The â€œlate-stageâ€? dead cells with blurry DAPI morphology that do not stain with either NucView or LysoTracker Red.
+d. Dead cells: The "late-stage" dead cells with blurry DAPI morphology that do not stain with either NucView or LysoTracker Red.
 e. Mitotic cells: The cells that stain brightly with LysoTracker Red and that have a rounded morphology.
 
 Reference for NucView:
@@ -699,11 +699,11 @@ In screening for small-molecule compounds that are effective at killing cancer c
 2. On Day 2, pin transfer performed by an ICCB-Longwood Screening Facility staff member using an Epson robot system. The pin transfer adds 100nL of each diluted compound from the 384-well compound library plate to each well of the assay plate.
 
 3. On each day of Day 3, 4, and 5 (24, 48, and 72 hrs after pin transfer), perform the following:
-(A) Prepare a cocktail of reagents in PBS that has 4ï?­g/mL Hoechst33342 (Sigma B2261), 4ï?­M LysoTracker-Red (Invitrogen L7528), and 2ï?­M DEVD-NucView488 (Biotium 10403).
-(B) Add 10ï?­L of the reagent cocktail to each well of the assay plate using benchtop WellMate plate filler, so that the final concentration of Hoechst33342 is 1ï?­g/mL, LysoTracker-Red is 1ï?­M, and DEVD-NucView488 is 500nM.
+(A) Prepare a cocktail of reagents in PBS that has 4ug/mL Hoechst33342 (Sigma B2261), 4uM LysoTracker-Red (Invitrogen L7528), and 2uM DEVD-NucView488 (Biotium 10403).
+(B) Add 10uL of the reagent cocktail to each well of the assay plate using benchtop WellMate plate filler, so that the final concentration of Hoechst33342 is 1ug/mL, LysoTracker-Red is 1uM, and DEVD-NucView488 is 500nM.
 (C) Incubate cells in a tissue culture incubator at 37C, 5% CO2 for 1.5 hrs.
 (D) Prepare 2% formaldehyde in PBS and pre-warm it in 37C water bath. 
-(E) Add 40ï?­L of the pre-warmed formaldehyde to each well of cells using benchtop WellMate, so that the final concentration of formaldehyde is 1%. Then immediately centrifuge the plates at 1000rpm at room temperature for 20 minutes, in a plate centrifuge, while the cells are being fixed. 
+(E) Add 40uL of the pre-warmed formaldehyde to each well of cells using benchtop WellMate, so that the final concentration of formaldehyde is 1%. Then immediately centrifuge the plates at 1000rpm at room temperature for 20 minutes, in a plate centrifuge, while the cells are being fixed. 
 (F) After 20 mins of fixation and centrifugation, seal the plates with adhesive plate seals. 
 (G) Image the plates, ideally within the same day, using the ImageXpress Micro screening microscope (Molecular Devices) and the 10x objective lens. Image 4 sites/per well
 
@@ -712,13 +712,13 @@ DAPI [Excitation 377/50; Emission 447/60]
 FITC [Excitation 482/35; Emission 536/40]
 Texas Red [Excitation 562/40; Emission 624/40]
 
-4. After image acquisition, image analysis is done using a customized Matlab program developed by Dr. Tiao Xie (Harvard Medical School). The program does segmentation on the DAPI channel to identify all nuclei, then it counts the bright, rounded cells in the Texas Red channel (LysoTracker-Red) to score mitotic cells. Finally it detects bright spots in the FITC channel (NucView) to score apoptotic cells. We also identify a population of late-stage dead cells with a â€œblurryâ€? DAPI morphology, and no NucView Signal or LysoTracker Red signal.
+4. After image acquisition, image analysis is done using a customized Matlab program developed by Dr. Tiao Xie (Harvard Medical School). The program does segmentation on the DAPI channel to identify all nuclei, then it counts the bright, rounded cells in the Texas Red channel (LysoTracker-Red) to score mitotic cells. Finally it detects bright spots in the FITC channel (NucView) to score apoptotic cells. We also identify a population of late-stage dead cells with a "blurry" DAPI morphology, and no NucView Signal or LysoTracker Red signal.
 
 5. When reporting data, 5 parameters are reported for each replicate for each cell line and compound condition:
 a. Cell Count: The total number of cells (nuclei) stained with Hoechst 33342 and detected in the DAPI channel.
 b. Interphase cells: The total number of cells less the number of Apoptotic cells, Dead cells, and Mitotic cells.
 c. Apoptotic cells: The cells stained with NucView.
-d. Dead cells: The â€œlate-stageâ€? dead cells with blurry DAPI morphology that do not stain with either NucView or LysoTracker Red.
+d. Dead cells: The "late-stage" dead cells with blurry DAPI morphology that do not stain with either NucView or LysoTracker Red.
 e. Mitotic cells: The cells that stain brightly with LysoTracker Red and that have a rounded morphology.
 
 Reference for NucView:
@@ -746,11 +746,11 @@ In screening for small-molecule compounds that are effective at killing cancer c
 2. On Day 2, pin transfer performed by an ICCB-Longwood Screening Facility staff member using an Epson robot system. The pin transfer adds 100nL of each diluted compound from the 384-well compound library plate to each well of the assay plate.
 
 3. On each day of Day 3, 4, and 5 (24, 48, and 72 hrs after pin transfer), perform the following:
-(A) Prepare a cocktail of reagents in PBS that has 4ï?­g/mL Hoechst33342 (Sigma B2261), 4ï?­M LysoTracker-Red (Invitrogen L7528), and 2ï?­M DEVD-NucView488 (Biotium 10403).
-(B) Add 10ï?­L of the reagent cocktail to each well of the assay plate using benchtop WellMate plate filler, so that the final concentration of Hoechst33342 is 1ï?­g/mL, LysoTracker-Red is 1ï?­M, and DEVD-NucView488 is 500nM.
+(A) Prepare a cocktail of reagents in PBS that has 4ug/mL Hoechst33342 (Sigma B2261), 4uM LysoTracker-Red (Invitrogen L7528), and 2uM DEVD-NucView488 (Biotium 10403).
+(B) Add 10uL of the reagent cocktail to each well of the assay plate using benchtop WellMate plate filler, so that the final concentration of Hoechst33342 is 1ug/mL, LysoTracker-Red is 1uM, and DEVD-NucView488 is 500nM.
 (C) Incubate cells in a tissue culture incubator at 37C, 5% CO2 for 1.5 hrs.
 (D) Prepare 2% formaldehyde in PBS and pre-warm it in 37C water bath. 
-(E) Add 40ï?­L of the pre-warmed formaldehyde to each well of cells using benchtop WellMate, so that the final concentration of formaldehyde is 1%. Then immediately centrifuge the plates at 1000rpm at room temperature for 20 minutes, in a plate centrifuge, while the cells are being fixed. 
+(E) Add 40uL of the pre-warmed formaldehyde to each well of cells using benchtop WellMate, so that the final concentration of formaldehyde is 1%. Then immediately centrifuge the plates at 1000rpm at room temperature for 20 minutes, in a plate centrifuge, while the cells are being fixed. 
 (F) After 20 mins of fixation and centrifugation, seal the plates with adhesive plate seals. 
 (G) Image the plates, ideally within the same day, using the ImageXpress Micro screening microscope (Molecular Devices) and the 10x objective lens. Image 4 sites/per well
 
@@ -759,13 +759,13 @@ DAPI [Excitation 377/50; Emission 447/60]
 FITC [Excitation 482/35; Emission 536/40]
 Texas Red [Excitation 562/40; Emission 624/40]
 
-4. After image acquisition, image analysis is done using a customized Matlab program developed by Dr. Tiao Xie (Harvard Medical School). The program does segmentation on the DAPI channel to identify all nuclei, then it counts the bright, rounded cells in the Texas Red channel (LysoTracker-Red) to score mitotic cells. Finally it detects bright spots in the FITC channel (NucView) to score apoptotic cells. We also identify a population of late-stage dead cells with a â€œblurryâ€? DAPI morphology, and no NucView Signal or LysoTracker Red signal.
+4. After image acquisition, image analysis is done using a customized Matlab program developed by Dr. Tiao Xie (Harvard Medical School). The program does segmentation on the DAPI channel to identify all nuclei, then it counts the bright, rounded cells in the Texas Red channel (LysoTracker-Red) to score mitotic cells. Finally it detects bright spots in the FITC channel (NucView) to score apoptotic cells. We also identify a population of late-stage dead cells with a "blurry" DAPI morphology, and no NucView Signal or LysoTracker Red signal.
 
 5. When reporting data, 5 parameters are reported for each replicate for each cell line and compound condition:
 a. Cell Count: The total number of cells (nuclei) stained with Hoechst 33342 and detected in the DAPI channel.
 b. Interphase cells: The total number of cells less the number of Apoptotic cells, Dead cells, and Mitotic cells.
 c. Apoptotic cells: The cells stained with NucView.
-d. Dead cells: The â€œlate-stageâ€? dead cells with blurry DAPI morphology that do not stain with either NucView or LysoTracker Red.
+d. Dead cells: The "late-stage" dead cells with blurry DAPI morphology that do not stain with either NucView or LysoTracker Red.
 e. Mitotic cells: The cells that stain brightly with LysoTracker Red and that have a rounded morphology.
 
 Reference for NucView:
@@ -793,11 +793,11 @@ In screening for small-molecule compounds that are effective at killing cancer c
 2. On Day 2, pin transfer performed by an ICCB-Longwood Screening Facility staff member using an Epson robot system. The pin transfer adds 100nL of each diluted compound from the 384-well compound library plate to each well of the assay plate.
 
 3. On each day of Day 3, 4, and 5 (24, 48, and 72 hrs after pin transfer), perform the following:
-(A) Prepare a cocktail of reagents in PBS that has 4ï?­g/mL Hoechst33342 (Sigma B2261), 4ï?­M LysoTracker-Red (Invitrogen L7528), and 2ï?­M DEVD-NucView488 (Biotium 10403).
-(B) Add 10ï?­L of the reagent cocktail to each well of the assay plate using benchtop WellMate plate filler, so that the final concentration of Hoechst33342 is 1ï?­g/mL, LysoTracker-Red is 1ï?­M, and DEVD-NucView488 is 500nM.
+(A) Prepare a cocktail of reagents in PBS that has 4ug/mL Hoechst33342 (Sigma B2261), 4uM LysoTracker-Red (Invitrogen L7528), and 2uM DEVD-NucView488 (Biotium 10403).
+(B) Add 10uL of the reagent cocktail to each well of the assay plate using benchtop WellMate plate filler, so that the final concentration of Hoechst33342 is 1ug/mL, LysoTracker-Red is 1uM, and DEVD-NucView488 is 500nM.
 (C) Incubate cells in a tissue culture incubator at 37C, 5% CO2 for 1.5 hrs.
 (D) Prepare 2% formaldehyde in PBS and pre-warm it in 37C water bath. 
-(E) Add 40ï?­L of the pre-warmed formaldehyde to each well of cells using benchtop WellMate, so that the final concentration of formaldehyde is 1%. Then immediately centrifuge the plates at 1000rpm at room temperature for 20 minutes, in a plate centrifuge, while the cells are being fixed. 
+(E) Add 40uL of the pre-warmed formaldehyde to each well of cells using benchtop WellMate, so that the final concentration of formaldehyde is 1%. Then immediately centrifuge the plates at 1000rpm at room temperature for 20 minutes, in a plate centrifuge, while the cells are being fixed. 
 (F) After 20 mins of fixation and centrifugation, seal the plates with adhesive plate seals. 
 (G) Image the plates, ideally within the same day, using the ImageXpress Micro screening microscope (Molecular Devices) and the 10x objective lens. Image 4 sites/per well
 
@@ -806,13 +806,13 @@ DAPI [Excitation 377/50; Emission 447/60]
 FITC [Excitation 482/35; Emission 536/40]
 Texas Red [Excitation 562/40; Emission 624/40]
 
-4. After image acquisition, image analysis is done using a customized Matlab program developed by Dr. Tiao Xie (Harvard Medical School). The program does segmentation on the DAPI channel to identify all nuclei, then it counts the bright, rounded cells in the Texas Red channel (LysoTracker-Red) to score mitotic cells. Finally it detects bright spots in the FITC channel (NucView) to score apoptotic cells. We also identify a population of late-stage dead cells with a â€œblurryâ€? DAPI morphology, and no NucView Signal or LysoTracker Red signal.
+4. After image acquisition, image analysis is done using a customized Matlab program developed by Dr. Tiao Xie (Harvard Medical School). The program does segmentation on the DAPI channel to identify all nuclei, then it counts the bright, rounded cells in the Texas Red channel (LysoTracker-Red) to score mitotic cells. Finally it detects bright spots in the FITC channel (NucView) to score apoptotic cells. We also identify a population of late-stage dead cells with a "blurry" DAPI morphology, and no NucView Signal or LysoTracker Red signal.
 
 5. When reporting data, 5 parameters are reported for each replicate for each cell line and compound condition:
 a. Cell Count: The total number of cells (nuclei) stained with Hoechst 33342 and detected in the DAPI channel.
 b. Interphase cells: The total number of cells less the number of Apoptotic cells, Dead cells, and Mitotic cells.
 c. Apoptotic cells: The cells stained with NucView.
-d. Dead cells: The â€œlate-stageâ€? dead cells with blurry DAPI morphology that do not stain with either NucView or LysoTracker Red.
+d. Dead cells: The "late-stage" dead cells with blurry DAPI morphology that do not stain with either NucView or LysoTracker Red.
 e. Mitotic cells: The cells that stain brightly with LysoTracker Red and that have a rounded morphology.
 
 Reference for NucView:
@@ -840,11 +840,11 @@ In screening for small-molecule compounds that are effective at killing cancer c
 2. On Day 2, pin transfer performed by an ICCB-Longwood Screening Facility staff member using an Epson robot system. The pin transfer adds 100nL of each diluted compound from the 384-well compound library plate to each well of the assay plate.
 
 3. On each day of Day 3, 4, and 5 (24, 48, and 72 hrs after pin transfer), perform the following:
-(A) Prepare a cocktail of reagents in PBS that has 4ï?­g/mL Hoechst33342 (Sigma B2261), 4ï?­M LysoTracker-Red (Invitrogen L7528), and 2ï?­M DEVD-NucView488 (Biotium 10403).
-(B) Add 10ï?­L of the reagent cocktail to each well of the assay plate using benchtop WellMate plate filler, so that the final concentration of Hoechst33342 is 1ï?­g/mL, LysoTracker-Red is 1ï?­M, and DEVD-NucView488 is 500nM.
+(A) Prepare a cocktail of reagents in PBS that has 4ug/mL Hoechst33342 (Sigma B2261), 4uM LysoTracker-Red (Invitrogen L7528), and 2uM DEVD-NucView488 (Biotium 10403).
+(B) Add 10uL of the reagent cocktail to each well of the assay plate using benchtop WellMate plate filler, so that the final concentration of Hoechst33342 is 1ug/mL, LysoTracker-Red is 1uM, and DEVD-NucView488 is 500nM.
 (C) Incubate cells in a tissue culture incubator at 37C, 5% CO2 for 1.5 hrs.
 (D) Prepare 2% formaldehyde in PBS and pre-warm it in 37C water bath. 
-(E) Add 40ï?­L of the pre-warmed formaldehyde to each well of cells using benchtop WellMate, so that the final concentration of formaldehyde is 1%. Then immediately centrifuge the plates at 1000rpm at room temperature for 20 minutes, in a plate centrifuge, while the cells are being fixed. 
+(E) Add 40uL of the pre-warmed formaldehyde to each well of cells using benchtop WellMate, so that the final concentration of formaldehyde is 1%. Then immediately centrifuge the plates at 1000rpm at room temperature for 20 minutes, in a plate centrifuge, while the cells are being fixed. 
 (F) After 20 mins of fixation and centrifugation, seal the plates with adhesive plate seals. 
 (G) Image the plates, ideally within the same day, using the ImageXpress Micro screening microscope (Molecular Devices) and the 10x objective lens. Image 4 sites/per well
 
@@ -853,13 +853,13 @@ DAPI [Excitation 377/50; Emission 447/60]
 FITC [Excitation 482/35; Emission 536/40]
 Texas Red [Excitation 562/40; Emission 624/40]
 
-4. After image acquisition, image analysis is done using a customized Matlab program developed by Dr. Tiao Xie (Harvard Medical School). The program does segmentation on the DAPI channel to identify all nuclei, then it counts the bright, rounded cells in the Texas Red channel (LysoTracker-Red) to score mitotic cells. Finally it detects bright spots in the FITC channel (NucView) to score apoptotic cells. We also identify a population of late-stage dead cells with a â€œblurryâ€? DAPI morphology, and no NucView Signal or LysoTracker Red signal.
+4. After image acquisition, image analysis is done using a customized Matlab program developed by Dr. Tiao Xie (Harvard Medical School). The program does segmentation on the DAPI channel to identify all nuclei, then it counts the bright, rounded cells in the Texas Red channel (LysoTracker-Red) to score mitotic cells. Finally it detects bright spots in the FITC channel (NucView) to score apoptotic cells. We also identify a population of late-stage dead cells with a "blurry" DAPI morphology, and no NucView Signal or LysoTracker Red signal.
 
 5. When reporting data, 5 parameters are reported for each replicate for each cell line and compound condition:
 a. Cell Count: The total number of cells (nuclei) stained with Hoechst 33342 and detected in the DAPI channel.
 b. Interphase cells: The total number of cells less the number of Apoptotic cells, Dead cells, and Mitotic cells.
 c. Apoptotic cells: The cells stained with NucView.
-d. Dead cells: The â€œlate-stageâ€? dead cells with blurry DAPI morphology that do not stain with either NucView or LysoTracker Red.
+d. Dead cells: The "late-stage" dead cells with blurry DAPI morphology that do not stain with either NucView or LysoTracker Red.
 e. Mitotic cells: The cells that stain brightly with LysoTracker Red and that have a rounded morphology.
 
 Reference for NucView:
@@ -887,11 +887,11 @@ In screening for small-molecule compounds that are effective at killing cancer c
 2. On Day 2, pin transfer performed by an ICCB-Longwood Screening Facility staff member using an Epson robot system. The pin transfer adds 100nL of each diluted compound from the 384-well compound library plate to each well of the assay plate.
 
 3. On each day of Day 3, 4, and 5 (24, 48, and 72 hrs after pin transfer), perform the following:
-(A) Prepare a cocktail of reagents in PBS that has 4ï?­g/mL Hoechst33342 (Sigma B2261), 4ï?­M LysoTracker-Red (Invitrogen L7528), and 2ï?­M DEVD-NucView488 (Biotium 10403).
-(B) Add 10ï?­L of the reagent cocktail to each well of the assay plate using benchtop WellMate plate filler, so that the final concentration of Hoechst33342 is 1ï?­g/mL, LysoTracker-Red is 1ï?­M, and DEVD-NucView488 is 500nM.
+(A) Prepare a cocktail of reagents in PBS that has 4ug/mL Hoechst33342 (Sigma B2261), 4uM LysoTracker-Red (Invitrogen L7528), and 2uM DEVD-NucView488 (Biotium 10403).
+(B) Add 10uL of the reagent cocktail to each well of the assay plate using benchtop WellMate plate filler, so that the final concentration of Hoechst33342 is 1ug/mL, LysoTracker-Red is 1uM, and DEVD-NucView488 is 500nM.
 (C) Incubate cells in a tissue culture incubator at 37C, 5% CO2 for 1.5 hrs.
 (D) Prepare 2% formaldehyde in PBS and pre-warm it in 37C water bath. 
-(E) Add 40ï?­L of the pre-warmed formaldehyde to each well of cells using benchtop WellMate, so that the final concentration of formaldehyde is 1%. Then immediately centrifuge the plates at 1000rpm at room temperature for 20 minutes, in a plate centrifuge, while the cells are being fixed. 
+(E) Add 40uL of the pre-warmed formaldehyde to each well of cells using benchtop WellMate, so that the final concentration of formaldehyde is 1%. Then immediately centrifuge the plates at 1000rpm at room temperature for 20 minutes, in a plate centrifuge, while the cells are being fixed. 
 (F) After 20 mins of fixation and centrifugation, seal the plates with adhesive plate seals. 
 (G) Image the plates, ideally within the same day, using the ImageXpress Micro screening microscope (Molecular Devices) and the 10x objective lens. Image 4 sites/per well
 
@@ -900,13 +900,13 @@ DAPI [Excitation 377/50; Emission 447/60]
 FITC [Excitation 482/35; Emission 536/40]
 Texas Red [Excitation 562/40; Emission 624/40]
 
-4. After image acquisition, image analysis is done using a customized Matlab program developed by Dr. Tiao Xie (Harvard Medical School). The program does segmentation on the DAPI channel to identify all nuclei, then it counts the bright, rounded cells in the Texas Red channel (LysoTracker-Red) to score mitotic cells. Finally it detects bright spots in the FITC channel (NucView) to score apoptotic cells. We also identify a population of late-stage dead cells with a â€œblurryâ€? DAPI morphology, and no NucView Signal or LysoTracker Red signal.
+4. After image acquisition, image analysis is done using a customized Matlab program developed by Dr. Tiao Xie (Harvard Medical School). The program does segmentation on the DAPI channel to identify all nuclei, then it counts the bright, rounded cells in the Texas Red channel (LysoTracker-Red) to score mitotic cells. Finally it detects bright spots in the FITC channel (NucView) to score apoptotic cells. We also identify a population of late-stage dead cells with a "blurry" DAPI morphology, and no NucView Signal or LysoTracker Red signal.
 
 5. When reporting data, 5 parameters are reported for each replicate for each cell line and compound condition:
 a. Cell Count: The total number of cells (nuclei) stained with Hoechst 33342 and detected in the DAPI channel.
 b. Interphase cells: The total number of cells less the number of Apoptotic cells, Dead cells, and Mitotic cells.
 c. Apoptotic cells: The cells stained with NucView.
-d. Dead cells: The â€œlate-stageâ€? dead cells with blurry DAPI morphology that do not stain with either NucView or LysoTracker Red.
+d. Dead cells: The "late-stage" dead cells with blurry DAPI morphology that do not stain with either NucView or LysoTracker Red.
 e. Mitotic cells: The cells that stain brightly with LysoTracker Red and that have a rounded morphology.
 
 Reference for NucView:
@@ -934,11 +934,11 @@ In screening for small-molecule compounds that are effective at killing cancer c
 2. On Day 2, pin transfer performed by an ICCB-Longwood Screening Facility staff member using an Epson robot system. The pin transfer adds 100nL of each diluted compound from the 384-well compound library plate to each well of the assay plate.
 
 3. On each day of Day 3, 4, and 5 (24, 48, and 72 hrs after pin transfer), perform the following:
-(A) Prepare a cocktail of reagents in PBS that has 4ï?­g/mL Hoechst33342 (Sigma B2261), 4ï?­M LysoTracker-Red (Invitrogen L7528), and 2ï?­M DEVD-NucView488 (Biotium 10403).
-(B) Add 10ï?­L of the reagent cocktail to each well of the assay plate using benchtop WellMate plate filler, so that the final concentration of Hoechst33342 is 1ï?­g/mL, LysoTracker-Red is 1ï?­M, and DEVD-NucView488 is 500nM.
+(A) Prepare a cocktail of reagents in PBS that has 4ug/mL Hoechst33342 (Sigma B2261), 4uM LysoTracker-Red (Invitrogen L7528), and 2uM DEVD-NucView488 (Biotium 10403).
+(B) Add 10uL of the reagent cocktail to each well of the assay plate using benchtop WellMate plate filler, so that the final concentration of Hoechst33342 is 1ug/mL, LysoTracker-Red is 1uM, and DEVD-NucView488 is 500nM.
 (C) Incubate cells in a tissue culture incubator at 37C, 5% CO2 for 1.5 hrs.
 (D) Prepare 2% formaldehyde in PBS and pre-warm it in 37C water bath. 
-(E) Add 40ï?­L of the pre-warmed formaldehyde to each well of cells using benchtop WellMate, so that the final concentration of formaldehyde is 1%. Then immediately centrifuge the plates at 1000rpm at room temperature for 20 minutes, in a plate centrifuge, while the cells are being fixed. 
+(E) Add 40uL of the pre-warmed formaldehyde to each well of cells using benchtop WellMate, so that the final concentration of formaldehyde is 1%. Then immediately centrifuge the plates at 1000rpm at room temperature for 20 minutes, in a plate centrifuge, while the cells are being fixed. 
 (F) After 20 mins of fixation and centrifugation, seal the plates with adhesive plate seals. 
 (G) Image the plates, ideally within the same day, using the ImageXpress Micro screening microscope (Molecular Devices) and the 10x objective lens. Image 4 sites/per well
 
@@ -947,13 +947,13 @@ DAPI [Excitation 377/50; Emission 447/60]
 FITC [Excitation 482/35; Emission 536/40]
 Texas Red [Excitation 562/40; Emission 624/40]
 
-4. After image acquisition, image analysis is done using a customized Matlab program developed by Dr. Tiao Xie (Harvard Medical School). The program does segmentation on the DAPI channel to identify all nuclei, then it counts the bright, rounded cells in the Texas Red channel (LysoTracker-Red) to score mitotic cells. Finally it detects bright spots in the FITC channel (NucView) to score apoptotic cells. We also identify a population of late-stage dead cells with a â€œblurryâ€? DAPI morphology, and no NucView Signal or LysoTracker Red signal.
+4. After image acquisition, image analysis is done using a customized Matlab program developed by Dr. Tiao Xie (Harvard Medical School). The program does segmentation on the DAPI channel to identify all nuclei, then it counts the bright, rounded cells in the Texas Red channel (LysoTracker-Red) to score mitotic cells. Finally it detects bright spots in the FITC channel (NucView) to score apoptotic cells. We also identify a population of late-stage dead cells with a "blurry" DAPI morphology, and no NucView Signal or LysoTracker Red signal.
 
 5. When reporting data, 5 parameters are reported for each replicate for each cell line and compound condition:
 a. Cell Count: The total number of cells (nuclei) stained with Hoechst 33342 and detected in the DAPI channel.
 b. Interphase cells: The total number of cells less the number of Apoptotic cells, Dead cells, and Mitotic cells.
 c. Apoptotic cells: The cells stained with NucView.
-d. Dead cells: The â€œlate-stageâ€? dead cells with blurry DAPI morphology that do not stain with either NucView or LysoTracker Red.
+d. Dead cells: The "late-stage" dead cells with blurry DAPI morphology that do not stain with either NucView or LysoTracker Red.
 e. Mitotic cells: The cells that stain brightly with LysoTracker Red and that have a rounded morphology.
 
 Reference for NucView:
@@ -981,11 +981,11 @@ In screening for small-molecule compounds that are effective at killing cancer c
 2. On Day 2, pin transfer performed by an ICCB-Longwood Screening Facility staff member using an Epson robot system. The pin transfer adds 100nL of each diluted compound from the 384-well compound library plate to each well of the assay plate.
 
 3. On each day of Day 3, 4, and 5 (24, 48, and 72 hrs after pin transfer), perform the following:
-(A) Prepare a cocktail of reagents in PBS that has 4ï?­g/mL Hoechst33342 (Sigma B2261), 4ï?­M LysoTracker-Red (Invitrogen L7528), and 2ï?­M DEVD-NucView488 (Biotium 10403).
-(B) Add 10ï?­L of the reagent cocktail to each well of the assay plate using benchtop WellMate plate filler, so that the final concentration of Hoechst33342 is 1ï?­g/mL, LysoTracker-Red is 1ï?­M, and DEVD-NucView488 is 500nM.
+(A) Prepare a cocktail of reagents in PBS that has 4ug/mL Hoechst33342 (Sigma B2261), 4uM LysoTracker-Red (Invitrogen L7528), and 2uM DEVD-NucView488 (Biotium 10403).
+(B) Add 10uL of the reagent cocktail to each well of the assay plate using benchtop WellMate plate filler, so that the final concentration of Hoechst33342 is 1ug/mL, LysoTracker-Red is 1uM, and DEVD-NucView488 is 500nM.
 (C) Incubate cells in a tissue culture incubator at 37C, 5% CO2 for 1.5 hrs.
 (D) Prepare 2% formaldehyde in PBS and pre-warm it in 37C water bath. 
-(E) Add 40ï?­L of the pre-warmed formaldehyde to each well of cells using benchtop WellMate, so that the final concentration of formaldehyde is 1%. Then immediately centrifuge the plates at 1000rpm at room temperature for 20 minutes, in a plate centrifuge, while the cells are being fixed. 
+(E) Add 40uL of the pre-warmed formaldehyde to each well of cells using benchtop WellMate, so that the final concentration of formaldehyde is 1%. Then immediately centrifuge the plates at 1000rpm at room temperature for 20 minutes, in a plate centrifuge, while the cells are being fixed. 
 (F) After 20 mins of fixation and centrifugation, seal the plates with adhesive plate seals. 
 (G) Image the plates, ideally within the same day, using the ImageXpress Micro screening microscope (Molecular Devices) and the 10x objective lens. Image 4 sites/per well
 
@@ -994,13 +994,13 @@ DAPI [Excitation 377/50; Emission 447/60]
 FITC [Excitation 482/35; Emission 536/40]
 Texas Red [Excitation 562/40; Emission 624/40]
 
-4. After image acquisition, image analysis is done using a customized Matlab program developed by Dr. Tiao Xie (Harvard Medical School). The program does segmentation on the DAPI channel to identify all nuclei, then it counts the bright, rounded cells in the Texas Red channel (LysoTracker-Red) to score mitotic cells. Finally it detects bright spots in the FITC channel (NucView) to score apoptotic cells. We also identify a population of late-stage dead cells with a â€œblurryâ€? DAPI morphology, and no NucView Signal or LysoTracker Red signal.
+4. After image acquisition, image analysis is done using a customized Matlab program developed by Dr. Tiao Xie (Harvard Medical School). The program does segmentation on the DAPI channel to identify all nuclei, then it counts the bright, rounded cells in the Texas Red channel (LysoTracker-Red) to score mitotic cells. Finally it detects bright spots in the FITC channel (NucView) to score apoptotic cells. We also identify a population of late-stage dead cells with a "blurry" DAPI morphology, and no NucView Signal or LysoTracker Red signal.
 
 5. When reporting data, 5 parameters are reported for each replicate for each cell line and compound condition:
 a. Cell Count: The total number of cells (nuclei) stained with Hoechst 33342 and detected in the DAPI channel.
 b. Interphase cells: The total number of cells less the number of Apoptotic cells, Dead cells, and Mitotic cells.
 c. Apoptotic cells: The cells stained with NucView.
-d. Dead cells: The â€œlate-stageâ€? dead cells with blurry DAPI morphology that do not stain with either NucView or LysoTracker Red.
+d. Dead cells: The "late-stage" dead cells with blurry DAPI morphology that do not stain with either NucView or LysoTracker Red.
 e. Mitotic cells: The cells that stain brightly with LysoTracker Red and that have a rounded morphology.
 
 Reference for NucView:
@@ -1028,11 +1028,11 @@ In screening for small-molecule compounds that are effective at killing cancer c
 2. On Day 2, pin transfer performed by an ICCB-Longwood Screening Facility staff member using an Epson robot system. The pin transfer adds 100nL of each diluted compound from the 384-well compound library plate to each well of the assay plate.
 
 3. On each day of Day 3, 4, and 5 (24, 48, and 72 hrs after pin transfer), perform the following:
-(A) Prepare a cocktail of reagents in PBS that has 4ï?­g/mL Hoechst33342 (Sigma B2261), 4ï?­M LysoTracker-Red (Invitrogen L7528), and 2ï?­M DEVD-NucView488 (Biotium 10403).
-(B) Add 10ï?­L of the reagent cocktail to each well of the assay plate using benchtop WellMate plate filler, so that the final concentration of Hoechst33342 is 1ï?­g/mL, LysoTracker-Red is 1ï?­M, and DEVD-NucView488 is 500nM.
+(A) Prepare a cocktail of reagents in PBS that has 4ug/mL Hoechst33342 (Sigma B2261), 4uM LysoTracker-Red (Invitrogen L7528), and 2uM DEVD-NucView488 (Biotium 10403).
+(B) Add 10uL of the reagent cocktail to each well of the assay plate using benchtop WellMate plate filler, so that the final concentration of Hoechst33342 is 1ug/mL, LysoTracker-Red is 1uM, and DEVD-NucView488 is 500nM.
 (C) Incubate cells in a tissue culture incubator at 37C, 5% CO2 for 1.5 hrs.
 (D) Prepare 2% formaldehyde in PBS and pre-warm it in 37C water bath. 
-(E) Add 40ï?­L of the pre-warmed formaldehyde to each well of cells using benchtop WellMate, so that the final concentration of formaldehyde is 1%. Then immediately centrifuge the plates at 1000rpm at room temperature for 20 minutes, in a plate centrifuge, while the cells are being fixed. 
+(E) Add 40uL of the pre-warmed formaldehyde to each well of cells using benchtop WellMate, so that the final concentration of formaldehyde is 1%. Then immediately centrifuge the plates at 1000rpm at room temperature for 20 minutes, in a plate centrifuge, while the cells are being fixed. 
 (F) After 20 mins of fixation and centrifugation, seal the plates with adhesive plate seals. 
 (G) Image the plates, ideally within the same day, using the ImageXpress Micro screening microscope (Molecular Devices) and the 10x objective lens. Image 4 sites/per well
 
@@ -1041,13 +1041,13 @@ DAPI [Excitation 377/50; Emission 447/60]
 FITC [Excitation 482/35; Emission 536/40]
 Texas Red [Excitation 562/40; Emission 624/40]
 
-4. After image acquisition, image analysis is done using a customized Matlab program developed by Dr. Tiao Xie (Harvard Medical School). The program does segmentation on the DAPI channel to identify all nuclei, then it counts the bright, rounded cells in the Texas Red channel (LysoTracker-Red) to score mitotic cells. Finally it detects bright spots in the FITC channel (NucView) to score apoptotic cells. We also identify a population of late-stage dead cells with a â€œblurryâ€? DAPI morphology, and no NucView Signal or LysoTracker Red signal.
+4. After image acquisition, image analysis is done using a customized Matlab program developed by Dr. Tiao Xie (Harvard Medical School). The program does segmentation on the DAPI channel to identify all nuclei, then it counts the bright, rounded cells in the Texas Red channel (LysoTracker-Red) to score mitotic cells. Finally it detects bright spots in the FITC channel (NucView) to score apoptotic cells. We also identify a population of late-stage dead cells with a "blurry" DAPI morphology, and no NucView Signal or LysoTracker Red signal.
 
 5. When reporting data, 5 parameters are reported for each replicate for each cell line and compound condition:
 a. Cell Count: The total number of cells (nuclei) stained with Hoechst 33342 and detected in the DAPI channel.
 b. Interphase cells: The total number of cells less the number of Apoptotic cells, Dead cells, and Mitotic cells.
 c. Apoptotic cells: The cells stained with NucView.
-d. Dead cells: The â€œlate-stageâ€? dead cells with blurry DAPI morphology that do not stain with either NucView or LysoTracker Red.
+d. Dead cells: The "late-stage" dead cells with blurry DAPI morphology that do not stain with either NucView or LysoTracker Red.
 e. Mitotic cells: The cells that stain brightly with LysoTracker Red and that have a rounded morphology.
 
 Reference for NucView:
@@ -1075,11 +1075,11 @@ In screening for small-molecule compounds that are effective at killing cancer c
 2. On Day 2, pin transfer performed by an ICCB-Longwood Screening Facility staff member using an Epson robot system. The pin transfer adds 100nL of each diluted compound from the 384-well compound library plate to each well of the assay plate.
 
 3. On each day of Day 3, 4, and 5 (24, 48, and 72 hrs after pin transfer), perform the following:
-(A) Prepare a cocktail of reagents in PBS that has 4ï?­g/mL Hoechst33342 (Sigma B2261), 4ï?­M LysoTracker-Red (Invitrogen L7528), and 2ï?­M DEVD-NucView488 (Biotium 10403).
-(B) Add 10ï?­L of the reagent cocktail to each well of the assay plate using benchtop WellMate plate filler, so that the final concentration of Hoechst33342 is 1ï?­g/mL, LysoTracker-Red is 1ï?­M, and DEVD-NucView488 is 500nM.
+(A) Prepare a cocktail of reagents in PBS that has 4ug/mL Hoechst33342 (Sigma B2261), 4uM LysoTracker-Red (Invitrogen L7528), and 2uM DEVD-NucView488 (Biotium 10403).
+(B) Add 10uL of the reagent cocktail to each well of the assay plate using benchtop WellMate plate filler, so that the final concentration of Hoechst33342 is 1ug/mL, LysoTracker-Red is 1uM, and DEVD-NucView488 is 500nM.
 (C) Incubate cells in a tissue culture incubator at 37C, 5% CO2 for 1.5 hrs.
 (D) Prepare 2% formaldehyde in PBS and pre-warm it in 37C water bath. 
-(E) Add 40ï?­L of the pre-warmed formaldehyde to each well of cells using benchtop WellMate, so that the final concentration of formaldehyde is 1%. Then immediately centrifuge the plates at 1000rpm at room temperature for 20 minutes, in a plate centrifuge, while the cells are being fixed. 
+(E) Add 40uL of the pre-warmed formaldehyde to each well of cells using benchtop WellMate, so that the final concentration of formaldehyde is 1%. Then immediately centrifuge the plates at 1000rpm at room temperature for 20 minutes, in a plate centrifuge, while the cells are being fixed. 
 (F) After 20 mins of fixation and centrifugation, seal the plates with adhesive plate seals. 
 (G) Image the plates, ideally within the same day, using the ImageXpress Micro screening microscope (Molecular Devices) and the 10x objective lens. Image 4 sites/per well
 
@@ -1088,13 +1088,13 @@ DAPI [Excitation 377/50; Emission 447/60]
 FITC [Excitation 482/35; Emission 536/40]
 Texas Red [Excitation 562/40; Emission 624/40]
 
-4. After image acquisition, image analysis is done using a customized Matlab program developed by Dr. Tiao Xie (Harvard Medical School). The program does segmentation on the DAPI channel to identify all nuclei, then it counts the bright, rounded cells in the Texas Red channel (LysoTracker-Red) to score mitotic cells. Finally it detects bright spots in the FITC channel (NucView) to score apoptotic cells. We also identify a population of late-stage dead cells with a â€œblurryâ€? DAPI morphology, and no NucView Signal or LysoTracker Red signal.
+4. After image acquisition, image analysis is done using a customized Matlab program developed by Dr. Tiao Xie (Harvard Medical School). The program does segmentation on the DAPI channel to identify all nuclei, then it counts the bright, rounded cells in the Texas Red channel (LysoTracker-Red) to score mitotic cells. Finally it detects bright spots in the FITC channel (NucView) to score apoptotic cells. We also identify a population of late-stage dead cells with a "blurry" DAPI morphology, and no NucView Signal or LysoTracker Red signal.
 
 5. When reporting data, 5 parameters are reported for each replicate for each cell line and compound condition:
 a. Cell Count: The total number of cells (nuclei) stained with Hoechst 33342 and detected in the DAPI channel.
 b. Interphase cells: The total number of cells less the number of Apoptotic cells, Dead cells, and Mitotic cells.
 c. Apoptotic cells: The cells stained with NucView.
-d. Dead cells: The â€œlate-stageâ€? dead cells with blurry DAPI morphology that do not stain with either NucView or LysoTracker Red.
+d. Dead cells: The "late-stage" dead cells with blurry DAPI morphology that do not stain with either NucView or LysoTracker Red.
 e. Mitotic cells: The cells that stain brightly with LysoTracker Red and that have a rounded morphology.
 
 Reference for NucView:
@@ -1122,11 +1122,11 @@ In screening for small-molecule compounds that are effective at killing cancer c
 2. On Day 2, pin transfer performed by an ICCB-Longwood Screening Facility staff member using an Epson robot system. The pin transfer adds 100nL of each diluted compound from the 384-well compound library plate to each well of the assay plate.
 
 3. On each day of Day 3, 4, and 5 (24, 48, and 72 hrs after pin transfer), perform the following:
-(A) Prepare a cocktail of reagents in PBS that has 4ï?­g/mL Hoechst33342 (Sigma B2261), 4ï?­M LysoTracker-Red (Invitrogen L7528), and 2ï?­M DEVD-NucView488 (Biotium 10403).
-(B) Add 10ï?­L of the reagent cocktail to each well of the assay plate using benchtop WellMate plate filler, so that the final concentration of Hoechst33342 is 1ï?­g/mL, LysoTracker-Red is 1ï?­M, and DEVD-NucView488 is 500nM.
+(A) Prepare a cocktail of reagents in PBS that has 4ug/mL Hoechst33342 (Sigma B2261), 4uM LysoTracker-Red (Invitrogen L7528), and 2uM DEVD-NucView488 (Biotium 10403).
+(B) Add 10uL of the reagent cocktail to each well of the assay plate using benchtop WellMate plate filler, so that the final concentration of Hoechst33342 is 1ug/mL, LysoTracker-Red is 1uM, and DEVD-NucView488 is 500nM.
 (C) Incubate cells in a tissue culture incubator at 37C, 5% CO2 for 1.5 hrs.
 (D) Prepare 2% formaldehyde in PBS and pre-warm it in 37C water bath. 
-(E) Add 40ï?­L of the pre-warmed formaldehyde to each well of cells using benchtop WellMate, so that the final concentration of formaldehyde is 1%. Then immediately centrifuge the plates at 1000rpm at room temperature for 20 minutes, in a plate centrifuge, while the cells are being fixed. 
+(E) Add 40uL of the pre-warmed formaldehyde to each well of cells using benchtop WellMate, so that the final concentration of formaldehyde is 1%. Then immediately centrifuge the plates at 1000rpm at room temperature for 20 minutes, in a plate centrifuge, while the cells are being fixed. 
 (F) After 20 mins of fixation and centrifugation, seal the plates with adhesive plate seals. 
 (G) Image the plates, ideally within the same day, using the ImageXpress Micro screening microscope (Molecular Devices) and the 10x objective lens. Image 4 sites/per well
 
@@ -1135,13 +1135,13 @@ DAPI [Excitation 377/50; Emission 447/60]
 FITC [Excitation 482/35; Emission 536/40]
 Texas Red [Excitation 562/40; Emission 624/40]
 
-4. After image acquisition, image analysis is done using a customized Matlab program developed by Dr. Tiao Xie (Harvard Medical School). The program does segmentation on the DAPI channel to identify all nuclei, then it counts the bright, rounded cells in the Texas Red channel (LysoTracker-Red) to score mitotic cells. Finally it detects bright spots in the FITC channel (NucView) to score apoptotic cells. We also identify a population of late-stage dead cells with a â€œblurryâ€? DAPI morphology, and no NucView Signal or LysoTracker Red signal.
+4. After image acquisition, image analysis is done using a customized Matlab program developed by Dr. Tiao Xie (Harvard Medical School). The program does segmentation on the DAPI channel to identify all nuclei, then it counts the bright, rounded cells in the Texas Red channel (LysoTracker-Red) to score mitotic cells. Finally it detects bright spots in the FITC channel (NucView) to score apoptotic cells. We also identify a population of late-stage dead cells with a "blurry" DAPI morphology, and no NucView Signal or LysoTracker Red signal.
 
 5. When reporting data, 5 parameters are reported for each replicate for each cell line and compound condition:
 a. Cell Count: The total number of cells (nuclei) stained with Hoechst 33342 and detected in the DAPI channel.
 b. Interphase cells: The total number of cells less the number of Apoptotic cells, Dead cells, and Mitotic cells.
 c. Apoptotic cells: The cells stained with NucView.
-d. Dead cells: The â€œlate-stageâ€? dead cells with blurry DAPI morphology that do not stain with either NucView or LysoTracker Red.
+d. Dead cells: The "late-stage" dead cells with blurry DAPI morphology that do not stain with either NucView or LysoTracker Red.
 e. Mitotic cells: The cells that stain brightly with LysoTracker Red and that have a rounded morphology.
 
 Reference for NucView:
@@ -1169,11 +1169,11 @@ In screening for small-molecule compounds that are effective at killing cancer c
 2. On Day 2, pin transfer performed by an ICCB-Longwood Screening Facility staff member using an Epson robot system. The pin transfer adds 100nL of each diluted compound from the 384-well compound library plate to each well of the assay plate.
 
 3. On each day of Day 3, 4, and 5 (24, 48, and 72 hrs after pin transfer), perform the following:
-(A) Prepare a cocktail of reagents in PBS that has 4ï?­g/mL Hoechst33342 (Sigma B2261), 4ï?­M LysoTracker-Red (Invitrogen L7528), and 2ï?­M DEVD-NucView488 (Biotium 10403).
-(B) Add 10ï?­L of the reagent cocktail to each well of the assay plate using benchtop WellMate plate filler, so that the final concentration of Hoechst33342 is 1ï?­g/mL, LysoTracker-Red is 1ï?­M, and DEVD-NucView488 is 500nM.
+(A) Prepare a cocktail of reagents in PBS that has 4ug/mL Hoechst33342 (Sigma B2261), 4uM LysoTracker-Red (Invitrogen L7528), and 2uM DEVD-NucView488 (Biotium 10403).
+(B) Add 10uL of the reagent cocktail to each well of the assay plate using benchtop WellMate plate filler, so that the final concentration of Hoechst33342 is 1ug/mL, LysoTracker-Red is 1uM, and DEVD-NucView488 is 500nM.
 (C) Incubate cells in a tissue culture incubator at 37C, 5% CO2 for 1.5 hrs.
 (D) Prepare 2% formaldehyde in PBS and pre-warm it in 37C water bath. 
-(E) Add 40ï?­L of the pre-warmed formaldehyde to each well of cells using benchtop WellMate, so that the final concentration of formaldehyde is 1%. Then immediately centrifuge the plates at 1000rpm at room temperature for 20 minutes, in a plate centrifuge, while the cells are being fixed. 
+(E) Add 40uL of the pre-warmed formaldehyde to each well of cells using benchtop WellMate, so that the final concentration of formaldehyde is 1%. Then immediately centrifuge the plates at 1000rpm at room temperature for 20 minutes, in a plate centrifuge, while the cells are being fixed. 
 (F) After 20 mins of fixation and centrifugation, seal the plates with adhesive plate seals. 
 (G) Image the plates, ideally within the same day, using the ImageXpress Micro screening microscope (Molecular Devices) and the 10x objective lens. Image 4 sites/per well
 
@@ -1182,13 +1182,13 @@ DAPI [Excitation 377/50; Emission 447/60]
 FITC [Excitation 482/35; Emission 536/40]
 Texas Red [Excitation 562/40; Emission 624/40]
 
-4. After image acquisition, image analysis is done using a customized Matlab program developed by Dr. Tiao Xie (Harvard Medical School). The program does segmentation on the DAPI channel to identify all nuclei, then it counts the bright, rounded cells in the Texas Red channel (LysoTracker-Red) to score mitotic cells. Finally it detects bright spots in the FITC channel (NucView) to score apoptotic cells. We also identify a population of late-stage dead cells with a â€œblurryâ€? DAPI morphology, and no NucView Signal or LysoTracker Red signal.
+4. After image acquisition, image analysis is done using a customized Matlab program developed by Dr. Tiao Xie (Harvard Medical School). The program does segmentation on the DAPI channel to identify all nuclei, then it counts the bright, rounded cells in the Texas Red channel (LysoTracker-Red) to score mitotic cells. Finally it detects bright spots in the FITC channel (NucView) to score apoptotic cells. We also identify a population of late-stage dead cells with a "blurry" DAPI morphology, and no NucView Signal or LysoTracker Red signal.
 
 5. When reporting data, 5 parameters are reported for each replicate for each cell line and compound condition:
 a. Cell Count: The total number of cells (nuclei) stained with Hoechst 33342 and detected in the DAPI channel.
 b. Interphase cells: The total number of cells less the number of Apoptotic cells, Dead cells, and Mitotic cells.
 c. Apoptotic cells: The cells stained with NucView.
-d. Dead cells: The â€œlate-stageâ€? dead cells with blurry DAPI morphology that do not stain with either NucView or LysoTracker Red.
+d. Dead cells: The "late-stage" dead cells with blurry DAPI morphology that do not stain with either NucView or LysoTracker Red.
 e. Mitotic cells: The cells that stain brightly with LysoTracker Red and that have a rounded morphology.
 
 Reference for NucView:
@@ -1216,11 +1216,11 @@ In screening for small-molecule compounds that are effective at killing cancer c
 2. On Day 2, pin transfer performed by an ICCB-Longwood Screening Facility staff member using an Epson robot system. The pin transfer adds 100nL of each diluted compound from the 384-well compound library plate to each well of the assay plate.
 
 3. On each day of Day 3, 4, and 5 (24, 48, and 72 hrs after pin transfer), perform the following:
-(A) Prepare a cocktail of reagents in PBS that has 4ï?­g/mL Hoechst33342 (Sigma B2261), 4ï?­M LysoTracker-Red (Invitrogen L7528), and 2ï?­M DEVD-NucView488 (Biotium 10403).
-(B) Add 10ï?­L of the reagent cocktail to each well of the assay plate using benchtop WellMate plate filler, so that the final concentration of Hoechst33342 is 1ï?­g/mL, LysoTracker-Red is 1ï?­M, and DEVD-NucView488 is 500nM.
+(A) Prepare a cocktail of reagents in PBS that has 4ug/mL Hoechst33342 (Sigma B2261), 4uM LysoTracker-Red (Invitrogen L7528), and 2uM DEVD-NucView488 (Biotium 10403).
+(B) Add 10uL of the reagent cocktail to each well of the assay plate using benchtop WellMate plate filler, so that the final concentration of Hoechst33342 is 1ug/mL, LysoTracker-Red is 1uM, and DEVD-NucView488 is 500nM.
 (C) Incubate cells in a tissue culture incubator at 37C, 5% CO2 for 1.5 hrs.
 (D) Prepare 2% formaldehyde in PBS and pre-warm it in 37C water bath. 
-(E) Add 40ï?­L of the pre-warmed formaldehyde to each well of cells using benchtop WellMate, so that the final concentration of formaldehyde is 1%. Then immediately centrifuge the plates at 1000rpm at room temperature for 20 minutes, in a plate centrifuge, while the cells are being fixed. 
+(E) Add 40uL of the pre-warmed formaldehyde to each well of cells using benchtop WellMate, so that the final concentration of formaldehyde is 1%. Then immediately centrifuge the plates at 1000rpm at room temperature for 20 minutes, in a plate centrifuge, while the cells are being fixed. 
 (F) After 20 mins of fixation and centrifugation, seal the plates with adhesive plate seals. 
 (G) Image the plates, ideally within the same day, using the ImageXpress Micro screening microscope (Molecular Devices) and the 10x objective lens. Image 4 sites/per well
 
@@ -1229,13 +1229,13 @@ DAPI [Excitation 377/50; Emission 447/60]
 FITC [Excitation 482/35; Emission 536/40]
 Texas Red [Excitation 562/40; Emission 624/40]
 
-4. After image acquisition, image analysis is done using a customized Matlab program developed by Dr. Tiao Xie (Harvard Medical School). The program does segmentation on the DAPI channel to identify all nuclei, then it counts the bright, rounded cells in the Texas Red channel (LysoTracker-Red) to score mitotic cells. Finally it detects bright spots in the FITC channel (NucView) to score apoptotic cells. We also identify a population of late-stage dead cells with a â€œblurryâ€? DAPI morphology, and no NucView Signal or LysoTracker Red signal.
+4. After image acquisition, image analysis is done using a customized Matlab program developed by Dr. Tiao Xie (Harvard Medical School). The program does segmentation on the DAPI channel to identify all nuclei, then it counts the bright, rounded cells in the Texas Red channel (LysoTracker-Red) to score mitotic cells. Finally it detects bright spots in the FITC channel (NucView) to score apoptotic cells. We also identify a population of late-stage dead cells with a "blurry" DAPI morphology, and no NucView Signal or LysoTracker Red signal.
 
 5. When reporting data, 5 parameters are reported for each replicate for each cell line and compound condition:
 a. Cell Count: The total number of cells (nuclei) stained with Hoechst 33342 and detected in the DAPI channel.
 b. Interphase cells: The total number of cells less the number of Apoptotic cells, Dead cells, and Mitotic cells.
 c. Apoptotic cells: The cells stained with NucView.
-d. Dead cells: The â€œlate-stageâ€? dead cells with blurry DAPI morphology that do not stain with either NucView or LysoTracker Red.
+d. Dead cells: The "late-stage" dead cells with blurry DAPI morphology that do not stain with either NucView or LysoTracker Red.
 e. Mitotic cells: The cells that stain brightly with LysoTracker Red and that have a rounded morphology.
 
 Reference for NucView:
@@ -1263,11 +1263,11 @@ In screening for small-molecule compounds that are effective at killing cancer c
 2. On Day 2, pin transfer performed by an ICCB-Longwood Screening Facility staff member using an Epson robot system. The pin transfer adds 100nL of each diluted compound from the 384-well compound library plate to each well of the assay plate.
 
 3. On each day of Day 3, 4, and 5 (24, 48, and 72 hrs after pin transfer), perform the following:
-(A) Prepare a cocktail of reagents in PBS that has 4ï?­g/mL Hoechst33342 (Sigma B2261), 4ï?­M LysoTracker-Red (Invitrogen L7528), and 2ï?­M DEVD-NucView488 (Biotium 10403).
-(B) Add 10ï?­L of the reagent cocktail to each well of the assay plate using benchtop WellMate plate filler, so that the final concentration of Hoechst33342 is 1ï?­g/mL, LysoTracker-Red is 1ï?­M, and DEVD-NucView488 is 500nM.
+(A) Prepare a cocktail of reagents in PBS that has 4ug/mL Hoechst33342 (Sigma B2261), 4uM LysoTracker-Red (Invitrogen L7528), and 2uM DEVD-NucView488 (Biotium 10403).
+(B) Add 10uL of the reagent cocktail to each well of the assay plate using benchtop WellMate plate filler, so that the final concentration of Hoechst33342 is 1ug/mL, LysoTracker-Red is 1uM, and DEVD-NucView488 is 500nM.
 (C) Incubate cells in a tissue culture incubator at 37C, 5% CO2 for 1.5 hrs.
 (D) Prepare 2% formaldehyde in PBS and pre-warm it in 37C water bath. 
-(E) Add 40ï?­L of the pre-warmed formaldehyde to each well of cells using benchtop WellMate, so that the final concentration of formaldehyde is 1%. Then immediately centrifuge the plates at 1000rpm at room temperature for 20 minutes, in a plate centrifuge, while the cells are being fixed. 
+(E) Add 40uL of the pre-warmed formaldehyde to each well of cells using benchtop WellMate, so that the final concentration of formaldehyde is 1%. Then immediately centrifuge the plates at 1000rpm at room temperature for 20 minutes, in a plate centrifuge, while the cells are being fixed. 
 (F) After 20 mins of fixation and centrifugation, seal the plates with adhesive plate seals. 
 (G) Image the plates, ideally within the same day, using the ImageXpress Micro screening microscope (Molecular Devices) and the 10x objective lens. Image 4 sites/per well
 
@@ -1276,13 +1276,13 @@ DAPI [Excitation 377/50; Emission 447/60]
 FITC [Excitation 482/35; Emission 536/40]
 Texas Red [Excitation 562/40; Emission 624/40]
 
-4. After image acquisition, image analysis is done using a customized Matlab program developed by Dr. Tiao Xie (Harvard Medical School). The program does segmentation on the DAPI channel to identify all nuclei, then it counts the bright, rounded cells in the Texas Red channel (LysoTracker-Red) to score mitotic cells. Finally it detects bright spots in the FITC channel (NucView) to score apoptotic cells. We also identify a population of late-stage dead cells with a â€œblurryâ€? DAPI morphology, and no NucView Signal or LysoTracker Red signal.
+4. After image acquisition, image analysis is done using a customized Matlab program developed by Dr. Tiao Xie (Harvard Medical School). The program does segmentation on the DAPI channel to identify all nuclei, then it counts the bright, rounded cells in the Texas Red channel (LysoTracker-Red) to score mitotic cells. Finally it detects bright spots in the FITC channel (NucView) to score apoptotic cells. We also identify a population of late-stage dead cells with a "blurry" DAPI morphology, and no NucView Signal or LysoTracker Red signal.
 
 5. When reporting data, 5 parameters are reported for each replicate for each cell line and compound condition:
 a. Cell Count: The total number of cells (nuclei) stained with Hoechst 33342 and detected in the DAPI channel.
 b. Interphase cells: The total number of cells less the number of Apoptotic cells, Dead cells, and Mitotic cells.
 c. Apoptotic cells: The cells stained with NucView.
-d. Dead cells: The â€œlate-stageâ€? dead cells with blurry DAPI morphology that do not stain with either NucView or LysoTracker Red.
+d. Dead cells: The "late-stage" dead cells with blurry DAPI morphology that do not stain with either NucView or LysoTracker Red.
 e. Mitotic cells: The cells that stain brightly with LysoTracker Red and that have a rounded morphology.
 
 Reference for NucView:
@@ -1310,11 +1310,11 @@ In screening for small-molecule compounds that are effective at killing cancer c
 2. On Day 2, pin transfer performed by an ICCB-Longwood Screening Facility staff member using an Epson robot system. The pin transfer adds 100nL of each diluted compound from the 384-well compound library plate to each well of the assay plate.
 
 3. On each day of Day 3, 4, and 5 (24, 48, and 72 hrs after pin transfer), perform the following:
-(A) Prepare a cocktail of reagents in PBS that has 4ï?­g/mL Hoechst33342 (Sigma B2261), 4ï?­M LysoTracker-Red (Invitrogen L7528), and 2ï?­M DEVD-NucView488 (Biotium 10403).
-(B) Add 10ï?­L of the reagent cocktail to each well of the assay plate using benchtop WellMate plate filler, so that the final concentration of Hoechst33342 is 1ï?­g/mL, LysoTracker-Red is 1ï?­M, and DEVD-NucView488 is 500nM.
+(A) Prepare a cocktail of reagents in PBS that has 4ug/mL Hoechst33342 (Sigma B2261), 4uM LysoTracker-Red (Invitrogen L7528), and 2uM DEVD-NucView488 (Biotium 10403).
+(B) Add 10uL of the reagent cocktail to each well of the assay plate using benchtop WellMate plate filler, so that the final concentration of Hoechst33342 is 1ug/mL, LysoTracker-Red is 1uM, and DEVD-NucView488 is 500nM.
 (C) Incubate cells in a tissue culture incubator at 37C, 5% CO2 for 1.5 hrs.
 (D) Prepare 2% formaldehyde in PBS and pre-warm it in 37C water bath. 
-(E) Add 40ï?­L of the pre-warmed formaldehyde to each well of cells using benchtop WellMate, so that the final concentration of formaldehyde is 1%. Then immediately centrifuge the plates at 1000rpm at room temperature for 20 minutes, in a plate centrifuge, while the cells are being fixed. 
+(E) Add 40uL of the pre-warmed formaldehyde to each well of cells using benchtop WellMate, so that the final concentration of formaldehyde is 1%. Then immediately centrifuge the plates at 1000rpm at room temperature for 20 minutes, in a plate centrifuge, while the cells are being fixed. 
 (F) After 20 mins of fixation and centrifugation, seal the plates with adhesive plate seals. 
 (G) Image the plates, ideally within the same day, using the ImageXpress Micro screening microscope (Molecular Devices) and the 10x objective lens. Image 4 sites/per well
 
@@ -1323,13 +1323,13 @@ DAPI [Excitation 377/50; Emission 447/60]
 FITC [Excitation 482/35; Emission 536/40]
 Texas Red [Excitation 562/40; Emission 624/40]
 
-4. After image acquisition, image analysis is done using a customized Matlab program developed by Dr. Tiao Xie (Harvard Medical School). The program does segmentation on the DAPI channel to identify all nuclei, then it counts the bright, rounded cells in the Texas Red channel (LysoTracker-Red) to score mitotic cells. Finally it detects bright spots in the FITC channel (NucView) to score apoptotic cells. We also identify a population of late-stage dead cells with a â€œblurryâ€? DAPI morphology, and no NucView Signal or LysoTracker Red signal.
+4. After image acquisition, image analysis is done using a customized Matlab program developed by Dr. Tiao Xie (Harvard Medical School). The program does segmentation on the DAPI channel to identify all nuclei, then it counts the bright, rounded cells in the Texas Red channel (LysoTracker-Red) to score mitotic cells. Finally it detects bright spots in the FITC channel (NucView) to score apoptotic cells. We also identify a population of late-stage dead cells with a "blurry" DAPI morphology, and no NucView Signal or LysoTracker Red signal.
 
 5. When reporting data, 5 parameters are reported for each replicate for each cell line and compound condition:
 a. Cell Count: The total number of cells (nuclei) stained with Hoechst 33342 and detected in the DAPI channel.
 b. Interphase cells: The total number of cells less the number of Apoptotic cells, Dead cells, and Mitotic cells.
 c. Apoptotic cells: The cells stained with NucView.
-d. Dead cells: The â€œlate-stageâ€? dead cells with blurry DAPI morphology that do not stain with either NucView or LysoTracker Red.
+d. Dead cells: The "late-stage" dead cells with blurry DAPI morphology that do not stain with either NucView or LysoTracker Red.
 e. Mitotic cells: The cells that stain brightly with LysoTracker Red and that have a rounded morphology.
 
 Reference for NucView:
@@ -1357,11 +1357,11 @@ In screening for small-molecule compounds that are effective at killing cancer c
 2. On Day 2, pin transfer performed by an ICCB-Longwood Screening Facility staff member using an Epson robot system. The pin transfer adds 100nL of each diluted compound from the 384-well compound library plate to each well of the assay plate.
 
 3. On each day of Day 3, 4, and 5 (24, 48, and 72 hrs after pin transfer), perform the following:
-(A) Prepare a cocktail of reagents in PBS that has 4ï?­g/mL Hoechst33342 (Sigma B2261), 4ï?­M LysoTracker-Red (Invitrogen L7528), and 2ï?­M DEVD-NucView488 (Biotium 10403).
-(B) Add 10ï?­L of the reagent cocktail to each well of the assay plate using benchtop WellMate plate filler, so that the final concentration of Hoechst33342 is 1ï?­g/mL, LysoTracker-Red is 1ï?­M, and DEVD-NucView488 is 500nM.
+(A) Prepare a cocktail of reagents in PBS that has 4ug/mL Hoechst33342 (Sigma B2261), 4uM LysoTracker-Red (Invitrogen L7528), and 2uM DEVD-NucView488 (Biotium 10403).
+(B) Add 10uL of the reagent cocktail to each well of the assay plate using benchtop WellMate plate filler, so that the final concentration of Hoechst33342 is 1ug/mL, LysoTracker-Red is 1uM, and DEVD-NucView488 is 500nM.
 (C) Incubate cells in a tissue culture incubator at 37C, 5% CO2 for 1.5 hrs.
 (D) Prepare 2% formaldehyde in PBS and pre-warm it in 37C water bath. 
-(E) Add 40ï?­L of the pre-warmed formaldehyde to each well of cells using benchtop WellMate, so that the final concentration of formaldehyde is 1%. Then immediately centrifuge the plates at 1000rpm at room temperature for 20 minutes, in a plate centrifuge, while the cells are being fixed. 
+(E) Add 40uL of the pre-warmed formaldehyde to each well of cells using benchtop WellMate, so that the final concentration of formaldehyde is 1%. Then immediately centrifuge the plates at 1000rpm at room temperature for 20 minutes, in a plate centrifuge, while the cells are being fixed. 
 (F) After 20 mins of fixation and centrifugation, seal the plates with adhesive plate seals. 
 (G) Image the plates, ideally within the same day, using the ImageXpress Micro screening microscope (Molecular Devices) and the 10x objective lens. Image 4 sites/per well
 
@@ -1370,13 +1370,13 @@ DAPI [Excitation 377/50; Emission 447/60]
 FITC [Excitation 482/35; Emission 536/40]
 Texas Red [Excitation 562/40; Emission 624/40]
 
-4. After image acquisition, image analysis is done using a customized Matlab program developed by Dr. Tiao Xie (Harvard Medical School). The program does segmentation on the DAPI channel to identify all nuclei, then it counts the bright, rounded cells in the Texas Red channel (LysoTracker-Red) to score mitotic cells. Finally it detects bright spots in the FITC channel (NucView) to score apoptotic cells. We also identify a population of late-stage dead cells with a â€œblurryâ€? DAPI morphology, and no NucView Signal or LysoTracker Red signal.
+4. After image acquisition, image analysis is done using a customized Matlab program developed by Dr. Tiao Xie (Harvard Medical School). The program does segmentation on the DAPI channel to identify all nuclei, then it counts the bright, rounded cells in the Texas Red channel (LysoTracker-Red) to score mitotic cells. Finally it detects bright spots in the FITC channel (NucView) to score apoptotic cells. We also identify a population of late-stage dead cells with a "blurry" DAPI morphology, and no NucView Signal or LysoTracker Red signal.
 
 5. When reporting data, 5 parameters are reported for each replicate for each cell line and compound condition:
 a. Cell Count: The total number of cells (nuclei) stained with Hoechst 33342 and detected in the DAPI channel.
 b. Interphase cells: The total number of cells less the number of Apoptotic cells, Dead cells, and Mitotic cells.
 c. Apoptotic cells: The cells stained with NucView.
-d. Dead cells: The â€œlate-stageâ€? dead cells with blurry DAPI morphology that do not stain with either NucView or LysoTracker Red.
+d. Dead cells: The "late-stage" dead cells with blurry DAPI morphology that do not stain with either NucView or LysoTracker Red.
 e. Mitotic cells: The cells that stain brightly with LysoTracker Red and that have a rounded morphology.
 
 Reference for NucView:
@@ -1404,11 +1404,11 @@ In screening for small-molecule compounds that are effective at killing cancer c
 2. On Day 2, pin transfer performed by an ICCB-Longwood Screening Facility staff member using an Epson robot system. The pin transfer adds 100nL of each diluted compound from the 384-well compound library plate to each well of the assay plate.
 
 3. On each day of Day 3, 4, and 5 (24, 48, and 72 hrs after pin transfer), perform the following:
-(A) Prepare a cocktail of reagents in PBS that has 4ï?­g/mL Hoechst33342 (Sigma B2261), 4ï?­M LysoTracker-Red (Invitrogen L7528), and 2ï?­M DEVD-NucView488 (Biotium 10403).
-(B) Add 10ï?­L of the reagent cocktail to each well of the assay plate using benchtop WellMate plate filler, so that the final concentration of Hoechst33342 is 1ï?­g/mL, LysoTracker-Red is 1ï?­M, and DEVD-NucView488 is 500nM.
+(A) Prepare a cocktail of reagents in PBS that has 4ug/mL Hoechst33342 (Sigma B2261), 4uM LysoTracker-Red (Invitrogen L7528), and 2uM DEVD-NucView488 (Biotium 10403).
+(B) Add 10uL of the reagent cocktail to each well of the assay plate using benchtop WellMate plate filler, so that the final concentration of Hoechst33342 is 1ug/mL, LysoTracker-Red is 1uM, and DEVD-NucView488 is 500nM.
 (C) Incubate cells in a tissue culture incubator at 37C, 5% CO2 for 1.5 hrs.
 (D) Prepare 2% formaldehyde in PBS and pre-warm it in 37C water bath. 
-(E) Add 40ï?­L of the pre-warmed formaldehyde to each well of cells using benchtop WellMate, so that the final concentration of formaldehyde is 1%. Then immediately centrifuge the plates at 1000rpm at room temperature for 20 minutes, in a plate centrifuge, while the cells are being fixed. 
+(E) Add 40uL of the pre-warmed formaldehyde to each well of cells using benchtop WellMate, so that the final concentration of formaldehyde is 1%. Then immediately centrifuge the plates at 1000rpm at room temperature for 20 minutes, in a plate centrifuge, while the cells are being fixed. 
 (F) After 20 mins of fixation and centrifugation, seal the plates with adhesive plate seals. 
 (G) Image the plates, ideally within the same day, using the ImageXpress Micro screening microscope (Molecular Devices) and the 10x objective lens. Image 4 sites/per well
 
@@ -1417,13 +1417,13 @@ DAPI [Excitation 377/50; Emission 447/60]
 FITC [Excitation 482/35; Emission 536/40]
 Texas Red [Excitation 562/40; Emission 624/40]
 
-4. After image acquisition, image analysis is done using a customized Matlab program developed by Dr. Tiao Xie (Harvard Medical School). The program does segmentation on the DAPI channel to identify all nuclei, then it counts the bright, rounded cells in the Texas Red channel (LysoTracker-Red) to score mitotic cells. Finally it detects bright spots in the FITC channel (NucView) to score apoptotic cells. We also identify a population of late-stage dead cells with a â€œblurryâ€? DAPI morphology, and no NucView Signal or LysoTracker Red signal.
+4. After image acquisition, image analysis is done using a customized Matlab program developed by Dr. Tiao Xie (Harvard Medical School). The program does segmentation on the DAPI channel to identify all nuclei, then it counts the bright, rounded cells in the Texas Red channel (LysoTracker-Red) to score mitotic cells. Finally it detects bright spots in the FITC channel (NucView) to score apoptotic cells. We also identify a population of late-stage dead cells with a "blurry" DAPI morphology, and no NucView Signal or LysoTracker Red signal.
 
 5. When reporting data, 5 parameters are reported for each replicate for each cell line and compound condition:
 a. Cell Count: The total number of cells (nuclei) stained with Hoechst 33342 and detected in the DAPI channel.
 b. Interphase cells: The total number of cells less the number of Apoptotic cells, Dead cells, and Mitotic cells.
 c. Apoptotic cells: The cells stained with NucView.
-d. Dead cells: The â€œlate-stageâ€? dead cells with blurry DAPI morphology that do not stain with either NucView or LysoTracker Red.
+d. Dead cells: The "late-stage" dead cells with blurry DAPI morphology that do not stain with either NucView or LysoTracker Red.
 e. Mitotic cells: The cells that stain brightly with LysoTracker Red and that have a rounded morphology.
 
 Reference for NucView:
@@ -1451,11 +1451,11 @@ In screening for small-molecule compounds that are effective at killing cancer c
 2. On Day 2, pin transfer performed by an ICCB-Longwood Screening Facility staff member using an Epson robot system. The pin transfer adds 100nL of each diluted compound from the 384-well compound library plate to each well of the assay plate.
 
 3. On each day of Day 3, 4, and 5 (24, 48, and 72 hrs after pin transfer), perform the following:
-(A) Prepare a cocktail of reagents in PBS that has 4Î¼g/mL Hoechst33342 (Sigma B2261), 4ÂµM LysoTracker-Red (Invitrogen L7528), and 2ï?­M DEVD-NucView488 (Biotium 10403).
-(B) Add 10ï?­L of the reagent cocktail to each well of the assay plate using benchtop WellMate plate filler, so that the final concentration of Hoechst33342 is 1ï?­g/mL, LysoTracker-Red is 1ï?­M, and DEVD-NucView488 is 500nM.
+(A) Prepare a cocktail of reagents in PBS that has 4Î¼g/mL Hoechst33342 (Sigma B2261), 4ÂµM LysoTracker-Red (Invitrogen L7528), and 2uM DEVD-NucView488 (Biotium 10403).
+(B) Add 10uL of the reagent cocktail to each well of the assay plate using benchtop WellMate plate filler, so that the final concentration of Hoechst33342 is 1ug/mL, LysoTracker-Red is 1uM, and DEVD-NucView488 is 500nM.
 (C) Incubate cells in a tissue culture incubator at 37C, 5% CO2 for 1.5 hrs.
 (D) Prepare 2% formaldehyde in PBS and pre-warm it in 37C water bath. 
-(E) Add 40ï?­L of the pre-warmed formaldehyde to each well of cells using benchtop WellMate, so that the final concentration of formaldehyde is 1%. Then immediately centrifuge the plates at 1000rpm at room temperature for 20 minutes, in a plate centrifuge, while the cells are being fixed. 
+(E) Add 40uL of the pre-warmed formaldehyde to each well of cells using benchtop WellMate, so that the final concentration of formaldehyde is 1%. Then immediately centrifuge the plates at 1000rpm at room temperature for 20 minutes, in a plate centrifuge, while the cells are being fixed. 
 (F) After 20 mins of fixation and centrifugation, seal the plates with adhesive plate seals. 
 (G) Image the plates, ideally within the same day, using the ImageXpress Micro screening microscope (Molecular Devices) and the 10x objective lens. Image 4 sites/per well
 
@@ -1464,13 +1464,13 @@ DAPI [Excitation 377/50; Emission 447/60]
 FITC [Excitation 482/35; Emission 536/40]
 Texas Red [Excitation 562/40; Emission 624/40]
 
-4. After image acquisition, image analysis is done using a customized Matlab program developed by Dr. Tiao Xie (Harvard Medical School). The program does segmentation on the DAPI channel to identify all nuclei, then it counts the bright, rounded cells in the Texas Red channel (LysoTracker-Red) to score mitotic cells. Finally it detects bright spots in the FITC channel (NucView) to score apoptotic cells. We also identify a population of late-stage dead cells with a â€œblurryâ€? DAPI morphology, and no NucView Signal or LysoTracker Red signal.
+4. After image acquisition, image analysis is done using a customized Matlab program developed by Dr. Tiao Xie (Harvard Medical School). The program does segmentation on the DAPI channel to identify all nuclei, then it counts the bright, rounded cells in the Texas Red channel (LysoTracker-Red) to score mitotic cells. Finally it detects bright spots in the FITC channel (NucView) to score apoptotic cells. We also identify a population of late-stage dead cells with a "blurry" DAPI morphology, and no NucView Signal or LysoTracker Red signal.
 
 5. When reporting data, 5 parameters are reported for each replicate for each cell line and compound condition:
 a. Cell Count: The total number of cells (nuclei) stained with Hoechst 33342 and detected in the DAPI channel.
 b. Interphase cells: The total number of cells less the number of Apoptotic cells, Dead cells, and Mitotic cells.
 c. Apoptotic cells: The cells stained with NucView.
-d. Dead cells: The â€œlate-stageâ€? dead cells with blurry DAPI morphology that do not stain with either NucView or LysoTracker Red.
+d. Dead cells: The "late-stage" dead cells with blurry DAPI morphology that do not stain with either NucView or LysoTracker Red.
 e. Mitotic cells: The cells that stain brightly with LysoTracker Red and that have a rounded morphology.
 
 Reference for NucView:
@@ -1498,11 +1498,11 @@ In screening for small-molecule compounds that are effective at killing cancer c
 2. On Day 2, pin transfer performed by an ICCB-Longwood Screening Facility staff member using an Epson robot system. The pin transfer adds 100nL of each diluted compound from the 384-well compound library plate to each well of the assay plate.
 
 3. On each day of Day 3, 4, and 5 (24, 48, and 72 hrs after pin transfer), perform the following:
-(A) Prepare a cocktail of reagents in PBS that has 4ï?­g/mL Hoechst33342 (Sigma B2261), 4ï?­M LysoTracker-Red (Invitrogen L7528), and 2ï?­M DEVD-NucView488 (Biotium 10403).
-(B) Add 10ï?­L of the reagent cocktail to each well of the assay plate using benchtop WellMate plate filler, so that the final concentration of Hoechst33342 is 1ï?­g/mL, LysoTracker-Red is 1ï?­M, and DEVD-NucView488 is 500nM.
+(A) Prepare a cocktail of reagents in PBS that has 4ug/mL Hoechst33342 (Sigma B2261), 4uM LysoTracker-Red (Invitrogen L7528), and 2uM DEVD-NucView488 (Biotium 10403).
+(B) Add 10uL of the reagent cocktail to each well of the assay plate using benchtop WellMate plate filler, so that the final concentration of Hoechst33342 is 1ug/mL, LysoTracker-Red is 1uM, and DEVD-NucView488 is 500nM.
 (C) Incubate cells in a tissue culture incubator at 37C, 5% CO2 for 1.5 hrs.
 (D) Prepare 2% formaldehyde in PBS and pre-warm it in 37C water bath. 
-(E) Add 40ï?­L of the pre-warmed formaldehyde to each well of cells using benchtop WellMate, so that the final concentration of formaldehyde is 1%. Then immediately centrifuge the plates at 1000rpm at room temperature for 20 minutes, in a plate centrifuge, while the cells are being fixed. 
+(E) Add 40uL of the pre-warmed formaldehyde to each well of cells using benchtop WellMate, so that the final concentration of formaldehyde is 1%. Then immediately centrifuge the plates at 1000rpm at room temperature for 20 minutes, in a plate centrifuge, while the cells are being fixed. 
 (F) After 20 mins of fixation and centrifugation, seal the plates with adhesive plate seals. 
 (G) Image the plates, ideally within the same day, using the ImageXpress Micro screening microscope (Molecular Devices) and the 10x objective lens. Image 4 sites/per well
 
@@ -1511,13 +1511,13 @@ DAPI [Excitation 377/50; Emission 447/60]
 FITC [Excitation 482/35; Emission 536/40]
 Texas Red [Excitation 562/40; Emission 624/40]
 
-4. After image acquisition, image analysis is done using a customized Matlab program developed by Dr. Tiao Xie (Harvard Medical School). The program does segmentation on the DAPI channel to identify all nuclei, then it counts the bright, rounded cells in the Texas Red channel (LysoTracker-Red) to score mitotic cells. Finally it detects bright spots in the FITC channel (NucView) to score apoptotic cells. We also identify a population of late-stage dead cells with a â€œblurryâ€? DAPI morphology, and no NucView Signal or LysoTracker Red signal.
+4. After image acquisition, image analysis is done using a customized Matlab program developed by Dr. Tiao Xie (Harvard Medical School). The program does segmentation on the DAPI channel to identify all nuclei, then it counts the bright, rounded cells in the Texas Red channel (LysoTracker-Red) to score mitotic cells. Finally it detects bright spots in the FITC channel (NucView) to score apoptotic cells. We also identify a population of late-stage dead cells with a "blurry" DAPI morphology, and no NucView Signal or LysoTracker Red signal.
 
 5. When reporting data, 5 parameters are reported for each replicate for each cell line and compound condition:
 a. Cell Count: The total number of cells (nuclei) stained with Hoechst 33342 and detected in the DAPI channel.
 b. Interphase cells: The total number of cells less the number of Apoptotic cells, Dead cells, and Mitotic cells.
 c. Apoptotic cells: The cells stained with NucView.
-d. Dead cells: The â€œlate-stageâ€? dead cells with blurry DAPI morphology that do not stain with either NucView or LysoTracker Red.
+d. Dead cells: The "late-stage" dead cells with blurry DAPI morphology that do not stain with either NucView or LysoTracker Red.
 e. Mitotic cells: The cells that stain brightly with LysoTracker Red and that have a rounded morphology.
 
 Reference for NucView:
@@ -1545,11 +1545,11 @@ In screening for small-molecule compounds that are effective at killing cancer c
 2. On Day 2, pin transfer performed by an ICCB-Longwood Screening Facility staff member using an Epson robot system. The pin transfer adds 100nL of each diluted compound from the 384-well compound library plate to each well of the assay plate.
 
 3. On each day of Day 3, 4, and 5 (24, 48, and 72 hrs after pin transfer), perform the following:
-(A) Prepare a cocktail of reagents in PBS that has 4ï?­g/mL Hoechst33342 (Sigma B2261), 4ï?­M LysoTracker-Red (Invitrogen L7528), and 2ï?­M DEVD-NucView488 (Biotium 10403).
-(B) Add 10ï?­L of the reagent cocktail to each well of the assay plate using benchtop WellMate plate filler, so that the final concentration of Hoechst33342 is 1ï?­g/mL, LysoTracker-Red is 1ï?­M, and DEVD-NucView488 is 500nM.
+(A) Prepare a cocktail of reagents in PBS that has 4ug/mL Hoechst33342 (Sigma B2261), 4uM LysoTracker-Red (Invitrogen L7528), and 2uM DEVD-NucView488 (Biotium 10403).
+(B) Add 10uL of the reagent cocktail to each well of the assay plate using benchtop WellMate plate filler, so that the final concentration of Hoechst33342 is 1ug/mL, LysoTracker-Red is 1uM, and DEVD-NucView488 is 500nM.
 (C) Incubate cells in a tissue culture incubator at 37C, 5% CO2 for 1.5 hrs.
 (D) Prepare 2% formaldehyde in PBS and pre-warm it in 37C water bath. 
-(E) Add 40ï?­L of the pre-warmed formaldehyde to each well of cells using benchtop WellMate, so that the final concentration of formaldehyde is 1%. Then immediately centrifuge the plates at 1000rpm at room temperature for 20 minutes, in a plate centrifuge, while the cells are being fixed. 
+(E) Add 40uL of the pre-warmed formaldehyde to each well of cells using benchtop WellMate, so that the final concentration of formaldehyde is 1%. Then immediately centrifuge the plates at 1000rpm at room temperature for 20 minutes, in a plate centrifuge, while the cells are being fixed. 
 (F) After 20 mins of fixation and centrifugation, seal the plates with adhesive plate seals. 
 (G) Image the plates, ideally within the same day, using the ImageXpress Micro screening microscope (Molecular Devices) and the 10x objective lens. Image 4 sites/per well
 
@@ -1558,13 +1558,13 @@ DAPI [Excitation 377/50; Emission 447/60]
 FITC [Excitation 482/35; Emission 536/40]
 Texas Red [Excitation 562/40; Emission 624/40]
 
-4. After image acquisition, image analysis is done using a customized Matlab program developed by Dr. Tiao Xie (Harvard Medical School). The program does segmentation on the DAPI channel to identify all nuclei, then it counts the bright, rounded cells in the Texas Red channel (LysoTracker-Red) to score mitotic cells. Finally it detects bright spots in the FITC channel (NucView) to score apoptotic cells. We also identify a population of late-stage dead cells with a â€œblurryâ€? DAPI morphology, and no NucView Signal or LysoTracker Red signal.
+4. After image acquisition, image analysis is done using a customized Matlab program developed by Dr. Tiao Xie (Harvard Medical School). The program does segmentation on the DAPI channel to identify all nuclei, then it counts the bright, rounded cells in the Texas Red channel (LysoTracker-Red) to score mitotic cells. Finally it detects bright spots in the FITC channel (NucView) to score apoptotic cells. We also identify a population of late-stage dead cells with a "blurry" DAPI morphology, and no NucView Signal or LysoTracker Red signal.
 
 5. When reporting data, 5 parameters are reported for each replicate for each cell line and compound condition:
 a. Cell Count: The total number of cells (nuclei) stained with Hoechst 33342 and detected in the DAPI channel.
 b. Interphase cells: The total number of cells less the number of Apoptotic cells, Dead cells, and Mitotic cells.
 c. Apoptotic cells: The cells stained with NucView.
-d. Dead cells: The â€œlate-stageâ€? dead cells with blurry DAPI morphology that do not stain with either NucView or LysoTracker Red.
+d. Dead cells: The "late-stage" dead cells with blurry DAPI morphology that do not stain with either NucView or LysoTracker Red.
 e. Mitotic cells: The cells that stain brightly with LysoTracker Red and that have a rounded morphology.
 
 Reference for NucView:
@@ -1592,11 +1592,11 @@ In screening for small-molecule compounds that are effective at killing cancer c
 2. On Day 2, pin transfer performed by an ICCB-Longwood Screening Facility staff member using an Epson robot system. The pin transfer adds 100nL of each diluted compound from the 384-well compound library plate to each well of the assay plate.
 
 3. On each day of Day 3, 4, and 5 (24, 48, and 72 hrs after pin transfer), perform the following:
-(A) Prepare a cocktail of reagents in PBS that has 4ï?­g/mL Hoechst33342 (Sigma B2261), 4ï?­M LysoTracker-Red (Invitrogen L7528), and 2ï?­M DEVD-NucView488 (Biotium 10403).
-(B) Add 10ï?­L of the reagent cocktail to each well of the assay plate using benchtop WellMate plate filler, so that the final concentration of Hoechst33342 is 1ï?­g/mL, LysoTracker-Red is 1ï?­M, and DEVD-NucView488 is 500nM.
+(A) Prepare a cocktail of reagents in PBS that has 4ug/mL Hoechst33342 (Sigma B2261), 4uM LysoTracker-Red (Invitrogen L7528), and 2uM DEVD-NucView488 (Biotium 10403).
+(B) Add 10uL of the reagent cocktail to each well of the assay plate using benchtop WellMate plate filler, so that the final concentration of Hoechst33342 is 1ug/mL, LysoTracker-Red is 1uM, and DEVD-NucView488 is 500nM.
 (C) Incubate cells in a tissue culture incubator at 37C, 5% CO2 for 1.5 hrs.
 (D) Prepare 2% formaldehyde in PBS and pre-warm it in 37C water bath. 
-(E) Add 40ï?­L of the pre-warmed formaldehyde to each well of cells using benchtop WellMate, so that the final concentration of formaldehyde is 1%. Then immediately centrifuge the plates at 1000rpm at room temperature for 20 minutes, in a plate centrifuge, while the cells are being fixed. 
+(E) Add 40uL of the pre-warmed formaldehyde to each well of cells using benchtop WellMate, so that the final concentration of formaldehyde is 1%. Then immediately centrifuge the plates at 1000rpm at room temperature for 20 minutes, in a plate centrifuge, while the cells are being fixed. 
 (F) After 20 mins of fixation and centrifugation, seal the plates with adhesive plate seals. 
 (G) Image the plates, ideally within the same day, using the ImageXpress Micro screening microscope (Molecular Devices) and the 10x objective lens. Image 4 sites/per well
 
@@ -1605,13 +1605,13 @@ DAPI [Excitation 377/50; Emission 447/60]
 FITC [Excitation 482/35; Emission 536/40]
 Texas Red [Excitation 562/40; Emission 624/40]
 
-4. After image acquisition, image analysis is done using a customized Matlab program developed by Dr. Tiao Xie (Harvard Medical School). The program does segmentation on the DAPI channel to identify all nuclei, then it counts the bright, rounded cells in the Texas Red channel (LysoTracker-Red) to score mitotic cells. Finally it detects bright spots in the FITC channel (NucView) to score apoptotic cells. We also identify a population of late-stage dead cells with a â€œblurryâ€? DAPI morphology, and no NucView Signal or LysoTracker Red signal.
+4. After image acquisition, image analysis is done using a customized Matlab program developed by Dr. Tiao Xie (Harvard Medical School). The program does segmentation on the DAPI channel to identify all nuclei, then it counts the bright, rounded cells in the Texas Red channel (LysoTracker-Red) to score mitotic cells. Finally it detects bright spots in the FITC channel (NucView) to score apoptotic cells. We also identify a population of late-stage dead cells with a "blurry" DAPI morphology, and no NucView Signal or LysoTracker Red signal.
 
 5. When reporting data, 5 parameters are reported for each replicate for each cell line and compound condition:
 a. Cell Count: The total number of cells (nuclei) stained with Hoechst 33342 and detected in the DAPI channel.
 b. Interphase cells: The total number of cells less the number of Apoptotic cells, Dead cells, and Mitotic cells.
 c. Apoptotic cells: The cells stained with NucView.
-d. Dead cells: The â€œlate-stageâ€? dead cells with blurry DAPI morphology that do not stain with either NucView or LysoTracker Red.
+d. Dead cells: The "late-stage" dead cells with blurry DAPI morphology that do not stain with either NucView or LysoTracker Red.
 e. Mitotic cells: The cells that stain brightly with LysoTracker Red and that have a rounded morphology.
 
 Reference for NucView:
@@ -2621,13 +2621,13 @@ DAPI [Excitation 377/50; Emission 447/60]
 FITC [Excitation 482/35; Emission 536/40]
 Texas Red [Excitation 562/40; Emission 624/40]
 
-4. After image acquisition, image analysis is done using a customized Matlab program developed by Dr. Tiao Xie (Harvard Medical School). The program does segmentation on the DAPI channel to identify all nuclei, then it counts the bright, rounded cells in the Texas Red channel (LysoTracker-Red) to score mitotic cells. Finally it detects bright spots in the FITC channel (NucView) to score apoptotic cells. We also identify a population of late-stage dead cells with a â€œblurryâ€? DAPI morphology, and no NucView Signal or LysoTracker Red signal.
+4. After image acquisition, image analysis is done using a customized Matlab program developed by Dr. Tiao Xie (Harvard Medical School). The program does segmentation on the DAPI channel to identify all nuclei, then it counts the bright, rounded cells in the Texas Red channel (LysoTracker-Red) to score mitotic cells. Finally it detects bright spots in the FITC channel (NucView) to score apoptotic cells. We also identify a population of late-stage dead cells with a "blurry" DAPI morphology, and no NucView Signal or LysoTracker Red signal.
 
 5. When reporting data, 5 parameters are reported for each replicate for each cell line and compound condition:
 a. Cell Count: The total number of cells (nuclei) stained with Hoechst 33342 and detected in the DAPI channel.
 b. Interphase cells: The total number of cells less the number of Apoptotic cells, Dead cells, and Mitotic cells.
 c. Apoptotic cells: The cells stained with NucView.
-d. Dead cells: The â€œlate-stageâ€? dead cells with blurry DAPI morphology that do not stain with either NucView or LysoTracker Red.
+d. Dead cells: The "late-stage" dead cells with blurry DAPI morphology that do not stain with either NucView or LysoTracker Red.
 e. Mitotic cells: The cells that stain brightly with LysoTracker Red and that have a rounded morphology.
 
 Reference for NucView:
@@ -2668,13 +2668,13 @@ DAPI [Excitation 377/50; Emission 447/60]
 FITC [Excitation 482/35; Emission 536/40]
 Texas Red [Excitation 562/40; Emission 624/40]
 
-4. After image acquisition, image analysis is done using a customized Matlab program developed by Dr. Tiao Xie (Harvard Medical School). The program does segmentation on the DAPI channel to identify all nuclei, then it counts the bright, rounded cells in the Texas Red channel (LysoTracker-Red) to score mitotic cells. Finally it detects bright spots in the FITC channel (NucView) to score apoptotic cells. We also identify a population of late-stage dead cells with a â€œblurryâ€? DAPI morphology, and no NucView Signal or LysoTracker Red signal.
+4. After image acquisition, image analysis is done using a customized Matlab program developed by Dr. Tiao Xie (Harvard Medical School). The program does segmentation on the DAPI channel to identify all nuclei, then it counts the bright, rounded cells in the Texas Red channel (LysoTracker-Red) to score mitotic cells. Finally it detects bright spots in the FITC channel (NucView) to score apoptotic cells. We also identify a population of late-stage dead cells with a "blurry" DAPI morphology, and no NucView Signal or LysoTracker Red signal.
 
 5. When reporting data, 5 parameters are reported for each replicate for each cell line and compound condition:
 a. Cell Count: The total number of cells (nuclei) stained with Hoechst 33342 and detected in the DAPI channel.
 b. Interphase cells: The total number of cells less the number of Apoptotic cells, Dead cells, and Mitotic cells.
 c. Apoptotic cells: The cells stained with NucView.
-d. Dead cells: The â€œlate-stageâ€? dead cells with blurry DAPI morphology that do not stain with either NucView or LysoTracker Red.
+d. Dead cells: The "late-stage" dead cells with blurry DAPI morphology that do not stain with either NucView or LysoTracker Red.
 e. Mitotic cells: The cells that stain brightly with LysoTracker Red and that have a rounded morphology.
 
 Reference for NucView:
@@ -2715,13 +2715,13 @@ DAPI [Excitation 377/50; Emission 447/60]
 FITC [Excitation 482/35; Emission 536/40]
 Texas Red [Excitation 562/40; Emission 624/40]
 
-4. After image acquisition, image analysis is done using a customized Matlab program developed by Dr. Tiao Xie (Harvard Medical School). The program does segmentation on the DAPI channel to identify all nuclei, then it counts the bright, rounded cells in the Texas Red channel (LysoTracker-Red) to score mitotic cells. Finally it detects bright spots in the FITC channel (NucView) to score apoptotic cells. We also identify a population of late-stage dead cells with a â€œblurryâ€? DAPI morphology, and no NucView Signal or LysoTracker Red signal.
+4. After image acquisition, image analysis is done using a customized Matlab program developed by Dr. Tiao Xie (Harvard Medical School). The program does segmentation on the DAPI channel to identify all nuclei, then it counts the bright, rounded cells in the Texas Red channel (LysoTracker-Red) to score mitotic cells. Finally it detects bright spots in the FITC channel (NucView) to score apoptotic cells. We also identify a population of late-stage dead cells with a "blurry" DAPI morphology, and no NucView Signal or LysoTracker Red signal.
 
 5. When reporting data, 5 parameters are reported for each replicate for each cell line and compound condition:
 a. Cell Count: The total number of cells (nuclei) stained with Hoechst 33342 and detected in the DAPI channel.
 b. Interphase cells: The total number of cells less the number of Apoptotic cells, Dead cells, and Mitotic cells.
 c. Apoptotic cells: The cells stained with NucView.
-d. Dead cells: The â€œlate-stageâ€? dead cells with blurry DAPI morphology that do not stain with either NucView or LysoTracker Red.
+d. Dead cells: The "late-stage" dead cells with blurry DAPI morphology that do not stain with either NucView or LysoTracker Red.
 e. Mitotic cells: The cells that stain brightly with LysoTracker Red and that have a rounded morphology.
 
 Reference for NucView:
@@ -2762,13 +2762,13 @@ DAPI [Excitation 377/50; Emission 447/60]
 FITC [Excitation 482/35; Emission 536/40]
 Texas Red [Excitation 562/40; Emission 624/40]
 
-4. After image acquisition, image analysis is done using a customized Matlab program developed by Dr. Tiao Xie (Harvard Medical School). The program does segmentation on the DAPI channel to identify all nuclei, then it counts the bright, rounded cells in the Texas Red channel (LysoTracker-Red) to score mitotic cells. Finally it detects bright spots in the FITC channel (NucView) to score apoptotic cells. We also identify a population of late-stage dead cells with a â€œblurryâ€? DAPI morphology, and no NucView Signal or LysoTracker Red signal.
+4. After image acquisition, image analysis is done using a customized Matlab program developed by Dr. Tiao Xie (Harvard Medical School). The program does segmentation on the DAPI channel to identify all nuclei, then it counts the bright, rounded cells in the Texas Red channel (LysoTracker-Red) to score mitotic cells. Finally it detects bright spots in the FITC channel (NucView) to score apoptotic cells. We also identify a population of late-stage dead cells with a "blurry" DAPI morphology, and no NucView Signal or LysoTracker Red signal.
 
 5. When reporting data, 5 parameters are reported for each replicate for each cell line and compound condition:
 a. Cell Count: The total number of cells (nuclei) stained with Hoechst 33342 and detected in the DAPI channel.
 b. Interphase cells: The total number of cells less the number of Apoptotic cells, Dead cells, and Mitotic cells.
 c. Apoptotic cells: The cells stained with NucView.
-d. Dead cells: The â€œlate-stageâ€? dead cells with blurry DAPI morphology that do not stain with either NucView or LysoTracker Red.
+d. Dead cells: The "late-stage" dead cells with blurry DAPI morphology that do not stain with either NucView or LysoTracker Red.
 e. Mitotic cells: The cells that stain brightly with LysoTracker Red and that have a rounded morphology.
 
 Reference for NucView:
@@ -2809,13 +2809,13 @@ DAPI [Excitation 377/50; Emission 447/60]
 FITC [Excitation 482/35; Emission 536/40]
 Texas Red [Excitation 562/40; Emission 624/40]
 
-4. After image acquisition, image analysis is done using a customized Matlab program developed by Dr. Tiao Xie (Harvard Medical School). The program does segmentation on the DAPI channel to identify all nuclei, then it counts the bright, rounded cells in the Texas Red channel (LysoTracker-Red) to score mitotic cells. Finally it detects bright spots in the FITC channel (NucView) to score apoptotic cells. We also identify a population of late-stage dead cells with a â€œblurryâ€? DAPI morphology, and no NucView Signal or LysoTracker Red signal.
+4. After image acquisition, image analysis is done using a customized Matlab program developed by Dr. Tiao Xie (Harvard Medical School). The program does segmentation on the DAPI channel to identify all nuclei, then it counts the bright, rounded cells in the Texas Red channel (LysoTracker-Red) to score mitotic cells. Finally it detects bright spots in the FITC channel (NucView) to score apoptotic cells. We also identify a population of late-stage dead cells with a "blurry" DAPI morphology, and no NucView Signal or LysoTracker Red signal.
 
 5. When reporting data, 5 parameters are reported for each replicate for each cell line and compound condition:
 a. Cell Count: The total number of cells (nuclei) stained with Hoechst 33342 and detected in the DAPI channel.
 b. Interphase cells: The total number of cells less the number of Apoptotic cells, Dead cells, and Mitotic cells.
 c. Apoptotic cells: The cells stained with NucView.
-d. Dead cells: The â€œlate-stageâ€? dead cells with blurry DAPI morphology that do not stain with either NucView or LysoTracker Red.
+d. Dead cells: The "late-stage" dead cells with blurry DAPI morphology that do not stain with either NucView or LysoTracker Red.
 e. Mitotic cells: The cells that stain brightly with LysoTracker Red and that have a rounded morphology.
 
 Reference for NucView:
@@ -2856,13 +2856,13 @@ DAPI [Excitation 377/50; Emission 447/60]
 FITC [Excitation 482/35; Emission 536/40]
 Texas Red [Excitation 562/40; Emission 624/40]
 
-4. After image acquisition, image analysis is done using a customized Matlab program developed by Dr. Tiao Xie (Harvard Medical School). The program does segmentation on the DAPI channel to identify all nuclei, then it counts the bright, rounded cells in the Texas Red channel (LysoTracker-Red) to score mitotic cells. Finally it detects bright spots in the FITC channel (NucView) to score apoptotic cells. We also identify a population of late-stage dead cells with a â€œblurryâ€? DAPI morphology, and no NucView Signal or LysoTracker Red signal.
+4. After image acquisition, image analysis is done using a customized Matlab program developed by Dr. Tiao Xie (Harvard Medical School). The program does segmentation on the DAPI channel to identify all nuclei, then it counts the bright, rounded cells in the Texas Red channel (LysoTracker-Red) to score mitotic cells. Finally it detects bright spots in the FITC channel (NucView) to score apoptotic cells. We also identify a population of late-stage dead cells with a "blurry" DAPI morphology, and no NucView Signal or LysoTracker Red signal.
 
 5. When reporting data, 5 parameters are reported for each replicate for each cell line and compound condition:
 a. Cell Count: The total number of cells (nuclei) stained with Hoechst 33342 and detected in the DAPI channel.
 b. Interphase cells: The total number of cells less the number of Apoptotic cells, Dead cells, and Mitotic cells.
 c. Apoptotic cells: The cells stained with NucView.
-d. Dead cells: The â€œlate-stageâ€? dead cells with blurry DAPI morphology that do not stain with either NucView or LysoTracker Red.
+d. Dead cells: The "late-stage" dead cells with blurry DAPI morphology that do not stain with either NucView or LysoTracker Red.
 e. Mitotic cells: The cells that stain brightly with LysoTracker Red and that have a rounded morphology.
 
 Reference for NucView:
@@ -2903,13 +2903,13 @@ DAPI [Excitation 377/50; Emission 447/60]
 FITC [Excitation 482/35; Emission 536/40]
 Texas Red [Excitation 562/40; Emission 624/40]
 
-4. After image acquisition, image analysis is done using a customized Matlab program developed by Dr. Tiao Xie (Harvard Medical School). The program does segmentation on the DAPI channel to identify all nuclei, then it counts the bright, rounded cells in the Texas Red channel (LysoTracker-Red) to score mitotic cells. Finally it detects bright spots in the FITC channel (NucView) to score apoptotic cells. We also identify a population of late-stage dead cells with a â€œblurryâ€? DAPI morphology, and no NucView Signal or LysoTracker Red signal.
+4. After image acquisition, image analysis is done using a customized Matlab program developed by Dr. Tiao Xie (Harvard Medical School). The program does segmentation on the DAPI channel to identify all nuclei, then it counts the bright, rounded cells in the Texas Red channel (LysoTracker-Red) to score mitotic cells. Finally it detects bright spots in the FITC channel (NucView) to score apoptotic cells. We also identify a population of late-stage dead cells with a "blurry" DAPI morphology, and no NucView Signal or LysoTracker Red signal.
 
 5. When reporting data, 5 parameters are reported for each replicate for each cell line and compound condition:
 a. Cell Count: The total number of cells (nuclei) stained with Hoechst 33342 and detected in the DAPI channel.
 b. Interphase cells: The total number of cells less the number of Apoptotic cells, Dead cells, and Mitotic cells.
 c. Apoptotic cells: The cells stained with NucView.
-d. Dead cells: The â€œlate-stageâ€? dead cells with blurry DAPI morphology that do not stain with either NucView or LysoTracker Red.
+d. Dead cells: The "late-stage" dead cells with blurry DAPI morphology that do not stain with either NucView or LysoTracker Red.
 e. Mitotic cells: The cells that stain brightly with LysoTracker Red and that have a rounded morphology.
 
 Reference for NucView:
@@ -2950,13 +2950,13 @@ DAPI [Excitation 377/50; Emission 447/60]
 FITC [Excitation 482/35; Emission 536/40]
 Texas Red [Excitation 562/40; Emission 624/40]
 
-4. After image acquisition, image analysis is done using a customized Matlab program developed by Dr. Tiao Xie (Harvard Medical School). The program does segmentation on the DAPI channel to identify all nuclei, then it counts the bright, rounded cells in the Texas Red channel (LysoTracker-Red) to score mitotic cells. Finally it detects bright spots in the FITC channel (NucView) to score apoptotic cells. We also identify a population of late-stage dead cells with a â€œblurryâ€? DAPI morphology, and no NucView Signal or LysoTracker Red signal.
+4. After image acquisition, image analysis is done using a customized Matlab program developed by Dr. Tiao Xie (Harvard Medical School). The program does segmentation on the DAPI channel to identify all nuclei, then it counts the bright, rounded cells in the Texas Red channel (LysoTracker-Red) to score mitotic cells. Finally it detects bright spots in the FITC channel (NucView) to score apoptotic cells. We also identify a population of late-stage dead cells with a "blurry" DAPI morphology, and no NucView Signal or LysoTracker Red signal.
 
 5. When reporting data, 5 parameters are reported for each replicate for each cell line and compound condition:
 a. Cell Count: The total number of cells (nuclei) stained with Hoechst 33342 and detected in the DAPI channel.
 b. Interphase cells: The total number of cells less the number of Apoptotic cells, Dead cells, and Mitotic cells.
 c. Apoptotic cells: The cells stained with NucView.
-d. Dead cells: The â€œlate-stageâ€? dead cells with blurry DAPI morphology that do not stain with either NucView or LysoTracker Red.
+d. Dead cells: The "late-stage" dead cells with blurry DAPI morphology that do not stain with either NucView or LysoTracker Red.
 e. Mitotic cells: The cells that stain brightly with LysoTracker Red and that have a rounded morphology.
 
 Reference for NucView:
@@ -2997,13 +2997,13 @@ DAPI [Excitation 377/50; Emission 447/60]
 FITC [Excitation 482/35; Emission 536/40]
 Texas Red [Excitation 562/40; Emission 624/40]
 
-4. After image acquisition, image analysis is done using a customized Matlab program developed by Dr. Tiao Xie (Harvard Medical School). The program does segmentation on the DAPI channel to identify all nuclei, then it counts the bright, rounded cells in the Texas Red channel (LysoTracker-Red) to score mitotic cells. Finally it detects bright spots in the FITC channel (NucView) to score apoptotic cells. We also identify a population of late-stage dead cells with a â€œblurryâ€? DAPI morphology, and no NucView Signal or LysoTracker Red signal.
+4. After image acquisition, image analysis is done using a customized Matlab program developed by Dr. Tiao Xie (Harvard Medical School). The program does segmentation on the DAPI channel to identify all nuclei, then it counts the bright, rounded cells in the Texas Red channel (LysoTracker-Red) to score mitotic cells. Finally it detects bright spots in the FITC channel (NucView) to score apoptotic cells. We also identify a population of late-stage dead cells with a "blurry" DAPI morphology, and no NucView Signal or LysoTracker Red signal.
 
 5. When reporting data, 5 parameters are reported for each replicate for each cell line and compound condition:
 a. Cell Count: The total number of cells (nuclei) stained with Hoechst 33342 and detected in the DAPI channel.
 b. Interphase cells: The total number of cells less the number of Apoptotic cells, Dead cells, and Mitotic cells.
 c. Apoptotic cells: The cells stained with NucView.
-d. Dead cells: The â€œlate-stageâ€? dead cells with blurry DAPI morphology that do not stain with either NucView or LysoTracker Red.
+d. Dead cells: The "late-stage" dead cells with blurry DAPI morphology that do not stain with either NucView or LysoTracker Red.
 e. Mitotic cells: The cells that stain brightly with LysoTracker Red and that have a rounded morphology.
 
 Reference for NucView:
@@ -3044,13 +3044,13 @@ DAPI [Excitation 377/50; Emission 447/60]
 FITC [Excitation 482/35; Emission 536/40]
 Texas Red [Excitation 562/40; Emission 624/40]
 
-4. After image acquisition, image analysis is done using a customized Matlab program developed by Dr. Tiao Xie (Harvard Medical School). The program does segmentation on the DAPI channel to identify all nuclei, then it counts the bright, rounded cells in the Texas Red channel (LysoTracker-Red) to score mitotic cells. Finally it detects bright spots in the FITC channel (NucView) to score apoptotic cells. We also identify a population of late-stage dead cells with a â€œblurryâ€? DAPI morphology, and no NucView Signal or LysoTracker Red signal.
+4. After image acquisition, image analysis is done using a customized Matlab program developed by Dr. Tiao Xie (Harvard Medical School). The program does segmentation on the DAPI channel to identify all nuclei, then it counts the bright, rounded cells in the Texas Red channel (LysoTracker-Red) to score mitotic cells. Finally it detects bright spots in the FITC channel (NucView) to score apoptotic cells. We also identify a population of late-stage dead cells with a "blurry" DAPI morphology, and no NucView Signal or LysoTracker Red signal.
 
 5. When reporting data, 5 parameters are reported for each replicate for each cell line and compound condition:
 a. Cell Count: The total number of cells (nuclei) stained with Hoechst 33342 and detected in the DAPI channel.
 b. Interphase cells: The total number of cells less the number of Apoptotic cells, Dead cells, and Mitotic cells.
 c. Apoptotic cells: The cells stained with NucView.
-d. Dead cells: The â€œlate-stageâ€? dead cells with blurry DAPI morphology that do not stain with either NucView or LysoTracker Red.
+d. Dead cells: The "late-stage" dead cells with blurry DAPI morphology that do not stain with either NucView or LysoTracker Red.
 e. Mitotic cells: The cells that stain brightly with LysoTracker Red and that have a rounded morphology.
 
 Reference for NucView:
@@ -3091,13 +3091,13 @@ DAPI [Excitation 377/50; Emission 447/60]
 FITC [Excitation 482/35; Emission 536/40]
 Texas Red [Excitation 562/40; Emission 624/40]
 
-4. After image acquisition, image analysis is done using a customized Matlab program developed by Dr. Tiao Xie (Harvard Medical School). The program does segmentation on the DAPI channel to identify all nuclei, then it counts the bright, rounded cells in the Texas Red channel (LysoTracker-Red) to score mitotic cells. Finally it detects bright spots in the FITC channel (NucView) to score apoptotic cells. We also identify a population of late-stage dead cells with a â€œblurryâ€? DAPI morphology, and no NucView Signal or LysoTracker Red signal.
+4. After image acquisition, image analysis is done using a customized Matlab program developed by Dr. Tiao Xie (Harvard Medical School). The program does segmentation on the DAPI channel to identify all nuclei, then it counts the bright, rounded cells in the Texas Red channel (LysoTracker-Red) to score mitotic cells. Finally it detects bright spots in the FITC channel (NucView) to score apoptotic cells. We also identify a population of late-stage dead cells with a "blurry" DAPI morphology, and no NucView Signal or LysoTracker Red signal.
 
 5. When reporting data, 5 parameters are reported for each replicate for each cell line and compound condition:
 a. Cell Count: The total number of cells (nuclei) stained with Hoechst 33342 and detected in the DAPI channel.
 b. Interphase cells: The total number of cells less the number of Apoptotic cells, Dead cells, and Mitotic cells.
 c. Apoptotic cells: The cells stained with NucView.
-d. Dead cells: The â€œlate-stageâ€? dead cells with blurry DAPI morphology that do not stain with either NucView or LysoTracker Red.
+d. Dead cells: The "late-stage" dead cells with blurry DAPI morphology that do not stain with either NucView or LysoTracker Red.
 e. Mitotic cells: The cells that stain brightly with LysoTracker Red and that have a rounded morphology.
 
 Reference for NucView:
@@ -3138,13 +3138,13 @@ DAPI [Excitation 377/50; Emission 447/60]
 FITC [Excitation 482/35; Emission 536/40]
 Texas Red [Excitation 562/40; Emission 624/40]
 
-4. After image acquisition, image analysis is done using a customized Matlab program developed by Dr. Tiao Xie (Harvard Medical School). The program does segmentation on the DAPI channel to identify all nuclei, then it counts the bright, rounded cells in the Texas Red channel (LysoTracker-Red) to score mitotic cells. Finally it detects bright spots in the FITC channel (NucView) to score apoptotic cells. We also identify a population of late-stage dead cells with a â€œblurryâ€? DAPI morphology, and no NucView Signal or LysoTracker Red signal.
+4. After image acquisition, image analysis is done using a customized Matlab program developed by Dr. Tiao Xie (Harvard Medical School). The program does segmentation on the DAPI channel to identify all nuclei, then it counts the bright, rounded cells in the Texas Red channel (LysoTracker-Red) to score mitotic cells. Finally it detects bright spots in the FITC channel (NucView) to score apoptotic cells. We also identify a population of late-stage dead cells with a "blurry" DAPI morphology, and no NucView Signal or LysoTracker Red signal.
 
 5. When reporting data, 5 parameters are reported for each replicate for each cell line and compound condition:
 a. Cell Count: The total number of cells (nuclei) stained with Hoechst 33342 and detected in the DAPI channel.
 b. Interphase cells: The total number of cells less the number of Apoptotic cells, Dead cells, and Mitotic cells.
 c. Apoptotic cells: The cells stained with NucView.
-d. Dead cells: The â€œlate-stageâ€? dead cells with blurry DAPI morphology that do not stain with either NucView or LysoTracker Red.
+d. Dead cells: The "late-stage" dead cells with blurry DAPI morphology that do not stain with either NucView or LysoTracker Red.
 e. Mitotic cells: The cells that stain brightly with LysoTracker Red and that have a rounded morphology.
 
 Reference for NucView:
