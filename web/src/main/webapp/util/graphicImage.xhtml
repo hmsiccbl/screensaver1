@@ -16,7 +16,8 @@
 
 <ui:composition>
   <t:graphicImage value="#{url}" alt="#{url}"
-    rendered="#{empty rendered ? true : rendered}" />
+    rendered="#{(empty rendered ? true : rendered) &amp;&amp; ! empty url}" />
+  <t:outputText value="no image" rendered="#{(empty rendered ? true : rendered) &amp;&amp; empty url}" />
 </ui:composition>
 
 </html>
