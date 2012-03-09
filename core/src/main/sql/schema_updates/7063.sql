@@ -9,9 +9,11 @@ current_timestamp,
 
 alter table gene_symbol add column ordinal int4;
 
-update gene_symbol gs1 set ordinal = (select count(*)-1 from gene_symbol gs2 where 
-	gs2.gene_id = gs1.gene_id and 
- 	gs1.entrezgene_symbol <= gs2.entrezgene_symbol order by gs1.entrezgene_symbol );
+UPDATE gene_symbol gs1
+SET ordinal = (SELECT COUNT(1)
+               FROM gene_symbol gs2
+               WHERE gs2.gene_id = gs1.gene_id
+                 AND gs2.entrezgene_symbol < gs1.entrezgene_symbol)
  	
 alter table gene_symbol alter column ordinal set not null;
 
