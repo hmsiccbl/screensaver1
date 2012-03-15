@@ -109,6 +109,7 @@
       
       <ss:property id="keepSourcePlateCherryPicksTogether" label="Keep Source Plate Cherry Picks Together"
         type="Boolean"
+        rendered="#{menu.applicationProperties.facilityKey != 'vcfg'}"
         description="True when cherry picks from the same source plate should always be mapped to the same cherry pick plate"
         value="#{cherryPickRequestDetailViewer.entity.keepSourcePlateCherryPicksTogether}"
         editable="#{cherryPickRequestDetailViewer.editMode &amp;&amp; !cherryPickRequestDetailViewer.entity.mapped}"
@@ -116,8 +117,17 @@
 
       <ss:property id="randomLayout" label="Random plate well layout"
         type="Boolean"
+        rendered="#{menu.applicationProperties.facilityKey != 'vcfg'}"
         description="True when screener requested a random layout for the cherry pick plates"
         value="#{cherryPickRequestDetailViewer.entity.randomizedAssayPlateLayout}"
+        editable="#{cherryPickRequestDetailViewer.editMode &amp;&amp; !cherryPickRequestDetailViewer.entity.mapped}"
+        styleClass="command" displayValueOnlyStyleClass="dataText" />
+        
+      <ss:property id="maxWellsToSkip" label="Max wells to skip to avoid reload"
+        type="Integer"
+        rendered="#{menu.applicationProperties.facilityKey == 'vcfg'}"
+        description="The maximum number of wells that can be skipped by the mapper to keep source picks from the same plate together"
+        value="#{cherryPickRequestDetailViewer.entity.maxSkippedWellsPerPlate}"
         editable="#{cherryPickRequestDetailViewer.editMode &amp;&amp; !cherryPickRequestDetailViewer.entity.mapped}"
         styleClass="command" displayValueOnlyStyleClass="dataText" />
         

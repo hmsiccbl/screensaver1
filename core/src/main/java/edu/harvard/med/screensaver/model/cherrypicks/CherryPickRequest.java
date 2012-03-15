@@ -108,6 +108,7 @@ public abstract class CherryPickRequest extends AuditedAbstractEntity<Integer>
   private AdministratorUser _volumeApprovedBy;
   private LocalDate _dateVolumeApproved;
   private boolean _randomizedAssayPlateLayout;
+  private Integer _maxSkippedWellsPerPlate;
   private Set<WellName> _emptyWellsOnAssayPlate = new HashSet<WellName>();
   private String _comments;
   private Set<ScreenerCherryPick> _screenerCherryPicks = new HashSet<ScreenerCherryPick>();
@@ -684,7 +685,19 @@ public abstract class CherryPickRequest extends AuditedAbstractEntity<Integer>
   {
     _cherryPickFollowupResultsStatus = cherryPickFollowupResultsStatus;
   }
+ 
+  /**
+   * Get the maximum number of wells the plate mapper can skip from the available wells
+   * to avoid having to reload a source plate.
+   */
+  public Integer getMaxSkippedWellsPerPlate() {
+	return _maxSkippedWellsPerPlate;
+  }
 
+  public void setMaxSkippedWellsPerPlate(Integer maxSkippedWellsPerPlate) {
+	_maxSkippedWellsPerPlate = maxSkippedWellsPerPlate;
+  }
+  
   /**
    * Get whether the lab cherry picks have been allocated, including the case
    * where they were canceled (allocated, mapped, and then deallocated). If at

@@ -1,5 +1,10 @@
 Screensaver-core release notes
 
+Version 2012-02-24_?
+
+[#3411] Convert the gene symbol field of gene to an ordered list
+[#3419] Create a "maxSkippedWellsPerPlate" field on Cherry Pick Request entity to support VCFG plate mapping functionality
+
 Version 2012-01-12-maint1
 
 [#3356] StudyCreator out of memory error 
