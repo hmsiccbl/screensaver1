@@ -14,7 +14,6 @@ import java.util.Arrays;
 import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Set;
-import java.util.TreeSet;
 
 import javax.faces.convert.Converter;
 import javax.faces.model.SelectItem;
@@ -51,7 +50,7 @@ public abstract class VocabularyColumn<R,V> extends TableColumn<R,V> implements 
                           String group,
                           Converter converter, V[] items)
   {
-    this(name, description, group, converter, new TreeSet<V>(Arrays.asList(items)));
+    this(name, description, group, converter, new LinkedHashSet<V>(Arrays.asList(items)));
   }
 
   public Set<V> getVocabulary()
