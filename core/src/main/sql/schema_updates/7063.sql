@@ -13,7 +13,7 @@ UPDATE gene_symbol gs1
 SET ordinal = (SELECT COUNT(1)
                FROM gene_symbol gs2
                WHERE gs2.gene_id = gs1.gene_id
-                 AND gs2.entrezgene_symbol < gs1.entrezgene_symbol)
+                 AND gs2.entrezgene_symbol < gs1.entrezgene_symbol);
  	
 alter table gene_symbol alter column ordinal set not null;
 
