@@ -86,7 +86,7 @@ psql -q -U $DB_USER $DB -f $DATA_DIRECTORY/lincs-users.sql -v ON_ERROR_STOP=1
 check_errs $? "lincs-users.sql fails"
 
 ## Create the library
-LIBRARY_1_SHORTNAME="R-HMS-LINCS"
+LIBRARY_1_SHORTNAME="R-HMS-LINCS-1"
 LIBRARY_2_SHORTNAME="R-Anti-Mitotics"
 LIBRARY_3_SHORTNAME="P-LINCS-1"
 LIBRARY_4_SHORTNAME="P-Anti-mitotics5"
@@ -96,6 +96,7 @@ LIBRARY_7_SHORTNAME="R-CMT-1"
 LIBRARY_8_SHORTNAME="P-LINCS-2"
 LIBRARY_9_SHORTNAME="P-LINCS-3"
 LIBRARY_10_SHORTNAME="P-Mario-2"
+LIBRARY_11_SHORTNAME="R-HMS-LINCS-2"
 
 set -x 
 ./run.sh edu.harvard.med.screensaver.io.libraries.LibraryCreator \
@@ -208,10 +209,26 @@ check_errs $? "create library fails"
 -f $DATA_DIRECTORY/HMS_LINCS-10.sdf -AE $ECOMMONS_ADMIN
 check_errs $? "library contents loading fails"
 
+./run.sh edu.harvard.med.screensaver.io.libraries.LibraryCreator \
+-n "HMS-LINCS-2 New Batches" -s $LIBRARY_11_SHORTNAME -lt "commercial" \
+-lp "Qingsong Liu" -st SMALL_MOLECULE -sp 15 -ep 15 -AE $ECOMMONS_ADMIN 
+check_errs $? "create library fails"
+
+./run.sh edu.harvard.med.screensaver.io.libraries.LibraryContentsLoader \
+--release-library-contents-version \
+-l $LIBRARY_11_SHORTNAME \
+-f $DATA_DIRECTORY/HMS_LINCS-11.sdf -AE $ECOMMONS_ADMIN
+check_errs $? "library contents loading fails"
+
 ## Restrict reagents
 
 psql -q -U $DB_USER $DB -f $DATA_DIRECTORY/restrict_reagents.sql -v ON_ERROR_STOP=1
 check_errs $? "lincs-users.sql fails"
+
+## Create the cells
+
+## ./run.sh edu.harvard.med.iccbl.screensaver.io.cells.CellImporter \
+-f $DATA_DIRECTORY/LINCS_CL_metadata.xls
 
 ## Create the screens
 
