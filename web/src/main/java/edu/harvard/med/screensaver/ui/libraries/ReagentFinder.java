@@ -177,32 +177,37 @@ public class ReagentFinder extends AbstractBackingBean
       return ImmutableSet.of("");
     }
     
+    boolean isQuoted = false;
     Set<String> values = Sets.newHashSet();
     for (String value : StringUtils.tokenizeQuotedWordList(_nameFacilityVendorIDInput)) {
+    	String temp = value;
       value = value.replaceAll("\"|'+", ""); // remove quote characters left in by the tokenizer
-      value = value.trim();
+      if(!temp.equals(value) ) isQuoted = true; // in response to [#3452] -sde
+      if(!isQuoted)  value = value.trim();
       if (StringUtils.isEmpty(value)) {
         continue;
       }
       // remove zero padding if salt - batch id were entered
       Matcher matcher = FACILITY_SALT_BATCH_PATTERN.matcher(value);
-      if(matcher.matches())
-      {
-        String temp = matcher.group(1);
-        try {
-          Integer id = Integer.parseInt(matcher.group(2));
-          temp += "-" + id;
-          // the second id is optional
-          if(! StringUtils.isEmpty(matcher.group(3))) {
-            id = Integer.parseInt(matcher.group(3));
-            temp += "-" + id;
-          }
-          log.info("search string: " + value + ", formatted: " + temp);
-          value = temp;
-        }
-        catch (NumberFormatException e) {
-          log.info("input string parse error for the facility-salt-batch pattern: " + FACILITY_SALT_BATCH_PATTERN + ", \"" + value + "\"", e);
-        }
+      if(!isQuoted) {
+	      if(matcher.matches())
+	      {
+	        temp = matcher.group(1);
+	        try {
+	          Integer id = Integer.parseInt(matcher.group(2));
+	          temp += "-" + id;
+	          // the second id is optional
+	          if(! StringUtils.isEmpty(matcher.group(3))) {
+	            id = Integer.parseInt(matcher.group(3));
+	            temp += "-" + id;
+	          }
+	          log.info("search string: " + value + ", formatted: " + temp);
+	          value = temp;
+	        }
+	        catch (NumberFormatException e) {
+	          log.info("input string parse error for the facility-salt-batch pattern: " + FACILITY_SALT_BATCH_PATTERN + ", \"" + value + "\"", e);
+	        }
+	      }
       }
       values.add(value);
     }
