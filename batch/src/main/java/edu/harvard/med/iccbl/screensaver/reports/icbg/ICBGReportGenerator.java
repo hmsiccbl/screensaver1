@@ -12,11 +12,8 @@ package edu.harvard.med.iccbl.screensaver.reports.icbg;
 import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
-import java.util.ArrayList;
-import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
-import java.util.Set;
 
 import jxl.read.biff.BiffException;
 import jxl.write.Label;
@@ -24,10 +21,9 @@ import jxl.write.WritableSheet;
 import jxl.write.WritableWorkbook;
 import jxl.write.WriteException;
 import jxl.write.biff.RowsExceededException;
-import org.apache.log4j.Logger;
-import org.springframework.context.support.ClassPathXmlApplicationContext;
 
-import com.google.common.collect.Lists;
+import org.apache.commons.cli.OptionBuilder;
+import org.apache.log4j.Logger;
 
 import edu.harvard.med.screensaver.db.DAOTransaction;
 import edu.harvard.med.screensaver.db.GenericEntityDAO;
@@ -37,7 +33,6 @@ import edu.harvard.med.screensaver.model.libraries.WellKey;
 import edu.harvard.med.screensaver.model.screenresults.DataColumn;
 import edu.harvard.med.screensaver.model.screenresults.ResultValue;
 import edu.harvard.med.screensaver.model.screenresults.ScreenResult;
-import edu.harvard.med.screensaver.model.screens.Screen;
 
 
 /**
@@ -51,7 +46,7 @@ public class ICBGReportGenerator extends CommandLineApplication
   // static fields
   
   private static Logger log = Logger.getLogger(ICBGReportGenerator.class);
-  private static final String REPORT_FILENAME = "report.xls";
+  private String _reportFilename = "report.xls";
   
   private static final int MAX_ROWS_PER_SHEET = /*10 DEBUG ONLY!*/ 65000;
   
@@ -70,9 +65,8 @@ public class ICBGReportGenerator extends CommandLineApplication
    */
   public static void main(String[] args) throws RowsExceededException, FileNotFoundException, WriteException, IOException, BiffException
   {
-
-   final ICBGReportGenerator generator = new ICBGReportGenerator( args);
-   generator.execute();
+  		ICBGReportGenerator generator = new ICBGReportGenerator( args);
+  		generator.execute();
   }
   
   private void execute()
@@ -108,12 +102,17 @@ public class ICBGReportGenerator extends CommandLineApplication
   public ICBGReportGenerator( String[] args) throws BiffException, IOException
   {
      super(args);
+     addCommandLineOption(OptionBuilder.hasArg(true).withArgName("mf").withLongOpt("mapping-file")
+ 				.withDescription("The path to the mapping file").create("mf"));   
+    addCommandLineOption(OptionBuilder.hasArg(true).withArgName("of").withLongOpt("output-file")
+ 						.withDescription("The output file path").create("of"));
 
     processOptions(true,false);
-    
+ 
+    if(isCommandLineFlagSet("of")) _reportFilename = getCommandLineOptionValue("of");
     _dao = (GenericEntityDAO) getSpringBean("genericEntityDao");
     _screenResultsDAO = (ScreenResultsDAO) getSpringBean("screenResultsDao");
-    _mapper = new ICCBLPlateWellToINBioLQMapper();
+    _mapper = new ICCBLPlateWellToINBioLQMapper(getCommandLineOptionValue("mf"));
     _assayInfoProducer = new AssayInfoProducer();
   }
   
@@ -126,7 +125,7 @@ public class ICBGReportGenerator extends CommandLineApplication
   
   private void initializeReport() throws FileNotFoundException, IOException, RowsExceededException, WriteException
   {
-    _report = jxl.Workbook.createWorkbook(new FileOutputStream(REPORT_FILENAME));
+    _report = jxl.Workbook.createWorkbook(new FileOutputStream(_reportFilename));
     _protocolSheet = _report.createSheet("PROTOCOL", 0);
     _protocolSheet.addCell(new Label(0, 0, "PROTOCOL_ID"));
     _protocolSheet.addCell(new Label(1, 0, "PROTOCOL_TYPE"));

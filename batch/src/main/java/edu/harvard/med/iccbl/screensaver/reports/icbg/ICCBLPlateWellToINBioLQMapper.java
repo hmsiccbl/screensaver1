@@ -26,6 +26,7 @@ import org.apache.log4j.Logger;
 
 import edu.harvard.med.screensaver.model.libraries.Well;
 import edu.harvard.med.screensaver.model.libraries.WellKey;
+import edu.harvard.med.screensaver.util.StringUtils;
 
 
 /**
@@ -45,8 +46,9 @@ public class ICCBLPlateWellToINBioLQMapper
   private Map<WellKey,String> _wellKeyToLQMap = new HashMap<WellKey,String>();
   
   
-  public ICCBLPlateWellToINBioLQMapper() throws BiffException, IOException
+  public ICCBLPlateWellToINBioLQMapper(String fileName) throws BiffException, IOException
   {
+  	if(!StringUtils.isEmpty(fileName)) _mappingFilename = fileName;
     initializeMappingWorksheet();
     populateWellKeyToLQMap();
   }
