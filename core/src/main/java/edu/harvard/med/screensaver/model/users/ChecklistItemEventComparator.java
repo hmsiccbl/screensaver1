@@ -28,7 +28,11 @@ class ChecklistItemEventComparator extends NullSafeComparator<ChecklistItemEvent
     int result = i1.getDateCreated().compareTo(i2.getDateCreated());
 
     if (result == 0) {
-      result = Integer.valueOf(i1.hashCode()).compareTo(i2.hashCode());
+    	// handle comparison of events created on the same moment (probably only in test code)
+    	result = i1.getDatePerformed().compareTo(i2.getDatePerformed());
+    	if(result == 0 ) {
+        result = Integer.valueOf(i1.hashCode()).compareTo(i2.hashCode());
+    	}
     }
     return result;
   }
