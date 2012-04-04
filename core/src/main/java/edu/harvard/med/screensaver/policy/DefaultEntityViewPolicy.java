@@ -14,6 +14,8 @@ import edu.harvard.med.screensaver.model.AttachedFileType;
 import edu.harvard.med.screensaver.model.Entity;
 import edu.harvard.med.screensaver.model.activities.AdministrativeActivity;
 import edu.harvard.med.screensaver.model.activities.ServiceActivity;
+import edu.harvard.med.screensaver.model.cells.Cell;
+import edu.harvard.med.screensaver.model.cells.ExperimentalCellInformation;
 import edu.harvard.med.screensaver.model.cherrypicks.CherryPickAssayPlate;
 import edu.harvard.med.screensaver.model.cherrypicks.CherryPickLiquidTransfer;
 import edu.harvard.med.screensaver.model.cherrypicks.LabCherryPick;
@@ -347,6 +349,16 @@ public class DefaultEntityViewPolicy implements EntityViewPolicy<Entity>
   {
     return true;
   }
+
+	@Override
+	public Entity visit(ExperimentalCellInformation entity) {
+		return entity;
+	}
+
+	@Override
+	public Entity visit(Cell entity) {
+		return entity;
+	}
 
 }
 

@@ -63,6 +63,12 @@ public abstract class Study extends AuditedAbstractEntity<Integer>
   {
     // TODO: this is a hack; proper solution is waiting on having the Study->Screen->IccbScreen hierarchy in place
     return getProjectPhase() == ProjectPhase.ANNOTATION;
+  }  
+  
+  @Transient
+  public boolean getIsStudyOnly()
+  {
+  	return isStudyOnly();
   }
 
   @Override

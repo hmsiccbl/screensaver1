@@ -34,11 +34,14 @@ import javax.persistence.Version;
 
 import com.google.common.base.Predicate;
 import com.google.common.collect.Maps;
+import com.google.common.collect.Sets;
+
 import org.apache.log4j.Logger;
 
 import edu.harvard.med.screensaver.model.AbstractEntity;
 import edu.harvard.med.screensaver.model.AbstractEntityVisitor;
 import edu.harvard.med.screensaver.model.DataModelViolationException;
+import edu.harvard.med.screensaver.model.cells.ExperimentalCellInformation;
 import edu.harvard.med.screensaver.model.libraries.WellKey;
 import edu.harvard.med.screensaver.model.meta.Cardinality;
 import edu.harvard.med.screensaver.model.meta.RelationshipPath;
@@ -107,8 +110,9 @@ public class DataColumn extends AbstractEntity<Integer> implements MetaDataType,
   private Integer channel;
   private Integer timePointOrdinal;
   private Integer zdepthOrdinal;
-  private String _cellLine;
-
+  //	 private String _cellLine;  //Legacy Field, to be replaced with ExperimentalCellInformation entity
+  
+//  private SortedSet<ExperimentalCellInformation> experimentalCellInformationSet = Sets.newTreeSet();
 
   /**
    * Constructs an uninitialized <code>DataColumn</code> object.
@@ -371,11 +375,11 @@ public class DataColumn extends AbstractEntity<Integer> implements MetaDataType,
     return this;
   }
   
-  public DataColumn forCellLine(String cellLine)
-  {
-    setCellLine(cellLine);
-    return this;
-  }
+	//  public DataColumn forCellLine(String cellLine)
+	//  {
+	//    setCellLine(cellLine);
+	//    return this;
+	//  }
   
   @Column(updatable = false)
   //@Immutable
@@ -1161,16 +1165,29 @@ public class DataColumn extends AbstractEntity<Integer> implements MetaDataType,
     this.zdepthOrdinal = zdepthOrdinal;
   }
   
-  @Column(updatable = false)
-  @edu.harvard.med.screensaver.model.annotations.Column(hasNonconventionalSetterMethod=true /*uses forCellLine() builder method*/)
-  @org.hibernate.annotations.Type(type="text")
-  public String getCellLine()
-  {
-    return _cellLine;
-  }
+	//  @Column(updatable = false)
+	//  @edu.harvard.med.screensaver.model.annotations.Column(hasNonconventionalSetterMethod=true /*uses forCellLine() builder method*/)
+	//  @org.hibernate.annotations.Type(type="text")
+	//  public String getCellLine()
+	//  {
+	//    return _cellLine;
+	//  }
+	//  
+	//  private void setCellLine(String string)
+	//  {
+	//    _cellLine = string;
+	//  }
   
-  private void setCellLine(String string)
-  {
-    _cellLine = string;
-  }
+//  @OneToMany(mappedBy = "dataColumn", cascade = { CascadeType.ALL }, orphanRemoval = false, fetch=FetchType.EAGER)
+//  @org.hibernate.annotations.Sort(type=org.hibernate.annotations.SortType.NATURAL)
+//  public Set<ExperimentalCellInformation> getExperimentalCellInformationSet()
+//  {
+//    return experimentalCellInformationSet;
+//  }
+//  
+//  public void setExperimentalCellInformationSet(SortedSet<ExperimentalCellInformation> value)
+//  {
+//  	experimentalCellInformationSet = value;
+//  }
+//  
 }

@@ -1,6 +1,7 @@
 
 package edu.harvard.med.screensaver.rest;
 
+import java.util.Collections;
 import java.util.List;
 import java.util.Set;
 
@@ -48,7 +49,15 @@ public class WellConverter extends RestConverter
       {
         Well well = (Well) value;
         well = getDao().reloadEntity(well);
-        Reagent reagent = ((Reagent)well.getLatestReleasedReagent().restrict());
+        Reagent reagent = null;
+        if(well.getLatestReleasedReagent() != null)
+        {
+          reagent = ((Reagent)well.getLatestReleasedReagent().restrict());
+        }
+        if(reagent == null) {
+          writer.setValue("empty"); // XStream doesn't like empty nodes
+          return;
+        }
         SmallMoleculeReagent smr = null;
         if (reagent != null && reagent instanceof SmallMoleculeReagent) {
           smr = (SmallMoleculeReagent) reagent;
@@ -95,9 +104,10 @@ public class WellConverter extends RestConverter
         writer.endNode();
 
         // TODO: code copied from WellViewer; need to encapsulate into a DAO method
-        Set<Reagent> reagents = librariesDao.findReagents(well.getLatestReleasedReagent().getVendorId(), true);                                                                                                  
+        Set<SmallMoleculeReagent> reagents = librariesDao.findReagents(well.getFacilityId(), null, null, true);                                                                                                  
         reagents.remove(well.getLatestReleasedReagent());
         List<Well> otherWellsWithReagent = Lists.newArrayList(Iterables.transform(reagents, new Function<Reagent,Well>() { public Well apply(Reagent r) { return r.getWell(); } }));
+        Collections.sort(otherWellsWithReagent);
         util.writeNode(new EntityCollection<Well>(Well.class, otherWellsWithReagent), "otherWellsWithReagent");
 
         util.writeUri(well.getLibrary(), "library");

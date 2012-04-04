@@ -44,12 +44,17 @@ import edu.harvard.med.screensaver.db.GenericEntityDAO;
 import edu.harvard.med.screensaver.db.NoSuchEntityException;
 import edu.harvard.med.screensaver.db.ScreenDAO;
 import edu.harvard.med.screensaver.db.UsersDAO;
+import edu.harvard.med.screensaver.db.datafetcher.DataFetcherUtil;
+import edu.harvard.med.screensaver.db.datafetcher.EntityDataFetcher;
+import edu.harvard.med.screensaver.db.hqlbuilder.HqlBuilder;
 import edu.harvard.med.screensaver.model.AttachedFile;
 import edu.harvard.med.screensaver.model.AttachedFileType;
 import edu.harvard.med.screensaver.model.BusinessRuleViolationException;
 import edu.harvard.med.screensaver.model.MolarConcentration;
 import edu.harvard.med.screensaver.model.MolarUnit;
 import edu.harvard.med.screensaver.model.RequiredPropertyException;
+import edu.harvard.med.screensaver.model.cells.Cell;
+import edu.harvard.med.screensaver.model.cells.ExperimentalCellInformation;
 import edu.harvard.med.screensaver.model.cherrypicks.CherryPickRequest;
 import edu.harvard.med.screensaver.model.screens.BillingItem;
 import edu.harvard.med.screensaver.model.screens.CellLine;
@@ -77,12 +82,14 @@ import edu.harvard.med.screensaver.service.OperationRestrictedException;
 import edu.harvard.med.screensaver.service.screens.ScreenGenerator;
 import edu.harvard.med.screensaver.service.screens.ScreeningDuplicator;
 import edu.harvard.med.screensaver.ui.activities.ActivityViewer;
+import edu.harvard.med.screensaver.ui.arch.datatable.model.InMemoryEntityDataModel;
 import edu.harvard.med.screensaver.ui.arch.util.AttachedFiles;
 import edu.harvard.med.screensaver.ui.arch.util.UICompositeSelectorBean;
 import edu.harvard.med.screensaver.ui.arch.util.UISelectOneBean;
 import edu.harvard.med.screensaver.ui.arch.util.UISelectOneEntityBean;
 import edu.harvard.med.screensaver.ui.arch.view.EditResult;
 import edu.harvard.med.screensaver.ui.arch.view.aspects.UICommand;
+import edu.harvard.med.screensaver.ui.cells.CellSearchResults;
 import edu.harvard.med.screensaver.ui.cherrypickrequests.CherryPickRequestDetailViewer;
 import edu.harvard.med.screensaver.util.NullSafeUtils;
 import edu.harvard.med.screensaver.util.StringUtils;
@@ -137,11 +144,11 @@ public class ScreenDetailViewer extends AbstractStudyDetailViewer<Screen>
 
   private AttachedFileType _publicationAttachedFileType;
 
-  private UISelectOneBean<Species> _species;
-
+   private UISelectOneBean<Species> _species;
+  
   private ScreenGenerator _screenGenerator;
-
-
+	
+   private CellSearchResults _cellSearchResults;
 
   /**
    * @motivation for CGLIB2
@@ -161,7 +168,8 @@ public class ScreenDetailViewer extends AbstractStudyDetailViewer<Screen>
                             PublicationInfoProvider publicationInfoProvider,
                             ScreeningDuplicator screeningDuplicator,
                             AttachedFiles attachedFiles,
-                            ScreenGenerator screenGenerator)
+                            ScreenGenerator screenGenerator,
+                            CellSearchResults cellSearchResults)
   {
     super(thisProxy,
           dao,
@@ -176,7 +184,9 @@ public class ScreenDetailViewer extends AbstractStudyDetailViewer<Screen>
     _screeningDuplicator = screeningDuplicator;
     _attachedFiles = attachedFiles;
     _screenGenerator = screenGenerator;
+    _cellSearchResults = cellSearchResults;
     getIsPanelCollapsedMap().put("screenDetail", false);
+    getIsPanelCollapsedMap().put("cellsForScreen", false); // LINCS proj
   }
 
   @Override
@@ -186,7 +196,7 @@ public class ScreenDetailViewer extends AbstractStudyDetailViewer<Screen>
   }
   
   @Override
-  protected void initializeViewer(Screen screen)
+  protected void initializeViewer(final Screen screen)
   {
     super.initializeViewer(screen);
     //_isAdminViewMode = false; // maintain this setting when viewing a new screen
@@ -214,6 +224,17 @@ public class ScreenDetailViewer extends AbstractStudyDetailViewer<Screen>
     _lastMinAllowedDataPrivacyExpirationDate = screen.getMinAllowedDataPrivacyExpirationDate();
     _lastMaxAllowedDataPrivacyExpirationDate = screen.getMaxAllowedDataPrivacyExpirationDate();
     _perturbagenMolarConcentrationSelector = null;    
+    
+    if(isLINCS())
+		_cellSearchResults.initialize(new InMemoryEntityDataModel<Cell, Integer, Cell>(
+				new EntityDataFetcher<Cell, Integer>(Cell.class, getDao()) {
+					@Override
+					public void addDomainRestrictions(HqlBuilder hql) {
+						DataFetcherUtil.addDomainRestrictions(hql, Cell.experimentalCellInformationSetPath.to("screen"), screen,
+								getRootAlias());
+					}
+				}));
+
   }
 
   private void initalizeAttachedFiles(Screen screen)
@@ -356,6 +377,11 @@ public class ScreenDetailViewer extends AbstractStudyDetailViewer<Screen>
       }
     });
     return new ListDataModel(publications);
+  }
+  
+  public CellSearchResults getCellSearchResults()
+  {
+  	return _cellSearchResults;
   }
 
   public Publication getNewPublication()
@@ -523,10 +549,8 @@ public class ScreenDetailViewer extends AbstractStudyDetailViewer<Screen>
     getDao().persistEntity(_newCellLine);
     getDao().flush();
 
-    // force reload of lab affiliation selections
     _cellLineMenu = null;
 
-    // set user's lab affiliation to new affiliation
     getCellLineMenu().setSelection(_newCellLine);
 
     _newCellLine = null;

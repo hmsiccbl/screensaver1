@@ -100,6 +100,9 @@ public interface ScreensaverConstants
   public static final String BROWSE_LIBRARY_COPY_PLATES = "browseLibraryCopyPlates";
   public static final String BROWSE_ATTACHED_FILES = "browseAttachedFiles";
 
+  public static final String BROWSE_CELLS = "browseCells";
+  public static final String VIEW_CELL = "viewCell";
+
   public static final String CELLHTS2_REPORTS_BASE_URL = "/screensaver/cellHTS2/";
 
   /**

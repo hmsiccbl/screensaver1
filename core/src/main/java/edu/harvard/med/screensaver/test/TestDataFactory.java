@@ -48,6 +48,9 @@ import edu.harvard.med.screensaver.model.activities.AdministrativeActivityType;
 import edu.harvard.med.screensaver.model.activities.ServiceActivityType;
 import edu.harvard.med.screensaver.model.activities.TypedActivity;
 import edu.harvard.med.screensaver.model.annotations.ContainedEntity;
+import edu.harvard.med.screensaver.model.cells.Cell;
+import edu.harvard.med.screensaver.model.cells.CellLineage;
+import edu.harvard.med.screensaver.model.cells.PrimaryCell;
 import edu.harvard.med.screensaver.model.cherrypicks.CherryPickAssayProtocolsFollowed;
 import edu.harvard.med.screensaver.model.cherrypicks.CherryPickFollowupResultsStatus;
 import edu.harvard.med.screensaver.model.cherrypicks.CherryPickLiquidTransferStatus;
@@ -449,6 +452,13 @@ public class TestDataFactory
         return TestDataFactory.this.newInstance(AdministrativeActivity.class, callStack);
       }
     });
+//    addBuilder(new AbstractBuilder<Cell>(Cell.class) {
+//      @Override
+//      public Cell newInstance(String callStack)
+//      {
+//        return TestDataFactory.this.newInstance(PrimaryCell.class, callStack);
+//      }
+//    });
     addBuilder(new AbstractBuilder<LabActivity>(LabActivity.class) {
       @Override
       public LabActivity newInstance(String callStack)
@@ -897,7 +907,17 @@ public class TestDataFactory
         return silencingReagent.getVendorGene();
       }
     });
-
+    
+    addBuilder(new AbstractBuilder<Cell>(Cell.class) {
+      @Override
+      public Cell newInstance(String callStack)
+      {
+        Cell cell =  TestDataFactory.this.newInstance(CellLineage.class, callStack);
+        return cell;
+      }
+    });
+    
+    
     // create special-case builders for Reagent types, in order to choose the correct parent factory method (the one w/o the updateReagentsRelationship param)
     // TODO: add these as spring beans which are then injected into TestDataFactory, thereby moving these special-case, domain model-specific builders into a deploy-time configurable location
     addBuilder(new ParentedEntityBuilder<SilencingReagent,Well>(SilencingReagent.class,
@@ -962,6 +982,14 @@ public class TestDataFactory
     addBuilder(numericResultValueBuilder);
 
     addDefaultEntityBuilders();
+
+    addPostCreateHook(CellLineage.class,new PostCreateHook<CellLineage>() {
+
+		@Override
+			public void postCreate(String callStack, CellLineage o) {
+				o.setFacilityId("1"); // TODO: hack - sde4
+			}
+    });
 
     addPostCreateHook(Well.class, new PostCreateHook<Well>() {
       /** ensure that a well has a reagent if we're ultimately instantiating a LabCherryPick */

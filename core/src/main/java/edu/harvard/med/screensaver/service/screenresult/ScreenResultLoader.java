@@ -119,7 +119,7 @@ public abstract class ScreenResultLoader
     AdministrativeActivity screenResultDataLoading = screen.getScreenResult().createScreenResultDataLoading(admin, screenResultParser.getPlateNumbersLoadedWithMaxReplicates(), comments);
     int assayPlatesCreated = Sets.difference(screen.getAssayPlatesDataLoaded(), screen.getAssayPlatesScreened()).size();
     if (assayPlatesCreated > 0) {
-      log.info("created " + assayPlatesCreated + " assay plate(s) that were not previously recorded as having been screened");
+      log.info("created " + assayPlatesCreated + " assay plate(s) that were not previously recorded as having been screened: " + Sets.difference(screen.getAssayPlatesDataLoaded(), screen.getAssayPlatesScreened()));
     }
     _dao.persistEntity(screenResultDataLoading);
 

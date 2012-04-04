@@ -24,12 +24,14 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSession;
 
-import com.google.common.collect.Maps;
 import org.apache.log4j.Logger;
 import org.springframework.mock.web.MockHttpServletRequest;
 import org.springframework.mock.web.MockHttpServletResponse;
 import org.springframework.mock.web.MockHttpSession;
 
+import com.google.common.collect.Maps;
+
+import edu.harvard.med.lincs.screensaver.LincsScreensaverConstants;
 import edu.harvard.med.screensaver.ScreensaverConstants;
 import edu.harvard.med.screensaver.ScreensaverProperties;
 import edu.harvard.med.screensaver.model.users.ScreeningRoomUser;
@@ -67,7 +69,8 @@ public abstract class AbstractBackingBean implements ScreensaverConstants
   private CurrentScreensaverUser _currentScreensaverUser;
 
   private Map<String,Boolean> _isPanelCollapsedMap = Maps.newHashMap();
-
+  private Boolean _isLINCS;
+  
   /**
    * Get the application name (without version number).
    */
@@ -429,5 +432,19 @@ public abstract class AbstractBackingBean implements ScreensaverConstants
   public Map<String,Boolean> getIsPanelCollapsedMap()
   {
     return _isPanelCollapsedMap;
+  }
+  
+  /** 
+   * Indicates that the application was built for the LINCS project 
+   * see {@link http://lincs.hms.harvard.edu/} and {@link http://lincsproject.org/}
+   * @return true if the project was built for the LINCS project.
+   * @see ScreensaverProperties#getFacilityKey()
+   **/
+  public boolean isLINCS()
+  {
+    if (_isLINCS == null) {
+      _isLINCS = getApplicationProperties().isFacility(LincsScreensaverConstants.FACILITY_KEY);
+    }
+    return _isLINCS;
   }
 }

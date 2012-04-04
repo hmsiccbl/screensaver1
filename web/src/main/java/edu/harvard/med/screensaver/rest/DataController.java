@@ -3,25 +3,27 @@ package edu.harvard.med.screensaver.rest;
 
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
+import java.util.Comparator;
 import java.util.Set;
 
 import javax.activation.MimetypesFileTypeMap;
-import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
 import org.apache.commons.io.IOUtils;
 import org.apache.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
-import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
-import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.servlet.ModelAndView;
+
+import com.google.common.base.Function;
 import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.Iterables;
+import com.google.common.collect.Iterators;
+import com.google.common.collect.Lists;
 import com.google.common.collect.Sets;
 
 import edu.harvard.med.screensaver.db.DAOTransaction;
@@ -30,6 +32,8 @@ import edu.harvard.med.screensaver.db.LibrariesDAO;
 import edu.harvard.med.screensaver.db.ScreenDAO;
 import edu.harvard.med.screensaver.io.libraries.WellsSdfDataExporter;
 import edu.harvard.med.screensaver.model.AttachedFile;
+import edu.harvard.med.screensaver.model.cells.Cell;
+import edu.harvard.med.screensaver.model.cells.ExperimentalCellInformation;
 import edu.harvard.med.screensaver.model.libraries.Library;
 import edu.harvard.med.screensaver.model.libraries.Reagent;
 import edu.harvard.med.screensaver.model.libraries.SmallMoleculeReagent;
@@ -152,14 +156,63 @@ public class DataController
     return mav;
   }
   
-   /**
-    * return the entire screen result 
-    */
-  @RequestMapping(value = "/screens/{facilityId}/results", method = RequestMethod.GET)
-  public ModelAndView screenResult(@PathVariable(value = "facilityId") String facilityId)
-  {
-    return makeModel(new ScreenResultValuesConverter.ScreenResult(genericEntityDao.findEntityByProperty(Screen.class, "facilityId", facilityId)));
+	/**
+	 * return the experimental cells used TODO: make this write out the ExperimentalCellInformation as soon as this data
+	 * is defined and imported - sde4
+	 */
+	@RequestMapping(value = "/screens/{facilityId}/cells", method = RequestMethod.GET)
+	public ModelAndView cellsForScreen(@PathVariable(value = "facilityId") String facilityId) {
+		Screen s = genericEntityDao.findEntityByProperty(Screen.class, "facilityId", facilityId, true,
+				Screen.experimentalCellInfomationSet);
+		if(s == null) return makeNotFoundError();
+  	Set<Cell> cells = Sets.newHashSet();
+		for(ExperimentalCellInformation eci:s.getExperimentalCellInformationSet()) {
+			cells.add(eci.getCell());
+		}
+		return makeModel(new EntityCollection.Cells(cells));
+	}	
+
+	/**
+	 * return the experimental cells used TODO: make this write out the ExperimentalCellInformation as soon as this data
+	 * is defined and imported - sde4
+	 */
+	@RequestMapping(value = "/studies/{facilityId}/cells", method = RequestMethod.GET)
+	public ModelAndView cellsForStudy(@PathVariable(value = "facilityId") String facilityId) {
+		return cellsForScreen(facilityId);
+	}
+ 
+ /**
+  * return the entire screen result 
+  */
+@RequestMapping(value = "/screens/{facilityId}/results", method = RequestMethod.GET)
+public ModelAndView screenResult(@PathVariable(value = "facilityId") String facilityId)
+{
+  return makeModel(new ScreenResultValuesConverter.ScreenResult(genericEntityDao.findEntityByProperty(Screen.class, "facilityId", facilityId)));
+}
+
+/**
+ * return the canonical set of reagents used for a screen result
+ */
+@RequestMapping(value = "/screens/{facilityId}/results/reagents", method = RequestMethod.GET)
+public ModelAndView screenResultReagents(@PathVariable(value = "facilityId") String facilityId)
+{
+  Screen s = genericEntityDao.findEntityByProperty(Screen.class, "facilityId", facilityId, true, Screen.screenResult.to(ScreenResult.assayWells));
+  if (s != null && s.getScreenResult() != null) {
+  	Set<Reagent> reagents = Sets.newTreeSet(new Comparator<Reagent>(){
+			@Override
+			public int compare(Reagent o1, Reagent o2) {
+				if(o1==o2) return 0;
+				return o1.getWell().getFacilityId().compareTo(o2.getWell().getFacilityId());
+			}});
+  	for(AssayWell aw:s.getScreenResult().getAssayWells()) {
+  		if(aw.getLibraryWell().getLatestReleasedReagent() != null) reagents.add(aw.getLibraryWell().getLatestReleasedReagent());
+  	}
+  	return makeModel(new EntityCollection.Reagents(reagents));
   }
+  else {
+    return makeNotFoundError();
+  }
+}
 
   @RequestMapping(value = "/screens/{facilityId}/results/columns", method = RequestMethod.GET)
   public ModelAndView screenResultColumns(@PathVariable(value = "facilityId") String facilityId)
@@ -440,7 +493,60 @@ public class DataController
     if(!result[0])  return makeNotFoundError(); // TODO better error handling
     return null;
   }
+  
 
+  @RequestMapping(value = "/cells", method = RequestMethod.GET)
+  public ModelAndView cells()
+  {
+    return makeModel(new EntityCollection.Cells(genericEntityDao.findAllEntitiesOfType(Cell.class)));
+  }
+  
+  /**
+   * @return the canonical well for a given compound Facility ID
+   */
+  @RequestMapping(value = "/cells/{facilityId}", method = RequestMethod.GET)
+  public ModelAndView cell(@PathVariable(value = "facilityId") String facilityId)
+  {
+    return makeModel(genericEntityDao.findEntityByProperty(Cell.class, "facilityId", facilityId));
+  }
+  
+  /**
+   * @return the screens that have used the cell of the given HMS Facility ID
+   */
+  @RequestMapping(value = "/cells/{facilityId}/screens", method = RequestMethod.GET)
+  public ModelAndView screensForCell(@PathVariable(value = "facilityId") String facilityId)
+  {
+  	Cell cell = genericEntityDao.findEntityByProperty(Cell.class, "facilityId", facilityId, true, Cell.experimentalCellInformationSetPath);
+  	if(cell == null) return makeNotFoundError();
+  	// TODO, find out why the fetched cells.getExperimentalInformationSet only ever returns the first attached screen
+  	Set<ExperimentalCellInformation> ecis = Sets.newHashSet(genericEntityDao.findEntitiesByProperty(ExperimentalCellInformation.class, "cell", cell));
+  	Set<Screen> screens = Sets.newHashSet();
+		for(ExperimentalCellInformation eci:ecis) {
+//  	for(ExperimentalCellInformation eci:cell.getExperimentalCellInformationSet()) {
+  			if(!eci.getScreen().isStudyOnly()) screens.add(eci.getScreen());
+  		}
+    return makeModel(new EntityCollection.Screens(Screen.class, screens));
+  }
+  
+  /**
+   * @return the screens that have used the cell of the given HMS Facility ID
+   */
+  @RequestMapping(value = "/cells/{facilityId}/studies", method = RequestMethod.GET)
+  public ModelAndView studiesForCell(@PathVariable(value = "facilityId") String facilityId)
+  {
+  	Cell cell = genericEntityDao.findEntityByProperty(Cell.class, "facilityId", facilityId, true, Cell.experimentalCellInformationSetPath);
+  	if(cell == null) return makeNotFoundError();
+  	// TODO, find out why the fetched cells.getExperimentalInformationSet only ever returns the first attached screen
+  	Set<ExperimentalCellInformation> ecis = Sets.newHashSet(genericEntityDao.findEntitiesByProperty(ExperimentalCellInformation.class, "cell", cell));
+  	Set<Screen> studies = Sets.newHashSet();
+		for(ExperimentalCellInformation eci:ecis) {
+			if(eci.getScreen().isStudyOnly()) studies.add(eci.getScreen());
+		}
+    return makeModel(new EntityCollection.Studies(Study.class, studies));
+  }
+  
+  // Utility methods
+  
   private void streamSdFile(Well well, HttpServletResponse response)
   {
     try {
@@ -474,7 +580,8 @@ public class DataController
   }
 
   private ModelAndView makeNotFoundError()
-  {log.info("not found!!");
+  {
+  	log.info("not found!!");
     return makeModel(new ErrorConverter.ErrorContainer(ERROR_OBJECT_ID_NOT_FOUND));
   }
 
@@ -484,5 +591,4 @@ public class DataController
     log.info("handling ex: " + ex.getLocalizedMessage(), ex);
     return makeModel(new ErrorConverter.ErrorContainer(ex, ex.getLocalizedMessage()));
   }
-
 }

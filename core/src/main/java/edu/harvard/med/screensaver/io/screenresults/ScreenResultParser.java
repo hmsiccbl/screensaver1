@@ -277,7 +277,7 @@ public class ScreenResultParser implements ScreenResultWorkbookSpecification
       log.info("parsing " + _workbook.getName());
       if (_screenResult == null) {
         _screenResult = screen.createScreenResult();
-        log.info("created screen result");
+        log.debug("created screen result");
         if (!parseDataColumnDefinitions(_screenResult, _workbook)) {
           log.info("errors found in data column definitions, will not attempt to parse data sheets");
           return _screenResult;
@@ -285,7 +285,7 @@ public class ScreenResultParser implements ScreenResultWorkbookSpecification
       }
 
       initializeDataColumnLocations(_screenResult, _workbook);
-      log.info("parsing data sheets");
+      log.debug("parsing data sheets");
       parseData(_workbook,
                 _screenResult,
                 plateNumberRange,
@@ -371,7 +371,7 @@ public class ScreenResultParser implements ScreenResultWorkbookSpecification
    */
   private boolean parseDataColumnDefinitions(ScreenResult screenResult, Workbook workbook) throws UnrecoverableScreenResultParseException
   {
-    log.info("parse data columns sheet");
+    log.debug("parse data columns sheet");
     
     Worksheet dataColumnsSheet = 
       _workbook.getWorksheet(DATA_COLUMNS_SHEET_NAME).forOrigin(DATA_COLUMNS_SHEET__FIRST_DATA_COLUMN__WORKSHEET_COLUMN_INDEX, 0);
@@ -460,9 +460,9 @@ public class ScreenResultParser implements ScreenResultWorkbookSpecification
       if (dataColumnPropertyRows.containsKey(DataColumnProperty.ZDEPTH_ORDINAL)) {
         dataColumn.forZdepthOrdinal(dataColumnPropertyRows.get(DataColumnProperty.ZDEPTH_ORDINAL).getCell(iDataColumn).getInteger());
       }
-      if (dataColumnPropertyRows.containsKey(DataColumnProperty.CELL_LINE)) {
-        dataColumn.forCellLine(dataColumnPropertyRows.get(DataColumnProperty.CELL_LINE).getCell(iDataColumn).getString());
-      }
+//      if (dataColumnPropertyRows.containsKey(DataColumnProperty.CELL_LINE)) {
+//        dataColumn.forCellLine(dataColumnPropertyRows.get(DataColumnProperty.CELL_LINE).getCell(iDataColumn).getString());
+//      }
       // note: we do this last so that _columnsDerivedFromParser does not allow the current column to be considered a valid "derived from" value
       _worksheetColumnLabel2DataColumnObjectMap.put(dataColumnPropertyRows.get(DataColumnProperty.COLUMN_IN_DATA_WORKSHEET).getCell(iDataColumn, true).getAsString(), dataColumn);
     }
@@ -537,7 +537,7 @@ public class ScreenResultParser implements ScreenResultWorkbookSpecification
                          boolean incrementalFlush)
     throws ExtantLibraryException, IOException, UnrecoverableScreenResultParseException
   {
-    log.info("incrementalFlush:" + incrementalFlush);
+    log.debug("incrementalFlush:" + incrementalFlush);
     long startTime = System.currentTimeMillis();
     long loopTime = startTime;
     

@@ -10,6 +10,8 @@ import edu.harvard.med.screensaver.model.AttachedFile;
 import edu.harvard.med.screensaver.model.AttachedFileType;
 import edu.harvard.med.screensaver.model.activities.AdministrativeActivity;
 import edu.harvard.med.screensaver.model.activities.ServiceActivity;
+import edu.harvard.med.screensaver.model.cells.Cell;
+import edu.harvard.med.screensaver.model.cells.ExperimentalCellInformation;
 import edu.harvard.med.screensaver.model.cherrypicks.CherryPickAssayPlate;
 import edu.harvard.med.screensaver.model.cherrypicks.CherryPickLiquidTransfer;
 import edu.harvard.med.screensaver.model.cherrypicks.LabCherryPick;
@@ -373,4 +375,14 @@ public class LincsEntityUriGenerator implements EntityUriGenerator<String>
   {
     return getUrl("/reagents/" + entity.getWell().getFacilityId());
   }
+
+	@Override
+	public String visit(ExperimentalCellInformation entity) {
+		return null; // TODO
+	}
+
+	@Override
+	public String visit(Cell entity) {
+		return getUrl("/cells/" + entity.getFacilityId());
+	}
 }

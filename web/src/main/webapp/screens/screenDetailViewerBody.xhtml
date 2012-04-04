@@ -148,7 +148,9 @@ TODO:
       <ss:property id="cellLine" label="#{screenDetailViewer.entity.screenType == 'RNAi' ? 'Mammalian ' : '' }Cell Line"
         type="Text" 
         editable="#{screenDetailViewer.editMode}"
-        value="#{screenDetailViewer.entity.cellLine.value}">
+        value="#{screenDetailViewer.entity.cellLine.value}"
+        rendered="#{screenDetailViewer.applicationProperties.facilityKey != 'lincs'}"
+        >
         <ui:define name="editableData">
           <t:selectOneMenu id="cellLineMenu"
            value="#{screenDetailViewer.cellLineMenu.value}"

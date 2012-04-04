@@ -191,7 +191,7 @@ public abstract class MetaDataTable<T extends MetaDataType> extends AbstractBack
         return BeanUtils.getProperty(metaDataType, _propertyName);
       }
       catch (Exception e) {
-        log.error(e.getMessage());
+        log.error("for metaDataType: " + metaDataType + ", of : " + metaDataType.getClass().getName() + ", "  + e.getMessage());
         return "<error>";
       }
     }

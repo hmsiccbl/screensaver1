@@ -261,15 +261,6 @@ public class ScreensaverProperties implements ScreensaverConstants
     return NullSafeUtils.nullSafeEquals(getFacilityKey(), facilityKey);
   }
 
-  /**
-   * @deprecated use {@link #getFacilityKey()}
-   */
-  @Deprecated
-  public boolean isLincsAppVersion()
-  {
-    return LincsScreensaverConstants.FACILITY_KEY.equals(getProperty(FACILITY_NAME));
-  }
-
   public boolean isAllowGuestLogin()
   {
     return getBooleanProperty("screensaver.ui.feature.allow_guest_access");

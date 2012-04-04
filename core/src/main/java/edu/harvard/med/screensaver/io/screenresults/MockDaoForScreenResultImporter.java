@@ -16,12 +16,16 @@ import java.util.Collection;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.SortedSet;
+
+import org.apache.log4j.Logger;
+import org.hibernate.ScrollableResults;
+import org.joda.time.DateTime;
 
 import com.google.common.collect.Maps;
 import com.google.common.collect.Sets;
-import org.apache.log4j.Logger;
-import org.hibernate.ScrollableResults;
 
+import edu.harvard.med.screensaver.db.CellsDAO;
 import edu.harvard.med.screensaver.db.DAOTransaction;
 import edu.harvard.med.screensaver.db.GenericEntityDAO;
 import edu.harvard.med.screensaver.db.HqlBuilderCallback;
@@ -33,6 +37,8 @@ import edu.harvard.med.screensaver.io.libraries.LibraryCopyPlateListParserResult
 import edu.harvard.med.screensaver.model.DuplicateEntityException;
 import edu.harvard.med.screensaver.model.Entity;
 import edu.harvard.med.screensaver.model.Volume;
+import edu.harvard.med.screensaver.model.cells.Cell;
+import edu.harvard.med.screensaver.model.cells.ExperimentalCellInformation;
 import edu.harvard.med.screensaver.model.cherrypicks.CherryPickRequest;
 import edu.harvard.med.screensaver.model.libraries.Copy;
 import edu.harvard.med.screensaver.model.libraries.CopyUsageType;
@@ -69,7 +75,7 @@ import edu.harvard.med.screensaver.model.users.LabHead;
  * @author <a mailto="andrew_tolopko@hms.harvard.edu">Andrew Tolopko</a>
  * @author <a mailto="john_sullivan@hms.harvard.edu">John Sullivan</a>
  */
-public class MockDaoForScreenResultImporter implements GenericEntityDAO, ScreenResultsDAO, LibrariesDAO
+public class MockDaoForScreenResultImporter implements GenericEntityDAO, ScreenResultsDAO, LibrariesDAO, CellsDAO
 {
   private static final Logger log = Logger.getLogger(MockDaoForScreenResultImporter.class);
 
@@ -531,5 +537,30 @@ public class MockDaoForScreenResultImporter implements GenericEntityDAO, ScreenR
   {
     return null;
   }
+
+	@Override
+	public SortedSet<ExperimentalCellInformation> findCellExperimentsFromCLOIds(String[] split) {
+		// TODO Auto-generated method stub
+		return null;
+	}
+	
+	public Set<Cell> findCellsByCloIds(String[] cloIds) {
+		return null;
+	}
+	
+	public 	Set<Cell> findCellsByHMSID(String[] split){
+		return null;
+	}
+	
+	public Set<String> findCanonicalCompoundsScreenedByWellId(Cell cell) 
+	{
+		return null;
+	}
+
+	@Override
+	public DateTime getLatestDataLoadingDate() {
+		// TODO Auto-generated method stub
+		return null;
+	}
 
 }

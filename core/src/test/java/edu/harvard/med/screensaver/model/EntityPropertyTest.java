@@ -20,6 +20,7 @@ import org.apache.log4j.Logger;
 
 import edu.harvard.med.screensaver.db.DAOTransaction;
 import edu.harvard.med.screensaver.model.annotations.ElementCollection;
+import edu.harvard.med.screensaver.model.annotations.IgnoreImmutabilityTest;
 import edu.harvard.med.screensaver.model.annotations.ToMany;
 import edu.harvard.med.screensaver.test.AbstractSpringPersistenceTest;
 import edu.harvard.med.screensaver.test.model.meta.DomainModelDefinitionException;
@@ -109,6 +110,10 @@ public class EntityPropertyTest<E extends AbstractEntity> extends AbstractSpring
   		log.error(new Exception("propertyDescriptor was null here"));
   		return;  // TODO: this implies that this test method is being run explicitly, so skip -sde4
   	}
+  	if(ModelIntrospectionUtil.isImmutableIgnoreTests(_entityClass)) {
+  		log.debug("class annotated with @Immutable and @IgnoreImmutabilityTest" );
+  		return;
+  	}
     log.info("testing entity property " + fullPropName(propertyDescriptor));
 
     Method getter = propertyDescriptor.getReadMethod();
@@ -138,7 +143,7 @@ public class EntityPropertyTest<E extends AbstractEntity> extends AbstractSpring
     else if (ModelIntrospectionUtil.isEntityIdProperty(_entityClass, propertyDescriptor)) {
     }
     else if (ModelIntrospectionUtil.isImmutableProperty(_entityClass, propertyDescriptor)) {
-      doTestImmutableProperty(propertyDescriptor);
+  		doTestImmutableProperty(propertyDescriptor);
     }
     else {
       doTestMutableProperty(propertyDescriptor);

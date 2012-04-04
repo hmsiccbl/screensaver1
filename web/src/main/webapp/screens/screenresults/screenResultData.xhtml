@@ -13,7 +13,7 @@
 <ui:composition>
 
   <h:form id="screenResultDataPanelsForm" enctype="multipart/form-data">
-    <ss:collapsiblePanel id="dataColumnsPanel" label="Data Columns"
+	    <ss:collapsiblePanel id="dataColumnsPanel" label="Data Columns"
       isCollapsed="#{screenResultViewer.isPanelCollapsedMap['dataColumnsTable']}"
       rendered="#{!empty screenResultViewer.entity &amp;&amp; !screenResultViewer.entity.restricted}">
       <ui:define name="content">

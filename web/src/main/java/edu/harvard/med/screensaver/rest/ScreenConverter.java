@@ -2,8 +2,11 @@
 package edu.harvard.med.screensaver.rest;
 
 import org.apache.log4j.Logger;
-import org.joda.time.LocalDate;
 import org.springframework.transaction.annotation.Transactional;
+
+import com.google.common.base.Function;
+import com.google.common.collect.Iterators;
+import com.google.common.collect.Lists;
 import com.thoughtworks.xstream.converters.MarshallingContext;
 import com.thoughtworks.xstream.converters.UnmarshallingContext;
 import com.thoughtworks.xstream.io.HierarchicalStreamReader;
@@ -11,6 +14,8 @@ import com.thoughtworks.xstream.io.HierarchicalStreamWriter;
 
 import edu.harvard.med.screensaver.db.DAOTransaction;
 import edu.harvard.med.screensaver.model.AttachedFile;
+import edu.harvard.med.screensaver.model.cells.Cell;
+import edu.harvard.med.screensaver.model.cells.ExperimentalCellInformation;
 import edu.harvard.med.screensaver.model.screens.ProjectPhase;
 import edu.harvard.med.screensaver.model.screens.Publication;
 import edu.harvard.med.screensaver.model.screens.Screen;
@@ -79,8 +84,16 @@ public class ScreenConverter extends RestConverter
             writeAttachedFile(af, writer);
           }
           writer.endNode();
+          
         }
-        
+        // TODO: make this write out the ExperimentalCellInformation when that data begins to be imported - sde4
+        util.writeNode(new EntityCollection.Cells(Lists.newArrayList(Iterators.transform(screen.getExperimentalCellInformationSet().iterator(), 
+     						new Function<ExperimentalCellInformation, Cell>(){
+
+     					@Override
+     					public Cell apply(ExperimentalCellInformation from) {
+     						return from.getCell();
+     					}}))), "cells");
       }
 
     });

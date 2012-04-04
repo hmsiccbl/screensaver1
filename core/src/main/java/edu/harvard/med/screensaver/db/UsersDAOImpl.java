@@ -78,7 +78,7 @@ public class UsersDAOImpl extends AbstractDAO implements UsersDAO
       throw new DuplicateEntityException(users.get(0));
     }
     if (users.size() == 1) {
-      log.info("found existing user " + users.get(0) + " for " + firstName + " " + lastName + ", " + email);
+      log.debug("found existing user " + users.get(0) + " for " + firstName + " " + lastName + ", " + email);
       return users.get(0);
     }
     return null;

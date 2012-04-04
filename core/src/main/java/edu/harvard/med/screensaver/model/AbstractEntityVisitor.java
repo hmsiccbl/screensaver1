@@ -11,6 +11,8 @@ package edu.harvard.med.screensaver.model;
 
 import edu.harvard.med.screensaver.model.activities.AdministrativeActivity;
 import edu.harvard.med.screensaver.model.activities.ServiceActivity;
+import edu.harvard.med.screensaver.model.cells.Cell;
+import edu.harvard.med.screensaver.model.cells.ExperimentalCellInformation;
 import edu.harvard.med.screensaver.model.cherrypicks.CherryPickAssayPlate;
 import edu.harvard.med.screensaver.model.cherrypicks.CherryPickLiquidTransfer;
 import edu.harvard.med.screensaver.model.cherrypicks.LabCherryPick;
@@ -158,4 +160,8 @@ public interface AbstractEntityVisitor<R>
   R visit(CellLine cellLine);
 
   R visit(TransfectionAgent transfectionAgent);
+
+	R visit(ExperimentalCellInformation experimentalCellInformation);
+
+	R visit(Cell cell);
 }

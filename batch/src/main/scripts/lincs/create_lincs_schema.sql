@@ -117,11 +117,59 @@
         primary key (attached_file_id, update_activity_id)
     );
 
+    create table cell (
+        cell_id int4 not null,
+        alternate_id varchar(255),
+        alternate_name varchar(255),
+        batch_id varchar(255),
+        cell_type varchar(255),
+        center_name varchar(255),
+        center_specific_id varchar(255),
+        clo_id varchar(255),
+        disease varchar(255),
+        facility_id varchar(255) not null unique,
+        genetic_modification varchar(255),
+        mutations text,
+        name varchar(255),
+        organ varchar(255),
+        organism varchar(255),
+        organism_gender varchar(255),
+        recommended_culture_conditions text,
+        tissue varchar(255),
+        vendor varchar(255),
+        vendor_catalog_id varchar(255),
+        verification text,
+        primary key (cell_id)
+    );
+
+    create table cell_growth_properties (
+        cell_id int4 not null,
+        growth_property text not null,
+        primary key (cell_id, growth_property)
+    );
+
     create table cell_line (
         cell_line_id int4 not null,
         value text not null unique,
         version int4 not null,
         primary key (cell_line_id)
+    );
+
+    create table cell_lineage (
+        cell_id int4 not null,
+        primary key (cell_id)
+    );
+
+    create table cell_markers (
+        cell_id int4 not null,
+        cell_markers text not null,
+        primary key (cell_id, cell_markers)
+    );
+
+    create table cell_related_projects (
+        cell_id int4 not null,
+        related_project text not null,
+        primary key (cell_id, related_project)
     );
 
     create table checklist_item (
@@ -195,6 +243,7 @@
         date_volume_approved date,
         keep_source_plate_cherry_picks_together bool not null,
         legacy_cherry_pick_request_number int4,
+        max_skipped_wells_per_plate int4,
         number_unfulfilled_lab_cherry_picks int4 not null,
         is_randomized_assay_plate_layout bool not null,
         transfer_volume_per_well_approved numeric(10, 9),
@@ -267,7 +316,6 @@
         data_column_id int4 not null,
         assay_phenotype text,
         assay_readout_type text,
-        cell_line text,
         channel int4,
         comments text,
         data_type text not null,
@@ -307,6 +355,13 @@
         primary key (equipment_used_id)
     );
 
+    create table experimental_cell_information (
+        experimental_cell_information_id int4 not null,
+        cell_id int4 not null,
+        screen_id int4 not null,
+        primary key (experimental_cell_information_id)
+    );
+
     create table funding_support (
         funding_support_id int4 not null,
         value text unique,
@@ -330,7 +385,8 @@
     create table gene_symbol (
         gene_id int4 not null,
         entrezgene_symbol text not null,
-        primary key (gene_id, entrezgene_symbol)
+        ordinal int4 not null,
+        primary key (gene_id, ordinal)
     );
 
     create table lab_activity (
@@ -475,6 +531,15 @@
         plate_id int4 not null,
         update_activity_id int4 not null unique,
         primary key (plate_id, update_activity_id)
+    );
+
+    create table primary_cell (
+        age_in_years int4 not null,
+        donor_ethnicity varchar(255),
+        donor_health_status varchar(255),
+        passage_number int4 not null,
+        cell_id int4 not null,
+        primary key (cell_id)
     );
 
     create table publication (
@@ -966,6 +1031,26 @@
         foreign key (attached_file_id) 
         references attached_file;
 
+    alter table cell_growth_properties 
+        add constraint fk_cell_growth_properties_to_cell 
+        foreign key (cell_id) 
+        references cell;
+
+    alter table cell_lineage 
+        add constraint fk_cell_lineage_to_cell 
+        foreign key (cell_id) 
+        references cell;
+
+    alter table cell_markers 
+        add constraint fk_cell_markers_to_cell 
+        foreign key (cell_id) 
+        references primary_cell;
+
+    alter table cell_related_projects 
+        add constraint fk_cell_related_projects_to_cell 
+        foreign key (cell_id) 
+        references cell;
+
     alter table checklist_item_event 
         add constraint fk_checklist_item_event_to_screening_room_user 
         foreign key (screening_room_user_id) 
@@ -1116,6 +1201,16 @@
         foreign key (lab_activity_id) 
         references lab_activity;
 
+    alter table experimental_cell_information 
+        add constraint fk_experimental_cell_information_link_to_cell 
+        foreign key (cell_id) 
+        references cell;
+
+    alter table experimental_cell_information 
+        add constraint fk_experimental_cell_information_set_to_screen 
+        foreign key (screen_id) 
+        references screen;
+
     alter table gene_genbank_accession_number 
         add constraint fk_gene_genbank_accession_number_to_gene 
         foreign key (gene_id) 
@@ -1255,6 +1350,11 @@
         add constraint FK361B029CAC7FFB69 
         foreign key (plate_id) 
         references plate;
+
+    alter table primary_cell 
+        add constraint fk_primary_cell_to_cell 
+        foreign key (cell_id) 
+        references cell;
 
     alter table publication 
         add constraint fk_publication_to_attached_file 
@@ -1598,6 +1698,8 @@
 
     create sequence attached_file_type_id_seq;
 
+    create sequence cell_id_seq;
+
     create sequence cell_line_id_seq;
 
     create sequence checklist_item_event_id_seq;
@@ -1613,6 +1715,8 @@
     create sequence data_column_id_seq;
 
     create sequence equipment_used_id_seq;
+
+    create sequence exp_cell_information_id_seq;
 
     create sequence funding_support_id_seq;
 

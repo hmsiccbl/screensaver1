@@ -220,7 +220,6 @@ public abstract class WellSearchResults extends TupleBasedEntitySearchResults<We
   private Boolean _isLINCS;
 
 
-
   public class RowsToFetchReference implements ValueReference<Integer>
   {
     @Override
@@ -411,7 +410,28 @@ public abstract class WellSearchResults extends TupleBasedEntitySearchResults<We
       setTableFilterMode(false);
     }
   }
+  
+  public void searchWellByWellId(final Set<String> wellIds, String title, Set<ScreenType> screenTypes)
+  {
+    setTitle(title);
+    setMode(WellSearchResultMode.SET_OF_WELLS);
+    _screenTypes = screenTypes;
+    TupleDataFetcher<Well,String> dataFetcher =
+      new TupleDataFetcher<Well,String>(Well.class, _dao) {
+        @Override
+        public void addDomainRestrictions(HqlBuilder hql)
+        {
+          DataFetcherUtil.addDomainRestrictions(hql, getRootAlias(), "wellId", wellIds);
+        }
+      };
+    initialize(dataFetcher);
 
+    // start with search panel closed
+    setTableFilterMode(false);
+
+    // TODO: should report # of well keys not found
+  }
+  
   public void searchWells(Set<WellKey> wellKeys, String title)
   {
     setTitle(title);
@@ -1349,18 +1369,18 @@ public abstract class WellSearchResults extends TupleBasedEntitySearchResults<We
     return columnDescription.toString();
   }
 
-  protected void setLINCS(boolean isLINCS)
-  {
-    _isLINCS = isLINCS;
-  }
-
-  protected boolean isLINCS()
-  {
-    if (_isLINCS == null) {
-      _isLINCS = getApplicationProperties().isFacility(LincsScreensaverConstants.FACILITY_KEY);
-    }
-    return _isLINCS;
-  }
+//  protected void setLINCS(boolean isLINCS)
+//  {
+//    _isLINCS = isLINCS;
+//  }
+//
+//  protected boolean isLINCS()
+//  {
+//    if (_isLINCS == null) {
+//      _isLINCS = getApplicationProperties().isFacility(LincsScreensaverConstants.FACILITY_KEY);
+//    }
+//    return _isLINCS;
+//  }
 
   private boolean accessSpecificLibraryContentsVersion()
   {

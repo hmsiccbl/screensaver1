@@ -84,6 +84,14 @@ public class ReagentFinderTest extends AbstractBackingBeanTest
             ((SmallMoleculeReagent)well.getLatestReleasedReagent()).forFacilityBatchId(1);
             log.info("setting: " + well + "," + well.getFacilityId());
           }
+          if(well.getWellId().equals("02000:A05"))
+          {
+            well.setFacilityId("HMSL99999");
+            ((SmallMoleculeReagent)well.getLatestReleasedReagent()).getCompoundNames().add("GDC-0941");
+            ((SmallMoleculeReagent)well.getLatestReleasedReagent()).forSaltFormId(1);
+            ((SmallMoleculeReagent)well.getLatestReleasedReagent()).forFacilityBatchId(1);
+            log.info("setting: " + well + "," + well.getFacilityId());
+          }
         }
         genericEntityDao.persistEntity(_library2);
       }
@@ -117,6 +125,12 @@ public class ReagentFinderTest extends AbstractBackingBeanTest
     reagentFinder.findWellsByNameFacilityVendorID();
     wellsBrowser.getRowCount();
     assertEquals(Sets.newHashSet("01000:A03", "02000:A03", "02000:A04"),
+                 Sets.newHashSet(Iterators.transform(wellsBrowser.getDataTableModel().iterator(), new TupleToKeyFunction<String>())));
+
+    reagentFinder.setNameFacilityVendorIDInput("GDC-0941");
+    reagentFinder.findWellsByNameFacilityVendorID();
+    wellsBrowser.getRowCount();
+    assertEquals(Sets.newHashSet("02000:A05"),
                  Sets.newHashSet(Iterators.transform(wellsBrowser.getDataTableModel().iterator(), new TupleToKeyFunction<String>())));
     
   }

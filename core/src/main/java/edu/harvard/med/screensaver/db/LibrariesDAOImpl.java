@@ -23,6 +23,7 @@ import javax.persistence.TypedQuery;
 
 import org.apache.log4j.Logger;
 import org.hibernate.Session;
+import org.joda.time.DateTime;
 import org.joda.time.LocalDate;
 
 import com.google.common.base.Function;
@@ -41,6 +42,7 @@ import edu.harvard.med.screensaver.model.BusinessRuleViolationException;
 import edu.harvard.med.screensaver.model.DuplicateEntityException;
 import edu.harvard.med.screensaver.model.Volume;
 import edu.harvard.med.screensaver.model.VolumeUnit;
+import edu.harvard.med.screensaver.model.activities.AdministrativeActivityType;
 import edu.harvard.med.screensaver.model.libraries.Copy;
 import edu.harvard.med.screensaver.model.libraries.CopyUsageType;
 import edu.harvard.med.screensaver.model.libraries.Gene;
@@ -119,15 +121,20 @@ public class LibrariesDAOImpl extends AbstractDAO implements LibrariesDAO
     return Sets.newHashSet(reagents);
   }
 
+  /**
+   * @param facilityId required
+   * @param saltId optional, if null, return all
+   * @param batchId optional if null, return all
+   */
   public Set<SmallMoleculeReagent> findReagents(String facilityId, Integer saltId, Integer batchId, boolean latestReleasedVersionsOnly)
   {
     final HqlBuilder hql = new HqlBuilder();
     hql.from(SmallMoleculeReagent.class, "r").
       from("r", SmallMoleculeReagent.well, "w", JoinType.LEFT_FETCH).
       from("w", Well.library, "l", JoinType.LEFT_FETCH).
-      where("w", "facilityId", Operator.EQUAL, facilityId).
-      where("r", "saltFormId", Operator.EQUAL, saltId).
-      where("r", SmallMoleculeReagent.facilityBatchId.getPropertyName(), Operator.EQUAL, batchId);
+      where("w", "facilityId", Operator.EQUAL, facilityId);
+    if(saltId != null) hql.where("r", "saltFormId", Operator.EQUAL, saltId);
+    if(batchId != null) hql.where("r", SmallMoleculeReagent.facilityBatchId.getPropertyName(), Operator.EQUAL, batchId);
     if (latestReleasedVersionsOnly) {
       hql.from("w", Well.latestReleasedReagent, "lrr").
       where("lrr", Operator.EQUAL, "r");
@@ -840,4 +847,15 @@ public class LibrariesDAOImpl extends AbstractDAO implements LibrariesDAO
     }
     return result.get(0);
   }
+  
+  @Override
+	public DateTime getLatestDataLoadingDate() {
+		String hql = "select max(a.dateCreated)  from AdministrativeActivity a  where a.type = ?";
+		List<DateTime> time = (List<DateTime>) getHibernateSession().createQuery(hql)
+				.setParameter(0, AdministrativeActivityType.LIBRARY_CONTENTS_LOADING).list();
+		if (time.isEmpty()) {
+			return null;
+		}
+		return time.get(0);
+	}
 }

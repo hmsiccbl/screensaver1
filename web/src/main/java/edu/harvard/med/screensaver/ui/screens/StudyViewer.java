@@ -69,7 +69,7 @@ public class StudyViewer<E extends Study> extends SearchResultContextEntityViewe
                      AttachedFiles attachedFiles)
   {
     super(thisProxy,
-          (Class<E>) Study.class,
+          (Class<E>) Screen.class,
           ScreensaverConstants.BROWSE_STUDIES,
           ScreensaverConstants.VIEW_STUDY,
           dao,

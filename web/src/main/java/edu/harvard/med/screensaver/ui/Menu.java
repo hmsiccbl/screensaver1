@@ -10,13 +10,16 @@
 package edu.harvard.med.screensaver.ui;
 
 
+import java.util.Date;
+
 import org.apache.log4j.Logger;
+import org.joda.time.format.DateTimeFormat;
 import org.springframework.transaction.annotation.Transactional;
 
 import edu.harvard.med.screensaver.db.Criterion;
+import edu.harvard.med.screensaver.db.Criterion.Operator;
 import edu.harvard.med.screensaver.db.GenericEntityDAO;
 import edu.harvard.med.screensaver.db.LibrariesDAO;
-import edu.harvard.med.screensaver.db.Criterion.Operator;
 import edu.harvard.med.screensaver.model.libraries.Library;
 import edu.harvard.med.screensaver.model.screens.Screen;
 import edu.harvard.med.screensaver.model.screens.ScreenType;
@@ -32,6 +35,7 @@ import edu.harvard.med.screensaver.ui.arch.datatable.column.TableColumn;
 import edu.harvard.med.screensaver.ui.arch.view.AbstractBackingBean;
 import edu.harvard.med.screensaver.ui.arch.view.aspects.UICommand;
 import edu.harvard.med.screensaver.ui.attachedFiles.AttachedFileSearchResults;
+import edu.harvard.med.screensaver.ui.cells.CellSearchResults;
 import edu.harvard.med.screensaver.ui.cherrypickrequests.CherryPickRequestSearchResults;
 import edu.harvard.med.screensaver.ui.libraries.LibraryCopyPlateSearchResults;
 import edu.harvard.med.screensaver.ui.libraries.LibraryCopySearchResults;
@@ -56,6 +60,7 @@ public class Menu extends AbstractBackingBean
   private ScreenSearchResults _screensBrowser;
   private StudySearchResults _studiesBrowser;
   private CherryPickRequestSearchResults _cherryPickRequestsBrowser;
+  private CellSearchResults _cellsBrowser;
   private LibrarySearchResults _librariesBrowser;
   private LibraryCopySearchResults _copiesBrowser;
   private LibraryCopyPlateSearchResults _libraryCopyPlatesBrowser;
@@ -81,6 +86,7 @@ public class Menu extends AbstractBackingBean
               ScreenSearchResults screensBrowser,
               StudySearchResults studiesBrowser,
               CherryPickRequestSearchResults cherryPickRequestsBrowser,
+              CellSearchResults cellsBrowser,
               LibrarySearchResults librariesBrowser,
               LibraryCopySearchResults copiesBrowser,
               LibraryCopyPlateSearchResults libraryCopyPlatesBrowser,
@@ -99,6 +105,7 @@ public class Menu extends AbstractBackingBean
     _screensBrowser = screensBrowser;
     _studiesBrowser = studiesBrowser;
     _cherryPickRequestsBrowser = cherryPickRequestsBrowser;
+    _cellsBrowser = cellsBrowser;
     _librariesBrowser = librariesBrowser;
     _copiesBrowser = copiesBrowser;
     _libraryCopyPlatesBrowser = libraryCopyPlatesBrowser;
@@ -293,6 +300,13 @@ public class Menu extends AbstractBackingBean
     _cherryPickRequestsBrowser.searchAll();
     return BROWSE_CHERRY_PICK_REQUESTS;
   }
+  
+  @UICommand
+  public String browseCells()
+  {
+    _cellsBrowser.searchAll();
+    return BROWSE_CELLS;
+  }
 
   @UICommand
   public String browseRnaiCherryPickRequests()
@@ -361,5 +375,10 @@ public class Menu extends AbstractBackingBean
   public String addLabHead()
   {
     return _userViewer.editNewEntity(new LabHead((AdministratorUser) getScreensaverUser()));
+  }
+  
+  public String getLastLoadedDate()
+  {
+  	return DateTimeFormat.forPattern("yyyy-MM-dd").print(_librariesDao.getLatestDataLoadingDate());
   }
 }

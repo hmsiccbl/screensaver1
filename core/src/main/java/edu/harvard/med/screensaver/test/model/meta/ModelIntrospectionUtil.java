@@ -33,6 +33,7 @@ import edu.harvard.med.screensaver.model.annotations.Column;
 import edu.harvard.med.screensaver.model.annotations.ContainedEntity;
 import edu.harvard.med.screensaver.model.annotations.Derived;
 import edu.harvard.med.screensaver.model.annotations.ElementCollection;
+import edu.harvard.med.screensaver.model.annotations.IgnoreImmutabilityTest;
 import edu.harvard.med.screensaver.model.annotations.ToMany;
 import edu.harvard.med.screensaver.model.annotations.ToOne;
 import edu.harvard.med.screensaver.util.DevelopmentException;
@@ -250,6 +251,11 @@ public class ModelIntrospectionUtil
   public static boolean isTransientProperty(PropertyDescriptor propertyDescriptor)
   {
     return hasAnnotation(Transient.class, propertyDescriptor);
+  }
+  
+  public static boolean isImmutableIgnoreTests(Class<? extends AbstractEntity> beanClass)
+  {
+  	return  beanClass.getAnnotation(Immutable.class) != null && beanClass.getAnnotation(IgnoreImmutabilityTest.class) != null;
   }
 
   public static boolean isImmutableProperty(Class<? extends AbstractEntity> beanClass, PropertyDescriptor propertyDescriptor)

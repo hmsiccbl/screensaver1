@@ -180,19 +180,22 @@ public class ReagentFinder extends AbstractBackingBean
     boolean isQuoted = false;
     Set<String> values = Sets.newHashSet();
     for (String value : StringUtils.tokenizeQuotedWordList(_nameFacilityVendorIDInput)) {
-    	String temp = value;
-      value = value.replaceAll("\"|'+", ""); // remove quote characters left in by the tokenizer
-      if(!temp.equals(value) ) isQuoted = true; // in response to [#3452] -sde
-      if(!isQuoted)  value = value.trim();
-      if (StringUtils.isEmpty(value)) {
+    	values.add(value); // add the "unparsed" value as a search as well.
+    	String parsedValue = value;
+    	parsedValue = parsedValue.replaceAll("\"|'+", ""); // remove quote characters left in by the tokenizer
+      if(!parsedValue.equals(value) ) {
+      	isQuoted = true; // in response to [#3452] -sde
+      }
+      if(!isQuoted)  parsedValue = parsedValue.trim();
+      if (StringUtils.isEmpty(parsedValue)) {
         continue;
       }
       // remove zero padding if salt - batch id were entered
-      Matcher matcher = FACILITY_SALT_BATCH_PATTERN.matcher(value);
+      Matcher matcher = FACILITY_SALT_BATCH_PATTERN.matcher(parsedValue);
       if(!isQuoted) {
 	      if(matcher.matches())
 	      {
-	        temp = matcher.group(1);
+	        String temp = matcher.group(1);
 	        try {
 	          Integer id = Integer.parseInt(matcher.group(2));
 	          temp += "-" + id;
@@ -202,14 +205,14 @@ public class ReagentFinder extends AbstractBackingBean
 	            temp += "-" + id;
 	          }
 	          log.info("search string: " + value + ", formatted: " + temp);
-	          value = temp;
+	          parsedValue = temp;
 	        }
 	        catch (NumberFormatException e) {
-	          log.info("input string parse error for the facility-salt-batch pattern: " + FACILITY_SALT_BATCH_PATTERN + ", \"" + value + "\"", e);
+	          log.info("input string parse error for the facility-salt-batch pattern: " + FACILITY_SALT_BATCH_PATTERN + ", \"" + parsedValue + "\"", e);
 	        }
 	      }
       }
-      values.add(value);
+      if(!parsedValue.equals(value)) values.add(parsedValue);
     }
     return values;
   }

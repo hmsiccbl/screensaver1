@@ -1,0 +1,33 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+<html xmlns="http://www.w3.org/1999/xhtml"
+	xmlns:ui="http://java.sun.com/jsf/facelets"
+	xmlns:h="http://java.sun.com/jsf/html"
+	xmlns:f="http://java.sun.com/jsf/core"
+	xmlns:t="http://myfaces.apache.org/tomahawk"
+	xmlns:s="http://myfaces.apache.org/sandbox"
+	xmlns:ss="http://screensaver.med.harvard.edu/ui">
+
+	<!-- facelet params:
+         - entity: AbstractEntity
+         - property: property to be displayed as the link text (optional, defaults to entityId)
+	       - viewer: EntityViewer
+	 -->
+
+<ui:composition>
+        <t:dataList id="#{id}#{type}EntityLinkList" var="entity"
+          value="#{value}" layout="simple"
+          rowIndexVar="eltIndex" rowCountVar="eltCount" cellspacing="5">
+
+					<t:commandLink id="#{id}Link" action="#{viewer.viewEntity}"
+						styleClass="entityLink #{styleClass}">
+						<f:param name="entityId" value="#{entity.entityId}" />
+						<ui:insert name="linkValue">
+							<t:outputText id="#{id}LinkValue"
+								value="#{empty property ? entity.entityId : entity[property]}#{eltIndex &lt; (eltCount-1) ? ',':''}" />
+						</ui:insert>
+					</t:commandLink>
+	</t:dataList>
+</ui:composition>
+
+</html>

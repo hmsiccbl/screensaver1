@@ -41,6 +41,11 @@ public class ParseError
     return _location;
   }
   
+  public void setErrorLocation(Object o)
+  {
+  	_location = o;
+  }
+  
   /**
    * @motivation for unit testing
    */

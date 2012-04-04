@@ -3,6 +3,7 @@ package edu.harvard.med.screensaver.rest;
 import java.util.Collection;
 
 import edu.harvard.med.screensaver.model.Entity;
+import edu.harvard.med.screensaver.model.cells.Cell;
 import edu.harvard.med.screensaver.model.libraries.Reagent;
 import edu.harvard.med.screensaver.model.screenresults.DataColumn;
 
@@ -98,6 +99,14 @@ public class EntityCollection<E extends Entity>
     public Reagents(Collection collection)
     {
       super(Reagent.class, collection);
+    }
+  };
+  
+  public static class Cells extends EntityCollection
+  {
+    public Cells(Collection collection)
+    {
+      super(Cell.class, collection);
     }
   };
 }

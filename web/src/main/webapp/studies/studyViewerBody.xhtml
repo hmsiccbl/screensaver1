@@ -32,6 +32,23 @@
   <!--  old: 
   ui:include src="studyDetailViewer.xhtml" 
   -->
+  <t:div rendered="#{studyDetailViewer.applicationProperties.facilityKey == 'lincs' &amp;&amp; studyDetailViewer.hasCells }">
+		<h:form id="cellsScreenedForm" 
+        >
+			<ss:collapsiblePanel id="cellsForStudyPanel" label="Cells"
+        
+				isCollapsed="#{studyDetailViewer.isPanelCollapsedMap['cellsForScreen']}">
+				<ui:define name="content">
+				</ui:define>
+			</ss:collapsiblePanel>
+		</h:form>
+
+	<!-- Warning: ss:searchResult must be included outside of h:form elements -->
+	<t:div
+		rendered="#{!studyDetailViewer.isPanelCollapsedMap['cellsForScreen']}">
+		<ss:searchResult searchResults="#{studyDetailViewer.cellSearchResults}" />
+	</t:div>
+</t:div>
 
   <h:form id="studyAnnotationsPanelForm">
    <t:collapsiblePanel id="annotationTypesPanel"

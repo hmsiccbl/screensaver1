@@ -94,12 +94,12 @@ public class CellVocabularyParser<T> implements CellValueParser<T>
   
   public T parse(Cell cell) 
   {
-    return doParse(cell.getString(), cell);
+    return doParse(cell.getString(), cell);  
   }
 
   public List<T> parseList(Cell cell) {
     List<T> result = new ArrayList<T>();
-    String textMultiValue = cell.getString();
+    String textMultiValue = cell.getAsString();
     if (textMultiValue == null) {
       return result;
     }

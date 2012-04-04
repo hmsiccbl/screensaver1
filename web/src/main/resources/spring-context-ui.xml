@@ -191,6 +191,7 @@
     <constructor-arg ref="screensBrowser" />
     <constructor-arg ref="studiesBrowser" />
     <constructor-arg ref="cherryPickRequestsBrowser" />
+    <constructor-arg ref="cellsBrowser" />
     <constructor-arg ref="librariesBrowser" />
     <constructor-arg ref="libraryCopiesBrowser" />
     <constructor-arg ref="libraryCopyPlatesBrowser" />
@@ -626,6 +627,7 @@
     <constructor-arg ref="studyViewer" />
     <constructor-arg ref="genericEntityDao" />
     <constructor-arg ref="usersDao" />
+    <constructor-arg ref="cellsBrowser" />
     <property
       name="entityEditPolicy"
       ref="entityEditPolicy" />
@@ -693,6 +695,7 @@
     <constructor-arg ref="screeningDuplicator" />
     <constructor-arg ref="attachedFiles" />
     <constructor-arg ref="screenGenerator" />
+    <constructor-arg ref="cellsBrowser" />
     <property
       name="entityUpdateHistoryBrowser"
       ref="entityUpdateHistoryBrowser" />
@@ -1081,6 +1084,56 @@
     <aop:scoped-proxy/>
   </bean>
     
+  <bean
+    id="cellsBrowser"
+    parent="uiBean"
+    scope="session"
+    class="edu.harvard.med.screensaver.ui.cells.CellSearchResults">
+    <constructor-arg ref="genericEntityDao" />
+    <constructor-arg ref="cellViewer" />
+    <aop:scoped-proxy/>
+  </bean>
+
+  <bean
+    id="cellViewer"
+    parent="uiBean"
+    scope="session"
+    class="edu.harvard.med.screensaver.ui.cells.CellViewer">
+    <constructor-arg ref="cellViewer" />
+    <constructor-arg ref="cellsBrowser" />
+    <constructor-arg ref="wellsBrowser" />
+    <constructor-arg ref="screenCellsBrowser" />
+    <constructor-arg ref="genericEntityDao" />
+    <constructor-arg ref="cellsDao" />
+    <aop:scoped-proxy/>
+  </bean>
+
+  <bean
+    id="screenCellsBrowser"
+    parent="uiBean"
+    scope="session"
+    class="edu.harvard.med.screensaver.ui.cells.ScreenCellSearchResults">
+    <constructor-arg ref="screenCellViewer" />
+    <constructor-arg ref="screenViewer" />
+    <constructor-arg ref="studyViewer"/>
+    <constructor-arg ref="cellViewer" />
+    <constructor-arg ref="genericEntityDao" />
+    <aop:scoped-proxy/>
+  </bean>
+
+  <bean
+    id="screenCellViewer"
+    parent="uiBean"
+    scope="session"
+    class="edu.harvard.med.screensaver.ui.cells.ScreenCellViewer">
+    <constructor-arg ref="screenCellViewer" />
+    <constructor-arg ref="screenCellsBrowser" />
+    <constructor-arg ref="genericEntityDao" />
+    <aop:scoped-proxy/>
+  </bean>
+
+
+
   <!-- converters -->
 
   <bean id="operatorConverter" class="edu.harvard.med.screensaver.ui.arch.util.converter.OperatorConverter" />

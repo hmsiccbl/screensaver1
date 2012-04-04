@@ -38,7 +38,7 @@ then
 elif [[ "$SERVER" == "LOCAL" ]] || [[ "$SERVER" == "local" ]] 
 then
   DIR=.
-  DATA_DIRECTORY=${2:-/home/sde4/sean/docs/work/LINCS/data/current}
+  DATA_DIRECTORY=${2:-/home/sde4/sean/docs/work/LINCS/data/dev}
   export SCREENSAVER_PROPERTIES_FILE=${3:-/home/sde4/workspace/current/screensaver.properties.LINCS}
   DB=${4:-screensavergo}
   DB_USER=${5:-screensavergo}
@@ -227,8 +227,8 @@ check_errs $? "lincs-users.sql fails"
 
 ## Create the cells
 
-## ./run.sh edu.harvard.med.iccbl.screensaver.io.cells.CellImporter \
--f $DATA_DIRECTORY/LINCS_CL_metadata.xls
+./run.sh edu.harvard.med.iccbl.screensaver.io.cells.CellImporter \
+-f $DATA_DIRECTORY/LINCS_Cells.djw.20120403.xls
 
 ## Create the screens
 
@@ -2500,9 +2500,9 @@ check_errs $? "create screen result import fails"
 -AE $ECOMMONS_ADMIN  \
 -st SMALL_MOLECULE  \
 -hf $LAB_HEAD_FIRST -hl $LAB_HEAD_LAST -he $LAB_HEAD_EMAIL -lf $LEAD_SCREENER_FIRST -ll $LEAD_SCREENER_LAST -le $LEAD_SCREENER_EMAIL \
--t 'Tang Proliferation/Mitosis: SNB75 cells.'  \
+-t 'Tang Proliferation/Mitosis: NCI-H810 cells.'  \
 -i 10047 \
---summary "Tang Proliferation/Mitosis: SNB75 cells. Dose response of anti-mitotic compounds in human cancer cell line SNB75 at 24, 48 and 72 hours to determine effect on cell proliferation and mitosis." \
+--summary "Tang Proliferation/Mitosis: NCI-H810 cells. Dose response of anti-mitotic compounds in human cancer cell line NCI-H810 at 24, 48 and 72 hours to determine effect on cell proliferation and mitosis." \
 -p '1. On Day 1, seed ~2000-3000 cells in 30 uL of growth medium into each well of a 384-well clear-bottom black assay plate (Corning 3712), using a WellMate plate filler in a cell culture hood. 
 
 2. On Day 2, pin transfer performed by an ICCB-Longwood Screening Facility staff member using an Epson robot system. The pin transfer adds 100nL of each diluted compound from the 384-well compound library plate to each well of the assay plate.
@@ -2549,7 +2549,7 @@ check_errs $? "create screen fails"
 
 ./run.sh edu.harvard.med.screensaver.io.screenresults.ScreenResultImporter \
 -AE $ECOMMONS_ADMIN \
--f $DATA_DIRECTORY/screen/tang_ProMitosis_SNB75.xls \
+-f $DATA_DIRECTORY/screen/tang_ProMitosis_NCI-H810.xls \
 -s 10047 -i
 check_errs $? "create screen result import fails"
 
@@ -4315,6 +4315,11 @@ check_errs $? "create study fails"
 --parseLincsSpecificFacilityID \
 --summary "`cat $DATA_DIRECTORY/study/ambit_protocol.txt`"
 check_errs $? "create study fails"
+
+## Link Cells to Screens and Studies through the ExperimentalCellInformation load
+
+./run.sh edu.harvard.med.iccbl.screensaver.io.cells.ExperimentalCellInformationImporter -f $DATA_DIRECTORY/LINCS_ExperimentalCellInformation.djw.20120403.xls
+
 
 ## [#3110] Track data received date, data publicized date for compounds, studies, screens
 

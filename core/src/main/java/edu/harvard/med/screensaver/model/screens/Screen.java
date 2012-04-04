@@ -67,6 +67,7 @@ import edu.harvard.med.screensaver.model.activities.AdministrativeActivity;
 import edu.harvard.med.screensaver.model.activities.AdministrativeActivityType;
 import edu.harvard.med.screensaver.model.annotations.Derived;
 import edu.harvard.med.screensaver.model.annotations.ToMany;
+import edu.harvard.med.screensaver.model.cells.ExperimentalCellInformation;
 import edu.harvard.med.screensaver.model.cherrypicks.CherryPickLiquidTransfer;
 import edu.harvard.med.screensaver.model.cherrypicks.CherryPickLiquidTransferStatus;
 import edu.harvard.med.screensaver.model.cherrypicks.CherryPickRequest;
@@ -125,6 +126,7 @@ public class Screen extends Study implements AttachedFilesEntity<ScreenAttachedF
   public static final RelationshipPath<Screen> pinTransferApprovalActivity = thisEntity.to("pinTransferApprovalActivity", Cardinality.TO_ONE);
   public static final RelationshipPath<Screen> reagents = thisEntity.to("reagents");
   public static final RelationshipPath<Screen> assayPlates = thisEntity.to("assayPlates");
+  public static final RelationshipPath<Screen> experimentalCellInfomationSet = thisEntity.to("experimentalCellInformationSet");
 
   public static final Function<Screen,String> ToFacilityId = new Function<Screen,String>() {
     public String apply(Screen screen)
@@ -225,8 +227,9 @@ public class Screen extends Study implements AttachedFilesEntity<ScreenAttachedF
   private MolarConcentration perturbagenMolarConcentration;
   private BigDecimal perturbagenUgMlConcentration;
   
-  // public constructors
+  // lincs screen
 
+  private SortedSet<ExperimentalCellInformation> _experimentalCellInformationSet = Sets.newTreeSet();
 
   /**
    * Construct an uninitialized <code>Screen</code>.
@@ -2072,4 +2075,21 @@ public class Screen extends Study implements AttachedFilesEntity<ScreenAttachedF
   {
     return this.perturbagenUgMlConcentration;
   }
+  /**
+   */
+  @OneToMany(mappedBy = "screen", cascade = { CascadeType.ALL }, orphanRemoval = false)
+  @ToMany(hasNonconventionalMutation=true )
+  @org.hibernate.annotations.Sort(type=org.hibernate.annotations.SortType.NATURAL)  
+  @org.hibernate.annotations.ForeignKey(name = "fk_experimental_cell_information_set_to_screen")
+  public Set<ExperimentalCellInformation> getExperimentalCellInformationSet()
+  {
+    return _experimentalCellInformationSet;
+  }
+  
+  
+  public void setExperimentalCellInformationSet(SortedSet<ExperimentalCellInformation> value)
+  {
+  	_experimentalCellInformationSet = value;
+  }
+  
 }

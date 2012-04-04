@@ -239,5 +239,17 @@
     <constructor-arg ref="genericEntityDao" />
     <constructor-arg ref="cherryPickPlateSourceWellMinimumVolumePolicy" />
   </bean>
+
+	<bean id="cellParser" class=" edu.harvard.med.screensaver.io.cells.CellParser"
+		scope="singleton">
+		<constructor-arg ref="genericEntityDao" />
+	</bean>
+	
+	<bean id="experimentalCellInformationParser" class=" edu.harvard.med.screensaver.io.cells.ExperimentalCellInformationParser"
+		scope="singleton">
+		<constructor-arg ref="genericEntityDao" />
+		<constructor-arg ref="screenDao" />
+		<constructor-arg ref="cellsDao" />
+	</bean>
   
 </beans>

@@ -49,4 +49,9 @@ public class DataFetcherUtil
     hql.whereIn(rootAlias, "id", entityKeys);
   }
 
+  static public <K> void addDomainRestrictions(HqlBuilder hql, String rootAlias, String property, Set<K> entityKeys)
+  {
+    hql.whereIn(rootAlias, property, entityKeys);
+  }
+
 }

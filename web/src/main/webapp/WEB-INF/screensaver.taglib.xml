@@ -108,6 +108,11 @@
     <tag>
       <tag-name>entityLink</tag-name>
       <source>../util/entityLink.xhtml</source>
+    </tag>  
+      
+    <tag>
+      <tag-name>listOfEntityLinks</tag-name>
+      <source>../util/listOfEntityLinks.xhtml</source>
     </tag>
     
     <tag>

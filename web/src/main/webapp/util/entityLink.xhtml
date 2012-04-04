@@ -12,12 +12,13 @@
          - entity: AbstractEntity
          - property: property to be displayed as the link text (optional, defaults to entityId)
 	       - viewer: EntityViewer
+	       - rendered - defaults to true
 	 -->
 
 <ui:composition>
 
   <t:commandLink id="#{id}Link" action="#{viewer.viewEntity}"
-    styleClass="entityLink #{styleClass}">
+    styleClass="entityLink #{styleClass}" rendered="#{empty rendered ? true : rendered }">
     <f:param name="entityId" value="#{entity.entityId}" />
     <ui:insert name="linkValue">
       <t:outputText id="#{id}LinkValue"

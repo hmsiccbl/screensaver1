@@ -535,6 +535,7 @@ public class ScreenSearchResults extends EntityBasedEntitySearchResults<Screen,I
     });
     columns.get(columns.size() - 1).setVisible(false);
 
+    // Non-LINCS Cell Line
     columns.add(new TextEntityColumn<Screen>(RelationshipPath.from(Screen.class).toProperty("cellLine"),
       "Cell Line", "The cell line", TableColumn.UNGROUPED) {
       @Override

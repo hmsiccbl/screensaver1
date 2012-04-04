@@ -16,7 +16,6 @@ import edu.harvard.med.screensaver.model.screens.Screen;
 import edu.harvard.med.screensaver.model.users.ScreeningRoomUser;
 
 /**
- * TODO: consider a class hierarchy of ScreensaverUserConverter<-ScreeningRoomUserConverter<-LabHeadConverter
  */
 @Component
 public class AnnotationTypeConverter extends RestConverter

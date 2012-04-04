@@ -113,6 +113,9 @@
       <props>
         <prop key="libraries">edu.harvard.med.screensaver.rest.EntityCollection.Libraries</prop>
         <prop key="library">edu.harvard.med.screensaver.model.libraries.Library</prop>
+        <prop key="cell">edu.harvard.med.screensaver.model.cells.Cell</prop>
+        <prop key="cell">edu.harvard.med.screensaver.model.cells.CellLineage</prop>
+        <prop key="cells">edu.harvard.med.screensaver.rest.EntityCollection.Cells</prop>
         <prop key="well">edu.harvard.med.screensaver.model.libraries.Well</prop>
         <prop key="reagents">edu.harvard.med.screensaver.rest.EntityCollection.Reagents</prop>
         <prop key="screens">edu.harvard.med.screensaver.rest.EntityCollection.Screens</prop>
@@ -146,6 +149,7 @@
         <bean id="dataColumnConverter" class="edu.harvard.med.screensaver.rest.DataColumnConverter" />
         <bean id="dataColumnValuesConverter" class="edu.harvard.med.screensaver.rest.DataColumnValuesConverter" />
         <bean id="studyColumnValuesConverter" class="edu.harvard.med.screensaver.rest.StudyColumnValuesConverter" />
+        <bean id="cellConverter" class="edu.harvard.med.screensaver.rest.CellConverter" />
         <bean id="wellConverter" class="edu.harvard.med.screensaver.rest.WellConverter" />
         <bean id="dateConverter" class="edu.harvard.med.screensaver.rest.DateConverter" />
         <bean id="labHeadConverter" class="edu.harvard.med.screensaver.rest.LabHeadConverter" />

@@ -249,7 +249,23 @@
         </ui:define>
       </ss:collapsiblePanel>
     </h:form>
+  <t:div rendered="#{screenViewer.applicationProperties.facilityKey == 'lincs'}">
+		<h:form id="cellsScreenedForm" 
+        >
+			<ss:collapsiblePanel id="cellsForScreenPanel" label="Cells"
+        rendered="#{screenViewer.applicationProperties.facilityKey == 'lincs'}"
+				isCollapsed="#{screenDetailViewer.isPanelCollapsedMap['cellsForScreen']}">
+				<ui:define name="content">
+				</ui:define>
+			</ss:collapsiblePanel>
+		</h:form>
 
+	<!-- Warning: ss:searchResult must be included outside of h:form elements -->
+	<t:div
+		rendered="#{screenDetailViewer.applicationProperties.facilityKey == 'lincs' &amp;&amp; !screenDetailViewer.isPanelCollapsedMap['cellsForScreen']}">
+		<ss:searchResult searchResults="#{screenDetailViewer.cellSearchResults}" />
+	</t:div>
+</t:div>
     <ui:include src="screenresults/screenResultData.xhtml" />
 
   </t:panelGrid>

@@ -37,7 +37,7 @@ public interface ScreenResultWorkbookSpecification
     CHANNEL("Channel"),
     TIME_POINT_ORDINAL("Time point ordinal"),
     ZDEPTH_ORDINAL("Zdepth ordinal"),
-    CELL_LINE("Cell Line");
+    CLO_ID("CLO ID");
 
     private String _displayText;
 

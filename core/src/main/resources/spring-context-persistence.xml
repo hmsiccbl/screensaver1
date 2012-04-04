@@ -142,6 +142,13 @@
     <constructor-arg ref="genericEntityDao" />
   </bean>
   
+  <bean
+    id="cellsDao"
+    class="edu.harvard.med.screensaver.db.CellsDAOImpl">
+    <constructor-arg ref="genericEntityDao" />
+    <constructor-arg ref="librariesDao" />
+  </bean>
+
   
   <bean
     id="schemaUtil"

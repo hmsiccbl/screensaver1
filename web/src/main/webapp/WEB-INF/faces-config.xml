@@ -316,7 +316,18 @@ Config 1.1//EN" "http://java.sun.com/dtd/web-facesconfig_1_1.dtd">
       <to-view-id>/attachedFiles/attachedFilesBrowser</to-view-id>
       <redirect/>
     </navigation-case>
-    
+
+    <!-- === cells navigation rules === -->
+    <navigation-case>
+      <from-outcome>browseCells</from-outcome>
+      <to-view-id>/cells/cellsBrowser</to-view-id>
+      <redirect/>
+    </navigation-case>
+    <navigation-case>
+      <from-outcome>viewCell</from-outcome>
+      <to-view-id>/cells/cellViewer</to-view-id>
+      <redirect/>
+    </navigation-case>    
     
   </navigation-rule>
 

@@ -74,6 +74,7 @@ public class HibernateConsole
         }
         catch (Exception e) {
           System.out.println("Hibernate Error: " + e.getMessage());
+          log.error("Hibernate error", e);
         }
         System.out.println();
       } while (true);

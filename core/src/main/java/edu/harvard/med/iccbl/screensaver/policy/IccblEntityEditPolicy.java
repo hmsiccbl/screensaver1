@@ -13,6 +13,8 @@ import edu.harvard.med.screensaver.model.AttachedFile;
 import edu.harvard.med.screensaver.model.AttachedFileType;
 import edu.harvard.med.screensaver.model.activities.AdministrativeActivity;
 import edu.harvard.med.screensaver.model.activities.ServiceActivity;
+import edu.harvard.med.screensaver.model.cells.Cell;
+import edu.harvard.med.screensaver.model.cells.ExperimentalCellInformation;
 import edu.harvard.med.screensaver.model.cherrypicks.CherryPickAssayPlate;
 import edu.harvard.med.screensaver.model.cherrypicks.CherryPickLiquidTransfer;
 import edu.harvard.med.screensaver.model.cherrypicks.LabCherryPick;
@@ -361,4 +363,14 @@ public class IccblEntityEditPolicy implements EntityEditPolicy
   {
     return true;
   }
+
+	@Override
+	public Boolean visit(ExperimentalCellInformation experimentalCellInformation) {
+		return true;
+	}
+
+	@Override
+	public Boolean visit(Cell cell) {
+		return true;
+	}
 }

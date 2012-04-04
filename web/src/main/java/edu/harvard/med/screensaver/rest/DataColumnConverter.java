@@ -43,7 +43,7 @@ public class DataColumnConverter extends RestConverter
         util.writeNode(dataColumn.getDecimalPlaces(), "decimalPlaces");
         util.writeNode(dataColumn.getTimePoint(), "timePoint");
         util.writeNode(dataColumn.getReplicateOrdinal(), "replicateNumber");
-        util.writeNode(dataColumn.getCellLine(), "cellLine");
+//        util.writeNode(dataColumn.getCellLine(), "cellLine");
         util.writeNode(dataColumn.getAssayReadoutType(), "assayReadoutType");
       }
     });

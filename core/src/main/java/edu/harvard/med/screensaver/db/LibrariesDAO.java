@@ -14,6 +14,8 @@ import java.util.Map;
 import java.util.Set;
 import java.util.SortedSet;
 
+import org.joda.time.DateTime;
+
 import edu.harvard.med.screensaver.io.libraries.LibraryCopyPlateListParserResult;
 import edu.harvard.med.screensaver.model.Volume;
 import edu.harvard.med.screensaver.model.libraries.Copy;
@@ -118,5 +120,7 @@ public interface LibrariesDAO
   public Well findCanonicalReagentWell(String facilityId,
                                        Integer saltId,
                                        Integer facilityBatchId);
+  
+	public DateTime getLatestDataLoadingDate();
   
 }

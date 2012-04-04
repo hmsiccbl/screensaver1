@@ -84,11 +84,15 @@ public class WellViewer extends SearchResultContextEntityViewerBackingBean<Well,
   private EntityViewPolicy _entityViewPolicy;
   private StructureImageLocator _structureImageLocator;
 
-  private List<SimpleCell> _annotationNameValueTable;
   private StudyViewer _studyViewer;
   private WellsSdfDataExporter _wellsSdfDataExporter;
   private LibraryContentsVersionReference _libraryContentsVersionRef;
+ 
+  // Note: the annotation search results is used by LINCS, it will display all annotations from all studies in one table.  TODO: rework this (by nesting two levels?) so that annotions are visually grouped by study
   private AnnotationSearchResults _annotationSearchResults;
+
+  // Note: the annotation name value table is used to display a generic table listing annotations from multiple studies, grouped in the well viewer
+  private List<SimpleCell> _annotationNameValueTable;
 
   private DataModel _otherWellsDataModel;
   private DataModel _duplexWellsDataModel;
@@ -189,7 +193,15 @@ public class WellViewer extends SearchResultContextEntityViewerBackingBean<Well,
                                                                                                   * library)
                                                                                                   */);
         reagents.remove(_versionedRestrictedReagent);
-        _otherWellsDataModel = new ListDataModel(Lists.newArrayList(reagents));
+        List<Reagent> list = Lists.newArrayList(reagents);
+        Collections.sort(list, new Comparator<Reagent>() {
+
+					@Override
+					public int compare(Reagent o1, Reagent o2) {
+						if(o1==o2) return 0;
+						return o1.getWell().getWellId().compareTo(o2.getWell().getWellId());
+					}} );
+        _otherWellsDataModel = new ListDataModel(list);
       }
       else {
         _otherWellsDataModel = new ListDataModel(Lists.newArrayList());
@@ -198,6 +210,7 @@ public class WellViewer extends SearchResultContextEntityViewerBackingBean<Well,
     return _otherWellsDataModel;
   }
 
+  // Annotation search results - used by LINCS - all annotations (for all studies) in one table
   public AnnotationSearchResults getAnnotationSearchResults()
   {
     // lazy initialization of _annotationSearchResults, for performance (avoid expense of determining columns, if not being viewed)
@@ -208,6 +221,7 @@ public class WellViewer extends SearchResultContextEntityViewerBackingBean<Well,
     return _annotationSearchResults;
   }
 
+  // Annotation name value table: (generic build) - annotations are grouped by study, shown as separate "name/value" tables (name/value table are simple property name/property value)
   public DataModel getAnnotationNameValueTable()
   {
     return new ListDataModel(_annotationNameValueTable);

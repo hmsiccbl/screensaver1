@@ -83,7 +83,7 @@ public class UICommandExceptionHandlerAspect extends OrderedAspect implements Or
     log.error("backing bean " + backingBean.getClass().getSimpleName() +
              " method " + joinPoint.getSignature().getName() +
              " threw " + t.getClass().getSimpleName() + 
-             ": " + t.getMessage());
+             ": " + t.getMessage(), t);
     _messages.setFacesMessageForComponent(errorMessageId, null, errorMessageArg);
     if (backingBean instanceof EditableEntityViewer) {
       // TODO not working...
