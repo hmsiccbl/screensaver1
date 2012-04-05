@@ -19,7 +19,7 @@ log4j.appender.stdout.layout.ConversionPattern=%d{ABSOLUTE} %5p %c{1}:%L - %m%n
 
 log4j.rootLogger=info, fileLog
 
-log4j.logger.edu.harvard.med.screensaver=info, stdout
+log4j.logger.edu.harvard.med=info, stdout
 log4j.logger.edu.harvard.med.screensaver.io.libraries.smallmolecule=ERROR
 log4j.logger.edu.harvard.med.screensaver.ui.util.ScreensaverServletFilter=debug
 log4j.logger.edu.harvard.med.screensaver.ScreensaverProperties=ERROR
