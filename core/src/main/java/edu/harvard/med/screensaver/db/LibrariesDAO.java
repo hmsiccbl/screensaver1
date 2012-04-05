@@ -121,6 +121,10 @@ public interface LibrariesDAO
                                        Integer saltId,
                                        Integer facilityBatchId);
   
+  public Set<Well> findWells(String facilityId,
+      Integer saltId,
+      Integer facilityBatchId);
+  
 	public DateTime getLatestDataLoadingDate();
   
 }

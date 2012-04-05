@@ -140,6 +140,7 @@
         <prop key="publication">edu.harvard.med.screensaver.model.screens.Publication</prop>
         <prop key="assayWell">edu.harvard.med.screensaver.model.screenresults.AssayWell</prop>
         <prop key="error">edu.harvard.med.screensaver.rest.ErrorConverter.ErrorContainer</prop>
+        <prop key="wells">edu.harvard.med.screensaver.rest.EntityCollection.Wells</prop>
       </props>
     </property>
     <property name="converters">
@@ -158,7 +159,6 @@
         <bean id="screeningRoomUserConverter" class="edu.harvard.med.screensaver.rest.ScreeningRoomUserConverter" />
         <bean id="publicationConverter" class="edu.harvard.med.screensaver.rest.PublicationConverter" />
         <bean id="assayWellConverter" class="edu.harvard.med.screensaver.rest.AssayWellConverter" />
-        <bean id="assayWellsConverter" class="edu.harvard.med.screensaver.rest.AssayWellsConverter" />
         <bean id="annotationTypeConverter" class="edu.harvard.med.screensaver.rest.AnnotationTypeConverter" />
         <bean id="studyReagentsCanonicalConverter" class="edu.harvard.med.screensaver.rest.StudyReagentsCanonicalConverter" />
         <bean id="studyRowConverter" class="edu.harvard.med.screensaver.rest.StudyRowConverter" />

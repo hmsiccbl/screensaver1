@@ -563,4 +563,10 @@ public class MockDaoForScreenResultImporter implements GenericEntityDAO, ScreenR
 		return null;
 	}
 
+	@Override
+	public Set<Well> findWells(String facilityId, Integer saltId, Integer facilityBatchId) {
+		// TODO Auto-generated method stub
+		return null;
+	}
+
 }

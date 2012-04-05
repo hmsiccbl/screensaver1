@@ -316,6 +316,14 @@ public ModelAndView screenResultReagents(@PathVariable(value = "facilityId") Str
   {
     return makeModel(new EntityCollection.Reagents(Sets.newHashSet(Iterables.transform(librariesDao.findAllCanonicalReagentWells(), Well.toLatestReleasedReagent))));
   }
+
+  @RequestMapping(value = "/reagents/{facilityId}/salt/{saltId}/batch/{batchId}", method = RequestMethod.GET)
+  public ModelAndView reagentWells(@PathVariable(value = "facilityId") String facilityId, @PathVariable(value = "saltId") Integer saltId, @PathVariable(value = "batchId") Integer batchId)
+  {
+  	Set<Well> wells = librariesDao.findWells(facilityId, saltId, batchId);
+  	if(wells == null || wells.isEmpty()) return makeNotFoundError();
+  	else return makeModel(new EntityCollection.Wells(wells));
+   }
   
   /**
    * @return the canonical well for a given compound Facility ID

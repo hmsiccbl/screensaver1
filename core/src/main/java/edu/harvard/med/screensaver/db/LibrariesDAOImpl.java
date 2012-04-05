@@ -817,6 +817,38 @@ public class LibrariesDAOImpl extends AbstractDAO implements LibrariesDAO
   }
 
   @Override
+  public Set<Well> findWells(String facilityId,
+                                       Integer saltId,
+                                       Integer facilityBatchId)
+  {
+    String q = "select w from Well w join w.library l join w.latestReleasedReagent r where w.facilityId = :facilityId";
+    if(facilityBatchId != null) {
+    	q += " and r.facilityBatchId = :facilityBatchId"; // and l.shortName like 'R-%'";
+    }
+    if (saltId != null) {
+      q += " and r.saltFormId = :saltId";
+    }
+    TypedQuery<Well> query = getEntityManager().createQuery(q, Well.class);
+    query.setParameter("facilityId", facilityId);
+    if (saltId != null) {
+      query.setParameter("saltId", saltId);
+    }
+    if (facilityBatchId != null) {
+      query.setParameter("facilityBatchId", facilityBatchId);
+    }
+
+    //return query.getSingleResult();
+    query.setMaxResults(2);
+    List<Well> result = query.getResultList();
+    if (result.size() == 0) {
+      log.warn("no reagent wells found for facility ID " + facilityId + ", salt: " + saltId + ", batch: " + facilityBatchId);
+      return null;
+    }
+   
+    return Sets.newHashSet(result);
+  }
+  
+  @Override
   public Well findCanonicalReagentWell(String facilityId,
                                        Integer saltId,
                                        Integer facilityBatchId)
@@ -827,7 +859,7 @@ public class LibrariesDAOImpl extends AbstractDAO implements LibrariesDAO
     }
     TypedQuery<Well> query = getEntityManager().createQuery(q, Well.class);
     query.setParameter("facilityId", facilityId);
-    query.setParameter("facilityBatchId", 1);
+    //query.setParameter("facilityBatchId", 1);
     if (saltId != null) {
       query.setParameter("saltId", saltId);
     }

@@ -113,6 +113,9 @@
       <props>
         <prop key="libraries">edu.harvard.med.screensaver.rest.EntityCollection.Libraries</prop>
         <prop key="library">edu.harvard.med.screensaver.model.libraries.Library</prop>
+        <prop key="cell">edu.harvard.med.screensaver.model.cells.Cell</prop>
+        <prop key="cell">edu.harvard.med.screensaver.model.cells.CellLineage</prop>
+        <prop key="cells">edu.harvard.med.screensaver.rest.EntityCollection.Cells</prop>
         <prop key="well">edu.harvard.med.screensaver.model.libraries.Well</prop>
         <prop key="reagents">edu.harvard.med.screensaver.rest.EntityCollection.Reagents</prop>
         <prop key="screens">edu.harvard.med.screensaver.rest.EntityCollection.Screens</prop>
@@ -137,6 +140,7 @@
         <prop key="publication">edu.harvard.med.screensaver.model.screens.Publication</prop>
         <prop key="assayWell">edu.harvard.med.screensaver.model.screenresults.AssayWell</prop>
         <prop key="error">edu.harvard.med.screensaver.rest.ErrorConverter.ErrorContainer</prop>
+        <prop key="wells">edu.harvard.med.screensaver.rest.EntityCollection.Wells</prop>
       </props>
     </property>
     <property name="converters">

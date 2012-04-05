@@ -23,7 +23,7 @@ public class EntityCollectionConverter extends RestConverter
   {
     @SuppressWarnings("rawtypes")
     final EntityCollection entityCollection = (EntityCollection) value;
-    if(entityCollection.getCollection().isEmpty()) return;
+    if(entityCollection.getCollection() == null || entityCollection.getCollection().isEmpty()) return;
     final XStreamUtil util = new XStreamUtil(writer, context, getEntityUriGenerator());
     
     getDao().doInTransaction(new DAOTransaction() {

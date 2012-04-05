@@ -5,6 +5,7 @@ import java.util.Collection;
 import edu.harvard.med.screensaver.model.Entity;
 import edu.harvard.med.screensaver.model.cells.Cell;
 import edu.harvard.med.screensaver.model.libraries.Reagent;
+import edu.harvard.med.screensaver.model.libraries.Well;
 import edu.harvard.med.screensaver.model.screenresults.DataColumn;
 
 /**
@@ -72,10 +73,16 @@ public class EntityCollection<E extends Entity>
   };
   public static class AssayWells extends EntityCollection
   {
-
     public AssayWells(Class clazz, Collection collection)
     {
       super(clazz, collection);
+    }
+  };
+  public static class Wells extends EntityCollection
+  {
+    public Wells(Collection collection)
+    {
+      super(Well.class, collection);
     }
   };
   public static class StudyColumns extends EntityCollection
