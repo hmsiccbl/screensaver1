@@ -81,7 +81,6 @@ public class Copy extends AuditedAbstractEntity<Integer> implements Comparable<C
   public static final Function<Copy,String> ToName = new Function<Copy,String>() { public String apply(Copy c) { return c.getName(); } };
   public static final Function<Copy,Library> ToLibrary = new Function<Copy,Library>() { public Library apply(Copy c) { return c.getLibrary(); } };
 
-
   private Integer _version;
   private Library _library;
   private String _name;

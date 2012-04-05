@@ -101,13 +101,13 @@ public class CellSearchResults extends EntityBasedEntitySearchResults<Cell, Inte
 
 		// CL:2 
 		columns.add(new TextEntityColumn<Cell>(RelationshipPath.from(Cell.class).toProperty("cloId"), "CL ID",
-				"Unique LINCS internal identifier", TableColumn.UNGROUPED) {
+				"Unique LINCS identifier", TableColumn.UNGROUPED) {
 			@Override
 			public String getCellValue(Cell info) {
 				return info.getCloId();
 			}
 		});
-		columns.get(columns.size() - 1).setVisible(true);
+		columns.get(columns.size() - 1).setVisible(false);
 		
 		// CL:3
 		columns.add(new TextEntityColumn<Cell>(RelationshipPath.from(Cell.class).toProperty("alternateName"), "Alternate Name",
@@ -117,7 +117,7 @@ public class CellSearchResults extends EntityBasedEntitySearchResults<Cell, Inte
 				return info.getAlternateName();
 			}
 		});
-		columns.get(columns.size() - 1).setVisible(false);
+		columns.get(columns.size() - 1).setVisible(true);
 		
 		// CL:4
 		columns.add(new TextEntityColumn<Cell>(RelationshipPath.from(Cell.class).toProperty("alternateId"), "Alternate ID",
@@ -127,7 +127,7 @@ public class CellSearchResults extends EntityBasedEntitySearchResults<Cell, Inte
 				return info.getAlternateId();
 			}
 		});
-		columns.get(columns.size() - 1).setVisible(false);
+		columns.get(columns.size() - 1).setVisible(true);
 		
 		// CL:5
 		columns.add(new TextEntityColumn<Cell>(RelationshipPath.from(Cell.class).toProperty("centerName"), "Center Name",
@@ -137,11 +137,11 @@ public class CellSearchResults extends EntityBasedEntitySearchResults<Cell, Inte
 				return info.getCenterName();
 			}
 		});
-		columns.get(columns.size() - 1).setVisible(true);
+		columns.get(columns.size() - 1).setVisible(false);
 		
 		// CL:6
 		columns.add(new TextEntityColumn<Cell>(RelationshipPath.from(Cell.class).toProperty("centerSpecificId"), "Center Specific ID",
-				"HMS or Broad cell line ID; batch specific ID", TableColumn.UNGROUPED) {
+				"LINCS center specific ID", TableColumn.UNGROUPED) {
 			@Override
 			public String getCellValue(Cell info) {
 				return info.getCenterSpecificId();
@@ -150,7 +150,7 @@ public class CellSearchResults extends EntityBasedEntitySearchResults<Cell, Inte
 		columns.get(columns.size() - 1).setVisible(false); // We're hiding this field, and showing the HMS facility ID, which is the same thing, for our facility
 
 		// CL:7
-		columns.add(new TextEntityColumn<Cell>(RelationshipPath.from(Cell.class).toProperty("vendorName"), "Cell Vendor/Provider",
+		columns.add(new TextEntityColumn<Cell>(RelationshipPath.from(Cell.class).toProperty("vendorName"), "Provider Name",
 				"Name of vendor or lab(provider)  that supplied the cell line", TableColumn.UNGROUPED) {
 			@Override
 			public String getCellValue(Cell info) {
@@ -160,7 +160,7 @@ public class CellSearchResults extends EntityBasedEntitySearchResults<Cell, Inte
 		columns.get(columns.size() - 1).setVisible(true);
 		
 		// CL:8
-		columns.add(new TextEntityColumn<Cell>(RelationshipPath.from(Cell.class).toProperty("vendorCatalogId"), "Cell Vendor/Provider Catalog ID",
+		columns.add(new TextEntityColumn<Cell>(RelationshipPath.from(Cell.class).toProperty("vendorCatalogId"), "Provider Catalog ID",
 				"ID or catalogue number or name assigned to the cell line by the vendor or provider", TableColumn.UNGROUPED) {
 			@Override
 			public String getCellValue(Cell info) {
@@ -170,14 +170,14 @@ public class CellSearchResults extends EntityBasedEntitySearchResults<Cell, Inte
 		columns.get(columns.size() - 1).setVisible(true);
 		
 		// CL:9
-		columns.add(new TextEntityColumn<Cell>(RelationshipPath.from(Cell.class).toProperty("batchId"), "Cell Vendor/Provider Batch ID",
+		columns.add(new TextEntityColumn<Cell>(RelationshipPath.from(Cell.class).toProperty("batchId"), "Provider Batch ID",
 				"Vendor/Provider Batch ID number; Batch or lot number assigned to the cell line by the vendor or provider", TableColumn.UNGROUPED) {
 			@Override
 			public String getCellValue(Cell info) {
 				return info.getBatchId();
 			}
 		});
-		columns.get(columns.size() - 1).setVisible(true);
+		columns.get(columns.size() - 1).setVisible(false);
 		
 		// CL:10 
 		columns.add(new TextEntityColumn<Cell>(RelationshipPath.from(Cell.class).toProperty("organism"), "Organism",
