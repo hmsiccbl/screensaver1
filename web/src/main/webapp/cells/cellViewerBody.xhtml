@@ -29,113 +29,132 @@
 			<ss:property id="facilityId" label="HMS ID"
 				value="#{cellViewer.entity.facilityId}" rendered="true" editable="false"
 				description="ID assigned to this cell by the HMS LINCS facility" type="Text" />
+			<ui:remove><!-- CL:1 --></ui:remove>
 			<ss:property id="name" label="Name" value="#{cellViewer.entity.name}"
 				rendered="true" editable="false" 
-				description="CL:1 The primary name for the cell line"
+				description="The primary name for the cell line"
 				type="Text" />
+			<ui:remove><!-- CL:2 --></ui:remove>
 			<ss:property id="cloid" label="Cell ID"
 				value="#{cellViewer.entity.cloId}" rendered="true" editable="false"
-				description="CL:2 Unique #{menu.applicationProperties.facilityKey == 'lincs' ?'LINCS ':''}internal identifier" type="Text" />
+				description="Unique #{menu.applicationProperties.facilityKey == 'lincs' ?'LINCS ':''}internal identifier" type="Text" />
+			<ui:remove><!-- CL:3 --></ui:remove>
 			<ss:property id="alternateName" label="Alternate Name"
 				value="#{cellViewer.entity.alternateName}" rendered="true" editable="false"
-				description="CL:3 Other relevant names"
+				description="Other relevant names"
 				type="Text" />
 
+			<ui:remove><!-- CL:4--></ui:remove>
 			<ss:property id="alternateId" label="Alternate ID"
 				value="#{cellViewer.entity.alternateId}" rendered="true" editable="false"
-				description="CL:4 Other relevant IDs for cell lines"
+				description="Other relevant IDs for cell lines"
 				type="Text" />
 
+			<ui:remove><!-- CL:5--></ui:remove>
 			<ss:property id="centerName" label="Center Name"
 				value="#{cellViewer.entity.centerName}" rendered="true" editable="false"
-				description="CL:5 Name provided by the LINCS center using the cell line"
+				description="Name provided by the LINCS center using the cell line"
 				type="Text" />
 
+			<ui:remove><!-- CL:6--></ui:remove>
 			<ss:property id="centerId" label="Center Specific ID"
 				value="#{cellViewer.entity.centerSpecificId}" rendered="true" editable="false"
-				description="CL:6 Batch specific ID provided by the LINCS center using the cell line"
+				description="Batch specific ID provided by the LINCS center using the cell line"
 				type="Text" />
 
-
+			<ui:remove><!-- CL:7--></ui:remove>
 			<ss:property id="vendor" label="Provider Name"
 				value="#{cellViewer.entity.vendor}" rendered="true" editable="false"
-				description="CL:7 Name of vendor or lab(provider)  that supplied the cell line"
+				description="Name of vendor or lab(provider)  that supplied the cell line"
 				type="Text" />
+			<ui:remove><!-- CL:8 --></ui:remove>
 			<ss:property id="vendorCatalogId" label="Provider Catalog ID"
 				value="#{cellViewer.entity.vendorCatalogId}" rendered="true"
 				editable="false"
-				description="CL:8 ID or catalogue number or name assigned to the cell line by the vendor or provider"
+				description="ID or catalogue number or name assigned to the cell line by the vendor or provider"
 				type="Text" />
+			<ui:remove><!-- CL:9 --></ui:remove>
 			<ss:property id="batchID" label="Provider Batch ID"
 				value="#{cellViewer.entity.batchId}" rendered="true"
 				editable="false"
-				description="CL:9 Provider Batch ID number; Batch or lot number assigned to the cell line by the vendor or provider"
+				description="Provider Batch ID number; Batch or lot number assigned to the cell line by the vendor or provider"
 				type="Text" />
+			<ui:remove><!-- CL:10 --></ui:remove>
 			<ss:property id="organism" label="Organism"
 				value="#{cellViewer.entity.organism}" rendered="true"
 				editable="false"
-				description="CL:10 Organism of origin; a controlled vocabulary describing the organism from which the cell line was derived (e.g. Homo sapiens, Mus musculus, etc.)"
+				description="Organism of origin; a controlled vocabulary describing the organism from which the cell line was derived (e.g. Homo sapiens, Mus musculus, etc.)"
 				type="Text" />
 				
+			<ui:remove><!-- CL:11 --></ui:remove>
 			<ss:property id="organ" label="Organ"
 				value="#{cellViewer.entity.organism}" rendered="true"
 				editable="false"
-				description="CL:11 Organ of origin; controlled terms describing the organ from which cell line is derived;  (e.g. lung, mammary gland etc.)"
+				description="Organ of origin; controlled terms describing the organ from which cell line is derived;  (e.g. lung, mammary gland etc.)"
 				type="Text" />
 				
-				
+			<ui:remove><!-- CL:12 --></ui:remove>
 			<ss:property id="tissue" label="Tissue"
 				value="#{cellViewer.entity.tissue}" rendered="true" editable="false"
-				description="CL:12 Tissue of origin; A controlled vocabulary describing the tissue from which the cell line was derived"
+				description="Tissue of origin; A controlled vocabulary describing the tissue from which the cell line was derived"
 				type="Text" />
+			<ui:remove><!-- CL:13 --></ui:remove>
 			<ss:property id="cellType" label="Cell Type"
 				value="#{cellViewer.entity.cellType}" rendered="true"
 				editable="false"
-				description="CL:13 A controlled vocabulary describing  the cell type from which a cell line was derived; e.g. epithelial like, fibroblast-like, lymphoblast like, hematopoetic, mesenchymal, neural, etc. This provides information about cell morphology.  Also sometimes referred to as cell morphology."
+				description="A controlled vocabulary describing  the cell type from which a cell line was derived; e.g. epithelial like, fibroblast-like, lymphoblast like, hematopoetic, mesenchymal, neural, etc. This provides information about cell morphology.  Also sometimes referred to as cell morphology."
 				type="Text" />
+			<ui:remove><!-- CL:14 --></ui:remove>
 			<ss:property id="disease" label="Cell Disease"
 				value="#{cellViewer.entity.disease}" rendered="true"
 				editable="false"
-				description="CL:14 If the cell line came from a particular diseased tissue, the disease should be noted in terms of a controlled vocabulary (e.g. breast cancer, colon cancer, not diseased, etc.)"
+				description="If the cell line came from a particular diseased tissue, the disease should be noted in terms of a controlled vocabulary (e.g. breast cancer, colon cancer, not diseased, etc.)"
 				type="Text" />
+			<ui:remove><!-- CL:15 --></ui:remove>
 			<ss:property id="growthProperties" label="Growth Properties"
 				value="#{cellViewer.entity.growthProperties}" rendered="true"
 				editable="false"
-				description="CL:15 A controlled vocabulary describing the growth properties of the cell line (e.g. adherent, suspension)"
+				description="A controlled vocabulary describing the growth properties of the cell line (e.g. adherent, suspension)"
 				type="List" />
+			<ui:remove><!-- CL:16 --></ui:remove>
 			<ss:property id="geneticModification" label="Genetic Modification"
 				value="#{cellViewer.entity.geneticModification}" rendered="true"
 				editable="false"
-				description="CL:16 Stable transfection or viral transduction.  If yes, the modifications (e.g. expressing GFP-tagged protein) should be described and appropriate references provided. This requires a number of fields including the parental cell line"
+				description="Stable transfection or viral transduction.  If yes, the modifications (e.g. expressing GFP-tagged protein) should be described and appropriate references provided. This requires a number of fields including the parental cell line"
 				type="Text" />
 
+			<ui:remove><!-- CL:17 --></ui:remove>
 			<ss:property id="relatedProjects" label="Related Projects"
 				value="#{cellViewer.entity.relatedProjects}" rendered="true"
 				editable="false"
-				description="CL:17 Other projects in which the cell line has been studied / used; A controlled vocabulary describing other large scale projects in which the cell line has been used (e.g. ENCODE, TCGA, ICBP, Epigenomics, etc.)"
+				description="Other projects in which the cell line has been studied / used; A controlled vocabulary describing other large scale projects in which the cell line has been used (e.g. ENCODE, TCGA, ICBP, Epigenomics, etc.)"
 				type="Text" />
 
+			<ui:remove><!-- CL:18 --></ui:remove>
 			<ss:property id="recCultCond" label="Recommended Culture Conditions"
 				value="#{cellViewer.entity.recommendedCultureConditions}"
 				rendered="true" editable="false"
-				description="CL:18 A description of the standard tissue culture conditions (media, supplements, culture dish treatment) used to maintain the cell line.  Description of culture dish treatment conditions would include information about coating of culture dish with fibronectin, collagen, etc, prior to cell plating. If special culture vessels are required to grow the cells, these should also be mentioned and details provided."
+				description="A description of the standard tissue culture conditions (media, supplements, culture dish treatment) used to maintain the cell line.  Description of culture dish treatment conditions would include information about coating of culture dish with fibronectin, collagen, etc, prior to cell plating. If special culture vessels are required to grow the cells, these should also be mentioned and details provided."
 				type="Text" />
 
+			<ui:remove><!-- CL:19 --></ui:remove>
 			<ss:property id="verification" label="Verification"
 				value="#{cellViewer.entity.verification}" rendered="true"
 				editable="false"
-				description="CL:19 Information pertaining to experimental verification of the cell line identity; batch-specific ID; STR profiling"
+				description="Information pertaining to experimental verification of the cell line identity; batch-specific ID; STR profiling"
 				type="Text" />
 
+			<ui:remove><!-- CL:20 --></ui:remove>
 			<ss:property id="mutations" label="Mutations"
 				value="#{cellViewer.entity.mutations}" rendered="true"
 				editable="false"
-				description="CL:20 Mutations inherent in certain cell lines" type="Text" />
+				description="Mutations inherent in certain cell lines" type="Text" />
 
+			<ui:remove><!-- CL:21 --></ui:remove>
 			<ss:property id="gender" label="Organism Gender"
 				value="#{cellViewer.entity.organismGender}" rendered="true"
 				editable="false"
-				description="CL:21 Whether cell line was obtained from a male or female subject"
+				description="Whether cell line was obtained from a male or female subject"
 				type="Text" />
 		</t:panelGrid>
     </ui:define>
