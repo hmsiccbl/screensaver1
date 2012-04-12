@@ -220,6 +220,17 @@ public class CellSearchResults extends EntityBasedEntitySearchResults<Cell, Inte
 		columns.get(columns.size() - 1).setVisible(true);
 		
 		// CL:14
+		columns.get(columns.size() - 1).setVisible(true);
+		columns.add(new TextEntityColumn<Cell>(RelationshipPath.from(Cell.class).toProperty("cellTypeDetail"), "Cell Type Detail",
+				"Additional description of cell type (histology) that is not available in CL, but may be known from other sources like ATCC", TableColumn.UNGROUPED) {
+			@Override
+			public String getCellValue(Cell info) {
+				return info.getCellTypeDetail();
+			}
+		});
+		columns.get(columns.size() - 1).setVisible(true);
+		
+		// CL:15
 		columns.add(new TextEntityColumn<Cell>(RelationshipPath.from(Cell.class).toProperty("disease"), "Disease",
 				"If the cell line came from a particular diseased tissue, the disease should be noted in terms of a controlled vocabulary (e.g. breast cancer, colon cancer, not diseased, etc.)", TableColumn.UNGROUPED) {
 			@Override
@@ -229,7 +240,17 @@ public class CellSearchResults extends EntityBasedEntitySearchResults<Cell, Inte
 		});
 		columns.get(columns.size() - 1).setVisible(true);
 		
-		// CL:15
+		// CL:16
+		columns.add(new TextEntityColumn<Cell>(RelationshipPath.from(Cell.class).toProperty("diseaseDetail"), "Disease Detail",
+				" Additional description of a disease related to the cell line that may not be available in the disease ontology above", TableColumn.UNGROUPED) {
+			@Override
+			public String getCellValue(Cell info) {
+				return info.getDiseaseDetail();
+			}
+		});
+		columns.get(columns.size() - 1).setVisible(true);
+		
+		// CL:17
 		columns.add(new TextSetEntityColumn<Cell>(RelationshipPath.from(Cell.class).toProperty("growthProperties"), "Growth Properties",
 				"A controlled vocabulary describing the growth properties of the cell line (e.g. adherent, suspension)", TableColumn.UNGROUPED) {
 			@Override
@@ -238,7 +259,7 @@ public class CellSearchResults extends EntityBasedEntitySearchResults<Cell, Inte
 			}
 		});
 
-		// CL:16
+		// CL:18
 		columns.add(new TextEntityColumn<Cell>(RelationshipPath.from(Cell.class).toProperty("geneticModificaton"), "Genetic Modification",
 				"Stable transfection or viral transduction.  If yes, the modifications (e.g. expressing GFP-tagged protein) should be described and appropriate references provided. ", TableColumn.UNGROUPED) {
 			@Override
@@ -248,7 +269,7 @@ public class CellSearchResults extends EntityBasedEntitySearchResults<Cell, Inte
 		});
 		columns.get(columns.size() - 1).setVisible(true);
 
-		// CL:17
+		// CL:19
 		columns.add(new TextSetEntityColumn<Cell>(RelationshipPath.from(Cell.class).toProperty("relatedProjects"), "Related Projects",
 				"Other projects in which the cell line has been studied / used; A controlled vocabulary describing other large scale projects in which the cell line has been used (e.g. ENCODE, TCGA, ICBP, Epigenomics, etc.)", TableColumn.UNGROUPED) {
 			@Override
@@ -258,7 +279,7 @@ public class CellSearchResults extends EntityBasedEntitySearchResults<Cell, Inte
 		});
 		columns.get(columns.size() - 1).setVisible(false);
 
-		// CL:18
+		// CL:20
 		columns.add(new TextEntityColumn<Cell>(RelationshipPath.from(Cell.class).toProperty("recommendedCultureConditions"), "Recommended Culture Conditions",
 				"A description of the standard tissue culture conditions (media, supplements, culture dish treatment) used to maintain the cell line.  Description of culture dish treatment conditions would include information about coating of culture dish with fibronectin, collagen, etc, prior to cell plating. If special culture vessels are required to grow the cells, these should also be mentioned and details provided.", TableColumn.UNGROUPED) {
 			@Override
@@ -268,27 +289,47 @@ public class CellSearchResults extends EntityBasedEntitySearchResults<Cell, Inte
 		});
 		columns.get(columns.size() - 1).setVisible(false);
 
-		// CL:19
-		columns.add(new TextEntityColumn<Cell>(RelationshipPath.from(Cell.class).toProperty("verification"), "Verification",
+		// CL:22
+		columns.add(new TextEntityColumn<Cell>(RelationshipPath.from(Cell.class).toProperty("verification"), "Verification Profile",
 				"Information pertaining to experimental verification of the cell line identity", TableColumn.UNGROUPED) {
 			@Override
 			public String getCellValue(Cell info) {
 				return info.getVerification();
 			}
 		});
+		
 		columns.get(columns.size() - 1).setVisible(false);
-
-		// CL:20
-		columns.add(new TextEntityColumn<Cell>(RelationshipPath.from(Cell.class).toProperty("mutations"), "Mutations",
-				"Mutations inherent in certain cell lines", TableColumn.UNGROUPED) {
+		// CL:22
+		columns.add(new TextEntityColumn<Cell>(RelationshipPath.from(Cell.class).toProperty("verificationReferenceProfile"), "Verification Reference Profile",
+				"Information pertaining to experimental verification of the cell line identity", TableColumn.UNGROUPED) {
 			@Override
 			public String getCellValue(Cell info) {
-				return info.getMutations();
+				return info.getVerificationReferenceProfile();
 			}
 		});
 		columns.get(columns.size() - 1).setVisible(false);
 
-		// CL:21
+		// CL:23
+		columns.add(new TextEntityColumn<Cell>(RelationshipPath.from(Cell.class).toProperty("mutationsReference"), "Mutations Reference",
+				"Mutations inherent in certain cell lines; from a reference", TableColumn.UNGROUPED) {
+			@Override
+			public String getCellValue(Cell info) {
+				return info.getMutationsReference();
+			}
+		});
+		columns.get(columns.size() - 1).setVisible(false);
+
+		// CL:24
+		columns.add(new TextEntityColumn<Cell>(RelationshipPath.from(Cell.class).toProperty("mutationsExplicit"), "Mutations Explicit",
+				"Mutations inherent in cell line, captured explicitly; e.g. if reference is not available", TableColumn.UNGROUPED) {
+			@Override
+			public String getCellValue(Cell info) {
+				return info.getMutationsExplicit();
+			}
+		});
+		columns.get(columns.size() - 1).setVisible(false);
+
+		// CL:25
 		columns.add(new TextEntityColumn<Cell>(RelationshipPath.from(Cell.class).toProperty("organismGender"), "Organism Gender",
 				"Whether cell line was obtained from a male or female subject", TableColumn.UNGROUPED) {
 			@Override

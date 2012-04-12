@@ -71,10 +71,16 @@ public abstract class Cell extends AbstractEntity<Integer> implements Comparable
   private SortedSet<String> relatedProjects;
   private String verification;
   private String recommendedCultureConditions;
-  private String mutations;
   private String organismGender;    // TODO: male/female/genderless
 
 	private String facilityId;
+
+	private String cellTypeDetail;
+	private String diseaseDetail;
+	private String mutationsReference;
+	private String mutationsExplicit;
+
+	private String verificationReferenceProfile;
 
   /**
    * @motivation for hibernate and proxy/concrete subclass constructors
@@ -238,6 +244,45 @@ public abstract class Cell extends AbstractEntity<Integer> implements Comparable
   public SortedSet<String> getRelatedProjects() {
 		return relatedProjects;
 	}
+  
+
+  @org.hibernate.annotations.Type(type="text")
+	public String getCellTypeDetail() {
+		return this.cellTypeDetail;
+	}
+
+  public void setCellTypeDetail(String value)
+  {
+  	this.cellTypeDetail = value;
+  }
+  
+  @org.hibernate.annotations.Type(type="text")
+	public String getDiseaseDetail() {
+		return this.diseaseDetail;
+	}
+
+  public void setDiseaseDetail(String value) {
+  	this.diseaseDetail = value;
+  }
+  
+  @org.hibernate.annotations.Type(type="text")
+	public String getMutationsReference() {
+		return this.mutationsReference;
+	}
+  
+  public void setMutationsReference(String value)
+  {
+  	this.mutationsReference = value;
+  }
+
+  @org.hibernate.annotations.Type(type="text")
+	public String getMutationsExplicit() {
+  	return mutationsExplicit;
+	}
+  
+  public void setMutationsExplicit(String value) {
+  	this.mutationsExplicit = value;
+  }
 
 	public void setRelatedProjects(SortedSet<String> relatedProjects) {
 		this.relatedProjects = relatedProjects;
@@ -259,15 +304,6 @@ public abstract class Cell extends AbstractEntity<Integer> implements Comparable
 
 	public void setRecommendedCultureConditions(String recommendedCultureConditions) {
 		this.recommendedCultureConditions = recommendedCultureConditions;
-	}
-
-  @org.hibernate.annotations.Type(type="text")
-  public String getMutations() {
-		return mutations;
-	}
-
-	public void setMutations(String mutations) {
-		this.mutations = mutations;
 	}
 
 	public String getOrganismGender() {
@@ -319,6 +355,14 @@ public abstract class Cell extends AbstractEntity<Integer> implements Comparable
 		this.organ = organ;
 	}
 	
+	@org.hibernate.annotations.Type(type="text")
+  public String getVerificationReferenceProfile() {
+		return this.verificationReferenceProfile;
+	}
+
+	public void setVerificationReferenceProfile(String value) {
+		this.verificationReferenceProfile = value;
+	}
 	public int compareTo(Cell o) {
     if (this.equals(o)) {
       return 0;
@@ -332,4 +376,7 @@ public abstract class Cell extends AbstractEntity<Integer> implements Comparable
 	{
 		return getFacilityId() + ": " + getName();
 	}
+
+
+
 }

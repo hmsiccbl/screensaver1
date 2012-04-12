@@ -51,13 +51,17 @@ public class CellParser
 	
 	public static final int COL_TISSUE = i++;
 	public static final int COL_CELL_TYPE = i++;
+	public static final int COL_CELL_TYPE_DETAIL = i++;
 	public static final int COL_DISEASE = i++;
+	private static final int COL_DISEASE_DETAIL = i++;
 	public static final int COL_GROWTH_PROPERTIES = i++;
 	public static final int COL_GENETIC_MOD = i++;
 	public static final int COL_RELATED_PROJECTS = i++;
 	public static final int COL_REC_CULTURE_COND = i++;
 	public static final int COL_VERIFICATION = i++;
-	public static final int COL_MUTATIONS = i++;
+	public static final int COL_VERIFICATION_REFERENCE_PROFILE = i++;
+	private static final int COL_MUTATIONS_REFERENCE = i++;
+	private static final int COL_MUTATIONS_EXPLICIT = i++;
 	public static final int COL_ORGANISM_GENDER = i++;
 	// this column marks the end of the generic columns
 	public static final int COLUMN_COUNT_MIN = COL_ORGANISM_GENDER + 1;
@@ -172,7 +176,9 @@ public class CellParser
 		cell.setOrgan(fields[getColumnForField(COL_ORGAN)]);
 		cell.setTissue(fields[getColumnForField(COL_TISSUE)]);
 		cell.setCellType(fields[getColumnForField(COL_CELL_TYPE)]);
+		cell.setCellTypeDetail(fields[getColumnForField(COL_CELL_TYPE_DETAIL)]);
 		cell.setDisease(fields[getColumnForField(COL_DISEASE)]);
+		cell.setDiseaseDetail(fields[getColumnForField(COL_DISEASE_DETAIL)]);
 		String temp = fields[getColumnForField(COL_GROWTH_PROPERTIES)];
 		if (!StringUtils.isEmpty(temp)) {
 			cell.setGrowthProperties(Sets.newTreeSet(Lists.newArrayList(temp.split(DELIMITER_INSIDE_FIELD))));
@@ -183,8 +189,10 @@ public class CellParser
 			cell.setRelatedProjects(Sets.newTreeSet(Lists.newArrayList(temp.split(DELIMITER_INSIDE_FIELD))));
 		}
 		cell.setVerification(fields[getColumnForField(COL_VERIFICATION)]);
+		cell.setVerificationReferenceProfile(fields[getColumnForField(COL_VERIFICATION_REFERENCE_PROFILE)]);
 		cell.setRecommendedCultureConditions(fields[getColumnForField(COL_REC_CULTURE_COND)]);
-		cell.setMutations(fields[getColumnForField(COL_MUTATIONS)]);
+		cell.setMutationsReference(fields[getColumnForField(COL_MUTATIONS_REFERENCE)]);
+		cell.setMutationsExplicit(fields[getColumnForField(COL_MUTATIONS_EXPLICIT)]);
 		cell.setOrganismGender(fields[getColumnForField(COL_ORGANISM_GENDER)]);
 	}
 

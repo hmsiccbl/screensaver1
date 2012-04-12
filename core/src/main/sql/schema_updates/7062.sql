@@ -20,13 +20,16 @@ alter table data_column drop column cell_line;
         alternate_name varchar(255),
         batch_id varchar(255),
         cell_type varchar(255),
+        cell_type_detail text,
         center_name varchar(255),
         center_specific_id varchar(255),
         clo_id varchar(255),
         disease varchar(255),
+        disease_detail text,
         facility_id varchar(255) not null unique,
         genetic_modification varchar(255),
-        mutations text,
+        mutations_explicit text,
+        mutations_reference text,
         name varchar(255),
         organ varchar(255),
         organism varchar(255),
@@ -36,6 +39,7 @@ alter table data_column drop column cell_line;
         vendor varchar(255),
         vendor_catalog_id varchar(255),
         verification text,
+        verification_reference_profile text,
         primary key (cell_id)
     );
 

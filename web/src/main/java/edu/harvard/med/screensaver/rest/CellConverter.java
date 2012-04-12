@@ -55,13 +55,17 @@ public class CellConverter extends RestConverter {
 		util.writeNode(cell.getOrganism(), "organism" );
 		util.writeNode(cell.getTissue(), "tissue" );
 		util.writeNode(cell.getCellType(), "cellType" );
+		util.writeNode(cell.getCellTypeDetail(), "cellTypeDetail" );
 		util.writeNode(cell.getDisease(), "disease" );
+		util.writeNode(cell.getDiseaseDetail(), "diseaseDetail" );
 		util.writeNodes(cell.getGrowthProperties(), "growthProperties", "growthProperty" );
 		util.writeNode(cell.getGeneticModification(), "geneticModification" );
 		util.writeNodes(cell.getRelatedProjects(), "relatedProjects", "relatedProject" );
 		util.writeNode(cell.getVerification(), "verification" );
+		util.writeNode(cell.getVerificationReferenceProfile(), "verificationReferenceProfile" );
 		util.writeNode(cell.getRecommendedCultureConditions(), "recommendedCultureConditions" );
-		util.writeNode(cell.getMutations(), "mutations" );
+		util.writeNode(cell.getMutationsReference(), "mutationsReference" );
+		util.writeNode(cell.getMutationsExplicit(), "mutationsExplicit" );
 		util.writeNode(cell.getOrganismGender(), "organismGender" );
 		
     // TODO: make this write out the ExperimentalCellInformation when that data begins to be imported - sde4

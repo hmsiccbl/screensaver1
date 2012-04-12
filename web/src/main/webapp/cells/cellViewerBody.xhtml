@@ -98,59 +98,90 @@
 				value="#{cellViewer.entity.tissue}" rendered="true" editable="false"
 				description="Tissue of origin; A controlled vocabulary describing the tissue from which the cell line was derived"
 				type="Text" />
+
 			<ui:remove><!-- CL:13 --></ui:remove>
 			<ss:property id="cellType" label="Cell Type"
 				value="#{cellViewer.entity.cellType}" rendered="true"
 				editable="false"
 				description="A controlled vocabulary describing  the cell type from which a cell line was derived; e.g. epithelial like, fibroblast-like, lymphoblast like, hematopoetic, mesenchymal, neural, etc. This provides information about cell morphology.  Also sometimes referred to as cell morphology."
 				type="Text" />
+				
 			<ui:remove><!-- CL:14 --></ui:remove>
+			<ss:property id="cellTypeDetail" label="Cell Type Detail"
+				value="#{cellViewer.entity.cellTypeDetail}" rendered="true"
+				editable="false"
+				description="Additional description of cell type (histology) that is not available in CL, but may be known from other sources like ATCC"
+				type="Text" />
+				
+			<ui:remove><!-- CL:15 --></ui:remove>
 			<ss:property id="disease" label="Cell Disease"
 				value="#{cellViewer.entity.disease}" rendered="true"
 				editable="false"
 				description="If the cell line came from a particular diseased tissue, the disease should be noted in terms of a controlled vocabulary (e.g. breast cancer, colon cancer, not diseased, etc.)"
 				type="Text" />
-			<ui:remove><!-- CL:15 --></ui:remove>
+			<ui:remove>
+			
+			<!-- CL:16 --></ui:remove>
+			<ss:property id="diseaseDetail" label="Cell Disease Detail"
+				value="#{cellViewer.entity.diseaseDetail}" rendered="true"
+				editable="false"
+				description="Additional description of a disease related to the cell line that may not be available in the disease ontology above."
+				type="Text" />
+				
+			<ui:remove><!-- CL:17 --></ui:remove>
 			<ss:property id="growthProperties" label="Growth Properties"
 				value="#{cellViewer.entity.growthProperties}" rendered="true"
 				editable="false"
 				description="A controlled vocabulary describing the growth properties of the cell line (e.g. adherent, suspension)"
 				type="List" />
-			<ui:remove><!-- CL:16 --></ui:remove>
+			<ui:remove><!-- CL:18 --></ui:remove>
 			<ss:property id="geneticModification" label="Genetic Modification"
 				value="#{cellViewer.entity.geneticModification}" rendered="true"
 				editable="false"
 				description="Stable transfection or viral transduction.  If yes, the modifications (e.g. expressing GFP-tagged protein) should be described and appropriate references provided. This requires a number of fields including the parental cell line"
 				type="Text" />
 
-			<ui:remove><!-- CL:17 --></ui:remove>
+			<ui:remove><!-- CL:19 --></ui:remove>
 			<ss:property id="relatedProjects" label="Related Projects"
 				value="#{cellViewer.entity.relatedProjects}" rendered="true"
 				editable="false"
 				description="Other projects in which the cell line has been studied / used; A controlled vocabulary describing other large scale projects in which the cell line has been used (e.g. ENCODE, TCGA, ICBP, Epigenomics, etc.)"
 				type="Text" />
 
-			<ui:remove><!-- CL:18 --></ui:remove>
+			<ui:remove><!-- CL:20 --></ui:remove>
 			<ss:property id="recCultCond" label="Recommended Culture Conditions"
 				value="#{cellViewer.entity.recommendedCultureConditions}"
 				rendered="true" editable="false"
 				description="A description of the standard tissue culture conditions (media, supplements, culture dish treatment) used to maintain the cell line.  Description of culture dish treatment conditions would include information about coating of culture dish with fibronectin, collagen, etc, prior to cell plating. If special culture vessels are required to grow the cells, these should also be mentioned and details provided."
 				type="Text" />
 
-			<ui:remove><!-- CL:19 --></ui:remove>
-			<ss:property id="verification" label="Verification"
+			<ui:remove><!-- CL:21 --></ui:remove>
+			<ss:property id="verification" label="Verification Profile"
 				value="#{cellViewer.entity.verification}" rendered="true"
 				editable="false"
 				description="Information pertaining to experimental verification of the cell line identity; batch-specific ID; STR profiling"
 				type="Text" />
 
-			<ui:remove><!-- CL:20 --></ui:remove>
-			<ss:property id="mutations" label="Mutations"
-				value="#{cellViewer.entity.mutations}" rendered="true"
+			<ui:remove><!-- CL:22 --></ui:remove>
+			<ss:property id="verificationReferenceProfile" label="Verification Reference Profile"
+				value="#{cellViewer.entity.verificationReferenceProfile}" rendered="true"
 				editable="false"
-				description="Mutations inherent in certain cell lines" type="Text" />
+				description="expected STR (reference) profile of the cell line based on provider information, if available"
+				type="Text" />
 
-			<ui:remove><!-- CL:21 --></ui:remove>
+			<ui:remove><!-- CL:23 --></ui:remove>
+			<ss:property id="mutationsReference" label="Mutations Reference"
+				value="#{cellViewer.entity.mutationsReference}" rendered="true"
+				editable="false"
+				description="Mutations inherent in certain cell lines; from a reference" type="Text" />
+
+			<ui:remove><!-- CL:24 --></ui:remove>
+			<ss:property id="mutationsExplicit" label="Mutations Explicit"
+				value="#{cellViewer.entity.mutationsExplicit}" rendered="true"
+				editable="false"
+				description="Mutations inherent in cell line, captured explicitly; e.g. if reference is not available" type="Text" />
+
+			<ui:remove><!-- CL:25 --></ui:remove>
 			<ss:property id="gender" label="Organism Gender"
 				value="#{cellViewer.entity.organismGender}" rendered="true"
 				editable="false"

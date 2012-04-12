@@ -35,28 +35,34 @@ public class CellImporterTest  extends AbstractSpringPersistenceTest
 	//String type = "Cell Line";
 	String name = "Test cell line";
 	String cloid = "CLO_ID_1";
-	
 	String alternateName = "alt name 1";
 	String alternateId = "alt ID 1";
 	String centerName = "center name 1";
 	String centerSpecificId = "CTR-1";
-	
 	String vendor = "small pharma";
 	String vendorCatId = "xxx11111";
 	String batchId = "111";
 	String organism = "C. Elegans";
-	
-	String organ = "heart";
-	
+	String organ = "heart";	
 	String tissue = "tissue x";
 	String cellType = "cell type xx";
+	
+	String cellTypeDetail = "some cell type detail...";
+	
 	String disease = "no disease here";
+	
+	String diseaseDetail = "some disease detail...";
+	
 	String[] growthProperties = { "growthProp1", "growthProp2", "growthProp3" };
 	String geneticMod = "modificationx";
 	String[] relatedProjects = { "proj1", "proj2", "proj3" };
 	String verification = "ISB:1";
+	String verificationReferenceProfile = "ISB:1:profile";
 	String recommendedCultureCond = "salt lightly, stir";
-	String mutations = "x,y, and z";
+	
+	String mutationsReference = "x,y, and z";
+	String mutationsExplicit = "xx,yy, and zz";
+		
 	String organismGender = "M";
 	
 	@Autowired
@@ -118,13 +124,23 @@ public class CellImporterTest  extends AbstractSpringPersistenceTest
 		
 		assertEquals(tissue, cell.getTissue());
 		assertEquals(cellType, cell.getCellType());
+		
+		assertEquals(cellTypeDetail, cell.getCellTypeDetail());
+		
 		assertEquals(disease, cell.getDisease());
+		
+		assertEquals(diseaseDetail, cell.getDiseaseDetail());
+		
 		assertEquals(Sets.newTreeSet(Lists.newArrayList(growthProperties)), cell.getGrowthProperties());
 		assertEquals(geneticMod, cell.getGeneticModification());
 		assertEquals(Sets.newTreeSet(Lists.newArrayList(relatedProjects)), cell.getRelatedProjects());
 		assertEquals(verification, cell.getVerification());
+		assertEquals(verificationReferenceProfile, cell.getVerificationReferenceProfile());
 		assertEquals(recommendedCultureCond, cell.getRecommendedCultureConditions());
-		assertEquals(mutations, cell.getMutations());
+		
+		assertEquals(mutationsReference, cell.getMutationsReference());
+		assertEquals(mutationsExplicit, cell.getMutationsExplicit());
+		
 		assertEquals(organismGender, cell.getOrganismGender());
 	}
 
