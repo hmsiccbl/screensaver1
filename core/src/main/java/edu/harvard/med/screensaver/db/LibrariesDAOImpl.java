@@ -853,9 +853,12 @@ public class LibrariesDAOImpl extends AbstractDAO implements LibrariesDAO
                                        Integer saltId,
                                        Integer facilityBatchId)
   {
-    String q = "select w from Well w join w.library l join w.latestReleasedReagent r where w.facilityId = :facilityId and r.facilityBatchId = :facilityBatchId and l.shortName like 'R-%'";
+    String q = "select w from Well w join w.library l join w.latestReleasedReagent r where w.facilityId = :facilityId and l.shortName like 'R-%' ";
     if (saltId != null) {
-      q += " and r.saltFormId = :saltId";
+      q += " and r.saltFormId = :saltId ";
+    }
+    if(facilityBatchId != null) {
+    	q += "  and r.facilityBatchId = :facilityBatchId ";
     }
     TypedQuery<Well> query = getEntityManager().createQuery(q, Well.class);
     query.setParameter("facilityId", facilityId);
