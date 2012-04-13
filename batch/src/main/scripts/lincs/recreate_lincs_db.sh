@@ -228,8 +228,7 @@ check_errs $? "lincs-users.sql fails"
 ## Create the cells
 
 ./run.sh edu.harvard.med.iccbl.screensaver.io.cells.CellImporter \
--f $DATA_DIRECTORY/LINCS_Cells.djw.20120403.xls
-check_errs $? "Cell contents loading fails"
+-f $DATA_DIRECTORY/LINCS_Cells_20120413.xls
 
 ## Create the screens
 
@@ -4320,7 +4319,7 @@ check_errs $? "create study fails"
 ## Link Cells to Screens and Studies through the ExperimentalCellInformation load
 
 ./run.sh edu.harvard.med.iccbl.screensaver.io.cells.ExperimentalCellInformationImporter -f $DATA_DIRECTORY/LINCS_ExperimentalCellInformation.djw.20120403.xls
-check_errs $? "ExperimentalCellInformationImporter loading fails"
+
 
 ## [#3110] Track data received date, data publicized date for compounds, studies, screens
 
