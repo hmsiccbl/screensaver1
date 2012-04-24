@@ -74,6 +74,7 @@ public class ScreenResultReporter
   public static final String DEFAULT_ANNOTATION_NAME_WEIGHTED_AVERAGE = "Weighted Average";
   public static final String DEFAULT_ANNOTATION_NAME_NUMBER_OF_SCREENS = "Number of screens";
   public static final String DEFAULT_ANNOTATION_TITLE_NUMBER_OF_SCREENS = "Number of screens";
+	public static final int NUMBER_OF_BINS = 5;  // TODO: 5 bins are needed because there are 4 duplexes for a pool reagent, and we are counting the # of screens with X duplexes confirming (plus one bin for "zero").
 
   // utility class, allows args in format(args) to be interpreted as Object[] 
   public static class MessageFormatter
@@ -126,6 +127,10 @@ public class ScreenResultReporter
       report.addDuplexConfirmatonResult(row.getFirst(),
                                         row.getSecond(),
                                         row.getThird());
+    }
+    if(report.getDuplexReagents().size() > NUMBER_OF_BINS -1)
+    {
+    	throw new RuntimeException("Error, " + report.getDuplexReagents().size() + " duplexes found, " + (NUMBER_OF_BINS -1) + " allowed per pool reagent.  Pool reagent: " + poolReagent.getWell() +  ", this is not allowed for pool libraries, and is incompatible with this study"); // for [#3451]
     }
 
     return report;
@@ -193,7 +198,7 @@ public class ScreenResultReporter
 
       ConfirmationReport report = getDuplexReconfirmationReport(poolReagent);
 
-      int[] binToScreenCount = report.getBinToScreenCount();
+      int[] binToScreenCount = report.getBinToScreenCount(poolReagent);
       int numberOfScreens = 0;
       for (int bin = 0; bin < binToScreenCount.length; bin++) {
         int screenCount = binToScreenCount[bin];
@@ -469,25 +474,32 @@ public class ScreenResultReporter
      * For RNAi
      * <li>Count of follow-up screens for well
      * <li>M+1 columns named "N duplexes confirming positive", where 0 <= N <= M, and M is the max number of duplexes
-     * per pool in any library, currently = 4). The value in each column is the number of follow-up screens that
+     * per pool in any library, (currently = 4). The value in each column is the number of follow-up screens that
      * confirmed the well as a positive with N duplexes
      * </ul>
      * <ul>
      * For SM (TODO)
      * <li>Count of follow-up screens for well
      * <li># follow-up screens confirming well as a positive
-     * <li>A column for every follow-up screen and duplex, containing the confirmation result of the well
      * </ul>
      */
     public int[] getBinToScreenCount()
+    {    
+    	return getBinToScreenCount(null);
+    }
+    public int[] getBinToScreenCount(SilencingReagent poolReagent)
     {
       if (_results.isEmpty()) return new int[0];
-      int[] binCountArray = new int[_duplexReagents.size() + 1];
+//    int[] binCountArray = new int[_duplexReagents.size() + 1];
+      int[] binCountArray = new int[NUMBER_OF_BINS]; // temp fix for  [#3451], since we've found a pool well that has > 4 duplexes assigned (this is probably an error, and ok to set this to 4, since we'll remove the other 4) -sde4
       for (Screen screen : _results.keySet()) {
         int bin = 0;
+        // iterate through each screen's - map[reagent->value], if value is positive, then that counts as a confirmation for that screen; tally the confirmations for the screen, and increment the bin
         for (ConfirmedPositiveValue cpv : _results.get(screen).values()) {
           if (cpv == ConfirmedPositiveValue.CONFIRMED_POSITIVE) bin++;
         }
+        if(bin > NUMBER_OF_BINS) 
+        	throw new RuntimeException("too many confirmations for screen: " + screen.getFacilityId() + ", pool: " + (poolReagent==null?"" : poolReagent.getWell()));
         binCountArray[bin]++;
       }
       return binCountArray;
