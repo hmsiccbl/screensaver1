@@ -119,6 +119,9 @@
 
     create table cell (
         cell_id int4 not null,
+        date_created timestamp not null,
+        date_loaded timestamp,
+        date_publicly_available timestamp,
         alternate_id varchar(255),
         alternate_name varchar(255),
         batch_id varchar(255),
@@ -143,6 +146,7 @@
         vendor_catalog_id varchar(255),
         verification text,
         verification_reference_profile text,
+        created_by_id int4,
         primary key (cell_id)
     );
 
