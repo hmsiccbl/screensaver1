@@ -184,12 +184,12 @@ public class GenericEntityDAOTest extends AbstractSpringPersistenceTest
   {
     genericEntityDao.mergeEntity(new Library(_adminUser, "ln1", "sn1", ScreenType.SMALL_MOLECULE, LibraryType.NATURAL_PRODUCTS, 1, 50, PlateSize.WELLS_384));
     genericEntityDao.mergeEntity(new Library(_adminUser, "ln2", "sn2", ScreenType.SMALL_MOLECULE, LibraryType.NATURAL_PRODUCTS, 51, 100, PlateSize.WELLS_384));
-    genericEntityDao.mergeEntity(new Library(_adminUser, "ln3", "sn3", ScreenType.SMALL_MOLECULE, LibraryType.DISCRETE, 101, 150, PlateSize.WELLS_384));
+    genericEntityDao.mergeEntity(new Library(_adminUser, "ln3", "sn3", ScreenType.SMALL_MOLECULE, LibraryType.ACADEMIC_COLLECTION, 101, 150, PlateSize.WELLS_384));
     genericEntityDao.mergeEntity(new Library(_adminUser, "ln4", "sn4", ScreenType.SMALL_MOLECULE, LibraryType.NATURAL_PRODUCTS, 151, 200, PlateSize.WELLS_384));
-    genericEntityDao.mergeEntity(new Library(_adminUser, "ln5", "sn5", ScreenType.SMALL_MOLECULE, LibraryType.DISCRETE, 201, 250, PlateSize.WELLS_384));
+    genericEntityDao.mergeEntity(new Library(_adminUser, "ln5", "sn5", ScreenType.SMALL_MOLECULE, LibraryType.ACADEMIC_COLLECTION, 201, 250, PlateSize.WELLS_384));
 
     assertEquals(3, genericEntityDao.findEntitiesByProperty(Library.class, "libraryType", LibraryType.NATURAL_PRODUCTS).size());
-    assertEquals(2, genericEntityDao.findEntitiesByProperty(Library.class, "libraryType", LibraryType.DISCRETE).size());
+    assertEquals(2, genericEntityDao.findEntitiesByProperty(Library.class, "libraryType", LibraryType.ACADEMIC_COLLECTION).size());
     assertEquals(0, genericEntityDao.findEntitiesByProperty(Library.class, "libraryType", LibraryType.COMMERCIAL).size());
   }
 
