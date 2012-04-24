@@ -146,6 +146,11 @@
         primary key (cell_id)
     );
 
+		create table cell_update_activity (
+    	copy_id int4 not null,
+    	update_activity_id int4 not null unique,
+    	primary key (copy_id, update_activity_id));
+    
     create table cell_growth_properties (
         cell_id int4 not null,
         growth_property text not null,
