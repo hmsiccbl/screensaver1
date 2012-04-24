@@ -89,7 +89,9 @@ public class LibraryContentsLoader
                                   InputStream stream) 
     throws ParseErrorsException, IOException
   {
-    Library library = lcv.getLibrary();
+    Library library = _dao.reloadEntity(lcv.getLibrary(), false, Library.wells);
+    library.resetContents();
+//    _dao.mergeEntity(library);
     LibraryContentsParser parser;
     if (library.getScreenType().equals(ScreenType.RNAI)) {
       parser = new RNAiLibraryContentsParser(_dao, stream, library);
@@ -120,6 +122,7 @@ public class LibraryContentsLoader
         // cascading)
         if (result.getSecond() != null) { 
           _dao.saveOrUpdateEntity(result.getSecond());
+          _dao.saveOrUpdateEntity(result.getFirst());
         }
         if (++nProcessed % FLUSH_BATCH_SIZE == 0) {
           // allow GC to occur
