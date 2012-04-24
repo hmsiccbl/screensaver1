@@ -12,9 +12,12 @@
 package edu.harvard.med.screensaver.ui.libraries;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 import java.util.Set;
 
+import com.google.common.base.Function;
+import com.google.common.collect.Iterables;
 import com.google.common.collect.Sets;
 import org.apache.log4j.Logger;
 
@@ -121,6 +124,9 @@ public class WellVolumeSearchResults extends EntityBasedEntitySearchResults<Well
       @Override
       public Set<String> getCellValue(WellVolume wellVolume)
       {
+        if( wellVolume.getActiveWellInfo().isEmpty()) {
+        	return Sets.newTreeSet(Arrays.asList(new String[] {"[no active copies]"} ));       
+        }
         return Sets.newTreeSet(wellVolume.getActiveWellInfo().getCopiesList());
       }
     });
@@ -129,6 +135,7 @@ public class WellVolumeSearchResults extends EntityBasedEntitySearchResults<Well
       @Override
       public Volume getCellValue(WellVolume wellVolume)
       {
+        if( wellVolume.getActiveWellInfo().isEmpty()) return null; 
         return wellVolume.getActiveWellInfo().getTotalInitialVolume();
       }
     });
@@ -137,6 +144,7 @@ public class WellVolumeSearchResults extends EntityBasedEntitySearchResults<Well
       @Override
       public Volume getCellValue(WellVolume wellVolume)
       {
+        if( wellVolume.getActiveWellInfo().isEmpty()) return null; 
         return wellVolume.getActiveWellInfo().getConsumedVolume();
       }
     });
@@ -145,7 +153,8 @@ public class WellVolumeSearchResults extends EntityBasedEntitySearchResults<Well
       @Override
       public Volume getCellValue(WellVolume wellVolume)
       {
-        return wellVolume.getActiveWellInfo().getMaxWellCopyVolume().getRemainingVolume();
+        if( wellVolume.getActiveWellInfo().isEmpty()) return null; 
+    		return wellVolume.getActiveWellInfo().getMaxWellCopyVolume().getRemainingVolume();
       }
     });
     columns.add(new TextColumn<WellVolume>("Max Remaining Volume Copy",
@@ -153,6 +162,7 @@ public class WellVolumeSearchResults extends EntityBasedEntitySearchResults<Well
       @Override
       public String getCellValue(WellVolume wellVolume)
       {
+        if( wellVolume.getActiveWellInfo().isEmpty()) return null; 
         return wellVolume.getActiveWellInfo().getMaxWellCopyVolume().getCopy().getName();
       }
     });
@@ -161,6 +171,7 @@ public class WellVolumeSearchResults extends EntityBasedEntitySearchResults<Well
       @Override
       public Volume getCellValue(WellVolume wellVolume)
       {
+        if( wellVolume.getActiveWellInfo().isEmpty()) return null; 
         return wellVolume.getActiveWellInfo().getMinWellCopyVolume().getRemainingVolume();
 
       }
@@ -170,6 +181,7 @@ public class WellVolumeSearchResults extends EntityBasedEntitySearchResults<Well
       @Override
       public String getCellValue(WellVolume wellVolume)
       {
+        if( wellVolume.getActiveWellInfo().isEmpty()) return null; 
         return wellVolume.getActiveWellInfo().getMinWellCopyVolume().getCopy().getName();
       }
     });
