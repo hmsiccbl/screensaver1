@@ -193,7 +193,7 @@ public class LibraryCopyPlateSearchResults extends EntityBasedEntitySearchResult
       @Override
         public void addDomainRestrictions(HqlBuilder hql)
         {
-          DataFetcherUtil.addDomainRestrictions(hql, getRootAlias(), plateIds);
+          DataFetcherUtil.addDomainRestrictions(hql, getRootAlias(), plateIds); 
           addLibraryTypeRestriction(hql, getRootAlias());
         }
       };
@@ -263,7 +263,7 @@ public class LibraryCopyPlateSearchResults extends EntityBasedEntitySearchResult
       public void filter(List<? extends TableColumn<Plate,?>> columns)
       {
         if (_mode == Mode.ALL && !hasCriteriaDefined(getColumnManager().getAllColumns())) {
-          setWrappedData(Collections.EMPTY_LIST);
+          setWrappedData(Collections.EMPTY_LIST);  // for memory performance, initialize with an empty list.
         }
         else {
           boolean calcScreeningStatisticsBeforeFiltering = Iterables.any(columns, isScreeningStatisticsColumnWithCriteria);
