@@ -472,6 +472,7 @@ public class LibraryContentsLoaderTest extends AbstractSpringPersistenceTest
                                       1534,
                                       PlateSize.WELLS_384);
         libraryCreator.createLibrary(library);
+
         // for [#2920] create the plate and copy so that the library loading will invoke the plateUpdater
         Plate plate = findPlateAndCreateCopyIfNecessary(genericEntityDao, librariesDao, 1534, "A", CopyUsageType.STOCK_PLATES, _admin);
         library = genericEntityDao.reloadEntity(library, false, Library.copies);
@@ -610,8 +611,47 @@ public class LibraryContentsLoaderTest extends AbstractSpringPersistenceTest
         assertEquals(new BigDecimal("2.460"), copy.getMaxMgMlConcentration());
         assertEquals(new BigDecimal("0.123"), copy.getMinMgMlConcentration());
         assertEquals(new BigDecimal("2.460"), copy.getPrimaryWellMgMlConcentration()); // note: 2.46 occurs once, as does 0.123, so the comparator chooses the greater value
+        
+        // for [#3439] Old well values are not nulled out before reloading new library content versions
+        well.setMgMlConcentration(new BigDecimal(".001"));
       }
     });
+    
+    
+    // for [#3439] Old well values are not nulled out before reloading new library content versions
+    genericEntityDao.doInTransaction(new DAOTransaction() {
+      public void runTransaction()
+      {
+        _admin = genericEntityDao.reloadEntity(_admin, false, ScreensaverUser.activitiesPerformed.castToSubtype(AdministratorUser.class));
+        Library library = librariesDao.findLibraryWithPlate(1534);
+        library = genericEntityDao.reloadEntity(library, false, Library.wells);
+        Well well = librariesDao.findWell(new WellKey(1534, "A08"));
+        assertEquals(new BigDecimal(".001"), well.getMgMlConcentration());
+        try {
+          LibraryContentsVersion lcv = libraryContentsLoader.loadLibraryContents(library, _admin, "clean data small molecule",
+                                                                                 new ClassPathResource("/libraries/clean_data_small_molecule.sdf").getInputStream());
+          libraryContentsVersionManager.releaseLibraryContentsVersion(lcv, _admin);
+          log.info("added library definition for " + library);
+        }catch(Exception e) {
+        	log.error("on library load", e);
+        	fail("on library load: " + e);
+        }
+        //flushAndClear();
+
+      }
+    });
+    
+    genericEntityDao.doInTransaction(new DAOTransaction() {
+      public void runTransaction()
+      {
+    
+    Well well = librariesDao.findWell(new WellKey(1534, "A08"));
+    assertNotNull(well.getMolarConcentration());
+    assertNull(well.getMgMlConcentration());
+    assertEquals("concentration", MolarConcentration.makeConcentration("115", MolarUnit.NANOMOLAR), well.getMolarConcentration());
+  }
+});
+
   }
     
   public static Plate findPlateAndCreateCopyIfNecessary(GenericEntityDAO dao,
