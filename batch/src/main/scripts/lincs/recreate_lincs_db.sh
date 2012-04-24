@@ -5459,6 +5459,102 @@ check_errs $? "attachment import fails"
 -f $DATA_DIRECTORY/qc/HPLC_HMSL10174.101.01.pdf -i HMSL10174 -sid 101 -bid 1 -type QC-HPLC
 check_errs $? "attachment import fails"
 
+./run.sh edu.harvard.med.lincs.screensaver.io.libraries.ReagentAttachmentImporter \
+-f $DATA_DIRECTORY/qc/NMR_HMSL10175.106.01.pdf -i HMSL10175 -sid 106 -bid 1 -type QC-NMR
+check_errs $? "attachment import fails"
+
+./run.sh edu.harvard.med.lincs.screensaver.io.libraries.ReagentAttachmentImporter \
+-f $DATA_DIRECTORY/qc/LCMS_HMSL10175.106.01.pdf -i HMSL10175 -sid 106 -bid 1 -type QC-LCMS
+check_errs $? "attachment import fails"
+
+./run.sh edu.harvard.med.lincs.screensaver.io.libraries.ReagentAttachmentImporter \
+-f $DATA_DIRECTORY/qc/NMR_HMSL10176.101.01.pdf -i HMSL10176 -sid 101 -bid 1 -type QC-NMR
+check_errs $? "attachment import fails"
+
+./run.sh edu.harvard.med.lincs.screensaver.io.libraries.ReagentAttachmentImporter \
+-f $DATA_DIRECTORY/qc/HPLC_HMSL10176.101.01.pdf -i HMSL10176 -sid 101 -bid 1 -type QC-HPLC
+check_errs $? "attachment import fails"
+
+./run.sh edu.harvard.med.lincs.screensaver.io.libraries.ReagentAttachmentImporter \
+-f $DATA_DIRECTORY/qc/NMR_HMSL10177.101.01.pdf -i HMSL10177 -sid 101 -bid 1 -type QC-NMR
+check_errs $? "attachment import fails"
+
+./run.sh edu.harvard.med.lincs.screensaver.io.libraries.ReagentAttachmentImporter \
+-f $DATA_DIRECTORY/qc/HPLC_HMSL10177.101.01.pdf -i HMSL10177 -sid 101 -bid 1 -type QC-HPLC
+check_errs $? "attachment import fails"
+
+./run.sh edu.harvard.med.lincs.screensaver.io.libraries.ReagentAttachmentImporter \
+-f $DATA_DIRECTORY/qc/NMR_HMSL10178.101.01.pdf -i HMSL10178 -sid 101 -bid 1 -type QC-NMR
+check_errs $? "attachment import fails"
+
+./run.sh edu.harvard.med.lincs.screensaver.io.libraries.ReagentAttachmentImporter \
+-f $DATA_DIRECTORY/qc/HPLC_HMSL10178.101.01.pdf -i HMSL10178 -sid 101 -bid 1 -type QC-HPLC
+check_errs $? "attachment import fails"
+
+./run.sh edu.harvard.med.lincs.screensaver.io.libraries.ReagentAttachmentImporter \
+-f $DATA_DIRECTORY/qc/NMR_HMSL10179.101.01.pdf -i HMSL10179 -sid 101 -bid 1 -type QC-NMR
+check_errs $? "attachment import fails"
+
+./run.sh edu.harvard.med.lincs.screensaver.io.libraries.ReagentAttachmentImporter \
+-f $DATA_DIRECTORY/qc/HPLC_HMSL10179.101.01.pdf -i HMSL10179 -sid 101 -bid 1 -type QC-HPLC
+check_errs $? "attachment import fails"
+
+./run.sh edu.harvard.med.lincs.screensaver.io.libraries.ReagentAttachmentImporter \
+-f $DATA_DIRECTORY/qc/NMR_HMSL10180.101.01.pdf -i HMSL10180 -sid 101 -bid 1 -type QC-NMR
+check_errs $? "attachment import fails"
+
+./run.sh edu.harvard.med.lincs.screensaver.io.libraries.ReagentAttachmentImporter \
+-f $DATA_DIRECTORY/qc/HPLC_HMSL10180.101.01.pdf -i HMSL10180 -sid 101 -bid 1 -type QC-HPLC
+check_errs $? "attachment import fails"
+
+./run.sh edu.harvard.med.lincs.screensaver.io.libraries.ReagentAttachmentImporter \
+-f $DATA_DIRECTORY/qc/NMR_HMSL10181.101.01.pdf -i HMSL10181 -sid 101 -bid 1 -type QC-NMR
+check_errs $? "attachment import fails"
+
+./run.sh edu.harvard.med.lincs.screensaver.io.libraries.ReagentAttachmentImporter \
+-f $DATA_DIRECTORY/qc/HPLC_HMSL10181.101.01.pdf -i HMSL10181 -sid 101 -bid 1 -type QC-HPLC
+check_errs $? "attachment import fails"
+
+./run.sh edu.harvard.med.lincs.screensaver.io.libraries.ReagentAttachmentImporter \
+-f $DATA_DIRECTORY/qc/NMR_HMSL10182.101.01.pdf -i HMSL10182 -sid 101 -bid 1 -type QC-NMR
+check_errs $? "attachment import fails"
+
+./run.sh edu.harvard.med.lincs.screensaver.io.libraries.ReagentAttachmentImporter \
+-f $DATA_DIRECTORY/qc/LCMS_HMSL10182.101.01.pdf -i HMSL10182 -sid 101 -bid 1 -type QC-LCMS
+check_errs $? "attachment import fails"
+
+./run.sh edu.harvard.med.lincs.screensaver.io.libraries.ReagentAttachmentImporter \
+-f $DATA_DIRECTORY/qc/NMR_HMSL10184.101.01.pdf -i HMSL10184 -sid 101 -bid 1 -type QC-NMR
+check_errs $? "attachment import fails"
+
+./run.sh edu.harvard.med.lincs.screensaver.io.libraries.ReagentAttachmentImporter \
+-f $DATA_DIRECTORY/qc/HPLC_HMSL10184.101.01.pdf -i HMSL10184 -sid 101 -bid 1 -type QC-HPLC
+check_errs $? "attachment import fails"
+
+./run.sh edu.harvard.med.lincs.screensaver.io.libraries.ReagentAttachmentImporter \
+-f $DATA_DIRECTORY/qc/NMR_HMSL10185.101.01.pdf -i HMSL10185 -sid 101 -bid 1 -type QC-NMR
+check_errs $? "attachment import fails"
+
+./run.sh edu.harvard.med.lincs.screensaver.io.libraries.ReagentAttachmentImporter \
+-f $DATA_DIRECTORY/qc/LCMS_HMSL10185.101.01.pdf -i HMSL10185 -sid 101 -bid 1 -type QC-LCMS
+check_errs $? "attachment import fails"
+
+./run.sh edu.harvard.med.lincs.screensaver.io.libraries.ReagentAttachmentImporter \
+-f $DATA_DIRECTORY/qc/NMR_HMSL10186.102.01.pdf -i HMSL10186 -sid 102 -bid 1 -type QC-NMR
+check_errs $? "attachment import fails"
+
+./run.sh edu.harvard.med.lincs.screensaver.io.libraries.ReagentAttachmentImporter \
+-f $DATA_DIRECTORY/qc/LCMS_HMSL10186.102.01.pdf -i HMSL10186 -sid 102 -bid 1 -type QC-LCMS
+check_errs $? "attachment import fails"
+
+./run.sh edu.harvard.med.lincs.screensaver.io.libraries.ReagentAttachmentImporter \
+-f $DATA_DIRECTORY/qc/NMR_HMSL10187.101.01.pdf -i HMSL10187 -sid 101 -bid 1 -type QC-NMR
+check_errs $? "attachment import fails"
+
+./run.sh edu.harvard.med.lincs.screensaver.io.libraries.ReagentAttachmentImporter \
+-f $DATA_DIRECTORY/qc/LCMS_HMSL10187.101.01.pdf -i HMSL10187 -sid 101 -bid 1 -type QC-LCMS
+check_errs $? "attachment import fails"
+
 # "Study-File" Attached files, for viewing in the study viewer
 
 ./run.sh edu.harvard.med.lincs.screensaver.io.screens.ScreenAttachmentImporter \
