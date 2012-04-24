@@ -150,6 +150,8 @@ public class WellVolume extends NonPersistentEntity<String> implements Comparabl
       return _wellCopyVolumes;
     }
     
+    public boolean isEmpty() { return getWellCopyVolumes().isEmpty(); }
+    
     public List<String> getCopiesList()
     {
       return _copyNames;

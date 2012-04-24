@@ -573,4 +573,11 @@ public class Well extends SemanticIDAbstractEntity<String> implements Comparable
   {
     return _mgMlConcentration;
   }
+
+  // for [#3439] Old well values are not nulled out before reloading new library content versions
+  // to be called when a new library contents is loaded.
+	public void resetLibraryContents() {
+		setMgMlConcentration(null);
+		setMolarConcentration(null);
+	}
 }

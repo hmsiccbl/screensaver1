@@ -819,4 +819,13 @@ public class Library extends AuditedAbstractEntity<Integer>
     }
     return libraryPlates;
   }
+
+  // [#3439] Old well values are not nulled out before reloading new library content versions
+  // TODO: the well contents are not held back for the LCV release, it appears, since the LCV release only affects the latest released reagent -sde4
+	public void resetContents() {
+  	for(Well well: getWells())
+  	{
+  		well.resetLibraryContents();
+  	}
+	}
 }
