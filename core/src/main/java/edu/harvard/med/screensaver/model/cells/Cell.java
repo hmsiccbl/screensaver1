@@ -30,10 +30,8 @@ import org.hibernate.annotations.SortType;
 
 import com.google.common.collect.Sets;
 
-import edu.harvard.med.screensaver.model.AbstractEntity;
 import edu.harvard.med.screensaver.model.AbstractEntityVisitor;
-import edu.harvard.med.screensaver.model.activities.Activity;
-import edu.harvard.med.screensaver.model.meta.Cardinality;
+import edu.harvard.med.screensaver.model.AuditedAbstractEntity;
 import edu.harvard.med.screensaver.model.meta.RelationshipPath;
 
 
@@ -44,7 +42,7 @@ import edu.harvard.med.screensaver.model.meta.RelationshipPath;
 @Entity
 @Inheritance(strategy=InheritanceType.JOINED)
 @org.hibernate.annotations.Proxy
-public abstract class Cell extends AbstractEntity<Integer> implements Comparable<Cell>
+public abstract class Cell extends AuditedAbstractEntity<Integer> implements Comparable<Cell>
 {
   private static final long serialVersionUID = 0L;
   

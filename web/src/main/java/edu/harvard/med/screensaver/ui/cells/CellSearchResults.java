@@ -13,9 +13,11 @@ import java.util.List;
 import java.util.Set;
 
 import org.apache.log4j.Logger;
+import org.joda.time.LocalDate;
 
 import com.google.common.collect.Lists;
 
+import edu.harvard.med.lincs.screensaver.LincsScreensaverConstants;
 import edu.harvard.med.screensaver.db.GenericEntityDAO;
 import edu.harvard.med.screensaver.db.datafetcher.EntityDataFetcher;
 import edu.harvard.med.screensaver.model.cells.Cell;
@@ -24,6 +26,7 @@ import edu.harvard.med.screensaver.model.libraries.SmallMoleculeReagent;
 import edu.harvard.med.screensaver.model.meta.RelationshipPath;
 import edu.harvard.med.screensaver.model.screens.ScreenType;
 import edu.harvard.med.screensaver.ui.arch.datatable.column.TableColumn;
+import edu.harvard.med.screensaver.ui.arch.datatable.column.entity.DateEntityColumn;
 import edu.harvard.med.screensaver.ui.arch.datatable.column.entity.IntegerEntityColumn;
 import edu.harvard.med.screensaver.ui.arch.datatable.column.entity.TextEntityColumn;
 import edu.harvard.med.screensaver.ui.arch.datatable.column.entity.TextSetEntityColumn;
@@ -289,9 +292,9 @@ public class CellSearchResults extends EntityBasedEntitySearchResults<Cell, Inte
 		});
 		columns.get(columns.size() - 1).setVisible(false);
 
-		// CL:22
-		columns.add(new TextEntityColumn<Cell>(RelationshipPath.from(Cell.class).toProperty("verification"), "Verification Profile",
-				"Information pertaining to experimental verification of the cell line identity", TableColumn.UNGROUPED) {
+		// CL:21
+		columns.add(new TextEntityColumn<Cell>(RelationshipPath.from(Cell.class).toProperty("verification"), "Batch Verification Profile",
+				"Information pertaining to experimental verification of the identity of a specific batch of the cell line; STR profiling", TableColumn.UNGROUPED) {
 			@Override
 			public String getCellValue(Cell info) {
 				return info.getVerification();
@@ -300,8 +303,8 @@ public class CellSearchResults extends EntityBasedEntitySearchResults<Cell, Inte
 		
 		columns.get(columns.size() - 1).setVisible(false);
 		// CL:22
-		columns.add(new TextEntityColumn<Cell>(RelationshipPath.from(Cell.class).toProperty("verificationReferenceProfile"), "Verification Reference Profile",
-				"Information pertaining to experimental verification of the cell line identity", TableColumn.UNGROUPED) {
+		columns.add(new TextEntityColumn<Cell>(RelationshipPath.from(Cell.class).toProperty("verificationReferenceProfile"), "Reference Verification Profile",
+				"Expected STR (reference) profile of the cell line based on provider information, if available", TableColumn.UNGROUPED) {
 			@Override
 			public String getCellValue(Cell info) {
 				return info.getVerificationReferenceProfile();
@@ -339,6 +342,45 @@ public class CellSearchResults extends EntityBasedEntitySearchResults<Cell, Inte
 		});
 		columns.get(columns.size() - 1).setVisible(true);
 
+    if (getApplicationProperties().isFacility(LincsScreensaverConstants.FACILITY_KEY)) {
+      columns.add(new DateEntityColumn<Cell>(RelationshipPath.from(Cell.class).toProperty("dateCreated"),
+                                                "Date Data Received",
+                                                "The date the data was received",
+                                                TableColumn.UNGROUPED) {
+        @Override
+        protected LocalDate getDate(Cell cell)
+        {
+          return cell.getDateCreated().toLocalDate();
+        }
+      });
+    }
+    
+    if (getApplicationProperties().isFacility(LincsScreensaverConstants.FACILITY_KEY)) {
+      columns.add(new DateEntityColumn<Cell>(RelationshipPath.from(Cell.class).toProperty("dateLoaded"),
+                                                "Date Loaded",
+                                                "The date the Cell data was loaded",
+                                                TableColumn.UNGROUPED) {
+        @Override
+        protected LocalDate getDate(Cell cell)
+        {
+          return cell.getDateLoaded()==null ? null : cell.getDateLoaded().toLocalDate();
+        }
+      });
+    }
+    
+    if (getApplicationProperties().isFacility(LincsScreensaverConstants.FACILITY_KEY)) {
+      columns.add(new DateEntityColumn<Cell>(RelationshipPath.from(Cell.class).toProperty("datePubliclyAvailable"),
+                                                "Date Publicly Available",
+                                                "The date the Cell data was made publicly available",
+                                                TableColumn.UNGROUPED) {
+        @Override
+        protected LocalDate getDate(Cell cell)
+        {
+          return cell.getDatePubliclyAvailable()==null ? null : cell.getDatePubliclyAvailable().toLocalDate();
+        }
+      });
+    }
+    
 		return columns;
 	}
 
