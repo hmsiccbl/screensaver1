@@ -33,6 +33,7 @@ import com.google.common.collect.Sets;
 import edu.harvard.med.screensaver.model.AbstractEntityVisitor;
 import edu.harvard.med.screensaver.model.AuditedAbstractEntity;
 import edu.harvard.med.screensaver.model.meta.RelationshipPath;
+import edu.harvard.med.screensaver.model.users.AdministratorUser;
 
 
 /**
@@ -83,7 +84,10 @@ public abstract class Cell extends AuditedAbstractEntity<Integer> implements Com
   /**
    * @motivation for hibernate and proxy/concrete subclass constructors
    */
-  protected Cell() {}
+  public Cell()
+  {
+  	super(null); // not supporting the parent AuditedAbstractEntity contract requiring a createdBy to be set.  this can be set later if needed. -sde4
+  }
 
   @Override
   public Object acceptVisitor(AbstractEntityVisitor visitor)

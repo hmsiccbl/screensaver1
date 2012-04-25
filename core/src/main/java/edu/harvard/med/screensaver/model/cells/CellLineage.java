@@ -34,5 +34,8 @@ public class CellLineage extends Cell
   /**
    * @motivation for hibernate and proxy/concrete subclass constructors
    */
-  public CellLineage() {}
+  public CellLineage() 
+  {
+  	super();
+  }
 }

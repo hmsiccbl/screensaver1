@@ -45,6 +45,13 @@ public class PrimaryCell extends Cell
   private SortedSet<String> cellMarkers; // TODO: Controlled Vocab
   private int passageNumber;
   
+	/**
+   * @motivation for hibernate and proxy/concrete subclass constructors
+   */
+  public PrimaryCell() {
+  	super();
+  }
+  
   public String getDonorEthnicity() {
 		return donorEthnicity;
 	}
@@ -93,11 +100,6 @@ public class PrimaryCell extends Cell
 	public void setPassageNumber(int passageNumber) {
 		this.passageNumber = passageNumber;
 	}
-
-	/**
-   * @motivation for hibernate and proxy/concrete subclass constructors
-   */
-  public PrimaryCell() {}
 
 
 }
