@@ -2,14 +2,14 @@
   <modelVersion>4.0.0</modelVersion>
   <parent>
     <artifactId>screensaver</artifactId>
-    <version>2012-02-24</version>
+    <version>2012-04-25</version>
     <groupId>edu.harvard.med</groupId>
     <relativePath>../pom.xml</relativePath>
   </parent>
   
   <groupId>edu.harvard.med</groupId>
   <artifactId>screensaver-web</artifactId>
-  <version>2012-02-24</version>
+  <version>2012-04-25</version>
   <name>Screensaver Web</name>
   <description>Screensaver web application</description>
 
@@ -31,6 +31,7 @@
     <url-pattern>/studies/*</url-pattern>
     <url-pattern>/screens/*</url-pattern>
     <url-pattern>/screens/screenresults/*</url-pattern>
+    <url-pattern>/cells/*</url-pattern>
     <url-pattern>/help/*]]></web.authenticated.url-pattern>
   </properties>
   
@@ -113,6 +114,7 @@
             <url-pattern>/libraries/*</url-pattern>
             <url-pattern>/studies/*</url-pattern>
             <url-pattern>/screens/*</url-pattern>
+            <url-pattern>/cells/*</url-pattern>
             <url-pattern>/screens/screenresults/*</url-pattern>
             <url-pattern>/help/*]]></web.unauthenticated.url-pattern>
       <web.authenticated.url-pattern>/main/authenticatedPage.jsf</web.authenticated.url-pattern>
@@ -171,7 +173,7 @@
   	<dependency>
   		<groupId>edu.harvard.med</groupId>
   		<artifactId>screensaver-core</artifactId>
-  		<version>2012-02-24</version>
+  		<version>2012-04-25</version>
   	</dependency>
 
     <dependency>
@@ -183,7 +185,7 @@
     <dependency>
       <groupId>edu.harvard.med</groupId>
       <artifactId>screensaver-test</artifactId>
-      <version>2012-02-24</version>
+      <version>2012-04-25</version>
       <scope>test</scope>
     </dependency>
 
