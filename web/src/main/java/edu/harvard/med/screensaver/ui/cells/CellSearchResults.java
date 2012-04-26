@@ -353,6 +353,7 @@ public class CellSearchResults extends EntityBasedEntitySearchResults<Cell, Inte
           return cell.getDateCreated().toLocalDate();
         }
       });
+  		columns.get(columns.size() - 1).setVisible(false);
     }
     
     if (getApplicationProperties().isFacility(LincsScreensaverConstants.FACILITY_KEY)) {
@@ -366,6 +367,7 @@ public class CellSearchResults extends EntityBasedEntitySearchResults<Cell, Inte
           return cell.getDateLoaded()==null ? null : cell.getDateLoaded().toLocalDate();
         }
       });
+  		columns.get(columns.size() - 1).setVisible(false);
     }
     
     if (getApplicationProperties().isFacility(LincsScreensaverConstants.FACILITY_KEY)) {
