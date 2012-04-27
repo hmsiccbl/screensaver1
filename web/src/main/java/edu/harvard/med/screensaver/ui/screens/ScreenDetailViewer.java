@@ -251,9 +251,9 @@ public class ScreenDetailViewer extends AbstractStudyDetailViewer<Screen>
                                   return !!!af.getFileType().getValue().equals(Publication.PUBLICATION_ATTACHED_FILE_TYPE_VALUE);
                                 }
                               });
-    _publicationAttachedFileType = getDao().findEntityByProperty(AttachedFileType.class, "value", Publication.PUBLICATION_ATTACHED_FILE_TYPE_VALUE);
+    _publicationAttachedFileType = getDao().findEntityByProperty(ScreenAttachedFileType.class, "value", Publication.PUBLICATION_ATTACHED_FILE_TYPE_VALUE);
     if (_publicationAttachedFileType == null) {
-      throw NoSuchEntityException.forProperty(AttachedFileType.class, "value", Publication.PUBLICATION_ATTACHED_FILE_TYPE_VALUE);
+      throw NoSuchEntityException.forProperty(ScreenAttachedFileType.class, "value", Publication.PUBLICATION_ATTACHED_FILE_TYPE_VALUE);
     }
   }
   
