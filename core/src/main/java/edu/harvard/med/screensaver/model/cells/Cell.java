@@ -23,6 +23,7 @@ import javax.persistence.Inheritance;
 import javax.persistence.InheritanceType;
 import javax.persistence.JoinColumn;
 import javax.persistence.JoinTable;
+import javax.persistence.ManyToMany;
 import javax.persistence.OneToMany;
 
 import org.hibernate.annotations.Sort;
@@ -32,6 +33,8 @@ import com.google.common.collect.Sets;
 
 import edu.harvard.med.screensaver.model.AbstractEntityVisitor;
 import edu.harvard.med.screensaver.model.AuditedAbstractEntity;
+import edu.harvard.med.screensaver.model.activities.AdministrativeActivity;
+import edu.harvard.med.screensaver.model.annotations.ToMany;
 import edu.harvard.med.screensaver.model.meta.RelationshipPath;
 import edu.harvard.med.screensaver.model.users.AdministratorUser;
 
@@ -365,6 +368,25 @@ public abstract class Cell extends AuditedAbstractEntity<Integer> implements Com
 	public void setVerificationReferenceProfile(String value) {
 		this.verificationReferenceProfile = value;
 	}
+	
+  @ManyToMany(fetch = FetchType.LAZY, cascade = { CascadeType.PERSIST, CascadeType.MERGE })
+  @JoinTable(name = "cellUpdateActivity",
+             joinColumns = @JoinColumn(name = "cellId", nullable = false, updatable = false),
+             inverseJoinColumns = @JoinColumn(name = "updateActivityId", nullable = false, updatable = false, unique = true))
+  @org.hibernate.annotations.Cascade(value = { org.hibernate.annotations.CascadeType.SAVE_UPDATE })
+  @Sort(type = SortType.NATURAL)
+  @ToMany(singularPropertyName = "updateActivity", hasNonconventionalMutation = true /*
+                                                                                      * model testing framework doesn't
+                                                                                      * understand this is a containment
+                                                                                      * relationship, and so requires
+                                                                                      * addUpdateActivity() method
+                                                                                      */)
+  @Override
+  public SortedSet<AdministrativeActivity> getUpdateActivities()
+  {
+    return _updateActivities;
+  }	
+	
 	public int compareTo(Cell o) {
     if (this.equals(o)) {
       return 0;

@@ -22,5 +22,15 @@ alter table cell
   add constraint FK2E896266AB751E 
   foreign key (created_by_id) 
   references screensaver_user;
-        
+  
+alter table cell_update_activity 
+    add constraint FKD53E98E87448DB73 
+    foreign key (cell_id) 
+    references cell;
+
+alter table cell_update_activity 
+    add constraint FKD53E98E88BCC1B97 
+    foreign key (update_activity_id) 
+    references administrative_activity;
+  
 COMMIT;
