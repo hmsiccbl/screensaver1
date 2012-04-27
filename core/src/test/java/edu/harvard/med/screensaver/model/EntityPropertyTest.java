@@ -111,7 +111,7 @@ public class EntityPropertyTest<E extends AbstractEntity> extends AbstractSpring
   		return;  // TODO: this implies that this test method is being run explicitly, so skip -sde4
   	}
   	if(ModelIntrospectionUtil.isImmutableIgnoreTests(_entityClass)) {
-  		log.debug("class annotated with @Immutable and @IgnoreImmutabilityTest" );
+  		log.info("class annotated with @Immutable and @IgnoreImmutabilityTest: " + _entityClass + ", ignoring.");
   		return;
   	}
     log.info("testing entity property " + fullPropName(propertyDescriptor));

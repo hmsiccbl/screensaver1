@@ -297,6 +297,10 @@ public abstract class AbstractEntityInstanceTest<E extends AbstractEntity> exten
       log.info("not an \"audited\" entity type: skipping testing 'createdBy' property");
       return;
     }
+  	if(ModelIntrospectionUtil.isImmutableIgnoreTests(_entityClass)) {
+  		log.info("class annotated with @Immutable and @IgnoreImmutabilityTest: " + _entityClass + ", ignoring.");
+  		return;
+  	}
       
     AuditedAbstractEntity auditedEntity = (AuditedAbstractEntity) dataFactory.newInstance(_entityClass, getName());
     ScreensaverUser dataEntryAdmin = auditedEntity.getCreatedBy();
