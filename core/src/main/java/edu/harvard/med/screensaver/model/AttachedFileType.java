@@ -18,7 +18,9 @@ import javax.persistence.GenerationType;
 import javax.persistence.Id;
 import javax.persistence.Inheritance;
 import javax.persistence.InheritanceType;
+import javax.persistence.Table;
 import javax.persistence.Transient;
+import javax.persistence.UniqueConstraint;
 
 
 import org.hibernate.annotations.Immutable;
@@ -35,6 +37,10 @@ import org.hibernate.annotations.Type;
 @org.hibernate.annotations.Proxy
 @DiscriminatorColumn(discriminatorType=DiscriminatorType.STRING, name="forEntityType")
 @Inheritance(strategy=InheritanceType.SINGLE_TABLE)
+@Table(uniqueConstraints={ @UniqueConstraint(columnNames={
+	  "value",
+	 "forEntityType"
+	}) })
 public abstract class AttachedFileType extends AbstractEntity<Integer> implements Comparable<AttachedFileType>
 {
   private static final long serialVersionUID = 1L;
@@ -74,7 +80,7 @@ public abstract class AttachedFileType extends AbstractEntity<Integer> implement
     setEntityId(attachedFileTypeId);
   }
 
-  @Column(unique=true, nullable=false)
+  @Column(unique=false, nullable=false)
   @Type(type="text")
   public String getValue()
   {
