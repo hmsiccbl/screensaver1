@@ -77,7 +77,7 @@ public class WellViewer extends SearchResultContextEntityViewerBackingBean<Well,
   public static final String CHEMBANK_ID_LOOKUP_URL_PREFIX =
     "http://chembank.broad.harvard.edu/chemistry/viewMolecule.htm?cbid=";
   public static final String CHEMBL_ID_LOOKUP_URL_PREFIX =
-    "http://www.ebi.ac.uk/chembldb/index.php/compound/inspect/";
+    "http://www.ebi.ac.uk/chembldb/compound/inspect/CHEMBL";
 
   private LibraryViewer _libraryViewer;
   private LibrariesDAO _librariesDao;
