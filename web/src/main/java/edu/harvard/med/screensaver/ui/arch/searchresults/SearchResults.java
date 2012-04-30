@@ -75,15 +75,10 @@ abstract public class SearchResults<R, K, P> extends EditableDataTable<R>
    */
   public void initialize(DataTableModel<R> dataTableModel)
   {
-    initialize(dataTableModel, buildColumns());
-  }
-  
-  public void initialize(DataTableModel<R> dataTableModel, List<? extends TableColumn<R,?>> columns)
-  {
     initialize(dataTableModel,
-               columns,
-               buildRowsPerPageSelector(),
-               !getApplicationProperties().isFeatureEnabled("data_table_tree_column_selector"));
+    		 			buildColumns(),
+    		 			buildRowsPerPageSelector(),
+    		 			!getApplicationProperties().isFeatureEnabled("data_table_tree_column_selector"));
   }
   
   /** 

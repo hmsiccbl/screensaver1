@@ -56,16 +56,6 @@ public abstract class EntitySearchResults<E extends Entity<K>,R,K extends Serial
   public void initialize(DataTableModel<R> dataTableModel)
   {
     super.initialize(new EntitySearchResultsDataModel(dataTableModel));
-
-    // reset to default rows-per-page, if in "entity view" mode
-    if (isEntityView()) {
-      getRowsPerPageSelector().setSelection(getRowsPerPageSelector().getDefaultSelection());
-    }
-  }
-
-  public void initialize(DataTableModel<R> dataTableModel, List<? extends TableColumn<R,?>> columns)
-  {
-    super.initialize(new EntitySearchResultsDataModel(dataTableModel), columns);
     
     // reset to default rows-per-page, if in "entity view" mode
     if (isEntityView()) {
