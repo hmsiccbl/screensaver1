@@ -107,8 +107,9 @@
     create table attached_file_type (
         for_entity_type varchar(31) not null,
         attached_file_type_id int4 not null,
-        value text not null unique,
-        primary key (attached_file_type_id)
+        value text not null,
+        primary key (attached_file_type_id),
+        unique (value, for_entity_type)
     );
 
     create table attached_file_update_activity (
@@ -150,11 +151,6 @@
         primary key (cell_id)
     );
 
-		create table cell_update_activity (
-    	copy_id int4 not null,
-    	update_activity_id int4 not null unique,
-    	primary key (copy_id, update_activity_id));
-    
     create table cell_growth_properties (
         cell_id int4 not null,
         growth_property text not null,
@@ -183,6 +179,12 @@
         cell_id int4 not null,
         related_project text not null,
         primary key (cell_id, related_project)
+    );
+
+    create table cell_update_activity (
+        cell_id int4 not null,
+        update_activity_id int4 not null unique,
+        primary key (cell_id, update_activity_id)
     );
 
     create table checklist_item (
@@ -1044,6 +1046,11 @@
         foreign key (attached_file_id) 
         references attached_file;
 
+    alter table cell 
+        add constraint FK2E896266AB751E 
+        foreign key (created_by_id) 
+        references screensaver_user;
+
     alter table cell_growth_properties 
         add constraint fk_cell_growth_properties_to_cell 
         foreign key (cell_id) 
@@ -1063,6 +1070,16 @@
         add constraint fk_cell_related_projects_to_cell 
         foreign key (cell_id) 
         references cell;
+
+    alter table cell_update_activity 
+        add constraint FKD53E98E87448DB73 
+        foreign key (cell_id) 
+        references cell;
+
+    alter table cell_update_activity 
+        add constraint FKD53E98E88BCC1B97 
+        foreign key (update_activity_id) 
+        references administrative_activity;
 
     alter table checklist_item_event 
         add constraint fk_checklist_item_event_to_screening_room_user 
