@@ -1,11 +1,11 @@
 BEGIN;
 
 
---INSERT INTO schema_history (screensaver_revision, date_updated, comment)
---SELECT
---7138,
---current_timestamp,
---'add "Publication", "Other" attached_file_types';
+INSERT INTO schema_history (screensaver_revision, date_updated, comment)
+SELECT
+7138,
+current_timestamp,
+'add "Publication", "Other" attached_file_types';
 
 alter table attached_file_type drop constraint attached_file_type_value_key;
 alter table attached_file_type add constraint attached_file_type_key unique ( value, for_entity_type );
