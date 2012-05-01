@@ -18,9 +18,20 @@ import edu.harvard.med.screensaver.model.Entity;
 import edu.harvard.med.screensaver.model.screenresults.AssayWell;
 import edu.harvard.med.screensaver.model.screenresults.DataColumn;
 import edu.harvard.med.screensaver.model.screenresults.ResultValue;
+import edu.harvard.med.screensaver.model.screenresults.ScreenResult;
 
 public class AssayWellsConverter extends RestConverter
 {
+	
+  public static class AssayWellsRequest
+  {
+    public ScreenResult sr;
+  
+    public AssayWellsRequest(ScreenResult sr)
+    {
+      this.sr = sr;
+    }
+  }	
   private static final Logger log = Logger.getLogger(AssayWellsConverter.class);
   
   @Autowired
@@ -28,7 +39,7 @@ public class AssayWellsConverter extends RestConverter
 
   public boolean canConvert(Class clazz)
   {
-    return EntityCollection.AssayWells.class.isAssignableFrom(clazz);
+    return AssayWellsConverter.AssayWellsRequest.class.isAssignableFrom(clazz);
   }
 
   public void marshal(final Object value, final HierarchicalStreamWriter writer,
@@ -39,11 +50,11 @@ public class AssayWellsConverter extends RestConverter
       @Override
       public void runTransaction()
       {
-        Set<AssayWell> assayWells = (Set<AssayWell>)((EntityCollection.AssayWells)value).getCollection();
-        for(AssayWell aw:assayWells)
+      	ScreenResult sr = getDao().reloadEntity(((AssayWellsConverter.AssayWellsRequest)value).sr);
+        for(AssayWell aw:sr.getAssayWells())
         {
           writer.startNode(getNodeName(AssayWell.class));
-          aw = getDao().reloadEntity(aw);
+          //aw = getDao().reloadEntity(aw);
           assayWellConverter.write(writer, aw);
           writer.endNode();
         }

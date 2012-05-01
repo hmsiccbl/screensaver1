@@ -124,7 +124,7 @@
         <prop key="screenColumns">edu.harvard.med.screensaver.rest.EntityCollection.ScreenColumns</prop>
         <prop key="screenColumn">edu.harvard.med.screensaver.model.screenresults.DataColumn</prop>
         <prop key="screenColumnValues">edu.harvard.med.screensaver.rest.DataColumnValuesConverter.DataColumnValuesRequest</prop>
-        <prop key="screenAssayWells">edu.harvard.med.screensaver.rest.EntityCollection.AssayWells</prop>
+        <prop key="screenAssayWells">edu.harvard.med.screensaver.rest.AssayWellsConverter.AssayWellsRequest</prop>
         <prop key="screenAssayWellValues">edu.harvard.med.screensaver.rest.AssayWellValuesConverter.AssayWellValuesRequest</prop>
         <prop key="studies">edu.harvard.med.screensaver.rest.EntityCollection.Studies</prop>
         <prop key="studyResult">edu.harvard.med.screensaver.rest.StudyValuesConverter.StudyValues</prop>
@@ -159,6 +159,7 @@
         <bean id="screeningRoomUserConverter" class="edu.harvard.med.screensaver.rest.ScreeningRoomUserConverter" />
         <bean id="publicationConverter" class="edu.harvard.med.screensaver.rest.PublicationConverter" />
         <bean id="assayWellConverter" class="edu.harvard.med.screensaver.rest.AssayWellConverter" />
+        <bean id="assayWellsConverter" class="edu.harvard.med.screensaver.rest.AssayWellsConverter" />
         <bean id="annotationTypeConverter" class="edu.harvard.med.screensaver.rest.AnnotationTypeConverter" />
         <bean id="studyReagentsCanonicalConverter" class="edu.harvard.med.screensaver.rest.StudyReagentsCanonicalConverter" />
         <bean id="studyRowConverter" class="edu.harvard.med.screensaver.rest.StudyRowConverter" />

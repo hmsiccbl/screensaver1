@@ -87,52 +87,54 @@ public class DataController
     return makeModel(new EntityCollection.Studies(Study.class, screenDao.findAllStudies()));
   }
 
+  // this returns a list of assay wells like <assaywell libraryWellUrl="..."/> 
   @RequestMapping(value = "/screens/{facilityId}/results/assaywells", method = RequestMethod.GET)
   public ModelAndView screenResultAssayWells(@PathVariable(value = "facilityId") String facilityId)
   {
     Screen s = genericEntityDao.findEntityByProperty(Screen.class, "facilityId", facilityId, true, Screen.screenResult.to(ScreenResult.assayWells));
     if (s != null && s.getScreenResult() != null) {
-      return makeModel(new EntityCollection.AssayWells(AssayWell.class, s.getScreenResult().getAssayWells()));
+      return makeModel(new AssayWellsConverter.AssayWellsRequest(s.getScreenResult()));
     }
     else {
       return makeNotFoundError();
     }
   }
 
-  @RequestMapping(value = "/screens/{facilityId}/results/assaywells/{plateNumber}", method = RequestMethod.GET)
-  public ModelAndView screenResultAssayWells(@PathVariable(value = "facilityId") String facilityId,
-                                             @PathVariable(value = "plateNumber") Integer plateNumber)
-  {
-    Screen s = genericEntityDao.findEntityByProperty(Screen.class, "facilityId", facilityId, true, Screen.screenResult.to(ScreenResult.assayWells));
-    if (s != null && s.getScreenResult() != null) {
-      Set<AssayWell> assayWells = Sets.newHashSet();
-      for(AssayWell aw:s.getScreenResult().getAssayWells()) {
-        if(aw.getLibraryWell().getPlateNumber().equals(plateNumber) ) assayWells.add(aw);
-      }
-      return makeModel(new EntityCollection.AssayWells(AssayWell.class, assayWells));  //TODO: consider creating a AssayWellsRequestConverter, like the DataColumnValuesConverter, and stream a list of control type and library well urls -sde4
-    }
-    else {
-      return makeNotFoundError();
-    }
-  }
-  
-  @RequestMapping(value = "/screens/{facilityId}/results/assaywells/{plateNumber}/{wellName}", method = RequestMethod.GET)
-  public ModelAndView screenResultAssayWells(@PathVariable(value = "facilityId") String facilityId,
-                                             @PathVariable(value = "plateNumber") Integer plateNumber,
-                                             @PathVariable(value = "wellName") String wellName)
-  {
-    ModelAndView mav = makeNotFoundError();
-    Screen s = genericEntityDao.findEntityByProperty(Screen.class, "facilityId", facilityId, true, Screen.screenResult.to(ScreenResult.assayWells));
-    if (s != null && s.getScreenResult() != null) {
-      for(AssayWell aw:s.getScreenResult().getAssayWells()) {
-        if(aw.getLibraryWell().getPlateNumber().equals(plateNumber) && aw.getLibraryWell().getWellName().equals(wellName) ) {
-          mav.addObject(MODEL_KEY, aw);
-          break;
-        }
-      }
-    }
-    return mav;
-  }
+//  Removing these, since all they return is the value "<assaywell libraryWellUrl="..."/> -sde4
+//  @RequestMapping(value = "/screens/{facilityId}/results/assaywells/{plateNumber}", method = RequestMethod.GET)
+//  public ModelAndView screenResultAssayWells(@PathVariable(value = "facilityId") String facilityId,
+//                                             @PathVariable(value = "plateNumber") Integer plateNumber)
+//  {
+//    Screen s = genericEntityDao.findEntityByProperty(Screen.class, "facilityId", facilityId, true, Screen.screenResult.to(ScreenResult.assayWells));
+//    if (s != null && s.getScreenResult() != null) {
+//      Set<AssayWell> assayWells = Sets.newHashSet();
+//      for(AssayWell aw:s.getScreenResult().getAssayWells()) {
+//        if(aw.getLibraryWell().getPlateNumber().equals(plateNumber) ) assayWells.add(aw);
+//      }
+//      return makeModel(new EntityCollection.AssayWells(AssayWell.class, assayWells));  //TODO: consider creating a AssayWellsRequestConverter, like the DataColumnValuesConverter, and stream a list of control type and library well urls -sde4
+//    }
+//    else {
+//      return makeNotFoundError();
+//    }
+//  }
+//  
+//  @RequestMapping(value = "/screens/{facilityId}/results/assaywells/{plateNumber}/{wellName}", method = RequestMethod.GET)
+//  public ModelAndView screenResultAssayWells(@PathVariable(value = "facilityId") String facilityId,
+//                                             @PathVariable(value = "plateNumber") Integer plateNumber,
+//                                             @PathVariable(value = "wellName") String wellName)
+//  {
+//    ModelAndView mav = makeNotFoundError();
+//    Screen s = genericEntityDao.findEntityByProperty(Screen.class, "facilityId", facilityId, true, Screen.screenResult.to(ScreenResult.assayWells));
+//    if (s != null && s.getScreenResult() != null) {
+//      for(AssayWell aw:s.getScreenResult().getAssayWells()) {
+//        if(aw.getLibraryWell().getPlateNumber().equals(plateNumber) && aw.getLibraryWell().getWellName().equals(wellName) ) {
+//          mav.addObject(MODEL_KEY, aw);
+//          break;
+//        }
+//      }
+//    }
+//    return mav;
+//  }
   
   /**
    * One row of Screen Result data, referenced by assaywell plate/well 
