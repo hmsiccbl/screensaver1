@@ -10,32 +10,34 @@
 <ui:composition>
 
 	<t:div styleClass="footer">
-		<t:htmlTag value="hr" />
-    <h:outputLink value="#{appInfo.applicationProperties.map['screensaver.project.url']}" target="_blank">
-      <h:outputText value="#{appInfo.applicationTitle}" />
-      <t:outputText id="buildNumber"
-        value="&#160;(#{appInfo.applicationProperties.buildNumber})"
-        visibleOnUserRole="developer"
-        title="The build number" />
-    </h:outputLink>
-    <h:outputText value=" | " />
-		<h:outputLink value="#{appInfo.applicationProperties.map['screensaver.ui.facility_url']}" target="_blank">
-			<h:outputText value="#{appInfo.applicationProperties.map['screensaver.ui.facility_name']}" />
-		</h:outputLink>
-		<h:outputText value=" | " />
-    <h:outputLink
-      value="#{appInfo.applicationProperties.map['screensaver.ui.release_notes_url']}"
-      target="_blank" title="Find out what's new in Screensaver!">
-      <h:outputText value="Release Notes" />
-    </h:outputLink>
-    <h:outputText value=" | " />
-		<h:outputLink value="#{appInfo.applicationProperties.map['screensaver.ui.feedback_url']}" target="_blank"
-			title="Let us know what you think!">
-			<h:outputText value="Feedback" />
-		</h:outputLink>
-    <h:outputText value=" | " />
-    <t:commandLink action="#{menu.viewHelp}" value="Help"
-      title="View the Screensaver help page" />
+		<h:form id="footerForm">
+			<t:htmlTag value="hr" />
+	    <h:outputLink value="#{appInfo.applicationProperties.map['screensaver.project.url']}" target="_blank">
+	      <h:outputText value="#{appInfo.applicationTitle}" />
+	      <t:outputText id="buildNumber"
+	        value="&#160;(#{appInfo.applicationProperties.buildNumber})"
+	        visibleOnUserRole="developer"
+	        title="The build number" />
+	    </h:outputLink>
+	    <h:outputText value=" | " />
+			<h:outputLink value="#{appInfo.applicationProperties.map['screensaver.ui.facility_url']}" target="_blank">
+				<h:outputText value="#{appInfo.applicationProperties.map['screensaver.ui.facility_name']}" />
+			</h:outputLink>
+			<h:outputText value=" | " />
+	    <h:outputLink
+	      value="#{appInfo.applicationProperties.map['screensaver.ui.release_notes_url']}"
+	      target="_blank" title="Find out what's new in Screensaver!">
+	      <h:outputText value="Release Notes" />
+	    </h:outputLink>
+	    <h:outputText value=" | " />
+			<h:outputLink value="#{appInfo.applicationProperties.map['screensaver.ui.feedback_url']}" target="_blank"
+				title="Let us know what you think!">
+				<h:outputText value="Feedback" />
+			</h:outputLink>
+	    <h:outputText value=" | " />
+	    <t:commandLink action="#{menu.viewHelp}" value="Help"
+	      title="View the Screensaver help page" />
+    </h:form>
   </t:div>
 
 </ui:composition>
