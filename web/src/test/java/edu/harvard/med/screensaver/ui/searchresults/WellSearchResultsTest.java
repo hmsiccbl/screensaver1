@@ -484,7 +484,7 @@ public class WellSearchResultsTest extends AbstractBackingBeanTest
       }
     }
     expectedSortedValues.addAll(actualSortedValues);
-    Collections.sort(expectedSortedValues, NullSafeComparator.NULLS_HIGH);
+    Collections.sort(expectedSortedValues, NullSafeComparator.NULLS_LOW);
     if (sortDirection == SortDirection.DESCENDING) {
       Collections.reverse(expectedSortedValues);
     }

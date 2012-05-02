@@ -86,6 +86,8 @@
       <property name="hibernate.jdbc.batch_versioned_data" value="true" />
       <property name="hibernate.order_inserts" value="true" />
       <property name="hibernate.order_updates" value="true" />
+      <!-- NOTE: this is only needed with the postgresql dialect, and some other dialects, see: https://hibernate.onjira.com/browse/HHH-465 -->
+      <property name="hibernate.ejb.interceptor" value="edu.harvard.med.screensaver.util.CustomNullsFirstInterceptor" />
     </properties>
     
   </persistence-unit>
