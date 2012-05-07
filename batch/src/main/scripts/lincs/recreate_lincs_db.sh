@@ -3208,7 +3208,7 @@ check_errs $? "create study fails"
 -t 'Sorafenib KINOMEscan'  \
 -i 300002 \
 --parseLincsSpecificFacilityID \
---summary "`cat $DATA_DIRECTORY/study/ambit_protocol.txt`"
+--summary "`cat $DATA_DIRECTORY/study/kinomescan_protocol.txt`"
 check_errs $? "create study fails"
 
 ./run.sh edu.harvard.med.screensaver.io.screens.StudyCreator \
@@ -3220,7 +3220,7 @@ check_errs $? "create study fails"
 -t 'HG-6-64-1 KINOMEscan'  \
 -i 300003 \
 --parseLincsSpecificFacilityID \
---summary "`cat $DATA_DIRECTORY/study/ambit_protocol.txt`"
+--summary "`cat $DATA_DIRECTORY/study/kinomescan_protocol.txt`"
 check_errs $? "create study fails"
 
 ./run.sh edu.harvard.med.screensaver.io.screens.StudyCreator \
@@ -3232,7 +3232,7 @@ check_errs $? "create study fails"
 -t 'GW-5074 KINOMEscan'  \
 -i 300004 \
 --parseLincsSpecificFacilityID \
---summary "`cat $DATA_DIRECTORY/study/ambit_protocol.txt`"
+--summary "`cat $DATA_DIRECTORY/study/kinomescan_protocol.txt`"
 check_errs $? "create study fails"
 
 ./run.sh edu.harvard.med.screensaver.io.screens.StudyCreator \
@@ -3244,7 +3244,7 @@ check_errs $? "create study fails"
 -t 'SB590885 KINOMEscan'  \
 -i 300005 \
 --parseLincsSpecificFacilityID \
---summary "`cat $DATA_DIRECTORY/study/ambit_protocol.txt`"
+--summary "`cat $DATA_DIRECTORY/study/kinomescan_protocol.txt`"
 check_errs $? "create study fails"
 
 ./run.sh edu.harvard.med.screensaver.io.screens.StudyCreator \
@@ -3256,7 +3256,7 @@ check_errs $? "create study fails"
 -t 'PLX-4720 KINOMEscan'  \
 -i 300006 \
 --parseLincsSpecificFacilityID \
---summary "`cat $DATA_DIRECTORY/study/ambit_protocol.txt`"
+--summary "`cat $DATA_DIRECTORY/study/kinomescan_protocol.txt`"
 check_errs $? "create study fails"
 
 ./run.sh edu.harvard.med.screensaver.io.screens.StudyCreator \
@@ -3268,7 +3268,7 @@ check_errs $? "create study fails"
 -t 'AZ-628 KINOMEscan'  \
 -i 300007 \
 --parseLincsSpecificFacilityID \
---summary "`cat $DATA_DIRECTORY/study/ambit_protocol.txt`"
+--summary "`cat $DATA_DIRECTORY/study/kinomescan_protocol.txt`"
 check_errs $? "create study fails"
 
 ./run.sh edu.harvard.med.screensaver.io.screens.StudyCreator \
@@ -3280,7 +3280,7 @@ check_errs $? "create study fails"
 -t 'PLX-4032 KINOMEscan'  \
 -i 300008 \
 --parseLincsSpecificFacilityID \
---summary "`cat $DATA_DIRECTORY/study/ambit_protocol.txt`"
+--summary "`cat $DATA_DIRECTORY/study/kinomescan_protocol.txt`"
 check_errs $? "create study fails"
 
 ./run.sh edu.harvard.med.screensaver.io.screens.StudyCreator \
@@ -3292,7 +3292,7 @@ check_errs $? "create study fails"
 -t 'AZD7762 KINOMEscan'  \
 -i 300009 \
 --parseLincsSpecificFacilityID \
---summary "`cat $DATA_DIRECTORY/study/ambit_protocol.txt`"
+--summary "`cat $DATA_DIRECTORY/study/kinomescan_protocol.txt`"
 check_errs $? "create study fails"
 
 ./run.sh edu.harvard.med.screensaver.io.screens.StudyCreator \
@@ -3304,7 +3304,7 @@ check_errs $? "create study fails"
 -t 'CP466722 KINOMEscan'  \
 -i 300010 \
 --parseLincsSpecificFacilityID \
---summary "`cat $DATA_DIRECTORY/study/ambit_protocol.txt`"
+--summary "`cat $DATA_DIRECTORY/study/kinomescan_protocol.txt`"
 check_errs $? "create study fails"
 
 ./run.sh edu.harvard.med.screensaver.io.screens.StudyCreator \
@@ -3316,7 +3316,7 @@ check_errs $? "create study fails"
 -t 'CP724714 KINOMEscan'  \
 -i 300011 \
 --parseLincsSpecificFacilityID \
---summary "`cat $DATA_DIRECTORY/study/ambit_protocol.txt`"
+--summary "`cat $DATA_DIRECTORY/study/kinomescan_protocol.txt`"
 check_errs $? "create study fails"
 
 ./run.sh edu.harvard.med.screensaver.io.screens.StudyCreator \
@@ -3328,7 +3328,7 @@ check_errs $? "create study fails"
 -t 'GSK429286A KINOMEscan'  \
 -i 300012 \
 --parseLincsSpecificFacilityID \
---summary "`cat $DATA_DIRECTORY/study/ambit_protocol.txt`"
+--summary "`cat $DATA_DIRECTORY/study/kinomescan_protocol.txt`"
 check_errs $? "create study fails"
 
 ./run.sh edu.harvard.med.screensaver.io.screens.StudyCreator \
@@ -3340,7 +3340,7 @@ check_errs $? "create study fails"
 -t 'GSK461364 KINOMEscan'  \
 -i 300013 \
 --parseLincsSpecificFacilityID \
---summary "`cat $DATA_DIRECTORY/study/ambit_protocol.txt`"
+--summary "`cat $DATA_DIRECTORY/study/kinomescan_protocol.txt`"
 check_errs $? "create study fails"
 
 ./run.sh edu.harvard.med.screensaver.io.screens.StudyCreator \
@@ -3352,7 +3352,7 @@ check_errs $? "create study fails"
 -t 'GW843682 KINOMEscan'  \
 -i 300014 \
 --parseLincsSpecificFacilityID \
---summary "`cat $DATA_DIRECTORY/study/ambit_protocol.txt`"
+--summary "`cat $DATA_DIRECTORY/study/kinomescan_protocol.txt`"
 check_errs $? "create study fails"
 
 ./run.sh edu.harvard.med.screensaver.io.screens.StudyCreator \
@@ -3364,7 +3364,7 @@ check_errs $? "create study fails"
 -t 'PF02341066 KINOMEscan'  \
 -i 300015 \
 --parseLincsSpecificFacilityID \
---summary "`cat $DATA_DIRECTORY/study/ambit_protocol.txt`"
+--summary "`cat $DATA_DIRECTORY/study/kinomescan_protocol.txt`"
 check_errs $? "create study fails"
 
 ./run.sh edu.harvard.med.screensaver.io.screens.StudyCreator \
@@ -3376,7 +3376,7 @@ check_errs $? "create study fails"
 -t 'BMS345541 KINOMEscan'  \
 -i 300016 \
 --parseLincsSpecificFacilityID \
---summary "`cat $DATA_DIRECTORY/study/ambit_protocol.txt`"
+--summary "`cat $DATA_DIRECTORY/study/kinomescan_protocol.txt`"
 check_errs $? "create study fails"
 
 ./run.sh edu.harvard.med.screensaver.io.screens.StudyCreator \
@@ -3388,7 +3388,7 @@ check_errs $? "create study fails"
 -t 'AS601245 KINOMEscan'  \
 -i 300017 \
 --parseLincsSpecificFacilityID \
---summary "`cat $DATA_DIRECTORY/study/ambit_protocol.txt`"
+--summary "`cat $DATA_DIRECTORY/study/kinomescan_protocol.txt`"
 check_errs $? "create study fails"
 
 ./run.sh edu.harvard.med.screensaver.io.screens.StudyCreator \
@@ -3400,7 +3400,7 @@ check_errs $? "create study fails"
 -t 'WH-4-023 KINOMEscan'  \
 -i 300018 \
 --parseLincsSpecificFacilityID \
---summary "`cat $DATA_DIRECTORY/study/ambit_protocol.txt`"
+--summary "`cat $DATA_DIRECTORY/study/kinomescan_protocol.txt`"
 check_errs $? "create study fails"
 
 ./run.sh edu.harvard.med.screensaver.io.screens.StudyCreator \
@@ -3412,7 +3412,7 @@ check_errs $? "create study fails"
 -t 'BX-912 KINOMEscan'  \
 -i 300019 \
 --parseLincsSpecificFacilityID \
---summary "`cat $DATA_DIRECTORY/study/ambit_protocol.txt`"
+--summary "`cat $DATA_DIRECTORY/study/kinomescan_protocol.txt`"
 check_errs $? "create study fails"
 
 ./run.sh edu.harvard.med.screensaver.io.screens.StudyCreator \
@@ -3424,7 +3424,7 @@ check_errs $? "create study fails"
 -t 'AZD-6482 KINOMEscan'  \
 -i 300020 \
 --parseLincsSpecificFacilityID \
---summary "`cat $DATA_DIRECTORY/study/ambit_protocol.txt`"
+--summary "`cat $DATA_DIRECTORY/study/kinomescan_protocol.txt`"
 check_errs $? "create study fails"
 
 ./run.sh edu.harvard.med.screensaver.io.screens.StudyCreator \
@@ -3436,7 +3436,7 @@ check_errs $? "create study fails"
 -t 'TAK-715 KINOMEscan'  \
 -i 300021 \
 --parseLincsSpecificFacilityID \
---summary "`cat $DATA_DIRECTORY/study/ambit_protocol.txt`"
+--summary "`cat $DATA_DIRECTORY/study/kinomescan_protocol.txt`"
 check_errs $? "create study fails"
 
 ./run.sh edu.harvard.med.screensaver.io.screens.StudyCreator \
@@ -3448,7 +3448,7 @@ check_errs $? "create study fails"
 -t 'NU7441 KINOMEscan'  \
 -i 300022 \
 --parseLincsSpecificFacilityID \
---summary "`cat $DATA_DIRECTORY/study/ambit_protocol.txt`"
+--summary "`cat $DATA_DIRECTORY/study/kinomescan_protocol.txt`"
 check_errs $? "create study fails"
 
 ./run.sh edu.harvard.med.screensaver.io.screens.StudyCreator \
@@ -3460,7 +3460,7 @@ check_errs $? "create study fails"
 -t 'KIN001-220 KINOMEscan'  \
 -i 300023 \
 --parseLincsSpecificFacilityID \
---summary "`cat $DATA_DIRECTORY/study/ambit_protocol.txt`"
+--summary "`cat $DATA_DIRECTORY/study/kinomescan_protocol.txt`"
 check_errs $? "create study fails"
 
 ./run.sh edu.harvard.med.screensaver.io.screens.StudyCreator \
@@ -3472,7 +3472,7 @@ check_errs $? "create study fails"
 -t 'MLN8054 KINOMEscan'  \
 -i 300024 \
 --parseLincsSpecificFacilityID \
---summary "`cat $DATA_DIRECTORY/study/ambit_protocol.txt`"
+--summary "`cat $DATA_DIRECTORY/study/kinomescan_protocol.txt`"
 check_errs $? "create study fails"
 
 ./run.sh edu.harvard.med.screensaver.io.screens.StudyCreator \
@@ -3484,7 +3484,7 @@ check_errs $? "create study fails"
 -t 'AZD1152-HQPA KINOMEscan'  \
 -i 300025 \
 --parseLincsSpecificFacilityID \
---summary "`cat $DATA_DIRECTORY/study/ambit_protocol.txt`"
+--summary "`cat $DATA_DIRECTORY/study/kinomescan_protocol.txt`"
 check_errs $? "create study fails"
 
 ./run.sh edu.harvard.med.screensaver.io.screens.StudyCreator \
@@ -3496,7 +3496,7 @@ check_errs $? "create study fails"
 -t 'PD0332991 KINOMEscan'  \
 -i 300026 \
 --parseLincsSpecificFacilityID \
---summary "`cat $DATA_DIRECTORY/study/ambit_protocol.txt`"
+--summary "`cat $DATA_DIRECTORY/study/kinomescan_protocol.txt`"
 check_errs $? "create study fails"
 
 ./run.sh edu.harvard.med.screensaver.io.screens.StudyCreator \
@@ -3508,7 +3508,7 @@ check_errs $? "create study fails"
 -t 'THZ-2-98-01 KINOMEscan'  \
 -i 300027 \
 --parseLincsSpecificFacilityID \
---summary "`cat $DATA_DIRECTORY/study/ambit_protocol.txt`"
+--summary "`cat $DATA_DIRECTORY/study/kinomescan_protocol.txt`"
 check_errs $? "create study fails"
 
 ./run.sh edu.harvard.med.screensaver.io.screens.StudyCreator \
@@ -3520,7 +3520,7 @@ check_errs $? "create study fails"
 -t 'JWE-035 KINOMEscan'  \
 -i 300028 \
 --parseLincsSpecificFacilityID \
---summary "`cat $DATA_DIRECTORY/study/ambit_protocol.txt`"
+--summary "`cat $DATA_DIRECTORY/study/kinomescan_protocol.txt`"
 check_errs $? "create study fails"
 
 ./run.sh edu.harvard.med.screensaver.io.screens.StudyCreator \
@@ -3532,7 +3532,7 @@ check_errs $? "create study fails"
 -t 'ZM-447439 KINOMEscan'  \
 -i 300029 \
 --parseLincsSpecificFacilityID \
---summary "`cat $DATA_DIRECTORY/study/ambit_protocol.txt`"
+--summary "`cat $DATA_DIRECTORY/study/kinomescan_protocol.txt`"
 check_errs $? "create study fails"
 
 ./run.sh edu.harvard.med.screensaver.io.screens.StudyCreator \
@@ -3544,7 +3544,7 @@ check_errs $? "create study fails"
 -t 'JNK-9L KINOMEscan'  \
 -i 300030 \
 --parseLincsSpecificFacilityID \
---summary "`cat $DATA_DIRECTORY/study/ambit_protocol.txt`"
+--summary "`cat $DATA_DIRECTORY/study/kinomescan_protocol.txt`"
 check_errs $? "create study fails"
 
 ./run.sh edu.harvard.med.screensaver.io.screens.StudyCreator \
@@ -3954,7 +3954,7 @@ LEAD_SCREENER_EMAIL="qingsong_liu@hms.harvard.edu"
 -t 'ALW-II-38-3 KINOMEscan'  \
 -i 300063 \
 --parseLincsSpecificFacilityID \
---summary "`cat $DATA_DIRECTORY/study/ambit_protocol.txt`"
+--summary "`cat $DATA_DIRECTORY/study/kinomescan_protocol.txt`"
 check_errs $? "create study fails"
 
 ./run.sh edu.harvard.med.screensaver.io.screens.StudyCreator \
@@ -3966,7 +3966,7 @@ check_errs $? "create study fails"
 -t 'ALW-II-49-7 KINOMEscan'  \
 -i 300064 \
 --parseLincsSpecificFacilityID \
---summary "`cat $DATA_DIRECTORY/study/ambit_protocol.txt`"
+--summary "`cat $DATA_DIRECTORY/study/kinomescan_protocol.txt`"
 check_errs $? "create study fails"
 
 ./run.sh edu.harvard.med.screensaver.io.screens.StudyCreator \
@@ -3978,7 +3978,7 @@ check_errs $? "create study fails"
 -t 'HG-5-113-01 KINOMEscan'  \
 -i 300065 \
 --parseLincsSpecificFacilityID \
---summary "`cat $DATA_DIRECTORY/study/ambit_protocol.txt`"
+--summary "`cat $DATA_DIRECTORY/study/kinomescan_protocol.txt`"
 check_errs $? "create study fails"
 
 ./run.sh edu.harvard.med.screensaver.io.screens.StudyCreator \
@@ -3990,7 +3990,7 @@ check_errs $? "create study fails"
 -t 'HG-5-88-01 KINOMEscan'  \
 -i 300066 \
 --parseLincsSpecificFacilityID \
---summary "`cat $DATA_DIRECTORY/study/ambit_protocol.txt`"
+--summary "`cat $DATA_DIRECTORY/study/kinomescan_protocol.txt`"
 check_errs $? "create study fails"
 
 ./run.sh edu.harvard.med.screensaver.io.screens.StudyCreator \
@@ -4002,7 +4002,7 @@ check_errs $? "create study fails"
 -t 'HKI-272 KINOMEscan'  \
 -i 300067 \
 --parseLincsSpecificFacilityID \
---summary "`cat $DATA_DIRECTORY/study/ambit_protocol.txt`"
+--summary "`cat $DATA_DIRECTORY/study/kinomescan_protocol.txt`"
 check_errs $? "create study fails"
 
 ./run.sh edu.harvard.med.screensaver.io.screens.StudyCreator \
@@ -4014,7 +4014,7 @@ check_errs $? "create study fails"
 -t 'GNF2 KINOMEscan'  \
 -i 300068 \
 --parseLincsSpecificFacilityID \
---summary "`cat $DATA_DIRECTORY/study/ambit_protocol.txt`"
+--summary "`cat $DATA_DIRECTORY/study/kinomescan_protocol.txt`"
 check_errs $? "create study fails"
 
 ./run.sh edu.harvard.med.screensaver.io.screens.StudyCreator \
@@ -4026,7 +4026,7 @@ check_errs $? "create study fails"
 -t 'CGP60474 KINOMEscan'  \
 -i 300069 \
 --parseLincsSpecificFacilityID \
---summary "`cat $DATA_DIRECTORY/study/ambit_protocol.txt`"
+--summary "`cat $DATA_DIRECTORY/study/kinomescan_protocol.txt`"
 check_errs $? "create study fails"
 
 ./run.sh edu.harvard.med.screensaver.io.screens.StudyCreator \
@@ -4038,7 +4038,7 @@ check_errs $? "create study fails"
 -t 'PD173074 KINOMEscan'  \
 -i 300070 \
 --parseLincsSpecificFacilityID \
---summary "`cat $DATA_DIRECTORY/study/ambit_protocol.txt`"
+--summary "`cat $DATA_DIRECTORY/study/kinomescan_protocol.txt`"
 check_errs $? "create study fails"
 
 ./run.sh edu.harvard.med.screensaver.io.screens.StudyCreator \
@@ -4050,7 +4050,7 @@ check_errs $? "create study fails"
 -t 'WH-4-025 KINOMEscan'  \
 -i 300071 \
 --parseLincsSpecificFacilityID \
---summary "`cat $DATA_DIRECTORY/study/ambit_protocol.txt`"
+--summary "`cat $DATA_DIRECTORY/study/kinomescan_protocol.txt`"
 check_errs $? "create study fails"
 
 ./run.sh edu.harvard.med.screensaver.io.screens.StudyCreator \
@@ -4062,7 +4062,7 @@ check_errs $? "create study fails"
 -t 'BI-2536 KINOMEscan'  \
 -i 300072 \
 --parseLincsSpecificFacilityID \
---summary "`cat $DATA_DIRECTORY/study/ambit_protocol.txt`"
+--summary "`cat $DATA_DIRECTORY/study/kinomescan_protocol.txt`"
 check_errs $? "create study fails"
 
 ./run.sh edu.harvard.med.screensaver.io.screens.StudyCreator \
@@ -4074,7 +4074,7 @@ check_errs $? "create study fails"
 -t 'KIN001-127 KINOMEscan'  \
 -i 300073 \
 --parseLincsSpecificFacilityID \
---summary "`cat $DATA_DIRECTORY/study/ambit_protocol.txt`"
+--summary "`cat $DATA_DIRECTORY/study/kinomescan_protocol.txt`"
 check_errs $? "create study fails"
 
 ./run.sh edu.harvard.med.screensaver.io.screens.StudyCreator \
@@ -4086,7 +4086,7 @@ check_errs $? "create study fails"
 -t 'A443644 KINOMEscan'  \
 -i 300074 \
 --parseLincsSpecificFacilityID \
---summary "`cat $DATA_DIRECTORY/study/ambit_protocol.txt`"
+--summary "`cat $DATA_DIRECTORY/study/kinomescan_protocol.txt`"
 check_errs $? "create study fails"
 
 ./run.sh edu.harvard.med.screensaver.io.screens.StudyCreator \
@@ -4098,7 +4098,7 @@ check_errs $? "create study fails"
 -t 'GDC-0941 KINOMEscan'  \
 -i 300075 \
 --parseLincsSpecificFacilityID \
---summary "`cat $DATA_DIRECTORY/study/ambit_protocol.txt`"
+--summary "`cat $DATA_DIRECTORY/study/kinomescan_protocol.txt`"
 check_errs $? "create study fails"
 
 ./run.sh edu.harvard.med.screensaver.io.screens.StudyCreator \
@@ -4110,7 +4110,7 @@ check_errs $? "create study fails"
 -t 'NPK76-II-72-1 KINOMEscan'  \
 -i 300076 \
 --parseLincsSpecificFacilityID \
---summary "`cat $DATA_DIRECTORY/study/ambit_protocol.txt`"
+--summary "`cat $DATA_DIRECTORY/study/kinomescan_protocol.txt`"
 check_errs $? "create study fails"
 
 ./run.sh edu.harvard.med.screensaver.io.screens.StudyCreator \
@@ -4122,7 +4122,7 @@ check_errs $? "create study fails"
 -t 'QL-X-138 KINOMEscan'  \
 -i 300077 \
 --parseLincsSpecificFacilityID \
---summary "`cat $DATA_DIRECTORY/study/ambit_protocol.txt`"
+--summary "`cat $DATA_DIRECTORY/study/kinomescan_protocol.txt`"
 check_errs $? "create study fails"
 
 ./run.sh edu.harvard.med.screensaver.io.screens.StudyCreator \
@@ -4134,7 +4134,7 @@ check_errs $? "create study fails"
 -t 'QL-XI-92 KINOMEscan'  \
 -i 300078 \
 --parseLincsSpecificFacilityID \
---summary "`cat $DATA_DIRECTORY/study/ambit_protocol.txt`"
+--summary "`cat $DATA_DIRECTORY/study/kinomescan_protocol.txt`"
 check_errs $? "create study fails"
 
 ./run.sh edu.harvard.med.screensaver.io.screens.StudyCreator \
@@ -4146,7 +4146,7 @@ check_errs $? "create study fails"
 -t 'Torin1 KINOMEscan'  \
 -i 300079 \
 --parseLincsSpecificFacilityID \
---summary "`cat $DATA_DIRECTORY/study/ambit_protocol.txt`"
+--summary "`cat $DATA_DIRECTORY/study/kinomescan_protocol.txt`"
 check_errs $? "create study fails"
 
 ./run.sh edu.harvard.med.screensaver.io.screens.StudyCreator \
@@ -4158,7 +4158,7 @@ check_errs $? "create study fails"
 -t 'Torin2 KINOMEscan'  \
 -i 300080 \
 --parseLincsSpecificFacilityID \
---summary "`cat $DATA_DIRECTORY/study/ambit_protocol.txt`"
+--summary "`cat $DATA_DIRECTORY/study/kinomescan_protocol.txt`"
 check_errs $? "create study fails"
 
 ./run.sh edu.harvard.med.screensaver.io.screens.StudyCreator \
@@ -4170,7 +4170,7 @@ check_errs $? "create study fails"
 -t 'WZ-4-145 KINOMEscan'  \
 -i 300081 \
 --parseLincsSpecificFacilityID \
---summary "`cat $DATA_DIRECTORY/study/ambit_protocol.txt`"
+--summary "`cat $DATA_DIRECTORY/study/kinomescan_protocol.txt`"
 check_errs $? "create study fails"
 
 ./run.sh edu.harvard.med.screensaver.io.screens.StudyCreator \
@@ -4182,7 +4182,7 @@ check_errs $? "create study fails"
 -t 'WZ-7043 KINOMEscan'  \
 -i 300082 \
 --parseLincsSpecificFacilityID \
---summary "`cat $DATA_DIRECTORY/study/ambit_protocol.txt`"
+--summary "`cat $DATA_DIRECTORY/study/kinomescan_protocol.txt`"
 check_errs $? "create study fails"
 
 ./run.sh edu.harvard.med.screensaver.io.screens.StudyCreator \
@@ -4194,7 +4194,7 @@ check_errs $? "create study fails"
 -t 'WZ3105 KINOMEscan'  \
 -i 300083 \
 --parseLincsSpecificFacilityID \
---summary "`cat $DATA_DIRECTORY/study/ambit_protocol.txt`"
+--summary "`cat $DATA_DIRECTORY/study/kinomescan_protocol.txt`"
 check_errs $? "create study fails"
 
 ./run.sh edu.harvard.med.screensaver.io.screens.StudyCreator \
@@ -4206,7 +4206,7 @@ check_errs $? "create study fails"
 -t 'WZ4002 KINOMEscan'  \
 -i 300084 \
 --parseLincsSpecificFacilityID \
---summary "`cat $DATA_DIRECTORY/study/ambit_protocol.txt`"
+--summary "`cat $DATA_DIRECTORY/study/kinomescan_protocol.txt`"
 check_errs $? "create study fails"
 
 ./run.sh edu.harvard.med.screensaver.io.screens.StudyCreator \
@@ -4218,7 +4218,7 @@ check_errs $? "create study fails"
 -t 'XMD11-50 KINOMEscan'  \
 -i 300085 \
 --parseLincsSpecificFacilityID \
---summary "`cat $DATA_DIRECTORY/study/ambit_protocol.txt`"
+--summary "`cat $DATA_DIRECTORY/study/kinomescan_protocol.txt`"
 check_errs $? "create study fails"
 
 ./run.sh edu.harvard.med.screensaver.io.screens.StudyCreator \
@@ -4230,7 +4230,7 @@ check_errs $? "create study fails"
 -t 'XMD11-85h KINOMEscan'  \
 -i 300086 \
 --parseLincsSpecificFacilityID \
---summary "`cat $DATA_DIRECTORY/study/ambit_protocol.txt`"
+--summary "`cat $DATA_DIRECTORY/study/kinomescan_protocol.txt`"
 check_errs $? "create study fails"
 
 ./run.sh edu.harvard.med.screensaver.io.screens.StudyCreator \
@@ -4242,7 +4242,7 @@ check_errs $? "create study fails"
 -t 'XMD13-2 KINOMEscan'  \
 -i 300087 \
 --parseLincsSpecificFacilityID \
---summary "`cat $DATA_DIRECTORY/study/ambit_protocol.txt`"
+--summary "`cat $DATA_DIRECTORY/study/kinomescan_protocol.txt`"
 check_errs $? "create study fails"
 
 ./run.sh edu.harvard.med.screensaver.io.screens.StudyCreator \
@@ -4254,7 +4254,7 @@ check_errs $? "create study fails"
 -t 'XMD14-99 KINOMEscan'  \
 -i 300088 \
 --parseLincsSpecificFacilityID \
---summary "`cat $DATA_DIRECTORY/study/ambit_protocol.txt`"
+--summary "`cat $DATA_DIRECTORY/study/kinomescan_protocol.txt`"
 check_errs $? "create study fails"
 
 ./run.sh edu.harvard.med.screensaver.io.screens.StudyCreator \
@@ -4266,7 +4266,7 @@ check_errs $? "create study fails"
 -t 'XMD15-27 KINOMEscan'  \
 -i 300089 \
 --parseLincsSpecificFacilityID \
---summary "`cat $DATA_DIRECTORY/study/ambit_protocol.txt`"
+--summary "`cat $DATA_DIRECTORY/study/kinomescan_protocol.txt`"
 check_errs $? "create study fails"
 
 ./run.sh edu.harvard.med.screensaver.io.screens.StudyCreator \
@@ -4278,7 +4278,7 @@ check_errs $? "create study fails"
 -t 'XMD16-144 KINOMEscan'  \
 -i 300090 \
 --parseLincsSpecificFacilityID \
---summary "`cat $DATA_DIRECTORY/study/ambit_protocol.txt`"
+--summary "`cat $DATA_DIRECTORY/study/kinomescan_protocol.txt`"
 check_errs $? "create study fails"
 
 ./run.sh edu.harvard.med.screensaver.io.screens.StudyCreator \
@@ -4290,7 +4290,7 @@ check_errs $? "create study fails"
 -t 'XMD8-85 KINOMEscan'  \
 -i 300091 \
 --parseLincsSpecificFacilityID \
---summary "`cat $DATA_DIRECTORY/study/ambit_protocol.txt`"
+--summary "`cat $DATA_DIRECTORY/study/kinomescan_protocol.txt`"
 check_errs $? "create study fails"
 
 ./run.sh edu.harvard.med.screensaver.io.screens.StudyCreator \
@@ -4302,7 +4302,7 @@ check_errs $? "create study fails"
 -t 'XMD8-92 KINOMEscan'  \
 -i 300092 \
 --parseLincsSpecificFacilityID \
---summary "`cat $DATA_DIRECTORY/study/ambit_protocol.txt`"
+--summary "`cat $DATA_DIRECTORY/study/kinomescan_protocol.txt`"
 check_errs $? "create study fails"
 
 ./run.sh edu.harvard.med.screensaver.io.screens.StudyCreator \
@@ -4314,7 +4314,7 @@ check_errs $? "create study fails"
 -t 'ZG-10 KINOMEscan'  \
 -i 300093 \
 --parseLincsSpecificFacilityID \
---summary "`cat $DATA_DIRECTORY/study/ambit_protocol.txt`"
+--summary "`cat $DATA_DIRECTORY/study/kinomescan_protocol.txt`"
 check_errs $? "create study fails"
 
 LAB_HEAD_FIRST="Cyril"
@@ -4532,7 +4532,7 @@ LEAD_SCREENER_EMAIL="qingsong_liu@hms.harvard.edu"
 -t 'WYE-125132 KINOMEscan'  \
 -i 300110 \
 --parseLincsSpecificFacilityID \
---summary "`cat $DATA_DIRECTORY/study/ambit_protocol.txt`"
+--summary "`cat $DATA_DIRECTORY/study/kinomescan_protocol.txt`"
 check_errs $? "create study fails"
 
 ./run.sh edu.harvard.med.screensaver.io.screens.StudyCreator \
@@ -4544,7 +4544,7 @@ check_errs $? "create study fails"
 -t 'PD0325901 KINOMEscan'  \
 -i 300111 \
 --parseLincsSpecificFacilityID \
---summary "`cat $DATA_DIRECTORY/study/ambit_protocol.txt`"
+--summary "`cat $DATA_DIRECTORY/study/kinomescan_protocol.txt`"
 check_errs $? "create study fails"
 
 ./run.sh edu.harvard.med.screensaver.io.screens.StudyCreator \
@@ -4556,7 +4556,7 @@ check_errs $? "create study fails"
 -t 'JNK-IN-5A KINOMEscan'  \
 -i 300112 \
 --parseLincsSpecificFacilityID \
---summary "`cat $DATA_DIRECTORY/study/ambit_protocol.txt`"
+--summary "`cat $DATA_DIRECTORY/study/kinomescan_protocol.txt`"
 check_errs $? "create study fails"
 
 ## Link Cells to Screens and Studies through the ExperimentalCellInformation load
