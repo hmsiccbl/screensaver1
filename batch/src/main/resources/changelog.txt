@@ -1,5 +1,9 @@
 Screensaver-batch release notes
 
+Version 2012-04-30-maint (7216)
+
+[#3490] SMUA cron job message links need to be updated for the new ICCBL website
+
 Version 2012-01-12-maint1
 
 [#3356] StudyCreator out of memory error 
