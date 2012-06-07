@@ -4014,7 +4014,7 @@ check_errs $? "create study fails"
 -t 'GNF2 KINOMEscan'  \
 -i 300068 \
 --parseLincsSpecificFacilityID \
---summary "`cat $DATA_DIRECTORY/study/kinomescan_protocol.txt`"
+--summary "`cat $DATA_DIRECTORY/study/kinomescan_NA.txt`"
 check_errs $? "create study fails"
 
 ./run.sh edu.harvard.med.screensaver.io.screens.StudyCreator \
@@ -4581,6 +4581,61 @@ check_errs $? "create study fails"
 -i 300114 \
 --parseLincsSpecificFacilityID \
 --summary "`cat $DATA_DIRECTORY/study/kinativ_protocol-2.txt`"
+check_errs $? "create study fails"
+
+./run.sh edu.harvard.med.screensaver.io.screens.StudyCreator \
+-AE $ECOMMONS_ADMIN -annotationNamesInCol1  \
+-y SMALL_MOLECULE -yy IN_VITRO \
+-hf $LAB_HEAD_FIRST -hl $LAB_HEAD_LAST -he $LAB_HEAD_EMAIL -lf $LEAD_SCREENER_FIRST -ll $LEAD_SCREENER_LAST -le $LEAD_SCREENER_EMAIL \
+-keyByFacilityId \
+-t 'KIN001-102 KINOMEscan (HMSL10035)'  \
+-i 300115 \
+--parseLincsSpecificFacilityID \
+--summary "`cat $DATA_DIRECTORY/study/kinomescan_NA.txt`"
+check_errs $? "create study fails"
+
+./run.sh edu.harvard.med.screensaver.io.screens.StudyCreator \
+-AE $ECOMMONS_ADMIN -annotationNamesInCol1  \
+-y SMALL_MOLECULE -yy IN_VITRO \
+-hf $LAB_HEAD_FIRST -hl $LAB_HEAD_LAST -he $LAB_HEAD_EMAIL -lf $LEAD_SCREENER_FIRST -ll $LEAD_SCREENER_LAST -le $LEAD_SCREENER_EMAIL \
+-keyByFacilityId \
+-t 'Rapamycin KINOMEscan (HMSL10052)'  \
+-i 300116 \
+--parseLincsSpecificFacilityID \
+--summary "`cat $DATA_DIRECTORY/study/kinomescan_NA.txt`"
+check_errs $? "create study fails"
+
+./run.sh edu.harvard.med.screensaver.io.screens.StudyCreator \
+-AE $ECOMMONS_ADMIN -annotationNamesInCol1  \
+-y SMALL_MOLECULE -yy IN_VITRO \
+-hf $LAB_HEAD_FIRST -hl $LAB_HEAD_LAST -he $LAB_HEAD_EMAIL -lf $LEAD_SCREENER_FIRST -ll $LEAD_SCREENER_LAST -le $LEAD_SCREENER_EMAIL \
+-keyByFacilityId \
+-t 'MK2206 KINOMEscan (HMSL10057)'  \
+-i 300117 \
+--parseLincsSpecificFacilityID \
+--summary "`cat $DATA_DIRECTORY/study/kinomescan_NA.txt`"
+check_errs $? "create study fails"
+
+./run.sh edu.harvard.med.screensaver.io.screens.StudyCreator \
+-AE $ECOMMONS_ADMIN -annotationNamesInCol1  \
+-y SMALL_MOLECULE -yy IN_VITRO \
+-hf $LAB_HEAD_FIRST -hl $LAB_HEAD_LAST -he $LAB_HEAD_EMAIL -lf $LEAD_SCREENER_FIRST -ll $LEAD_SCREENER_LAST -le $LEAD_SCREENER_EMAIL \
+-keyByFacilityId \
+-t 'Celastrol KINOMEscan (HMSL10117)'  \
+-i 300118 \
+--parseLincsSpecificFacilityID \
+--summary "`cat $DATA_DIRECTORY/study/kinomescan_NA.txt`"
+check_errs $? "create study fails"
+
+./run.sh edu.harvard.med.screensaver.io.screens.StudyCreator \
+-AE $ECOMMONS_ADMIN -annotationNamesInCol1  \
+-y SMALL_MOLECULE -yy IN_VITRO \
+-hf $LAB_HEAD_FIRST -hl $LAB_HEAD_LAST -he $LAB_HEAD_EMAIL -lf $LEAD_SCREENER_FIRST -ll $LEAD_SCREENER_LAST -le $LEAD_SCREENER_EMAIL \
+-keyByFacilityId \
+-t 'Chelerythrine chloride KINOMEscan (HMSL10186)'  \
+-i 300119 \
+--parseLincsSpecificFacilityID \
+--summary "`cat $DATA_DIRECTORY/study/kinomescan_NA.txt`"
 check_errs $? "create study fails"
 
 ## Link Cells to Screens and Studies through the ExperimentalCellInformation load
