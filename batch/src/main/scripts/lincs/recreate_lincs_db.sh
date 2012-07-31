@@ -228,7 +228,7 @@ check_errs $? "lincs-users.sql fails"
 ## Create the cells
 
 ./run.sh edu.harvard.med.iccbl.screensaver.io.cells.CellImporter \
--f $DATA_DIRECTORY/LINCS_Cells_20120413.xls
+-f $DATA_DIRECTORY/LINCS_Cells_20120727.xls
 check_errs $? "Cell contents loading fails"
 
 ## Create the screens
@@ -3556,7 +3556,7 @@ check_errs $? "create study fails"
 -t 'Sorafenib KiNativ'  \
 -i 300031 \
 --parseLincsSpecificFacilityID \
---summary "`cat $DATA_DIRECTORY/study/kinativ_protocol.txt`"
+--summary "`cat $DATA_DIRECTORY/study/kinativ_dose_response_protocol.txt`"
 check_errs $? "create study fails"
 
 ./run.sh edu.harvard.med.screensaver.io.screens.StudyCreator \
@@ -3568,7 +3568,7 @@ check_errs $? "create study fails"
 -t 'HG-6-64-01 KiNativ'  \
 -i 300032 \
 --parseLincsSpecificFacilityID \
---summary "`cat $DATA_DIRECTORY/study/kinativ_protocol.txt`"
+--summary "`cat $DATA_DIRECTORY/study/kinativ_dose_response_protocol.txt`"
 check_errs $? "create study fails"
 
 ./run.sh edu.harvard.med.screensaver.io.screens.StudyCreator \
@@ -3580,7 +3580,7 @@ check_errs $? "create study fails"
 -t 'GW-5074 KiNativ'  \
 -i 300033 \
 --parseLincsSpecificFacilityID \
---summary "`cat $DATA_DIRECTORY/study/kinativ_protocol.txt`"
+--summary "`cat $DATA_DIRECTORY/study/kinativ_dose_response_protocol.txt`"
 check_errs $? "create study fails"
 
 ./run.sh edu.harvard.med.screensaver.io.screens.StudyCreator \
@@ -3592,7 +3592,7 @@ check_errs $? "create study fails"
 -t 'SB590885 KiNativ'  \
 -i 300034 \
 --parseLincsSpecificFacilityID \
---summary "`cat $DATA_DIRECTORY/study/kinativ_protocol.txt`"
+--summary "`cat $DATA_DIRECTORY/study/kinativ_dose_response_protocol.txt`"
 check_errs $? "create study fails"
 
 ./run.sh edu.harvard.med.screensaver.io.screens.StudyCreator \
@@ -3604,7 +3604,7 @@ check_errs $? "create study fails"
 -t 'PLX-4720 KiNativ'  \
 -i 300035 \
 --parseLincsSpecificFacilityID \
---summary "`cat $DATA_DIRECTORY/study/kinativ_protocol.txt`"
+--summary "`cat $DATA_DIRECTORY/study/kinativ_dose_response_protocol.txt`"
 check_errs $? "create study fails"
 
 ./run.sh edu.harvard.med.screensaver.io.screens.StudyCreator \
@@ -3616,7 +3616,7 @@ check_errs $? "create study fails"
 -t 'AZ-628 KiNativ'  \
 -i 300036 \
 --parseLincsSpecificFacilityID \
---summary "`cat $DATA_DIRECTORY/study/kinativ_protocol.txt`"
+--summary "`cat $DATA_DIRECTORY/study/kinativ_dose_response_protocol.txt`"
 check_errs $? "create study fails"
 
 ./run.sh edu.harvard.med.screensaver.io.screens.StudyCreator \
@@ -3628,7 +3628,7 @@ check_errs $? "create study fails"
 -t 'PLX4032 KiNativ'  \
 -i 300037 \
 --parseLincsSpecificFacilityID \
---summary "`cat $DATA_DIRECTORY/study/kinativ_protocol.txt`"
+--summary "`cat $DATA_DIRECTORY/study/kinativ_dose_response_protocol.txt`"
 check_errs $? "create study fails"
 
 LAB_HEAD_FIRST="Cyril"
@@ -4568,7 +4568,7 @@ check_errs $? "create study fails"
 -t 'Torin1 KiNativ'  \
 -i 300113 \
 --parseLincsSpecificFacilityID \
---summary "`cat $DATA_DIRECTORY/study/kinativ_protocol-2.txt`"
+--summary "`cat $DATA_DIRECTORY/study/kinativ_single_dose_protocol.txt`"
 check_errs $? "create study fails"
 
 ./run.sh edu.harvard.med.screensaver.io.screens.StudyCreator \
@@ -4580,7 +4580,7 @@ check_errs $? "create study fails"
 -t 'Torin2 KiNativ'  \
 -i 300114 \
 --parseLincsSpecificFacilityID \
---summary "`cat $DATA_DIRECTORY/study/kinativ_protocol-2.txt`"
+--summary "`cat $DATA_DIRECTORY/study/kinativ_single_dose_protocol.txt`"
 check_errs $? "create study fails"
 
 ./run.sh edu.harvard.med.screensaver.io.screens.StudyCreator \
@@ -4636,6 +4636,145 @@ check_errs $? "create study fails"
 -i 300119 \
 --parseLincsSpecificFacilityID \
 --summary "`cat $DATA_DIRECTORY/study/kinomescan_NA.txt`"
+check_errs $? "create study fails"
+
+LAB_HEAD_FIRST="Cyril"
+LAB_HEAD_LAST="Benes"
+LAB_HEAD_EMAIL="cbenes@partners.org"
+LEAD_SCREENER_FIRST="Cyril"
+LEAD_SCREENER_LAST="Benes"
+LEAD_SCREENER_EMAIL="cbenes@partners.org"
+
+./run.sh edu.harvard.med.screensaver.io.screens.StudyCreator \
+-AE $ECOMMONS_ADMIN -annotationNamesInCol1  \
+-y SMALL_MOLECULE -yy IN_VITRO \
+-hf $LAB_HEAD_FIRST -hl $LAB_HEAD_LAST -he $LAB_HEAD_EMAIL -lf $LEAD_SCREENER_FIRST -ll $LEAD_SCREENER_LAST -le $LEAD_SCREENER_EMAIL \
+-keyByFacilityId \
+--replace -f $DATA_DIRECTORY/study/HMSL10174_template.xls \
+-t 'A-769662: MGH/Sanger Institute growth inhibition data (9 dose)'  \
+-i 300120 \
+--parseLincsSpecificFacilityID \
+--summary "`cat $DATA_DIRECTORY/study/cmt_protocol_9-dose.txt`"
+check_errs $? "create study fails"
+
+./run.sh edu.harvard.med.screensaver.io.screens.StudyCreator \
+-AE $ECOMMONS_ADMIN -annotationNamesInCol1  \
+-y SMALL_MOLECULE -yy IN_VITRO \
+-hf $LAB_HEAD_FIRST -hl $LAB_HEAD_LAST -he $LAB_HEAD_EMAIL -lf $LEAD_SCREENER_FIRST -ll $LEAD_SCREENER_LAST -le $LEAD_SCREENER_EMAIL \
+-keyByFacilityId \
+--replace -f $DATA_DIRECTORY/study/HMSL10017_template.xls \
+-t 'HG-6-64-01: MGH/Sanger Institute growth inhibition data (9 dose)'  \
+-i 300121 \
+--parseLincsSpecificFacilityID \
+--summary "`cat $DATA_DIRECTORY/study/cmt_protocol_9-dose.txt`"
+check_errs $? "create study fails"
+
+./run.sh edu.harvard.med.screensaver.io.screens.StudyCreator \
+-AE $ECOMMONS_ADMIN -annotationNamesInCol1  \
+-y SMALL_MOLECULE -yy IN_VITRO \
+-hf $LAB_HEAD_FIRST -hl $LAB_HEAD_LAST -he $LAB_HEAD_EMAIL -lf $LEAD_SCREENER_FIRST -ll $LEAD_SCREENER_LAST -le $LEAD_SCREENER_EMAIL \
+-keyByFacilityId \
+--replace -f $DATA_DIRECTORY/study/HMSL10034_template.xls \
+-t 'AS601245: MGH/Sanger Institute growth inhibition data (9 dose)'  \
+-i 300122 \
+--parseLincsSpecificFacilityID \
+--summary "`cat $DATA_DIRECTORY/study/cmt_protocol_9-dose.txt`"
+check_errs $? "create study fails"
+
+./run.sh edu.harvard.med.screensaver.io.screens.StudyCreator \
+-AE $ECOMMONS_ADMIN -annotationNamesInCol1  \
+-y SMALL_MOLECULE -yy IN_VITRO \
+-hf $LAB_HEAD_FIRST -hl $LAB_HEAD_LAST -he $LAB_HEAD_EMAIL -lf $LEAD_SCREENER_FIRST -ll $LEAD_SCREENER_LAST -le $LEAD_SCREENER_EMAIL \
+-keyByFacilityId \
+--replace -f $DATA_DIRECTORY/study/HMSL10059_template.xls \
+-t 'AZD6482: MGH/Sanger Institute growth inhibition data (9 dose)'  \
+-i 300123 \
+--parseLincsSpecificFacilityID \
+--summary "`cat $DATA_DIRECTORY/study/cmt_protocol_9-dose.txt`"
+check_errs $? "create study fails"
+
+./run.sh edu.harvard.med.screensaver.io.screens.StudyCreator \
+-AE $ECOMMONS_ADMIN -annotationNamesInCol1  \
+-y SMALL_MOLECULE -yy IN_VITRO \
+-hf $LAB_HEAD_FIRST -hl $LAB_HEAD_LAST -he $LAB_HEAD_EMAIL -lf $LEAD_SCREENER_FIRST -ll $LEAD_SCREENER_LAST -le $LEAD_SCREENER_EMAIL \
+-keyByFacilityId \
+--replace -f $DATA_DIRECTORY/study/HMSL10100_template.xls \
+-t 'JNK-9L: MGH/Sanger Institute growth inhibition data (9 dose)'  \
+-i 300124 \
+--parseLincsSpecificFacilityID \
+--summary "`cat $DATA_DIRECTORY/study/cmt_protocol_9-dose.txt`"
+check_errs $? "create study fails"
+
+./run.sh edu.harvard.med.screensaver.io.screens.StudyCreator \
+-AE $ECOMMONS_ADMIN -annotationNamesInCol1  \
+-y SMALL_MOLECULE -yy IN_VITRO \
+-hf $LAB_HEAD_FIRST -hl $LAB_HEAD_LAST -he $LAB_HEAD_EMAIL -lf $LEAD_SCREENER_FIRST -ll $LEAD_SCREENER_LAST -le $LEAD_SCREENER_EMAIL \
+-keyByFacilityId \
+--replace -f $DATA_DIRECTORY/study/HMSL10134_template.xls \
+-t 'GSK1904529A: MGH/Sanger Institute growth inhibition data (9 dose)'  \
+-i 300125 \
+--parseLincsSpecificFacilityID \
+--summary "`cat $DATA_DIRECTORY/study/cmt_protocol_9-dose.txt`"
+check_errs $? "create study fails"
+
+./run.sh edu.harvard.med.screensaver.io.screens.StudyCreator \
+-AE $ECOMMONS_ADMIN -annotationNamesInCol1  \
+-y SMALL_MOLECULE -yy IN_VITRO \
+-hf $LAB_HEAD_FIRST -hl $LAB_HEAD_LAST -he $LAB_HEAD_EMAIL -lf $LEAD_SCREENER_FIRST -ll $LEAD_SCREENER_LAST -le $LEAD_SCREENER_EMAIL \
+-keyByFacilityId \
+--replace -f $DATA_DIRECTORY/study/HMSL10135_template.xls \
+-t 'OSI-906: MGH/Sanger Institute growth inhibition data (9 dose)'  \
+-i 300126 \
+--parseLincsSpecificFacilityID \
+--summary "`cat $DATA_DIRECTORY/study/cmt_protocol_9-dose.txt`"
+check_errs $? "create study fails"
+
+./run.sh edu.harvard.med.screensaver.io.screens.StudyCreator \
+-AE $ECOMMONS_ADMIN -annotationNamesInCol1  \
+-y SMALL_MOLECULE -yy IN_VITRO \
+-hf $LAB_HEAD_FIRST -hl $LAB_HEAD_LAST -he $LAB_HEAD_EMAIL -lf $LEAD_SCREENER_FIRST -ll $LEAD_SCREENER_LAST -le $LEAD_SCREENER_EMAIL \
+-keyByFacilityId \
+--replace -f $DATA_DIRECTORY/study/HMSL10166_template.xls \
+-t 'BAY61-3606: MGH/Sanger Institute growth inhibition data (9 dose)'  \
+-i 300127 \
+--parseLincsSpecificFacilityID \
+--summary "`cat $DATA_DIRECTORY/study/cmt_protocol_9-dose.txt`"
+check_errs $? "create study fails"
+
+./run.sh edu.harvard.med.screensaver.io.screens.StudyCreator \
+-AE $ECOMMONS_ADMIN -annotationNamesInCol1  \
+-y SMALL_MOLECULE -yy IN_VITRO \
+-hf $LAB_HEAD_FIRST -hl $LAB_HEAD_LAST -he $LAB_HEAD_EMAIL -lf $LEAD_SCREENER_FIRST -ll $LEAD_SCREENER_LAST -le $LEAD_SCREENER_EMAIL \
+-keyByFacilityId \
+--replace -f $DATA_DIRECTORY/study/HMSL10180_template.xls \
+-t 'CHIR-99021: MGH/Sanger Institute growth inhibition data (9 dose)'  \
+-i 300128 \
+--parseLincsSpecificFacilityID \
+--summary "`cat $DATA_DIRECTORY/study/cmt_protocol_9-dose.txt`"
+check_errs $? "create study fails"
+
+./run.sh edu.harvard.med.screensaver.io.screens.StudyCreator \
+-AE $ECOMMONS_ADMIN -annotationNamesInCol1  \
+-y SMALL_MOLECULE -yy IN_VITRO \
+-hf $LAB_HEAD_FIRST -hl $LAB_HEAD_LAST -he $LAB_HEAD_EMAIL -lf $LEAD_SCREENER_FIRST -ll $LEAD_SCREENER_LAST -le $LEAD_SCREENER_EMAIL \
+-keyByFacilityId \
+--replace -f $DATA_DIRECTORY/study/HMSL10072_template.xls \
+-t 'PF-562271: MGH/Sanger Institute growth inhibition data (9 dose)'  \
+-i 300129 \
+--parseLincsSpecificFacilityID \
+--summary "`cat $DATA_DIRECTORY/study/cmt_protocol_9-dose.txt`"
+check_errs $? "create study fails"
+
+./run.sh edu.harvard.med.screensaver.io.screens.StudyCreator \
+-AE $ECOMMONS_ADMIN -annotationNamesInCol1  \
+-y SMALL_MOLECULE -yy IN_VITRO \
+-hf $LAB_HEAD_FIRST -hl $LAB_HEAD_LAST -he $LAB_HEAD_EMAIL -lf $LEAD_SCREENER_FIRST -ll $LEAD_SCREENER_LAST -le $LEAD_SCREENER_EMAIL \
+-keyByFacilityId \
+--replace -f $DATA_DIRECTORY/study/HMSL10220_template.xls \
+-t 'PKC412: MGH/Sanger Institute growth inhibition data (9 dose)'  \
+-i 300130 \
+--parseLincsSpecificFacilityID \
+--summary "`cat $DATA_DIRECTORY/study/cmt_protocol_9-dose.txt`"
 check_errs $? "create study fails"
 
 ## Link Cells to Screens and Studies through the ExperimentalCellInformation load
@@ -6281,6 +6420,50 @@ check_errs $? "attachment import fails"
 
 ./run.sh edu.harvard.med.lincs.screensaver.io.screens.ScreenAttachmentImporter \
 -f $DATA_DIRECTORY/study/HMSL10219_UO-126_CMT_Study300109.xls -i 300109
+check_errs $? "attachment import fails"
+
+./run.sh edu.harvard.med.lincs.screensaver.io.screens.ScreenAttachmentImporter \
+-f $DATA_DIRECTORY/study/HMSL10174_A-769662_CMT_Study300120.xls -i 300120
+check_errs $? "attachment import fails"
+
+./run.sh edu.harvard.med.lincs.screensaver.io.screens.ScreenAttachmentImporter \
+-f $DATA_DIRECTORY/study/HMSL10017_HG-6-64-01_CMT_Study300121.xls -i 300121
+check_errs $? "attachment import fails"
+
+./run.sh edu.harvard.med.lincs.screensaver.io.screens.ScreenAttachmentImporter \
+-f $DATA_DIRECTORY/study/HMSL10034_AS601245_CMT_Study300122.xls -i 300122
+check_errs $? "attachment import fails"
+
+./run.sh edu.harvard.med.lincs.screensaver.io.screens.ScreenAttachmentImporter \
+-f $DATA_DIRECTORY/study/HMSL10059_AZD6482_CMT_Study300123.xls -i 300123
+check_errs $? "attachment import fails"
+
+./run.sh edu.harvard.med.lincs.screensaver.io.screens.ScreenAttachmentImporter \
+-f $DATA_DIRECTORY/study/HMSL10100_JNK-9L_CMT_Study300124.xls -i 300124
+check_errs $? "attachment import fails"
+
+./run.sh edu.harvard.med.lincs.screensaver.io.screens.ScreenAttachmentImporter \
+-f $DATA_DIRECTORY/study/HMSL10134_GSK1904529A_CMT_Study300125.xls -i 300125
+check_errs $? "attachment import fails"
+
+./run.sh edu.harvard.med.lincs.screensaver.io.screens.ScreenAttachmentImporter \
+-f $DATA_DIRECTORY/study/HMSL10135_OSI-906_CMT_Study300126.xls -i 300126
+check_errs $? "attachment import fails"
+
+./run.sh edu.harvard.med.lincs.screensaver.io.screens.ScreenAttachmentImporter \
+-f $DATA_DIRECTORY/study/HMSL10166_BAY61-3606_CMT_Study300127.xls -i 300127
+check_errs $? "attachment import fails"
+
+./run.sh edu.harvard.med.lincs.screensaver.io.screens.ScreenAttachmentImporter \
+-f $DATA_DIRECTORY/study/HMSL10180_CHIR-99021_CMT_Study300128.xls -i 300128
+check_errs $? "attachment import fails"
+
+./run.sh edu.harvard.med.lincs.screensaver.io.screens.ScreenAttachmentImporter \
+-f $DATA_DIRECTORY/study/HMSL10072_PF-562271_CMT_Study300129.xls -i 300129
+check_errs $? "attachment import fails"
+
+./run.sh edu.harvard.med.lincs.screensaver.io.screens.ScreenAttachmentImporter \
+-f $DATA_DIRECTORY/study/HMSL10220_PKC412_CMT_Study300130.xls -i 300130
 check_errs $? "attachment import fails"
 
 # THIS SHOULD ALWAYS BE THE LAST COMMAND!
