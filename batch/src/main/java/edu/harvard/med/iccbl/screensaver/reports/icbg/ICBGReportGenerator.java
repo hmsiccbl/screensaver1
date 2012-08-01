@@ -103,7 +103,9 @@ public class ICBGReportGenerator extends CommandLineApplication
   {
      super(args);
      addCommandLineOption(OptionBuilder.hasArg(true).withArgName("mf").withLongOpt("mapping-file")
- 				.withDescription("The path to the mapping file").create("mf"));   
+ 				.withDescription("The path to the mapping file").create("mf"));    
+     addCommandLineOption(OptionBuilder.hasArg(true).withArgName("cf").withLongOpt("assay-category-file")
+ 		 				.withDescription("The path to the assay category file").create("cf"));   
     addCommandLineOption(OptionBuilder.hasArg(true).withArgName("of").withLongOpt("output-file")
  						.withDescription("The output file path").create("of"));
 
@@ -113,7 +115,7 @@ public class ICBGReportGenerator extends CommandLineApplication
     _dao = (GenericEntityDAO) getSpringBean("genericEntityDao");
     _screenResultsDAO = (ScreenResultsDAO) getSpringBean("screenResultsDao");
     _mapper = new ICCBLPlateWellToINBioLQMapper(getCommandLineOptionValue("mf"));
-    _assayInfoProducer = new AssayInfoProducer();
+    _assayInfoProducer = new AssayInfoProducer(getCommandLineOptionValue("cf"));
   }
   
   public WritableWorkbook produceReport() throws RowsExceededException, FileNotFoundException, WriteException, IOException
@@ -166,7 +168,7 @@ public class ICBGReportGenerator extends CommandLineApplication
    return sheet;
 }
   
-  private void parseScreenResults() throws RowsExceededException, WriteException
+  private void parseScreenResults() throws RowsExceededException, WriteException, FileNotFoundException
   {
     List<ScreenResult> screenResults = _dao.findAllEntitiesOfType(ScreenResult.class);
     int row = 1;

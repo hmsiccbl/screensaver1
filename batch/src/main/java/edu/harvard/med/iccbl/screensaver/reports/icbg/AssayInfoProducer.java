@@ -9,11 +9,20 @@
 
 package edu.harvard.med.iccbl.screensaver.reports.icbg;
 
+import java.io.File;
+import java.io.FileNotFoundException;
+import java.util.Map;
+
 import org.apache.log4j.Logger;
 import org.joda.time.LocalDate;
 
+import com.google.common.collect.Maps;
+
+import edu.harvard.med.screensaver.io.workbook2.Row;
+import edu.harvard.med.screensaver.io.workbook2.Workbook;
 import edu.harvard.med.screensaver.model.screens.Screen;
 import edu.harvard.med.screensaver.model.screens.StatusItem;
+import edu.harvard.med.screensaver.util.StringUtils;
 
 
 /**
@@ -22,8 +31,26 @@ import edu.harvard.med.screensaver.model.screens.StatusItem;
 public class AssayInfoProducer
 {
   private static Logger log = Logger.getLogger(AssayInfoProducer.class);
+	private String _categoryFilename;
+	private Map<String,String> assayCategories;
+  
+  public AssayInfoProducer(String filename) throws FileNotFoundException {
+  	if(!StringUtils.isEmpty(filename)) _categoryFilename = filename;
 
-  public AssayInfo getAssayInfoForScreen(Screen screen)
+    if(_categoryFilename != null)
+    {
+    	assayCategories = Maps.newHashMap();
+    	Workbook book = new Workbook(new File(_categoryFilename));
+    	for(Row row:book.getWorksheet(0)) {
+    		String temp = row.getCell(0).getString();
+    		temp = temp.replace("ICCBL", "");
+    		assayCategories.put(temp,row.getCell(1).getString());
+    		
+    	}
+    }
+  }
+
+  public AssayInfo getAssayInfoForScreen(Screen screen) throws FileNotFoundException
   {
     AssayInfo assayInfo = new AssayInfo();
     assayInfo.setAssayName("ICCBL" + screen.getFacilityId());
@@ -35,9 +62,12 @@ public class AssayInfoProducer
     for (String keyword : screen.getKeywords()) {
       assayCategoryText += keyword.toUpperCase() + " ";
     }
-    assayCategoryText += screen.getSummary().toUpperCase();
-    setAssayCategory(assayInfo, assayCategoryText);
-
+    if(assayCategories != null) {
+    	assayInfo.setAssayCategory(assayCategories.get(screen.getFacilityId()));
+    }else {
+	    assayCategoryText += screen.getSummary().toUpperCase();
+	    setAssayCategory(assayInfo, assayCategoryText);
+    }
     LocalDate assayDate = screen.getDateCreated().toLocalDate();
     for (StatusItem statusItem: screen.getStatusItems()) {
       LocalDate statusItemDate = statusItem.getStatusDate();
@@ -51,6 +81,8 @@ public class AssayInfoProducer
       assayDate.getDayOfMonth() + "/" +
       (assayDate.getYear()));
     assert assayDate.getYear() >= 1900 : "year should include century";
+    
+
 
     return assayInfo;
   }
