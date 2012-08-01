@@ -210,6 +210,34 @@ public class AnnotationSearchResults extends EntityBasedEntitySearchResults<Anno
         col2.addRelationshipPath(AnnotationValue.reagent.to(Reagent.well));
         col2.setVisible(false);
         columns.add(col2);
+      }      
+      
+      if (_study.getScreenType().equals(ScreenType.SMALL_MOLECULE)) {
+        column = new TextEntityColumn<AnnotationValue>(AnnotationValue.reagent.toCollectionOfValues("compoundNames"),
+            "Primary Compound Name", "The primary name for the compound studied",
+            TableColumn.UNGROUPED) {
+
+						@Override
+						public String getCellValue(AnnotationValue row)
+						{
+							return ((SmallMoleculeReagent)row.getReagent()).getPrimaryCompoundName();
+						}
+						
+						@Override
+						public boolean isCommandLink()
+						{
+						return true;
+						}
+						
+						@Override
+						public Object cellAction(AnnotationValue row)
+						{
+							return _wellViewer.viewEntity(row.getReagent().getWell());
+						}
+					};
+					column.addRelationshipPath(AnnotationValue.reagent.to(Reagent.well));
+					column.setVisible(_study.getWellStudied() == null);
+					columns.add(column);
       }
 
       col2 = new IntegerEntityColumn<AnnotationValue>(AnnotationValue.reagent,
