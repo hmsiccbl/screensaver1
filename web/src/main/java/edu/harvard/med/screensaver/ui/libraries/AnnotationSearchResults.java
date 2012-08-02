@@ -241,7 +241,7 @@ public class AnnotationSearchResults extends EntityBasedEntitySearchResults<Anno
 					};
 					// TODO: this fails with NPE at hibernate BasicLoader:99
 					//column.addRelationshipPath(AnnotationValue.reagent.toCollectionOfValues("compoundNames"));
-					column.setVisible(false);
+					column.setVisible(true);
 					columns.add(column);
       }
 
