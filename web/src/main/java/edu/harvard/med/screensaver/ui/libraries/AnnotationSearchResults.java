@@ -212,15 +212,19 @@ public class AnnotationSearchResults extends EntityBasedEntitySearchResults<Anno
         columns.add(col2);
       }      
       
-      if (_study.getScreenType().equals(ScreenType.SMALL_MOLECULE)) {
-        column = new TextEntityColumn<AnnotationValue>(AnnotationValue.reagent.toCollectionOfValues("compoundNames"),
+      if (_study.getScreenType().equals(ScreenType.SMALL_MOLECULE) && isLINCS()) { // added for LINCS
+        column = new TextEntityColumn<AnnotationValue>(AnnotationValue.reagent,
             "Primary Compound Name", "The primary name for the compound studied",
             TableColumn.UNGROUPED) {
 
 						@Override
 						public String getCellValue(AnnotationValue row)
 						{
-							return ((SmallMoleculeReagent)row.getReagent()).getPrimaryCompoundName();
+							SmallMoleculeReagent smr = _dao.findEntityById(SmallMoleculeReagent.class, row.getReagent().getEntityId(), true, SmallMoleculeReagent.compoundNames);
+							return smr.getPrimaryCompoundName();
+							
+							//return ((SmallMoleculeReagent)row.getReagent()).getCompoundNames().get(0);
+							//return "blah";
 						}
 						
 						@Override
@@ -235,8 +239,9 @@ public class AnnotationSearchResults extends EntityBasedEntitySearchResults<Anno
 							return _wellViewer.viewEntity(row.getReagent().getWell());
 						}
 					};
-					column.addRelationshipPath(AnnotationValue.reagent.to(Reagent.well));
-					column.setVisible(_study.getWellStudied() == null);
+					// TODO: this fails with NPE at hibernate BasicLoader:99
+					//column.addRelationshipPath(AnnotationValue.reagent.toCollectionOfValues("compoundNames"));
+					column.setVisible(false);
 					columns.add(column);
       }
 
