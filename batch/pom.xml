@@ -5,13 +5,13 @@
   <modelVersion>4.0.0</modelVersion>
   <parent>
     <artifactId>screensaver</artifactId>
-    <version>2012-04-30</version>
+    <version>2012-08-01</version>
     <groupId>edu.harvard.med</groupId>
     <relativePath>../pom.xml</relativePath>
   </parent>
   <groupId>edu.harvard.med</groupId>
   <artifactId>screensaver-batch</artifactId>
-  <version>2012-04-30</version>
+  <version>2012-08-01</version>
   <packaging>jar</packaging>
   <name>Screensaver Batch</name>
   <description>Screensaver command-line applications for batch I/O</description>
@@ -130,7 +130,7 @@
     <dependency>
       <groupId>edu.harvard.med</groupId>
       <artifactId>screensaver-core</artifactId>
-      <version>2012-04-30</version>
+      <version>2012-08-01</version>
       <scope>compile</scope>
       <type>jar</type>
     </dependency>

@@ -4,7 +4,7 @@
   <modelVersion>4.0.0</modelVersion>
   <groupId>edu.harvard.med</groupId>
   <artifactId>screensaver</artifactId>
-  <version>2012-04-30</version>
+  <version>2012-08-01</version>
   <packaging>pom</packaging>
   <name>Screensaver HTS LIMS</name>
 
@@ -113,12 +113,12 @@
     <!-- "0_" prefix allows this to be found in classpath before hibernate-core*.jar -->
     <!-- NOTE: this file must be added to the local repository with: 
          mvn install:install-file -DgroupId=edu.harvard.med.iccbl -DartifactId=hibernate-core-patch -Dversion=3.6.2.Final-patch -Dpackaging=jar -Dfile=target/0_hibernate-core-patch-3.6.2.Final-patch.jar
-    -->
     <dependency>
       <groupId>edu.harvard.med.iccbl</groupId>
       <artifactId>0_hibernate-core-patch</artifactId>
       <version>${hibernate-core.version}</version>
     </dependency>
+    -->
 
     <dependency>
       <groupId>org.hibernate</groupId>
