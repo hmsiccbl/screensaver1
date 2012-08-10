@@ -4777,6 +4777,25 @@ check_errs $? "create study fails"
 --summary "`cat $DATA_DIRECTORY/study/cmt_protocol_9-dose.txt`"
 check_errs $? "create study fails"
 
+LAB_HEAD_FIRST="Nathanael"
+LAB_HEAD_LAST="Gray"
+LAB_HEAD_EMAIL="nathanael_gray@dfci.harvard.edu"
+LEAD_SCREENER_FIRST="Qingsong"
+LEAD_SCREENER_LAST="Liu"
+LEAD_SCREENER_EMAIL="qingsong_liu@hms.harvard.edu"
+
+./run.sh edu.harvard.med.screensaver.io.screens.StudyCreator \
+-AE $ECOMMONS_ADMIN -annotationNamesInCol1  \
+-y SMALL_MOLECULE -yy IN_VITRO \
+-hf $LAB_HEAD_FIRST -hl $LAB_HEAD_LAST -he $LAB_HEAD_EMAIL -lf $LEAD_SCREENER_FIRST -ll $LEAD_SCREENER_LAST -le $LEAD_SCREENER_EMAIL \
+-keyByFacilityId \
+--replace -f $DATA_DIRECTORY/study/HMSL10140_CYT387_kinomescan.xls \
+-t 'CYT387 KINOMEscan'  \
+-i 300131 \
+--parseLincsSpecificFacilityID \
+--summary "`cat $DATA_DIRECTORY/study/kinomescan_protocol.txt`"
+check_errs $? "create study fails"
+
 ## Link Cells to Screens and Studies through the ExperimentalCellInformation load
 
 ./run.sh edu.harvard.med.iccbl.screensaver.io.cells.ExperimentalCellInformationImporter -f $DATA_DIRECTORY/LINCS_ExperimentalCellInformation.djw.20120403.xls
