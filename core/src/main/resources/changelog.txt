@@ -1,6 +1,10 @@
 Screensaver-core release notes
 
-Version 2012-02-24_?
+Version 2012-08-01 - Rev 1
+
+- added the dependency for the "0_hibernate-core-patch" back in to the parent pom.xml.  This was removed in error with the last release.   
+
+Version 2012-02-24_
 
 [#3411] Convert the gene symbol field of gene to an ordered list
 [#3419] Create a "maxSkippedWellsPerPlate" field on Cherry Pick Request entity to support VCFG plate mapping functionality
