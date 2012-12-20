@@ -329,10 +329,10 @@ public class WellViewer extends SearchResultContextEntityViewerBackingBean<Well,
       : well.getReagents().get(_libraryContentsVersionRef.value());
     if (versionedReagent != null) {
       if (well.getLibrary().getReagentType().equals(SilencingReagent.class)) {
-        getDao().needReadOnly((SilencingReagent) versionedReagent, SilencingReagent.vendorGene.to(Gene.genbankAccessionNumbers));
-        getDao().needReadOnly((SilencingReagent) versionedReagent, SilencingReagent.vendorGene.to(Gene.entrezgeneSymbols));
-        getDao().needReadOnly((SilencingReagent) versionedReagent, SilencingReagent.facilityGene.to(Gene.genbankAccessionNumbers));
-        getDao().needReadOnly((SilencingReagent) versionedReagent, SilencingReagent.facilityGene.to(Gene.entrezgeneSymbols));
+        getDao().needReadOnly((SilencingReagent) versionedReagent, SilencingReagent.vendorGenes.to(Gene.genbankAccessionNumbers));
+        getDao().needReadOnly((SilencingReagent) versionedReagent, SilencingReagent.vendorGenes.to(Gene.entrezgeneSymbols));
+        getDao().needReadOnly((SilencingReagent) versionedReagent, SilencingReagent.facilityGenes.to(Gene.genbankAccessionNumbers));
+        getDao().needReadOnly((SilencingReagent) versionedReagent, SilencingReagent.facilityGenes.to(Gene.entrezgeneSymbols));
         getDao().needReadOnly((SilencingReagent) versionedReagent, SilencingReagent.duplexWells.to(Well.library));
       }
       if (well.getLibrary().getReagentType().equals(SmallMoleculeReagent.class)) {

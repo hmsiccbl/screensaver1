@@ -266,7 +266,7 @@ public class GenericEntityDAOTest extends AbstractSpringPersistenceTest
                                                                  "startPlate",
                                                                  1,
                                                                  false,
-                                                                 Library.wells.to(Well.latestReleasedReagent).to(SilencingReagent.vendorGene).to(Gene.genbankAccessionNumbers));
+                                                                 Library.wells.to(Well.latestReleasedReagent).to(SilencingReagent.vendorGenes).to(Gene.genbankAccessionNumbers));
         assertTrue(expectedLibrary[0].isEquivalent(actualLibrary[0]));
       }
     });

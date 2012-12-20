@@ -59,8 +59,8 @@
         <t:outputText rendered="#{empty value}" value="#{!empty emptyValue ? emptyValue : ''}" />
         <t:outputText id="#{id}#{type}Value" value="#{value}"
           escape="#{(empty escape ? true : escape)}"
-          rendered="#{!empty value &amp;&amp; !(type == 'Textarea' || type == 'Volume' || type == 'MolarConcentration' || type == 'ListOfLinks' || type == 'Link' || type == 'Vocabulary')}"
-          converter="#{!empty converter ? converter : (empty type || type == 'Text' || type == 'Textarea') ? stringConverter : type == 'Integer' ? javax.faces.convert.IntegerConverter : type == 'Date' ? dateConverter : type == 'Set' ? setConverter : type == 'List' ? listConverter : type == 'Volume' ? volumeValueConverter : type == 'MolarConcentration' ? molarConcentrationValueConverter : type == 'Currency' ? currencyConverter : null}" />
+          rendered="#{!empty value &amp;&amp; !(type == 'Textarea' || type == 'Volume' || type == 'MolarConcentration' || type == 'Set' || type == 'List' || type == 'ListOfLinks' || type == 'Link' || type == 'Vocabulary')}"
+          converter="#{!empty converter ? converter : (empty type || type == 'Text' || type == 'Textarea') ? stringConverter : type == 'Integer' ? javax.faces.convert.IntegerConverter : type == 'Date' ? dateConverter : type == 'Volume' ? volumeValueConverter : type == 'MolarConcentration' ? molarConcentrationValueConverter : type == 'Currency' ? currencyConverter : null}" />
         <t:inputTextarea id="#{id}#{type}Value1"
           rendered="#{!empty value &amp;&amp; type == 'Textarea'}"
           value="#{value}"
@@ -86,6 +86,20 @@
             rendered="#{eltIndex &lt; eltCount - 1}"
             escape="#{(empty escape ? true : escape)}"
             styleClass="propertyValue dataText" />
+        </t:dataList>
+        <t:dataList id="#{id}#{type}Elements" var="eltValue"
+          value="#{value}" layout="simple"
+          rendered="#{!empty value &amp;&amp; (type == 'List' || type == 'Set')}"
+          rowIndexVar="eltIndex" rowCountVar="eltCount">
+          <ui:insert name="element">
+          	<h:outputText value="#{eltValue}" styleClass="propertyValue dataText" />
+		  </ui:insert>
+		  <ui:insert name="separator">
+	        <h:outputText value="#{separatorText}" 
+	          escape="#{(empty escapeSeparator ? true : escapeSeparator)}"
+	          rendered="#{!empty separatorText &amp;&amp; !empty eltValue &amp;&amp; eltIndex &lt; (eltCount - 1)}"
+	          styleClass="propertyValue dataText" />
+		  </ui:insert>
         </t:dataList>
         <h:outputLink value="#{linkValue}"
           rendered="#{!empty value &amp;&amp; (type == 'Link')}"

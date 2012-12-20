@@ -23,6 +23,7 @@ import edu.harvard.med.screensaver.io.ParseError;
 import edu.harvard.med.screensaver.io.ParseErrorsException;
 import edu.harvard.med.screensaver.io.ParseException;
 import edu.harvard.med.screensaver.io.libraries.LibraryContentsParser;
+import edu.harvard.med.screensaver.io.libraries.rnai.HairpinLibraryContentsParser;
 import edu.harvard.med.screensaver.io.libraries.rnai.RNAiLibraryContentsParser;
 import edu.harvard.med.screensaver.io.libraries.smallmolecule.NaturalProductsLibraryContentsParser;
 import edu.harvard.med.screensaver.io.libraries.smallmolecule.SmallMoleculeLibraryContentsParser;
@@ -92,9 +93,13 @@ public class LibraryContentsLoader
     Library library = _dao.reloadEntity(lcv.getLibrary(), false, Library.wells);
     library.resetContents();
 //    _dao.mergeEntity(library);
-    LibraryContentsParser parser;
+    LibraryContentsParser<? extends Reagent> parser;
     if (library.getScreenType().equals(ScreenType.RNAI)) {
-      parser = new RNAiLibraryContentsParser(_dao, stream, library);
+      if (library.getLibraryType().equals(LibraryType.SHRNA)) {
+    	  parser = new HairpinLibraryContentsParser(_dao, stream, library);
+      } else {
+    	  parser = new RNAiLibraryContentsParser(_dao, stream, library);
+      }
     }
     else if (library.getScreenType().equals(ScreenType.SMALL_MOLECULE)) 
     {
@@ -117,13 +122,15 @@ public class LibraryContentsLoader
         if (result == null) {
           break;
         }
-        // due to memory optimizations, the relationship from Well to Reagent
-        // may not be set, which would prevent Reagent from being persisted (no
-        // cascading)
-        if (result.getSecond() != null) { 
-          _dao.saveOrUpdateEntity(result.getSecond());
-          _dao.saveOrUpdateEntity(result.getFirst());
+        
+        if(result.getSecond() != null) {
+          _dao.persistEntity(result.getSecond());
         }
+        
+        if(result.getFirst() != null) {
+          _dao.persistEntity(result.getFirst());
+        }
+          
         if (++nProcessed % FLUSH_BATCH_SIZE == 0) {
           // allow GC to occur
           _dao.flush();

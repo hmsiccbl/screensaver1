@@ -147,7 +147,7 @@ public class RNAiLibraryContentsParser extends WorkbookLibraryContentsParser<Sil
       throw new ParseException(new ParseError(VENDOR.getName() + " and " + VENDOR_REAGENT_ID.getName() + " must both be specified, or neither should be specified", 
                                               VENDOR_REAGENT_ID.getLocation(row)));
     }
-    ReagentVendorIdentifier rvi = null;;
+    ReagentVendorIdentifier rvi = null;
     if (vendorReagentId != null) {
       rvi = new ReagentVendorIdentifier(vendorName, vendorReagentId);
     }

@@ -9,6 +9,7 @@
 
 package edu.harvard.med.screensaver.model.libraries;
 
+import java.util.Collection;
 import java.util.List;
 import java.util.Set;
 
@@ -21,6 +22,7 @@ import javax.persistence.Id;
 import javax.persistence.JoinColumn;
 import javax.persistence.JoinTable;
 
+import com.google.common.base.Function;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Sets;
 import org.hibernate.annotations.Immutable;
@@ -49,6 +51,16 @@ public class Gene extends AbstractEntity<Integer>
 
   public static final PropertyPath<Gene> genbankAccessionNumbers = RelationshipPath.from(Gene.class).toCollectionOfValues("genbankAccessionNumbers");
   public static final PropertyPath<Gene> entrezgeneSymbols = RelationshipPath.from(Gene.class).toCollectionOfValues("entrezgeneSymbols");
+
+  public static final Function<Gene,String> ToGeneName = new Function<Gene,String>() { public String apply(Gene g) { return g.getGeneName(); } };
+
+  public static final Function<Gene,String> ToSpeciesName = new Function<Gene,String>() { public String apply(Gene g) { return g.getSpeciesName(); } };
+
+  public static final Function<Gene,Integer> ToEntrezgeneId = new Function<Gene,Integer>() { public Integer apply(Gene g) { return g.getEntrezgeneId(); } };
+
+  public static final Function<Gene,List<String>> ToEntrezgeneSymbols = new Function<Gene,List<String>>() { public List<String> apply(Gene g) { return g.getEntrezgeneSymbols(); } };
+
+  public static final Function<Gene,Collection<String>> ToGenbankAccessionNumbers = new Function<Gene,Collection<String>>() { public Collection<String> apply(Gene g) { return g.getGenbankAccessionNumbers(); } };
 
   public static final Gene NullGene = new Gene();
 

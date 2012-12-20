@@ -29,7 +29,7 @@ public abstract class CsvSetColumn<E> extends CsvColumn<Set<E>>
   {
     Set<E> set = Sets.newHashSet();
     if (value != null) {
-      String[] values = value.split(DataExporter.LIST_DELIMITER);
+      String[] values = value.split(DataExporter.LIST_DELIMITER, -1);
       for (String v : values) {
         if (!set.add(parseElement(v.trim()))) {
           throw new ParseException(new ParseError(getName() +

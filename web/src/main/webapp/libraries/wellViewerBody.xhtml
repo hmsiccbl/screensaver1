@@ -4,12 +4,19 @@
   xmlns:ui="http://java.sun.com/jsf/facelets"
   xmlns:h="http://java.sun.com/jsf/html"
   xmlns:f="http://java.sun.com/jsf/core"
+  xmlns:fn="http://java.sun.com/jsp/jstl/functions"
   xmlns:t="http://myfaces.apache.org/tomahawk"
   xmlns:s="http://myfaces.apache.org/sandbox"
   xmlns:ss="http://screensaver.med.harvard.edu/ui">
 
 <ui:composition>
   <h:form>
+  	 <t:panelGroup id="commandPanel">
+  	 	<t:commandButton action="#{wellViewer.showWellCopyVolumes}"
+			id="showWellCopyVolumesCommand" value="Show Well Copy Volumes" styleClass="command"
+			rendered="#{wellViewer.readAdmin}" />
+  	 
+  	 </t:panelGroup>
      <t:panelGrid id="wellInfoPropertiesPanel" columns="2"
       columnClasses="propertyLabelColumn,column"
       styleClass="layoutPanel">
@@ -71,43 +78,54 @@
          description="The reagent's library contents version" 
          value="#{wellViewer.restrictedReagent.libraryContentsVersion.versionNumber}">
        </ss:property>
-
+	   
        <ss:property id="sequence" label="Sequence" 
-         type="Text" rendered="#{wellViewer.entity.library.reagentType.simpleName == 'SilencingReagent' &amp;&amp; !empty wellViewer.restrictedReagent}"
+         type="List" rendered="#{wellViewer.entity.library.reagentType.simpleName == 'SilencingReagent' &amp;&amp; !empty wellViewer.restrictedReagent}"
          description="The nucleotide sequence of the silencing reagent" 
-         value="#{wellViewer.restrictedReagent.sequence}">
+         value="#{fn:split(wellViewer.restrictedReagent.sequence, ';')}" separatorText="&lt;br/&gt;" escapeSeparator="false">
        </ss:property>
 
        <ss:property id="geneName" label="Gene Name" 
-         type="Text" rendered="#{wellViewer.entity.library.reagentType.simpleName == 'SilencingReagent' &amp;&amp; !empty wellViewer.restrictedReagent}"
+         type="Set" rendered="#{wellViewer.entity.library.reagentType.simpleName == 'SilencingReagent' &amp;&amp; !empty wellViewer.restrictedReagent}"
          description="The name of the gene, as labelled in EntrezGene" 
-         value="#{wellViewer.restrictedReagent.facilityGene.geneName}">
+         value="#{ss:compact(ss:transform(ss:concat(wellViewer.restrictedReagent.facilityGenes, wellViewer.restrictedReagent.vendorGenes), '#{gene}', '#{empty gene ? null : gene.geneName}'))}"
+         separatorText="&lt;br/&gt;" escapeSeparator="false">
        </ss:property>
 
        <ss:property id="entrezGeneId" label="EntrezGene ID" 
-         type="Link" rendered="#{wellViewer.entity.library.reagentType.simpleName == 'SilencingReagent' &amp;&amp; !empty wellViewer.restrictedReagent}"
+         type="Set" rendered="#{wellViewer.entity.library.reagentType.simpleName == 'SilencingReagent' &amp;&amp; !empty wellViewer.restrictedReagent}"
          description="The EntrezGene ID, a.k.a. Locus ID" 
-         value="#{wellViewer.restrictedReagent.facilityGene.entrezgeneId}"
-         linkValue="#{wellViewer.entrezgeneIdUrlPrefix}#{wellViewer.restrictedReagent.facilityGene.entrezgeneId}">
+         value="#{ss:compact(ss:transform(ss:concat(wellViewer.restrictedReagent.facilityGenes, wellViewer.restrictedReagent.vendorGenes), '#{gene}', '#{empty gene ? null : gene.entrezgeneId}'))}"
+         separatorText="; ">
+         <ui:define name="element">
+	         <h:outputLink value="#{wellViewer.entrezgeneIdUrlPrefix}#{eltValue}" target="_blank">
+	            <h:outputText value="#{eltValue}" styleClass="propertyValue dataText" />
+	         </h:outputLink>
+         </ui:define>
        </ss:property>
        
        <ss:property id="entrezGeneSymbols" label="EntrezGene Symbol" 
-         type="List" rendered="#{wellViewer.entity.library.reagentType.simpleName == 'SilencingReagent' &amp;&amp; !empty wellViewer.restrictedReagent}"
+         type="Set" rendered="#{wellViewer.entity.library.reagentType.simpleName == 'SilencingReagent' &amp;&amp; !empty wellViewer.restrictedReagent}"
          description="The EntrezGene Gene Symbols" 
-         value="#{wellViewer.restrictedReagent.facilityGene.entrezgeneSymbols}">
+         value="#{ss:compact(ss:transform(ss:concat(wellViewer.restrictedReagent.facilityGenes, wellViewer.restrictedReagent.vendorGenes), '#{gene}', '#{empty gene ? null : gene.entrezgeneSymbols}'))}"
+         separatorText=", ">
        </ss:property>
        
        <ss:property id="genBankAccessionNumbers" label="GenBank Accession Numbers" 
-         type="ListOfLinks" rendered="#{wellViewer.entity.library.reagentType.simpleName == 'SilencingReagent' &amp;&amp; !empty wellViewer.restrictedReagent}"
+         type="Set" rendered="#{wellViewer.entity.library.reagentType.simpleName == 'SilencingReagent' &amp;&amp; !empty wellViewer.restrictedReagent}"
          description="The GenBank Accession Numbers for the gene" 
-         value="#{wellViewer.restrictedReagent.facilityGene.genbankAccessionNumbers}"
-         linkPrefix="#{wellViewer.genbankAccessionNumberUrlPrefix}" >
+         value="#{ss:compact(ss:transform(ss:concat(wellViewer.restrictedReagent.facilityGenes, wellViewer.restrictedReagent.vendorGenes), '#{gene}', '#{empty gene ? null : gene.genbankAccessionNumbers}'))}">
+         <ui:define name="element">
+	         <h:outputLink value="#{wellViewer.genbankAccessionNumberUrlPrefix}#{eltValue}" target="_blank">
+	            <h:outputText value="#{eltValue}" styleClass="propertyValue dataText" />
+	         </h:outputLink>
+         </ui:define>
        </ss:property>
        
        <ss:property id="speciesName" label="Species Name" 
-         type="Text" rendered="#{wellViewer.entity.library.reagentType.simpleName == 'SilencingReagent' &amp;&amp; !empty wellViewer.restrictedReagent}"
+         type="Set" rendered="#{wellViewer.entity.library.reagentType.simpleName == 'SilencingReagent' &amp;&amp; !empty wellViewer.restrictedReagent}"
          description="The species this gene is found in" 
-         value="#{wellViewer.restrictedReagent.facilityGene.speciesName}">
+         value="#{ss:compact(ss:transform(ss:concat(wellViewer.restrictedReagent.facilityGenes, wellViewer.restrictedReagent.vendorGenes), '#{gene}', '#{empty gene ? null : gene.speciesName}'))}">
        </ss:property>
         
        <!-- Small Molecule Reagent stuff -->

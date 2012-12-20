@@ -129,7 +129,7 @@ public class LibraryContentsLoaderTest extends AbstractSpringPersistenceTest
         libraryCreator.createWells(otherLibrary);
         otherLibrary.createContentsVersion(_admin);
         otherLibrary.getLatestContentsVersion().release(new AdministrativeActivity(_admin, new LocalDate(), AdministrativeActivityType.LIBRARY_CONTENTS_VERSION_RELEASE));
-        genericEntityDao.saveOrUpdateEntity(otherLibrary);
+        genericEntityDao.persistEntity(otherLibrary);
 
         try {
           LibraryContentsVersion lcv = libraryContentsLoader.loadLibraryContents(library, _admin, "clean data rnai",

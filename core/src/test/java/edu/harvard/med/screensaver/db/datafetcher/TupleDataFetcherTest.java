@@ -168,12 +168,12 @@ public class TupleDataFetcherTest extends AbstractSpringPersistenceTest
     ArrayList<PropertyPath<Well>> properties =
       Lists.newArrayList(RelationshipPath.from(Well.class).toProperty("id"),
                          Well.latestReleasedReagent.toProperty("id"),
-                         Well.latestReleasedReagent.to(SilencingReagent.facilityGene).to(Gene.entrezgeneSymbols));
+                         Well.latestReleasedReagent.to(SilencingReagent.facilityGenes).to(Gene.entrezgeneSymbols));
     dataFetcher.setPropertiesToFetch(properties);
     Map<String,Tuple<String>> result = dataFetcher.fetchData(Sets.newHashSet(well.getWellId()));
     Tuple<String> tuple = result.get(well.getWellId());
     assertNotNull(tuple);
-    Object propValue = tuple.getProperty("latestReleasedReagent.facilityGene.entrezgeneSymbols");
+    Object propValue = tuple.getProperty("latestReleasedReagent.facilityGenes.entrezgeneSymbols");
     assertNotNull(propValue);
     assertTrue(propValue instanceof List);
     assertEquals(Sets.newHashSet("xxx", "yyy"), Sets.newHashSet((List<String>) propValue));

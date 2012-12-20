@@ -8,6 +8,8 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
+import com.google.common.base.Predicate;
+import com.google.common.base.Predicates;
 import com.google.common.collect.Iterables;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
@@ -42,7 +44,9 @@ import edu.harvard.med.screensaver.ui.arch.datatable.column.entity.BooleanEntity
 import edu.harvard.med.screensaver.ui.arch.datatable.column.entity.EnumEntityColumn;
 import edu.harvard.med.screensaver.ui.arch.datatable.column.entity.HasFetchPaths;
 import edu.harvard.med.screensaver.ui.arch.datatable.column.entity.IntegerEntityColumn;
+import edu.harvard.med.screensaver.ui.arch.datatable.column.entity.IntegerSetEntityColumn;
 import edu.harvard.med.screensaver.ui.arch.datatable.column.entity.TextEntityColumn;
+import edu.harvard.med.screensaver.ui.arch.datatable.column.entity.TextSetEntityColumn;
 import edu.harvard.med.screensaver.ui.arch.datatable.model.InMemoryEntityDataModel;
 import edu.harvard.med.screensaver.ui.arch.searchresults.EntityBasedEntitySearchResults;
 import edu.harvard.med.screensaver.util.NullSafeUtils;
@@ -58,6 +62,8 @@ public class LabCherryPicksSearchResult extends EntityBasedEntitySearchResults<L
   private boolean _isRecordOriginalSourceCopyWellsAsEmpty;
 
   protected LabCherryPicksSearchResult() {}
+  
+  protected static final Predicate<String> NOT_EMPTY = Predicates.and(Predicates.notNull(), Predicates.not(Predicates.equalTo("")));
   
   public LabCherryPicksSearchResult(CherryPickRequestAllocator cherryPickRequestAllocator,
                                     WellCopyVolumeAdjuster wellCopyVolumeAdjuster,
@@ -115,7 +121,7 @@ public class LabCherryPicksSearchResult extends EntityBasedEntitySearchResults<L
     return labCherryPicksTableColumns;
   }
 
-  private List<TableColumn<LabCherryPick,?>> buildLabCherryPicksTableColumns()
+  protected List<TableColumn<LabCherryPick,?>> buildLabCherryPicksTableColumns()
   {
     List<TableColumn<LabCherryPick,?>> labCherryPicksTableColumns = Lists.newArrayList();
     labCherryPicksTableColumns.add(new EnumEntityColumn<LabCherryPick,LabCherryPickStatus>(
@@ -239,58 +245,52 @@ public class LabCherryPicksSearchResult extends EntityBasedEntitySearchResults<L
     }
     
 
-    labCherryPicksTableColumns.add(new LabCherryPickReagentEntityColumn<SilencingReagent,String>(
+    labCherryPicksTableColumns.add(new LabCherryPickReagentEntityColumn<SilencingReagent,Set<String>>(
       SilencingReagent.class,
-      new TextEntityColumn<SilencingReagent>(
-        SilencingReagent.facilityGene.toProperty("geneName"),
+      new TextSetEntityColumn<SilencingReagent>(
+        SilencingReagent.facilityGenes.toProperty("geneName"),
         "Gene", 
         "The name of the gene targeted by the screened well", 
         RNAI_COLUMNS_GROUP) {
-        @Override
-        public String getCellValue(SilencingReagent r)
-        {
-          Gene gene = r.getFacilityGene();
-          return gene == null ? null : gene.getGeneName();
-        }
+          @Override
+          public Set<String> getCellValue(SilencingReagent r)
+          {
+        	return r.getFacilityGenes() == null ? null : Sets.newLinkedHashSet(Iterables.filter(Iterables.transform(Iterables.filter(r.getFacilityGenes(), Predicates.notNull()), Gene.ToGeneName), NOT_EMPTY));
+          }
       }));
-    labCherryPicksTableColumns.add(new LabCherryPickReagentEntityColumn<SilencingReagent,Integer>(
+    labCherryPicksTableColumns.add(new LabCherryPickReagentEntityColumn<SilencingReagent,Set<Integer>>(
       SilencingReagent.class,
-      new IntegerEntityColumn<SilencingReagent>(
-        SilencingReagent.facilityGene.toProperty("entrezgeneId"),
+      new IntegerSetEntityColumn<SilencingReagent>(
+        SilencingReagent.facilityGenes.toProperty("entrezgeneId"),
         "Entrez ID", 
         "The Entrez ID of the gene targeted by the screened well", 
         RNAI_COLUMNS_GROUP) {
         @Override
-        public Integer getCellValue(SilencingReagent r)
+        public Set<Integer> getCellValue(SilencingReagent r)
         {
-          Gene gene = r.getFacilityGene();
-          return gene == null ? null : gene.getEntrezgeneId();
+          return r.getFacilityGenes() == null ? null : Sets.newLinkedHashSet(Iterables.filter(Iterables.transform(Iterables.filter(r.getFacilityGenes(), Predicates.notNull()), Gene.ToEntrezgeneId), Predicates.notNull()));
         }
       }));
-    labCherryPicksTableColumns.add(new LabCherryPickReagentEntityColumn<SilencingReagent,String>(SilencingReagent.class,
-                                                                                                 new TextEntityColumn<SilencingReagent>(SilencingReagent.facilityGene.to(Gene.entrezgeneSymbols),
+    labCherryPicksTableColumns.add(new LabCherryPickReagentEntityColumn<SilencingReagent,Set<String>>(SilencingReagent.class,
+                                                                                                 new TextSetEntityColumn<SilencingReagent>(SilencingReagent.facilityGenes.to(Gene.entrezgeneSymbols),
         "Entrez Symbol", 
         "The Entrez symbol of the gene targeted by the screened well", 
         RNAI_COLUMNS_GROUP) {
         @Override
-        public String getCellValue(SilencingReagent r)
+        public Set<String> getCellValue(SilencingReagent r)
         {
-          Gene gene = r.getFacilityGene();
-          // TODO: not appropriate to show single, arbitrary entrezgene symbol
-          return gene == null ? null : gene.getEntrezgeneSymbols().isEmpty() ? null : gene.getEntrezgeneSymbols().iterator().next();
+          return r.getFacilityGenes() == null ? null : Sets.newLinkedHashSet(Iterables.filter(Iterables.concat(Iterables.filter(Iterables.transform(Iterables.filter(r.getFacilityGenes(), Predicates.notNull()), Gene.ToEntrezgeneSymbols), Predicates.notNull())), NOT_EMPTY));
         }
       }));
-    labCherryPicksTableColumns.add(new LabCherryPickReagentEntityColumn<SilencingReagent,String>(SilencingReagent.class,
-                                                                                                 new TextEntityColumn<SilencingReagent>(SilencingReagent.facilityGene.to(Gene.genbankAccessionNumbers),
+    labCherryPicksTableColumns.add(new LabCherryPickReagentEntityColumn<SilencingReagent,Set<String>>(SilencingReagent.class,
+                                                                                                 new TextSetEntityColumn<SilencingReagent>(SilencingReagent.facilityGenes.to(Gene.genbankAccessionNumbers),
         "Genbank AccNo", 
         "The Genbank accession number of the gene targeted by the screened well",
         RNAI_COLUMNS_GROUP) {
         @Override
-        public String getCellValue(SilencingReagent r)
+        public Set<String> getCellValue(SilencingReagent r)
         {
-          Gene gene = r.getFacilityGene();
-          // TODO: not appropriate to show single, arbitrary genbank acc no
-          return gene == null ? null : gene.getGenbankAccessionNumbers().isEmpty() ? null : gene.getGenbankAccessionNumbers().iterator().next();
+            return r.getFacilityGenes() == null ? null : Sets.newLinkedHashSet(Iterables.filter(Iterables.concat(Iterables.filter(Iterables.transform(Iterables.filter(r.getFacilityGenes(), Predicates.notNull()), Gene.ToGenbankAccessionNumbers), Predicates.notNull())), NOT_EMPTY));
         }
       }));
 
@@ -424,7 +424,7 @@ public class LabCherryPicksSearchResult extends EntityBasedEntitySearchResults<L
     return labCherryPicksTableCompoundSorts;
   }
 
-  Map<LabCherryPick,String> lcpNewSourceCopies = Maps.newHashMap();
+  protected Map<LabCherryPick,String> lcpNewSourceCopies = Maps.newHashMap();
   
   @Override
   protected void doEdit()

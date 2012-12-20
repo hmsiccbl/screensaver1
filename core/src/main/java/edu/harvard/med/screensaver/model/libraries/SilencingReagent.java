@@ -9,6 +9,8 @@
 
 package edu.harvard.med.screensaver.model.libraries;
 
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Set;
 
 import javax.persistence.CascadeType;
@@ -18,6 +20,7 @@ import javax.persistence.FetchType;
 import javax.persistence.JoinColumn;
 import javax.persistence.JoinTable;
 import javax.persistence.ManyToMany;
+import javax.persistence.OneToMany;
 import javax.persistence.OneToOne;
 import javax.persistence.Transient;
 
@@ -28,6 +31,7 @@ import com.google.common.collect.Iterables;
 import com.google.common.collect.Sets;
 import org.hibernate.annotations.Cascade;
 import org.hibernate.annotations.Immutable;
+import org.hibernate.annotations.IndexColumn;
 import org.hibernate.annotations.LazyCollection;
 import org.hibernate.annotations.LazyCollectionOption;
 
@@ -52,8 +56,8 @@ public class SilencingReagent extends Reagent
 {
   private static final long serialVersionUID = 0L;
 
-  public static final RelationshipPath<SilencingReagent> vendorGene = RelationshipPath.from(SilencingReagent.class).to("vendorGene", Cardinality.TO_ONE);
-  public static final RelationshipPath<SilencingReagent> facilityGene = RelationshipPath.from(SilencingReagent.class).to("facilityGene", Cardinality.TO_ONE);
+  public static final RelationshipPath<SilencingReagent> vendorGenes = RelationshipPath.from(SilencingReagent.class).to("vendorGenes", Cardinality.TO_MANY);
+  public static final RelationshipPath<SilencingReagent> facilityGenes = RelationshipPath.from(SilencingReagent.class).to("facilityGenes", Cardinality.TO_MANY);
   public static final RelationshipPath<SilencingReagent> duplexWells = RelationshipPath.from(SilencingReagent.class).to("duplexWells");
   
   private static final Function<Well,SilencingReagent> wellToReagentTransformer = 
@@ -61,8 +65,8 @@ public class SilencingReagent extends Reagent
     
   private SilencingReagentType _silencingReagentType;
   private String _sequence;
-  private Gene _vendorGene;
-  private Gene _facilityGene;
+  private List<Gene> _vendorGenes;
+  private List<Gene> _facilityGenes;
   private Set<Well> _duplexWells = Sets.newHashSet();
   private boolean _isRestrictedSequence;
 
@@ -86,6 +90,8 @@ public class SilencingReagent extends Reagent
     super(rvi, well, libraryContentsVersion);
     _silencingReagentType = silencingReagentType;
     _sequence = sequence;
+    _vendorGenes = new ArrayList<Gene>();
+    _facilityGenes = new ArrayList<Gene>();
   }
 
   @Override
@@ -124,26 +130,36 @@ public class SilencingReagent extends Reagent
     _sequence = sequence;
   }
 
-  @OneToOne(cascade={ CascadeType.PERSIST, CascadeType.MERGE, CascadeType.REMOVE }, fetch=FetchType.LAZY)
-  @JoinColumn(name="vendorGeneId", nullable=true, unique=true)
-  @org.hibernate.annotations.LazyToOne(value=org.hibernate.annotations.LazyToOneOption.PROXY)
-  @org.hibernate.annotations.Cascade(value={org.hibernate.annotations.CascadeType.SAVE_UPDATE, org.hibernate.annotations.CascadeType.DELETE})
-  @ToOne(hasNonconventionalSetterMethod=true) /* lazy-created in getter */
-  public Gene getVendorGene()
+  @OneToMany(cascade = { CascadeType.PERSIST, CascadeType.MERGE, CascadeType.REMOVE }, fetch = FetchType.LAZY)
+  @JoinTable(name = "reagentVendorGenes", joinColumns = @JoinColumn(name = "reagentId"), inverseJoinColumns = @JoinColumn(name = "geneId"))
+  @IndexColumn(name = "ordinal")
+  @org.hibernate.annotations.Cascade(value = { org.hibernate.annotations.CascadeType.SAVE_UPDATE,
+                  org.hibernate.annotations.CascadeType.DELETE })
+  @org.hibernate.annotations.ForeignKey(name = "fk_vendor_genes_to_reagent")
+  @ToMany(hasNonconventionalMutation = true)
+  public List<Gene> getVendorGenes()
   {
-    // lazy instantiate the Gene iff SilencingReagent has not yet been persisted
-    // (since SilencingReagent and Gene are immutable)
-    if (_vendorGene == null && getReagentId() == null) {
-      _vendorGene = new Gene();
-    }
-    return _vendorGene;
+    return _vendorGenes;
   }
 
-  private void setVendorGene(Gene vendorGene)
+  private void setVendorGenes(List<Gene> vendorGenes)
   {
-    _vendorGene = vendorGene;
+    _vendorGenes = vendorGenes;
   }
 
+  @Transient
+  public Gene getVendorGene() {
+	  if(_vendorGenes == null) {
+		  _vendorGenes = new ArrayList<Gene>();
+	  }
+	  
+	  if(_vendorGenes.size() == 0 && getEntityId() == null) {
+		  _vendorGenes.add(new Gene());
+	  }
+
+	  return _vendorGenes.size() == 0 ? null : _vendorGenes.get(0);
+  }
+  
   /**
    * Optional gene information provided by the screening facility, which can
    * differ from the vendor-provided gene information ({@link #getVendorGene()}).
@@ -153,26 +169,36 @@ public class SilencingReagent extends Reagent
    * silencing reagent in fact targets a different gene than expected, the
    * facility gene information can be used reflect this fact.
    */
-  @OneToOne(cascade={ CascadeType.PERSIST, CascadeType.MERGE, CascadeType.REMOVE }, fetch=FetchType.LAZY)
-  @JoinColumn(name="facilityGeneId", nullable=true, unique=true)
-  @org.hibernate.annotations.LazyToOne(value=org.hibernate.annotations.LazyToOneOption.PROXY)
-  @org.hibernate.annotations.Cascade(value={org.hibernate.annotations.CascadeType.SAVE_UPDATE, org.hibernate.annotations.CascadeType.DELETE})
-  @ToOne(hasNonconventionalSetterMethod=true) /* lazy-created in getter */
-  public Gene getFacilityGene()
+  @OneToMany(cascade = { CascadeType.PERSIST, CascadeType.MERGE, CascadeType.REMOVE }, fetch = FetchType.LAZY)
+  @JoinTable(name = "reagentFacilityGenes", joinColumns = @JoinColumn(name = "reagentId"), inverseJoinColumns = @JoinColumn(name = "geneId"))
+  @IndexColumn(name = "ordinal")
+  @org.hibernate.annotations.Cascade(value = { org.hibernate.annotations.CascadeType.SAVE_UPDATE,
+                  org.hibernate.annotations.CascadeType.DELETE })
+  @org.hibernate.annotations.ForeignKey(name = "fk_facility_genes_to_reagent")
+  @ToMany(hasNonconventionalMutation = true)
+  public List<Gene> getFacilityGenes()
   {
-    // lazy instantiate the Gene iff SilencingReagent has not yet been persisted
-    // (since SilencingReagent and Gene are immutable)
-    if (_facilityGene == null && getReagentId() == null) {
-      _facilityGene = new Gene();
-    }
-    return _facilityGene;
+    return _facilityGenes;
   }
 
-  private void setFacilityGene(Gene facilityGene)
+  private void setFacilityGenes(List<Gene> facilityGenes)
   {
-   _facilityGene = facilityGene;
+   _facilityGenes = facilityGenes;
   }
 
+  @Transient
+  public Gene getFacilityGene() {
+	  if(_facilityGenes == null) {
+		  _facilityGenes = new ArrayList<Gene>();
+	  }
+	  
+	  if(_facilityGenes.size() == 0 && getEntityId() == null) {
+		  _facilityGenes.add(new Gene());
+	  }
+
+	  return _facilityGenes.size() == 0 ? null : _facilityGenes.get(0);
+  }
+  
   @ManyToMany(cascade={}, fetch=FetchType.LAZY)
   @JoinTable(
     joinColumns=@JoinColumn(name="silencing_reagent_id"),

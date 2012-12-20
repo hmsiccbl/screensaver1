@@ -199,13 +199,13 @@ public class LibrariesDAOImpl extends AbstractDAO implements LibrariesDAO
     Library library = libraryContentsVersion.getLibrary();
     if (library.getReagentType().equals(SilencingReagent.class)) {
       _dao.need(library, 
-                Library.wells.to(Well.reagents).to(SilencingReagent.facilityGene).to(Gene.entrezgeneSymbols));
+                Library.wells.to(Well.reagents).to(SilencingReagent.facilityGenes).to(Gene.entrezgeneSymbols));
       _dao.need(library,
-                Library.wells.to(Well.reagents).to(SilencingReagent.facilityGene).to(Gene.genbankAccessionNumbers));
+                Library.wells.to(Well.reagents).to(SilencingReagent.facilityGenes).to(Gene.genbankAccessionNumbers));
       _dao.need(library, 
-                Library.wells.to(Well.reagents).to(SilencingReagent.vendorGene).to(Gene.entrezgeneSymbols));
+                Library.wells.to(Well.reagents).to(SilencingReagent.vendorGenes).to(Gene.entrezgeneSymbols));
       _dao.need(library,
-                Library.wells.to(Well.reagents).to(SilencingReagent.vendorGene).to(Gene.genbankAccessionNumbers));
+                Library.wells.to(Well.reagents).to(SilencingReagent.vendorGenes).to(Gene.genbankAccessionNumbers));
     }
     else if (library.getReagentType().equals(SmallMoleculeReagent.class)) { 
       _dao.need(library, Library.wells.to(Well.reagents).to(SmallMoleculeReagent.compoundNames));
@@ -627,7 +627,7 @@ public class LibrariesDAOImpl extends AbstractDAO implements LibrariesDAO
     }
   }
 
-  private static Volume toPlateVolume(BigDecimal volumeLiters)
+  protected static Volume toPlateVolume(BigDecimal volumeLiters)
   {
     if (volumeLiters == null) {
       return null;

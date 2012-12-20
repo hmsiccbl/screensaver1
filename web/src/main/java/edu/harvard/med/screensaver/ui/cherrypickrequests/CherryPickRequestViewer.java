@@ -14,19 +14,22 @@ import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.Iterator;
+import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Set;
-import java.util.SortedSet;
 
 import javax.faces.model.DataModel;
 import javax.faces.model.ListDataModel;
 
-import com.google.common.collect.Lists;
-import com.google.common.collect.Sets;
-
 import org.apache.log4j.Logger;
 import org.joda.time.LocalDate;
 import org.springframework.transaction.annotation.Transactional;
+
+import com.google.common.base.Predicate;
+import com.google.common.base.Predicates;
+import com.google.common.collect.Iterables;
+import com.google.common.collect.Lists;
+import com.google.common.collect.Sets;
 
 import edu.harvard.med.iccbl.screensaver.policy.cherrypicks.RNAiCherryPickRequestAllowancePolicy;
 import edu.harvard.med.iccbl.screensaver.policy.cherrypicks.SmallMoleculeCherryPickRequestAllowancePolicy;
@@ -51,7 +54,6 @@ import edu.harvard.med.screensaver.model.libraries.Gene;
 import edu.harvard.med.screensaver.model.libraries.Reagent;
 import edu.harvard.med.screensaver.model.libraries.SilencingReagent;
 import edu.harvard.med.screensaver.model.libraries.Well;
-import edu.harvard.med.screensaver.model.libraries.WellKey;
 import edu.harvard.med.screensaver.model.meta.PropertyPath;
 import edu.harvard.med.screensaver.model.meta.RelationshipPath;
 import edu.harvard.med.screensaver.model.screens.CherryPickScreening;
@@ -66,7 +68,9 @@ import edu.harvard.med.screensaver.ui.activities.ActivityViewer;
 import edu.harvard.med.screensaver.ui.arch.datatable.column.TableColumn;
 import edu.harvard.med.screensaver.ui.arch.datatable.column.entity.BooleanEntityColumn;
 import edu.harvard.med.screensaver.ui.arch.datatable.column.entity.IntegerEntityColumn;
+import edu.harvard.med.screensaver.ui.arch.datatable.column.entity.IntegerSetEntityColumn;
 import edu.harvard.med.screensaver.ui.arch.datatable.column.entity.TextEntityColumn;
+import edu.harvard.med.screensaver.ui.arch.datatable.column.entity.TextSetEntityColumn;
 import edu.harvard.med.screensaver.ui.arch.datatable.model.DataTableModel;
 import edu.harvard.med.screensaver.ui.arch.datatable.model.InMemoryDataModel;
 import edu.harvard.med.screensaver.ui.arch.datatable.model.InMemoryEntityDataModel;
@@ -76,7 +80,6 @@ import edu.harvard.med.screensaver.ui.arch.util.JSFUtils;
 import edu.harvard.med.screensaver.ui.arch.view.SearchResultContextEntityViewerBackingBean;
 import edu.harvard.med.screensaver.ui.arch.view.aspects.UICommand;
 import edu.harvard.med.screensaver.ui.libraries.WellCopyVolumeSearchResults;
-import edu.harvard.med.screensaver.ui.libraries.WellFinder;
 
 /**
  * Backing bean for Cherry Pick Request Viewer page.
@@ -89,7 +92,9 @@ public class CherryPickRequestViewer extends SearchResultContextEntityViewerBack
   static final String RNAI_COLUMNS_GROUP = "RNAi";
   static final String SMALL_MOLECULE_COLUMNS_GROUP = "Small Molecule";
 
-  private enum AssayPlateValidationType {
+  protected static final Predicate<String> NOT_EMPTY = Predicates.and(Predicates.notNull(), Predicates.not(Predicates.equalTo("")));
+  
+  protected enum AssayPlateValidationType {
     LIQUID_TRANSFER,
     DOWNLOAD,
     DEALLOCATION,
@@ -164,7 +169,7 @@ public class CherryPickRequestViewer extends SearchResultContextEntityViewerBack
     _labCherryPicksSearchResult.setNestedIn(this);
   }
 
-  private void buildScreenerCherryPickSearchResult()
+  protected void buildScreenerCherryPickSearchResult()
   {
     _screenerCherryPicksSearchResult = new EntityBasedEntitySearchResults<ScreenerCherryPick,Integer>() {
       @Override
@@ -187,7 +192,7 @@ public class CherryPickRequestViewer extends SearchResultContextEntityViewerBack
     _screenerCherryPicksSearchResult.searchAll();
   }
 
-  private List<TableColumn<ScreenerCherryPick,?>> buildScreenerCherryPicksTableColumns()
+  protected List<TableColumn<ScreenerCherryPick,?>> buildScreenerCherryPicksTableColumns()
   {
     List<TableColumn<ScreenerCherryPick,?>> screenerCherryPicksTableColumns = Lists.newArrayList();
     screenerCherryPicksTableColumns.add(new TextEntityColumn<ScreenerCherryPick>(
@@ -264,65 +269,59 @@ public class CherryPickRequestViewer extends SearchResultContextEntityViewerBack
       }
     });
     screenerCherryPicksTableColumns.get(screenerCherryPicksTableColumns.size() - 1).setVisible(false);
-    screenerCherryPicksTableColumns.add(new ScreenerCherryPickReagentEntityColumn<SilencingReagent,String>(
+    screenerCherryPicksTableColumns.add(new ScreenerCherryPickReagentEntityColumn<SilencingReagent,Set<String>>(
       SilencingReagent.class,
-      new TextEntityColumn<SilencingReagent>(
-        SilencingReagent.facilityGene.toProperty("geneName"),
+      new TextSetEntityColumn<SilencingReagent>(
+        SilencingReagent.facilityGenes.toProperty("geneName"),
         "Gene", 
         "The name of the gene targeted by the screened well", 
         RNAI_COLUMNS_GROUP) {
         @Override
-        public String getCellValue(SilencingReagent r)
+        public Set<String> getCellValue(SilencingReagent r)
         {
-          Gene gene = r.getFacilityGene();
-          return gene == null ? null : gene.getGeneName();
+          return r.getFacilityGenes() == null ? null : Sets.newLinkedHashSet(Iterables.filter(Iterables.transform(Iterables.filter(r.getFacilityGenes(), Predicates.notNull()), Gene.ToGeneName), NOT_EMPTY));
         }
       }));
-    screenerCherryPicksTableColumns.add(new ScreenerCherryPickReagentEntityColumn<SilencingReagent,Integer>(
+    screenerCherryPicksTableColumns.add(new ScreenerCherryPickReagentEntityColumn<SilencingReagent,Set<Integer>>(
       SilencingReagent.class,
-      new IntegerEntityColumn<SilencingReagent>(
-        SilencingReagent.facilityGene.toProperty("entrezgeneId"),
+      new IntegerSetEntityColumn<SilencingReagent>(
+        SilencingReagent.facilityGenes.toProperty("entrezgeneId"),
         "Entrez ID", 
         "The Entrez ID of the gene targeted by the screened well", 
         RNAI_COLUMNS_GROUP) {
         @Override
-        public Integer getCellValue(SilencingReagent r)
+        public Set<Integer> getCellValue(SilencingReagent r)
         {
-          Gene gene = r.getFacilityGene();
-          return gene == null ? null : gene.getEntrezgeneId();
+          return r.getFacilityGenes() == null ? null : Sets.newLinkedHashSet(Iterables.filter(Iterables.transform(Iterables.filter(r.getFacilityGenes(), Predicates.notNull()), Gene.ToEntrezgeneId), Predicates.notNull()));
         }
       }));
-    screenerCherryPicksTableColumns.add(new ScreenerCherryPickReagentEntityColumn<SilencingReagent,String>(SilencingReagent.class,
-                                                                                                           new TextEntityColumn<SilencingReagent>(SilencingReagent.facilityGene.to(Gene.entrezgeneSymbols),
+    screenerCherryPicksTableColumns.add(new ScreenerCherryPickReagentEntityColumn<SilencingReagent,Set<String>>(SilencingReagent.class,
+                                                                                                           new TextSetEntityColumn<SilencingReagent>(SilencingReagent.facilityGenes.to(Gene.entrezgeneSymbols),
         "Entrez Symbol", 
         "The Entrez symbol of the gene targeted by the screened well", 
         RNAI_COLUMNS_GROUP) {
         @Override
-        public String getCellValue(SilencingReagent r)
+        public Set<String> getCellValue(SilencingReagent r)
         {
-          Gene gene = r.getFacilityGene();
-          // TODO: not appropriate to show single, arbitrary entrezgene symbol
-          return gene == null ? null : gene.getEntrezgeneSymbols().isEmpty() ? null : gene.getEntrezgeneSymbols().iterator().next();
+          return r.getFacilityGenes() == null ? null : Sets.newLinkedHashSet(Iterables.filter(Iterables.concat(Iterables.filter(Iterables.transform(Iterables.filter(r.getFacilityGenes(), Predicates.notNull()), Gene.ToEntrezgeneSymbols), Predicates.notNull())), NOT_EMPTY));
         }
       }));
-    screenerCherryPicksTableColumns.add(new ScreenerCherryPickReagentEntityColumn<SilencingReagent,String>(SilencingReagent.class,
-                                                                                                           new TextEntityColumn<SilencingReagent>(SilencingReagent.facilityGene.to(Gene.genbankAccessionNumbers),
+    screenerCherryPicksTableColumns.add(new ScreenerCherryPickReagentEntityColumn<SilencingReagent,Set<String>>(SilencingReagent.class,
+                                                                                                           new TextSetEntityColumn<SilencingReagent>(SilencingReagent.facilityGenes.to(Gene.genbankAccessionNumbers),
         "Genbank AccNo", 
         "The Genbank accession number of the gene targeted by the screened well",
         RNAI_COLUMNS_GROUP) {
         @Override
-        public String getCellValue(SilencingReagent r)
+        public Set<String> getCellValue(SilencingReagent r)
         {
-          Gene gene = r.getFacilityGene();
-          // TODO: not appropriate to show single, arbitrary genbank acc no
-          return gene == null ? null : gene.getGenbankAccessionNumbers().isEmpty() ? null : gene.getGenbankAccessionNumbers().iterator().next();
+          return r.getFacilityGenes() == null ? null : Sets.newLinkedHashSet(Iterables.filter(Iterables.concat(Iterables.filter(Iterables.transform(Iterables.filter(r.getFacilityGenes(), Predicates.notNull()), Gene.ToGenbankAccessionNumbers), Predicates.notNull())), NOT_EMPTY));
         }
       }));
   
     return screenerCherryPicksTableColumns;
   }
 
-  private List<List<TableColumn<ScreenerCherryPick,?>>> buildScreenerCherryPicksTableCompoundSorts(List<TableColumn<ScreenerCherryPick,?>> _screenerCherryPicksTableColumns)
+  protected List<List<TableColumn<ScreenerCherryPick,?>>> buildScreenerCherryPicksTableCompoundSorts(List<TableColumn<ScreenerCherryPick,?>> _screenerCherryPicksTableColumns)
   {
     List<List<TableColumn<ScreenerCherryPick,?>>> _screenerCherryPicksTableCompoundSorts = Lists.newArrayList();
     // define compound sorts
@@ -342,7 +341,7 @@ public class CherryPickRequestViewer extends SearchResultContextEntityViewerBack
     return _screenerCherryPicksTableCompoundSorts;
   }
 
-  private <T extends Entity<Integer>> DataTableModel<T> buildCherryPicksDataTableModel(final Class<T> clazz,
+  protected <T extends Entity<Integer>> DataTableModel<T> buildCherryPicksDataTableModel(final Class<T> clazz,
                                                                                        final CherryPickRequest cpr)
   {
     if (cpr == null) {
@@ -473,7 +472,7 @@ public class CherryPickRequestViewer extends SearchResultContextEntityViewerBack
     return doAddCherryPicksForPoolWells(true);
   }
   
-  private String doAddCherryPicksForPoolWells(boolean deconvoluteToDuplexWells)
+  protected String doAddCherryPicksForPoolWells(boolean deconvoluteToDuplexWells)
   {
     PlateWellListParserResult result = PlateWellListParser.parseWellsFromPlateWellList(_cherryPicksInput);
     if (result.getErrors().size() > 0) {
@@ -682,7 +681,9 @@ public class CherryPickRequestViewer extends SearchResultContextEntityViewerBack
   public String createNewCherryPickRequestForUnfulfilledCherryPicks()
   {
     CherryPickRequest cherryPickRequest = getDao().reloadEntity(getEntity());
-    CherryPickRequest newCherryPickRequest = cherryPickRequest.getScreen().createCherryPickRequest((AdministratorUser) getScreensaverUser());
+    // Note reload of cherry pick may have created a proxy for the current user already: reload detached user into session
+    AdministratorUser currentUser = getDao().reloadEntity((AdministratorUser) getScreensaverUser());
+    CherryPickRequest newCherryPickRequest = cherryPickRequest.getScreen().createCherryPickRequest(currentUser);
     newCherryPickRequest.setComments("Created for unfulfilled cherry picks in Cherry Pick Request " +
                                      cherryPickRequest.getCherryPickRequestNumber());
     // TODO: this might be better done in a copy constructor
@@ -710,11 +711,11 @@ public class CherryPickRequestViewer extends SearchResultContextEntityViewerBack
     }
     getDao().saveOrUpdateEntity(newCherryPickRequest);
     getDao().flush();
-    return getThisProxy().reload();
+    return getThisProxy().viewEntity(newCherryPickRequest);
   }
 
   @SuppressWarnings("unchecked")
-  private Set<CherryPickAssayPlate> getSelectedAssayPlates()
+  protected Set<CherryPickAssayPlate> getSelectedAssayPlates()
   {
     Set<CherryPickAssayPlate> selectedAssayPlates = new HashSet<CherryPickAssayPlate>();
     List<AssayPlateRow> data = (List<AssayPlateRow>) getAssayPlatesDataModel().getWrappedData();
@@ -727,7 +728,7 @@ public class CherryPickRequestViewer extends SearchResultContextEntityViewerBack
   }
 
   @SuppressWarnings("unchecked")
-  private boolean validateSelectedAssayPlates(AssayPlateValidationType validationType)
+  protected boolean validateSelectedAssayPlates(AssayPlateValidationType validationType)
   {
     Set<CherryPickAssayPlate> selectedAssayPlates = getSelectedAssayPlates();
     if (selectedAssayPlates.size() == 0) {
@@ -813,7 +814,7 @@ public class CherryPickRequestViewer extends SearchResultContextEntityViewerBack
     return !adjustSelection;
   }
   
-  private String doViewCherryPickRequestWellVolumes(boolean forUnfulfilledOnly)
+  protected String doViewCherryPickRequestWellVolumes(boolean forUnfulfilledOnly)
   {
     _wellCopyVolumesBrowser.searchWellsForCherryPickRequest(getEntity(), forUnfulfilledOnly);
     return BROWSE_WELL_VOLUMES;

@@ -236,7 +236,7 @@ public class ReagentFinder extends AbstractBackingBean
 		return keys;
 	}
 
-  private void resetSearchFields()
+  protected void resetSearchFields()
   {
     _nameFacilityVendorIDInput = null;
     _reagentIdentifiersInput = null;

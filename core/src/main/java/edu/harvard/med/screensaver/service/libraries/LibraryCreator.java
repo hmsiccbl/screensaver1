@@ -60,7 +60,7 @@ public class LibraryCreator
   {
     validateLibrary(newLibrary);
     createWells(newLibrary);
-    _dao.saveOrUpdateEntity(newLibrary);
+    _dao.persistEntity(newLibrary);
     _dao.flush();
     log.info("added library definition for " + newLibrary.getLibraryName() + ", " + newLibrary);
   }

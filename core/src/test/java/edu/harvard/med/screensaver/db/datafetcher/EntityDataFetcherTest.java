@@ -508,7 +508,7 @@ public class EntityDataFetcherTest extends AbstractSpringPersistenceTest
    */
   public void testFetchCollectionOfElements()
   {
-    _wellSetFetcher.setPropertiesToFetch(Lists.newArrayList(Well.latestReleasedReagent.to(SilencingReagent.facilityGene).to(Gene.genbankAccessionNumbers),
+    _wellSetFetcher.setPropertiesToFetch(Lists.newArrayList(Well.latestReleasedReagent.to(SilencingReagent.facilityGenes).to(Gene.genbankAccessionNumbers),
                                                             Well.library.to(Library.contentsVersions).toFullEntity()));
     List<Well> data = _wellSetFetcher.fetchAllData();
     assertEquals("well.reagents.facilityGene.genbankAccessionNumbers size", 1, data.get(0).<SilencingReagent>getLatestReleasedReagent().getFacilityGene().getGenbankAccessionNumbers().size());
@@ -521,7 +521,7 @@ public class EntityDataFetcherTest extends AbstractSpringPersistenceTest
    */
   public void testFilterCollectionOfElements()
   {
-    PropertyPath<Well> propPath = Well.latestReleasedReagent.to(SilencingReagent.facilityGene).to(Gene.genbankAccessionNumbers);
+    PropertyPath<Well> propPath = Well.latestReleasedReagent.to(SilencingReagent.facilityGenes).to(Gene.genbankAccessionNumbers);
     _wellSetFetcher.setPropertiesToFetch(Collections.singletonList(propPath));
     Map<PropertyPath<Well>,List<? extends Criterion<?>>> filteringCriteria = new HashMap<PropertyPath<Well>,List<? extends Criterion<?>>>();
     filteringCriteria.put(propPath, Collections.singletonList(new Criterion<String>(Operator.EQUAL, "GB3074279")));

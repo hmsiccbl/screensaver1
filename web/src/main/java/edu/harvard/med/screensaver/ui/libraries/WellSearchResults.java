@@ -111,17 +111,17 @@ public abstract class WellSearchResults extends TupleBasedEntitySearchResults<We
 {
 	private static final Logger log = Logger.getLogger(WellSearchResults.class);
 
-  private static final String WELL_COLUMNS_GROUP = "Well Columns";
-  private static final String SILENCING_REAGENT_COLUMNS_GROUP = "Silencing Reagent Columns";
-  private static final String ASSAY_DESCRIPTORS_COLUMNS_GROUP = "Assay Descriptors";
-  private static final String COMPOUND_COLUMNS_GROUP = "Compound Reagent Columns";
-  private static final String OUR_DATA_COLUMNS_GROUP = "Screen Result Data Columns";
-  private static final String OTHER_DATA_COLUMNS_GROUP = "Screen Result Data Columns (Other Screen Results)";
-  private static final String OTHER_ANNOTATION_TYPES_COLUMN_GROUP = "Study Annotations (Other Studies)";
-  private static final String OUR_ANNOTATION_TYPES_COLUMN_GROUP = "Study Annotations";
-  private static final String COLUMN_COMPOUND_NAMES = "Compound Names";
+  protected static final String WELL_COLUMNS_GROUP = "Well Columns";
+  protected static final String SILENCING_REAGENT_COLUMNS_GROUP = "Silencing Reagent Columns";
+  protected static final String ASSAY_DESCRIPTORS_COLUMNS_GROUP = "Assay Descriptors";
+  protected static final String COMPOUND_COLUMNS_GROUP = "Compound Reagent Columns";
+  protected static final String OUR_DATA_COLUMNS_GROUP = "Screen Result Data Columns";
+  protected static final String OTHER_DATA_COLUMNS_GROUP = "Screen Result Data Columns (Other Screen Results)";
+  protected static final String OTHER_ANNOTATION_TYPES_COLUMN_GROUP = "Study Annotations (Other Studies)";
+  protected static final String OUR_ANNOTATION_TYPES_COLUMN_GROUP = "Study Annotations";
+  protected static final String COLUMN_COMPOUND_NAMES = "Compound Names";
 
-  private static String COLUMN_REAGENT_ID = "Vendor Reagent ID";
+  protected static String COLUMN_REAGENT_ID = "Vendor Reagent ID";
 
   private static Joiner fsbColumnValueJoiner = Joiner.on(LincsScreensaverConstants.FACILITY_ID_SEPARATOR);
 
@@ -172,12 +172,12 @@ public abstract class WellSearchResults extends TupleBasedEntitySearchResults<We
    * @motivation respect EntityViewPolicy logic for restricting sequence-related properties on SilencingReagent, using
    *             only the tuple returned from the database query (and not the full entity)
    */
-  private abstract class TuplePropertySilencingReagent extends SilencingReagent
+  protected abstract class TuplePropertySilencingReagent extends SilencingReagent
   {
     private final PropertyPath<Well> _restrictedSequencePropertyPath;
     private final Tuple<String> _tuple;
 
-    private TuplePropertySilencingReagent(PropertyPath<Well> restrictedSequencePropertyPath,
+    protected TuplePropertySilencingReagent(PropertyPath<Well> restrictedSequencePropertyPath,
                                           Tuple<String> tuple)
     {
       _restrictedSequencePropertyPath = restrictedSequencePropertyPath;
@@ -209,11 +209,11 @@ public abstract class WellSearchResults extends TupleBasedEntitySearchResults<We
   protected StructureImageLocator _structureImageLocator;
   private LibraryContentsVersionReference _libraryContentsVersionRef;
 
-  private WellSearchResultMode _mode;
-  private Set<ScreenType> _screenTypes;
-  private ScreenResult _screenResult;
-  private Study _study;
-  private List<AnnotationType> _validAnnotationTypes = null;
+  protected WellSearchResultMode _mode;
+  protected Set<ScreenType> _screenTypes;
+  protected ScreenResult _screenResult;
+  protected Study _study;
+  protected List<AnnotationType> _validAnnotationTypes = null;
 
   /** flag to indicate that this instantiation of WSR is for the LINCS project **/
   // TODO: refactor code so that all LINCS-related code is placed into LincsWellSearchResults
@@ -581,19 +581,19 @@ public abstract class WellSearchResults extends TupleBasedEntitySearchResults<We
     return columns;
   }
 
-  private void buildSilencingReagentPropertyColumns(List<TableColumn<Tuple<String>,?>> columns)
+  protected void buildSilencingReagentPropertyColumns(List<TableColumn<Tuple<String>,?>> columns)
   {
     RelationshipPath<Well> relPath = getWellToReagentRelationshipPath();
     
-    columns.add(new TextTupleColumn<Well,String>(
-      relPath.to(SilencingReagent.facilityGene).toProperty("geneName"),
+    columns.add(new TextSetTupleColumn<Well,String>(
+      relPath.to(SilencingReagent.facilityGenes).toProperty("geneName"),
       "Gene Name",
       "The gene name for the silencing reagent in the well",
       SILENCING_REAGENT_COLUMNS_GROUP));
     columns.get(columns.size() - 1).setVisible(false);
 
-    columns.add(new IntegerTupleColumn<Well,String>(
-      relPath.to(SilencingReagent.facilityGene).toProperty("entrezgeneId"),
+    columns.add(new IntegerSetTupleColumn<Well,String>(
+      relPath.to(SilencingReagent.facilityGenes).toProperty("entrezgeneId"),
       "Entrez Gene ID",
       "The Entrez gene ID for the gene targeted by silencing reagent in the well",
       SILENCING_REAGENT_COLUMNS_GROUP));
@@ -607,13 +607,13 @@ public abstract class WellSearchResults extends TupleBasedEntitySearchResults<We
       SilencingReagentType.values()));
     columns.get(columns.size() - 1).setVisible(false);
 
-    columns.add(new TextSetTupleColumn<Well,String>(relPath.to(SilencingReagent.facilityGene).to(Gene.entrezgeneSymbols),
+    columns.add(new TextSetTupleColumn<Well,String>(relPath.to(SilencingReagent.facilityGenes).to(Gene.entrezgeneSymbols),
                                                     "Entrez Gene Symbol",
                                                     "The Entrez gene symbol for the gene targeted by silencing reagent in the well",
                                                     SILENCING_REAGENT_COLUMNS_GROUP));
     columns.get(columns.size() - 1).setVisible(false);
 
-    columns.add(new TextSetTupleColumn<Well,String>(relPath.to(SilencingReagent.facilityGene).to(Gene.genbankAccessionNumbers),
+    columns.add(new TextSetTupleColumn<Well,String>(relPath.to(SilencingReagent.facilityGenes).to(Gene.genbankAccessionNumbers),
                                                     "Genbank Accession Numbers",
                                                     "The Genbank Accession Numbers for the gene targeted by silencing reagent in the well",
                                                     SILENCING_REAGENT_COLUMNS_GROUP));
@@ -642,8 +642,8 @@ public abstract class WellSearchResults extends TupleBasedEntitySearchResults<We
     columns.get(columns.size() - 1).setVisible(false);
     ((TextTupleColumn<Well,String>) Iterables.getLast(columns)).addRelationshipPath(restrictedSequencePropertyPath);
 
-    columns.add(new TextTupleColumn<Well,String>(
-      relPath.to(SilencingReagent.facilityGene).toProperty("speciesName"),
+    columns.add(new TextSetTupleColumn<Well,String>(
+      relPath.to(SilencingReagent.facilityGenes).toProperty("speciesName"),
       "Species",
       "The species of this silencing reagent",
       SILENCING_REAGENT_COLUMNS_GROUP));
@@ -656,7 +656,7 @@ public abstract class WellSearchResults extends TupleBasedEntitySearchResults<We
     columns.get(columns.size() - 1).setVisible(false);
   }
 
-  private RelationshipPath<Well> getWellToReagentRelationshipPath()
+  protected RelationshipPath<Well> getWellToReagentRelationshipPath()
   {
     RelationshipPath<Well> relPath;
     if (accessSpecificLibraryContentsVersion()) {
@@ -668,7 +668,7 @@ public abstract class WellSearchResults extends TupleBasedEntitySearchResults<We
     return relPath;
   }
 
-  private void buildCompoundPropertyColumns(List<TableColumn<Tuple<String>,?>> columns)
+  protected void buildCompoundPropertyColumns(List<TableColumn<Tuple<String>,?>> columns)
   {
     RelationshipPath<Well> relPath = getWellToReagentRelationshipPath();
 
@@ -826,7 +826,7 @@ public abstract class WellSearchResults extends TupleBasedEntitySearchResults<We
       columns.get(columns.size() - 1).setVisible(false);
   }
 
-  private void buildReagentPropertyColumns(List<TableColumn<Tuple<String>,?>> columns)
+  protected void buildReagentPropertyColumns(List<TableColumn<Tuple<String>,?>> columns)
   {
     RelationshipPath<Well> relPath = getWellToReagentRelationshipPath();
 
@@ -845,7 +845,7 @@ public abstract class WellSearchResults extends TupleBasedEntitySearchResults<We
     columns.get(columns.size() - 1).setVisible(false);
   }
 
-  private void buildWellPropertyColumns(List<TableColumn<Tuple<String>,?>> columns)
+  protected void buildWellPropertyColumns(List<TableColumn<Tuple<String>,?>> columns)
   {
     columns.add(new IntegerTupleColumn<Well,String>(RelationshipPath.from(Well.class).toProperty("plateNumber"),
       "Plate",
@@ -1026,7 +1026,7 @@ public abstract class WellSearchResults extends TupleBasedEntitySearchResults<We
 		return values;
 	}
   
-  private void buildDataColumns(List<TableColumn<Tuple<String>,?>> columns, List<DataColumn> dataColumns)
+  protected void buildDataColumns(List<TableColumn<Tuple<String>,?>> columns, List<DataColumn> dataColumns)
   {
     List<TableColumn<Tuple<String>,?>> otherColumns = Lists.newArrayList();
     boolean areAssayWellColumnsCreated = false;
@@ -1218,14 +1218,14 @@ public abstract class WellSearchResults extends TupleBasedEntitySearchResults<We
     columns.addAll(otherColumns);
   }
 
-  private LibraryScreening getLibraryScreening()
+  protected LibraryScreening getLibraryScreening()
   {
     if (_screenResult == null) return null;
     SortedSet<? extends LabActivity> temp = _screenResult.getScreen().getLabActivitiesOfType(LibraryScreening.class);
     return temp.isEmpty() ? null : (LibraryScreening) temp.last();
   }
 
-  private String makeScreenColumnGroup(String facilityId, String screenTitle)
+  protected String makeScreenColumnGroup(String facilityId, String screenTitle)
   {
     String columnGroup;
     if (_screenResult != null && _screenResult.getScreen().getFacilityId().equals(facilityId)) {
@@ -1238,7 +1238,7 @@ public abstract class WellSearchResults extends TupleBasedEntitySearchResults<We
     return columnGroup;
   }
 
-  private String makeStudyColumnGroup(String facilityId, String studyTitle)
+  protected String makeStudyColumnGroup(String facilityId, String studyTitle)
   {
     String columnGroup;
     if (_study != null && facilityId.equals(_study.getFacilityId())) {
@@ -1251,7 +1251,7 @@ public abstract class WellSearchResults extends TupleBasedEntitySearchResults<We
     return columnGroup;
   }
 
-  private List<DataColumn> findValidDataColumns()
+  protected List<DataColumn> findValidDataColumns()
   {
     return _dao.runQuery(new Query() {
       public List<DataColumn> execute(Session session)
@@ -1273,7 +1273,7 @@ public abstract class WellSearchResults extends TupleBasedEntitySearchResults<We
     });
   }
   	
-  private List<AnnotationType> findValidAnnotationTypes()
+  protected List<AnnotationType> findValidAnnotationTypes()
   {
   	if(_validAnnotationTypes == null) {
     	log.info("entering findValidAnnotationTypes");
@@ -1382,7 +1382,7 @@ public abstract class WellSearchResults extends TupleBasedEntitySearchResults<We
 //    return _isLINCS;
 //  }
 
-  private boolean accessSpecificLibraryContentsVersion()
+  protected boolean accessSpecificLibraryContentsVersion()
   {
     return _mode == WellSearchResultMode.LIBRARY_WELLS && _libraryContentsVersionRef.value() != null;
   }

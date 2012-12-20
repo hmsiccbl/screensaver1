@@ -145,4 +145,53 @@
       <source>../util/publications.xhtml</source>
     </tag>
 
+	<function>
+	  <!-- performs depth-first iteration of nested collections and all values encountered -->
+	  <function-name>flatten</function-name>
+	  <function-class>edu.harvard.med.screensaver.ui.arch.util.Functions</function-class>
+	  <function-signature>java.util.Collection flatten(java.lang.Iterable)</function-signature>
+	</function>
+
+	<function>
+	  <!-- performs depth-first iteration of nested collections and all unique, non-empty values encountered -->
+	  <function-name>compact</function-name>
+	  <function-class>edu.harvard.med.screensaver.ui.arch.util.Functions</function-class>
+	  <function-signature>java.util.Collection compact(java.lang.Iterable)</function-signature>
+	</function>
+
+	<function>
+	  <!-- performs concatenation of iterables -->
+	  <function-name>concat</function-name>
+	  <function-class>edu.harvard.med.screensaver.ui.arch.util.Functions</function-class>
+	  <function-signature>java.lang.Iterable concat(java.lang.Iterable, java.lang.Iterable)</function-signature>
+	</function>
+
+	<function>
+	  <!-- return all unique values in the iterable -->
+	  <function-name>distinct</function-name>
+	  <function-class>edu.harvard.med.screensaver.ui.arch.util.Functions</function-class>
+	  <function-signature>java.util.Collection distinct(java.lang.Iterable)</function-signature>
+	</function>
+
+	<function>
+	  <!-- return all non-empty values in the iterable -->
+	  <function-name>coalesce</function-name>
+	  <function-class>edu.harvard.med.screensaver.ui.arch.util.Functions</function-class>
+	  <function-signature>java.util.Collection coalesce(java.lang.Iterable)</function-signature>
+	</function>
+
+	<function>
+	  <!-- applies an expression to each element in a list: first string is the name to bind the current element to, and the second string is the expression to evaluate -->
+	  <function-name>transform</function-name>
+	  <function-class>edu.harvard.med.screensaver.ui.arch.util.Functions</function-class>
+	  <function-signature>java.util.Collection transform(java.lang.Iterable, java.lang.String, java.lang.String)</function-signature>
+	</function>
+
+	<function>
+	  <!-- applies an expression to each element in a list: first string is the name to bind the current element to, and the second string is the expression to evaluate -->
+	  <function-name>filter</function-name>
+	  <function-class>edu.harvard.med.screensaver.ui.arch.util.Functions</function-class>
+	  <function-signature>java.util.Collection filter(java.lang.Iterable, java.lang.String, java.lang.String)</function-signature>
+	</function>
+
 </facelet-taglib>

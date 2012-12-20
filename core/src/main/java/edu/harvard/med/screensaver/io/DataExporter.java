@@ -16,6 +16,7 @@ import java.util.Iterator;
 public interface DataExporter<T>
 {
   public static final String LIST_DELIMITER = ";";
+  public static final String SUBLIST_DELIMITER = ":";
 
   public String getFormatName();
   public String getMimeType();

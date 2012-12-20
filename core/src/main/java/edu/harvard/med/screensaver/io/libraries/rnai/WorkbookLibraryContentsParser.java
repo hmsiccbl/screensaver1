@@ -69,10 +69,10 @@ abstract public class WorkbookLibraryContentsParser<R extends Reagent> extends L
 
   public void convert() throws IOException
   {
-    log.debug("converting workbook into csv file...");
     Workbook _workbook = new Workbook("Library Contents Input Stream", getStream());
     File tmpFile = File.createTempFile("workbook", ".csv");
     tmpFile.deleteOnExit();
+    log.debug("converting workbook into csv file: " + tmpFile.getAbsolutePath());
     CSVPrintWriter writer = new CSVPrintWriter(new BufferedWriter(new FileWriter(tmpFile)), "\n", FIELD_DELIMITER);
     Iterator<Worksheet> worksheetsIterator = _workbook.iterator();
     int prevSheetLastRecord = 0;

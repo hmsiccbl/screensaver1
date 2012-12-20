@@ -10,14 +10,11 @@
 package edu.harvard.med.screensaver.io.parseutil;
 
 import java.util.List;
-import java.util.Set;
-
-import edu.harvard.med.screensaver.io.DataExporter;
-import edu.harvard.med.screensaver.io.ParseError;
-import edu.harvard.med.screensaver.io.ParseException;
 
 import com.google.common.collect.Lists;
-import com.google.common.collect.Sets;
+
+import edu.harvard.med.screensaver.io.DataExporter;
+import edu.harvard.med.screensaver.io.ParseException;
 
 public abstract class CsvListColumn<E> extends CsvColumn<List<E>>
 {
@@ -31,14 +28,10 @@ public abstract class CsvListColumn<E> extends CsvColumn<List<E>>
   {
     List<E> list = Lists.newArrayList();
     if (value != null) {
-      String[] values = value.split(DataExporter.LIST_DELIMITER);
+      String[] values = value.split(DataExporter.LIST_DELIMITER, -1);
       for (String v : values) {
       	E val = parseElement(v.trim());
-      	if(list.contains(val)) {
-          throw new ParseException(new ParseError(getName() +
-              " cannot contain duplicates: " +
-              val));
-      	}
+      	// No duplicate checks in lists: use CsvSetColumn<E> if you want a unique list
         list.add(val);
       }
     }

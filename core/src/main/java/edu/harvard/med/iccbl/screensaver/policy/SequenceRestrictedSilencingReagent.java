@@ -2,12 +2,11 @@ package edu.harvard.med.iccbl.screensaver.policy;
 
 import java.io.IOException;
 import java.io.InputStream;
+import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
 import org.joda.time.LocalDate;
-
-import com.google.common.collect.Sets;
 
 import edu.harvard.med.screensaver.model.AbstractEntity;
 import edu.harvard.med.screensaver.model.AttachedFile;
@@ -31,6 +30,8 @@ import edu.harvard.med.screensaver.policy.EntityViewPolicy;
  */
 public class SequenceRestrictedSilencingReagent extends SilencingReagent
 {
+  private static final long serialVersionUID = 1L;
+  
   private SilencingReagent delegate;
 
   public SequenceRestrictedSilencingReagent(SilencingReagent entity)
@@ -63,6 +64,18 @@ public class SequenceRestrictedSilencingReagent extends SilencingReagent
   public Gene getFacilityGene()
   {
     return delegate.getFacilityGene();
+  }
+
+  @Override
+  public List<Gene> getVendorGenes()
+  {
+    return delegate.getVendorGenes();
+  }
+
+  @Override
+  public List<Gene> getFacilityGenes()
+  {
+    return delegate.getFacilityGenes();
   }
 
   @Override
