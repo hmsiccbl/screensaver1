@@ -8,6 +8,8 @@ import org.hibernate.EmptyInterceptor;
  * This solves the problem with NULL values sorting higher than non-NULL values in postgresql.
  * see: https://hibernate.onjira.com/browse/HHH-465
  * fix for [#3478] PropertyPathDataFetcher based Search results sort null values higher than non-null values (in PostgreSQL)
+ * TODO: NOTE that this fix breaks with subqueries (which aren't currently used 
+ * in our Hibernate implementations).
  */
 public class CustomNullsFirstInterceptor extends EmptyInterceptor {
 	

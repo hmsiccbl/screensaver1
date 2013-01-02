@@ -148,8 +148,8 @@ public class SmallMoleculeReagent extends Reagent
   @Transient
   public String getPrimaryCompoundName()
   {
-    if (_compoundNames.isEmpty()) return null;
-    return _compoundNames.get(0);
+    if (getCompoundNames().isEmpty()) return null;
+    return getCompoundNames().get(0);
   }
 
   @ElementCollection

@@ -223,7 +223,7 @@ a.heatMapValue:link,a.heatMapValue:visited {
 }
 
 .smallLabel {
-  font-size: x-small;
+  font-size: small;
 }
 
 .command,.inputText,.label {

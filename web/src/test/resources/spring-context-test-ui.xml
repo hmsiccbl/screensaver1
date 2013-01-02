@@ -48,5 +48,24 @@
         </map>
     </property>
   </bean>
+    
+  <bean
+    id="appInfo"
+    parent="uiBean"
+    class="edu.harvard.med.screensaver.ui.ApplicationInfo"
+    scope="singleton">
+    <description>
+      A global UI bean that provides basic, static information about the
+      application (e.g., application name). This is the only UI bean
+      that can be accessed by login.jsp.
+    </description>
+  </bean>
+  
+  <bean 
+    id="imageProviderServlet" 
+    class="edu.harvard.med.screensaver.ui.arch.util.servlet.ImageProviderServlet">
+    <constructor-arg ref="appInfo" />
+  </bean>
+  
 
 </beans>

@@ -29,6 +29,7 @@ import edu.harvard.med.screensaver.model.meta.PropertyPath;
 import edu.harvard.med.screensaver.policy.EntityViewPolicy;
 import edu.harvard.med.screensaver.ui.arch.datatable.column.TableColumn;
 import edu.harvard.med.screensaver.ui.arch.datatable.model.InMemoryEntityDataModel;
+import edu.harvard.med.screensaver.ui.arch.util.servlet.ImageProviderServlet;
 import edu.harvard.med.screensaver.ui.libraries.LibraryViewer;
 import edu.harvard.med.screensaver.ui.libraries.WellSearchResults;
 
@@ -53,19 +54,20 @@ public class LincsWellSearchResults extends WellSearchResults
     super();
   }
 
-  public LincsWellSearchResults(GenericEntityDAO dao,
-                                LibrariesDAO librariesDao,
-                                EntityViewPolicy entityViewPolicy,
-                                LibraryViewer libraryViewer,
-                                WellViewer wellViewer,
-                                StructureImageLocator structureImageLocator,
-                                LibraryContentsVersionReference libraryContentsVersionRef,
-                                List<DataExporter<Tuple<String>>> dataExporters)
-  {
-    super(dao, librariesDao, entityViewPolicy, libraryViewer, wellViewer, structureImageLocator, libraryContentsVersionRef, dataExporters);
-    _dao = dao;
-    _librariesDao = librariesDao;
-  }
+	public LincsWellSearchResults(GenericEntityDAO dao,
+	                              LibrariesDAO librariesDao,
+	                              EntityViewPolicy entityViewPolicy,
+	                              LibraryViewer libraryViewer,
+	                              WellViewer wellViewer,
+	                              StructureImageLocator structureImageLocator,
+	                              LibraryContentsVersionReference libraryContentsVersionRef,
+	                              List<DataExporter<Tuple<String>>> dataExporters,
+	                              ImageProviderServlet imageProviderServlet)
+	{
+	  super(dao, librariesDao, entityViewPolicy, libraryViewer, wellViewer, structureImageLocator, libraryContentsVersionRef, dataExporters, imageProviderServlet);
+	  _dao = dao;
+	  _librariesDao = librariesDao;
+	}
 
   public LincsWellSearchResults getReagentsBrowser()
   {
@@ -200,5 +202,6 @@ public class LincsWellSearchResults extends WellSearchResults
   {
     return;
   }
+
 
 }

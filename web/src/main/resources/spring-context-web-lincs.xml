@@ -76,6 +76,7 @@
           </bean>
       </list>
     </constructor-arg>
+    <constructor-arg ref="imageProviderServlet" />
     <property name="reagentsBrowser" ref="reagentsBrowser"/>
     <property
       name="rowsPerPageSelections">
@@ -111,6 +112,7 @@
           </bean>
       </list>
     </constructor-arg>
+    <constructor-arg ref="imageProviderServlet" />
     <property
       name="rowsPerPageSelections">
       <list>
@@ -145,6 +147,7 @@
           </bean>
       </list>
     </constructor-arg>
+    <constructor-arg ref="imageProviderServlet" />
     <property
       name="rowsPerPageSelections">
       <list>

@@ -14,6 +14,7 @@ import edu.harvard.med.screensaver.model.meta.PropertyPath;
 import edu.harvard.med.screensaver.policy.EntityViewPolicy;
 import edu.harvard.med.screensaver.ui.arch.datatable.model.DataTableModel;
 import edu.harvard.med.screensaver.ui.arch.datatable.model.VirtualPagingEntityDataModel;
+import edu.harvard.med.screensaver.ui.arch.util.servlet.ImageProviderServlet;
 
 public class DefaultWellSearchResults extends WellSearchResults
 {
@@ -31,9 +32,10 @@ public class DefaultWellSearchResults extends WellSearchResults
                                   WellViewer wellViewer,
                                   StructureImageLocator structureImageLocator,
                                   LibraryContentsVersionReference libraryContentsVersionRef,
-                                  List<DataExporter<Tuple<String>>> dataExporters)
+                                  List<DataExporter<Tuple<String>>> dataExporters, 
+                                  ImageProviderServlet imageProviderServlet)
   {
-    super(dao, librariesDao, entityViewPolicy, libraryViewer, wellViewer, structureImageLocator, libraryContentsVersionRef, dataExporters);
+    super(dao, librariesDao, entityViewPolicy, libraryViewer, wellViewer, structureImageLocator, libraryContentsVersionRef, dataExporters, imageProviderServlet);
     _dao = dao;
   }
 

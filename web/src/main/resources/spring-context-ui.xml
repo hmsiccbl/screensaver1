@@ -396,6 +396,7 @@
           </bean>
       </list>
     </constructor-arg>
+    <constructor-arg ref="imageProviderServlet" />
     <property
       name="rowsPerPageSelections">
       <list>
@@ -430,6 +431,7 @@
           </bean>
       </list>
     </constructor-arg>
+    <constructor-arg ref="imageProviderServlet" />
     <property
       name="rowsPerPageSelections">
       <list>
@@ -794,6 +796,7 @@
     <constructor-arg ref="cherryPickRequestViewer" />
     <constructor-arg ref="screenViewer" />
     <constructor-arg ref="userViewer" />
+    <constructor-arg ref="screenDao" />
     <constructor-arg ref="genericEntityDao" />
     <aop:scoped-proxy/>
   </bean>

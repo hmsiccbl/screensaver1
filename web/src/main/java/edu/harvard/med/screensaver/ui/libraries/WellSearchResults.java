@@ -19,16 +19,16 @@ import java.util.Map;
 import java.util.Set;
 import java.util.SortedSet;
 
+import org.apache.log4j.Logger;
+import org.hibernate.Session;
+
 import com.google.common.base.Function;
 import com.google.common.base.Joiner;
-import com.google.common.collect.Collections2;
 import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.Iterables;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
 import com.google.common.collect.Sets;
-import org.apache.log4j.Logger;
-import org.hibernate.Session;
 
 import edu.harvard.med.lincs.screensaver.LincsScreensaverConstants;
 import edu.harvard.med.screensaver.ScreensaverConstants;
@@ -97,6 +97,7 @@ import edu.harvard.med.screensaver.ui.arch.datatable.column.entity.TextSetTupleC
 import edu.harvard.med.screensaver.ui.arch.datatable.column.entity.TextTupleColumn;
 import edu.harvard.med.screensaver.ui.arch.searchresults.SearchResults;
 import edu.harvard.med.screensaver.ui.arch.searchresults.TupleBasedEntitySearchResults;
+import edu.harvard.med.screensaver.ui.arch.util.servlet.ImageProviderServlet;
 import edu.harvard.med.screensaver.util.NullSafeUtils;
 import edu.harvard.med.screensaver.util.Triple;
 import edu.harvard.med.screensaver.util.ValueReference;
@@ -245,9 +246,11 @@ public abstract class WellSearchResults extends TupleBasedEntitySearchResults<We
                            WellViewer wellViewer,
                            StructureImageLocator structureImageLocator,
                            LibraryContentsVersionReference libraryContentsVersionRef,
-                           List<DataExporter<Tuple<String>>> dataExporters)
+                           List<DataExporter<Tuple<String>>> dataExporters,
+                           ImageProviderServlet imageProviderServlet)
   {
     super(Well.class, dao, wellViewer);
+    setImageProviderServlet(imageProviderServlet);
     getDataExporters().addAll(dataExporters);
     _dao = dao;
     _librariesDao = librariesDao;

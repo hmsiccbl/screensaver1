@@ -11,11 +11,15 @@ package edu.harvard.med.screensaver.ui.arch.searchresults;
 
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
+import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.net.URL;
 import java.util.Iterator;
 import java.util.List;
+
+import javax.servlet.ServletConfig;
+import javax.servlet.ServletContext;
 
 import jxl.CellView;
 import jxl.Workbook;
@@ -31,6 +35,7 @@ import edu.harvard.med.screensaver.io.workbook2.Workbook2Utils;
 import edu.harvard.med.screensaver.ui.arch.datatable.TableDataExporter;
 import edu.harvard.med.screensaver.ui.arch.datatable.column.ColumnType;
 import edu.harvard.med.screensaver.ui.arch.datatable.column.TableColumn;
+import edu.harvard.med.screensaver.ui.arch.util.servlet.ImageProviderServlet;
 import edu.harvard.med.screensaver.util.DevelopmentException;
 
 public class ExcelWorkbookDataExporter<T> implements TableDataExporter<T> 
@@ -48,12 +53,23 @@ public class ExcelWorkbookDataExporter<T> implements TableDataExporter<T>
   private String _dataTypeName;
   private List<TableColumn<T,?>> _columns;
 
-  private StructureImageLocator _structureImageLocator;
+  private ImageProviderServlet _imageProviderServlet;
+  private String _servletContextPath;
 
 
   public ExcelWorkbookDataExporter(String dataTypeName)
   {
     _dataTypeName = dataTypeName;
+  }
+  /**
+   * Use this constructor when in a servlet context, and can pass in the imageprovider servlet so that images can be acquired directly, not through the web interface.
+
+   */
+  public ExcelWorkbookDataExporter(String dataTypeName, ImageProviderServlet imageProviderServlet, String servletContextPath)
+  {
+    _dataTypeName = dataTypeName;
+    _imageProviderServlet = imageProviderServlet;
+    _servletContextPath = servletContextPath;
   }
 
   public void setTableColumns(List<TableColumn<T,?>> columns)
@@ -130,12 +146,21 @@ public class ExcelWorkbookDataExporter<T> implements TableDataExporter<T>
       if (column.getColumnType() == ColumnType.IMAGE) {
         if (column.getCellValue(datum) != null) {
           try {
-            byte[] imageData = IOUtils.toByteArray(new URL(column.getCellValue(datum).toString()).openStream());
-            Workbook2Utils.writeImage(sheet, rowIndex, colIndex, imageData);
+	        	if(getImageProviderServlet() != null) {
+	        		String path = column.getCellValue(datum).toString();
+	        		path = path.substring(path.indexOf("imageprovider/")+"imageprovider/".length());
+	        		log.debug("---- get the image internally: "+ path);
+	        		Workbook2Utils.writeImage(sheet, rowIndex, colIndex, IOUtils.toByteArray(new FileInputStream(getImageProviderServlet().getImage(getServletContextPath(), path))));
+	        	}else {
+	        		log.debug("---- get the image through server");
+	            byte[] imageData = IOUtils.toByteArray(new URL(column.getCellValue(datum).toString()).openStream()); // TODO: this is non-performant for large sets of images - should access the images directly and not use URL to open a socket
+	            Workbook2Utils.writeImage(sheet, rowIndex, colIndex, imageData);
+	          }
           }
           catch (Exception e) {
+          	log.warn("Error retrieving image: ", e);
             Workbook2Utils.writeCell(sheet, rowIndex, colIndex, "<error: bad image source: " + column.getCellValue(datum) + ">");
-          }
+        	}
         }
       }
       else {
@@ -174,6 +199,14 @@ public class ExcelWorkbookDataExporter<T> implements TableDataExporter<T>
       Workbook2Utils.writeCell(sheet, HEADER_ROW_INDEX, colIndex++, column.getName());
     }
   }
+
+	private ImageProviderServlet getImageProviderServlet() {
+		return _imageProviderServlet;
+	}
+	private String getServletContextPath() {
+		return _servletContextPath;
+	}
+
 }
 
 

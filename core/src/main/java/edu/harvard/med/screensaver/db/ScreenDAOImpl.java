@@ -13,8 +13,10 @@ package edu.harvard.med.screensaver.db;
 
 import java.util.Collections;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 
+import com.google.common.collect.Maps;
 import com.google.common.collect.Sets;
 import org.apache.log4j.Logger;
 import org.hibernate.Query;
@@ -116,6 +118,19 @@ public class ScreenDAOImpl extends AbstractDAO implements ScreenDAO
       "where s = ? and cplt.status = 'Successful'";
     Long count = (Long) getHibernateSession().createQuery(hql).setEntity(0, screen).list().get(0);
     return count.intValue();
+  }
+  
+  public Map<Integer,Integer> retrieveTotalLabCherryPickCounts()
+  {
+  	String hql = "select cpr.id, count(*) from CherryPickRequest cpr join cpr.labCherryPicks lcp group by cpr.id";
+  	List results = getHibernateSession().createQuery(hql).list();
+  	Map<Integer,Integer> map = Maps.newHashMap();
+  	for(Object o:results) {
+  		Object[] result = (Object[])o;
+  		map.put((Integer)result[0],((Long)result[1]).intValue());
+  	}
+  	log.info("retrieveTotalLabCherryPickCounts:" + map.size());
+  	return map;
   }
 
   @Override

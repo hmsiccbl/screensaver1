@@ -20,6 +20,7 @@ import javax.faces.component.UIData;
 import javax.faces.component.UIInput;
 import javax.faces.event.ActionEvent;
 import javax.faces.event.ValueChangeEvent;
+import javax.servlet.http.HttpServletRequest;
 
 import com.google.common.collect.Lists;
 import org.apache.log4j.Logger;
@@ -33,6 +34,7 @@ import edu.harvard.med.screensaver.ui.arch.searchresults.CsvDataExporter;
 import edu.harvard.med.screensaver.ui.arch.searchresults.ExcelWorkbookDataExporter;
 import edu.harvard.med.screensaver.ui.arch.util.JSFUtils;
 import edu.harvard.med.screensaver.ui.arch.util.UISelectOneBean;
+import edu.harvard.med.screensaver.ui.arch.util.servlet.ImageProviderServlet;
 import edu.harvard.med.screensaver.ui.arch.view.AbstractBackingBean;
 import edu.harvard.med.screensaver.ui.arch.view.aspects.UICommand;
 
@@ -71,6 +73,8 @@ public class DataTable<R> extends AbstractBackingBean implements Observer
   private boolean _isTableFilterMode;
   private List<DataExporter<R>> _dataExporters;
   private UISelectOneBean<DataExporter<R>> _dataExporterSelector;
+  private ImageProviderServlet _imageProviderServlet;
+
   /**
    * @motivation for unit tests
    */
@@ -299,7 +303,13 @@ public class DataTable<R> extends AbstractBackingBean implements Observer
     if (_dataExporters == null) {
       _dataExporters = Lists.newArrayList();
       _dataExporters.add(new CsvDataExporter<R>("searchResult"));
-      _dataExporters.add(new ExcelWorkbookDataExporter<R>("searchResult"));
+      if(getImageProviderServlet() != null && getExternalContext() != null) {
+      	log.info("Using the ExcelWorkbookDataExporter initialized with an internal image provider reference");
+      	_dataExporters.add(new ExcelWorkbookDataExporter<R>("searchResult", getImageProviderServlet(), ((HttpServletRequest)getExternalContext().getRequest()).getRealPath("/")));
+      }else {
+      	log.info("not using the ExcelWorkbookDataExporter");
+      	_dataExporters.add(new ExcelWorkbookDataExporter<R>("searchResult"));
+      }
     }
     return _dataExporters;
   }
@@ -489,4 +499,12 @@ public class DataTable<R> extends AbstractBackingBean implements Observer
       _pendingFirstRow = rowIndex;
     }
   }
+
+	private ImageProviderServlet getImageProviderServlet() {
+		return _imageProviderServlet;
+	}
+
+	public void setImageProviderServlet(ImageProviderServlet imageProviderServlet) {
+		this._imageProviderServlet = imageProviderServlet;
+	}
 }

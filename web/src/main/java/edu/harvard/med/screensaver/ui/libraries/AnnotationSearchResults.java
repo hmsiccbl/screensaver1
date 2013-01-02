@@ -222,9 +222,7 @@ public class AnnotationSearchResults extends EntityBasedEntitySearchResults<Anno
 						{
 							SmallMoleculeReagent smr = _dao.findEntityById(SmallMoleculeReagent.class, row.getReagent().getEntityId(), true, SmallMoleculeReagent.compoundNames);
 							return smr.getPrimaryCompoundName();
-							
 							//return ((SmallMoleculeReagent)row.getReagent()).getCompoundNames().get(0);
-							//return "blah";
 						}
 						
 						@Override
@@ -241,6 +239,7 @@ public class AnnotationSearchResults extends EntityBasedEntitySearchResults<Anno
 					};
 					// TODO: this fails with NPE at hibernate BasicLoader:99
 					//column.addRelationshipPath(AnnotationValue.reagent.toCollectionOfValues("compoundNames"));
+					column.addRelationshipPath(AnnotationValue.reagent.to(Reagent.well));
 					column.setVisible(true);
 					columns.add(column);
       }

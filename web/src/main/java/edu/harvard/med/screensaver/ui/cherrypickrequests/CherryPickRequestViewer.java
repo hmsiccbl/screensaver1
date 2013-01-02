@@ -432,10 +432,15 @@ public class CherryPickRequestViewer extends SearchResultContextEntityViewerBack
           getDao().needReadOnly(cpr, CherryPickRequest.cherryPickAssayPlates.to(CherryPickAssayPlate.cherryPickLiquidTransfer).to(CherryPickLiquidTransfer.performedBy));
           getDao().needReadOnly(cpr, CherryPickRequest.cherryPickAssayPlates.to(CherryPickAssayPlate.cherryPickScreenings).to(Activity.performedBy));
           getDao().needReadOnly(cpr, CherryPickRequest.cherryPickAssayPlates.to(CherryPickAssayPlate.cherryPickRequest).to(CherryPickRequest.requestedBy));
+          getDao().needReadOnly(cpr, CherryPickRequest.requestedBy);
+          // TODO: this is definitely a bug, but the following call will populate the cpr.requestedBy since it is not working otherwise, outside of this tx; 
+          // an analysis of the output SQL indicates that the cpr.requestedBy fields are being fetched into the returned resultset, so not clear why this is causing a lazy init ex
+          // Longer term: dispense with this issue by building the assay plate model in memory?  see: [#3527] Lazy init exception when viewing Cherry Pick Request
+          log.info("======================= CPR.requested by: " + cpr.getRequestedBy());
           getDao().needReadOnly(cpr, CherryPickRequest.screen);
           // HACK: following reln is (only) needed by validateSelectedAssayPlates() in LIQUID_TRANSFER case 
           getDao().needReadOnly(cpr, CherryPickRequest.cherryPickAssayPlates.to(CherryPickAssayPlate.labCherryPicks).to(LabCherryPick.screenerCherryPick).to(ScreenerCherryPick.screenedWell).to(Well.latestReleasedReagent));
-          List<AssayPlateRow> rows = new ArrayList<AssayPlateRow>();
+          List<AssayPlateRow> rows = new ArrayList<AssayPlateRow>(); 
           for (CherryPickAssayPlate assayPlate : cpr.getCherryPickAssayPlates()) {
             AssayPlateRow row = new AssayPlateRow(assayPlate);
             row.setSelected(_selectAllAssayPlates);

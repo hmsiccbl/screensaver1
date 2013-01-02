@@ -10,14 +10,17 @@
 package edu.harvard.med.screensaver.ui.cherrypickrequests;
 
 import java.util.List;
+import java.util.Map;
+
+import org.joda.time.LocalDate;
 
 import com.google.common.collect.Lists;
 import com.google.common.collect.Sets;
-import org.joda.time.LocalDate;
 
 import edu.harvard.med.screensaver.db.Criterion;
-import edu.harvard.med.screensaver.db.GenericEntityDAO;
 import edu.harvard.med.screensaver.db.Criterion.Operator;
+import edu.harvard.med.screensaver.db.GenericEntityDAO;
+import edu.harvard.med.screensaver.db.ScreenDAO;
 import edu.harvard.med.screensaver.db.datafetcher.DataFetcherUtil;
 import edu.harvard.med.screensaver.db.datafetcher.EntityDataFetcher;
 import edu.harvard.med.screensaver.db.hqlbuilder.HqlBuilder;
@@ -55,7 +58,10 @@ public class CherryPickRequestSearchResults extends EntityBasedEntitySearchResul
   private ScreenViewer _screenViewer;
   private UserViewer _userViewer;
   private GenericEntityDAO _dao;
+  private ScreenDAO _screenDao;
 
+  // custom cache of values to get around lazy loading issue, see [#3528] Add a total Lab Cherry Picks column to the CherryPickRequestSearchResults
+  private Map<Integer,Integer> cprLcpCounts = null;
 
   /**
    * @motivation for CGLIB2
@@ -67,11 +73,13 @@ public class CherryPickRequestSearchResults extends EntityBasedEntitySearchResul
   public CherryPickRequestSearchResults(CherryPickRequestViewer cprViewer,
                                         ScreenViewer screenViewer,
                                         UserViewer userViewer,
+                                        ScreenDAO screenDao,
                                         GenericEntityDAO dao)
   {
     super(cprViewer);
     _screenViewer = screenViewer;
     _userViewer = userViewer;
+    _screenDao = screenDao;
     _dao = dao;
   }
 
@@ -110,11 +118,12 @@ public class CherryPickRequestSearchResults extends EntityBasedEntitySearchResul
 
 
   // implementations of the SearchResults abstract methods
-
   @Override
   protected List<TableColumn<CherryPickRequest,?>> buildColumns()
   {
     List<TableColumn<CherryPickRequest,?>> columns = Lists.newArrayList();
+    
+    cprLcpCounts = _screenDao.retrieveTotalLabCherryPickCounts();
 
     columns.add(new IntegerEntityColumn<CherryPickRequest>(RelationshipPath.from(CherryPickRequest.class).toProperty("cherryPickRequestId"),
       "CPR #", 
@@ -192,13 +201,22 @@ public class CherryPickRequestSearchResults extends EntityBasedEntitySearchResul
       @Override
       public Integer getCellValue(CherryPickRequest cpr) { return cpr.getCompletedCherryPickAssayPlates().size(); }
     });
+    // [#3528] Add a total Lab Cherry Picks column to the CherryPickRequestSearchResults
+    columns.add(new IntegerEntityColumn<CherryPickRequest>(RelationshipPath.from(CherryPickRequest.class),
+        "# Total LCPs", 
+        "The total number of lab cherry picks.", 
+        TableColumn.UNGROUPED) {
+        @Override
+        public Integer getCellValue(CherryPickRequest cpr) { return cprLcpCounts.get(cpr.getEntityId()); /**cpr.getLabCherryPicks().size();**/ }
+      });
+
     columns.add(new IntegerEntityColumn<CherryPickRequest>(RelationshipPath.from(CherryPickRequest.class).toProperty("numberUnfulfilledLabCherryPicks"),
-      "# Unfulfilled LCPs", 
-      "The number of lab cherry picks that have are unfulfilled.", 
-      TableColumn.UNGROUPED) {
-      @Override
-      public Integer getCellValue(CherryPickRequest cpr) { return cpr.getNumberUnfulfilledLabCherryPicks(); }
-    });
+        "# Unfulfilled LCPs", 
+        "The number of lab cherry picks that have are unfulfilled.", 
+        TableColumn.UNGROUPED) {
+        @Override
+        public Integer getCellValue(CherryPickRequest cpr) { return cpr.getNumberUnfulfilledLabCherryPicks(); }
+      });
 
     columns.add(new DateEntityColumn<CherryPickRequest>(
       CherryPickRequest.cherryPickAssayPlates.to(CherryPickAssayPlate.cherryPickLiquidTransfer),

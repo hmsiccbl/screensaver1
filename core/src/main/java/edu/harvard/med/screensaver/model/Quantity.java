@@ -86,16 +86,20 @@ import org.apache.log4j.Logger;
    */
   public Q convertToReasonableUnits()
   {
-    Q newQuantity = newQuantity(_value, _unit);
+    //Q newQuantity = newQuantity(_value, _unit);
+  	BigDecimal value = getValue();
+  	T unit = getUnits();
+  	BigDecimal newValue = value;
+  	T newUnitChoice = unit;
     for (T newUnit : _unit.getValues()) {
-      newQuantity._value = convertUnits(newQuantity, newUnit);
-      newQuantity._unit = newUnit;
-      if (newQuantity._value.abs().compareTo(BigDecimal.ONE) >= 0) {
+      newValue = convertUnits(value, unit.getScale(), newUnit.getScale());
+      newUnitChoice = newUnit;
+      if (newValue.abs().compareTo(BigDecimal.ONE) >= 0) {
         break;
       }
     }
-    newQuantity._value = scaleValue(newQuantity._value, newQuantity._unit);
-    return newQuantity;
+    newValue = scaleValue(newValue, newUnitChoice);
+    return newQuantity(newValue,newUnitChoice);
   }
 
   protected BigDecimal scaleValue(BigDecimal value, QuantityUnit<T> unit)
@@ -122,17 +126,17 @@ import org.apache.log4j.Logger;
 
   public Q add(Q value)
   {
-    return newQuantity(_value.add(value.convert(_unit)._value), _unit);
+    return newQuantity(getValue().add(value.convert(_unit).getValue()), getUnits());
   }
 
   public Q subtract(Q value)
   {
-    return newQuantity(_value.subtract(value.convert(_unit)._value), _unit);
+    return newQuantity(getValue().subtract(value.convert(_unit).getValue()), getUnits());
   }
 
   public Q negate()
   {
-    return newQuantity(_value.negate()/*.toString()*/, _unit);
+    return newQuantity(getValue().negate()/*.toString()*/, getUnits());
   }
 
   public T getUnits()
@@ -183,7 +187,7 @@ import org.apache.log4j.Logger;
 
   public int compareTo(Q o)
   {
-    return _value.compareTo(o.convert(_unit)._value);
+    return getValue().compareTo(o.convert(_unit).getValue());
   }
 
   @Override
@@ -201,9 +205,9 @@ import org.apache.log4j.Logger;
     if (this.getClass() != obj.getClass()) return false;
     Q other = (Q) obj;
 
-    if (_value.equals( other._value ) && _unit == other._unit) return true;
+    if (getValue().equals( other.getValue() ) && getUnits() == other.getUnits()) return true;
 
-    return (this._value.equals(convertUnits(other.getValue(), other.getUnits().getScale(), _unit.getScale())));
+    return (this.getValue().equals(convertUnits(other.getValue(), other.getUnits().getScale(), getUnits().getScale())));
   }
 
   @Override

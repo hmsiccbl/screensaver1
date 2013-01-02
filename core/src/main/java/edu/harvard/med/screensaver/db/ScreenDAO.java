@@ -10,6 +10,7 @@
 package edu.harvard.med.screensaver.db;
 
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 
 import edu.harvard.med.screensaver.model.libraries.Reagent;
@@ -51,5 +52,8 @@ public interface ScreenDAO
    * </b>
    */
 	int populateStudyReagentLinkTable(int screenId);
+	
+	/** custom method to get around lazy loading scaling issues in the CPR search results **/
+  public Map<Integer,Integer> retrieveTotalLabCherryPickCounts();
 
 }
