@@ -4,7 +4,7 @@
   <modelVersion>4.0.0</modelVersion>
   <groupId>edu.harvard.med</groupId>
   <artifactId>screensaver</artifactId>
-  <version>2013-01-02</version>
+  <version>2013-02-27</version>
   <packaging>pom</packaging>
   <name>Screensaver HTS LIMS</name>
 
@@ -288,7 +288,6 @@
     <module>test</module>
     <module>web</module>
     <module>batch</module>
-    <module>plate-reader-data-parser</module>
 <!--    <module>screensaver-cellhts</module>-->
   </modules>
 </project>

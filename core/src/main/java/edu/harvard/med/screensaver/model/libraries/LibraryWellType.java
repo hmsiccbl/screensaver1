@@ -24,12 +24,12 @@ public enum LibraryWellType implements VocabularyTerm
 
   // the vocabulary
   
-  UNDEFINED("<undefined>"), // for cases where library has been created, but library contents have not yet been loaded (or have been unloaded) 
-  EXPERIMENTAL("experimental"),
-  EMPTY("empty"), // for RNAi libraries, on assay, can become Assay Control, Assay Positive Control, Other (see AssayWellControlType)
-  DMSO("DMSO"), // small molecule libraries only
-  LIBRARY_CONTROL("library control"), // RNAi libraries only
-  RNAI_BUFFER("RNAi buffer") // RNAi libraries only
+  UNDEFINED("<undefined>", "U"), // for cases where library has been created, but library contents have not yet been loaded (or have been unloaded) 
+  EXPERIMENTAL("experimental", "X"),
+  EMPTY("empty", "E"), // for RNAi libraries, on assay, can become Assay Control, Assay Positive Control, Other (see AssayWellControlType)
+  DMSO("DMSO", "D"), // small molecule libraries only
+  LIBRARY_CONTROL("library control", "C"), // RNAi libraries only
+  RNAI_BUFFER("RNAi buffer", "B") // RNAi libraries only
   ;
   
   // static inner class
@@ -48,18 +48,21 @@ public enum LibraryWellType implements VocabularyTerm
   // private instance field and constructor
 
   private String _value;
-
+  private String _abbreviation;
   /**
    * Constructs a <code>LibraryWellType</code> vocabulary term.
    * @param value The value of the term.
    */
-  private LibraryWellType(String value)
+  private LibraryWellType(String value, String abbreviation)
   {
     _value = value;
+    _abbreviation = abbreviation;
   }
-
-
-  // public instance methods
+  
+  public String getAbbreviation()
+  {
+  	return _abbreviation;
+  }
 
   /**
    * Get the value of the vocabulary term.

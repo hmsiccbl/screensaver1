@@ -29,7 +29,7 @@ public enum AssayReadoutType implements VocabularyTerm
   FRET("FRET"),
   IMAGING("Imaging"),
   LUMINESCENCE("Luminescence"),
-  PHOTOMETRY("Photometry"), // aka absorbance
+  ABSORBANCE("Absorbance"), // aka absorbance
   UNSPECIFIED("Unspecified")
   ;
 

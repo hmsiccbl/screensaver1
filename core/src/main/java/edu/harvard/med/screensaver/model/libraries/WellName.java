@@ -25,7 +25,7 @@ public class WellName implements Comparable<WellName>
 {
   // static members
 
-  Pattern WELL_NAME_PATTERN = Pattern.compile("([A-Z]+)([0-9]+)", Pattern.CASE_INSENSITIVE);
+  public static Pattern WELL_NAME_PATTERN = Pattern.compile("([A-Z]+)([0-9]+)", Pattern.CASE_INSENSITIVE);
 
   public static final Predicate<WellName> makeIsNonExtantWellNamePredicate(final PlateSize plateSize)
   {
@@ -59,6 +59,11 @@ public class WellName implements Comparable<WellName>
   {
   }
 
+  /**
+   * 
+   * @param rowIndex
+   * @param columnIndex 0 based index (column label is converted to 1 based)
+   */
   public WellName(int rowIndex,
                   int columnIndex)
   {

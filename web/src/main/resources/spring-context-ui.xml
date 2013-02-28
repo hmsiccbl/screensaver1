@@ -732,8 +732,19 @@
     class="edu.harvard.med.screensaver.ui.screenresults.PlateReaderRawDataTransformer"
     scope="session">
     <constructor-arg ref="genericEntityDao"/>
-    <constructor-arg ref="plateReaderRawDataTransformerService"/>
+    <constructor-arg ref="librariesDao"/>
     <constructor-arg ref="screenViewer"/>
+    <aop:scoped-proxy />
+  </bean>
+  
+  <bean
+    id="cherryPickReaderRawDataTransformer"
+    parent="uiBean"
+    class="edu.harvard.med.screensaver.ui.screenresults.PlateReaderRawDataTransformer"
+    scope="session">
+    <constructor-arg ref="genericEntityDao"/>
+    <constructor-arg ref="librariesDao"/>
+    <constructor-arg ref="cherryPickRequestViewer"/>
     <aop:scoped-proxy />
   </bean>
   

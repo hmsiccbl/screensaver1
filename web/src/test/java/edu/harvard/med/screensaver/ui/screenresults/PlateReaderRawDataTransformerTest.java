@@ -65,7 +65,7 @@ public class PlateReaderRawDataTransformerTest extends AbstractBackingBeanTest
     form2a.setConditions("x y z");
     form2a.setReadouts("1 2 3");
     form2a.setReplicates(7);
-    form2a.setReadoutTypeSelection(AssayReadoutType.PHOTOMETRY);
+    form2a.setReadoutTypeSelection(AssayReadoutType.ABSORBANCE);
     
     String serialized = form2a.serialize();
     PlateReaderRawDataTransformer.InputFileParams form2b = PlateReaderRawDataTransformer.InputFileParams.deserialize(serialized);

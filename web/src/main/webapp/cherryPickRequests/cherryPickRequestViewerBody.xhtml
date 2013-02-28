@@ -191,6 +191,11 @@
               disabled="#{!cherryPickRequestViewer.entity.mapped}"
               styleClass="command"
               title="Download the input files for the liquid transfer equipment" />
+            <t:commandButton
+              action="#{cherryPickReaderRawDataTransformer.viewCherryPickTransformer}"
+              value="Transform Raw Data..." styleClass="command"
+              rendered="#{cherryPickRequestViewer.screensaverUser.isUserInRoleOfNameMap['cherryPickRequestsAdmin'] &amp;&amp; cherryPickRequestViewer.entity.mapped}"
+              title="Transform plate reader raw data into intermediate screen cherry pick result format" />
           </t:panelGroup>
 
 <ui:remove> <!-- This is non-performant for large CPRs -->
