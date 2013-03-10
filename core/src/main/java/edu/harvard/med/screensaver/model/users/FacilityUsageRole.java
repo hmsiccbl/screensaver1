@@ -26,7 +26,9 @@ public enum FacilityUsageRole implements VocabularyTerm
   // note: nonScreeningUser is *not* mutually exclusive with screener roles; user may have been a nonScreeningUser initially, then became screener later on
   NON_SCREENER("nonScreeningUser", "Non-screening User", "Users that are using the facility for purposes other than conducting a screen."),
   MEDICINAL_CHEMIST_USER("medicinalChemistUser", "Medicinal Chemistry User", "Users that are medicinal chemists."),
-  QPCR_USER("qpcrUser", "qPCR User", "Users that are performing Quantitative PCR analyses at the facility.");
+  QPCR_USER("qpcrUser", "qPCR User", "Users that are performing Quantitative PCR analyses at the facility."),
+  ICCBL_PROJECT_USER("iccblProjectUser", "ICCB-L Project User", "Users working on ICCB-L projects."),
+  MOUSE_IMAGER_USER("qpcrUser", "Mouse Imager User", "Users permitted to use the mouse imager.");
 
   public static Function<FacilityUsageRole,String> ToDisplayableName = new Function<FacilityUsageRole,String>() {
     public String apply(FacilityUsageRole role)

@@ -2,14 +2,14 @@
   <modelVersion>4.0.0</modelVersion>
   <parent>
     <artifactId>screensaver</artifactId>
-    <version>2013-02-27</version>
+    <version>2013-03-10</version>
     <groupId>edu.harvard.med</groupId>
     <relativePath>../pom.xml</relativePath>
   </parent>
   
   <groupId>edu.harvard.med</groupId>
   <artifactId>screensaver-web</artifactId>
-  <version>2013-02-27</version>
+  <version>2013-03-10</version>
   <name>Screensaver Web</name>
   <description>Screensaver web application</description>
 
@@ -173,19 +173,19 @@
   	<dependency>
   		<groupId>edu.harvard.med</groupId>
   		<artifactId>screensaver-core</artifactId>
-  		<version>2013-02-27</version>
+  		<version>2013-03-10</version>
   	</dependency>
 
-    <dependency>
-      <groupId>edu.harvard.med.iccbl</groupId>
-      <artifactId>plate-reader-data-parser</artifactId>
-      <version>1</version>
-    </dependency>
+<!--     <dependency> -->
+<!--       <groupId>edu.harvard.med.iccbl</groupId> -->
+<!--       <artifactId>plate-reader-data-parser</artifactId> -->
+<!--       <version>1</version> -->
+<!--     </dependency> -->
 
     <dependency>
       <groupId>edu.harvard.med</groupId>
       <artifactId>screensaver-test</artifactId>
-      <version>2013-02-27</version>
+      <version>2013-03-10</version>
       <scope>test</scope>
     </dependency>
 

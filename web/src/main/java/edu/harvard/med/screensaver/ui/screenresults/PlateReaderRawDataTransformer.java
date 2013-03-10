@@ -1129,7 +1129,7 @@ public class PlateReaderRawDataTransformer extends AbstractBackingBean
 								sheet.addCell(new jxl.write.Label(col++, sheetRow, gene == null ? "" : Joiner.on(",").join(sr.getVendorGene().getGenbankAccessionNumbers())));
 								sheet.addCell(new jxl.write.Label(col++, sheetRow, sr == null || sr.getVendorId() == null ? "" : "" + sr.getVendorId()));
 								sheet.addCell(new jxl.write.Label(col++, sheetRow, gene == null || gene.getGeneName() == null ? "" : gene.getGeneName() ));
-								sheet.addCell(new jxl.write.Label(col++, sheetRow, ""+well.isDeprecated()));
+								sheet.addCell(new jxl.write.Label(col++, sheetRow, well.isDeprecated() ? "Y": ""));
 							}
 						}
 					}

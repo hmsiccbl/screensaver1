@@ -1,7 +1,7 @@
 #!/bin/bash
 # runs the batch jobs for the Screensaver ICCBL databases
 
-DIR=.
+DIR=/groups/screensaver/batch/screensaver/
 
 export JAVA_HOME=/usr/lib/jvm/java-6-sun/
 
@@ -29,4 +29,4 @@ else
 fi
 
 cd $DIR
-$DIR/bjobs.sh bsub -u sean.erickson.hms@gmail.com -q shared_12h $DIR/run.sh "$@"
+$DIR/bjobs.sh bsub -u sean.erickson.hms@gmail.com -q short -W 4:0 $DIR/run.sh "$@"

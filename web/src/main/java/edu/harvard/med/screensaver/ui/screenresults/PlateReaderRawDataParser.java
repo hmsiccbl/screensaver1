@@ -305,6 +305,7 @@ public class PlateReaderRawDataParser {
   	int matrixNumber = 0;
   	for(List<String[]> matrix:newMatrices) {
   		if(matrix.size() < expectedRows) {
+  			logger.info("matrix: " + matrix);
   			throw new IllegalArgumentException("Wrong number of rows parsed in matrix: " 
   					+ matrixNumber + ", found: " + matrix.size() + ", expected: " + expectedRows);
   		}
@@ -338,7 +339,7 @@ public class PlateReaderRawDataParser {
 		int line = 0;
 		
 		Pattern headerPattern = Pattern.compile("^\\s+\\d{1,2}\\s+\\d{1,2}\\s+.*");
-		Pattern rowPattern = Pattern.compile("^\\s?([A-Z]{1,2})\\s+\\d+.*");
+		Pattern rowPattern = Pattern.compile("^\\s?([A-Z]{1,2})\\s+[-]?\\d+.*");
 		
 		List<List<String[]>> plateMatrices = Lists.newArrayList();
 		List<String[]> readMatrix = null;
@@ -487,7 +488,7 @@ public class PlateReaderRawDataParser {
 					i++;
 				}
 			}catch(NumberFormatException e) {
-				String msg = "Error parsing: matrix: " + i + " (plate: " + plate + "), row: " + j + ", col: " + k + " (counting from zero)";
+				String msg = "Error parsing: matrix: " + i + " (plate: " + plate + "), row: " + getRowLetters(j) + ", col: " + k ;
 				logger.warn(msg, e);
 				throw new IOException(msg + e.getLocalizedMessage());
 			}
