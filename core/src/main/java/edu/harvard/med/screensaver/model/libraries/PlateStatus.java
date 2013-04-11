@@ -83,7 +83,7 @@ public enum PlateStatus implements VocabularyTerm
     Transitions.put(NOT_CREATED, allExcept(ImmutableSet.of(NOT_SPECIFIED)));
     Transitions.put(NOT_AVAILABLE, allExcept(ImmutableSet.of(NOT_SPECIFIED, NOT_CREATED)));
     Transitions.put(AVAILABLE, allExcept(ImmutableSet.of(NOT_SPECIFIED, NOT_CREATED)));
-    Transitions.put(RETIRED, ImmutableSet.of(GIVEN_AWAY, DISCARDED, VOLUME_TRANSFERRED_AND_DISCARDED, LOST));
+    Transitions.put(RETIRED, ImmutableSet.of(AVAILABLE, GIVEN_AWAY, DISCARDED, VOLUME_TRANSFERRED_AND_DISCARDED, LOST));
     Transitions.put(GIVEN_AWAY, ImmutableSet.<PlateStatus>of());
     Transitions.put(DISCARDED, ImmutableSet.<PlateStatus>of());
     Transitions.put(VOLUME_TRANSFERRED_AND_DISCARDED, ImmutableSet.<PlateStatus>of());
