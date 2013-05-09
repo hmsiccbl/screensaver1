@@ -21,6 +21,7 @@ import org.apache.commons.io.LineIterator;
 import org.apache.log4j.Logger;
 import org.joda.time.LocalDate;
 import org.joda.time.format.DateTimeFormat;
+import org.springframework.transaction.annotation.Transactional;
 
 import edu.harvard.med.screensaver.db.DAOTransaction;
 import edu.harvard.med.screensaver.db.DAOTransactionRollbackException;
@@ -50,20 +51,37 @@ public class WellDeprecator
   public static void main(String[] args)
   {
     final CommandLineApplication app = new CommandLineApplication(args);
-    try {
       app.addCommandLineOption(OptionBuilder.hasArg().isRequired().withArgName("admin user ID").withLongOpt("admin-approved-by").withDescription("user ID of administrator that approved this well deprecation activity").create("aa"));
       app.addCommandLineOption(OptionBuilder.hasArg().isRequired().withArgName("yyyy-mm-dd").withLongOpt("approval-date").withDescription("date this well deprecation activity was approved").create("d"));
       app.addCommandLineOption(OptionBuilder.hasArg().isRequired().withArgName("text").withLongOpt("comments").create("c"));
       app.addCommandLineOption(OptionBuilder.hasArg().isRequired().withArgName("file").withLongOpt("input-file").withDescription("workbook file containing list of wells to be deprecated").create("f"));
       app.processOptions(true, true);
 
-      String comments = app.getCommandLineOptionValue("c");
+      
+      final GenericEntityDAO dao = (GenericEntityDAO) app.getSpringBean("genericEntityDao");
+
+      dao.doInTransaction(new DAOTransaction() {
+            public void runTransaction() {
+                try {
+                    int size = updateWells(app, dao);
+                    System.out.println("WellDeprecator read in and added comments for " + size + " wells.");
+                } catch (Exception e) {
+                    e.printStackTrace();
+                    log.error(e.toString());
+                    System.exit(1);
+                }
+          }
+      });
+
+  }
+
+  @Transactional
+  private static int updateWells(CommandLineApplication app, GenericEntityDAO dao) throws ParseException, IOException{
+	  String comments = app.getCommandLineOptionValue("c");
       Integer approvedByAdminId = app.getCommandLineOptionValue("aa", Integer.class);
       LocalDate dateApproved = app.getCommandLineOptionValue("d", DateTimeFormat.forPattern(CommandLineApplication.DEFAULT_DATE_PATTERN)).toLocalDate();
 
-      GenericEntityDAO dao = (GenericEntityDAO) app.getSpringBean("genericEntityDao");
-      final LibrariesDAO librariesDao = (LibrariesDAO) app.getSpringBean("librariesDao");
-      AdministratorUser performedBy = app.findAdministratorUser();
+	  AdministratorUser performedBy = app.findAdministratorUser();
       AdministratorUser approvedBy = dao.findEntityById(AdministratorUser.class, approvedByAdminId);
       if (approvedBy == null) {
         throw new IllegalArgumentException("no administrator user found with User ID=" + approvedByAdminId);
@@ -75,50 +93,41 @@ public class WellDeprecator
                                    dateApproved,
                                    AdministrativeActivityType.WELL_DEPRECATION);
       activity.setComments(comments);
-
+      final int[] _sizeRead = new int[1];
+      final LibrariesDAO librariesDao = (LibrariesDAO) app.getSpringBean("librariesDao");
       final Set<WellKey> wellKeys = readWellsFromFile(app);
-      dao.doInTransaction(new DAOTransaction() {
-        public void runTransaction() {
-          for (WellKey wellKey : wellKeys) {
-            Well well = librariesDao.findWell(wellKey);
-            if (well == null) {
-              throw new DAOTransactionRollbackException("no such well " + wellKey);
-            }
-            else {
-              if (well.getDeprecationActivity() != null) {
-                throw new DAOTransactionRollbackException("well " + wellKey + " is already deprecated");
-              }
-              well.setDeprecationActivity(activity);
-            }
-          }
-        }
-      });
-
-      log.info("successfully deprecated " + wellKeys.size() + " wells");
-    }
-    catch (Exception e) {
-      e.printStackTrace();
-      log.error(e.toString());
-      System.exit(1);
-    }
+	  for (WellKey wellKey : wellKeys) {
+	      Well well = librariesDao.findWell(wellKey);
+	      if (well == null) {
+	        throw new DAOTransactionRollbackException("no such well " + wellKey);
+		  }
+		  else {
+		    if (well.getDeprecationActivity() != null) {
+		      throw new DAOTransactionRollbackException("well " + wellKey + " is already deprecated");
+		    }
+		    well.setDeprecationActivity(activity);
+		  }
+	  }
+	  log.info("WellDeprecator read in and added comments for " + wellKeys.size() + " wells.");
+	  return wellKeys.size();
   }
 
-  private static AdministratorUser findPerformedByAdminUser(String performedByEcommonsId,
-                                                            GenericEntityDAO dao)
-    throws Exception
-  {
-    AdministratorUser admin =
-      dao.findEntityByProperty(AdministratorUser.class,
-                               "ECommonsId",
-                               performedByEcommonsId,
-                               false,
-                               ScreensaverUser.activitiesPerformed.castToSubtype(AdministratorUser.class));
-
-    if (admin == null) {
-      throw new Exception("no such user with eCommons ID " + performedByEcommonsId);
-    }
-    return admin;
-  }
+//  private static AdministratorUser findPerformedByAdminUser(String performedByEcommonsId,
+//                                                            GenericEntityDAO dao)
+//    throws Exception
+//  {
+//    AdministratorUser admin =
+//      dao.findEntityByProperty(AdministratorUser.class,
+//                               "ECommonsId",
+//                               performedByEcommonsId,
+//                               false,
+//                               ScreensaverUser.activitiesPerformed.castToSubtype(AdministratorUser.class));
+//
+//    if (admin == null) {
+//      throw new Exception("no such user with eCommons ID " + performedByEcommonsId);
+//    }
+//    return admin;
+//  }
 
   private static Set<WellKey> readWellsFromFile(CommandLineApplication app) throws IOException, ParseException
   {
