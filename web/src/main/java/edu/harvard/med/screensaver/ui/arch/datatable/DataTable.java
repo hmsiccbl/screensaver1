@@ -304,10 +304,10 @@ public class DataTable<R> extends AbstractBackingBean implements Observer
       _dataExporters = Lists.newArrayList();
       _dataExporters.add(new CsvDataExporter<R>("searchResult"));
       if(getImageProviderServlet() != null && getExternalContext() != null) {
-      	log.info("Using the ExcelWorkbookDataExporter initialized with an internal image provider reference");
+      	log.debug("Using the ExcelWorkbookDataExporter initialized with an internal image provider reference");
       	_dataExporters.add(new ExcelWorkbookDataExporter<R>("searchResult", getImageProviderServlet(), ((HttpServletRequest)getExternalContext().getRequest()).getRealPath("/")));
       }else {
-      	log.info("not using the ExcelWorkbookDataExporter");
+      	log.debug("not using the ExcelWorkbookDataExporter with the ImageProviderServlet: "+getImageProviderServlet() + ", "+ getExternalContext());
       	_dataExporters.add(new ExcelWorkbookDataExporter<R>("searchResult"));
       }
     }

@@ -11,6 +11,7 @@ package edu.harvard.med.screensaver.ui.arch.searchresults;
 
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
+import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;
@@ -81,14 +82,20 @@ public class ExcelWorkbookDataExporter<T> implements TableDataExporter<T>
   public InputStream export(Iterator<T> iter) throws IOException
   {
     assert _columns != null : "must call setTableColumns() first";
-    final ByteArrayOutputStream out = new ByteArrayOutputStream();
+ //   final ByteArrayOutputStream out = new ByteArrayOutputStream();
+    long startTime = System.currentTimeMillis();
+    log.info("----start exporting!");
     try {
-      WritableWorkbook workbook = Workbook.createWorkbook(out);
+      File outputFile = File.createTempFile(System.currentTimeMillis()+"_"+Math.random(), "tmp");
+
+      WritableWorkbook workbook = Workbook.createWorkbook(outputFile);
       writeWorkbook(workbook, iter);
       workbook.write();
       workbook.close();
-      out.close();
-      return new ByteArrayInputStream(out.toByteArray());
+//      out.close();
+//      return new ByteArrayInputStream(out.toByteArray());
+      log.info("----output file created: time: " + (System.currentTimeMillis()-startTime));
+      return new FileInputStream(outputFile);
     }
     catch (Exception e) {
       if (e instanceof IOException) {
@@ -97,7 +104,7 @@ public class ExcelWorkbookDataExporter<T> implements TableDataExporter<T>
       throw new DevelopmentException(e.getMessage());
     }
     finally {
-      IOUtils.closeQuietly(out);
+//      IOUtils.closeQuietly(out);
     }
   }
 
@@ -146,16 +153,16 @@ public class ExcelWorkbookDataExporter<T> implements TableDataExporter<T>
       if (column.getColumnType() == ColumnType.IMAGE) {
         if (column.getCellValue(datum) != null) {
           try {
-	        	if(getImageProviderServlet() != null) {
-	        		String path = column.getCellValue(datum).toString();
-	        		path = path.substring(path.indexOf("imageprovider/")+"imageprovider/".length());
-	        		log.debug("---- get the image internally: "+ path);
-	        		Workbook2Utils.writeImage(sheet, rowIndex, colIndex, IOUtils.toByteArray(new FileInputStream(getImageProviderServlet().getImage(getServletContextPath(), path))));
-	        	}else {
-	        		log.debug("---- get the image through server");
-	            byte[] imageData = IOUtils.toByteArray(new URL(column.getCellValue(datum).toString()).openStream()); // TODO: this is non-performant for large sets of images - should access the images directly and not use URL to open a socket
-	            Workbook2Utils.writeImage(sheet, rowIndex, colIndex, imageData);
-	          }
+              if(getImageProviderServlet() != null) {
+                  String path = column.getCellValue(datum).toString();
+                  path = path.substring(path.indexOf("imageprovider/")+"imageprovider/".length());
+                  log.debug("---- get the image internally: "+ path);
+                  Workbook2Utils.writeImage(sheet, rowIndex, colIndex, IOUtils.toByteArray(new FileInputStream(getImageProviderServlet().getImage(getServletContextPath(), path))));
+              }else {
+                  log.debug("---- get the image through server");
+                  byte[] imageData = IOUtils.toByteArray(new URL(column.getCellValue(datum).toString()).openStream()); // TODO: this is non-performant for large sets of images - should access the images directly and not use URL to open a socket
+                  Workbook2Utils.writeImage(sheet, rowIndex, colIndex, imageData);
+              }
           }
           catch (Exception e) {
           	log.warn("Error retrieving image: ", e);

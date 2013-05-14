@@ -106,7 +106,7 @@ public class ImageProviderServlet extends HttpServlet
    * @throws IOException if the image file cannot be found
    */
   @Override
-  protected void service(HttpServletRequest req, HttpServletResponse resp) throws ServletException
+  protected void service(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException
   {
     if (log.isDebugEnabled()) {
       log.debug("ImageProviderServlet: \"" + ScreensaverConstants.IMAGES_BASE_DIR 
@@ -132,6 +132,7 @@ public class ImageProviderServlet extends HttpServlet
       else {
         resp.setContentType("image/jpeg"); // default should be ok, since not strictly req'd
       }
+      FileInputStream fis = null;
     	try {
     		File file = getImage(req.getSession().getServletContext().getRealPath("/"), pathInfo);
   			if (log.isDebugEnabled()) {
@@ -139,21 +140,15 @@ public class ImageProviderServlet extends HttpServlet
   			}
   			if(!file.exists()) {
   			  log.warn("image file not found: " + file);
-  			  //        BufferedImage image  = new BufferedImage(1, 1, BufferedImage.TYPE_INT_RGB );
-  			  //        Graphics2D    graphics = image.createGraphics();
-  			  //        graphics.setPaint ( Color.WHITE ); // it is better to use a white image
-  			  //        graphics.fillRect ( 0, 0, image.getWidth(), image.getHeight() );  
-  			  //        BufferedOutputStream bos=new BufferedOutputStream(resp.getOutputStream()); 
-  			  //        JPEGImageEncoder encoder= JPEGCodec.createJPEGEncoder(bos);
-  			  //        encoder.encode(image);
-  			  // throw new ServletException("image file not found");
   			}
-  			
-  			// note, allow IOException to be thrown if not found. (will print to the log)
-  			resp.getOutputStream().write( IOUtils.toByteArray(new FileInputStream(file)));		
+  			fis = new FileInputStream(file);
+  			resp.getOutputStream().write( IOUtils.toByteArray(fis));
     	} catch (Exception e) {
 				log.error("on serving the image for req: " + req.getPathInfo() + ", interpreted as: " + pathInfo + ", " + e.getMessage());
-				throw new ServletException("Error retrieving the image");
+				resp.sendError(resp.SC_NOT_FOUND,
+	                       "Image not found: " + pathInfo);
+    	} finally {
+    	  fis.close();
     	}
     }
     else {
