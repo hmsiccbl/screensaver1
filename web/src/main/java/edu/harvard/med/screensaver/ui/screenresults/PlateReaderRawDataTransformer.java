@@ -1179,6 +1179,7 @@ public class PlateReaderRawDataTransformer extends AbstractBackingBean
 							sheet.addCell(new jxl.write.Label(col++, 0, "Gene ID"));
 							sheet.addCell(new jxl.write.Label(col++, 0, "Genbank Accession No."));
 							sheet.addCell(new jxl.write.Label(col++, 0, "Sequence"));
+                            sheet.addCell(new jxl.write.Label(col++, 0, "Gene Name"));
 							// choose not to include these, informatics meeting 20130207
 							//							sheet.addCell(new jxl.write.Label(col++, 0, "Pool Well Plate"));
 							//							sheet.addCell(new jxl.write.Label(col++, 0, "Pool Well"));
@@ -1267,6 +1268,9 @@ public class PlateReaderRawDataTransformer extends AbstractBackingBean
 									sheet.addCell(new jxl.write.Label(col++, sheetRow, duplexReagent.getVendorGene().getEntrezgeneId()==null?"":duplexReagent.getVendorGene().getEntrezgeneId().toString()));
 									sheet.addCell(new jxl.write.Label(col++, sheetRow, Joiner.on(",").join(duplexReagent.getVendorGene().getGenbankAccessionNumbers())));
 									sheet.addCell(new jxl.write.Label(col++, sheetRow, duplexReagent.getSequence()));
+
+									sheet.addCell(new jxl.write.Label(col++, sheetRow, duplexReagent.getVendorGene() == null || duplexReagent.getVendorGene().getGeneName() == null ? "" : duplexReagent.getVendorGene().getGeneName() ));
+
 									// choose not to include these, informatics meeting 20130207
 									// sheet.addCell(new jxl.write.Label(col++, sheetRow, poolWell == null ? "" : ""+poolWell.getPlateNumber()));
 									// sheet.addCell(new jxl.write.Label(col++, sheetRow, poolWell == null ? "" : poolWell.getWellName()));
