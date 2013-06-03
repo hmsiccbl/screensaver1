@@ -36,6 +36,7 @@ import edu.harvard.med.screensaver.model.activities.AdministrativeActivity;
 import edu.harvard.med.screensaver.model.screens.ScreenType;
 import edu.harvard.med.screensaver.model.users.ChecklistItemEvent;
 import edu.harvard.med.screensaver.model.users.ScreeningRoomUser;
+import edu.harvard.med.screensaver.model.users.ScreensaverUserRole;
 import edu.harvard.med.screensaver.service.OperationRestrictedException;
 import edu.harvard.med.screensaver.util.Pair;
 
@@ -284,10 +285,15 @@ public class UserAgreementExpirationUpdater extends AdminEmailApplication
       else {
         // send user an email
         for (Pair<ScreeningRoomUser,ChecklistItemEvent> pair : pairList) {
+          String roleName = "default";
+          ScreensaverUserRole role = DataSharingLevelMapper.getPrimaryDataSharingLevelRoleForUser(_screenType, pair.getFirst());
+          if (role != null){
+            roleName = role.getDisplayableRoleName();
+          }
           String message = MessageFormat.format(notificationSubjectAndMessage.getSecond(),
                                                 _screenType,
                                                 EXPIRE_DATE_FORMATTER.print(expireDate),
-                                                DataSharingLevelMapper.getPrimaryDataSharingLevelRoleForUser(_screenType, pair.getFirst()).getDisplayableRoleName());
+                                                roleName);
           if(sendEmail(notificationSubjectAndMessage.getFirst().replace("{0}", _screenType.getValue()), message, pair.getFirst())) {
             _userAgreementUpdater.setLastNotifiedUserAgreementChecklistItemEvent(pair.getFirst(), pair.getSecond(), _screenType);
           }

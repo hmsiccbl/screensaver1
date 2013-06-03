@@ -108,6 +108,14 @@ public class UserAgreementUpdaterTest extends AbstractSpringPersistenceTest
     user2.setLoginId("user2");
     user2.addScreensaverUserRole(ScreensaverUserRole.SM_DSL_LEVEL1_MUTUAL_SCREENS);
     genericEntityDao.persistEntity(user2);
+    
+    // create an expired user, but remove her roles, she should not then be notified
+    ScreeningRoomUser user3 = new ScreeningRoomUser("expired, no roles", "User3");
+    user3.setEmail("notexpired@screensaver.med.harvard.edu");
+    user3.setLoginId("user3");
+    //user2.addScreensaverUserRole(ScreensaverUserRole.SM_DSL_LEVEL1_MUTUAL_SCREENS);
+    genericEntityDao.persistEntity(user3);
+    
 
     flushAndClear();
 
@@ -121,6 +129,7 @@ public class UserAgreementUpdaterTest extends AbstractSpringPersistenceTest
     user1 = genericEntityDao.reloadEntity(user1);
     userExpired2YearsAgo = genericEntityDao.reloadEntity(userExpired2YearsAgo);
     user2 = genericEntityDao.reloadEntity(user2);
+    user3 = genericEntityDao.reloadEntity(user3);
     admin = genericEntityDao.reloadEntity(admin);
     
     InputStream inputStream = new ByteArrayInputStream("contents".getBytes());
@@ -141,11 +150,14 @@ public class UserAgreementUpdaterTest extends AbstractSpringPersistenceTest
     LocalDate date2 = new LocalDate();
     date2 = date2.plusYears(1);
     ChecklistItemEvent cieToBeNotified = user2.createChecklistItemActivationEvent(checklistItem, date2, admin);
+    ChecklistItemEvent cieToBeDeactivated = user3.createChecklistItemActivationEvent(checklistItem, date1, admin);
+    cieToBeDeactivated.createChecklistItemExpirationEvent(new LocalDate(), admin);
 
     flushAndClear();
 
     user1 = genericEntityDao.reloadEntity(user1);
     user2 = genericEntityDao.reloadEntity(user2);
+    user3 = genericEntityDao.reloadEntity(user3);
     userExpired2YearsAgo = genericEntityDao.reloadEntity(userExpired2YearsAgo);
     
     // first find the user with the old event first
@@ -156,6 +168,7 @@ public class UserAgreementUpdaterTest extends AbstractSpringPersistenceTest
     assertTrue(contains(user1, expiredSet));
     assertTrue(contains(userExpired2YearsAgo, expiredSet));
     assertFalse(contains(user2, expiredSet));
+    assertFalse(contains(user3, expiredSet));
     assertEquals(2,expiredSet.size());
     
     // now move the date out 
@@ -166,6 +179,7 @@ public class UserAgreementUpdaterTest extends AbstractSpringPersistenceTest
     assertTrue(contains(user1, expiredSet));
     assertTrue(contains(userExpired2YearsAgo, expiredSet));
     assertTrue(contains(user2, expiredSet));
+    assertFalse(contains(user3, expiredSet));
     assertEquals(3,expiredSet.size());
     
     // set the notification flag on the SRU
