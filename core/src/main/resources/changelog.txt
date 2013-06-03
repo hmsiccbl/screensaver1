@@ -2,7 +2,7 @@ Screensaver-core release notes
 
 Version 2012-08-01 - Rev 1
 
-- added the dependency for the "0_hibernate-core-patch" back in to the parent pom.xml.  This was removed in error with the last release.   
+- added the dependency for the "0_hibernate-core-patch" back in to the parent pom.xml.  This was removed in error with the last release.
 
 Version 2012-02-24_
 
@@ -11,6 +11,11 @@ Version 2012-02-24_
 
 Version 2012-01-12-maint1
 
-[#3356] StudyCreator out of memory error 
+[#3356] StudyCreator out of memory error
 see: http://forge.abcd.harvard.edu/gf/project/screensaver/tracker/?action=TrackerItemEdit&tracker_item_id=3356&start=0
 detail: Memory performance fix to StudyAnnotationParser to populate the Study-Reagent link table outside of HQL
+
+Version 2013-06-03
+
+#104 User agreement expiration notification being sent repeatedly
+- fixed NPE caused by trying to obtain user's role name when the user has no roles
