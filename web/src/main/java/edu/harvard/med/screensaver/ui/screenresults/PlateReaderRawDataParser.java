@@ -8,6 +8,7 @@ import java.io.FileReader;
 import java.io.IOException;
 import java.nio.channels.FileChannel;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -840,12 +841,20 @@ public class PlateReaderRawDataParser {
 				}
 				int begin = Integer.parseInt(range[0]);
 				int end = Integer.parseInt(range[1]);
-				if (end<begin) { int tmp=end; end=begin; begin=tmp; }
-				for(int i=begin; i<=end; i++) plates.add(i);
+				// for issue #105 Preserve the user entered ordering for the plate list
+        //if (end<begin) { int tmp=end; end=begin; begin=tmp; }
+				int dir = 1;
+        if (end<begin) dir = -1;
+//        for(int i=begin; i<=end; i++) plates.add(i);
+				for(int i=begin; i != end+dir; ){
+				  plates.add(i);
+				  i += dir;
+				}
 			}else {
 				plates.add(Integer.parseInt(arg));
 			}
 		}
+		
 		return plates.toArray(new Integer[] {});
 	}	
   

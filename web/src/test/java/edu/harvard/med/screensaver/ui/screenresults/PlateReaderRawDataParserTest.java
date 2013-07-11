@@ -43,14 +43,22 @@ public class PlateReaderRawDataParserTest extends TestCase
 		assertEquals("range 1 wrong", parsedOutput.get(range1Label), expected1);
 		assertEquals("range 2 wrong", parsedOutput.get(range2Label), expected2);
 	}
-	
-	public void testPlateRangeParser() {
-		String range = "1-3, 5";
-		Integer[] expected = { 1,2,3,5 };
-		Integer[] actual = PlateReaderRawDataParser.expandPlatesArg(range);
-//		assertEquals("expected, returned: " + Joiner.on(",").join(expected) + ", " + Joiner.on(",").join(actual) ,expected, actual);
-		assertEquals(Joiner.on(",").join(expected),Joiner.on(",").join(actual));
-	}
+  
+  public void testPlateRangeParser() {
+    String range = "1-3, 5";
+    Integer[] expected = { 1,2,3,5 };
+    Integer[] actual = PlateReaderRawDataParser.expandPlatesArg(range);
+//    assertEquals("expected, returned: " + Joiner.on(",").join(expected) + ", " + Joiner.on(",").join(actual) ,expected, actual);
+    assertEquals(Joiner.on(",").join(expected),Joiner.on(",").join(actual));
+  } 
+  
+  public void testDescendingPlateRangeParser() {
+    String range = "3-1, 5";
+    Integer[] expected = { 3,2,1,5 };
+    Integer[] actual = PlateReaderRawDataParser.expandPlatesArg(range);
+//    assertEquals("expected, returned: " + Joiner.on(",").join(expected) + ", " + Joiner.on(",").join(actual) ,expected, actual);
+    assertEquals(Joiner.on(",").join(expected),Joiner.on(",").join(actual));
+  }
 	
 	public void testWellRangeParser() {
 		String input = "O19-Q22";
