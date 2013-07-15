@@ -148,7 +148,7 @@ public class ImageProviderServlet extends HttpServlet
 				resp.sendError(resp.SC_NOT_FOUND,
 	                       "Image not found: " + pathInfo);
     	} finally {
-    	  fis.close();
+    	  if (fis!= null)  fis.close();
     	}
     }
     else {
