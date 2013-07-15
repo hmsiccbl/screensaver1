@@ -228,7 +228,11 @@ public class ScreenSearchResults extends EntityBasedEntitySearchResults<Screen,I
       @Override
       public Set<String> getCellValue(Screen screen)
       {
-        return Sets.newHashSet(Iterables.transform(screen.getScreenResult().getAssayReadoutTypes(), Functions.toStringFunction())); 
+        if( screen.getScreenResult() != null){ // conditional check, fixes issue #107 - adding the "Assay Readout Type" column causes an exception
+          return Sets.newHashSet(Iterables.transform(screen.getScreenResult().getAssayReadoutTypes(), Functions.toStringFunction()));
+        }else{
+          return Sets.newHashSet();
+        }
       }
     });
     columns.get(columns.size() - 1).setAdministrative(true);
