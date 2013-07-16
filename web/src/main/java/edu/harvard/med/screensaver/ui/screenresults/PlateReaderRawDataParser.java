@@ -356,7 +356,9 @@ public class PlateReaderRawDataParser {
 		  	} else {
 		      Matcher matcher = rowPattern.matcher(s);
 		      if (matcher.matches()) {
-		      	readMatrix.add(s.split("\\s+"));
+		        String[] row = s.split("\\s+");
+		        row = Arrays.copyOfRange(row, 1, row.length);
+		      	readMatrix.add(row);
 		      }else {
 		      	inMatrix = false;
 		      	plateMatrices.add(readMatrix);
@@ -473,12 +475,15 @@ public class PlateReaderRawDataParser {
 					for(String[] row:matrix)
 					{
 						//logger.info("matrix: " + i + ", row: " + j + ", lps: " + lps);
-						for(k=1;k<row.length;k++) // k=1 skip the row label
+//            for(k=1;k<row.length;k++) // k=1 skip the row label
+            for(k=0;k<row.length;k++) // k=1 skip the row label
 						{
-							int sheetRow = j * (row.length-1) + k;
+//              int sheetRow = j * (row.length-1) + k;
+              int sheetRow = j * (row.length) + k +1;
 							String plateName = StringUtils.isEmpty(sheetNamePrefix) ? ""+plate : sheetNamePrefix + "_" + plate;
 							sheet.addCell(new jxl.write.Label(0,sheetRow,plateName)); // Plate
-							WellKey wellKey = new WellKey(plate,j,k-1 ); // j==row (letter) and k==col (number)
+//              WellKey wellKey = new WellKey(plate,j,k-1 ); // j==row (letter) and k==col (number)
+              WellKey wellKey = new WellKey(plate,j,k ); // j==row (letter) and k==col (number)
 							sheet.addCell(new jxl.write.Label(wellCol,sheetRow, wellKey.getWellName()));
 							
 							wellWriter.writeWell(sheet, sheetRow, wellKey, baseColumns.length);

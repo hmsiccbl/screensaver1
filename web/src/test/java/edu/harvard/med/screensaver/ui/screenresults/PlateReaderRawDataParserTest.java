@@ -14,6 +14,7 @@ import com.google.common.collect.Lists;
 import com.google.common.collect.Sets;
 
 import edu.harvard.med.screensaver.model.libraries.WellName;
+import edu.harvard.med.screensaver.ui.screenresults.PlateReaderRawDataParser.MatrixOrder;
 import edu.harvard.med.screensaver.ui.screenresults.PlateReaderRawDataParser.Odometer;
 
 public class PlateReaderRawDataParserTest extends TestCase
@@ -276,5 +277,102 @@ public class PlateReaderRawDataParserTest extends TestCase
 		
 		reading = odometer.getReading(23);
 		assertEquals(ImmutableList.of(3,"condition2", 12),reading);
+
+//    List<Integer> plates = ImmutableList.of(new Integer[] {1,4,6,12});
+//    List<String> conditions = ImmutableList.of(new String[] {"condition1", "condition2"});
+//    List<Integer> replicates = ImmutableList.of(new Integer[] {1,2,3});
+		odometer = new Odometer(plates,replicates,conditions);
+		
+    reading = odometer.getReading(0);
+    assertEquals(ImmutableList.of(1,1,"condition1"),reading);
+    
+    reading = odometer.getReading(1);
+    assertEquals(ImmutableList.of(4,1,"condition1"),reading);
+    
+    reading = odometer.getReading(2);
+    assertEquals(ImmutableList.of(6,1,"condition1"),reading);
+    
+    reading = odometer.getReading(3);
+    assertEquals(ImmutableList.of(12,1,"condition1"),reading);
+    
+    reading = odometer.getReading(4);
+    assertEquals(ImmutableList.of(1,2,"condition1"),reading);
+
+	}
+	
+	public void testMatrixOrder(){
+
+    String[] readouts = {"readout1", "readout2"};
+    String[] replicates = {"1","2","3"};    
+    String[] conditions = {"condition1", "condition2"};
+	  Integer[] plates = {1,4,6,12};
+    
+    CollationOrder ordering = new CollationOrder(
+        ImmutableList.of(PlateOrderingGroup.Plates, 
+                         PlateOrderingGroup.Quadrants, 
+                         PlateOrderingGroup.Conditions, 
+                         PlateOrderingGroup.Replicates, 
+                         PlateOrderingGroup.Readouts));
+	  
+    PlateReaderRawDataParser.MatrixOrder matrixOrder = 
+        new PlateReaderRawDataParser.MatrixOrder(
+            ordering, plates, conditions, readouts, replicates);
+    
+    assertEquals(matrixOrder.getReadout(0), "readout1");
+    assertEquals(matrixOrder.getReadout(1), "readout2");
+    assertEquals(matrixOrder.getReadout(2), "readout1");
+    assertEquals(matrixOrder.getReadout(3), "readout2");
+    assertEquals(matrixOrder.getReadout(6), "readout1");
+    assertEquals(matrixOrder.getReadout(12), "readout1");
+    assertEquals(matrixOrder.getReadout(18), "readout1");
+    assertEquals(matrixOrder.getReadout(19), "readout2");
+    assertEquals(matrixOrder.getReadout(32), "readout1");
+    assertEquals(matrixOrder.getReadout(33), "readout2");
+     
+    assertEquals(matrixOrder.getReplicate(0), "1");
+    assertEquals(matrixOrder.getReplicate(1), "1");
+    assertEquals(matrixOrder.getReplicate(2), "2");
+    assertEquals(matrixOrder.getReplicate(3), "2");
+    assertEquals(matrixOrder.getReplicate(4), "3");
+    assertEquals(matrixOrder.getReplicate(5), "3");
+    assertEquals(matrixOrder.getReplicate(6), "1");
+    assertEquals(matrixOrder.getReplicate(12), "1");
+    assertEquals(matrixOrder.getReplicate(18), "1");
+    assertEquals(matrixOrder.getReplicate(24), "1");
+    assertEquals(matrixOrder.getReplicate(30), "1");
+    assertEquals(matrixOrder.getReplicate(31), "1");
+    assertEquals(matrixOrder.getReplicate(32), "2");
+    assertEquals(matrixOrder.getReplicate(34), "3");
+    assertEquals(matrixOrder.getReplicate(35), "3");
+    assertEquals(matrixOrder.getReplicate(36), "1");
+    
+    assertEquals(matrixOrder.getCondtion(0), "condition1");
+    assertEquals(matrixOrder.getCondtion(1), "condition1");
+    assertEquals(matrixOrder.getCondtion(2), "condition1");
+    assertEquals(matrixOrder.getCondtion(3), "condition1");
+    assertEquals(matrixOrder.getCondtion(4), "condition1");
+    assertEquals(matrixOrder.getCondtion(5), "condition1");
+    assertEquals(matrixOrder.getCondtion(6), "condition2");
+    assertEquals(matrixOrder.getCondtion(12), "condition1");
+    assertEquals(matrixOrder.getCondtion(18), "condition2");
+    assertEquals(matrixOrder.getCondtion(24), "condition1");
+    assertEquals(matrixOrder.getCondtion(30), "condition2");
+    assertEquals(matrixOrder.getCondtion(35), "condition2");
+    assertEquals(matrixOrder.getCondtion(36), "condition1");
+    
+    
+    assertEquals(matrixOrder.getPlate(0), new Integer(1));
+    assertEquals(matrixOrder.getPlate(1), new Integer(1));
+    assertEquals(matrixOrder.getPlate(2), new Integer(1));
+    assertEquals(matrixOrder.getPlate(3), new Integer(1));
+    assertEquals(matrixOrder.getPlate(4), new Integer(1));
+    assertEquals(matrixOrder.getPlate(8), new Integer(1));
+    assertEquals(matrixOrder.getPlate(12), new Integer(4));
+    assertEquals(matrixOrder.getPlate(23), new Integer(4));
+    assertEquals(matrixOrder.getPlate(24), new Integer(6));
+    assertEquals(matrixOrder.getPlate(35), new Integer(6));
+    assertEquals(matrixOrder.getPlate(36), new Integer(12));
+    assertEquals(matrixOrder.getPlate(47), new Integer(12));
+	  
 	}
 }
