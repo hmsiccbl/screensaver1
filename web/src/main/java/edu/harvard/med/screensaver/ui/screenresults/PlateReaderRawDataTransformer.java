@@ -72,6 +72,8 @@ import edu.harvard.med.screensaver.ui.arch.view.AbstractBackingBean;
 import edu.harvard.med.screensaver.ui.arch.view.aspects.UICommand;
 import edu.harvard.med.screensaver.ui.cherrypickrequests.CherryPickRequestViewer;
 import edu.harvard.med.screensaver.ui.screenresults.PlateReaderRawDataParser.MatrixOrder;
+import edu.harvard.med.screensaver.ui.screenresults.PlateReaderRawDataParser.MatrixOrder1536;
+import edu.harvard.med.screensaver.ui.screenresults.PlateReaderRawDataParser.MatrixOrderPattern;
 import edu.harvard.med.screensaver.ui.screens.ScreenViewer;
 import edu.harvard.med.screensaver.util.NullSafeUtils;
 import edu.harvard.med.screensaver.util.StringUtils;
@@ -472,19 +474,15 @@ public class PlateReaderRawDataTransformer extends AbstractBackingBean
     private Integer _replicates;
     private String _readouts;
     private UISelectOneBean<CollationOrder> _collationOrder =
-      new UISelectOneBean<CollationOrder>(ImmutableList.of(new CollationOrder(ImmutableList.of(PlateOrderingGroup.Plates, PlateOrderingGroup.Quadrants, PlateOrderingGroup.Conditions, PlateOrderingGroup.Replicates, PlateOrderingGroup.Readouts)),
-                                                           new CollationOrder(ImmutableList.of(PlateOrderingGroup.Plates, PlateOrderingGroup.Quadrants, PlateOrderingGroup.Replicates, PlateOrderingGroup.Conditions, PlateOrderingGroup.Readouts)),
-                                                           new CollationOrder(ImmutableList.of(PlateOrderingGroup.Conditions, PlateOrderingGroup.Plates, PlateOrderingGroup.Quadrants, PlateOrderingGroup.Replicates, PlateOrderingGroup.Readouts)),
-                                                           new CollationOrder(ImmutableList.of(PlateOrderingGroup.Conditions, PlateOrderingGroup.Replicates, PlateOrderingGroup.Plates, PlateOrderingGroup.Quadrants, PlateOrderingGroup.Readouts)),
-                                                           new CollationOrder(ImmutableList.of(PlateOrderingGroup.Replicates, PlateOrderingGroup.Plates, PlateOrderingGroup.Quadrants, PlateOrderingGroup.Conditions, PlateOrderingGroup.Readouts)),
-                                                           new CollationOrder(ImmutableList.of(PlateOrderingGroup.Replicates, PlateOrderingGroup.Conditions, PlateOrderingGroup.Plates, PlateOrderingGroup.Quadrants, PlateOrderingGroup.Readouts)),
-      new CollationOrder(ImmutableList.of(PlateOrderingGroup.Replicates, PlateOrderingGroup.Conditions, PlateOrderingGroup.Readouts, PlateOrderingGroup.Plates, PlateOrderingGroup.Quadrants)),
-      new CollationOrder(ImmutableList.of(PlateOrderingGroup.Replicates, PlateOrderingGroup.Readouts, PlateOrderingGroup.Conditions, PlateOrderingGroup.Plates, PlateOrderingGroup.Quadrants)),
-      new CollationOrder(ImmutableList.of(PlateOrderingGroup.Readouts, PlateOrderingGroup.Replicates, PlateOrderingGroup.Conditions, PlateOrderingGroup.Plates, PlateOrderingGroup.Quadrants)),
-      new CollationOrder(ImmutableList.of(PlateOrderingGroup.Readouts, PlateOrderingGroup.Conditions,PlateOrderingGroup.Replicates, PlateOrderingGroup.Plates, PlateOrderingGroup.Quadrants)),
-      new CollationOrder(ImmutableList.of(PlateOrderingGroup.Conditions, PlateOrderingGroup.Readouts, PlateOrderingGroup.Replicates, PlateOrderingGroup.Plates, PlateOrderingGroup.Quadrants)),
-      new CollationOrder(ImmutableList.of(PlateOrderingGroup.Conditions, PlateOrderingGroup.Replicates, PlateOrderingGroup.Readouts, PlateOrderingGroup.Plates, PlateOrderingGroup.Quadrants))
-      
+      new UISelectOneBean<CollationOrder>(ImmutableList.of(
+          new CollationOrder(ImmutableList.of(PlateOrderingGroup.Plates, PlateOrderingGroup.Quadrants, PlateOrderingGroup.Conditions, PlateOrderingGroup.Replicates, PlateOrderingGroup.Readouts)),
+          new CollationOrder(ImmutableList.of(PlateOrderingGroup.Plates, PlateOrderingGroup.Quadrants, PlateOrderingGroup.Replicates, PlateOrderingGroup.Conditions, PlateOrderingGroup.Readouts)),
+          new CollationOrder(ImmutableList.of(PlateOrderingGroup.Conditions, PlateOrderingGroup.Plates, PlateOrderingGroup.Quadrants, PlateOrderingGroup.Replicates, PlateOrderingGroup.Readouts)),
+          new CollationOrder(ImmutableList.of(PlateOrderingGroup.Conditions, PlateOrderingGroup.Replicates, PlateOrderingGroup.Plates, PlateOrderingGroup.Quadrants, PlateOrderingGroup.Readouts)),
+          new CollationOrder(ImmutableList.of(PlateOrderingGroup.Replicates, PlateOrderingGroup.Plates, PlateOrderingGroup.Quadrants, PlateOrderingGroup.Conditions, PlateOrderingGroup.Readouts)),
+          new CollationOrder(ImmutableList.of(PlateOrderingGroup.Replicates, PlateOrderingGroup.Conditions, PlateOrderingGroup.Plates, PlateOrderingGroup.Quadrants, PlateOrderingGroup.Readouts))
+
+
           ));
     private Integer _expectedPlateMatrixCount;
     private Integer _uploadedPlateMatrixCount;
@@ -953,9 +951,9 @@ public class PlateReaderRawDataTransformer extends AbstractBackingBean
     
     InputStream multiFileInputStream = null;
     
-		int aps = getFormOne().getAssayPlateSize().getWellCount();
-		int lps = getFormOne().getLibraryPlateSize().getWellCount();
-    List<MatrixOrder> combinedPlateOrderings = Lists.newArrayList();
+		final int aps = getFormOne().getAssayPlateSize().getWellCount();
+		final int lps = getFormOne().getLibraryPlateSize().getWellCount();
+    List<MatrixOrderPattern> combinedPlateOrderings = Lists.newArrayList();
     List<List<String[]>> combinedParsedMatrices = Lists.newArrayList();
     int expectedPlateMatrices = 0;
     int expectedMatricesReadIn = 0;
@@ -987,12 +985,19 @@ public class PlateReaderRawDataTransformer extends AbstractBackingBean
 			if(conditions.isEmpty()) conditions.add("condition1");
 
       try {
-  			MatrixOrder matrixOrder = 
+  			MatrixOrderPattern matrixOrder = 
   					new MatrixOrder(inputFile.getCollationOrder1(), 
   							plates, 
   							conditions.toArray(new String[] {}), 
   							assayReadouts.toArray(new String[] {}), 
   							replicates);
+  			if(aps == 1536){
+  			  matrixOrder = new MatrixOrder1536(inputFile.getCollationOrder1(), 
+              plates, 
+              conditions.toArray(new String[] {}), 
+              assayReadouts.toArray(new String[] {}), 
+              replicates);
+  			}
   			int tempPlateMatrices = matrixOrder.getExpectedMatrixCount();
   			expectedPlateMatrices += tempPlateMatrices;
   			int tempMatricesToReadIn = tempPlateMatrices * lps / aps;
@@ -1011,6 +1016,9 @@ public class PlateReaderRawDataTransformer extends AbstractBackingBean
   			inputFile.setExpectedPlateMatrixCount(tempPlateMatrices);
   			inputFile.setUploadedPlateMatrixCount(tempMatricesToReadIn);
 
+  			// TODO: converting the matrices into the "standard" 384 format here for all cases, 96to384 and 1536to384
+  			// instead, could convert nothing, but use the "convert" functions to convert each cell at write time.
+  			// since doing it this way leads to making assumptions about plate/quadrant ordering that differ for 96 and 1536
   			List<List<String[]>> newMatrices = 
   					PlateReaderRawDataParser.convertMatrixFormat(aps, lps, parsedMatrices);
   			if(newMatrices.size() !=  tempPlateMatrices ) {
@@ -1037,7 +1045,7 @@ public class PlateReaderRawDataTransformer extends AbstractBackingBean
 		    final PlateReaderRawDataParser.WellFinder finder = 
 		    		new PlateReaderRawDataParser.WellFinder()
 		    {
-		    	int MAXSIZE_PLATES = 20;
+		    	int MAXSIZE_PLATES = 40;
 		    	// Construct the LHM with "true" for least-accessed-first order
 		    	LinkedHashMap<Integer,Map<WellKey, Well>> plateWellMap = 
 		    			new LinkedHashMap<Integer, Map<WellKey,Well>>(MAXSIZE_PLATES,0.75f,true);
@@ -1117,6 +1125,7 @@ public class PlateReaderRawDataTransformer extends AbstractBackingBean
 						int i = 0;
 						int typeCol = baseColumns + i++;
 						int excludeCol = baseColumns + i++;
+            int col = baseColumns + i + numberOfValueColumns;
 						WellName wellNameReadIn = new WellName(wellReadIn.getWellName());
 						if(plateControls1.containsKey(wellReadIn)) {
 							sheet.addCell(new jxl.write.Label(typeCol, sheetRow, plateControls1.get(wellReadIn).getAbbreviation()));
@@ -1129,7 +1138,6 @@ public class PlateReaderRawDataTransformer extends AbstractBackingBean
 							String abbreviation = well==null?"U":well.getLibraryWellType().getAbbreviation();
 							sheet.addCell(new jxl.write.Label(typeCol, sheetRow, abbreviation));
 							if(_screenViewer.getEntity().getScreenType() == ScreenType.RNAI) {
-								int col = baseColumns + i + numberOfValueColumns;
 								SilencingReagent sr = ((SilencingReagent)well.getLatestReleasedReagent());
 								Gene gene = sr == null ? null : sr.getVendorGene();
 								sheet.addCell(new jxl.write.Label(col++, sheetRow, gene == null ? "" : Joiner.on(",").join(gene.getEntrezgeneSymbols())));
@@ -1153,6 +1161,7 @@ public class PlateReaderRawDataTransformer extends AbstractBackingBean
 
 				PlateReaderRawDataParser.writeParsedMatrices(
 						"", // + _screenViewer.getEntity().getFacilityId(),
+						aps, lps,
 						plates, 
 						combinedPlateOrderings, 
 						combinedParsedMatrices,
@@ -1304,6 +1313,7 @@ public class PlateReaderRawDataTransformer extends AbstractBackingBean
 				
 				PlateReaderRawDataParser.writeParsedMatrices(
 						"CP" + _cherryPickRequestViewer.getEntity().getCherryPickRequestId(),
+						aps, lps,
 						plates, 
 						combinedPlateOrderings, 
 						combinedParsedMatrices,

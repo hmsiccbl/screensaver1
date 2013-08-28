@@ -1,18 +1,16 @@
 IMPORTANT: ICCB-L/NSRB screen data due to be shared at Level 1
 Dear ICCB-L/NSRB screener:
 
-According to our records, the data associated with your screen, #{0}, 
-entitled "{1}", 
-with the current data sharing level: {2}, 
-will convert to Level 1 sharing on {3},  
-in accordance with the ICCB-L/NSRB user agreement that you   
-have signed.  Please note that Level 1 sharing occurs only within the   
-context of the Screensaver database and is not the same as public   
-release.  If you wish to delay conversion to Level 1 sharing, you must   
-provide a written request and justification for consideration by the   
-Advisory Committee that is responsible for your screen (ICCB-L or NSRB). 
+According to our records, the data associated with your screen, #{0},
+entitled "{1}",
+with the current data sharing level: {2},
+will convert to Level 1 sharing on {3},
+in accordance with the ICCB-L/NSRB user agreement that you
+have signed.  Please note that Level 1 sharing occurs only within the
+context of the Screensaver database and is not the same as public
+release.  If you wish to delay conversion to Level 1 sharing, you must
+provide a written request and justification for consideration by the
+Advisory Committee that is responsible for your screen (ICCB-L or NSRB).
 
-For requests or questions relating to ICCB-L screens, please contact
-Jen Smith (jennifer_smith@hms.harvard.edu). 
-
-For NSRB screens, please contact Su Chiang (su_chiang@hms.harvard.edu).
+For requests or questions relating to screens, please contact
+Jen Smith (jennifer_smith@hms.harvard.edu).

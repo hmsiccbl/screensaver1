@@ -21,16 +21,16 @@
         	rendered="#{plateReaderRawDataTransformer.isCherryPickParse}"
         	editable="false"
         	value="#{plateReaderRawDataTransformer.cherryPickRequest.cherryPickRequestId}"
-        	type="Text" 
+        	type="Text"
         />
-        
+
         <ss:property id="plateNumbers" label="Plate Numbers"
           description="Specify the ordered set of plate numbers for which data is being uploaded and transformed using individual plate numbers and/or ranges (e.g. &quot;90, 92, 98-103&quot;)"
           editable="true"
           value="#{plateReaderRawDataTransformer.formOne.plates}"
           type="Textarea" editWidth="20" edithHeight="10"
           required="true" />
-          
+
         <ss:property id="outputFileName" label="Output File Name"
           description="The name of the Excel file that will be generated and downloaded (leave empty for default naming)"
           editable="true"

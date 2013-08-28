@@ -1,14 +1,12 @@
 Notice: Impending Expiration of {0} ICCB-L/NSRB User Agreement
 Dear Screensaver User:
 
-According to our records, your {0} ICCB-L/NSRB user agreement will expire  
+According to our records, your {0} ICCB-L/NSRB user agreement will expire
 on {1}. Your current data sharing level is:
-{2}. If you wish to retain access to Screensaver 
-after the expiration date, please complete and return a new user agreement. 
-The agreement and related information are available online at 
-http://iccb.med.harvard.edu/faq/screening-documents/. 
+{2}. If you wish to retain access to Screensaver
+after the expiration date, please complete and return a new user agreement.
+The agreement and related information are available online at
+http://iccb.med.harvard.edu/faq/screening-documents/.
 
 If you have additional questions, please contact:
-Jen Smith (jennifer_smith@hms.harvard.edu) 
-or 
-Su Chiang (su_chiang@hms.harvard.edu).
+Jen Smith (jennifer_smith@hms.harvard.edu)

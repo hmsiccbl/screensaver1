@@ -206,7 +206,7 @@ public class PlateReaderRawDataParser {
 			String[] readouts = cmdLine.getOptionValue("readouts").split(",");
 			String inputFilePath = cmdLine.getOptionValue("input_file");
 			
-			MatrixOrder matrixOrder = new MatrixOrder(ordering, plates, conditions, readouts, replicates);
+			MatrixOrderPattern matrixOrder = new MatrixOrder(ordering, plates, conditions, readouts, replicates);
 			int expectedMatricesCreated = matrixOrder.getExpectedMatrixCount();
 			int expectedMatricesReadIn = expectedMatricesCreated * lps / aps;
 			
@@ -273,6 +273,7 @@ public class PlateReaderRawDataParser {
 			File outputFile = File.createTempFile(outputFileName, ".xls");
 			writeParsedMatrices(
 					"", 
+					aps,lps,
 					plates, 
 					Lists.newArrayList(matrixOrder), 
 					newMatrices, 
@@ -351,7 +352,6 @@ public class PlateReaderRawDataParser {
 		  if (headerMatcher.matches() || inMatrix) {
 		  	if (!inMatrix) {
 		  		readMatrix = Lists.newArrayList();
-		    	logger.info("matched header at line: " + line);
 		  		inMatrix = true;
 		  	} else {
 		      Matcher matcher = rowPattern.matcher(s);
@@ -392,8 +392,9 @@ public class PlateReaderRawDataParser {
 	 */
 	public static void writeParsedMatrices(
 			String sheetNamePrefix,
+			int aps, int lps,
 			Integer[] plates, 
-			List<MatrixOrder> matrixOrders,
+			List<MatrixOrderPattern> matrixOrders,
 			List<List<String[]>> combinedPlateMatrices,
 			SheetHeaderWriter sheetHeaderWriter,
 			WellWriter wellWriter,
@@ -405,13 +406,33 @@ public class PlateReaderRawDataParser {
 		WritableWorkbook workbook = Workbook.createWorkbook(outputFile);
 		Map<Integer,WritableSheet> sheets = Maps.newHashMap();
 		String[] baseColumns = new String[] { "Plate", "Well"};
+		if(aps>lps){
+		  baseColumns = new String[] { "Plate", "Well", "Source Plate", "Quadrant", "SourceWell"};
+		}else if(lps>aps){
+      baseColumns = new String[] { "Plate", "Well", "Source Plate", "SourceWell"};
+		}
 		int wellCol = 1;
 		
 		int i=0;
-		for(Integer plate:plates) {
+//		for(Integer plate:plates) {
+		for(i=0; i<plates.length; ){
 			String temp = "";
 			if(!StringUtils.isEmpty(sheetNamePrefix)) temp = sheetNamePrefix + "_";
-			sheets.put(plate,workbook.createSheet(temp + plate, i++));
+			int plate = plates[i];
+			if(aps>lps && i%(aps/lps)==0){ // i.e. if 1536 aps
+			  int j = i;
+        String sourcePlateName = "" + plates[j++];
+        sourcePlateName += "," + plates[j++];
+        sourcePlateName += "," + plates[j++];
+        sourcePlateName += "," + plates[j++];
+        WritableSheet sheet = workbook.createSheet(sourcePlateName, i);
+        sheets.put(plates[i++], sheet);
+        sheets.put(plates[i++], sheet);
+        sheets.put(plates[i++], sheet);
+        sheets.put(plates[i++], sheet);
+			}else{
+			  sheets.put(plate,workbook.createSheet(temp + plate, i++));
+			}
 		}
 		
 		// Write the value column header labels, map header label to column position
@@ -419,7 +440,7 @@ public class PlateReaderRawDataParser {
 		int cumulativeMatrixCount = 0;
 		int inputSetNumber = 0;
 		// First, build a list of value columns, mapped to their relative position to the first value column
-		for(MatrixOrder matrixOrder:matrixOrders) {
+		for(MatrixOrderPattern matrixOrder:matrixOrders) {
 			Map<String,Integer> columns = matrixOrder.getColumnNamesToMatrixOrder();
 			for(Map.Entry<String,Integer> entry:columns.entrySet()) {
 				// adjust columns for cumulative position and entryset
@@ -448,7 +469,7 @@ public class PlateReaderRawDataParser {
 		// Now write the matrices
 		cumulativeMatrixCount = 0;
 		inputSetNumber = 0;
-		for(MatrixOrder matrixOrder:matrixOrders) {
+		for(MatrixOrderPattern matrixOrder:matrixOrders) {
 			logger.info("writing matrix set: " + inputSetNumber);
 			List<List<String[]>> plateMatrices = 
 					combinedPlateMatrices.subList(
@@ -462,7 +483,14 @@ public class PlateReaderRawDataParser {
 			{
 				for(List<String[]> matrix:plateMatrices) 
 				{
-					String colName = matrixOrder.getColName(i);
+          // Source plate/well; use aps, lps in reverse order
+          int quadrant = 0;
+          int sourcePlate = i;
+          if(lps < aps){
+            quadrant = sourcePlate%(aps/lps);
+          }
+
+          String colName = matrixOrder.getColName(i);
 					if(!cumulativeColumns.containsKey(colName)) {
 							throw new IllegalArgumentException("Programmer error: Unexpected column: " + colName);
 					}
@@ -474,20 +502,28 @@ public class PlateReaderRawDataParser {
 					j=0;
 					for(String[] row:matrix)
 					{
-						//logger.info("matrix: " + i + ", row: " + j + ", lps: " + lps);
-//            for(k=1;k<row.length;k++) // k=1 skip the row label
             for(k=0;k<row.length;k++) // k=1 skip the row label
 						{
-//              int sheetRow = j * (row.length-1) + k;
-              int sheetRow = j * (row.length) + k +1;
+              int sheetRow = quadrant*row.length*matrix.size() + j * (row.length) + k +1;
 							String plateName = StringUtils.isEmpty(sheetNamePrefix) ? ""+plate : sheetNamePrefix + "_" + plate;
-							sheet.addCell(new jxl.write.Label(0,sheetRow,plateName)); // Plate
-//              WellKey wellKey = new WellKey(plate,j,k-1 ); // j==row (letter) and k==col (number)
+							sheet.addCell(new jxl.write.Label(0,sheetRow,plateName)); // Plate//              WellKey wellKey = new WellKey(plate,j,k-1 ); // j==row (letter) and k==col (number)
               WellKey wellKey = new WellKey(plate,j,k ); // j==row (letter) and k==col (number)
 							sheet.addCell(new jxl.write.Label(wellCol,sheetRow, wellKey.getWellName()));
 							
+              if(aps>lps) {
+                // source plate value is the sheet name
+                // quadrant and source well
+                sheet.addCell(new jxl.write.Label(wellCol+1, sheetRow, "" + sheet.getName()));
+                sheet.addCell(new jxl.write.Label(wellCol+2, sheetRow, "" + (quadrant+1)));
+                sheet.addCell(new jxl.write.Label(wellCol+3, sheetRow, "" + convertWell(new WellName(wellKey.getWellName()), lps, aps, quadrant)));
+              }else if(lps>aps){
+                // source plate value is the matrix #
+                sheet.addCell(new jxl.write.Label(wellCol+1, sheetRow, "" + i));
+                sheet.addCell(new jxl.write.Label(wellCol+2, sheetRow, "" + convertWell(new WellName(wellKey.getWellName()), aps, lps, quadrant)));
+              }
 							wellWriter.writeWell(sheet, sheetRow, wellKey, baseColumns.length);
 							wellValueWriter.writeWell(sheet, sheetRow, col, row[k]);
+							
 						}
 						j++;
 					}
@@ -524,6 +560,7 @@ public class PlateReaderRawDataParser {
 	 */
 	public static int convoluteCol(int source_plate_size, int dest_plate_size, int source_matrix_quadrant, int col)
 	{
+	  //logger.info("convolute: " + source_matrix_quadrant + ", " + col);
 		int factor = dest_plate_size/source_plate_size;  // note factor must be an integer value
 		return col * factor/2 + source_matrix_quadrant%(factor/2);
 	}
@@ -645,28 +682,119 @@ public class PlateReaderRawDataParser {
 			return deCombinedMatrices;
 		}
 	}
+	
+	
+  
+  public static interface MatrixOrderPattern{
+    public int getExpectedMatrixCount();
+    public Integer getPlate(int matrixCount);
+    public Integer getQuadrant(int matrixCount);
+    public String getCondtion(int matrixCount);
+    public String getReadout(int matrixCount);
+    public String getReplicate(int matrixCount);
+    public Map<String,Integer> getColumnNamesToMatrixOrder();
+    public String getColName(int i);
+
+  }	
+	
+	 /**
+   * Hack to make 1536 collation work, where input reads are always grouped by 4 386 well plates in the 4 quadrants of the 1536 well input
+   */
+  public static class MatrixOrder1536 implements MatrixOrderPattern
+  {
+    private Integer[] originalPlates;
+    private MatrixOrder matrixOrder;
+    
+    public MatrixOrder1536(CollationOrder ordering, Integer[] plates,
+        String[] conditions, String[] readouts, String[] replicates) {
+      this.originalPlates = plates;
+      Integer[] plates1536 = new Integer[plates.length/4];
+      for(int i=0;i<plates1536.length;i++) plates1536[i] = i;
+      Integer[] quadrants = new Integer[] {0,1,2,3};
+      
+      List<PlateOrderingGroup> _ordering = Lists.newArrayList(ordering.getOrdering());
+      _ordering.remove(PlateOrderingGroup.Quadrants);
+      _ordering.add(_ordering.size(), PlateOrderingGroup.Quadrants);
+      CollationOrder ordering1536 = new CollationOrder(_ordering);
+      this.matrixOrder = new MatrixOrder(ordering1536, plates1536, conditions, readouts, replicates, quadrants);
+    }
+
+    @Override
+    public int getExpectedMatrixCount() {
+      return this.matrixOrder.getExpectedMatrixCount();
+    }
+
+    @Override
+    public Integer getPlate(int matrixCount) {
+      int quadrant = this.matrixOrder.getQuadrant(matrixCount);
+      int plate1536 = this.matrixOrder.getPlate(matrixCount);
+      return this.originalPlates[plate1536*4+quadrant];
+    }
+
+    @Override
+    public String getCondtion(int matrixCount) {
+      return this.matrixOrder.getCondtion(matrixCount);
+    }
+
+    @Override
+    public String getReadout(int matrixCount) {
+      return this.matrixOrder.getReadout(matrixCount);
+    }
+
+    @Override
+    public String getReplicate(int matrixCount) {
+      return this.matrixOrder.getReplicate(matrixCount);
+    }
+
+    @Override
+    public Integer getQuadrant(int matrixCount) {
+      return this.matrixOrder.getQuadrant(matrixCount);
+    }
+
+    @Override
+    public Map<String, Integer> getColumnNamesToMatrixOrder() {
+      return this.matrixOrder.getColumnNamesToMatrixOrder();
+    }
+
+    public String getColName(int i) { 
+      return this.matrixOrder.getColName(i);
+    }
+    
+  }
+
  
 	/**
 	 * Specialized "Odometer" for counting through source assay plates collated using 
 	 * a combination of LibraryPlate, condition, readout and replicate ordering.
 	 */
-  public static class MatrixOrder
+  public static class MatrixOrder implements MatrixOrderPattern
   {
   	private Odometer odometer;
 		private CollationOrder ordering;
-		private int platePosition;
+    private int platePosition;
+    private int quadrantPosition;
 		private int conditionPosition;
 		private int readoutPosition;
 		private int replicatePosition;
 		private Integer[] plates;
+		private Integer[] quadrants;
 		private String[] conditions;
 		private String[] readouts;
 		private String[] replicates;
-  	public MatrixOrder(CollationOrder ordering, Integer[] plates, String[] conditions, 
-  			String[] readouts, String[] replicates)
-  	{
+		
+    public MatrixOrder(CollationOrder ordering, Integer[] plates, String[] conditions, 
+        String[] readouts, String[] replicates)
+    {
+      // create a default case for the non-1536 reads, where we aren't using quadrants.
+      // note, if 96 input weren't converted before writing, would be needed for that
+      this(ordering, plates, conditions, readouts, replicates, new Integer[] {0});
+    }
+    public MatrixOrder(CollationOrder ordering, Integer[] plates, String[] conditions, 
+          String[] readouts, String[] replicates, Integer[] quadrants)
+      {
   		this.ordering = ordering;
   		this.plates = plates;
+  		this.quadrants = quadrants;
   		this.conditions = conditions;
   		this.readouts = readouts;
   		this.replicates = replicates;
@@ -677,25 +805,27 @@ public class PlateReaderRawDataParser {
 				switch(o) {
 				case Plates:
 					orderings.add(0,Arrays.asList(plates));
-					this.platePosition = 3-i; // TODO: clean this up - for the ordering group, first position is highest significance, last lowest, so reversing here
+					this.platePosition = 4-i; // TODO: clean this up - for the ordering group, first position is highest significance, last lowest, so reversing here
 					i++;
 					break;
 				case Quadrants:
-					// NOP: quadrants are taken care of while reading
-					continue;
+          orderings.add(0,Arrays.asList(quadrants));
+          this.quadrantPosition = 4-i;
+          i++;
+          break;
 				case Conditions:
 					orderings.add(0,Arrays.asList(conditions));
-					this.conditionPosition = 3-i;
+					this.conditionPosition = 4-i;
 					i++;
 					break;
 				case Readouts:
 					orderings.add(0,Arrays.asList(readouts));
-					this.readoutPosition = 3-i;
+					this.readoutPosition = 4-i;
 					i++;
 					break;
 				case Replicates:
 					orderings.add(0,Arrays.asList(replicates));
-					this.replicatePosition = 3-i;
+					this.replicatePosition = 4-i;
 					i++;
 					break;
 				default:
@@ -716,20 +846,7 @@ public class PlateReaderRawDataParser {
   	public Map<String,Integer> getColumnNamesToMatrixOrder()
   	{
 			Map<String,Integer> columns = Maps.newHashMap();
-			// Columns will be defined by Readout_Condition_Replicate
-//			int i = 0; //baseColumns.length;
-//			for (String readout:readouts) {
-//				for (String condition:conditions) {
-//					if(conditions.length == 1) condition = "";
-//					else condition = "_" + condition;
-//					for (String replicate:replicates) {
-//						if(replicates.length==1) replicate = "";
-//						else replicate = "_" + replicate;
-//						columns.put(readout + condition + replicate, i++);
-//					}
-//				}
-//			}
-//			return columns;
+
 			
 			// Columns will be defined by Readout_Condition_Replicate
 			// Columns will be in the order of the collation order
@@ -765,6 +882,11 @@ public class PlateReaderRawDataParser {
   	{
   		return (String)this.odometer.getReading(matrixCount).get(this.replicatePosition);
   	}
+
+    @Override
+    public Integer getQuadrant(int matrixCount) {
+      return (Integer)this.odometer.getReading(matrixCount).get(this.quadrantPosition);
+    }
   }
   
 

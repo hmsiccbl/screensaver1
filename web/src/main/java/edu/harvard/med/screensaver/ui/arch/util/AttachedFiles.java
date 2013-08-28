@@ -40,6 +40,7 @@ import edu.harvard.med.screensaver.db.GenericEntityDAO;
 import edu.harvard.med.screensaver.model.AttachedFile;
 import edu.harvard.med.screensaver.model.AttachedFileType;
 import edu.harvard.med.screensaver.model.AttachedFilesEntity;
+import edu.harvard.med.screensaver.model.AuditedAbstractEntity;
 import edu.harvard.med.screensaver.ui.arch.view.AbstractBackingBean;
 import edu.harvard.med.screensaver.ui.arch.view.aspects.UICommand;
 
@@ -217,10 +218,17 @@ public class AttachedFiles extends AbstractBackingBean
         return;
       }
 
-      _entity.createAttachedFile(filename,
+      AttachedFile af = _entity.createAttachedFile(filename,
                                  _newAttachedFileType.getSelection(),
                                  _newAttachedFileDate,
                                  contentsInputStream);
+// TODO: need to log this
+//      try{
+//        ((AuditedAbstractEntity<Serializable>)_entity)
+//            .createUpdateActivity(recordedBy, "Attached the file: [id: " + af.getAttachedFileId() + ", type: "+ af.getFileType() + ", filename: " + af.getFilename())
+//      }catch(Exception e){
+//        logger.warn('Exception because the attached file entity does not support auditing: ', _entity);
+//      }
     }
     catch (IOException e) {
       reportApplicationError("could not attach the file contents");

@@ -300,6 +300,25 @@ public class PlateReaderRawDataParserTest extends TestCase
 
 	}
 	
+	public void testMatrixCollate(){
+	  
+    String[] readouts = {"readout1", "readout2"};
+    String[] replicates = {"1","2","3"};    
+    String[] conditions = {"condition1", "condition2"};
+    Integer[] plates = {1,4,6,12};
+    
+    CollationOrder ordering = new CollationOrder(
+        ImmutableList.of(PlateOrderingGroup.Plates, 
+                         PlateOrderingGroup.Quadrants, 
+                         PlateOrderingGroup.Conditions, 
+                         PlateOrderingGroup.Replicates, 
+                         PlateOrderingGroup.Readouts));
+    
+    PlateReaderRawDataParser.MatrixOrder matrixOrder = 
+        new PlateReaderRawDataParser.MatrixOrder(
+            ordering, plates, conditions, readouts, replicates);
+	}
+	
 	public void testMatrixOrder(){
 
     String[] readouts = {"readout1", "readout2"};
@@ -373,6 +392,37 @@ public class PlateReaderRawDataParserTest extends TestCase
     assertEquals(matrixOrder.getPlate(35), new Integer(6));
     assertEquals(matrixOrder.getPlate(36), new Integer(12));
     assertEquals(matrixOrder.getPlate(47), new Integer(12));
+	}
+	
+	public void testMatrixOrder1536(){
+    String[] readouts = {"readout1", "readout2"};
+    String[] replicates = {"1","2","3"};    
+    String[] conditions = {"condition1", "condition2"};
+    Integer[] plates = new Integer[]{1,2,3,4,5,6,7,8};
+    
+    CollationOrder ordering = new CollationOrder(
+        ImmutableList.of(
+            PlateOrderingGroup.Plates,
+            PlateOrderingGroup.Quadrants,
+                         PlateOrderingGroup.Conditions, 
+                         PlateOrderingGroup.Replicates, 
+                         PlateOrderingGroup.Readouts));
+    
+    PlateReaderRawDataParser.MatrixOrderPattern matrixOrder = 
+        new PlateReaderRawDataParser.MatrixOrder1536(
+            ordering, plates, conditions, readouts, replicates);
+
+    
+    
+    
+    assertEquals(matrixOrder.getPlate(0), new Integer(1));
+    assertEquals(matrixOrder.getPlate(1), new Integer(2));
+    assertEquals(matrixOrder.getPlate(2), new Integer(3));
+    assertEquals(matrixOrder.getPlate(3), new Integer(4));
+    assertEquals(matrixOrder.getPlate(4), new Integer(1));
+    assertEquals(matrixOrder.getPlate(5), new Integer(2));
+    assertEquals(matrixOrder.getPlate(6), new Integer(3));
+    assertEquals(matrixOrder.getPlate(7), new Integer(4));
 	  
 	}
 }
