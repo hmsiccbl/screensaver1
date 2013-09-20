@@ -72,7 +72,8 @@ public class LibrarySearchResults extends EntityBasedEntitySearchResults<Library
                                            LibraryType.SHRNA,
                                            LibraryType.MIRNA_INHIBITOR,
                                            LibraryType.MIRNA_MIMIC,
-                                           LibraryType.OTHER));
+                                           LibraryType.OTHER,
+                                           LibraryType.ACADEMIC_COLLECTION));
 
 
   private GenericEntityDAO _dao;
