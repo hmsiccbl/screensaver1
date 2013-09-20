@@ -38,6 +38,7 @@ import com.google.common.collect.Sets;
 import org.hibernate.annotations.Immutable;
 import org.hibernate.annotations.Index;
 import org.hibernate.annotations.MapKeyManyToMany;
+import org.hibernate.annotations.Type;
 import org.joda.time.LocalDate;
 
 import edu.harvard.med.screensaver.model.AbstractEntity;
@@ -79,6 +80,7 @@ public abstract class Reagent extends AbstractEntity<Integer> implements Compara
   public static final RelationshipPath<Reagent> annotationValues = RelationshipPath.from(Reagent.class).to("annotationValues");
   public static final RelationshipPath<Reagent> studies = RelationshipPath.from(Reagent.class).to("studies");
   public static final PropertyPath<Reagent> vendorName = RelationshipPath.from(Reagent.class).toProperty("vendorId.vendorName");
+  public static final PropertyPath<Reagent> vendorNameSynonym = RelationshipPath.from(Reagent.class).toProperty("vendorId.vendorNameSynonym");
   public static final PropertyPath<Reagent> vendorIdentifier = RelationshipPath.from(Reagent.class).toProperty("vendorId.vendorIdentifier");
   public static final RelationshipPath<Reagent> publications = RelationshipPath.from(Reagent.class).to("publications");
   public static final RelationshipPath<Reagent> attachedFiles = RelationshipPath.from(Reagent.class).to("attachedFiles");
@@ -92,6 +94,9 @@ public abstract class Reagent extends AbstractEntity<Integer> implements Compara
   private Set<AttachedFile> _attachedFiles = new HashSet<AttachedFile>();
   private String _vendorBatchId;
   private Integer _facilityBatchId;
+
+
+  private String _vendorNameSynonym;
 
   /**
    * @motivation for hibernate and proxy/concrete subclass constructors
@@ -142,6 +147,16 @@ public abstract class Reagent extends AbstractEntity<Integer> implements Compara
   private void setVendorId(ReagentVendorIdentifier vendorId)
   {
     _vendorId = vendorId;
+  }
+  
+  @Type(type="text")
+  public String getVendorNameSynonym()
+  {
+    return _vendorNameSynonym;
+  }
+  
+  private void setVendorNameSynonym(String value){
+    _vendorNameSynonym = value;
   }
 
   @ManyToOne(fetch=FetchType.LAZY)

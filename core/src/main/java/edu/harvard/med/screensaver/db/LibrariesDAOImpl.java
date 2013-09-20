@@ -118,7 +118,31 @@ public class LibrariesDAOImpl extends AbstractDAO implements LibrariesDAO
         return hql.toQuery(session, true).list();
       }
     });
-    return Sets.newHashSet(reagents);
+    Set<Reagent> reagentSet = Sets.newHashSet(reagents);
+    
+    // Now find the synonyms
+    final HqlBuilder hql1 = new HqlBuilder();
+    hql1.from(Reagent.class, "r").
+      from("r", Reagent.well, "w", JoinType.LEFT_FETCH).
+      from("w", Well.library, "l", JoinType.LEFT_FETCH).
+    where("r", Reagent.vendorIdentifier.getPath(), Operator.EQUAL, rvi.getVendorIdentifier()).
+    where("r", Reagent.vendorNameSynonym.getPath(), Operator.EQUAL, rvi.getVendorName());
+    if (latestReleasedOnly) {
+      hql1.from("w", Well.latestReleasedReagent, "lrr").
+      where("lrr", Operator.EQUAL, "r");
+    }
+    hql1.select("r");
+    if (log.isDebugEnabled()) {
+      log.debug(hql1.toString());
+    }
+    reagents = _dao.runQuery(new Query<Reagent>() {
+      public List<Reagent> execute(Session session)
+      {
+        return hql1.toQuery(session, true).list();
+      }
+    });
+    reagentSet.addAll(reagents);
+    return reagentSet;
   }
 
   /**
