@@ -6,7 +6,7 @@ INSERT INTO schema_history (screensaver_revision, date_updated, comment)
 SELECT
 20130113,
 current_timestamp,
-'Issue #113 Create a synonym table for vendor IDs: because Biomol library vendor changed';
+'Issue #113 Create a synonym table for vendor IDs: because the Biomol library vendor name has changed';
 
 alter table reagent add column vendor_name_synonym text;
 

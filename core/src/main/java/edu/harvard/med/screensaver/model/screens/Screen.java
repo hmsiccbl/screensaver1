@@ -123,6 +123,7 @@ public class Screen extends Study implements AttachedFilesEntity<ScreenAttachedF
   public static final RelationshipPath<Screen> attachedFiles = thisEntity.to("attachedFiles");
   public static final RelationshipPath<Screen> publications = thisEntity.to("publications");
   public static final PropertyPath<Screen> keywords = thisEntity.toCollectionOfValues("keywords");
+  public static final PropertyPath<Screen> cellLines= thisEntity.toCollectionOfValues("cellLines");
   public static final RelationshipPath<Screen> pinTransferApprovalActivity = thisEntity.to("pinTransferApprovalActivity", Cardinality.TO_ONE);
   public static final RelationshipPath<Screen> reagents = thisEntity.to("reagents");
   public static final RelationshipPath<Screen> assayPlates = thisEntity.to("assayPlates");
@@ -222,7 +223,10 @@ public class Screen extends Study implements AttachedFilesEntity<ScreenAttachedF
   private Integer _maxDataLoadedReplicateCount;
   
   private Species _species;
-  private CellLine _cellLine;
+  
+//  private CellLine _cellLine;
+  private SortedSet<CellLine> _cellLines= new TreeSet<CellLine>();
+  
   private TransfectionAgent _transfectionAgent;
   private MolarConcentration perturbagenMolarConcentration;
   private BigDecimal perturbagenUgMlConcentration;
@@ -1860,21 +1864,68 @@ public class Screen extends Study implements AttachedFilesEntity<ScreenAttachedF
     return Collections.emptySet();
   }
 
-  public void setCellLine(CellLine _cellLine)
+//  public void setCellLine(CellLine _cellLine)
+//  {
+//    this._cellLine = _cellLine;
+//  }
+
+//  @ManyToOne
+//  @JoinColumn(name="cellLineId", nullable=true)
+//  @org.hibernate.annotations.ForeignKey(name="fk_screen_to_cell_line")
+//  @org.hibernate.annotations.Cascade(value={ org.hibernate.annotations.CascadeType.SAVE_UPDATE })
+//  @edu.harvard.med.screensaver.model.annotations.ToOne(unidirectional=true)  
+//  public CellLine getCellLine()
+//  {
+//    return _cellLine;
+//  }
+  
+  /**
+   * Get the set of cell lines.
+   * @return the set of cell lines
+   */
+  @ManyToMany(fetch=FetchType.LAZY)
+  @JoinTable(
+    name="screenCellLine",
+    joinColumns=@JoinColumn(name="screenId"),
+    inverseJoinColumns=@JoinColumn(name="cellLineId")
+  )
+  @org.hibernate.annotations.ForeignKey(name="fk_screen_cell_line_to_screen")
+  @org.hibernate.annotations.LazyCollection(value=org.hibernate.annotations.LazyCollectionOption.TRUE)
+  @Sort(type=SortType.NATURAL)
+  public SortedSet<CellLine> getCellLines()
   {
-    this._cellLine = _cellLine;
+    return _cellLines;
   }
 
-  @ManyToOne
-  @JoinColumn(name="cellLineId", nullable=true)
-  @org.hibernate.annotations.ForeignKey(name="fk_screen_to_cell_line")
-  @org.hibernate.annotations.Cascade(value={ org.hibernate.annotations.CascadeType.SAVE_UPDATE })
-  @edu.harvard.med.screensaver.model.annotations.ToOne(unidirectional=true)  
-  public CellLine getCellLine()
+  /**
+   * Set the cellLines.
+   * @param cellLines the new cellLines
+   */
+  public void setCellLines(SortedSet<CellLine> cellLines)
   {
-    return _cellLine;
+    _cellLines = cellLines;
   }
-  
+
+  /**
+   * Add the cell line.
+   * @param keyword the cell line to add
+   * @return true iff the screen did not already have the cell line
+   */
+  public boolean addCellLine(CellLine cellLine)
+  {
+    return _cellLines.add(cellLine);
+  }
+
+  /**
+   * Remove the cell line.
+   * @param cell line the cell line to remove
+   * @return true iff the screen previously had the cellline
+   */
+  public boolean removeCellLine(CellLine cellLine)
+  {
+    return _cellLines.remove(cellLine);
+  }
+    
   public void setTransfectionAgent(TransfectionAgent _transfectionAgent)
   {
     this._transfectionAgent = _transfectionAgent;

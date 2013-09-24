@@ -140,13 +140,15 @@ TODO:
       description="A summary of the screen" type="Textarea"
       editWidth="80" editHeight="6" />
       <ss:property id="species" label="Species"
-        type="Vocabulary" 
+        type="Vocabulary"
         editable="#{screenDetailViewer.editMode}"
         value="#{screenDetailViewer.species.value}"
         selectItems="#{screenDetailViewer.species.selectItems}" />
-        
-      <ss:property id="cellLine" label="#{screenDetailViewer.entity.screenType == 'RNAi' ? 'Mammalian ' : '' }Cell Line"
-        type="Text" 
+
+
+<!--
+    <ss:property id="cellLine" label="#{screenDetailViewer.entity.screenType == 'RNAi' ? 'Mammalian ' : '' }Cell Line"
+        type="Text"
         editable="#{screenDetailViewer.editMode}"
         value="#{screenDetailViewer.entity.cellLine.value}"
         rendered="#{screenDetailViewer.applicationProperties.facilityKey != 'lincs'}"
@@ -157,12 +159,11 @@ TODO:
            styleClass="inputText selectMenu">
            <f:selectItems value="#{screenDetailViewer.cellLineMenu.selectItems}" />
          </t:selectOneMenu>
-         <t:div id="newCellLineDiv" styleClass="groupingPanel"
-         >
+         <t:div id="newCellLineDiv" styleClass="groupingPanel">
            <t:panelGrid columns="1" columnClasses="column">
              <ss:propertyGroup id="newCellLineGroup"
                label="New Cell Line (optional)">
-               
+
                <ss:property id="newCellLine" label="Name (ATCC Designation)"
                  description="The name of the new cell line to be created"
                  value="#{screenDetailViewer.newCellLine.value}"
@@ -173,10 +174,56 @@ TODO:
            </t:panelGrid>
          </t:div>
        </ui:define>
-      </ss:property>
+    </ss:property>
+-->
+
+
+    <ss:property id="cellLine2" label="Cell Lines"
+      description="Cell lines studied"
+      >
+      <ui:define name="data">
+        <ss:collectionTable id="cellLinesTable"
+          editable="#{screenDetailViewer.editMode}"
+          dataModel="#{screenDetailViewer.cellLinesDataModel}"
+          actionBean="#{screenDetailViewer}"
+          addAction="addCellLineToScreen"
+          deleteAction="deleteCellLineFromScreen">
+          <ui:define name="columns">
+            <t:column>
+              <t:outputText value="#{element.value}" />
+            </t:column>
+          </ui:define>
+          <ui:define name="addProperties">
+            <t:selectOneMenu id="cellLinesEditable"
+              value="#{screenDetailViewer.newCellLineToAdd.value}"
+              rendered="#{screenDetailViewer.editMode}"
+              styleClass="inputText selectMenu">
+              <f:selectItems
+                value="#{screenDetailViewer.newCellLineToAdd.selectItems}" />
+            </t:selectOneMenu>
+          </ui:define>
+
+        </ss:collectionTable>
+        <t:div id="newCellLineDiv" styleClass="groupingPanel" rendered="#{screenDetailViewer.editMode}" >
+           <t:panelGrid columns="1" columnClasses="column">
+             <ss:propertyGroup id="newCellLineGroup"
+               label="New Cell Line (optional)">
+
+               <ss:property id="newCellLine" label="Name (ATCC Designation)"
+                 description="The name of the new cell line to be created"
+                 value="#{screenDetailViewer.newCellLine.value}"
+                 editable="true" editWidth="60" />
+           <t:commandButton id="addNewCellLine" value="Add"
+             action="#{screenDetailViewer.addNewCellLine}" />
+             </ss:propertyGroup>
+           </t:panelGrid>
+         </t:div>
+       </ui:define>
+
+    </ss:property>
 
       <ss:property id="transfectionAgent" label="RNAi Transfection Agent"
-        type="Text" 
+        type="Text"
         editable="#{screenDetailViewer.editMode}"
         rendered="#{screenDetailViewer.entity.screenType == 'RNAi'}"
         value="#{screenDetailViewer.entity.transfectionAgent.value}">
@@ -191,7 +238,7 @@ TODO:
            <t:panelGrid columns="1" columnClasses="column">
              <ss:propertyGroup id="newTransfectionAgentGroup"
                label="New Transfection Agent (optional)">
-               
+
                <ss:property id="newTransfectionAgent" label="Name"
                  description="The name of the new transfection agent to be created"
                  value="#{screenDetailViewer.newTransfectionAgent.value}"
@@ -206,7 +253,7 @@ TODO:
 
     <ss:propertyGroup label="Perturbagen Concentration" columns="2"
       columnClasses="column" >
-     
+
      <ss:property id="perturbagenMolarConcentration" label="" labelPosition="after"
       rendered="#{screenDetailViewer.editMode || ! empty screenDetailViewer.perturbagenMolarConcentrationSelector.value}"
       value="#{screenDetailViewer.perturbagenMolarConcentrationSelector.value}"
@@ -215,14 +262,14 @@ TODO:
       description="perturbagen (Molar)concentration"
       converter="#{molarConcentrationValueConverter}"
       editable="#{screenDetailViewer.editMode}" />
-      
+
      <ss:property id="perturbagenUgMlConcentration" label="ug/mL" labelPosition="after"
        value="#{screenDetailViewer.entity.perturbagenUgMlConcentration}"
        converter="#{mgMlConcentrationConverter}"
        rendered="#{screenDetailViewer.entity.screenType == 'Small Molecule' &amp;&amp; (! empty screenDetailViewer.entity.perturbagenUgMlConcentration || screenDetailViewer.editMode)}"
        description="perturbagen concentration (ug/mL)" editable="#{screenDetailViewer.editMode}"
        editWidth="6" />
-             
+
     </ss:propertyGroup>
 
     <ss:propertyGroup label="Publishable Protocol" columns="1"
@@ -278,7 +325,7 @@ TODO:
         description="The date on which the screen will become visible to level 1 users, set automatically, 26 months after last Screening activity"
         value="#{screenDetailViewer.entity.dataPrivacyExpirationDate}"
         emptyValue="&lt;not specified&gt;"
-        type="Date" 
+        type="Date"
         adminOnly="true" rendered="#{screenDetailViewer.editMode || screenDetailViewer.adminViewMode}" />
       <ss:property id="minAllowedDataPrivacyExpirationDate"
         label="Earliest Allowed Data Privacy Expiration Date (optional)"
@@ -298,7 +345,7 @@ TODO:
         label="Data Privacy Expiration Notification Sent Date"
         description="Date at which the data privacy expiration notification was sent"
         value="#{screenDetailViewer.entity.dataPrivacyExpirationNotifiedDate}"
-        type="Date" 
+        type="Date"
         adminOnly="true" rendered="#{screenDetailViewer.adminViewMode}" />
     </ss:propertyGroup>
 
@@ -327,11 +374,11 @@ TODO:
                 styleClass="inputText" />
             </ui:define>
           </ss:property>
-      </ui:define>    
+      </ui:define>
     </ss:publications>
-    
+
     <ss:attachedFiles attachedFiles="#{screenDetailViewer.attachedFiles}"
-      entityTypeName="screen" 
+      entityTypeName="screen"
       adminOnly="#{screenDetailViewer.applicationProperties.facilityKey == 'lincs'}"
       rendered="#{screenDetailViewer.editMode || screenDetailViewer.adminViewMode}"
       editMode="#{screenDetailViewer.editMode}" />
@@ -407,7 +454,7 @@ TODO:
       value="#{screenDetailViewer.entity.totalPlatedLabCherryPicks}"
       rendered="#{screenDetailViewer.allowedAccessToScreenDetails &amp;&amp; !screenDetailViewer.editMode &amp;&amp; appInfo.applicationProperties.facilityKey != 'lincs'}"
       description="The number of lab cherry picks that have been plated to date, for all cherry pick requests" />
-      
+
     <ss:property id="keywords"
         label="#{screenDetailViewer.editMode ? 'Keywords (comma-separated)' : 'Keywords'}"
         type="Set" value="#{screenDetailViewer.entity.keywords}"
@@ -580,7 +627,7 @@ TODO:
           value="#{screenDetailViewer.pinTransferApprovalComments}"
           editable="#{screenDetailViewer.editMode }" />
       </ss:propertyGroup>
-      
+
   </ui:define>
 
   <ui:define name="tablesContent">

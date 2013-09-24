@@ -80,7 +80,6 @@ public abstract class Reagent extends AbstractEntity<Integer> implements Compara
   public static final RelationshipPath<Reagent> annotationValues = RelationshipPath.from(Reagent.class).to("annotationValues");
   public static final RelationshipPath<Reagent> studies = RelationshipPath.from(Reagent.class).to("studies");
   public static final PropertyPath<Reagent> vendorName = RelationshipPath.from(Reagent.class).toProperty("vendorId.vendorName");
-  public static final PropertyPath<Reagent> vendorNameSynonym = RelationshipPath.from(Reagent.class).toProperty("vendorId.vendorNameSynonym");
   public static final PropertyPath<Reagent> vendorIdentifier = RelationshipPath.from(Reagent.class).toProperty("vendorId.vendorIdentifier");
   public static final RelationshipPath<Reagent> publications = RelationshipPath.from(Reagent.class).to("publications");
   public static final RelationshipPath<Reagent> attachedFiles = RelationshipPath.from(Reagent.class).to("attachedFiles");

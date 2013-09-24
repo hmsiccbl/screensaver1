@@ -15,6 +15,7 @@ import java.util.List;
 import java.util.Set;
 import java.util.SortedSet;
 
+import com.google.common.base.Function;
 import com.google.common.base.Functions;
 import com.google.common.collect.Iterables;
 import com.google.common.collect.Lists;
@@ -31,6 +32,7 @@ import edu.harvard.med.screensaver.db.hqlbuilder.HqlBuilder;
 import edu.harvard.med.screensaver.model.Entity;
 import edu.harvard.med.screensaver.model.meta.RelationshipPath;
 import edu.harvard.med.screensaver.model.screenresults.ScreenResult;
+import edu.harvard.med.screensaver.model.screens.CellLine;
 import edu.harvard.med.screensaver.model.screens.ProjectPhase;
 import edu.harvard.med.screensaver.model.screens.Screen;
 import edu.harvard.med.screensaver.model.screens.ScreenDataSharingLevel;
@@ -40,6 +42,7 @@ import edu.harvard.med.screensaver.model.screens.StatusItem;
 import edu.harvard.med.screensaver.model.users.LabHead;
 import edu.harvard.med.screensaver.model.users.ScreeningRoomUser;
 import edu.harvard.med.screensaver.model.users.ScreensaverUser;
+import edu.harvard.med.screensaver.model.users.ScreensaverUserRole;
 import edu.harvard.med.screensaver.ui.arch.datatable.column.TableColumn;
 import edu.harvard.med.screensaver.ui.arch.datatable.column.entity.DateEntityColumn;
 import edu.harvard.med.screensaver.ui.arch.datatable.column.entity.DateTimeEntityColumn;
@@ -540,15 +543,33 @@ public class ScreenSearchResults extends EntityBasedEntitySearchResults<Screen,I
     columns.get(columns.size() - 1).setVisible(false);
 
     // Non-LINCS Cell Line
-    columns.add(new TextEntityColumn<Screen>(RelationshipPath.from(Screen.class).toProperty("cellLine"),
-      "Cell Line", "The cell line", TableColumn.UNGROUPED) {
-      @Override
-      public String getCellValue(Screen screen)
-      {
-        return screen.getCellLine() == null ? null : screen.getCellLine().getValue();
+    
+    columns.add(new TextSetEntityColumn<Screen>(RelationshipPath.from(Screen.class).to(Screen.cellLines), 
+            "Cell Lines",
+            "The cell lines associated with this screen",
+            TableColumn.UNGROUPED) {
+      public Set<String> getCellValue(Screen screen) 
+      { 
+        Set<CellLine> cellLines = Sets.newHashSet(screen.getCellLines());
+        if (cellLines.isEmpty()) {
+          return Sets.newHashSet("<not yet specified>");
+        }
+        return Sets.newHashSet(Iterables.transform(cellLines, new Function<CellLine, String>(){
+          public String apply(CellLine cell){
+            return cell.getValue();
+          }
+        })); 
       }
     });
     columns.get(columns.size() - 1).setVisible(false);
+//    columns.add(new TextEntityColumn<Screen>(RelationshipPath.from(Screen.class).toProperty("cellLine"),
+//      "Cell Line", "The cell line", TableColumn.UNGROUPED) {
+//      @Override
+//      public String getCellValue(Screen screen)
+//      {
+//        return screen.getCellLine() == null ? null : screen.getCellLine().getValue();
+//      }
+//    });
 
     columns.add(new TextEntityColumn<Screen>(RelationshipPath.from(Screen.class).toProperty("transfectionAgent"),
       "Transfection Agent", "The transfection agent", TableColumn.UNGROUPED) {

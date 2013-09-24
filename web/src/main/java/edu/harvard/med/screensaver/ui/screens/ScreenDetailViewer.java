@@ -130,8 +130,10 @@ public class ScreenDetailViewer extends AbstractStudyDetailViewer<Screen>
 
   private UISelectOneBean<ScreenDataSharingLevel> _dataSharingLevel;
 
-  private UISelectOneEntityBean<CellLine> _cellLineMenu;
   private CellLine _newCellLine;
+  protected SortedSet<CellLine> _cellLines;
+  private UISelectOneEntityBean<CellLine> _cellLineMenu;
+  
   private UISelectOneEntityBean<TransfectionAgent> _transfectionAgentMenu;
   private TransfectionAgent _newTransfectionAgent;
   private UICompositeSelectorBean<BigDecimal, MolarUnit> _perturbagenMolarConcentrationSelector;
@@ -224,6 +226,11 @@ public class ScreenDetailViewer extends AbstractStudyDetailViewer<Screen>
     _lastMinAllowedDataPrivacyExpirationDate = screen.getMinAllowedDataPrivacyExpirationDate();
     _lastMaxAllowedDataPrivacyExpirationDate = screen.getMaxAllowedDataPrivacyExpirationDate();
     _perturbagenMolarConcentrationSelector = null;    
+    
+    
+    _cellLines = Sets.newTreeSet(screen.getCellLines());
+    
+    
     
     if(isLINCS())
 		_cellSearchResults.initialize(new InMemoryEntityDataModel<Cell, Integer, Cell>(
@@ -520,13 +527,13 @@ public class ScreenDetailViewer extends AbstractStudyDetailViewer<Screen>
     if (_cellLineMenu == null) {
       SortedSet<CellLine> cellLines= new TreeSet<CellLine>();
       cellLines.addAll(getDao().findAllEntitiesOfType(CellLine.class));
-      _cellLineMenu= new UISelectOneEntityBean<CellLine>(cellLines, getEntity().getCellLine(), true, getDao()) ;
-            _cellLineMenu.addObserver(new Observer() {
-        public void update(Observable arg0, Object value)
-        {
-          getEntity().setCellLine((CellLine) value);
-        }
-      });
+      _cellLineMenu= new UISelectOneEntityBean<CellLine>(cellLines, /** getEntity().getCellLine(), true,**/ getDao()) ;
+//      _cellLineMenu.addObserver(new Observer() {
+//        public void update(Observable arg0, Object value)
+//        {
+//          getEntity().setCellLine((CellLine) value);
+//        }
+//      });
 
     }
     return _cellLineMenu;
@@ -565,7 +572,54 @@ public class ScreenDetailViewer extends AbstractStudyDetailViewer<Screen>
     }
     return _newCellLine;
   }
+  
+  public UISelectOneEntityBean<CellLine> getNewCellLineToAdd()
+  {
+    if (_cellLineMenu == null) {
+      SortedSet<CellLine> cellLines= new TreeSet<CellLine>();
+      cellLines.addAll(getDao().findAllEntitiesOfType(CellLine.class));
+      cellLines.removeAll(this._cellLines);
+      
+      _cellLineMenu= new UISelectOneEntityBean<CellLine>(cellLines, /** getEntity().getCellLine(), true,**/ getDao()) ;
+    }
+    return _cellLineMenu;
+  }  
+  
+  @UICommand
+  public String addCellLineToScreen()
+  {
+    if (getCellLineMenu().getSelection() != null) {
+      CellLine cellLine = getCellLineMenu().getSelection();
+      _cellLines.add(cellLine);
+      _newCellLine = null;
+    }
+    return REDISPLAY_PAGE_ACTION_RESULT;
+  }
 
+  @UICommand
+  public String deleteCellLineFromScreen()
+  {
+    CellLine cellLine = (CellLine) getRequestMap().get("element");
+    _cellLines.remove(cellLine);
+    _newCellLine = null;
+    return REDISPLAY_PAGE_ACTION_RESULT;
+  }
+
+  public SortedSet<CellLine> getCellLines()
+  {
+    return _cellLines;
+  }
+  
+  public DataModel getCellLinesDataModel()
+  {
+    return new ListDataModel(new ArrayList<CellLine>(_cellLines));
+  }
+
+  
+  
+  
+  
+  
   public UISelectOneEntityBean<TransfectionAgent> getTransfectionAgentMenu()
   {
     if (_transfectionAgentMenu == null) {
@@ -711,6 +765,14 @@ public class ScreenDetailViewer extends AbstractStudyDetailViewer<Screen>
     for (ScreeningRoomUser collaborator : Sets.difference(extantCollaborators, _collaborators)) {
       screen.removeCollaborator(getDao().reloadEntity(collaborator));
     }
+
+    Set<CellLine> extantCellLines= Sets.newHashSet(screen.getCellLines());
+    for (CellLine cellLine : Sets.difference(_cellLines, extantCellLines )) {
+      screen.addCellLine(cellLine);
+    }
+    for (CellLine cellLine : Sets.difference(extantCellLines, _cellLines)) {
+      screen.removeCellLine(cellLine);
+    }    
     
     if (getPinTransferApprovedBy().getSelection() != null && screen.getPinTransferApprovalActivity() == null) {
       screen.setPinTransferApproved((AdministratorUser) getDao().reloadEntity(getScreensaverUser(), false, ScreensaverUser.activitiesPerformed),

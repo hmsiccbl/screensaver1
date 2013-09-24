@@ -126,7 +126,7 @@ public class LibrariesDAOImpl extends AbstractDAO implements LibrariesDAO
       from("r", Reagent.well, "w", JoinType.LEFT_FETCH).
       from("w", Well.library, "l", JoinType.LEFT_FETCH).
     where("r", Reagent.vendorIdentifier.getPath(), Operator.EQUAL, rvi.getVendorIdentifier()).
-    where("r", Reagent.vendorNameSynonym.getPath(), Operator.EQUAL, rvi.getVendorName());
+    where("r", "vendorNameSynonym", Operator.EQUAL, rvi.getVendorName());
     if (latestReleasedOnly) {
       hql1.from("w", Well.latestReleasedReagent, "lrr").
       where("lrr", Operator.EQUAL, "r");
