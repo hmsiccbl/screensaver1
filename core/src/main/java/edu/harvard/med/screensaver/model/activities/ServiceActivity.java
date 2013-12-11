@@ -37,8 +37,10 @@ public class ServiceActivity extends TypedActivity<ServiceActivityType>
 
   public static final ServiceActivity Null = new ServiceActivity();
 
-  public static final RelationshipPath<ServiceActivity> servicedUser = RelationshipPath.from(ServiceActivity.class).to("servicedUser", Cardinality.TO_ONE);
-  public static final RelationshipPath<ServiceActivity> servicedScreen = RelationshipPath.from(ServiceActivity.class).to("servicedScreen", Cardinality.TO_ONE);
+  public static final RelationshipPath<ServiceActivity> servicedUser = 
+      RelationshipPath.from(ServiceActivity.class).to("servicedUser", Cardinality.TO_ONE);
+  public static final RelationshipPath<ServiceActivity> servicedScreen = 
+      RelationshipPath.from(ServiceActivity.class).to("servicedScreen", Cardinality.TO_ONE);
 
   private Screen _servicedScreen;
   private ScreeningRoomUser _servicedUser;
@@ -84,7 +86,8 @@ public class ServiceActivity extends TypedActivity<ServiceActivityType>
    */
   @ManyToOne(cascade = { CascadeType.PERSIST, CascadeType.MERGE })
   @JoinColumn(name = "serviced_screen_id", nullable = true)
-  @edu.harvard.med.screensaver.model.annotations.ToOne(unidirectional = true)
+  @org.hibernate.annotations.LazyToOne(value=org.hibernate.annotations.LazyToOneOption.PROXY)
+  @edu.harvard.med.screensaver.model.annotations.ToOne(inverseProperty="serviceActivities")
   public Screen getServicedScreen()
   {
     return _servicedScreen;

@@ -681,9 +681,9 @@ TODO:
       </ui:define>
     </ss:property>
 
-    <ss:property id="labActivities" label="Lab Activities Summary"
+    <ss:property id="activities" label="Activities Summary"
       rendered="#{screenDetailViewer.allowedAccessToScreenActivity &amp;&amp; !screenDetailViewer.editMode &amp;&amp; appInfo.applicationProperties.facilityKey != 'lincs'}"
-      description="Activities carried out in the lab (e.g., screening a library, creating an assay plate, etc.)">
+      description="Activities carried out in the lab (e.g., screening a library, creating an assay plate, etc.) or service activities performed for the screen.">
       <ui:define name="data">
         <t:panelGrid columns="2"
           columnClasses="propertyLabelColumn,column"
@@ -691,26 +691,26 @@ TODO:
           <ss:property id="activityCount" label="Activities">
             <ui:define name="data">
               <t:commandLink
-                value="#{screenDetailViewer.labActivitiesCount}"
-                action="#{screenViewer.browseLabActivities}" />
+                value="#{screenDetailViewer.activitiesCount}"
+                action="#{screenViewer.browseActivities}" />
             </ui:define>
           </ss:property>
           <ss:propertyGroup label="Last Activity">
             <t:outputText value="&lt;none&gt;" styleClass="dataText"
-              rendered="#{empty screenDetailViewer.lastLabActivity}" />
-            <ss:property id="lastLabActivityDate" label="Date"
-              value="#{screenDetailViewer.lastLabActivity.dateOfActivity}"
+              rendered="#{empty screenDetailViewer.lastActivity}" />
+            <ss:property id="lastActivityDate" label="Date"
+              value="#{screenDetailViewer.lastActivity.dateOfActivity}"
               type="Date"
-              rendered="#{!empty screenDetailViewer.lastLabActivity}" />
-            <ss:property id="lastLabActivityType" label="Activity Type"
-              value="#{screenDetailViewer.lastLabActivity.activityTypeName}"
+              rendered="#{!empty screenDetailViewer.lastActivity}" />
+            <ss:property id="lastActivityType" label="Activity Type"
+              value="#{screenDetailViewer.lastActivity.activityTypeName}"
               type="Text"
-              rendered="#{!empty screenDetailViewer.lastLabActivity}" />
-            <ss:property id="lastLabActivityPerformedBy"
+              rendered="#{!empty screenDetailViewer.lastActivity}" />
+            <ss:property id="lastActivityPerformedBy"
               label="Performed By"
-              value="#{screenDetailViewer.lastLabActivity.performedBy.fullNameLastFirst}"
+              value="#{screenDetailViewer.lastActivity.performedBy.fullNameLastFirst}"
               type="Text"
-              rendered="#{!empty screenDetailViewer.lastLabActivity}" />
+              rendered="#{!empty screenDetailViewer.lastActivity}" />
           </ss:propertyGroup>
         </t:panelGrid>
       </ui:define>

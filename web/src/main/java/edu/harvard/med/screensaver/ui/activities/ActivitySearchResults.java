@@ -13,13 +13,14 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Set;
 
+import org.apache.log4j.Logger;
+import org.joda.time.LocalDate;
+
 import com.google.common.base.Function;
 import com.google.common.base.Predicate;
 import com.google.common.collect.Iterables;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Sets;
-import org.apache.log4j.Logger;
-import org.joda.time.LocalDate;
 
 import edu.harvard.med.screensaver.db.EntityInflator;
 import edu.harvard.med.screensaver.db.GenericEntityDAO;
@@ -297,14 +298,24 @@ public class ActivitySearchResults extends EntityBasedEntitySearchResults<Activi
       isUserInRole(ScreensaverUserRole.READ_EVERYTHING_ADMIN);
   }
 
-  public void searchLabActivitiesForScreen(final Screen screen)
+  public void searchActivitiesForScreen(final Screen screen)
   {
-    setTitle("Lab Activities for screen " + screen.getFacilityId());
+    setTitle("Activities for screen " + screen.getFacilityId());
     initialize(new InMemoryEntityDataModel<Activity,Integer,Activity>(new EntityDataFetcher<Activity,Integer>(Activity.class, _dao) {
       @Override
       public void addDomainRestrictions(HqlBuilder hql)
       {
-        DataFetcherUtil.addDomainRestrictions(hql, LabActivity.Screen, screen, getRootAlias());
+        hql.from(getRootAlias(), LabActivity.Screen, "las");
+        hql.from(getRootAlias(), ServiceActivity.servicedScreen, "sas");
+        hql.where(
+            new edu.harvard.med.screensaver.db.hqlbuilder.Predicate() {
+                @Override
+                public String toHql()
+                {
+                  return "las = " + screen.getScreenId() + " or " + " sas = " + screen.getScreenId();
+                }
+            }
+        );
       }
     }));
   }
@@ -336,8 +347,11 @@ public class ActivitySearchResults extends EntityBasedEntitySearchResults<Activi
       @Override
       public Integer getCellValue(Activity activity)
       { 
-        CherryPickRequest cherryPickRequest = getCherryPickRequest(activity);
-        return cherryPickRequest == null ? null : cherryPickRequest.getCherryPickRequestNumber();
+        if (activity instanceof LabActivity) {
+          CherryPickRequest cherryPickRequest = getCherryPickRequest(activity);
+          return cherryPickRequest == null ? null : cherryPickRequest.getCherryPickRequestNumber();
+        }
+        return null;
       }
   
       private CherryPickRequest getCherryPickRequest(Activity activity)
@@ -382,6 +396,9 @@ public class ActivitySearchResults extends EntityBasedEntitySearchResults<Activi
               return ((LabActivity) a).getScreen();
             }
             else if (a instanceof ServiceActivity) {
+              // reload the activity as a service activity
+              // thereby instantiate the serviced screen lazy connection
+              a = _dao.findEntityById(ServiceActivity.class, a.getActivityId());
               return ((ServiceActivity) a).getServicedScreen();
             }
             return null;

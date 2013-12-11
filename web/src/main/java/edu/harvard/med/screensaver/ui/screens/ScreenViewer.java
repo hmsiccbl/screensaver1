@@ -18,6 +18,7 @@ import edu.harvard.med.screensaver.db.Criterion.Operator;
 import edu.harvard.med.screensaver.model.AttachedFile;
 import edu.harvard.med.screensaver.model.AuditedAbstractEntity;
 import edu.harvard.med.screensaver.model.activities.Activity;
+import edu.harvard.med.screensaver.model.activities.ServiceActivity;
 import edu.harvard.med.screensaver.model.cherrypicks.CherryPickRequest;
 import edu.harvard.med.screensaver.model.libraries.LibraryPlate;
 import edu.harvard.med.screensaver.model.screenresults.DataColumn;
@@ -120,6 +121,11 @@ public class ScreenViewer extends StudyViewer<Screen>
     getDao().needReadOnly(screen, Screen.collaborators.to(ScreeningRoomUser.LabHead));
     getDao().needReadOnly(screen, Screen.billingItems);
     getDao().needReadOnly(screen, Screen.labActivities.to(Activity.performedBy));
+    //    Note: explicit load of serviceActivity screen; however this doesn't solve the need
+    // to reload the screeen when displaying the activity in the ActivitySearchResults - sde4
+    getDao().needReadOnly(screen, Screen.serviceActivities.to(Activity.performedBy));
+    getDao().needReadOnly(screen, Screen.serviceActivities.to(ServiceActivity.servicedUser));
+    getDao().needReadOnly(screen, Screen.serviceActivities.to(ServiceActivity.servicedScreen));
     getDao().needReadOnly(screen, Screen.attachedFiles.to(AttachedFile.fileType));
     getDao().needReadOnly(screen, Screen.fundingSupports);
     getDao().needReadOnly(screen, Screen.publications);
@@ -150,9 +156,9 @@ public class ScreenViewer extends StudyViewer<Screen>
   }
 
   @UICommand
-  public String browseLabActivities()
+  public String browseActivities()
   {
-    _activitiesBrowser.searchLabActivitiesForScreen(getEntity());
+    _activitiesBrowser.searchActivitiesForScreen(getEntity());
     return BROWSE_ACTIVITIES;
   }
 

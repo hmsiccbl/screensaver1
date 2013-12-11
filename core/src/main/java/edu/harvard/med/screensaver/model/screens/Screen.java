@@ -47,6 +47,7 @@ import com.google.common.collect.Iterables;
 import com.google.common.collect.Multimap;
 import com.google.common.collect.Multimaps;
 import com.google.common.collect.Sets;
+
 import org.apache.log4j.Logger;
 import org.hibernate.annotations.Sort;
 import org.hibernate.annotations.SortType;
@@ -65,6 +66,7 @@ import edu.harvard.med.screensaver.model.MolarConcentration;
 import edu.harvard.med.screensaver.model.RequiredPropertyException;
 import edu.harvard.med.screensaver.model.activities.AdministrativeActivity;
 import edu.harvard.med.screensaver.model.activities.AdministrativeActivityType;
+import edu.harvard.med.screensaver.model.activities.ServiceActivity;
 import edu.harvard.med.screensaver.model.annotations.Derived;
 import edu.harvard.med.screensaver.model.annotations.ToMany;
 import edu.harvard.med.screensaver.model.cells.ExperimentalCellInformation;
@@ -117,6 +119,7 @@ public class Screen extends Study implements AttachedFilesEntity<ScreenAttachedF
   public static final RelationshipPath<Screen> annotationTypes = thisEntity.to("annotationTypes");
   public static final RelationshipPath<Screen> cherryPickRequests = thisEntity.to("cherryPickRequests");
   public static final RelationshipPath<Screen> labActivities = thisEntity.to("labActivities");
+  public static final RelationshipPath<Screen> serviceActivities = thisEntity.to("serviceActivities");
   public static final RelationshipPath<Screen> statusItems = thisEntity.to("statusItems");
   public static final RelationshipPath<Screen> fundingSupports = thisEntity.to("fundingSupports");
   public static final PropertyPath<Screen> billingItems = thisEntity.toCollectionOfValues("billingItems");
@@ -184,6 +187,7 @@ public class Screen extends Study implements AttachedFilesEntity<ScreenAttachedF
 
   private SortedSet<StatusItem> _statusItems = new TreeSet<StatusItem>();
   private SortedSet<LabActivity> _labActivities = new TreeSet<LabActivity>();
+  private SortedSet<ServiceActivity> _serviceActivities = new TreeSet<ServiceActivity>();
   private LocalDate _dataMeetingScheduled;
   private LocalDate _dataMeetingComplete;
   private BillingInformation _billingInformation = new BillingInformation(this, false);
@@ -793,6 +797,19 @@ public class Screen extends Study implements AttachedFilesEntity<ScreenAttachedF
   public SortedSet<LabActivity> getLabActivities()
   {
     return _labActivities;
+  }
+
+  /**
+   * Get the service activities.
+   * @return the service activities
+   */
+  @OneToMany(mappedBy = "servicedScreen", cascade = { CascadeType.ALL })
+  @Sort(type=SortType.NATURAL)
+  @edu.harvard.med.screensaver.model.annotations.ToMany(singularPropertyName="serviceActivity", 
+                                                        hasNonconventionalMutation=true )
+  public SortedSet<ServiceActivity> getServiceActivities()
+  {
+    return _serviceActivities;
   }
 
   /**
@@ -1763,6 +1780,14 @@ public class Screen extends Study implements AttachedFilesEntity<ScreenAttachedF
   private void setLabActivities(SortedSet<LabActivity> labActivities)
   {
     _labActivities = labActivities;
+  }
+  
+  /**
+   * @motivation for hibernate
+   */
+  private void setServiceActivities(SortedSet<ServiceActivity> values)
+  {
+    _serviceActivities = values;
   }
 
   /**

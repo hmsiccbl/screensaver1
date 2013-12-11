@@ -33,6 +33,7 @@ import com.google.common.collect.ImmutableSortedSet;
 import com.google.common.collect.Iterables;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Sets;
+
 import org.apache.log4j.Logger;
 import org.apache.myfaces.custom.fileupload.UploadedFile;
 import org.joda.time.LocalDate;
@@ -53,6 +54,8 @@ import edu.harvard.med.screensaver.model.BusinessRuleViolationException;
 import edu.harvard.med.screensaver.model.MolarConcentration;
 import edu.harvard.med.screensaver.model.MolarUnit;
 import edu.harvard.med.screensaver.model.RequiredPropertyException;
+import edu.harvard.med.screensaver.model.activities.Activity;
+import edu.harvard.med.screensaver.model.activities.ServiceActivity;
 import edu.harvard.med.screensaver.model.cells.Cell;
 import edu.harvard.med.screensaver.model.cells.ExperimentalCellInformation;
 import edu.harvard.med.screensaver.model.cherrypicks.CherryPickRequest;
@@ -230,17 +233,17 @@ public class ScreenDetailViewer extends AbstractStudyDetailViewer<Screen>
     
     _cellLines = Sets.newTreeSet(screen.getCellLines());
     
-    
-    
-    if(isLINCS())
-		_cellSearchResults.initialize(new InMemoryEntityDataModel<Cell, Integer, Cell>(
-				new EntityDataFetcher<Cell, Integer>(Cell.class, getDao()) {
-					@Override
-					public void addDomainRestrictions(HqlBuilder hql) {
-						DataFetcherUtil.addDomainRestrictions(hql, Cell.experimentalCellInformationSetPath.to("screen"), screen,
-								getRootAlias());
-					}
-				}));
+    //    
+    //    
+    //    if(isLINCS())
+    //		_cellSearchResults.initialize(new InMemoryEntityDataModel<Cell, Integer, Cell>(
+    //				new EntityDataFetcher<Cell, Integer>(Cell.class, getDao()) {
+    //					@Override
+    //					public void addDomainRestrictions(HqlBuilder hql) {
+    //						DataFetcherUtil.addDomainRestrictions(hql, Cell.experimentalCellInformationSetPath.to("screen"), screen,
+    //								getRootAlias());
+    //					}
+    //				}));
 
   }
 
@@ -347,17 +350,31 @@ public class ScreenDetailViewer extends AbstractStudyDetailViewer<Screen>
     return new ListDataModel(new ArrayList<StatusItem>(getEntity().getStatusItems()));
   }
   
-  public int getLabActivitiesCount()
+  public int getActivitiesCount()
   {
-    return getEntity().getLabActivities().size();
+    return getEntity().getLabActivities().size() + 
+        getEntity().getServiceActivities().size();
   }
 
-  public LabActivity getLastLabActivity()
+  public Activity getLastActivity()
   {
-    if (getEntity().getLabActivities().isEmpty()) {
-      return null;
+    Activity lastActivity = null;
+    if (!getEntity().getLabActivities().isEmpty()){
+      lastActivity = getEntity().getLabActivities().last();
     }
-    return getEntity().getLabActivities().last();
+    if (!getEntity().getServiceActivities().isEmpty()){
+        Activity temp = getEntity().getServiceActivities().last();
+        if (lastActivity == null ){
+          lastActivity = temp;
+        }
+        else{
+            if(lastActivity.getDateOfActivity().compareTo(temp.getDateOfActivity()) < 0){
+                lastActivity = temp;
+            }
+        }
+    }
+    
+    return lastActivity;
   }	
 
   public DataModel getCherryPickRequestsDataModel()
