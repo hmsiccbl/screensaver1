@@ -404,9 +404,6 @@ public class ActivitySearchResults extends EntityBasedEntitySearchResults<Activi
             Screen s = null;
             if (a instanceof LabActivity) {
               s = ((LabActivity) a).getScreen();
-//              _dao.needReadOnly(s, Screen.labHead);
-//              _dao.needReadOnly(s, Screen.leadScreener);
-//              return s;
             }
             else if (a instanceof ServiceActivity) {
               // reload the activity as a service activity
@@ -429,136 +426,8 @@ public class ActivitySearchResults extends EntityBasedEntitySearchResults<Activi
     labActivityScreenColumns.get(0).setVisible(true);
     columns.addAll(labActivityScreenColumns);
     
-//    columns.addAll(buildScreenColumns());
-//    
-//    TableColumn tc = null;
-//    for(TableColumn t:columns){
-//      if(t.getName().equals("Lab Head")){
-//        tc = t;
-//      }
-//    }
-//    columns.remove(tc);
-  
     return columns;
   }
-  
-// NOTE: the following is an attempt to build the "screen" columns explicitly
-// in order to avoid lazy init exceptions when including them in the adctivity 
-// viewer.
-  
-//  private Screen getScreen(Activity a){
-//    Screen s = null;
-//    if (a instanceof LabActivity) {
-//      s = ((LabActivity) a).getScreen();
-////      _dao.needReadOnly(s, Screen.labHead);
-////      _dao.needReadOnly(s, Screen.leadScreener);
-////      return s;
-//    }
-//    else if (a instanceof ServiceActivity) {
-//      // reload the activity as a service activity
-//      // thereby instantiate the serviced screen lazy connection
-//      a = _dao.findEntityById(ServiceActivity.class, a.getActivityId());
-//      s = ((ServiceActivity) a).getServicedScreen();
-////      _dao.needReadOnly(s, Screen.labHead);
-////      _dao.needReadOnly(s, Screen.leadScreener);
-////      return s;
-//    }
-//    
-//    if(s != null){
-//      _dao.findEntityById(Screen.class, s.getScreenId(), true, Screen.statusItems);
-//      return s;
-//    }
-//    return null;
-//  }
-//  
-//  @SuppressWarnings("unchecked")
-//  private List<? extends TableColumn<Activity,?>>   buildScreenColumns()
-//  {  
-//    List<TableColumn<Activity, ?>> columns = Lists.newArrayList();
-////    columns.add(new UserNameColumn<Activity, ScreeningRoomUser>(RelationshipPath.from(Activity.class).to("screen", Cardinality.TO_ONE).to(Screen.labHead),
-////        "Lab Head1", "The head of the lab performing the screen",
-////        TableColumn.UNGROUPED, _userViewer) {
-////      @Override
-////      public ScreeningRoomUser getUser(Activity activity) {
-////        Screen s = getScreen(activity);
-////        if (s != null){
-////          return s.getLabHead(); 
-////        }
-////        return null;
-////      }
-////    });
-//    
-//    columns.add(new TextEntityColumn<Activity>(RelationshipPath.from(
-//        Activity.class).toProperty("comments"), "Lab Head1",
-//        "Lab Head", TextColumn.UNGROUPED) {
-//      @Override
-//      public String getCellValue(Activity activity) {
-//        Screen s = getScreen(activity);
-//        if (s != null){
-//          LabHead lh = _dao.findEntityById(LabHead.class, s.getLabHead().getScreensaverUserId(), true);
-//          if(lh!=null) return lh.getFullNameLastFirst();
-//        }
-//        return null;
-//      }
-//    });    
-//    columns.get(columns.size()-1).setVisible(false);
-//
-//    columns
-//        .add(new EnumEntityColumn<Activity, ScreenStatus>(
-//            RelationshipPath.from(Activity.class).toProperty("screen")
-//                .toProperty("statusItems"),
-//            "Status",
-//            "The current status of the screen, e.g., 'Completed', 'Ongoing', 'Pending', etc.",
-//            TableColumn.UNGROUPED, ScreenStatus.values()) {
-//          @Override
-//          public ScreenStatus getCellValue(Activity a) {
-//            Screen s = getScreen(a);
-//            if (s != null) {
-//              SortedSet<StatusItem> statusItems = s.getStatusItems();
-//              return statusItems.isEmpty() ? null : statusItems.last()
-//                  .getStatus();
-//
-//            }
-//            return null;
-//          }
-//        });
-//    columns.get(columns.size() - 1).setVisible(false);
-//    columns.get(columns.size() - 1).setAdministrative(true);
-//
-////    columns.add(new DateEntityColumn<Screen>(Screen.statusItems
-////        .toProperty("statusDate"), "Status Date",
-////        "The date of the most recent change of status for the screen",
-////        TableColumn.UNGROUPED) {
-////      @Override
-////      protected LocalDate getDate(Screen screen) {
-////        SortedSet<StatusItem> statusItems = screen.getStatusItems();
-////        return statusItems.isEmpty() ? null : statusItems.last()
-////            .getStatusDate();
-////      }
-////    });
-////    columns.get(columns.size() - 1).setAdministrative(true);
-//
-//    // TODO: should make this a vocab list, but need support for list-of-vocab
-//    // column type
-//    columns.add(new TextSetEntityColumn<Activity>(RelationshipPath
-//        .from(Activity.class).toProperty("screen")
-//        .toProperty("fundingSupports").toProperty("value"), "Funding Supports",
-//        "The list of funding supports for the screen", TableColumn.UNGROUPED) {
-//      @Override
-//      public Set<String> getCellValue(Activity a) {
-//        Screen s = getScreen(a);
-//        if (s != null) {
-//          return Sets.newHashSet(Iterables.transform(s.getFundingSupports(),
-//              Functions.toStringFunction()));
-//        }
-//        return null;
-//      }
-//    });  
-//    columns.get(columns.size() - 1).setAdministrative(true);
-//    columns.get(columns.size() - 1).setVisible(false);
-//    
-//    return columns;
-//  }
   
   protected Set<String> getActivityTypes()
   {
