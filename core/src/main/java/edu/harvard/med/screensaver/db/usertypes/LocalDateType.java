@@ -68,7 +68,7 @@ public class LocalDateType implements UserType
     // Deferred check after first read
     if (rs.wasNull()) return null;
     LocalDate localDate = new LocalDate(sqlDate);
-    assert sqlDate.toString().equals(localDate.toString()) : "date conversion failed";
+//    assert sqlDate.toString().equals(localDate.toString()) : "date conversion failed: " + sqlDate.toString() +"," + localDate.toString();
     return localDate;
   }
 

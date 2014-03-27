@@ -367,7 +367,7 @@ public class Screen extends Study implements AttachedFilesEntity<ScreenAttachedF
    * Get the lab head.
    * @return the lab head
    */
-  @ManyToOne(fetch=FetchType.LAZY, cascade={ CascadeType.PERSIST, CascadeType.MERGE })
+  @ManyToOne(fetch=FetchType.EAGER, cascade={ CascadeType.PERSIST, CascadeType.MERGE })
   @JoinColumn(name="labHeadId")
   @org.hibernate.annotations.ForeignKey(name="fk_screen_to_lab_head")
   @org.hibernate.annotations.LazyToOne(value=org.hibernate.annotations.LazyToOneOption.PROXY)
@@ -739,7 +739,7 @@ public class Screen extends Study implements AttachedFilesEntity<ScreenAttachedF
    *
    * @return the status items
    */
-  @ElementCollection
+  @ElementCollection(fetch=FetchType.EAGER)
   @JoinTable(name = "screen_status_item",
              joinColumns = @JoinColumn(name = "screen_id"))
   @Sort(type=SortType.NATURAL)
@@ -1342,7 +1342,7 @@ public class Screen extends Study implements AttachedFilesEntity<ScreenAttachedF
    * Get the set of funding supports.
    * @return the set of funding supports
    */
-  @ManyToMany(fetch=FetchType.LAZY)
+  @ManyToMany(fetch=FetchType.EAGER)
   @JoinTable(
     name="screenFundingSupportLink",
     joinColumns=@JoinColumn(name="screenId"),
