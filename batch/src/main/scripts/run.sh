@@ -10,7 +10,7 @@ fi
 
 SCREENSAVER=.
 JAVA=$JAVA_HOME/bin/java 
-MAX_RAM=1200m
+MAX_RAM=2000m
 RESOURCES=$SCREENSAVER/resources
 JARS=`find $SCREENSAVER/lib -name "*.jar" -print`
 LIBS=`for s in $JARS ; do printf ":$s" ; done`

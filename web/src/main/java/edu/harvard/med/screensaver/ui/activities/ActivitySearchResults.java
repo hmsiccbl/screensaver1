@@ -10,13 +10,16 @@
 package edu.harvard.med.screensaver.ui.activities;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 import java.util.Set;
+import java.util.SortedSet;
 
 import org.apache.log4j.Logger;
 import org.joda.time.LocalDate;
 
 import com.google.common.base.Function;
+import com.google.common.base.Functions;
 import com.google.common.base.Predicate;
 import com.google.common.collect.Iterables;
 import com.google.common.collect.Lists;
@@ -43,15 +46,20 @@ import edu.harvard.med.screensaver.model.screens.CherryPickScreening;
 import edu.harvard.med.screensaver.model.screens.LabActivity;
 import edu.harvard.med.screensaver.model.screens.LibraryScreening;
 import edu.harvard.med.screensaver.model.screens.Screen;
+import edu.harvard.med.screensaver.model.screens.ScreenStatus;
+import edu.harvard.med.screensaver.model.screens.StatusItem;
+import edu.harvard.med.screensaver.model.users.LabHead;
 import edu.harvard.med.screensaver.model.users.ScreeningRoomUser;
 import edu.harvard.med.screensaver.model.users.ScreensaverUser;
 import edu.harvard.med.screensaver.model.users.ScreensaverUserRole;
 import edu.harvard.med.screensaver.ui.arch.datatable.column.TableColumn;
 import edu.harvard.med.screensaver.ui.arch.datatable.column.TextColumn;
 import edu.harvard.med.screensaver.ui.arch.datatable.column.entity.DateEntityColumn;
+import edu.harvard.med.screensaver.ui.arch.datatable.column.entity.EnumEntityColumn;
 import edu.harvard.med.screensaver.ui.arch.datatable.column.entity.IntegerEntityColumn;
 import edu.harvard.med.screensaver.ui.arch.datatable.column.entity.RelatedEntityColumn;
 import edu.harvard.med.screensaver.ui.arch.datatable.column.entity.TextEntityColumn;
+import edu.harvard.med.screensaver.ui.arch.datatable.column.entity.TextSetEntityColumn;
 import edu.harvard.med.screensaver.ui.arch.datatable.column.entity.UserNameColumn;
 import edu.harvard.med.screensaver.ui.arch.datatable.column.entity.VocabularyEntityColumn;
 import edu.harvard.med.screensaver.ui.arch.datatable.model.InMemoryEntityDataModel;
@@ -228,7 +236,8 @@ public class ActivitySearchResults extends EntityBasedEntitySearchResults<Activi
       @Override
       public boolean isCommandLink() { return true; }
     });
-    columns.add(new VocabularyEntityColumn<Activity,String>(RelationshipPath.from(Activity.class).toProperty("activityType"),
+//    columns.add(new VocabularyEntityColumn<Activity,String>(RelationshipPath.from(Activity.class).toProperty("activityType"),
+    columns.add(new VocabularyEntityColumn<Activity,String>(RelationshipPath.from(Activity.class).toId(),
       "Activity Type",
       "The type of the activity",
       TableColumn.UNGROUPED,
@@ -392,14 +401,20 @@ public class ActivitySearchResults extends EntityBasedEntitySearchResults<Activi
         { 
           public Screen getRelatedEntity(Activity a)
           {
+            Screen s = null;
             if (a instanceof LabActivity) {
-              return ((LabActivity) a).getScreen();
+              s = ((LabActivity) a).getScreen();
             }
             else if (a instanceof ServiceActivity) {
               // reload the activity as a service activity
               // thereby instantiate the serviced screen lazy connection
               a = _dao.findEntityById(ServiceActivity.class, a.getActivityId());
-              return ((ServiceActivity) a).getServicedScreen();
+              s = ((ServiceActivity) a).getServicedScreen();
+            }
+            
+            if(s != null){
+              _dao.reloadEntity(s, true, Screen.statusItems);
+              return s;
             }
             return null;
           }
@@ -410,10 +425,10 @@ public class ActivitySearchResults extends EntityBasedEntitySearchResults<Activi
     }));
     labActivityScreenColumns.get(0).setVisible(true);
     columns.addAll(labActivityScreenColumns);
-  
+    
     return columns;
   }
-
+  
   protected Set<String> getActivityTypes()
   {
     return activityTypes;
