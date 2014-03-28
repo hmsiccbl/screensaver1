@@ -95,17 +95,30 @@ public class RNAiLibraryContentsParser extends WorkbookLibraryContentsParser<Sil
     }
   };
   private CsvTextColumn SEQUENCES = new CsvTextColumn("Sequences", AlphabeticCounter.toIndex("I"), false);
-  private CsvIntegerColumn VENDOR_ENTREZGENE_ID = new CsvIntegerColumn("Vendor Entrezgene ID", AlphabeticCounter.toIndex("J"), false);
-  private CsvTextListColumn VENDOR_ENTREZGENE_SYMBOLS = new CsvTextListColumn("Vendor Entrezgene Symbols", AlphabeticCounter.toIndex("K"), false);
-  private CsvTextColumn VENDOR_GENE_NAME = new CsvTextColumn("Vendor Gene Name", AlphabeticCounter.toIndex("L"), false);
-  private CsvTextSetColumn VENDOR_GENBANK_ACCESSION_NUMBERS = new CsvTextSetColumn("Vendor Genbank Accession Numbers", AlphabeticCounter.toIndex("M"), false);
-  private CsvTextColumn VENDOR_SPECIES = new CsvTextColumn("Vendor Species", AlphabeticCounter.toIndex("N"), false);
-  private CsvIntegerColumn FACILITY_ENTREZGENE_ID = new CsvIntegerColumn("Vendor Entrezgene ID", AlphabeticCounter.toIndex("O"), false);
-  private CsvTextListColumn FACILITY_ENTREZGENE_SYMBOLS = new CsvTextListColumn("Vendor Entrezgene Symbols", AlphabeticCounter.toIndex("P"), false);
-  private CsvTextColumn FACILITY_GENE_NAME = new CsvTextColumn("Vendor Gene Name", AlphabeticCounter.toIndex("Q"), false);
-  private CsvTextSetColumn FACILITY_GENBANK_ACCESSION_NUMBERS = new CsvTextSetColumn("Vendor Genbank Accession Numbers", AlphabeticCounter.toIndex("R"), false);
-  private CsvTextColumn FACILITY_SPECIES = new CsvTextColumn("Vendor Species", AlphabeticCounter.toIndex("S"), false);
-  private CsvSetColumn<WellKey> DUPLEX_WELLS = new CsvSetColumn<WellKey>("Duplex Wells", AlphabeticCounter.toIndex("T"), false) {
+  private CsvTextColumn ANTISENSE_SEQUENCES = 
+      new CsvTextColumn("Anti-sense Sequences", AlphabeticCounter.toIndex("J"), false);
+  private CsvIntegerColumn VENDOR_ENTREZGENE_ID = 
+      new CsvIntegerColumn("Vendor Entrezgene ID", AlphabeticCounter.toIndex("K"), false);
+  private CsvTextListColumn VENDOR_ENTREZGENE_SYMBOLS = 
+      new CsvTextListColumn("Vendor Entrezgene Symbols", AlphabeticCounter.toIndex("L"), false);
+  private CsvTextColumn VENDOR_GENE_NAME = 
+      new CsvTextColumn("Vendor Gene Name", AlphabeticCounter.toIndex("M"), false);
+  private CsvTextSetColumn VENDOR_GENBANK_ACCESSION_NUMBERS = 
+      new CsvTextSetColumn("Vendor Genbank Accession Numbers", AlphabeticCounter.toIndex("N"), false);
+  private CsvTextColumn VENDOR_SPECIES = 
+      new CsvTextColumn("Vendor Species", AlphabeticCounter.toIndex("O"), false);
+  private CsvIntegerColumn FACILITY_ENTREZGENE_ID = 
+      new CsvIntegerColumn("Vendor Entrezgene ID", AlphabeticCounter.toIndex("P"), false);
+  private CsvTextListColumn FACILITY_ENTREZGENE_SYMBOLS = 
+      new CsvTextListColumn("Vendor Entrezgene Symbols", AlphabeticCounter.toIndex("Q"), false);
+  private CsvTextColumn FACILITY_GENE_NAME = 
+      new CsvTextColumn("Vendor Gene Name", AlphabeticCounter.toIndex("R"), false);
+  private CsvTextSetColumn FACILITY_GENBANK_ACCESSION_NUMBERS = 
+      new CsvTextSetColumn("Vendor Genbank Accession Numbers", AlphabeticCounter.toIndex("S"), false);
+  private CsvTextColumn FACILITY_SPECIES = 
+      new CsvTextColumn("Vendor Species", AlphabeticCounter.toIndex("T"), false);
+  private CsvSetColumn<WellKey> DUPLEX_WELLS = 
+      new CsvSetColumn<WellKey>("Duplex Wells", AlphabeticCounter.toIndex("U"), false) {
     @Override
     protected WellKey parseElement(String value)
     {
@@ -181,6 +194,8 @@ public class RNAiLibraryContentsParser extends WorkbookLibraryContentsParser<Sil
       // parse reagent info
       SilencingReagentType srt = SILENCING_REAGENT_TYPE.getValue(row);
       String sequences = SEQUENCES.getValue(row);
+      String antiSequences = ANTISENSE_SEQUENCES.getValue(row);
+      
       if (sequences != null && (rvi == null || srt == null)) {
         throw new ParseException(new ParseError("if sequence is specified, " + VENDOR_REAGENT_ID.getName() + " and " + SILENCING_REAGENT_TYPE.getName() + " must be specified",
                                                 SEQUENCES.getLocation(row)));
@@ -194,6 +209,7 @@ public class RNAiLibraryContentsParser extends WorkbookLibraryContentsParser<Sil
         well.createSilencingReagent(rvi,
                                     srt,
                                     sequences,
+                                    antiSequences,
                                     false);
       updateGene(reagent.getVendorGene(),
                  VENDOR_ENTREZGENE_ID.getValue(row),

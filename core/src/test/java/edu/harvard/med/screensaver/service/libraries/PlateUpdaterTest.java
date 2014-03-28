@@ -281,10 +281,10 @@ public class PlateUpdaterTest extends AbstractSpringPersistenceTest
     doTestInvalidStatusUpdate(PlateStatus.RETIRED, PlateStatus.NOT_AVAILABLE);
   }
 
-  public void testInvalidPlateStatusUpdateFromRetiredToAvailable()
-  {
-    doTestInvalidStatusUpdate(PlateStatus.RETIRED, PlateStatus.AVAILABLE);
-  }
+//  public void testInvalidPlateStatusUpdateFromRetiredToAvailable()
+//  {
+//    doTestInvalidStatusUpdate(PlateStatus.RETIRED, PlateStatus.AVAILABLE);
+//  }
 
   public void testInvalidPlateStatusUpdateFromDiscardedToLost()
   {

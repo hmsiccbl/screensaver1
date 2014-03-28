@@ -192,9 +192,17 @@ public class Well extends SemanticIDAbstractEntity<String> implements Comparable
   
   public SilencingReagent createSilencingReagent(ReagentVendorIdentifier rvi,
                                                  SilencingReagentType silencingReagentType,
+                                                 String sequence,
+                                                 String antiSenseSequence)
+  {
+    return createSilencingReagent(rvi, silencingReagentType, sequence, antiSenseSequence, true);
+  }  
+  
+  public SilencingReagent createSilencingReagent(ReagentVendorIdentifier rvi,
+                                                 SilencingReagentType silencingReagentType,
                                                  String sequence)
   {
-    return createSilencingReagent(rvi, silencingReagentType, sequence, true);
+    return createSilencingReagent(rvi, silencingReagentType, sequence, null, true);
   }
 
   /**
@@ -208,6 +216,7 @@ public class Well extends SemanticIDAbstractEntity<String> implements Comparable
   public SilencingReagent createSilencingReagent(ReagentVendorIdentifier rvi,
                                                  SilencingReagentType silencingReagentType,
                                                  String sequence,
+                                                 String antiSenseSequence,
                                                  boolean updateReagentsRelationship)
   {
     if (getLibrary().getLatestContentsVersion() == null) {
@@ -223,7 +232,8 @@ public class Well extends SemanticIDAbstractEntity<String> implements Comparable
                                                              this, 
                                                              getLibrary().getLatestContentsVersion(),                                                                         
                                                              silencingReagentType,
-                                                             sequence);
+                                                             sequence,
+                                                             antiSenseSequence);
     if (updateReagentsRelationship) {
       _reagents.put(getLibrary().getLatestContentsVersion(), silencingReagent);
     }

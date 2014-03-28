@@ -65,6 +65,7 @@ public class SilencingReagent extends Reagent
     
   private SilencingReagentType _silencingReagentType;
   private String _sequence;
+  private String _antisenseSequence;
   private List<Gene> _vendorGenes;
   private List<Gene> _facilityGenes;
   private Set<Well> _duplexWells = Sets.newHashSet();
@@ -85,11 +86,13 @@ public class SilencingReagent extends Reagent
                    Well well,
                    LibraryContentsVersion libraryContentsVersion,
                    SilencingReagentType silencingReagentType,
-                   String sequence)
+                   String sequence,
+                   String antiSequence)
   {
     super(rvi, well, libraryContentsVersion);
     _silencingReagentType = silencingReagentType;
     _sequence = sequence;
+    _antisenseSequence = antiSequence;
     _vendorGenes = new ArrayList<Gene>();
     _facilityGenes = new ArrayList<Gene>();
   }
@@ -128,6 +131,25 @@ public class SilencingReagent extends Reagent
   private void setSequence(String sequence)
   {
     _sequence = sequence;
+  }
+  
+  /**
+   * The genetic anti-sense sequence of the silencing reagent. For pool wells, this may be
+   * null (or empty), or can be a delimited list of the sequences of the
+   * constituent duplexes. If left null/empty, it is still possible to find the
+   * duplex sequences via {@link #getDuplexWells}.{@link Well#getLatestReleasedReagent}.
+   */
+  @Column(nullable=true)
+  @org.hibernate.annotations.Type(type="text")
+  @edu.harvard.med.screensaver.model.annotations.Column(hasNonconventionalSetterMethod = true)
+  public String getAntiSenseSequence()
+  {
+    return _antisenseSequence;
+  }
+
+  private void setAntiSenseSequence(String sequence)
+  {
+    _antisenseSequence = sequence;
   }
 
   @OneToMany(cascade = { CascadeType.PERSIST, CascadeType.MERGE, CascadeType.REMOVE }, fetch = FetchType.LAZY)

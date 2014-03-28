@@ -55,6 +55,15 @@ public class SequenceRestrictedSilencingReagent extends SilencingReagent
   }
 
   @Override
+  public String getAntiSenseSequence()
+  {
+    if (isRestrictedSequence()) {
+      return null;
+    }
+    return delegate.getAntiSenseSequence();
+  }
+
+  @Override
   public Gene getVendorGene()
   {
     return delegate.getVendorGene();

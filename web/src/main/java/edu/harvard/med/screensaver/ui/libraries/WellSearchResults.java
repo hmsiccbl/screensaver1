@@ -645,6 +645,28 @@ public abstract class WellSearchResults extends TupleBasedEntitySearchResults<We
     columns.get(columns.size() - 1).setVisible(false);
     ((TextTupleColumn<Well,String>) Iterables.getLast(columns)).addRelationshipPath(restrictedSequencePropertyPath);
 
+    columns.add(new TextTupleColumn<Well,String>(
+      relPath.toProperty("antiSenseSequence"),
+      "Anti-sense Sequence",
+      "The nucleotide anti-sense sequence of this silencing reagent",
+      SILENCING_REAGENT_COLUMNS_GROUP) {
+      @Override
+      public String getCellValue(Tuple<String> tuple)
+      {
+        final String sequence = super.getCellValue(tuple);
+        return ((SilencingReagent) new TuplePropertySilencingReagent(restrictedSequencePropertyPath, tuple)
+        {
+          @Override
+          public String getAntiSenseSequence()
+          {
+            return sequence;
+          }
+        }.restrict()).getAntiSenseSequence();
+      }
+    });
+    columns.get(columns.size() - 1).setVisible(false);
+    ((TextTupleColumn<Well,String>) Iterables.getLast(columns)).addRelationshipPath(restrictedSequencePropertyPath);
+    
     columns.add(new TextSetTupleColumn<Well,String>(
       relPath.to(SilencingReagent.facilityGenes).toProperty("speciesName"),
       "Species",
