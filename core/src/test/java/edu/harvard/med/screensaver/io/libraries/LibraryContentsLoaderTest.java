@@ -265,7 +265,7 @@ public class LibraryContentsLoaderTest extends AbstractSpringPersistenceTest
             expectedErrors.add(new ParseError("Well Type is required", "Human Kinases:(C,9)"));
             expectedErrors.add(new ParseError("Vendor is required", "Human Kinases:(E,10)"));
             expectedErrors.add(new ParseError("Silencing Reagent Type is required", "Human Kinases:(H,11)"));
-            expectedErrors.add(new ParseError("NumberFormatException", "Human Kinases 2:(J,12)"));
+            expectedErrors.add(new ParseError("NumberFormatException", "Human Kinases 2:(K,12)"));
 
             log.debug("expected errors that were not reported: " +
               Sets.difference(expectedErrors, Sets.newHashSet(e.getErrors())));

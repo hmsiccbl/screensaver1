@@ -149,6 +149,7 @@ public abstract class Reagent extends AbstractEntity<Integer> implements Compara
   }
   
   @Type(type="text")
+  @edu.harvard.med.screensaver.model.annotations.Column(hasNonconventionalSetterMethod = true)
   public String getVendorNameSynonym()
   {
     return _vendorNameSynonym;

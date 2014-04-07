@@ -78,11 +78,17 @@
          description="The reagent's library contents version" 
          value="#{wellViewer.restrictedReagent.libraryContentsVersion.versionNumber}">
        </ss:property>
-	   
+     
        <ss:property id="sequence" label="Sequence" 
          type="List" rendered="#{wellViewer.entity.library.reagentType.simpleName == 'SilencingReagent' &amp;&amp; !empty wellViewer.restrictedReagent}"
          description="The nucleotide sequence of the silencing reagent" 
          value="#{fn:split(wellViewer.restrictedReagent.sequence, ';')}" separatorText="&lt;br/&gt;" escapeSeparator="false">
+       </ss:property>
+     
+       <ss:property id="asequence" label="Anti-sense Sequence" 
+         type="List" rendered="#{wellViewer.entity.library.reagentType.simpleName == 'SilencingReagent' &amp;&amp; !empty wellViewer.restrictedReagent}"
+         description="The nucleotide anti-sense sequence of the silencing reagent" 
+         value="#{fn:split(wellViewer.restrictedReagent.antiSenseSequence, ';')}" separatorText="&lt;br/&gt;" escapeSeparator="false">
        </ss:property>
 
        <ss:property id="geneName" label="Gene Name" 

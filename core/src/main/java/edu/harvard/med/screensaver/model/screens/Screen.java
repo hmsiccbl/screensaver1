@@ -1909,6 +1909,7 @@ public class Screen extends Study implements AttachedFilesEntity<ScreenAttachedF
    * @return the set of cell lines
    */
   @ManyToMany(fetch=FetchType.LAZY)
+  @edu.harvard.med.screensaver.model.annotations.Column(hasNonconventionalSetterMethod = true)
   @JoinTable(
     name="screenCellLine",
     joinColumns=@JoinColumn(name="screenId"),
@@ -1926,7 +1927,7 @@ public class Screen extends Study implements AttachedFilesEntity<ScreenAttachedF
    * Set the cellLines.
    * @param cellLines the new cellLines
    */
-  public void setCellLines(SortedSet<CellLine> cellLines)
+  private void setCellLines(SortedSet<CellLine> cellLines)
   {
     _cellLines = cellLines;
   }

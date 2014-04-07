@@ -110,7 +110,11 @@ import edu.harvard.med.screensaver.util.ValueReference;
  */
 public abstract class WellSearchResults extends TupleBasedEntitySearchResults<Well,String>
 {
-	private static final Logger log = Logger.getLogger(WellSearchResults.class);
+	private static final String COLUMN_GENE_SYMBOL = "Entrez Gene Symbol";
+
+  private static final String COLUMN_GENE_ID = "Entrez Gene ID";
+
+  private static final Logger log = Logger.getLogger(WellSearchResults.class);
 
   protected static final String WELL_COLUMNS_GROUP = "Well Columns";
   protected static final String SILENCING_REAGENT_COLUMNS_GROUP = "Silencing Reagent Columns";
@@ -321,17 +325,7 @@ public abstract class WellSearchResults extends TupleBasedEntitySearchResults<We
       }
     };
     initialize(dataFetcher);
-
-    // hide SM/RNAi columns depending on the screen type
-    if(library.getScreenType() != ScreenType.SMALL_MOLECULE)
-    {
-    	getColumnManager().getColumn(COLUMN_COMPOUND_NAMES).setVisible(false);
-    }
-    
-    if (isLINCS()) {
-      getColumnManager().getColumn("Library Well Type").setVisible(true);
-      ((Criterion<LibraryWellType>) getColumnManager().getColumn("Library Well Type").resetCriteria()).setOperatorAndValue(Operator.EQUAL, LibraryWellType.EXPERIMENTAL);
-    }
+    setColumnsForScreenType(library.getScreenType());
 
     // start with search panel closed
     setTableFilterMode(false);
@@ -351,14 +345,23 @@ public abstract class WellSearchResults extends TupleBasedEntitySearchResults<We
       }
     };
     initialize(dataFetcher);
+    setColumnsForScreenType(lcv.getLibrary().getScreenType());
 
-    // hide SM/RNAi columns depending on the screen type
-    if(lcv.getLibrary().getScreenType() != ScreenType.SMALL_MOLECULE)
-    {
-    	getColumnManager().getColumn(COLUMN_COMPOUND_NAMES).setVisible(false);
-    }
     // start with search panel closed
     setTableFilterMode(false);
+  }
+  
+  private void setColumnsForScreenType(ScreenType screenType){
+    // hide SM/RNAi columns depending on the screen type
+    if(screenType == ScreenType.SMALL_MOLECULE)
+    {
+      getColumnManager().getColumn(COLUMN_COMPOUND_NAMES).setVisible(true);
+    }
+    if(screenType == ScreenType.RNAI)
+    {
+      getColumnManager().getColumn(COLUMN_GENE_ID).setVisible(true);
+      getColumnManager().getColumn(COLUMN_GENE_SYMBOL).setVisible(true);
+    }
   }
 
   public void searchWellsForScreenResult(ScreenResult screenResult)
@@ -397,18 +400,7 @@ public abstract class WellSearchResults extends TupleBasedEntitySearchResults<We
           column.setVisible(true);
         }
       }
-      
-      // hide SM/RNAi columns depending on the screen type
-      if(screenResult.getScreen().getScreenType() != ScreenType.SMALL_MOLECULE)
-      {
-      	getColumnManager().getColumn(COLUMN_COMPOUND_NAMES).setVisible(false);
-      }
-      
-      if (isLINCS()) {
-        getColumnManager().getColumn(COLUMN_COMPOUND_NAMES).setVisible(true);
-        ((Criterion<LibraryWellType>) getColumnManager().getColumn(COLUMN_COMPOUND_NAMES).resetCriteria()).setOperator(Operator.NOT_EMPTY);
-      }      
-
+      setColumnsForScreenType(screenResult.getScreen().getScreenType());
       // start with search panel closed
       setTableFilterMode(false);
     }
@@ -587,20 +579,6 @@ public abstract class WellSearchResults extends TupleBasedEntitySearchResults<We
   protected void buildSilencingReagentPropertyColumns(List<TableColumn<Tuple<String>,?>> columns)
   {
     RelationshipPath<Well> relPath = getWellToReagentRelationshipPath();
-    
-    columns.add(new TextSetTupleColumn<Well,String>(
-      relPath.to(SilencingReagent.facilityGenes).toProperty("geneName"),
-      "Gene Name",
-      "The gene name for the silencing reagent in the well",
-      SILENCING_REAGENT_COLUMNS_GROUP));
-    columns.get(columns.size() - 1).setVisible(false);
-
-    columns.add(new IntegerSetTupleColumn<Well,String>(
-      relPath.to(SilencingReagent.facilityGenes).toProperty("entrezgeneId"),
-      "Entrez Gene ID",
-      "The Entrez gene ID for the gene targeted by silencing reagent in the well",
-      SILENCING_REAGENT_COLUMNS_GROUP));
-    columns.get(columns.size() - 1).setVisible(false);
 
     columns.add(new EnumTupleColumn<Well,String,SilencingReagentType>(
       relPath.toProperty("silencingReagentType"),
@@ -610,8 +588,22 @@ public abstract class WellSearchResults extends TupleBasedEntitySearchResults<We
       SilencingReagentType.values()));
     columns.get(columns.size() - 1).setVisible(false);
 
+    columns.add(new TextSetTupleColumn<Well,String>(
+      relPath.to(SilencingReagent.facilityGenes).toProperty("geneName"),
+      "Gene Name",
+      "The gene name for the silencing reagent in the well",
+      SILENCING_REAGENT_COLUMNS_GROUP));
+    columns.get(columns.size() - 1).setVisible(false);
+
+    columns.add(new IntegerSetTupleColumn<Well,String>(
+      relPath.to(SilencingReagent.facilityGenes).toProperty("entrezgeneId"),
+      COLUMN_GENE_ID,
+      "The Entrez gene ID for the gene targeted by silencing reagent in the well",
+      SILENCING_REAGENT_COLUMNS_GROUP));
+    columns.get(columns.size() - 1).setVisible(false);
+
     columns.add(new TextSetTupleColumn<Well,String>(relPath.to(SilencingReagent.facilityGenes).to(Gene.entrezgeneSymbols),
-                                                    "Entrez Gene Symbol",
+                                                    COLUMN_GENE_SYMBOL,
                                                     "The Entrez gene symbol for the gene targeted by silencing reagent in the well",
                                                     SILENCING_REAGENT_COLUMNS_GROUP));
     columns.get(columns.size() - 1).setVisible(false);
@@ -625,8 +617,8 @@ public abstract class WellSearchResults extends TupleBasedEntitySearchResults<We
     final PropertyPath<Well> restrictedSequencePropertyPath = relPath.toProperty("restrictedSequence");
     columns.add(new TextTupleColumn<Well,String>(
       relPath.toProperty("sequence"),
-      "Sequence",
-      "The nucleotide sequence of this silencing reagent",
+      "Sense Sequence",
+      "The nucleotide sense sequence of this silencing reagent",
       SILENCING_REAGENT_COLUMNS_GROUP) {
       @Override
       public String getCellValue(Tuple<String> tuple)
@@ -645,6 +637,28 @@ public abstract class WellSearchResults extends TupleBasedEntitySearchResults<We
     columns.get(columns.size() - 1).setVisible(false);
     ((TextTupleColumn<Well,String>) Iterables.getLast(columns)).addRelationshipPath(restrictedSequencePropertyPath);
 
+    columns.add(new TextTupleColumn<Well,String>(
+      relPath.toProperty("antiSenseSequence"),
+      "Anti-sense Sequence",
+      "The nucleotide anti-sense sequence of this silencing reagent",
+      SILENCING_REAGENT_COLUMNS_GROUP) {
+      @Override
+      public String getCellValue(Tuple<String> tuple)
+      {
+        final String sequence = super.getCellValue(tuple);
+        return ((SilencingReagent) new TuplePropertySilencingReagent(restrictedSequencePropertyPath, tuple)
+        {
+          @Override
+          public String getAntiSenseSequence()
+          {
+            return sequence;
+          }
+        }.restrict()).getAntiSenseSequence();
+      }
+    });
+    columns.get(columns.size() - 1).setVisible(false);
+    ((TextTupleColumn<Well,String>) Iterables.getLast(columns)).addRelationshipPath(restrictedSequencePropertyPath);
+    
     columns.add(new TextSetTupleColumn<Well,String>(
       relPath.to(SilencingReagent.facilityGenes).toProperty("speciesName"),
       "Species",
@@ -808,7 +822,7 @@ public abstract class WellSearchResults extends TupleBasedEntitySearchResults<We
                                                     COLUMN_COMPOUND_NAMES,
                                                     "The names of the compound in the well",
                                                     COMPOUND_COLUMNS_GROUP));
-    columns.get(columns.size() - 1).setVisible(true);
+    columns.get(columns.size() - 1).setVisible(false);
 
     columns.add(new IntegerSetTupleColumn<Well,String>(relPath.to(SmallMoleculeReagent.pubchemCids),
       "PubChem CIDs",
@@ -901,7 +915,7 @@ public abstract class WellSearchResults extends TupleBasedEntitySearchResults<We
                                                             "The library screen type",
                                                             WELL_COLUMNS_GROUP,
                                                             ScreenType.values()));
-    if (isLINCS()) columns.get(columns.size() - 1).setVisible(false);
+    columns.get(columns.size() - 1).setVisible(false);
 
     
     columns.add(new EnumTupleColumn<Well,String,LibraryWellType>(RelationshipPath.from(Well.class).toProperty("libraryWellType"),
