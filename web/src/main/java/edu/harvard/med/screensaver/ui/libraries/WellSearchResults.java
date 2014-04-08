@@ -56,6 +56,7 @@ import edu.harvard.med.screensaver.model.libraries.Gene;
 import edu.harvard.med.screensaver.model.libraries.Library;
 import edu.harvard.med.screensaver.model.libraries.LibraryContentsVersion;
 import edu.harvard.med.screensaver.model.libraries.LibraryWellType;
+import edu.harvard.med.screensaver.model.libraries.MolecularFormula;
 import edu.harvard.med.screensaver.model.libraries.Reagent;
 import edu.harvard.med.screensaver.model.libraries.SilencingReagent;
 import edu.harvard.med.screensaver.model.libraries.SilencingReagentType;
@@ -817,7 +818,85 @@ public abstract class WellSearchResults extends TupleBasedEntitySearchResults<We
     });
     ((TextTupleColumn) Iterables.getLast(columns)).addRelationshipPath(restrictedStructurePropertyPath);
     columns.get(columns.size() - 1).setVisible(false);
+    
 
+    columns.add(new TextTupleColumn<Well, String>(relPath
+        .to(SmallMoleculeReagent.molecularFormula), "Molecular Formula",
+        "The molecular formula for the compound in the well",
+        COMPOUND_COLUMNS_GROUP) {
+      @Override
+      public String getCellValue(Tuple<String> tuple) {
+        final String value = super.getCellValue(tuple);
+        MolecularFormula v = 
+            ((SmallMoleculeReagent) new TuplePropertySmallMoleculeReagent(
+                restrictedStructurePropertyPath, tuple) {
+              @Override
+              public MolecularFormula getMolecularFormula() {
+                if(value!=null && value.length() > 0 && !"null".equalsIgnoreCase(value) ){
+                  return new MolecularFormula(value);
+                }
+                return null;
+              }
+            }.restrict()).getMolecularFormula();
+        return v == null ? null : "" + v;        
+      }
+    });
+    ((TextTupleColumn) Iterables.getLast(columns))
+        .addRelationshipPath(restrictedStructurePropertyPath);
+    columns.get(columns.size() - 1).setVisible(false);
+
+    columns.add(new TextTupleColumn<Well, String>(relPath
+        .to(SmallMoleculeReagent.molecularMass), "Molecular Mass",
+        "The molecular mass for the compound in the well",
+        COMPOUND_COLUMNS_GROUP) {
+      @Override
+      public String getCellValue(Tuple<String> tuple) {
+        final String value = super.getCellValue(tuple);
+        BigDecimal v = 
+            ((SmallMoleculeReagent) new TuplePropertySmallMoleculeReagent(
+                restrictedStructurePropertyPath, tuple) {
+              @Override
+              public BigDecimal getMolecularMass() {
+                if (value != null && value.length() > 0
+                    && !"null".equalsIgnoreCase(value)) {
+                  return new BigDecimal(value);
+                }
+                return null;
+              }
+            }.restrict()).getMolecularMass();
+        return v == null ? null : "" + v;
+      }
+    });
+    ((TextTupleColumn) Iterables.getLast(columns))
+        .addRelationshipPath(restrictedStructurePropertyPath);
+    columns.get(columns.size() - 1).setVisible(false);
+
+    columns.add(new TextTupleColumn<Well, String>(relPath
+        .to(SmallMoleculeReagent.molecularWeight), "Molecular Weight",
+        "The molecular weight for the compound in the well",
+        COMPOUND_COLUMNS_GROUP) {
+      @Override
+      public String getCellValue(Tuple<String> tuple) {
+        final String value = super.getCellValue(tuple);
+        BigDecimal v = 
+            ((SmallMoleculeReagent) new TuplePropertySmallMoleculeReagent(
+                restrictedStructurePropertyPath, tuple) {
+              @Override
+              public BigDecimal getMolecularWeight() {
+                if(value!=null && value.length() > 0 && !"null".equalsIgnoreCase(value) ){
+                  return new BigDecimal(value);
+                }
+                return null;
+              }
+            }.restrict()).getMolecularWeight();
+        return v == null ? null : "" + v;
+      }
+    });
+    ((TextTupleColumn) Iterables.getLast(columns))
+        .addRelationshipPath(restrictedStructurePropertyPath);
+    columns.get(columns.size() - 1).setVisible(false);
+    
+    
     columns.add(new TextSetTupleColumn<Well,String>(relPath.to(SmallMoleculeReagent.compoundNames),
                                                     COLUMN_COMPOUND_NAMES,
                                                     "The names of the compound in the well",
