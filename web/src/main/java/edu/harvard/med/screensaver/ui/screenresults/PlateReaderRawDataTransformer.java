@@ -887,7 +887,6 @@ public class PlateReaderRawDataTransformer extends AbstractBackingBean
   	int factor = 1;
   	if(aps<lps) {
   		factor = lps/aps;
-  		if( plates.length % factor != 0 ) throw new IllegalArgumentException("Number of library plates must be a multiple of " + factor);
   	}
   	Map<WellKey, AssayWellControlType> controlWells = Maps.newHashMap();
   	List<String> exceptions = Lists.newArrayList();
