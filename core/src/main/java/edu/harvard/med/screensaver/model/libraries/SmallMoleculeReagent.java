@@ -48,11 +48,18 @@ public class SmallMoleculeReagent extends Reagent
   private static final long serialVersionUID = 1L;
 
   public static final PropertyPath<SmallMoleculeReagent> compoundNames = RelationshipPath.from(SmallMoleculeReagent.class).toCollectionOfValues("compoundNames");
+  public static final PropertyPath<SmallMoleculeReagent> molecularFormula = 
+      RelationshipPath.from(SmallMoleculeReagent.class).toProperty("molecularFormula");
+  public static final PropertyPath<SmallMoleculeReagent> molecularMass = 
+      RelationshipPath.from(SmallMoleculeReagent.class).toProperty("molecularMass");
+  public static final PropertyPath<SmallMoleculeReagent> molecularWeight = 
+      RelationshipPath.from(SmallMoleculeReagent.class).toProperty("molecularWeight");
   public static final PropertyPath<SmallMoleculeReagent> pubchemCids = RelationshipPath.from(SmallMoleculeReagent.class).toCollectionOfValues("pubchemCids");
   public static final PropertyPath<SmallMoleculeReagent> chembankIds = RelationshipPath.from(SmallMoleculeReagent.class).toCollectionOfValues("chembankIds");
   public static final PropertyPath<SmallMoleculeReagent> chemblIds = RelationshipPath.from(SmallMoleculeReagent.class).toCollectionOfValues("chemblIds");
   public static final PropertyPath<SmallMoleculeReagent> molfileList = RelationshipPath.from(SmallMoleculeReagent.class).toCollectionOfValues("molfileList");
-  public static final PropertyPath<SmallMoleculeReagent> facilityBatchId = RelationshipPath.from(SmallMoleculeReagent.class).toProperty("facilityBatchId");
+  public static final PropertyPath<SmallMoleculeReagent> facilityBatchId = 
+      RelationshipPath.from(SmallMoleculeReagent.class).toProperty("facilityBatchId");
   
   public static final SmallMoleculeReagent NullSmallMoleculeReagent = 
     new SmallMoleculeReagent(ReagentVendorIdentifier.NULL_VENDOR_ID,
