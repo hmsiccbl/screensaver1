@@ -80,7 +80,8 @@ import edu.harvard.med.screensaver.util.StringUtils;
 
 public class PlateReaderRawDataTransformer extends AbstractBackingBean
 {
-  private static final Logger log = Logger.getLogger(PlateReaderRawDataTransformer.class);
+  private static final Logger log =
+      Logger.getLogger(PlateReaderRawDataTransformer.class);
   private static final String ACTIVITY_INPUT_PARAMS_DELIMITER = ";";
   
   public enum OutputFormat {
@@ -102,33 +103,39 @@ public class PlateReaderRawDataTransformer extends AbstractBackingBean
   public static class FormOne
   {
     private String _plates;
-    private UISelectOneBean<PlateSize> _plateSize = new UISelectOneBean<PlateSize>(Lists.newArrayList(PlateSize.values()), ScreensaverConstants.DEFAULT_PLATE_SIZE) {
-      @Override
-      protected String makeLabel(PlateSize p)
-      {
-        return p.getValue().toString();
-      }
-    };
-    private UISelectOneBean<PlateSize> _libraryPlateSize = new UISelectOneBean<PlateSize>(Lists.newArrayList(PlateSize.values()), ScreensaverConstants.DEFAULT_PLATE_SIZE) {
-      @Override
-      protected String makeLabel(PlateSize p)
-      {
-        return p.getValue().toString();
-      }
-    };
+    private UISelectOneBean<PlateSize> _plateSize = 
+        new UISelectOneBean<PlateSize>(Lists.newArrayList(PlateSize.values()), 
+            ScreensaverConstants.DEFAULT_PLATE_SIZE) {
+          @Override
+          protected String makeLabel(PlateSize p)
+          {
+            return p.getValue().toString();
+          }
+        };
+    private UISelectOneBean<PlateSize> _libraryPlateSize = 
+        new UISelectOneBean<PlateSize>(Lists.newArrayList(PlateSize.values()), 
+            ScreensaverConstants.DEFAULT_PLATE_SIZE) {
+          @Override
+          protected String makeLabel(PlateSize p)
+          {
+            return p.getValue().toString();
+          }
+        };
     private String _outputFileName;
     private String _assayNegativeControls;
     private String _assayPositiveControls;
     private String _assayOtherControls;
     private String _libraryControls;
     private transient DataModel _assayControlWellsModel;
-    private UISelectOneBean<OutputFormat> _outputFormat = new UISelectOneBean<OutputFormat>(Lists.newArrayList(OutputFormat.values())) {
-      @Override
-      protected String makeLabel(OutputFormat t)
-      {
-        return t.getDisplayText();
-      }
-    };
+    private UISelectOneBean<OutputFormat> _outputFormat = 
+        new UISelectOneBean<OutputFormat>(Lists.newArrayList(OutputFormat.values())) 
+        {
+          @Override
+          protected String makeLabel(OutputFormat t)
+          {
+            return t.getDisplayText();
+          }
+        };
 
     public FormOne()
     {}
@@ -305,19 +312,25 @@ public class PlateReaderRawDataTransformer extends AbstractBackingBean
     {
     	//for the labels, don't care what type they are
     	Map<WellName,String> labels = Maps.newHashMap();
-    	Map<String,Set<WellName>> labelledControlSet = PlateReaderRawDataParser.expandNamedWellRanges(getAssayPositiveControls(), getAssayPlateSize().getWellCount());
+    	Map<String,Set<WellName>> labelledControlSet = 
+    	    PlateReaderRawDataParser.expandNamedWellRanges(
+    	        getAssayPositiveControls(), getAssayPlateSize().getWellCount());
     	for(String label:labelledControlSet.keySet()) {
     		for(WellName wellName:labelledControlSet.get(label)) {
     			labels.put(wellName,label);
     		}
     	}
-    	labelledControlSet = PlateReaderRawDataParser.expandNamedWellRanges(getAssayNegativeControls(), getAssayPlateSize().getWellCount());
+    	labelledControlSet = 
+    	    PlateReaderRawDataParser.expandNamedWellRanges(
+    	        getAssayNegativeControls(), getAssayPlateSize().getWellCount());
     	for(String label:labelledControlSet.keySet()) {
     		for(WellName wellName:labelledControlSet.get(label)) {
     			labels.put(wellName,label);
     		}
     	}
-    	labelledControlSet = PlateReaderRawDataParser.expandNamedWellRanges(getAssayOtherControls(), getAssayPlateSize().getWellCount());
+    	labelledControlSet = 
+    	    PlateReaderRawDataParser.expandNamedWellRanges(
+    	        getAssayOtherControls(), getAssayPlateSize().getWellCount());
     	for(String label:labelledControlSet.keySet()) {
     		for(WellName wellName:labelledControlSet.get(label)) {
     			labels.put(wellName,label);
@@ -330,7 +343,9 @@ public class PlateReaderRawDataTransformer extends AbstractBackingBean
 	  private Map<WellName, String> parseLibraryControlLabels()
 	  {
     	Map<WellName,String> labels = Maps.newHashMap();
-    	Map<String,Set<WellName>> labelledControlSet = PlateReaderRawDataParser.expandNamedWellRanges(getLibraryControls(), getLibraryPlateSize().getWellCount());
+    	Map<String,Set<WellName>> labelledControlSet = 
+    	    PlateReaderRawDataParser.expandNamedWellRanges(
+    	        getLibraryControls(), getLibraryPlateSize().getWellCount());
 	  	for(String label:labelledControlSet.keySet()) {
 	  		for(WellName wellName:labelledControlSet.get(label)) {
 	  			labels.put(wellName,label);
@@ -344,40 +359,58 @@ public class PlateReaderRawDataTransformer extends AbstractBackingBean
     {
     	SortedMap<WellName,AssayWellControlType> mapping = Maps.newTreeMap();
 //    	
-//    	Set<WellName> positiveControls = PlateReaderRawDataParser.expandWellRange(getAssayPositiveControls(),getAssayPlateSize().getWellCount());
-//    	Set<WellName> negativeControls = PlateReaderRawDataParser.expandWellRange(getAssayNegativeControls(),getAssayPlateSize().getWellCount());
-//    	Set<WellName> otherControls = PlateReaderRawDataParser.expandWellRange(getAssayOtherControls(),getAssayPlateSize().getWellCount());
+//    	Set<WellName> positiveControls = 
+//    	   PlateReaderRawDataParser.expandWellRange(
+//    	       getAssayPositiveControls(),getAssayPlateSize().getWellCount());
+//    	Set<WellName> negativeControls = 
+//    	     PlateReaderRawDataParser.expandWellRange(
+//    	         getAssayNegativeControls(),getAssayPlateSize().getWellCount());
+//    	Set<WellName> otherControls = 
+//    	     PlateReaderRawDataParser.expandWellRange(
+//    	         getAssayOtherControls(),getAssayPlateSize().getWellCount());
 //    	
 //    	if( !Sets.intersection(positiveControls, negativeControls).isEmpty() ||
 //    			!Sets.intersection(positiveControls, otherControls).isEmpty() ||
 //    			!Sets.intersection(negativeControls, otherControls).isEmpty() ) 
 //    		throw new IllegalArgumentException("Control wells are repeated");
 //    	
-//    	for(WellName wellName:positiveControls) mapping.put(wellName, AssayWellControlType.ASSAY_POSITIVE_CONTROL);
-//    	for(WellName wellName:negativeControls) mapping.put(wellName, AssayWellControlType.ASSAY_CONTROL);
-//    	for(WellName wellName:otherControls) mapping.put(wellName, AssayWellControlType.OTHER_CONTROL);
+//    	for(WellName wellName:positiveControls) 
+//    	   mapping.put(wellName, AssayWellControlType.ASSAY_POSITIVE_CONTROL);
+//    	for(WellName wellName:negativeControls) 
+//    	   mapping.put(wellName, AssayWellControlType.ASSAY_CONTROL);
+//    	for(WellName wellName:otherControls) 
+//    	   mapping.put(wellName, AssayWellControlType.OTHER_CONTROL);
 
     	//for the type, don't care what labels are
     	
-    	Map<String,Set<WellName>> positiveControls = PlateReaderRawDataParser.expandNamedWellRanges(getAssayPositiveControls(), getAssayPlateSize().getWellCount());
-    	Map<String,Set<WellName>> negativeControls = PlateReaderRawDataParser.expandNamedWellRanges(getAssayNegativeControls(), getAssayPlateSize().getWellCount());
-    	Map<String,Set<WellName>> otherControls = PlateReaderRawDataParser.expandNamedWellRanges(getAssayOtherControls(), getAssayPlateSize().getWellCount());
+    	Map<String,Set<WellName>> positiveControls = 
+    	    PlateReaderRawDataParser.expandNamedWellRanges(
+    	        getAssayPositiveControls(), getAssayPlateSize().getWellCount());
+    	Map<String,Set<WellName>> negativeControls = 
+    	    PlateReaderRawDataParser.expandNamedWellRanges(
+    	        getAssayNegativeControls(), getAssayPlateSize().getWellCount());
+    	Map<String,Set<WellName>> otherControls = 
+    	    PlateReaderRawDataParser.expandNamedWellRanges(
+    	        getAssayOtherControls(), getAssayPlateSize().getWellCount());
 
     	for(Set<WellName> wellSet:positiveControls.values()) {
     		for(WellName wellName:wellSet) {
-    			if(mapping.containsKey(wellName)) throw new IllegalArgumentException("Control well is repeated: " + wellName);
+    			if(mapping.containsKey(wellName)) 
+    			    throw new IllegalArgumentException("Control well is repeated: " + wellName);
     			else mapping.put(wellName, AssayWellControlType.ASSAY_POSITIVE_CONTROL);
     		}
     	}    	
     	for(Set<WellName> wellSet:negativeControls.values()) {
     		for(WellName wellName:wellSet) {
-    			if(mapping.containsKey(wellName)) throw new IllegalArgumentException("Control well is repeated: " + wellName);
+    			if(mapping.containsKey(wellName)) 
+    			    throw new IllegalArgumentException("Control well is repeated: " + wellName);
     			else mapping.put(wellName, AssayWellControlType.ASSAY_CONTROL);
     		}
     	}    	
     	for(Set<WellName> wellSet:otherControls.values()) {
     		for(WellName wellName:wellSet) {
-    			if(mapping.containsKey(wellName)) throw new IllegalArgumentException("Control well is repeated: " + wellName);
+    			if(mapping.containsKey(wellName)) 
+    			  throw new IllegalArgumentException("Control well is repeated: " + wellName);
     			else mapping.put(wellName, AssayWellControlType.OTHER_CONTROL);
     		}
     	}
@@ -386,7 +419,9 @@ public class PlateReaderRawDataTransformer extends AbstractBackingBean
     
     private Set<WellName> parseLibraryControls(){
     	Set<WellName> allControls = Sets.newHashSet();
-    	Map<String,Set<WellName>> controls = PlateReaderRawDataParser.expandNamedWellRanges(getLibraryControls(), getLibraryPlateSize().getWellCount());
+    	Map<String,Set<WellName>> controls = 
+    	    PlateReaderRawDataParser.expandNamedWellRanges(
+    	        getLibraryControls(), getLibraryPlateSize().getWellCount());
     	for(Set<WellName> set:controls.values()) {
     		allControls.addAll(set);
     	}
@@ -425,7 +460,8 @@ public class PlateReaderRawDataTransformer extends AbstractBackingBean
     }
 
     /**
-     * Serialize to a JSON representation using {@link ObjectMapper#writeValue(java.io.Writer, Object)}
+     * Serialize to a JSON representation using 
+     * {@link ObjectMapper#writeValue(java.io.Writer, Object)}
      * 
      * @return a JSON representation
      * @throws IOException
@@ -433,15 +469,17 @@ public class PlateReaderRawDataTransformer extends AbstractBackingBean
     public String serialize() throws IOException
     {
       ObjectMapper mapper = new ObjectMapper();
-      FilterProvider filters = new SimpleFilterProvider().addFilter("savedForm1Properties",
-                                                                    SimpleBeanPropertyFilter.filterOutAllExcept("plates",
-                                                                                                                "assayPlateSize",
-                                                                                                                "outputFileName",
-                                                                                                                "outputFormat",
-                                                                                                                "assayPositiveControls",
-                                                                                                                "assayNegativeControls",
-                                                                                                                "assayOtherControls",
-                                                                                                                "libraryControls"));
+      FilterProvider filters = new SimpleFilterProvider().addFilter(
+          "savedForm1Properties",
+          SimpleBeanPropertyFilter.filterOutAllExcept(
+              "plates",
+              "assayPlateSize",
+              "outputFileName",
+              "outputFormat",
+              "assayPositiveControls",
+              "assayNegativeControls",
+              "assayOtherControls",
+              "libraryControls"));
       return mapper.writer(filters).writeValueAsString(this);
     }
 
@@ -463,24 +501,43 @@ public class PlateReaderRawDataTransformer extends AbstractBackingBean
   {
     private UploadedFile _uploadedFile;
     private UISelectOneBean<AssayReadoutType> _readoutType =
-      new UISelectOneBean<AssayReadoutType>(Lists.newArrayList(AssayReadoutType.values()), true) {
-      protected String getEmptyLabel()
+      new UISelectOneBean<AssayReadoutType>(Lists.newArrayList(AssayReadoutType.values()), true) 
       {
-        return "<select>";
-      }
-    };
+        protected String getEmptyLabel()
+        {
+          return "<select>";
+        }
+      };
 
     private String _conditions;
     private Integer _replicates;
     private String _readouts;
     private UISelectOneBean<CollationOrder> _collationOrder =
       new UISelectOneBean<CollationOrder>(ImmutableList.of(
-          new CollationOrder(ImmutableList.of(PlateOrderingGroup.Plates, PlateOrderingGroup.Quadrants, PlateOrderingGroup.Conditions, PlateOrderingGroup.Replicates, PlateOrderingGroup.Readouts)),
-          new CollationOrder(ImmutableList.of(PlateOrderingGroup.Plates, PlateOrderingGroup.Quadrants, PlateOrderingGroup.Replicates, PlateOrderingGroup.Conditions, PlateOrderingGroup.Readouts)),
-          new CollationOrder(ImmutableList.of(PlateOrderingGroup.Conditions, PlateOrderingGroup.Plates, PlateOrderingGroup.Quadrants, PlateOrderingGroup.Replicates, PlateOrderingGroup.Readouts)),
-          new CollationOrder(ImmutableList.of(PlateOrderingGroup.Conditions, PlateOrderingGroup.Replicates, PlateOrderingGroup.Plates, PlateOrderingGroup.Quadrants, PlateOrderingGroup.Readouts)),
-          new CollationOrder(ImmutableList.of(PlateOrderingGroup.Replicates, PlateOrderingGroup.Plates, PlateOrderingGroup.Quadrants, PlateOrderingGroup.Conditions, PlateOrderingGroup.Readouts)),
-          new CollationOrder(ImmutableList.of(PlateOrderingGroup.Replicates, PlateOrderingGroup.Conditions, PlateOrderingGroup.Plates, PlateOrderingGroup.Quadrants, PlateOrderingGroup.Readouts))
+          new CollationOrder(ImmutableList.of(
+              PlateOrderingGroup.Plates, PlateOrderingGroup.Quadrants, 
+              PlateOrderingGroup.Conditions, PlateOrderingGroup.Replicates, 
+              PlateOrderingGroup.Readouts)),
+          new CollationOrder(ImmutableList.of(
+              PlateOrderingGroup.Plates, PlateOrderingGroup.Quadrants, 
+              PlateOrderingGroup.Replicates, PlateOrderingGroup.Conditions, 
+              PlateOrderingGroup.Readouts)),
+          new CollationOrder(ImmutableList.of(
+              PlateOrderingGroup.Conditions, PlateOrderingGroup.Plates, 
+              PlateOrderingGroup.Quadrants, PlateOrderingGroup.Replicates, 
+              PlateOrderingGroup.Readouts)),
+          new CollationOrder(ImmutableList.of(
+              PlateOrderingGroup.Conditions, PlateOrderingGroup.Replicates, 
+              PlateOrderingGroup.Plates, PlateOrderingGroup.Quadrants, 
+              PlateOrderingGroup.Readouts)),
+          new CollationOrder(ImmutableList.of(
+              PlateOrderingGroup.Replicates, PlateOrderingGroup.Plates, 
+              PlateOrderingGroup.Quadrants, PlateOrderingGroup.Conditions, 
+              PlateOrderingGroup.Readouts)),
+          new CollationOrder(ImmutableList.of(
+              PlateOrderingGroup.Replicates, PlateOrderingGroup.Conditions, 
+              PlateOrderingGroup.Plates, PlateOrderingGroup.Quadrants, 
+              PlateOrderingGroup.Readouts))
 
 
           ));
@@ -501,7 +558,9 @@ public class PlateReaderRawDataTransformer extends AbstractBackingBean
 
     public void setUploadedFile(UploadedFile uploadedFile)
     {
-      // note: only replace the previously uploaded file, if user specified a new file (since multiple page reloads may occur before the transformation operation is invoked)
+      // note: only replace the previously uploaded file, if user specified a 
+      // new file (since multiple page reloads may occur before the 
+      // transformation operation is invoked)
       if (uploadedFile != null) {
         log.info("uploaded new file " + uploadedFile);
         _uploadedFile = uploadedFile;
@@ -631,7 +690,8 @@ public class PlateReaderRawDataTransformer extends AbstractBackingBean
     }
 
     /**
-     * Serialize to a JSON representation using {@link ObjectMapper#writeValue(java.io.Writer, Object)}
+     * Serialize to a JSON representation using 
+     * {@link ObjectMapper#writeValue(java.io.Writer, Object)}
      * 
      * @return a JSON representation
      * @throws IOException
@@ -639,13 +699,14 @@ public class PlateReaderRawDataTransformer extends AbstractBackingBean
     public String serialize() throws IOException
     {
       ObjectMapper mapper = new ObjectMapper();
-      FilterProvider filters = new SimpleFilterProvider().addFilter("savedForm2Properties",
-                                                                    SimpleBeanPropertyFilter.filterOutAllExcept("uploadedFilename",
-                                                                                                                "conditions",
-                                                                                                                "replicates",
-                                                                                                                "readoutTypeSelection",
-                                                                                                                "readouts",
-                                                                                                                "collationOrderOrdering"));
+      FilterProvider filters = new SimpleFilterProvider().addFilter(
+          "savedForm2Properties",
+          SimpleBeanPropertyFilter.filterOutAllExcept("uploadedFilename",
+              "conditions",
+              "replicates",
+              "readoutTypeSelection",
+              "readouts",
+              "collationOrderOrdering"));
       return mapper.writer(filters).writeValueAsString(this);
     }
 
@@ -657,13 +718,14 @@ public class PlateReaderRawDataTransformer extends AbstractBackingBean
     public static InputFileParams deserialize(String input) throws IOException
     {
       ObjectMapper mapper = new ObjectMapper();
-      InputFileParams params = mapper.readValue(input.getBytes(), InputFileParams.class);
+      InputFileParams params = mapper.readValue(
+          input.getBytes(), InputFileParams.class);
       return params;
     }
 
     /**
-     * Parse out strings, delimited by newlines or commas, trimming surrounding whitespace from each token (but not
-     * internal whitespace)
+     * Parse out strings, delimited by newlines or commas, trimming 
+     * surrounding whitespace from each token (but not internal whitespace)
      */
     private List<String> parseStrings(String input)
     {
@@ -690,7 +752,6 @@ public class PlateReaderRawDataTransformer extends AbstractBackingBean
 
   private GenericEntityDAO _dao;
   private ScreenViewer _screenViewer;
-//  private edu.harvard.med.screensaver.service.screenresult.PlateReaderRawDataTransformer _transformer;
 
   private FormOne _formOne = new FormOne();
   private List<InputFileParams> _inputFiles = Lists.newArrayList();
@@ -796,9 +857,13 @@ public class PlateReaderRawDataTransformer extends AbstractBackingBean
   private void restoreInputParams()
   {
   	if(_screenViewer != null) {
-	    if (!getScreen().getUpdateActivitiesOfType(AdministrativeActivityType.PLATE_RAW_DATA_TRANSFORMATION).isEmpty()) {
-	      String comments = NullSafeUtils.value(getScreen().getUpdateActivitiesOfType(AdministrativeActivityType.PLATE_RAW_DATA_TRANSFORMATION).last().getComments(), "");
-	      String[] parts = NullSafeUtils.value(comments.split(ACTIVITY_INPUT_PARAMS_DELIMITER), new String[] {}); 
+	    if (!getScreen().getUpdateActivitiesOfType(
+	        AdministrativeActivityType.PLATE_RAW_DATA_TRANSFORMATION).isEmpty()) {
+	      String comments = NullSafeUtils.value(
+	          getScreen().getUpdateActivitiesOfType(
+	              AdministrativeActivityType.PLATE_RAW_DATA_TRANSFORMATION).last().getComments(), "");
+	      String[] parts = NullSafeUtils.value(
+	          comments.split(ACTIVITY_INPUT_PARAMS_DELIMITER), new String[] {}); 
 	      if (parts.length > 0) {
 	        try {
 	          setFormOne(new FormOne(parts[0]));
@@ -819,9 +884,14 @@ public class PlateReaderRawDataTransformer extends AbstractBackingBean
 	    }
   	}else if(_cherryPickRequestViewer != null){
   		CherryPickRequest cpr = getCherryPickRequest();
-	    if (!cpr.getUpdateActivitiesOfType(AdministrativeActivityType.PLATE_RAW_DATA_TRANSFORMATION).isEmpty()) {
-	      String comments = NullSafeUtils.value(cpr.getUpdateActivitiesOfType(AdministrativeActivityType.PLATE_RAW_DATA_TRANSFORMATION).last().getComments(), "");
-	      String[] parts = NullSafeUtils.value(comments.split(ACTIVITY_INPUT_PARAMS_DELIMITER), new String[] {}); 
+	    if (!cpr.getUpdateActivitiesOfType(
+	        AdministrativeActivityType.PLATE_RAW_DATA_TRANSFORMATION).isEmpty()) 
+	    {
+	      String comments = NullSafeUtils.value(
+	          cpr.getUpdateActivitiesOfType(
+	              AdministrativeActivityType.PLATE_RAW_DATA_TRANSFORMATION).last().getComments(), "");
+	      String[] parts = NullSafeUtils.value(
+	          comments.split(ACTIVITY_INPUT_PARAMS_DELIMITER), new String[] {}); 
 	      if (parts.length > 0) {
 	        try {
 	          setFormOne(new FormOne(parts[0]));
@@ -891,32 +961,44 @@ public class PlateReaderRawDataTransformer extends AbstractBackingBean
   	Map<WellKey, AssayWellControlType> controlWells = Maps.newHashMap();
   	List<String> exceptions = Lists.newArrayList();
   	
-  	Set<WellName> exceptionControlWellsIfAny = Sets.newHashSet(); // temp list to track these, to only show them once in the error output
-  	for(Map.Entry<WellName,AssayWellControlType> entry:assayControlMapping.entrySet()) {
+    // temp list to track these, to only show them once in the error output
+  	Set<WellName> exceptionControlWellsIfAny = Sets.newHashSet(); 
+  	for(Map.Entry<WellName,AssayWellControlType> entry : 
+  	      assayControlMapping.entrySet()) {
   		WellName assayPlateWellName = entry.getKey();
   		for(int i=0;i<plates.length;i=i+factor) {
   			int plate = plates[i];
   			int sourceQuadrant = i % factor; // note, this is ignored if aps>=lps
-  			WellName libraryWellName = PlateReaderRawDataParser.convertWell(assayPlateWellName, aps, lps, sourceQuadrant);
+  			WellName libraryWellName = 
+  			    PlateReaderRawDataParser.convertWell(
+  			        assayPlateWellName, aps, lps, sourceQuadrant);
   			
     		WellKey libraryWellKey = new WellKey(plate,libraryWellName);
   			if(factor > 1) {
-    			int destQuadrant = PlateReaderRawDataParser.deconvoluteMatrix(aps, lps, assayPlateWellName.getRowIndex(), assayPlateWellName.getColumnIndex());
+    			int destQuadrant = 
+    			    PlateReaderRawDataParser.deconvoluteMatrix(
+    			        aps, lps, assayPlateWellName.getRowIndex(), 
+    			        assayPlateWellName.getColumnIndex());
     			libraryWellKey = new WellKey(plate+destQuadrant, libraryWellName);
   			}
     		Well well = finder.findWell(libraryWellKey);
-    		if(well == null) throw new IllegalArgumentException("cannot find the well: " + libraryWellKey);
+    		if(well == null) 
+    		    throw new IllegalArgumentException(
+    		        "cannot find the well: " + libraryWellKey);
     		if(!manuallLibraryControls.contains(libraryWellName) &&
     				well.getLibraryWellType() == LibraryWellType.EXPERIMENTAL ) 
     		{
       		if(!manuallLibraryControls.contains(libraryWellName)) {
-      			if(!exceptionControlWellsIfAny.contains(assayPlateWellName)) { // only add the error for a control well once, not for all plates
-      				exceptions.add("Control: "+ assayPlateWellName + ": " + entry.getValue() + " => " + well + ": manual library control");
+            // only add the error for a control well once, not for all plates
+      			if(!exceptionControlWellsIfAny.contains(assayPlateWellName)) { 
+      				exceptions.add("Control: "+ assayPlateWellName + ": " + 
+      				    entry.getValue() + " => " + well + ": manual library control");
       				exceptionControlWellsIfAny.add(assayPlateWellName);
       			}
       		}else {
       			if(!exceptionControlWellsIfAny.contains(assayPlateWellName)) {
-        			exceptions.add("Control: " + assayPlateWellName + ": " + entry.getValue() + " => " + well + ": " + well.getLibraryWellType() );
+        			exceptions.add("Control: " + assayPlateWellName + ": " + 
+        			    entry.getValue() + " => " + well + ": " + well.getLibraryWellType() );
       				exceptionControlWellsIfAny.add(assayPlateWellName);
       			}
       		}
@@ -927,8 +1009,11 @@ public class PlateReaderRawDataTransformer extends AbstractBackingBean
   	}
   	if(!exceptions.isEmpty())
 		{
-  		String msg = "Library plate wells must be 'empty' or 'DMSO' to be used as an assay control: ";
-  		if(exceptions.size() > 5 ) msg += exceptions.subList(0, 4) + ", and " + (exceptions.size() -5 ) + " other similar errors.";
+  		String msg = 
+  		    "Library plate wells must be 'empty' or 'DMSO' to be used as an assay control: ";
+  		if(exceptions.size() > 5 ) 
+  		    msg += exceptions.subList(0, 4) + ", and " + 
+  		           (exceptions.size() -5 ) + " other similar errors.";
   		else msg += exceptions;
   		throw new IllegalArgumentException(msg);
 		}
@@ -963,7 +1048,8 @@ public class PlateReaderRawDataTransformer extends AbstractBackingBean
         multiFileInputStream = inputFile.getUploadedFile().getInputStream();
       } 
       else {
-        multiFileInputStream = new SequenceInputStream(multiFileInputStream, inputFile.getUploadedFile().getInputStream());
+        multiFileInputStream = new SequenceInputStream(
+            multiFileInputStream, inputFile.getUploadedFile().getInputStream());
       }
       
       AssayReadoutType assayReadoutType = inputFile.getReadoutTypeSelection();
@@ -1003,11 +1089,13 @@ public class PlateReaderRawDataTransformer extends AbstractBackingBean
   			expectedMatricesReadIn += tempMatricesToReadIn;
   			
   			List<List<String[]>> parsedMatrices = 
-  					PlateReaderRawDataParser.parseMatrices(new BufferedReader(new InputStreamReader(multiFileInputStream)));
+  					PlateReaderRawDataParser.parseMatrices(
+  					    new BufferedReader(new InputStreamReader(multiFileInputStream)));
 
   			if(parsedMatrices.size() !=  tempMatricesToReadIn ) {
   	    	showMessage("invalidUserInput", "Plates", 
-  	    			"Expected matrices before collation/deconvolution: " + tempMatricesToReadIn  + ", but found: " + parsedMatrices.size());
+  	    			"Expected matrices before collation/deconvolution: " + tempMatricesToReadIn  + 
+  	    			", but found: " + parsedMatrices.size());
   	      return REDISPLAY_PAGE_ACTION_RESULT;
   			}
   			PlateReaderRawDataParser.validateMatrices(parsedMatrices, aps);
@@ -1015,13 +1103,18 @@ public class PlateReaderRawDataTransformer extends AbstractBackingBean
   			inputFile.setExpectedPlateMatrixCount(tempPlateMatrices);
   			inputFile.setUploadedPlateMatrixCount(tempMatricesToReadIn);
 
-  			// TODO: converting the matrices into the "standard" 384 format here for all cases, 96to384 and 1536to384
-  			// instead, could convert nothing, but use the "convert" functions to convert each cell at write time.
-  			// since doing it this way leads to making assumptions about plate/quadrant ordering that differ for 96 and 1536
+  			// TODO: converting the matrices into the "standard" 384 format here 
+  			// for all cases, 96to384 and 1536to384;
+  			// instead, could convert nothing, but use the "convert" functions to 
+  			// convert each cell at write time.
+  			// since doing it this way leads to making assumptions about 
+  			// plate/quadrant ordering that differ for 96 and 1536
   			List<List<String[]>> newMatrices = 
   					PlateReaderRawDataParser.convertMatrixFormat(aps, lps, parsedMatrices);
   			if(newMatrices.size() !=  tempPlateMatrices ) {
-  				throw new Exception("ExpectedCount adjusted matrix count: " + tempPlateMatrices  + ", but found: " + newMatrices.size());
+  				throw new Exception(
+  				    "ExpectedCount adjusted matrix count: " + tempPlateMatrices  + 
+  				    ", but found: " + newMatrices.size());
   			}
   			
   			combinedPlateOrderings.add(matrixOrder);
@@ -1065,7 +1158,9 @@ public class PlateReaderRawDataTransformer extends AbstractBackingBean
 						}
 						Map<WellKey, Well> wellMap = plateWellMap.get(wellKey.getPlateNumber());
 						Well well = wellMap.get(wellKey);
-						if(well == null) throw new IllegalArgumentException("Well not found in database: " + wellKey);
+						if(well == null) 
+						  throw new IllegalArgumentException(
+						      "Well not found in database: " + wellKey);
 						return well;
 					}
 				};
@@ -1086,77 +1181,117 @@ public class PlateReaderRawDataTransformer extends AbstractBackingBean
 		    if(log.isDebugEnabled()) log.debug("plate controls: " + plateControls);
 		    else log.info("plate controls: " + plateControls.size());
 			    
-				PlateReaderRawDataParser.SheetHeaderWriter headerWriter = new PlateReaderRawDataParser.SheetHeaderWriter() {
-					@Override
-					public void writeHeaders(WritableSheet sheet, int baseColumns, Map<String, Integer> valueColumnLabels) throws RowsExceededException, WriteException 
-					{
-						int col = baseColumns;
-						sheet.addCell(new jxl.write.Label(col++, 0, "Type"));
-						sheet.addCell(new jxl.write.Label(col++, 0, "Exclude"));
-						for(Map.Entry<String, Integer> entry: valueColumnLabels.entrySet()) {
-							String colName = entry.getKey();
-							sheet.addCell(new jxl.write.Label(col + entry.getValue(), 0, colName));
-						}
-						col += valueColumnLabels.size();
-						sheet.addCell(new jxl.write.Label(col++, 0, "Pre-Loaded Controls"));
-						
-						if(_screenViewer.getEntity().getScreenType() == ScreenType.RNAI) {
-							sheet.addCell(new jxl.write.Label(col++, 0, "Entrezgene Symbol"));
-							sheet.addCell(new jxl.write.Label(col++, 0, "Entrezgene ID"));
-							sheet.addCell(new jxl.write.Label(col++, 0, "Genbank Accession No."));
-							sheet.addCell(new jxl.write.Label(col++, 0, "Catalog No."));
-							sheet.addCell(new jxl.write.Label(col++, 0, "Gene Name"));
-							sheet.addCell(new jxl.write.Label(col++, 0, "Deprecated Pool"));
-						}
-					}
-				};
+				PlateReaderRawDataParser.SheetHeaderWriter headerWriter = 
+				    new PlateReaderRawDataParser.SheetHeaderWriter() {
+    				@Override
+    				public void writeHeaders(
+    				    WritableSheet sheet, int baseColumns, 
+    				    Map<String, Integer> valueColumnLabels) 
+    				        throws RowsExceededException, WriteException 
+    				{
+    					int col = baseColumns;
+    					sheet.addCell(new jxl.write.Label(col++, 0, "Type"));
+    					sheet.addCell(new jxl.write.Label(col++, 0, "Exclude"));
+    					for(Map.Entry<String, Integer> entry: valueColumnLabels.entrySet()) {
+    						String colName = entry.getKey();
+    						sheet.addCell(new jxl.write.Label(col + entry.getValue(), 0, colName));
+    					}
+    					col += valueColumnLabels.size();
+    					sheet.addCell(new jxl.write.Label(col++, 0, "Pre-Loaded Controls"));
+    					
+    					if(_screenViewer.getEntity().getScreenType() == ScreenType.RNAI) {
+    						sheet.addCell(new jxl.write.Label(col++, 0, "Entrezgene Symbol"));
+    						sheet.addCell(new jxl.write.Label(col++, 0, "Entrezgene ID"));
+    						sheet.addCell(new jxl.write.Label(col++, 0, "Genbank Accession No."));
+    						sheet.addCell(new jxl.write.Label(col++, 0, "Catalog No."));
+    						sheet.addCell(new jxl.write.Label(col++, 0, "Gene Name"));
+    						sheet.addCell(new jxl.write.Label(col++, 0, "Deprecated Pool"));
+    					}
+    				}
+    			};
 
 				final int numberOfValueColumns = expectedPlateMatrices / plates.length+1;
-				log.info("numberOfValueColumns: " + numberOfValueColumns + ", epm: " + expectedPlateMatrices);
-				if(expectedPlateMatrices % plates.length != 0 ) throw new IllegalArgumentException("Collation order options must be a factor of the number of plates");
-				final Map<WellKey, AssayWellControlType> plateControls1 = plateControls;
-				final Map<WellName, String> plateControlLabels = getFormOne().parseControlLabels();
-				final Map<WellName, String> libraryControlLabels = getFormOne().parseLibraryControlLabels();
-				final Set<WellName> libraryControls = getFormOne().parseLibraryControls();
-				PlateReaderRawDataParser.WellWriter wellWriter = new PlateReaderRawDataParser.WellWriter() {
-					@Override
-					public void writeWell(WritableSheet sheet, int sheetRow, WellKey wellReadIn, int baseColumns) throws RowsExceededException, WriteException {
-						int i = 0;
-						int typeCol = baseColumns + i++;
-						int excludeCol = baseColumns + i++;
-            int col = baseColumns + i + numberOfValueColumns;
-						WellName wellNameReadIn = new WellName(wellReadIn.getWellName());
-						if(plateControls1.containsKey(wellReadIn)) {
-							sheet.addCell(new jxl.write.Label(typeCol, sheetRow, plateControls1.get(wellReadIn).getAbbreviation()));
-							sheet.addCell(new jxl.write.Label(numberOfValueColumns + excludeCol,sheetRow,plateControlLabels.get(new WellName(wellReadIn.getWellName()))));
-						} else if (libraryControls.contains(wellNameReadIn)) {
-							sheet.addCell(new jxl.write.Label(typeCol, sheetRow, "C")); 
-							sheet.addCell(new jxl.write.Label(numberOfValueColumns + excludeCol,sheetRow,libraryControlLabels.get(new WellName(wellReadIn.getWellName()))));
-						}else {
-							Well well = finder.findWell(wellReadIn);
-							String abbreviation = well==null?"U":well.getLibraryWellType().getAbbreviation();
-							sheet.addCell(new jxl.write.Label(typeCol, sheetRow, abbreviation));
-							if(_screenViewer.getEntity().getScreenType() == ScreenType.RNAI) {
-								SilencingReagent sr = ((SilencingReagent)well.getLatestReleasedReagent());
-								Gene gene = sr == null ? null : sr.getVendorGene();
-								sheet.addCell(new jxl.write.Label(col++, sheetRow, gene == null ? "" : Joiner.on(",").join(gene.getEntrezgeneSymbols())));
-								sheet.addCell(new jxl.write.Label(col++, sheetRow, gene == null ? "" : ""+sr.getVendorGene().getEntrezgeneId()));
-								sheet.addCell(new jxl.write.Label(col++, sheetRow, gene == null ? "" : Joiner.on(",").join(sr.getVendorGene().getGenbankAccessionNumbers())));
-								sheet.addCell(new jxl.write.Label(col++, sheetRow, sr == null || sr.getVendorId() == null ? "" : "" + sr.getVendorId()));
-								sheet.addCell(new jxl.write.Label(col++, sheetRow, gene == null || gene.getGeneName() == null ? "" : gene.getGeneName() ));
-								sheet.addCell(new jxl.write.Label(col++, sheetRow, well.isDeprecated() ? "Y": ""));
-							}
-						}
-					}
-				};
+				log.info("numberOfValueColumns: " + numberOfValueColumns + 
+				         ", epm: " + expectedPlateMatrices);
+				if(expectedPlateMatrices % plates.length != 0 ) 
+				  throw new IllegalArgumentException(
+				      "Collation order options must be a factor of the number of plates");
 				
-				PlateReaderRawDataParser.WellValueWriter wellValueWriter = new PlateReaderRawDataParser.WellValueWriter() {
-					@Override
-					public void writeWell(WritableSheet sheet,  int sheetRow, int columnPosition, String rawValue) throws NumberFormatException, RowsExceededException, WriteException {
-						int wellColumns = 2; // for the colums written above in the wellWriter
-						sheet.addCell(new jxl.write.Number( columnPosition+wellColumns, sheetRow,Double.parseDouble(rawValue)));
-					}
-				};
+				final Map<WellKey, AssayWellControlType> plateControls1 = plateControls;
+				final Map<WellName, String> plateControlLabels = 
+				    getFormOne().parseControlLabels();
+				final Map<WellName, String> libraryControlLabels = 
+				    getFormOne().parseLibraryControlLabels();
+				final Set<WellName> libraryControls = 
+				    getFormOne().parseLibraryControls();
+				PlateReaderRawDataParser.WellWriter wellWriter = 
+				    new PlateReaderRawDataParser.WellWriter() {
+    					@Override
+    					public void writeWell(WritableSheet sheet, int sheetRow, 
+    					    WellKey wellReadIn, int baseColumns) 
+    					        throws RowsExceededException, WriteException {
+    						int i = 0;
+    						int typeCol = baseColumns + i++;
+    						int excludeCol = baseColumns + i++;
+                int col = baseColumns + i + numberOfValueColumns;
+    						WellName wellNameReadIn = new WellName(wellReadIn.getWellName());
+    						if(plateControls1.containsKey(wellReadIn)) {
+    							sheet.addCell(new jxl.write.Label(
+    							    typeCol, sheetRow, plateControls1.get(wellReadIn).getAbbreviation()));
+    							sheet.addCell(new jxl.write.Label(
+    							    numberOfValueColumns + excludeCol, sheetRow, 
+    							    plateControlLabels.get(new WellName(wellReadIn.getWellName()))));
+    						} else if (libraryControls.contains(wellNameReadIn)) {
+    							sheet.addCell(new jxl.write.Label(typeCol, sheetRow, "C")); 
+    							sheet.addCell(new jxl.write.Label(
+    							    numberOfValueColumns + excludeCol,sheetRow,
+    							    libraryControlLabels.get(new WellName(wellReadIn.getWellName()))));
+    						}else {
+    							Well well = finder.findWell(wellReadIn);
+    							String abbreviation = well==null ? 
+    							    "U":well.getLibraryWellType().getAbbreviation();
+    							sheet.addCell(new jxl.write.Label(typeCol, sheetRow, abbreviation));
+    							if(_screenViewer.getEntity().getScreenType() == ScreenType.RNAI) {
+    								SilencingReagent sr = ((SilencingReagent)well.getLatestReleasedReagent());
+    								Gene gene = sr == null ? null : sr.getVendorGene();
+    								sheet.addCell(new jxl.write.Label(
+    								    col++, sheetRow, 
+    								    gene == null ? "" : Joiner.on(",").join(
+    								        gene.getEntrezgeneSymbols())));
+    								sheet.addCell(new jxl.write.Label(
+    								    col++, sheetRow, 
+    								    gene == null ? "" : ""+sr.getVendorGene().getEntrezgeneId()));
+    								sheet.addCell(new jxl.write.Label(
+    								    col++, sheetRow, 
+    								    gene == null ? "" : Joiner.on(",").join(
+    								        sr.getVendorGene().getGenbankAccessionNumbers())));
+    								sheet.addCell(new jxl.write.Label(
+    								    col++, sheetRow, 
+    								    sr == null || sr.getVendorId() == null ? "" : "" + sr.getVendorId()));
+    								sheet.addCell(new jxl.write.Label(
+    								    col++, sheetRow, 
+    								    gene == null || gene.getGeneName() == null ? "" : gene.getGeneName() ));
+    								sheet.addCell(new jxl.write.Label(
+    								    col++, sheetRow, well.isDeprecated() ? "Y": ""));
+    							}
+    						}
+    					}
+    				};
+				
+				PlateReaderRawDataParser.WellValueWriter wellValueWriter = 
+				    new PlateReaderRawDataParser.WellValueWriter() {
+    					@Override
+    					public void writeWell(
+    					    WritableSheet sheet,  int sheetRow, int columnPosition, 
+    					    String rawValue) 
+    					        throws NumberFormatException, RowsExceededException, WriteException 
+			        {
+    					  // for the colums written above in the wellWriter  
+    						int wellColumns = 2; 
+    						sheet.addCell(new jxl.write.Number( 
+    						    columnPosition+wellColumns, sheetRow,Double.parseDouble(rawValue)));
+    					}
+    				};
 
 				PlateReaderRawDataParser.writeParsedMatrices(
 						"", // + _screenViewer.getEntity().getFacilityId(),
@@ -1169,146 +1304,214 @@ public class PlateReaderRawDataTransformer extends AbstractBackingBean
 						wellValueWriter,
 						outputFile);
 				
-			}else if (_cherryPickRequestViewer != null) {
-				PlateReaderRawDataParser.SheetHeaderWriter headerWriter = new PlateReaderRawDataParser.SheetHeaderWriter() {
-					@Override
-					public void writeHeaders(WritableSheet sheet, int baseColumns, Map<String, Integer> valueColumns) throws RowsExceededException, WriteException 
-					{
-						int col = baseColumns;
-						sheet.addCell(new jxl.write.Label(col++, 0, "Type"));
-						for(Map.Entry<String, Integer> entry: valueColumns.entrySet()) {
-							String colName = entry.getKey();
-							sheet.addCell(new jxl.write.Label(col + entry.getValue(), 0, colName));
-						}
-						col += valueColumns.size();
-						sheet.addCell(new jxl.write.Label(col++, 0, "Pre-Loaded Controls"));
-						sheet.addCell(new jxl.write.Label(col++, 0, "Library Plate"));
-						sheet.addCell(new jxl.write.Label(col++, 0, "Source Well"));
-						sheet.addCell(new jxl.write.Label(col++, 0, "Library Name"));
-						if(_cherryPickRequestViewer.getEntity().getScreen().getScreenType() == ScreenType.SMALL_MOLECULE) {
-							sheet.addCell(new jxl.write.Label(col++, 0, "Reagent Vendor ID"));
-							sheet.addCell(new jxl.write.Label(col++, 0, "Vendor Batch"));
-						}else { // RNAi
-							sheet.addCell(new jxl.write.Label(col++, 0, "Vendor ID"));
-							sheet.addCell(new jxl.write.Label(col++, 0, "Vendor Batch ID"));
-							sheet.addCell(new jxl.write.Label(col++, 0, "Gene Symbol"));
-							sheet.addCell(new jxl.write.Label(col++, 0, "Gene ID"));
-							sheet.addCell(new jxl.write.Label(col++, 0, "Genbank Accession No."));
-							sheet.addCell(new jxl.write.Label(col++, 0, "Sequence"));
-                            sheet.addCell(new jxl.write.Label(col++, 0, "Gene Name"));
-							// choose not to include these, informatics meeting 20130207
-							//							sheet.addCell(new jxl.write.Label(col++, 0, "Pool Well Plate"));
-							//							sheet.addCell(new jxl.write.Label(col++, 0, "Pool Well"));
-						}
-					}
-				};
+			} else if (_cherryPickRequestViewer != null) {
+				PlateReaderRawDataParser.SheetHeaderWriter headerWriter = 
+				    new PlateReaderRawDataParser.SheetHeaderWriter() {
+    					@Override
+    					public void writeHeaders(
+    					    WritableSheet sheet, int baseColumns, Map<String, 
+    					    Integer> valueColumns) 
+    					        throws RowsExceededException, WriteException 
+    					{
+    						int col = baseColumns;
+    						sheet.addCell(new jxl.write.Label(col++, 0, "Type"));
+    						for(Map.Entry<String, Integer> entry: valueColumns.entrySet()) {
+    							String colName = entry.getKey();
+    							sheet.addCell(new jxl.write.Label(col + entry.getValue(), 0, colName));
+    						}
+    						col += valueColumns.size();
+    						sheet.addCell(new jxl.write.Label(col++, 0, "Pre-Loaded Controls"));
+    						sheet.addCell(new jxl.write.Label(col++, 0, "Library Plate"));
+    						sheet.addCell(new jxl.write.Label(col++, 0, "Source Well"));
+    						sheet.addCell(new jxl.write.Label(col++, 0, "Library Name"));
+    						if(_cherryPickRequestViewer.getEntity().getScreen().getScreenType() == 
+  						      ScreenType.SMALL_MOLECULE) {
+    							sheet.addCell(new jxl.write.Label(col++, 0, "Reagent Vendor ID"));
+    							sheet.addCell(new jxl.write.Label(col++, 0, "Vendor Batch"));
+    						}else { // RNAi
+    							sheet.addCell(new jxl.write.Label(col++, 0, "Vendor ID"));
+    							sheet.addCell(new jxl.write.Label(col++, 0, "Vendor Batch ID"));
+    							sheet.addCell(new jxl.write.Label(col++, 0, "Gene Symbol"));
+    							sheet.addCell(new jxl.write.Label(col++, 0, "Gene ID"));
+    							sheet.addCell(new jxl.write.Label(col++, 0, "Genbank Accession No."));
+    							sheet.addCell(new jxl.write.Label(col++, 0, "Sequence"));
+                                sheet.addCell(new jxl.write.Label(col++, 0, "Gene Name"));
+    							// choose not to include these, informatics meeting 20130207
+    							//							sheet.addCell(new jxl.write.Label(col++, 0, "Pool Well Plate"));
+    							//							sheet.addCell(new jxl.write.Label(col++, 0, "Pool Well"));
+    						}
+    					}
+    				};
 				
 				// map the cp assay plate ("destination") wellkeys to the library source wells
-				final PlateReaderRawDataParser.WellFinder sourceWellFinder = new PlateReaderRawDataParser.WellFinder() {
-					Map<WellKey, Well> destinationToSourceWellMap = Maps.newHashMap();
-					@Override
-					public Well findWell(WellKey wellKey) {
-						if(destinationToSourceWellMap.isEmpty()) {
-							CherryPickRequest cpr = _dao.findEntityById(CherryPickRequest.class, _cherryPickRequestViewer.getEntity().getEntityId());
-							for(LabCherryPick lcp: cpr.getLabCherryPicks()) {
-								Well well = _librariesDAO.findWell(lcp.getSourceWell().getWellKey());
-								destinationToSourceWellMap.put(new WellKey(lcp.getAssayPlate().getPlateOrdinal()+1, lcp.getAssayPlateWellName()), well);
-							}
-						}
-						return destinationToSourceWellMap.get(wellKey);
-					}
-				};
+				final PlateReaderRawDataParser.WellFinder sourceWellFinder = 
+				    new PlateReaderRawDataParser.WellFinder() {
+    					Map<WellKey, Well> destinationToSourceWellMap = Maps.newHashMap();
+    					@Override
+    					public Well findWell(WellKey wellKey) {
+    						if(destinationToSourceWellMap.isEmpty()) {
+    							CherryPickRequest cpr = _dao.findEntityById(
+    							    CherryPickRequest.class, 
+    							    _cherryPickRequestViewer.getEntity().getEntityId());
+    							for(LabCherryPick lcp: cpr.getLabCherryPicks()) {
+    								Well well = _librariesDAO.findWell(lcp.getSourceWell().getWellKey());
+    								destinationToSourceWellMap.put(
+    								    new WellKey(lcp.getAssayPlate().getPlateOrdinal()+1, 
+    								                lcp.getAssayPlateWellName()), well);
+    							}
+    						}
+    						return destinationToSourceWellMap.get(wellKey);
+    					}
+    				};
 				
 				// map the library duplex source wells to the pool wells (TODO: improve the API!)
-				final PlateReaderRawDataParser.WellFinder poolWellFinder = new PlateReaderRawDataParser.WellFinder() {
-					Map<WellKey, Well> duplexToPoolWellMap = Maps.newHashMap();
-					@Override
-					public Well findWell(WellKey wellKey) {
-						if(duplexToPoolWellMap.isEmpty()) {
-							for(ScreenerCherryPick scp: _cherryPickRequestViewer.getEntity().getScreenerCherryPicks()) {
-								Well well = _librariesDAO.findWell(scp.getScreenedWell().getWellKey());
-								for(Well duplexWell:((SilencingReagent)well.getLatestReleasedReagent()).getDuplexWells()) {
-									duplexToPoolWellMap.put(duplexWell.getWellKey(),well);
-								}
-							}
-						}
-						return duplexToPoolWellMap.get(wellKey);
-					}
-				};
+				final PlateReaderRawDataParser.WellFinder poolWellFinder = 
+				    new PlateReaderRawDataParser.WellFinder() {
+    					Map<WellKey, Well> duplexToPoolWellMap = Maps.newHashMap();
+    					@Override
+    					public Well findWell(WellKey wellKey) {
+    						if(duplexToPoolWellMap.isEmpty()) {
+    							for(ScreenerCherryPick scp : 
+    							    _cherryPickRequestViewer.getEntity().getScreenerCherryPicks()) 
+    							{
+    								Well well = _librariesDAO.findWell(scp.getScreenedWell().getWellKey());
+    								for(Well duplexWell : 
+    								    ((SilencingReagent)well.getLatestReleasedReagent()).getDuplexWells()) 
+    								{
+    									duplexToPoolWellMap.put(duplexWell.getWellKey(),well);
+    								}
+    							}
+    						}
+    						return duplexToPoolWellMap.get(wellKey);
+    					}
+    				};
 				
 				final int numberOfValueColumns = expectedPlateMatrices / plates.length;
-				log.info("numberOfValueColumns: " + numberOfValueColumns + ", epm: " + expectedPlateMatrices);
-				if(expectedPlateMatrices % plates.length != 0 ) throw new IllegalArgumentException("Collation order options must be a factor of the number of plates");
-				final Map<WellName, AssayWellControlType> plateControls = getFormOne().parseAssayControls();
-				final Map<WellName, String> plateControlLabels = getFormOne().parseControlLabels();
-				final Map<WellName, String> libraryControlLabels = getFormOne().parseLibraryControlLabels();
-				final Set<WellName> libraryControls = getFormOne().parseLibraryControls();
-				PlateReaderRawDataParser.WellWriter wellWriter = new PlateReaderRawDataParser.WellWriter() {
-					@Override
-					public void writeWell(WritableSheet sheet, int sheetRow, WellKey wellReadIn, int baseColumns) throws RowsExceededException, WriteException {
-						int typeCol = baseColumns;
-						int i = numberOfValueColumns +1;
-						int controlLabelCol = baseColumns + i++;
-						int libraryPlateCol = baseColumns + i++;
-						int sourceWellCol = baseColumns + i++;
-						int libraryNameCol = baseColumns + i++;
-						int rviCol = baseColumns + i++;
-						int vendorBatchCol = baseColumns + i++;
-						WellName wellNameReadIn = new WellName(wellReadIn.getWellName());
-						if(plateControls.containsKey(wellNameReadIn)) {
-							sheet.addCell(new jxl.write.Label(typeCol, sheetRow, plateControls.get(wellNameReadIn).getAbbreviation()));
-							sheet.addCell(new jxl.write.Label(controlLabelCol,sheetRow,plateControlLabels.get(new WellName(wellReadIn.getWellName()))));
-						} else if (libraryControls.contains(wellNameReadIn)) {
-							sheet.addCell(new jxl.write.Label(typeCol, sheetRow, "C")); 
-							sheet.addCell(new jxl.write.Label(controlLabelCol,sheetRow,libraryControlLabels.get(new WellName(wellReadIn.getWellName()))));
-						}else {
-							Well well = sourceWellFinder.findWell(wellReadIn);
-							String abbreviation = well==null?"E":well.getLibraryWellType().getAbbreviation();
-							sheet.addCell(new jxl.write.Label(typeCol, sheetRow, abbreviation));
-							if(well != null) {
-								sheet.addCell(new jxl.write.Label(libraryPlateCol,sheetRow, "" + well.getPlateNumber()));
-								sheet.addCell(new jxl.write.Label(libraryNameCol,sheetRow, well.getLibrary().getShortName()));
-								sheet.addCell(new jxl.write.Label(sourceWellCol,sheetRow, well.getWellName()));
-								//log.info("_cherryPickRequestViewer.getEntity().getScreen().getScreenType(): " + _cherryPickRequestViewer.getEntity().getScreen().getScreenType());
-								if(_cherryPickRequestViewer.getEntity().getScreen().getScreenType() == ScreenType.SMALL_MOLECULE) {
-									sheet.addCell(new jxl.write.Label(rviCol, sheetRow, "" + well.getLatestReleasedReagent().getVendorId()));
-									sheet.addCell(new jxl.write.Label(vendorBatchCol, sheetRow, well.getLatestReleasedReagent().getVendorBatchId()));
-								}else {
-									// In the case of the RNAi CP, the source well is a duplex well, so still have to find the corresponding pool well
-									SilencingReagent duplexReagent = well.getLatestReleasedReagent();
-									Well poolWell = poolWellFinder.findWell(well.getWellKey());
-									int col = rviCol;
-									sheet.addCell(new jxl.write.Label(col++, sheetRow, ""+duplexReagent.getVendorId()));
-									sheet.addCell(new jxl.write.Label(col++, sheetRow, duplexReagent.getVendorBatchId())); 
-									sheet.addCell(new jxl.write.Label(col++, sheetRow, Joiner.on(",").join(duplexReagent.getVendorGene().getEntrezgeneSymbols())));
-									sheet.addCell(new jxl.write.Label(col++, sheetRow, duplexReagent.getVendorGene().getEntrezgeneId()==null?"":duplexReagent.getVendorGene().getEntrezgeneId().toString()));
-									sheet.addCell(new jxl.write.Label(col++, sheetRow, Joiner.on(",").join(duplexReagent.getVendorGene().getGenbankAccessionNumbers())));
-									sheet.addCell(new jxl.write.Label(col++, sheetRow, duplexReagent.getSequence()));
-
-									sheet.addCell(new jxl.write.Label(col++, sheetRow, duplexReagent.getVendorGene() == null || duplexReagent.getVendorGene().getGeneName() == null ? "" : duplexReagent.getVendorGene().getGeneName() ));
-
-									// choose not to include these, informatics meeting 20130207
-									// sheet.addCell(new jxl.write.Label(col++, sheetRow, poolWell == null ? "" : ""+poolWell.getPlateNumber()));
-									// sheet.addCell(new jxl.write.Label(col++, sheetRow, poolWell == null ? "" : poolWell.getWellName()));
-								}
-							}
-						}
-					}
-				};
+				log.info("numberOfValueColumns: " + numberOfValueColumns +
+				         ", epm: " + expectedPlateMatrices);
+				if(expectedPlateMatrices % plates.length != 0 ) 
+				  throw new IllegalArgumentException(
+				      "Collation order options must be a factor of the number of plates");
+				final Map<WellName, AssayWellControlType> plateControls = 
+				    getFormOne().parseAssayControls();
+				final Map<WellName, String> plateControlLabels = 
+				    getFormOne().parseControlLabels();
+				final Map<WellName, String> libraryControlLabels = 
+				    getFormOne().parseLibraryControlLabels();
+				final Set<WellName> libraryControls = 
+				    getFormOne().parseLibraryControls();
+				PlateReaderRawDataParser.WellWriter wellWriter = 
+				    new PlateReaderRawDataParser.WellWriter() {
+    					@Override
+    					public void writeWell(WritableSheet sheet, int sheetRow, 
+    					    WellKey wellReadIn, int baseColumns) 
+    					        throws RowsExceededException, WriteException {
+    						int typeCol = baseColumns;
+    						int i = numberOfValueColumns +1;
+    						int controlLabelCol = baseColumns + i++;
+    						int libraryPlateCol = baseColumns + i++;
+    						int sourceWellCol = baseColumns + i++;
+    						int libraryNameCol = baseColumns + i++;
+    						int rviCol = baseColumns + i++;
+    						int vendorBatchCol = baseColumns + i++;
+    						WellName wellNameReadIn = new WellName(wellReadIn.getWellName());
+    						if(plateControls.containsKey(wellNameReadIn)) {
+    							sheet.addCell(new jxl.write.Label(
+    							    typeCol, sheetRow, 
+    							    plateControls.get(wellNameReadIn).getAbbreviation()));
+    							sheet.addCell(new jxl.write.Label(
+    							    controlLabelCol,sheetRow,
+    							    plateControlLabels.get(new WellName(wellReadIn.getWellName()))));
+    						} else if (libraryControls.contains(wellNameReadIn)) {
+    							sheet.addCell(new jxl.write.Label(typeCol, sheetRow, "C")); 
+    							sheet.addCell(new jxl.write.Label(
+    							    controlLabelCol,sheetRow,
+    							    libraryControlLabels.get(new WellName(wellReadIn.getWellName()))));
+    						}else {
+    							Well well = sourceWellFinder.findWell(wellReadIn);
+    							String abbreviation = well==null ? 
+    							    "E" : well.getLibraryWellType().getAbbreviation();
+    							sheet.addCell(new jxl.write.Label(typeCol, sheetRow, abbreviation));
+    							if(well != null) {
+    								sheet.addCell(new jxl.write.Label(
+    								    libraryPlateCol,sheetRow, "" + well.getPlateNumber()));
+    								sheet.addCell(new jxl.write.Label(
+    								    libraryNameCol,sheetRow, well.getLibrary().getShortName()));
+    								sheet.addCell(new jxl.write.Label(
+    								    sourceWellCol,sheetRow, well.getWellName()));
+    								if(_cherryPickRequestViewer.getEntity().getScreen().getScreenType() 
+    								      == ScreenType.SMALL_MOLECULE) {
+    									sheet.addCell(new jxl.write.Label(
+    									    rviCol, sheetRow, 
+    									    "" + well.getLatestReleasedReagent().getVendorId()));
+    									sheet.addCell(new jxl.write.Label(
+    									    vendorBatchCol, sheetRow, 
+    									    well.getLatestReleasedReagent().getVendorBatchId()));
+    								}else {
+    									// In the case of the RNAi CP, the source well is a 
+    								  // duplex well, so still have to find the corresponding pool well
+    									SilencingReagent duplexReagent = well.getLatestReleasedReagent();
+    									Well poolWell = poolWellFinder.findWell(well.getWellKey());
+    									int col = rviCol;
+    									sheet.addCell(new jxl.write.Label(
+    									    col++, sheetRow, ""+duplexReagent.getVendorId()));
+    									sheet.addCell(new jxl.write.Label(
+    									    col++, sheetRow, duplexReagent.getVendorBatchId())); 
+    									sheet.addCell(new jxl.write.Label(
+    									    col++, sheetRow, 
+    									    Joiner.on(",").join(
+    									        duplexReagent.getVendorGene().getEntrezgeneSymbols())));
+    									sheet.addCell(new jxl.write.Label(
+    									    col++, sheetRow, 
+    									    duplexReagent.getVendorGene().getEntrezgeneId() == null ? 
+    									        "":duplexReagent.getVendorGene().getEntrezgeneId().toString()));
+    									sheet.addCell(new jxl.write.Label(
+    									    col++, sheetRow, 
+    									    Joiner.on(",").join(
+    									        duplexReagent.getVendorGene().getGenbankAccessionNumbers())));
+    									sheet.addCell(new jxl.write.Label(
+    									    col++, sheetRow, duplexReagent.getSequence()));
+    
+    									sheet.addCell(new jxl.write.Label(
+    									    col++, sheetRow, 
+    									    duplexReagent.getVendorGene() == null || 
+    									      duplexReagent.getVendorGene().getGeneName() == null ? 
+    									          "" : duplexReagent.getVendorGene().getGeneName() ));
+    
+    									// choose not to include these, informatics meeting 20130207
+    									// sheet.addCell(new jxl.write.Label(col++, sheetRow, 
+    									//     poolWell == null ? "" : ""+poolWell.getPlateNumber()));
+    									// sheet.addCell(new jxl.write.Label(col++, sheetRow, 
+    									//     poolWell == null ? "" : poolWell.getWellName()));
+    								}
+    							}
+    						}
+    					}
+    				};
 				
-				PlateReaderRawDataParser.WellValueWriter wellValueWriter = new PlateReaderRawDataParser.WellValueWriter() {
-					
-					@Override
-					public void writeWell(WritableSheet sheet,  int sheetRow, int columnPosition, String rawValue) throws NumberFormatException, RowsExceededException, WriteException {
-						if(_cherryPickRequestViewer.getEntity().getScreen().getScreenType() == ScreenType.SMALL_MOLECULE) {
-							int wellColumns = 1; // for the type column written above in the wellWriter
-							sheet.addCell(new jxl.write.Number( columnPosition+wellColumns, sheetRow,Double.parseDouble(rawValue)));
-						}else {
-							int wellColumns = 1; // for the type column written above in the wellWriter
-							sheet.addCell(new jxl.write.Number( columnPosition+wellColumns, sheetRow,Double.parseDouble(rawValue)));
-						}
-					}
-				};
+				PlateReaderRawDataParser.WellValueWriter wellValueWriter = 
+				    new PlateReaderRawDataParser.WellValueWriter() {
+    					@Override
+    					public void writeWell( WritableSheet sheet, int sheetRow, 
+    					    int columnPosition, String rawValue) 
+    					        throws NumberFormatException, RowsExceededException, 
+    					               WriteException {
+    						if( _cherryPickRequestViewer.getEntity().getScreen().getScreenType() 
+    						        == ScreenType.SMALL_MOLECULE) {
+                  // for the type column written above in the wellWriter
+    							int wellColumns = 1; 
+    							sheet.addCell(new jxl.write.Number( 
+    							    columnPosition+wellColumns, 
+    							    sheetRow,Double.parseDouble(rawValue)));
+    						}else {
+                  // for the type column written above in the wellWriter
+    							int wellColumns = 1; 
+    							sheet.addCell(new jxl.write.Number( 
+    							    columnPosition+wellColumns, 
+    							    sheetRow,Double.parseDouble(rawValue)));
+    						}
+    					}
+    				};
 				
 				PlateReaderRawDataParser.writeParsedMatrices(
 						"CP" + _cherryPickRequestViewer.getEntity().getCherryPickRequestId(),
@@ -1321,7 +1524,8 @@ public class PlateReaderRawDataTransformer extends AbstractBackingBean
 						wellValueWriter,
 						outputFile);
 			} else {
-				throw new IllegalArgumentException("invalid operation, not set to screen results or to cherry pick results");
+				throw new IllegalArgumentException(
+				    "invalid operation, not set to screen results or to cherry pick results");
 			}
 			
 			_result = new Result();
@@ -1348,9 +1552,11 @@ public class PlateReaderRawDataTransformer extends AbstractBackingBean
   private String makeOutputFileName()
   {
   	if(_screenViewer != null) {
-      return "screen" + getScreen().getFacilityId() + "-" + getFormOne().getPlates().replaceAll("\\s+", "_") + ".xls";
+      return "screen" + getScreen().getFacilityId() + 
+          "-" + getFormOne().getPlates().replaceAll("\\s+", "_") + ".xls";
   	}else if(_cherryPickRequestViewer != null) {
-      return "cpr" + getCherryPickRequest().getCherryPickRequestId() + "-" + getFormOne().getPlates().replaceAll("\\s+", "_") + ".xls";
+      return "cpr" + getCherryPickRequest().getCherryPickRequestId() + 
+          "-" + getFormOne().getPlates().replaceAll("\\s+", "_") + ".xls";
   	}else {
   		// nop
   		throw new IllegalArgumentException("illegal clause");
@@ -1367,7 +1573,9 @@ public class PlateReaderRawDataTransformer extends AbstractBackingBean
   public String download() throws IOException
   {
     if (_result != null && _result.matricesProcessed > 0) {
-      JSFUtils.handleUserFileDownloadRequest(getFacesContext(), _result.outputFile, getFormOne().getOutputFileName(), Workbook.MIME_TYPE);
+      JSFUtils.handleUserFileDownloadRequest(
+          getFacesContext(), _result.outputFile, 
+          getFormOne().getOutputFileName(), Workbook.MIME_TYPE);
       recordActivities();
     }
     return REDISPLAY_PAGE_ACTION_RESULT;
@@ -1376,14 +1584,16 @@ public class PlateReaderRawDataTransformer extends AbstractBackingBean
   private void recordActivities()
   {
   	if(_screenViewer != null) {
-      // create two Administrative Activities, one for the comment, one for the settings
+      // create two Administrative Activities, for the comment and settings
       if (!StringUtils.isEmpty(getComments())) {
-        getScreen().createUpdateActivity(AdministrativeActivityType.COMMENT,
-                                         (AdministratorUser) getCurrentScreensaverUser().getScreensaverUser(),
-                                         getComments());
+        getScreen().createUpdateActivity(
+            AdministrativeActivityType.COMMENT,
+            (AdministratorUser) getCurrentScreensaverUser().getScreensaverUser(),
+            getComments());
       }
 
-      // serialize and save the InputFileParams as a JSON string appended to the comment of the Activity
+      // serialize and save the InputFileParams as a JSON string appended to 
+      // the comment of the Activity
       try {
         StringBuilder activityComment = new StringBuilder();
         activityComment.append(getFormOne().serialize());
@@ -1391,8 +1601,10 @@ public class PlateReaderRawDataTransformer extends AbstractBackingBean
           activityComment.append(ACTIVITY_INPUT_PARAMS_DELIMITER);
           activityComment.append(inputFile.serialize());
         }
-        getScreen().createUpdateActivity(AdministrativeActivityType.PLATE_RAW_DATA_TRANSFORMATION, 
-                                         (AdministratorUser) getCurrentScreensaverUser().getScreensaverUser(), activityComment.toString());
+        getScreen().createUpdateActivity(
+            AdministrativeActivityType.PLATE_RAW_DATA_TRANSFORMATION, 
+            (AdministratorUser) getCurrentScreensaverUser().getScreensaverUser(), 
+            activityComment.toString());
       }
       catch (Exception e) {
         // TODO: show user message instead
@@ -1402,14 +1614,16 @@ public class PlateReaderRawDataTransformer extends AbstractBackingBean
       _screenViewer.reload();
   	}else if(_cherryPickRequestViewer != null){
   		CherryPickRequest cpr = getCherryPickRequest();
-      // create two Administrative Activities, one for the comment, one for the settings
+      // create two Administrative Activities, for comment and settings
       if (!StringUtils.isEmpty(getComments())) {
-        cpr.createUpdateActivity(AdministrativeActivityType.COMMENT,
-                                         (AdministratorUser) getCurrentScreensaverUser().getScreensaverUser(),
-                                         getComments());
+        cpr.createUpdateActivity(
+            AdministrativeActivityType.COMMENT,
+            (AdministratorUser) getCurrentScreensaverUser().getScreensaverUser(),
+            getComments());
       }
 
-      // serialize and save the InputFileParams as a JSON string appended to the comment of the Activity
+      // serialize and save the InputFileParams as a JSON string appended to 
+      // the comment of the Activity
       try {
         StringBuilder activityComment = new StringBuilder();
         activityComment.append(getFormOne().serialize());
@@ -1417,8 +1631,10 @@ public class PlateReaderRawDataTransformer extends AbstractBackingBean
           activityComment.append(ACTIVITY_INPUT_PARAMS_DELIMITER);
           activityComment.append(inputFile.serialize());
         }
-        cpr.createUpdateActivity(AdministrativeActivityType.PLATE_RAW_DATA_TRANSFORMATION, 
-                                         (AdministratorUser) getCurrentScreensaverUser().getScreensaverUser(), activityComment.toString());
+        cpr.createUpdateActivity(
+            AdministrativeActivityType.PLATE_RAW_DATA_TRANSFORMATION, 
+            (AdministratorUser) getCurrentScreensaverUser().getScreensaverUser(), 
+            activityComment.toString());
       }
       catch (Exception e) {
         // TODO: show user message instead
