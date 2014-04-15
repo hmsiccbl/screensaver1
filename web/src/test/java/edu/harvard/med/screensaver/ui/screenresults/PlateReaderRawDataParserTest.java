@@ -49,7 +49,8 @@ public class PlateReaderRawDataParserTest extends TestCase
     String range = "1-3, 5";
     Integer[] expected = { 1,2,3,5 };
     Integer[] actual = PlateReaderRawDataParser.expandPlatesArg(range);
-//    assertEquals("expected, returned: " + Joiner.on(",").join(expected) + ", " + Joiner.on(",").join(actual) ,expected, actual);
+//    assertEquals("expected, returned: " + Joiner.on(",").join(expected) 
+//        + ", " + Joiner.on(",").join(actual) ,expected, actual);
     assertEquals(Joiner.on(",").join(expected),Joiner.on(",").join(actual));
   } 
   
@@ -57,7 +58,8 @@ public class PlateReaderRawDataParserTest extends TestCase
     String range = "3-1, 5";
     Integer[] expected = { 3,2,1,5 };
     Integer[] actual = PlateReaderRawDataParser.expandPlatesArg(range);
-//    assertEquals("expected, returned: " + Joiner.on(",").join(expected) + ", " + Joiner.on(",").join(actual) ,expected, actual);
+//    assertEquals("expected, returned: " + Joiner.on(",").join(expected) 
+//        + ", " + Joiner.on(",").join(actual) ,expected, actual);
     assertEquals(Joiner.on(",").join(expected),Joiner.on(",").join(actual));
   }
 	
@@ -66,7 +68,8 @@ public class PlateReaderRawDataParserTest extends TestCase
 		int plateSize = 384;
 		Set<WellName> expected1 = Sets.newHashSet(
 				Collections2.transform(
-						Lists.newArrayList( "O19", "O20", "O21", "O22", "P19", "P20", "P21", "P22", "Q19", "Q20", "Q21", "Q22" ),wellNameTransformer));
+						Lists.newArrayList( "O19", "O20", "O21", "O22", "P19", "P20", "P21", 
+						    "P22", "Q19", "Q20", "Q21", "Q22" ),wellNameTransformer));
 		
 		Set<WellName> output = PlateReaderRawDataParser.expandWellRange(input, plateSize);
 		assertEquals(expected1,output);
@@ -87,7 +90,9 @@ public class PlateReaderRawDataParserTest extends TestCase
 		assertEquals(expected2,output);
 
 		
-		int inputI = 4; // Note; this is the _users_ input, so it should be interpreted as a "4", which will be column index 3 (zero based)
+    // Note; this is the _users_ input, so it should be interpreted as a "4", 
+		// which will be column index 3 (zero based)
+		int inputI = 4; 
 		Set<WellName> expected = Sets.newHashSet();
 		for(int i=0;i<16;i++) expected.add(new WellName(i,inputI-1));
 		
@@ -118,12 +123,56 @@ public class PlateReaderRawDataParserTest extends TestCase
 		expectedWell = new WellName("A3");
 		assertEquals(expectedWell, PlateReaderRawDataParser.convertWell(sourceWell, aps, lps, quadrant));
 
-		quadrant = 3;
-		sourceWell = new WellName("A2");
-		expectedWell = new WellName("B4");
-		assertEquals(expectedWell, PlateReaderRawDataParser.convertWell(sourceWell, aps, lps, quadrant));
-		
-		quadrant = 0;
+    quadrant = 3;
+    sourceWell = new WellName("A2");
+    expectedWell = new WellName("B4");
+    assertEquals(expectedWell, PlateReaderRawDataParser.convertWell(sourceWell, aps, lps, quadrant));
+    
+    quadrant = 3;
+    sourceWell = new WellName("H12");
+    expectedWell = new WellName("P24");
+    assertEquals(expectedWell, PlateReaderRawDataParser.convertWell(sourceWell, aps, lps, quadrant));
+    
+    quadrant = 2;
+    sourceWell = new WellName("H12");
+    expectedWell = new WellName("P23");
+    assertEquals(expectedWell, PlateReaderRawDataParser.convertWell(sourceWell, aps, lps, quadrant));
+
+    quadrant = 2;
+    sourceWell = new WellName("G12");
+    expectedWell = new WellName("N23");
+    assertEquals(expectedWell, PlateReaderRawDataParser.convertWell(sourceWell, aps, lps, quadrant));
+
+    quadrant = 2;
+    sourceWell = new WellName("H11");
+    expectedWell = new WellName("P21");
+    assertEquals(expectedWell, PlateReaderRawDataParser.convertWell(sourceWell, aps, lps, quadrant));
+    
+    quadrant = 2;
+    sourceWell = new WellName("G11");
+    expectedWell = new WellName("N21");
+    assertEquals(expectedWell, PlateReaderRawDataParser.convertWell(sourceWell, aps, lps, quadrant));
+    
+    aps = 384;
+    lps = 96;
+    quadrant = 0;
+    sourceWell = new WellName("P24");
+    expectedWell = new WellName("H12");
+    assertEquals(expectedWell, PlateReaderRawDataParser.convertWell(sourceWell, aps, lps, quadrant));
+    
+    sourceWell = new WellName("N21");
+    expectedWell = new WellName("G11");
+    assertEquals(expectedWell, PlateReaderRawDataParser.convertWell(sourceWell, aps, lps, quadrant));
+    
+    sourceWell = new WellName("A02");
+    expectedWell = new WellName("A01");
+    assertEquals(expectedWell, PlateReaderRawDataParser.convertWell(sourceWell, aps, lps, quadrant));
+    
+    sourceWell = new WellName("A03");
+    expectedWell = new WellName("A02");
+    assertEquals(expectedWell, PlateReaderRawDataParser.convertWell(sourceWell, aps, lps, quadrant));
+    
+    quadrant = 0;
 		aps = 1536;
 		lps = 384;
 		sourceWell = new WellName("A2");
@@ -137,18 +186,27 @@ public class PlateReaderRawDataParserTest extends TestCase
 		expectedWell = new WellName("A1");
 		int expectedQuadrant = 3;
 		assertEquals(expectedWell, PlateReaderRawDataParser.convertWell(sourceWell, aps, lps, quadrant));
-		assertEquals(expectedQuadrant, PlateReaderRawDataParser.deconvoluteMatrix(aps, lps, sourceWell.getRowIndex(), sourceWell.getColumnIndex()));
+		assertEquals(expectedQuadrant, 
+		    PlateReaderRawDataParser.deconvoluteMatrix(
+		        aps, lps, sourceWell.getRowIndex(), sourceWell.getColumnIndex()));
 		
 		aps = 1536;
 		lps = 384;
 		sourceWell = new WellName("B3");
 		expectedWell = new WellName("A2");
 		expectedQuadrant = 2;
-		assertEquals(expectedWell, PlateReaderRawDataParser.convertWell(sourceWell, aps, lps, quadrant));
-		assertEquals(expectedQuadrant, PlateReaderRawDataParser.deconvoluteMatrix(aps, lps, sourceWell.getRowIndex(), sourceWell.getColumnIndex()));
+		assertEquals(expectedWell, 
+		    PlateReaderRawDataParser.convertWell(sourceWell, aps, lps, quadrant));
+		assertEquals(expectedQuadrant, 
+		    PlateReaderRawDataParser.deconvoluteMatrix(
+		        aps, lps, sourceWell.getRowIndex(), sourceWell.getColumnIndex()));
 		
 	}
-	
+  public void testCollations96()
+  {
+
+  }
+  
 	public void testConvertMatrix()
 	{
 		// first, convert 96 to 386
@@ -167,7 +225,8 @@ public class PlateReaderRawDataParserTest extends TestCase
 			}
 		}
 		
-		List<List<String[]>> combinedMatrices = PlateReaderRawDataParser.convertMatrixFormat(96,384,sourceMatrices);
+		List<List<String[]>> combinedMatrices = 
+		    PlateReaderRawDataParser.convertMatrixFormat(96,384,null, sourceMatrices);
 		
 		assertEquals("wrong number of result matrices", 2, combinedMatrices.size());
 		assertEquals("rows wrong", 16, combinedMatrices.get(0).size());
@@ -177,13 +236,13 @@ public class PlateReaderRawDataParserTest extends TestCase
 		List<String[]> combinedMatrix = combinedMatrices.get(0);
 		for(int i=0;i<16;i++) {
 			for(int j=0;j<24;j++) {
-//				int sourceMatrixNumber = j%(factor/2) +  (i%(factor/2))*(factor/2);
-//				int sourceRow = i/(factor/2)+ i%(factor/2)-sourceMatrixNumber/(factor/2);
-//				int sourceCol = j/(factor/2)+ j%(factor/2)-sourceMatrixNumber%(factor/2);
-				int sourceMatrixNumber = PlateReaderRawDataParser.deconvoluteMatrix(1536, 384, i, j);
-				int sourceRow = PlateReaderRawDataParser.deconvoluteRow(1536, 384, i, j);
-				int sourceCol = PlateReaderRawDataParser.deconvoluteCol(1536, 384, i, j);
-				assertEquals("i:"+ i+"j:" + j,"Q"+sourceMatrixNumber+"C"+sourceCol+"R"+sourceRow, combinedMatrix.get(i)[j]);
+				int sourceMatrixNumber = PlateReaderRawDataParser.deconvoluteMatrix(384, 96, i, j);
+				int sourceRow = PlateReaderRawDataParser.deconvoluteRow(384, 96, i, j);
+				int sourceCol = PlateReaderRawDataParser.deconvoluteCol(384, 96, i, j);
+				assertEquals(
+				    "i:"+ i+"j:" + j,
+				    "Q"+sourceMatrixNumber+"C"+sourceCol+"R"+sourceRow, 
+				    combinedMatrix.get(i)[j]);
 			}
 		}
 		
@@ -202,7 +261,7 @@ public class PlateReaderRawDataParserTest extends TestCase
 			}
 		}
 		
-		combinedMatrices = PlateReaderRawDataParser.convertMatrixFormat(1536,384,sourceMatrices);
+		combinedMatrices = PlateReaderRawDataParser.convertMatrixFormat(1536,384,null, sourceMatrices);
 		
 		assertEquals("wrong number of result matrices", 8, combinedMatrices.size());
 		assertEquals("rows wrong", 16, combinedMatrices.get(0).size());
@@ -210,7 +269,8 @@ public class PlateReaderRawDataParserTest extends TestCase
 			
 		// TODO: test by converting back to 1536!
 		
-		List<List<String[]>> decombinedMatrices = PlateReaderRawDataParser.convertMatrixFormat(384, 1536, combinedMatrices);
+		List<List<String[]>> decombinedMatrices = 
+		    PlateReaderRawDataParser.convertMatrixFormat(384, 1536, null, combinedMatrices);
 
 		assertEquals("wrong number of result matrices", 2, decombinedMatrices.size());
 		assertEquals("rows wrong", 32, decombinedMatrices.get(0).size());
@@ -219,7 +279,8 @@ public class PlateReaderRawDataParserTest extends TestCase
 		for(int i=0;i<2;i++) {
 			for(int j=0;j<32;j++) {
 				for(int k=0;k<48;k++) {
-					assertEquals("M: " + i + " C"+k+"R"+j, sourceMatrices.get(i).get(j)[k], decombinedMatrices.get(i).get(j)[k]);
+					assertEquals("M: " + i + " C"+k+"R"+j, 
+					    sourceMatrices.get(i).get(j)[k], decombinedMatrices.get(i).get(j)[k]);
 				}
 			}
 		}

@@ -226,7 +226,8 @@ public class PlateReaderRawDataParser {
 			}
 			validateMatrices(parsedMatrices, aps);
 			
-			List<List<String[]>> newMatrices = convertMatrixFormat(aps, lps, parsedMatrices);
+			// FIXME: #134 - matrix format conversion _must_ be done after putting in quadrant order
+			List<List<String[]>> newMatrices = convertMatrixFormat(aps, lps, matrixOrder, parsedMatrices);
 			if(newMatrices.size() !=  expectedMatricesCreated ) {
 				throw new Exception(
 				    "ExpectedCount adjusted matrix count: " + expectedMatricesCreated  + 
@@ -430,6 +431,8 @@ public class PlateReaderRawDataParser {
 	 *   the matrixOrders.
 	 * @param plates the library plates in the order that they appear in the 
 	 * combinedMatrices.
+	 * @param matrixOrders {@link MatrixOrder} for each of the plateMatrixes read in,
+	 *     the matrix order defines collation; output will be per plate.
 	 */
 	public static void writeParsedMatrices(
 			String sheetNamePrefix,
@@ -530,7 +533,8 @@ public class PlateReaderRawDataParser {
 				for(List<String[]> matrix:plateMatrices) 
 				{
           // Source plate/well; use aps, lps in reverse order
-          int quadrant = 0;
+          // FIXME: quadrant is always zero if not lps,aps?
+				  int quadrant = 0;
           int sourcePlate = i;
           if(lps < aps){
             quadrant = sourcePlate%(aps/lps);
@@ -543,6 +547,7 @@ public class PlateReaderRawDataParser {
 					}
 					int col = cumulativeColumns.get(colName) + baseColumns.length;
 					plate = matrixOrder.getPlate(i);
+//					quadrant = matrixOrder.getQuadrant(i);
 					logger.info("matrix: " + i + ", cumulative matrix: " + (cumulativeMatrixCount+i) 
 							+ ", plate: " + plate + ", colName: " + colName);
 					WritableSheet sheet = sheets.get(plate);
@@ -581,7 +586,8 @@ public class PlateReaderRawDataParser {
                     new WellName(wellKey.getWellName()), lps, aps, quadrant);
                 int internalQuadrant = deconvoluteMatrix(
                     lps,aps,wellKey.getRow(),wellKey.getColumn());
-                sheet.addCell(new jxl.write.Label(wellCol+1, sheetRow, ""+ internalQuadrant));
+                sheet.addCell(new jxl.write.Label(wellCol+1, sheetRow, 
+                              ""+ (internalQuadrant+1) ));
                 logger.info("convert: aps: " + aps + ", lps: " + lps + ", " + 
                     wellKey.getWellName() + ", to: " + sourceWell );
                 sheet.addCell(new jxl.write.Label(wellCol+2, sheetRow, "" + sourceWell ));
@@ -609,6 +615,13 @@ public class PlateReaderRawDataParser {
 		workbook.close();
 		logger.info("Wrote " + outputFile);
 	}
+	
+//	public static List<List<String[]>> collate(
+//	    List<List<String[]>> inputMatrices, 
+//	    MatrixOrderPattern matrixOrder)
+//  {
+//	  List<List<String[]>> outputList = new ArrayList()
+//  }
 	
 	/**
 	 * Map the input well from a source screening plate to a destination 
@@ -688,6 +701,7 @@ public class PlateReaderRawDataParser {
 	}
 	
 	/**
+	 * NOTE: input matrix must be in quadrant order?
 	 * Convert source plate plateMatrices from one plate size to another size;
 	 * either by combining quadrants into larger plates, or subdividing plates 
 	 * into quadrants.
@@ -697,7 +711,9 @@ public class PlateReaderRawDataParser {
 	 * @return
 	 */
 	public static List<List<String[]>> convertMatrixFormat(
-	    int sourcePlateSize, int destPlateSize, List<List<String[]>> plateMatrices) 
+	    int sourcePlateSize, int destPlateSize,
+	    MatrixOrderPattern matrixOrder,
+	    List<List<String[]>> plateMatrices) 
 	{
 		if(sourcePlateSize==destPlateSize) 
 		{ // aps==lps
@@ -722,10 +738,21 @@ public class PlateReaderRawDataParser {
 			if (plateMatrices.size() < factor || plateMatrices.size() % factor != 0 )
 			    throw new IllegalArgumentException(
 			        "Matrices read must be a multiple of " + factor);
+
+			// iterate in quadrant-collated-first order
+      int quadrantStep = 1;
+      if(matrixOrder != null){
+        quadrantStep = matrixOrder.getQuadrantStep();
+      }
 			
-			for(int count = 0; count < plateMatrices.size();) {
+			for(int count = 0; count*factor < plateMatrices.size();) {
 				List<List<String[]>> quadrantMatrices = Lists.newArrayList();
-				for(int i=0;i<factor;i++) quadrantMatrices.add(plateMatrices.get(count+i));
+				// FIXME: will only work for factor==4, not 16
+				
+				for(int quadrant=0;quadrant<factor;quadrant++){
+				  int nextByQuadrant = count*factor+quadrant*quadrantStep;
+				  quadrantMatrices.add(plateMatrices.get(nextByQuadrant));
+				}
 				
 				List<String[]> combinedMatrix = Lists.newArrayList();
 				for(int x=0;x<destRows;x++) {
@@ -747,7 +774,7 @@ public class PlateReaderRawDataParser {
 					}
 				}// end quadrant matrices
 				combinedMatrices.add(combinedMatrix);
-				count = count+factor;
+				count++;
 			}
 			return combinedMatrices;
 		}else { // lps < aps
@@ -793,7 +820,7 @@ public class PlateReaderRawDataParser {
     public String getReplicate(int matrixCount);
     public Map<String,Integer> getColumnNamesToMatrixOrder();
     public String getColName(int i);
-
+    public int getQuadrantStep();
   }	
 	
 	 /**
@@ -862,6 +889,9 @@ public class PlateReaderRawDataParser {
       return this.matrixOrder.getColName(i);
     }
     
+    public int getQuadrantStep() {
+      return this.matrixOrder.getQuadrantStep();
+    }
   }
 
  
@@ -883,6 +913,21 @@ public class PlateReaderRawDataParser {
 		private String[] conditions;
 		private String[] readouts;
 		private String[] replicates;
+		
+		
+		/**
+		 * A quadrant step is how many matrices are between each quadrant
+		 * @return
+		 */
+		public int getQuadrantStep() {
+		  int qstep = 1;
+		  if(this.quadrantPosition != 4){
+		    for(int i=0; i!=this.quadrantPosition; i++){
+		      qstep *= this.odometer.getCounterSize(i);
+		    }
+		  }
+		  return qstep;
+		}
 		
     public MatrixOrder(CollationOrder ordering, Integer[] plates, String[] conditions, 
         String[] readouts, String[] replicates)
@@ -992,6 +1037,10 @@ public class PlateReaderRawDataParser {
     public Integer getQuadrant(int matrixCount) {
       return (Integer)this.odometer.getReading(matrixCount).get(this.quadrantPosition);
     }
+    
+    public CollationOrder getOrder(){
+      return this.ordering;
+    }
   }
   
 
@@ -1032,6 +1081,10 @@ public class PlateReaderRawDataParser {
   	}
 		
 		public int getSize() { return this.size; }
+		
+		public int getCounterSize(int counterPosition){
+		  return this.counters[counterPosition].size();
+		}
 		
 		public List<?> getReading(int count)
 		{

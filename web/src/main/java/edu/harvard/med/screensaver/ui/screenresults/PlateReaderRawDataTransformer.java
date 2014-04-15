@@ -1110,7 +1110,7 @@ public class PlateReaderRawDataTransformer extends AbstractBackingBean
   			// since doing it this way leads to making assumptions about 
   			// plate/quadrant ordering that differ for 96 and 1536
   			List<List<String[]>> newMatrices = 
-  					PlateReaderRawDataParser.convertMatrixFormat(aps, lps, parsedMatrices);
+  					PlateReaderRawDataParser.convertMatrixFormat(aps, lps, matrixOrder, parsedMatrices);
   			if(newMatrices.size() !=  tempPlateMatrices ) {
   				throw new Exception(
   				    "ExpectedCount adjusted matrix count: " + tempPlateMatrices  + 
