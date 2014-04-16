@@ -224,6 +224,7 @@ public class PlateReaderRawDataTransformer extends AbstractBackingBean
 
     /**
      * @motivation for serialization
+     * FIXME: this doesn't appear to be used -sde4 20140416
      */
     public OutputFormat getOutputFormat()
     {
@@ -1061,8 +1062,8 @@ public class PlateReaderRawDataTransformer extends AbstractBackingBean
       	}
       }
 
-      int reps = inputFile.getReplicates();
-			if (reps < 1) throw new IllegalArgumentException("replicate count must be > 1"); 
+      int reps = inputFile.getReplicates()!=null?inputFile.getReplicates():0;
+			if (reps < 1) throw new IllegalArgumentException("replicate count must be > 0"); 
 			String[] replicates = new String[reps];
 			for(int i=0;i<reps; i++ ) replicates[i] = ("" + (char)('A'+i));
 
@@ -1083,9 +1084,14 @@ public class PlateReaderRawDataTransformer extends AbstractBackingBean
               assayReadouts.toArray(new String[] {}), 
               replicates);
   			}
-  			int tempPlateMatrices = matrixOrder.getExpectedMatrixCount();
-  			expectedPlateMatrices += tempPlateMatrices;
-  			int tempMatricesToReadIn = tempPlateMatrices * lps / aps;
+  			int matrixCount = matrixOrder.getExpectedMatrixCount();
+  			MatrixOrderPattern converterMatrix = matrixOrder;
+  			if(aps == 96 ){
+  			  converterMatrix = matrixOrder.getDeconvolutedMatrixOrder();
+//  			  matrixCount = converterMatrix.getDeconvolutedMatrixOrder().getExpectedMatrixCount();
+  			}
+  			expectedPlateMatrices += matrixCount;
+  			int tempMatricesToReadIn = matrixCount * lps / aps;
   			expectedMatricesReadIn += tempMatricesToReadIn;
   			
   			List<List<String[]>> parsedMatrices = 
@@ -1100,7 +1106,7 @@ public class PlateReaderRawDataTransformer extends AbstractBackingBean
   			}
   			PlateReaderRawDataParser.validateMatrices(parsedMatrices, aps);
   			
-  			inputFile.setExpectedPlateMatrixCount(tempPlateMatrices);
+  			inputFile.setExpectedPlateMatrixCount(matrixCount);
   			inputFile.setUploadedPlateMatrixCount(tempMatricesToReadIn);
 
   			// TODO: converting the matrices into the "standard" 384 format here 
@@ -1110,12 +1116,13 @@ public class PlateReaderRawDataTransformer extends AbstractBackingBean
   			// since doing it this way leads to making assumptions about 
   			// plate/quadrant ordering that differ for 96 and 1536
   			List<List<String[]>> newMatrices = 
-  					PlateReaderRawDataParser.convertMatrixFormat(aps, lps, matrixOrder, parsedMatrices);
-  			if(newMatrices.size() !=  tempPlateMatrices ) {
-  				throw new Exception(
-  				    "ExpectedCount adjusted matrix count: " + tempPlateMatrices  + 
-  				    ", but found: " + newMatrices.size());
-  			}
+  					PlateReaderRawDataParser.convertMatrixFormat(
+  					    aps, lps, converterMatrix, parsedMatrices);
+//  			if(newMatrices.size() !=  matrixCount ) {
+//  				throw new Exception(
+//  				    "ExpectedCount adjusted matrix count: " + matrixCount  + 
+//  				    ", but found: " + newMatrices.size());
+//  			}
   			
   			combinedPlateOrderings.add(matrixOrder);
   			combinedParsedMatrices.addAll(newMatrices);

@@ -28,9 +28,11 @@ import org.apache.commons.cli.OptionBuilder;
 import org.apache.commons.cli.Options;
 import org.apache.commons.cli.ParseException;
 import org.apache.log4j.Logger;
+import org.hibernate.annotations.Immutable;
 
 import com.google.common.base.Function;
 import com.google.common.base.Joiner;
+import com.google.common.collect.ImmutableList;
 import com.google.common.collect.Iterables;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
@@ -339,12 +341,12 @@ public class PlateReaderRawDataParser {
   		}
   		int rowNumber = 0;
   		for(String[] row:matrix) {
-    		if(row.length < expectedCols) {
+    		if(row.length < expectedCols) { logger.error("Wrong number of cols parsed: row: " + rowNumber + ", matrix: " + matrixNumber + ", row as read: " + Joiner.on(",").join(row));
     			throw new IllegalArgumentException(
     			    "Wrong number of cols parsed in matrix: " 
     					+ matrixNumber + ", row: " + rowNumber +", found: " + row.length + 
     					", expected: " + expectedCols);
-    		}
+    		} rowNumber++;
   		}
   		matrixNumber++;
   	}
@@ -616,13 +618,6 @@ public class PlateReaderRawDataParser {
 		logger.info("Wrote " + outputFile);
 	}
 	
-//	public static List<List<String[]>> collate(
-//	    List<List<String[]>> inputMatrices, 
-//	    MatrixOrderPattern matrixOrder)
-//  {
-//	  List<List<String[]>> outputList = new ArrayList()
-//  }
-	
 	/**
 	 * Map the input well from a source screening plate to a destination 
 	 * screening plate, using standard HTS interleaved mapping for 3 col : 2 row 
@@ -632,7 +627,8 @@ public class PlateReaderRawDataParser {
 	    int source_plate_size, int dest_plate_size, int source_matrix_quadrant, 
 	    int row)
 	{
-	  logger.info("convoluteRow: sps: " + source_plate_size 
+	  if(logger.isDebugEnabled()) 
+	    logger.debug("convoluteRow: sps: " + source_plate_size 
 	      + ", dps: " + dest_plate_size + ", smq: " + source_matrix_quadrant
 	      + ", row: " + row );
     // note factor must be an integer value
@@ -710,105 +706,217 @@ public class PlateReaderRawDataParser {
 	 * @param plateMatrices
 	 * @return
 	 */
-	public static List<List<String[]>> convertMatrixFormat(
-	    int sourcePlateSize, int destPlateSize,
-	    MatrixOrderPattern matrixOrder,
-	    List<List<String[]>> plateMatrices) 
-	{
-		if(sourcePlateSize==destPlateSize) 
-		{ // aps==lps
-			return plateMatrices;
-		}
-		
-		int destCols = getNumCols(destPlateSize);
-		int destRows = getNumRows(destPlateSize);
-		int srcCols = getNumCols(sourcePlateSize);
-		int srcRows = getNumRows(sourcePlateSize);
-		
-		// convert the matrices if necessary from assay plate format to library 
-		// plate format
-		if(sourcePlateSize < destPlateSize) {
-			// interleave to build the lps
-			List<List<String[]>> combinedMatrices = Lists.newArrayList();
-			
-			if (destPlateSize % sourcePlateSize != 0 ) 
-			    throw new IllegalArgumentException(
-			        "Library plate size must be a multiple of assay plate size");
-			int factor = destPlateSize/sourcePlateSize;
-			if (plateMatrices.size() < factor || plateMatrices.size() % factor != 0 )
-			    throw new IllegalArgumentException(
-			        "Matrices read must be a multiple of " + factor);
+  public static List<List<String[]>> convertMatrixFormat(
+      int sourcePlateSize, int destPlateSize,
+      MatrixOrderPattern matrixOrder,
+      List<List<String[]>> plateMatrices) 
+  {
+    if(sourcePlateSize==destPlateSize) 
+    { // aps==lps
+      return plateMatrices;
+    }
+    
+    int destCols = getNumCols(destPlateSize);
+    int destRows = getNumRows(destPlateSize);
+    int srcCols = getNumCols(sourcePlateSize);
+    int srcRows = getNumRows(sourcePlateSize);
+    
+    // convert the matrices if necessary from assay plate format to library 
+    // plate format
+    if(sourcePlateSize < destPlateSize) {
+      
+      // interleave to build the lps
+      List<List<String[]>> combinedMatrices = Lists.newArrayList();
+      
+      if (destPlateSize % sourcePlateSize != 0 ) 
+          throw new IllegalArgumentException(
+              "Library plate size must be a multiple of assay plate size");
+      int factor = destPlateSize/sourcePlateSize;
+      if (plateMatrices.size() < factor || plateMatrices.size() % factor != 0 )
+          throw new IllegalArgumentException(
+              "Matrices read must be a multiple of " + factor);
+      
+      // collect by quadrant
+      List<List<String[]>> q1matrices = Lists.newArrayList();
+      List<List<String[]>> q2matrices = Lists.newArrayList();
+      List<List<String[]>> q3matrices = Lists.newArrayList();
+      List<List<String[]>> q4matrices = Lists.newArrayList();
+      Object[] qms = new Object[] {
+          q1matrices,q2matrices,q3matrices,q4matrices
+      };
+      
+      for(int count = 0; count < plateMatrices.size();) {
+        int q = count%4;
+        if(matrixOrder!=null)
+          q = matrixOrder.getQuadrant(count)-1;
+        List<String[]> m = plateMatrices.get(count);
+        ((List<List<String[]>>)qms[q]).add(m);
+        count++;
+      }      
+      
+      // iterate over combined-by-quadrant matrices
+      for(int i=0; i< q1matrices.size(); i++) {
+        List<String[]> combinedMatrix = Lists.newArrayList();
+        for(int x=0;x<destRows;x++) {
+          combinedMatrix.add(x,new String[destCols]);
+        }
+        for(int q=0; q<4; q++){
+          List<String[]> quadrantMatrix = ((List<List<String[]>>)qms[q]).get(i);
+          for(int j=0; j< srcRows; j++) {
+            String[] sourceRow = quadrantMatrix.get(j);
+            for(int k=0; k<srcCols; k++) {
+              int destRow = convoluteRow(sourcePlateSize, destPlateSize, q, j);
+              int destCol = convoluteCol(sourcePlateSize, destPlateSize, q, k);
+              logger.info("sourceMatrix: " + i + "(" + (q) + ")" + 
+                  ", sourceRow: " + j + ", sourceCol: " + k + 
+                  ", destRow: " + destRow + ", destCol: " + destCol);
+              String[] destRowArray = combinedMatrix.get(destRow);
+              destRowArray[destCol] = sourceRow[k];
+            }
+          }
+        }// end quadrant matrices
+        combinedMatrices.add(combinedMatrix);
+      }
+      return combinedMatrices;
+    }else { // lps < aps
+      // deconvoluting case
+      if (sourcePlateSize % destPlateSize != 0 ) 
+          throw new IllegalArgumentException(
+              "Assay plate size must be a multiple of library plate size");
+      int factor = sourcePlateSize/destPlateSize;
+      
+      // build output matrices
+      List<List<String[]>> deCombinedMatrices = Lists.newArrayList();
+      for(int k=0;k<plateMatrices.size()*factor; k++){
+        List<String[]> temp = Lists.newArrayList();
+        for(int i=0; i< destRows; i++) {
+          temp.add(new String[destCols]);
+        }
+        deCombinedMatrices.add(temp);
+      }
+      
+      int plate = 0;
+      for(List<String[]> sourceMatrix:plateMatrices) {
+        for(int i=0;i<srcRows;i++) {
+          for(int j=0;j<srcCols;j++) {
+            int destQuad = deconvoluteMatrix(sourcePlateSize,destPlateSize,i,j);
+            int destRow = deconvoluteRow(sourcePlateSize,destPlateSize,i,j);
+            int destCol = deconvoluteCol(sourcePlateSize,destPlateSize,i,j);
+            int destMatrixNumber = destQuad;
+            if(matrixOrder != null)
+                destMatrixNumber = matrixOrder.getDeconvolutedCount(plate, destQuad);
+            
+            List<String[]> destMatrix = deCombinedMatrices.get(destMatrixNumber);
+            destMatrix.get(destRow)[destCol] = sourceMatrix.get(i)[j];
+          }
+        }
+        plate++;
+      }
+      return deCombinedMatrices;
+    }
+  }
+  
+  public static List<List<String[]>> convertMatrixFormat1(
+      int sourcePlateSize, int destPlateSize,
+      MatrixOrderPattern matrixOrder,
+      List<List<String[]>> plateMatrices) 
+  {
+    if(sourcePlateSize==destPlateSize) 
+    { // aps==lps
+      return plateMatrices;
+    }
+    
+    int destCols = getNumCols(destPlateSize);
+    int destRows = getNumRows(destPlateSize);
+    int srcCols = getNumCols(sourcePlateSize);
+    int srcRows = getNumRows(sourcePlateSize);
+    
+    // convert the matrices if necessary from assay plate format to library 
+    // plate format
+    if(sourcePlateSize < destPlateSize) {
+      // interleave to build the lps
+      List<List<String[]>> combinedMatrices = Lists.newArrayList();
+      
+      if (destPlateSize % sourcePlateSize != 0 ) 
+          throw new IllegalArgumentException(
+              "Library plate size must be a multiple of assay plate size");
+      int factor = destPlateSize/sourcePlateSize;
+      if (plateMatrices.size() < factor || plateMatrices.size() % factor != 0 )
+          throw new IllegalArgumentException(
+              "Matrices read must be a multiple of " + factor);
 
-			// iterate in quadrant-collated-first order
+      // iterate in quadrant-collated-first order
       int quadrantStep = 1;
       if(matrixOrder != null){
         quadrantStep = matrixOrder.getQuadrantStep();
       }
-			
-			for(int count = 0; count*factor < plateMatrices.size();) {
-				List<List<String[]>> quadrantMatrices = Lists.newArrayList();
-				// FIXME: will only work for factor==4, not 16
-				
-				for(int quadrant=0;quadrant<factor;quadrant++){
-				  int nextByQuadrant = count*factor+quadrant*quadrantStep;
-				  quadrantMatrices.add(plateMatrices.get(nextByQuadrant));
-				}
-				
-				List<String[]> combinedMatrix = Lists.newArrayList();
-				for(int x=0;x<destRows;x++) {
-					combinedMatrix.add(x,new String[destCols]);
-				}
-				for(int i=0; i< quadrantMatrices.size(); i++) {
-					List<String[]> quadrantMatrix = quadrantMatrices.get(i);
-					for(int j=0; j< srcRows; j++) {
-						String[] sourceRow = quadrantMatrix.get(j);
-						for(int k=0; k<srcCols; k++) {
-							int destRow = convoluteRow(sourcePlateSize, destPlateSize, i, j);
-							int destCol = convoluteCol(sourcePlateSize, destPlateSize, i, k);
-							logger.info("sourceMatrix: " + i + "(" + (i+count) + ")" + 
-							    ", sourceRow: " + j + ", sourceCol: " + k + 
-							    ", destRow: " + destRow + ", destCol: " + destCol);
-							String[] destRowArray = combinedMatrix.get(destRow);
-							destRowArray[destCol] = sourceRow[k];
-						}
-					}
-				}// end quadrant matrices
-				combinedMatrices.add(combinedMatrix);
-				count++;
-			}
-			return combinedMatrices;
-		}else { // lps < aps
-			// deconvoluting case
-			if (sourcePlateSize % destPlateSize != 0 ) 
-			    throw new IllegalArgumentException(
-			        "Assay plate size must be a multiple of library plate size");
-			int factor = sourcePlateSize/destPlateSize;
-			List<List<String[]>> deCombinedMatrices = Lists.newArrayList();
-			for(List<String[]> sourceMatrix:plateMatrices) {
-				List<List<String[]>> quadMatrices = Lists.newArrayList();
-				for(int x=0;x<factor;x++) {
-					List<String[]> temp = Lists.newArrayList();
-					for(int i=0; i< destRows; i++) {
-						temp.add(new String[destCols]);
-					}
-					quadMatrices.add(temp);
-					deCombinedMatrices.add(temp);
-				}
-				for(int i=0;i<srcRows;i++) {
-					for(int j=0;j<srcCols;j++) {
-						int destMatrixNumber = deconvoluteMatrix(sourcePlateSize,destPlateSize,i,j);
-						int destRow = deconvoluteRow(sourcePlateSize,destPlateSize,i,j);
-						int destCol = deconvoluteCol(sourcePlateSize,destPlateSize,i,j);
-						
-						List<String[]> destMatrix = quadMatrices.get(destMatrixNumber);
-						destMatrix.get(destRow)[destCol] = sourceMatrix.get(i)[j];
-					}
-				}
-			}
-			return deCombinedMatrices;
-		}
-	}
-	
+      
+      for(int count = 0; count < plateMatrices.size();) {
+        List<List<String[]>> quadrantMatrices = Lists.newArrayList();
+        // FIXME: will only work for factor==4, not 16
+        
+        for(int quadrant=0;quadrant<factor;quadrant++){
+          int nextByQuadrant = count+ quadrant*(quadrantStep-1);
+          quadrantMatrices.add(plateMatrices.get(nextByQuadrant));
+        }
+        
+        List<String[]> combinedMatrix = Lists.newArrayList();
+        for(int x=0;x<destRows;x++) {
+          combinedMatrix.add(x,new String[destCols]);
+        }
+        for(int i=0; i< quadrantMatrices.size(); i++) {
+          List<String[]> quadrantMatrix = quadrantMatrices.get(i);
+          for(int j=0; j< srcRows; j++) {
+            String[] sourceRow = quadrantMatrix.get(j);
+            for(int k=0; k<srcCols; k++) {
+              int destRow = convoluteRow(sourcePlateSize, destPlateSize, i, j);
+              int destCol = convoluteCol(sourcePlateSize, destPlateSize, i, k);
+              logger.info("sourceMatrix: " + i + "(" + (i+count) + ")" + 
+                  ", sourceRow: " + j + ", sourceCol: " + k + 
+                  ", destRow: " + destRow + ", destCol: " + destCol);
+              String[] destRowArray = combinedMatrix.get(destRow);
+              destRowArray[destCol] = sourceRow[k];
+            }
+          }
+        }// end quadrant matrices
+        combinedMatrices.add(combinedMatrix);
+        count++;
+      }
+      return combinedMatrices;
+    }else { // lps < aps
+      // deconvoluting case
+      if (sourcePlateSize % destPlateSize != 0 ) 
+          throw new IllegalArgumentException(
+              "Assay plate size must be a multiple of library plate size");
+      int factor = sourcePlateSize/destPlateSize;
+      List<List<String[]>> deCombinedMatrices = Lists.newArrayList();
+      
+      
+      for(List<String[]> sourceMatrix:plateMatrices) {
+        List<List<String[]>> quadMatrices = Lists.newArrayList();
+        for(int x=0;x<factor;x++) {
+          List<String[]> temp = Lists.newArrayList();
+          for(int i=0; i< destRows; i++) {
+            temp.add(new String[destCols]);
+          }
+          quadMatrices.add(temp);
+          deCombinedMatrices.add(temp);
+        }
+        for(int i=0;i<srcRows;i++) {
+          for(int j=0;j<srcCols;j++) {
+            int destMatrixNumber = deconvoluteMatrix(sourcePlateSize,destPlateSize,i,j);
+            int destRow = deconvoluteRow(sourcePlateSize,destPlateSize,i,j);
+            int destCol = deconvoluteCol(sourcePlateSize,destPlateSize,i,j);
+            
+            List<String[]> destMatrix = quadMatrices.get(destMatrixNumber);
+            destMatrix.get(destRow)[destCol] = sourceMatrix.get(i)[j];
+          }
+        }
+      }
+      return deCombinedMatrices;
+    }
+  }
+  
 	
   
   public static interface MatrixOrderPattern{
@@ -821,6 +929,10 @@ public class PlateReaderRawDataParser {
     public Map<String,Integer> getColumnNamesToMatrixOrder();
     public String getColName(int i);
     public int getQuadrantStep();
+    public List<?> getReading(int count);
+    public int getSize();
+    public int getDeconvolutedCount(int count, int quadrant);
+    public MatrixOrderPattern getDeconvolutedMatrixOrder();
   }	
 	
 	 /**
@@ -837,7 +949,7 @@ public class PlateReaderRawDataParser {
       this.originalPlates = plates;
       Integer[] plates1536 = new Integer[plates.length/4];
       for(int i=0;i<plates1536.length;i++) plates1536[i] = i;
-      Integer[] quadrants = new Integer[] {0,1,2,3};
+      Integer[] quadrants = new Integer[] {1,2,3,4};
       
       List<PlateOrderingGroup> _ordering = Lists.newArrayList(ordering.getOrdering());
       _ordering.remove(PlateOrderingGroup.Quadrants);
@@ -857,7 +969,7 @@ public class PlateReaderRawDataParser {
     public Integer getPlate(int matrixCount) {
       int quadrant = this.matrixOrder.getQuadrant(matrixCount);
       int plate1536 = this.matrixOrder.getPlate(matrixCount);
-      return this.originalPlates[plate1536*4+quadrant];
+      return this.originalPlates[plate1536*4+(quadrant-1)];
     }
 
     @Override
@@ -891,6 +1003,24 @@ public class PlateReaderRawDataParser {
     
     public int getQuadrantStep() {
       return this.matrixOrder.getQuadrantStep();
+    }
+    @Override
+    public List<?> getReading(int count) {
+      return this.matrixOrder.getReading(count);
+    }
+    
+    @Override
+    public int getSize() {
+      return this.matrixOrder.getSize();
+    }
+    
+    @Override
+    public int getDeconvolutedCount(int count, int quadrant) {
+      return this.matrixOrder.getDeconvolutedCount(count, quadrant);
+    }
+    @Override
+    public MatrixOrderPattern getDeconvolutedMatrixOrder() {
+      return this.matrixOrder.getDeconvolutedMatrixOrder();
     }
   }
 
@@ -929,6 +1059,56 @@ public class PlateReaderRawDataParser {
 		  return qstep;
 		}
 		
+		public int getSize(){
+		  return this.odometer.getSize();
+		}
+		
+		public List<?> getReading(int count){
+		  return this.odometer.getReading(count);
+		}
+		
+		public int getCount(List<?> reading){
+		  return this.odometer.getCount(reading);
+		}
+		
+		public MatrixOrderPattern getDeconvolutedMatrixOrder(){
+      MatrixOrder internalOrder = 
+          new MatrixOrder(ordering, plates, conditions, readouts, replicates, new Integer[]{1,2,3,4});
+		  return internalOrder;
+		}
+		
+		/**
+		 * use count to get a reading, adjust reading for quad, use to get a new count.
+		 */
+		public int getDeconvolutedCount(int count, int quadrant){
+		  MatrixOrder internalOrder = 
+		      new MatrixOrder(ordering, plates, conditions, readouts, replicates, new Integer[]{0});
+		  List<Object> reading = (List<Object>)internalOrder.getReading(count);
+		  
+		  reading.set(this.quadrantPosition, (Object)new Integer(quadrant+1));
+//		  logger.info("new reading: " + reading);
+		  return getCount(reading);
+		}
+		
+		public int getNextByQuadrant(int count, int newQuadrant){
+		  List<?> reading = getReading(count);
+		  // construct new reading, with the new quadrant
+		  // note that this is klunky due to collections interface
+		  Object[] newReading = new Object[reading.size()];
+		  for(int i=0;i<reading.size();i++){
+		    if(i==quadrantPosition){
+		      newReading[i] = newQuadrant;
+		    }else{
+		      newReading[i] = reading.get(i);
+		    }
+		  }
+      if (logger.isDebugEnabled())
+        logger.debug(
+          "count: " + count + ", reading: " + reading + 
+          ", newReading: " + ImmutableList.of(newReading));
+		  return getCount(ImmutableList.of(newReading));
+		}
+		
     public MatrixOrder(CollationOrder ordering, Integer[] plates, String[] conditions, 
         String[] readouts, String[] replicates)
     {
@@ -936,8 +1116,9 @@ public class PlateReaderRawDataParser {
       // note, if 96 input weren't converted before writing, would be needed for that
       this(ordering, plates, conditions, readouts, replicates, new Integer[] {0});
     }
-    public MatrixOrder(CollationOrder ordering, Integer[] plates, String[] conditions, 
-          String[] readouts, String[] replicates, Integer[] quadrants)
+    public MatrixOrder(
+        CollationOrder ordering, Integer[] plates, String[] conditions, 
+        String[] readouts, String[] replicates, Integer[] quadrants)
       {
   		this.ordering = ordering;
   		this.plates = plates;
@@ -983,7 +1164,7 @@ public class PlateReaderRawDataParser {
 				}
 			}
   		this.odometer = new Odometer(orderings.toArray(new List<?>[] {}));
-			logger.info("Odometer: " + odometer);
+//			logger.info("Odometer: " + odometer);
   	}
   	
   	public String getColName(int i) { 
@@ -1041,6 +1222,16 @@ public class PlateReaderRawDataParser {
     public CollationOrder getOrder(){
       return this.ordering;
     }
+
+    public Object getQuadrantCount(int i) 
+    {
+      int i2=i;
+      List<?> reading = getReading(i);
+      int qs = getQuadrantStep();
+      if(qs>1)
+        i2 = i/4 + (i%4)*qs;
+      return i2;
+    }
   }
   
 
@@ -1084,6 +1275,30 @@ public class PlateReaderRawDataParser {
 		
 		public int getCounterSize(int counterPosition){
 		  return this.counters[counterPosition].size();
+		}
+		
+		public int getCount(List<?> reading){
+		  
+		  int position = 0;
+		  int count = 0;
+		  int[] counterPositions = new int[counters.length];
+		  for(Object o:reading){
+		    List<?> counter = counters[position];
+		    int counterPosition = 0;
+		    for(Object counterObject:counter){
+		      if(counterObject.equals(o)) break;
+		      counterPosition++;
+		    }
+		    counterPositions[position] = counterPosition;
+		    position++;
+		  }
+		  
+		  int place = 1;
+		  for(int i=0;i<counterPositions.length; i++){
+		    count += counterPositions[i] * place;
+		    place = place*counters[i].size();
+		  }
+		  return count;
 		}
 		
 		public List<?> getReading(int count)
@@ -1228,7 +1443,7 @@ public class PlateReaderRawDataParser {
   	}
   	int sourceRow = sourceWellName.getRowIndex();
   	int sourceCol = sourceWellName.getColumnIndex();
-    logger.info("convertWell: " + sourceWellName + ", " + sourceRow + ", " + sourceCol);
+//    logger.info("convertWell: " + sourceWellName + ", " + sourceRow + ", " + sourceCol);
   	
   	if(sourcePlateSize==destinationPlateSize) return sourceWellName;
   	if(sourcePlateSize > destinationPlateSize)
