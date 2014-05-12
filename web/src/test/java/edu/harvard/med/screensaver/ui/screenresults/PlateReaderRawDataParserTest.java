@@ -25,7 +25,8 @@ public class PlateReaderRawDataParserTest extends TestCase
   private static Logger logger = Logger.getLogger(PlateReaderRawDataParserTest.class);
 
   
-  public static Function<String,WellName> wellNameTransformer = new Function<String,WellName>() {
+  public static Function<String,WellName> wellNameTransformer = 
+      new Function<String,WellName>() {
 		@Override
 		public WellName apply(String input) {
 			return new WellName(input);
@@ -39,11 +40,13 @@ public class PlateReaderRawDataParserTest extends TestCase
 		int plateSize = 384;
 		Set<WellName> expected1 = Sets.newHashSet(
 				Collections2.transform(
-						Lists.newArrayList( "A1", "A2", "B1", "B2", "C1", "C2", "F3"),wellNameTransformer));
+						Lists.newArrayList( 
+						    "A1", "A2", "B1", "B2", "C1", "C2", "F3"),wellNameTransformer));
 		Set<WellName> expected2 = Sets.newHashSet(
 				Collections2.transform(
 						Lists.newArrayList( "P23", "P24", "Q23", "Q24"),wellNameTransformer));
-		Map<String,Set<WellName>> parsedOutput = PlateReaderRawDataParser.expandNamedWellRanges(input, plateSize);
+		Map<String,Set<WellName>> parsedOutput = 
+		    PlateReaderRawDataParser.expandNamedWellRanges(input, plateSize);
 		
 		assertTrue("does not contain range 1: " + parsedOutput, parsedOutput.containsKey(range1Label));
 		assertTrue("does not contain range 2: " + parsedOutput, parsedOutput.containsKey(range2Label));
@@ -108,7 +111,6 @@ public class PlateReaderRawDataParserTest extends TestCase
 		// 1536
 		inputI = 4;
 		expected = Sets.newHashSet();
-//		for(int i=0;i<32;i++) expected[i] = PlateReaderRawDataParser.getRowLetters(i) + input;
 		for(int i=0;i<32;i++) expected.add(new WellName(i,inputI-1));
 		
 		output = PlateReaderRawDataParser.expandWellRange("" + inputI, 1536);
@@ -123,67 +125,80 @@ public class PlateReaderRawDataParserTest extends TestCase
 		WellName sourceWell = new WellName("A1");
 		WellName expectedWell = new WellName("A1");
 		
-		assertEquals(expectedWell, PlateReaderRawDataParser.convertWell(sourceWell, aps, lps, quadrant));
+		assertEquals(expectedWell, 
+		    PlateReaderRawDataParser.convertWell(sourceWell, aps, lps, quadrant));
 		
 		sourceWell = new WellName("A2");
 		expectedWell = new WellName("A3");
-		assertEquals(expectedWell, PlateReaderRawDataParser.convertWell(sourceWell, aps, lps, quadrant));
+		assertEquals(expectedWell, 
+		    PlateReaderRawDataParser.convertWell(sourceWell, aps, lps, quadrant));
 
     quadrant = 3;
     sourceWell = new WellName("A2");
     expectedWell = new WellName("B4");
-    assertEquals(expectedWell, PlateReaderRawDataParser.convertWell(sourceWell, aps, lps, quadrant));
+    assertEquals(expectedWell, 
+        PlateReaderRawDataParser.convertWell(sourceWell, aps, lps, quadrant));
     
     quadrant = 3;
     sourceWell = new WellName("H12");
     expectedWell = new WellName("P24");
-    assertEquals(expectedWell, PlateReaderRawDataParser.convertWell(sourceWell, aps, lps, quadrant));
+    assertEquals(expectedWell, 
+        PlateReaderRawDataParser.convertWell(sourceWell, aps, lps, quadrant));
     
     quadrant = 2;
     sourceWell = new WellName("H12");
     expectedWell = new WellName("P23");
-    assertEquals(expectedWell, PlateReaderRawDataParser.convertWell(sourceWell, aps, lps, quadrant));
+    assertEquals(expectedWell, 
+        PlateReaderRawDataParser.convertWell(sourceWell, aps, lps, quadrant));
 
     quadrant = 2;
     sourceWell = new WellName("G12");
     expectedWell = new WellName("N23");
-    assertEquals(expectedWell, PlateReaderRawDataParser.convertWell(sourceWell, aps, lps, quadrant));
+    assertEquals(expectedWell, 
+        PlateReaderRawDataParser.convertWell(sourceWell, aps, lps, quadrant));
 
     quadrant = 2;
     sourceWell = new WellName("H11");
     expectedWell = new WellName("P21");
-    assertEquals(expectedWell, PlateReaderRawDataParser.convertWell(sourceWell, aps, lps, quadrant));
+    assertEquals(expectedWell, 
+        PlateReaderRawDataParser.convertWell(sourceWell, aps, lps, quadrant));
     
     quadrant = 2;
     sourceWell = new WellName("G11");
     expectedWell = new WellName("N21");
-    assertEquals(expectedWell, PlateReaderRawDataParser.convertWell(sourceWell, aps, lps, quadrant));
+    assertEquals(expectedWell, 
+        PlateReaderRawDataParser.convertWell(sourceWell, aps, lps, quadrant));
     
     aps = 384;
     lps = 96;
     quadrant = 0;
     sourceWell = new WellName("P24");
     expectedWell = new WellName("H12");
-    assertEquals(expectedWell, PlateReaderRawDataParser.convertWell(sourceWell, aps, lps, quadrant));
+    assertEquals(expectedWell, 
+        PlateReaderRawDataParser.convertWell(sourceWell, aps, lps, quadrant));
     
     sourceWell = new WellName("N21");
     expectedWell = new WellName("G11");
-    assertEquals(expectedWell, PlateReaderRawDataParser.convertWell(sourceWell, aps, lps, quadrant));
+    assertEquals(expectedWell, 
+        PlateReaderRawDataParser.convertWell(sourceWell, aps, lps, quadrant));
     
     sourceWell = new WellName("A02");
     expectedWell = new WellName("A01");
-    assertEquals(expectedWell, PlateReaderRawDataParser.convertWell(sourceWell, aps, lps, quadrant));
+    assertEquals(expectedWell, 
+        PlateReaderRawDataParser.convertWell(sourceWell, aps, lps, quadrant));
     
     sourceWell = new WellName("A03");
     expectedWell = new WellName("A02");
-    assertEquals(expectedWell, PlateReaderRawDataParser.convertWell(sourceWell, aps, lps, quadrant));
+    assertEquals(expectedWell, 
+        PlateReaderRawDataParser.convertWell(sourceWell, aps, lps, quadrant));
     
     quadrant = 0;
 		aps = 1536;
 		lps = 384;
 		sourceWell = new WellName("A2");
 		expectedWell = new WellName("A1");
-		assertEquals(expectedWell, PlateReaderRawDataParser.convertWell(sourceWell, aps, lps, quadrant));
+		assertEquals(expectedWell, 
+		    PlateReaderRawDataParser.convertWell(sourceWell, aps, lps, quadrant));
 		
 		quadrant = 0;
 		aps = 1536;
@@ -191,7 +206,8 @@ public class PlateReaderRawDataParserTest extends TestCase
 		sourceWell = new WellName("B2");
 		expectedWell = new WellName("A1");
 		int expectedQuadrant = 3;
-		assertEquals(expectedWell, PlateReaderRawDataParser.convertWell(sourceWell, aps, lps, quadrant));
+		assertEquals(expectedWell, 
+		    PlateReaderRawDataParser.convertWell(sourceWell, aps, lps, quadrant));
 		assertEquals(expectedQuadrant, 
 		    PlateReaderRawDataParser.deconvoluteMatrix(
 		        aps, lps, sourceWell.getRowIndex(), sourceWell.getColumnIndex()));
@@ -246,7 +262,8 @@ public class PlateReaderRawDataParserTest extends TestCase
     // Test by converting back to 96!
     
     List<List<String[]>> decombinedMatrices = 
-        PlateReaderRawDataParser.convertMatrixFormat(384, 96, matrixOrder.getDeconvolutedMatrixOrder(), combinedMatrices);
+        PlateReaderRawDataParser.convertMatrixFormat(
+            384, 96, matrixOrder.getDeconvolutedMatrixOrder(), combinedMatrices);
 
     assertEquals("wrong number of result matrices", 28, decombinedMatrices.size());
     assertEquals("rows wrong", 8, decombinedMatrices.get(0).size());
@@ -290,7 +307,8 @@ public class PlateReaderRawDataParserTest extends TestCase
     }
     
     List<List<String[]>> decombinedMatrices = 
-        PlateReaderRawDataParser.convertMatrixFormat(1536,384,matrixOrder1536, sourceMatrices);
+        PlateReaderRawDataParser.convertMatrixFormat(
+            1536,384,matrixOrder1536, sourceMatrices);
     
     assertEquals("wrong number of result matrices", 28, decombinedMatrices.size());
     assertEquals("rows wrong", 16, decombinedMatrices.get(0).size());
@@ -299,7 +317,8 @@ public class PlateReaderRawDataParserTest extends TestCase
     // Test by converting back to 1536!
     
     List<List<String[]>> combinedMatrices = 
-        PlateReaderRawDataParser.convertMatrixFormat(384, 1536, matrixOrder1536, decombinedMatrices);
+        PlateReaderRawDataParser.convertMatrixFormat(
+            384, 1536, matrixOrder1536, decombinedMatrices);
 
     assertEquals("wrong number of result matrices", 7, combinedMatrices.size());
     assertEquals("rows wrong", 32, combinedMatrices.get(0).size());
@@ -346,7 +365,8 @@ public class PlateReaderRawDataParserTest extends TestCase
     List<String[]> combinedMatrix = combinedMatrices.get(0);
     for(int i=0;i<16;i++) {
       for(int j=0;j<24;j++) {
-        int sourceMatrixNumber = PlateReaderRawDataParser.deconvoluteMatrix(384, 96, i, j);
+        int sourceMatrixNumber = 
+            PlateReaderRawDataParser.deconvoluteMatrix(384, 96, i, j);
         int sourceRow = PlateReaderRawDataParser.deconvoluteRow(384, 96, i, j);
         int sourceCol = PlateReaderRawDataParser.deconvoluteCol(384, 96, i, j);
         assertEquals(
@@ -386,7 +406,8 @@ public class PlateReaderRawDataParserTest extends TestCase
 			}
 		}
 		
-		combinedMatrices = PlateReaderRawDataParser.convertMatrixFormat(1536,384,null, sourceMatrices);
+		combinedMatrices = PlateReaderRawDataParser.convertMatrixFormat(
+		    1536,384,null, sourceMatrices);
 		
 		assertEquals("wrong number of result matrices", 8, combinedMatrices.size());
 		assertEquals("rows wrong", 16, combinedMatrices.get(0).size());
@@ -395,7 +416,8 @@ public class PlateReaderRawDataParserTest extends TestCase
 		// Test by converting back to 1536!
 		
 		List<List<String[]>> decombinedMatrices = 
-		    PlateReaderRawDataParser.convertMatrixFormat(384, 1536, null, combinedMatrices);
+		    PlateReaderRawDataParser.convertMatrixFormat(
+		        384, 1536, null, combinedMatrices);
 
 		assertEquals("wrong number of result matrices", 2, decombinedMatrices.size());
 		assertEquals("rows wrong", 32, decombinedMatrices.get(0).size());
@@ -417,10 +439,12 @@ public class PlateReaderRawDataParserTest extends TestCase
     // reverse of testOdometer: get the count from a reading
     List<Integer> plates = ImmutableList.of(new Integer[] {1,4,6,12});
     List<Integer> quadrants = ImmutableList.of(new Integer[] {1,2,3,4});
-    List<String> conditions = ImmutableList.of(new String[] {"condition1", "condition2"});
+    List<String> conditions = 
+        ImmutableList.of(new String[] {"condition1", "condition2"});
     List<Integer> replicates = ImmutableList.of(new Integer[] {1,2,3});
     
-    PlateReaderRawDataParser.Odometer odometer = new Odometer(replicates,quadrants, conditions,plates);
+    PlateReaderRawDataParser.Odometer odometer = new Odometer(
+        replicates,quadrants, conditions,plates);
     
     List<?> reading = ImmutableList.of(1,1,"condition1", 1);
     assertEquals(0,odometer.getCount(reading));
@@ -431,58 +455,13 @@ public class PlateReaderRawDataParserTest extends TestCase
     }
   }
   
-//  public void testQuadrantCounting(){
-//    Integer[] plates = new Integer[] {1,4,6,12};
-//    Integer[] quadrants = new Integer[] {1,2,3,4};
-//    String[] conditions = new String[] {"a","b","c","d","e","f","g"};
-//    String[] replicates = new String[] {"1",};
-//    String[] readouts = new String[] {"1"};
-//    CollationOrder ordering = CollationOrder.getOrder("RPQC");
-//    PlateReaderRawDataParser.MatrixOrder matrixOrder = 
-//        new PlateReaderRawDataParser.MatrixOrder(
-//            ordering, plates,conditions,readouts, replicates,quadrants);    
-//    
-//    
-//    int[] expected = new int[] { 0,7,14,21,1,8,15,22,2,9,16,23,
-//    };
-//    
-//    for(int i=0; i<matrixOrder.getSize(); i++){
-//      if(i<expected.length){
-//        assertEquals("i: " + i, expected[i], matrixOrder.getQuadrantCount(i));
-//      }
-//      if(i==29)
-//        assertEquals("i: " + i, 35, matrixOrder.getQuadrantCount(i));
-//      logger.info("i: " + i + ", quad order count: " + matrixOrder.getQuadrantCount(i));
-//    }
-//    
-//
-//    ordering = CollationOrder.getOrder("RCPQ");
-//    matrixOrder = 
-//        new PlateReaderRawDataParser.MatrixOrder(
-//            ordering, plates,conditions,readouts, replicates,quadrants);    
-//
-//    for(int i=0; i<matrixOrder.getSize(); i++){
-//      if(i<expected.length){
-//        assertEquals("i: " + i, i, matrixOrder.getQuadrantCount(i));
-//      }
-//      logger.info("i: " + i + ", quad order count: " + matrixOrder.getQuadrantCount(i));
-//    }
-
-    
-//    ordering = CollationOrder.getOrder("PQCR");
-//    matrixOrder = 
-//        new PlateReaderRawDataParser.MatrixOrder(
-//            ordering, plates,conditions,readouts, replicates,quadrants);    
-//
-//    for(int i=0; i<matrixOrder.getSize(); i++){
-//      if(i<expected.length){
-//        assertEquals("i: " + i, i, matrixOrder.getQuadrantCount(i));
-//      }
-//      logger.info("i: " + i + ", quad order count: " + matrixOrder.getQuadrantCount(i));
-//    }
-//  }
-  
+  /**
+   * Test that, for a set of matrices having a collation order with quadrants 
+   * not being last, that we can iterate through the matrices such that we pick
+   * from each quadrant in succession.
+   */
   public void testNextByQuadrant(){
+    
     Integer[] plates = new Integer[] {1,4,6,12};
     Integer[] quadrants = new Integer[] {1,2,3,4};
     String[] conditions = new String[] {"condition1", "condition2"};
@@ -499,8 +478,7 @@ public class PlateReaderRawDataParserTest extends TestCase
       logger.info("count: " + i + ", reading: " + reading1);
       assertEquals(i, matrixOrder.getCount(reading1));
     }
-    
-    
+        
     int sizeWithoutQuadrantsPlates = conditions.length*replicates.length;
     
     int quadrantStep = matrixOrder.getQuadrantStep();
@@ -526,10 +504,12 @@ public class PlateReaderRawDataParserTest extends TestCase
 	public void testOdometer()
 	{
 		List<Integer> plates = ImmutableList.of(new Integer[] {1,4,6,12});
-		List<String> conditions = ImmutableList.of(new String[] {"condition1", "condition2"});
+		List<String> conditions = 
+		    ImmutableList.of(new String[] {"condition1", "condition2"});
 		List<Integer> replicates = ImmutableList.of(new Integer[] {1,2,3});
 		
-		PlateReaderRawDataParser.Odometer odometer = new Odometer(replicates,conditions,plates);
+		PlateReaderRawDataParser.Odometer odometer = 
+		    new Odometer(replicates,conditions,plates);
 		
 		List<?> reading = odometer.getReading(0);
 		assertEquals(ImmutableList.of(1,"condition1", 1),reading);
@@ -576,9 +556,6 @@ public class PlateReaderRawDataParserTest extends TestCase
 		reading = odometer.getReading(23);
 		assertEquals(ImmutableList.of(3,"condition2", 12),reading);
 
-//    List<Integer> plates = ImmutableList.of(new Integer[] {1,4,6,12});
-//    List<String> conditions = ImmutableList.of(new String[] {"condition1", "condition2"});
-//    List<Integer> replicates = ImmutableList.of(new Integer[] {1,2,3});
 		odometer = new Odometer(plates,replicates,conditions);
 		
     reading = odometer.getReading(0);
