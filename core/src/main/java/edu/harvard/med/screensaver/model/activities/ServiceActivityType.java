@@ -37,6 +37,7 @@ public enum ServiceActivityType implements VocabularyTerm
   TRAINING_ENVISION("Training - Envision"),
   TRAINING_BIOMEKFX("Training - BiomekFX"),
   TRAINING_CYBIO("Training - CyBio"),
+  TRAINING_COMBI("Training - Combi"),
   TRAINING_FLEXSTATION_III("Training - Flexstation III"),
   TRAINING_M5("Training - M5"),
   TRAINING_OTHER("Training - Other"),
