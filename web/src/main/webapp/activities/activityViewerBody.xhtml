@@ -32,6 +32,21 @@
       </ui:define>
     </ss:property>
 
+    <ss:property id="fundingSupport" label="Funding Support"
+      description="The funding support"
+      value="#{activityViewer.entity.fundingSupport}"
+      editable="#{activityViewer.editMode &amp;&amp; activityViewer.entity.class.simpleName == 'ServiceActivity'}"
+      >
+      <ui:define name="editableData">
+        <t:selectOneMenu id="fundingSupportEditable"
+          value="#{activityViewer.fundingSupportValue}"
+          styleClass="inputText selectMenu">
+          <f:selectItems
+            value="#{activityViewer.fundingSupportSelectItems}" />
+        </t:selectOneMenu>
+      </ui:define>
+    </ss:property>
+
     <ss:property id="dateOfActivity" label="Performed"
       description="The date the activity was performed in the lab"
       value="#{activityViewer.entity.dateOfActivity}" type="Date"

@@ -12,16 +12,21 @@ package edu.harvard.med.screensaver.model.activities;
 import javax.persistence.CascadeType;
 import javax.persistence.Column;
 import javax.persistence.Entity;
+import javax.persistence.FetchType;
 import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
 import javax.persistence.PrimaryKeyJoinColumn;
+import javax.persistence.Transient;
 
+import org.apache.log4j.Logger;
 import org.joda.time.LocalDate;
 
 import edu.harvard.med.screensaver.model.AbstractEntityVisitor;
 import edu.harvard.med.screensaver.model.meta.Cardinality;
 import edu.harvard.med.screensaver.model.meta.RelationshipPath;
+import edu.harvard.med.screensaver.model.screens.FundingSupport;
 import edu.harvard.med.screensaver.model.screens.Screen;
+import edu.harvard.med.screensaver.model.screens.ScreenType;
 import edu.harvard.med.screensaver.model.users.AdministratorUser;
 import edu.harvard.med.screensaver.model.users.ScreeningRoomUser;
 
@@ -33,6 +38,8 @@ import edu.harvard.med.screensaver.model.users.ScreeningRoomUser;
 @org.hibernate.annotations.Proxy
 public class ServiceActivity extends TypedActivity<ServiceActivityType>
 {
+  private static Logger log = Logger.getLogger(ServiceActivity.class);
+  
   private static final long serialVersionUID = 1L;
 
   public static final ServiceActivity Null = new ServiceActivity();
@@ -44,6 +51,7 @@ public class ServiceActivity extends TypedActivity<ServiceActivityType>
 
   private Screen _servicedScreen;
   private ScreeningRoomUser _servicedUser;
+  private FundingSupport _fundingSupport;
 
   /**
    * @motivation for hibernate and proxy/concrete subclass constructors
@@ -80,6 +88,22 @@ public class ServiceActivity extends TypedActivity<ServiceActivityType>
   {
     _type = type;
   }
+  
+  @ManyToOne(cascade={ CascadeType.PERSIST, CascadeType.MERGE })
+  @JoinColumn(name="fundingSupportId", nullable=true)
+  @org.hibernate.annotations.ForeignKey(name="fk_service_activity_to_funding_support")
+//  @org.hibernate.annotations.LazyToOne(value=org.hibernate.annotations.LazyToOneOption.PROXY)
+  @edu.harvard.med.screensaver.model.annotations.ToOne(unidirectional=true)
+  public FundingSupport getFundingSupport()
+  {
+    return _fundingSupport;
+  }
+
+  public void setFundingSupport(FundingSupport fundingSupport)
+  {
+    _fundingSupport = fundingSupport;
+  }
+  
 
   /**
    * The screen for which this service was performed (optional).

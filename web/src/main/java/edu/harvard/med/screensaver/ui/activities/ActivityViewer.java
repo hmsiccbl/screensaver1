@@ -19,12 +19,14 @@ import java.util.TreeSet;
 import javax.faces.model.DataModel;
 import javax.faces.model.ListDataModel;
 import javax.faces.model.SelectItem;
+import javax.persistence.Transient;
 
 import com.google.common.base.Joiner;
 import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.Iterables;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Sets;
+
 import org.apache.log4j.Logger;
 import org.hibernate.Hibernate;
 import org.springframework.transaction.annotation.Transactional;
@@ -52,6 +54,7 @@ import edu.harvard.med.screensaver.model.libraries.PlateRange;
 import edu.harvard.med.screensaver.model.screenresults.AssayPlate;
 import edu.harvard.med.screensaver.model.screens.AssayProtocolType;
 import edu.harvard.med.screensaver.model.screens.CherryPickScreening;
+import edu.harvard.med.screensaver.model.screens.FundingSupport;
 import edu.harvard.med.screensaver.model.screens.LabActivity;
 import edu.harvard.med.screensaver.model.screens.LibraryScreening;
 import edu.harvard.med.screensaver.model.screens.Screen;
@@ -98,6 +101,7 @@ public class ActivityViewer extends SearchResultContextEditableEntityViewerBacki
   private String _volumeTransferredPerWellToAssayPlatesValue;
   private String _volumeTransferredPerWellFromLibraryPlatesValue;
   private String _assayWellVolumeValue;
+  private String _fundingSupportValue;
   private DataModel _cherryPickPlatesDataModel;
   private DataModel _platesScreenedDataModel;
   private Integer _newPlateRangeScreenedStartPlate;
@@ -162,6 +166,23 @@ public class ActivityViewer extends SearchResultContextEditableEntityViewerBacki
       getDao().needReadOnly((ServiceActivity) entity, ServiceActivity.servicedScreen);
       getDao().needReadOnly((ServiceActivity) entity, ServiceActivity.servicedUser);
       ((ServiceActivity) entity).setServicedScreen(getServicedScreen().getSelection());
+      
+      if(_fundingSupportValue != null && _fundingSupportValue != ""){
+        FundingSupport selected = null;
+        for(FundingSupport fs : getDao().findAllEntitiesOfType(FundingSupport.class)){
+          log.error("trying: " + fs.getValue()+ "," +_fundingSupportValue.equals(fs.getValue()));
+          if(_fundingSupportValue.equals(fs.getValue())){
+            selected = fs;
+            break;
+          }
+        }
+        if(selected != null){
+          ((ServiceActivity) entity).setFundingSupport(selected);
+        }else{
+//          throw new RuntimeException("unable to locate funding support: "+ _fundingSupportValue);
+          log.warn("unable to locate funding support:" + _fundingSupportValue);
+        }
+      }
     }
     else if (getEntity() instanceof LabActivity) {
       getDao().needReadOnly((LabActivity) entity, LabActivity.Screen);
@@ -277,6 +298,7 @@ public class ActivityViewer extends SearchResultContextEditableEntityViewerBacki
     _volumeTransferredPerWellFromLibraryPlatesValue = null;
     _assayWellVolumeValue = null;
     _assayWellVolumeType = null;
+    _fundingSupportValue = null;
   }
 
   /**
@@ -828,6 +850,36 @@ public class ActivityViewer extends SearchResultContextEditableEntityViewerBacki
   {
     return JSFUtils.createUISelectItemsWithEmptySelection(Arrays.asList(ServiceActivityType.values()),
                                                           "<select>");
+  }
+
+  public List<SelectItem> getFundingSupportSelectItems()
+  { 
+    List<FundingSupport> fslist = getDao().findAllEntitiesOfType(FundingSupport.class);
+    List<String> fsvalues = Lists.newArrayList();
+    for(FundingSupport fs:fslist){
+      fsvalues.add(fs.getValue());
+    }
+    return JSFUtils.createUISelectItemsWithEmptySelection(fsvalues,"<select>");
+  }
+  
+  public String getFundingSupportValue(){
+    if (getEntity() instanceof ServiceActivity) {
+      log.error("start getFundingSupportValue");
+      FundingSupport fs = ((ServiceActivity)this.getEntity()).getFundingSupport();
+      log.error("1start getFundingSupportValue");
+      if(fs == null){
+        log.error("2start getFundingSupportValue");
+        return "";
+      }else{
+        log.error("3start getFundingSupportValue");
+        return fs.getValue();
+      }
+    }
+    return null;
+  }
+  
+  public void setFundingSupportValue(String value){
+    _fundingSupportValue = value;
   }
 
   @Transactional

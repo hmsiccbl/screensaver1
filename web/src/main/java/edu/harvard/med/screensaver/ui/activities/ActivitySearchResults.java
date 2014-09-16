@@ -43,6 +43,7 @@ import edu.harvard.med.screensaver.model.libraries.Plate;
 import edu.harvard.med.screensaver.model.libraries.WellVolumeCorrectionActivity;
 import edu.harvard.med.screensaver.model.meta.RelationshipPath;
 import edu.harvard.med.screensaver.model.screens.CherryPickScreening;
+import edu.harvard.med.screensaver.model.screens.FundingSupport;
 import edu.harvard.med.screensaver.model.screens.LabActivity;
 import edu.harvard.med.screensaver.model.screens.LibraryScreening;
 import edu.harvard.med.screensaver.model.screens.Screen;
@@ -350,7 +351,21 @@ public class ActivitySearchResults extends EntityBasedEntitySearchResults<Activi
     column.setVisible(false);
     // TODO: reinstae ordering: 
     // columns.add(2, column);
-  
+
+    columns.add(new TextEntityColumn<Activity>(RelationshipPath.from(
+        Activity.class).toProperty("fundingSupport"), "Funding Support",
+        "Funding support", TextColumn.UNGROUPED) {
+      @Override
+      public String getCellValue(Activity activity) {
+        if (activity instanceof ServiceActivity) {
+          FundingSupport fs = ((ServiceActivity)activity).getFundingSupport();
+          return fs == null? "": fs.getValue();
+        }
+        return null;
+      }
+    });
+    columns.get(columns.size() - 1).setVisible(false);
+    
     column = new IntegerEntityColumn<Activity>(CherryPickScreening.cherryPickRequest.castToSupertype(Activity.class),
       "Cherry Pick Request #", "The cherry pick request number, if applicable", TableColumn.UNGROUPED) {
       @Override
