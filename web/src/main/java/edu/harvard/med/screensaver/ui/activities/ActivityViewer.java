@@ -179,7 +179,6 @@ public class ActivityViewer extends SearchResultContextEditableEntityViewerBacki
         if(selected != null){
           ((ServiceActivity) entity).setFundingSupport(selected);
         }else{
-//          throw new RuntimeException("unable to locate funding support: "+ _fundingSupportValue);
           log.warn("unable to locate funding support:" + _fundingSupportValue);
         }
       }
@@ -864,14 +863,10 @@ public class ActivityViewer extends SearchResultContextEditableEntityViewerBacki
   
   public String getFundingSupportValue(){
     if (getEntity() instanceof ServiceActivity) {
-      log.error("start getFundingSupportValue");
       FundingSupport fs = ((ServiceActivity)this.getEntity()).getFundingSupport();
-      log.error("1start getFundingSupportValue");
       if(fs == null){
-        log.error("2start getFundingSupportValue");
         return "";
       }else{
-        log.error("3start getFundingSupportValue");
         return fs.getValue();
       }
     }
