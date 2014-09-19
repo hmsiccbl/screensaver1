@@ -36,6 +36,7 @@
       description="The funding support"
       value="#{activityViewer.entity.fundingSupport}"
       editable="#{activityViewer.editMode &amp;&amp; activityViewer.entity.class.simpleName == 'ServiceActivity'}"
+      rendered="#{activityViewer.entity.class.simpleName == 'ServiceActivity'}"
       >
       <ui:define name="editableData">
         <t:selectOneMenu id="fundingSupportEditable"
