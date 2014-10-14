@@ -6,12 +6,12 @@
   <parent>
     <artifactId>screensaver</artifactId>
     <groupId>edu.harvard.med</groupId>
-    <version>2014-09-16</version>
+    <version>2014-09-22</version>
   </parent>
 
   <groupId>edu.harvard.med</groupId>
   <artifactId>screensaver-core</artifactId>
-  <version>2014-09-16</version>
+  <version>2014-09-22</version>
   <name>Screensaver Core</name>
 
   <packaging>jar</packaging>
@@ -87,7 +87,7 @@
           <dependency>
             <groupId>edu.harvard.med</groupId>
             <artifactId>screensaver-test</artifactId>
-            <version>2014-09-16</version>
+            <version>2014-09-22</version>
             <scope>test</scope>
           </dependency>
 -->
@@ -348,7 +348,7 @@
     <dependency>
       <groupId>edu.harvard.med</groupId>
       <artifactId>screensaver-test</artifactId>
-      <version>2014-09-16</version>
+      <version>2014-09-22</version>
       <scope>test</scope>
     </dependency>
 

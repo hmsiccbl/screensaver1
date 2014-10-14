@@ -38,6 +38,7 @@ import org.codehaus.jackson.map.ser.impl.SimpleBeanPropertyFilter;
 import org.codehaus.jackson.map.ser.impl.SimpleFilterProvider;
 import org.springframework.transaction.annotation.Transactional;
 
+import com.google.common.base.Function;
 import com.google.common.base.Joiner;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.Iterables;
@@ -913,7 +914,9 @@ public class PlateReaderRawDataTransformer extends AbstractBackingBean
 	    }else {
 	  		Set<Integer> lcpPlates = Sets.newHashSet();
 	  		for(LabCherryPick lcp:_cherryPickRequestViewer.getEntity().getLabCherryPicks()) {
-	  			lcpPlates.add(lcp.getAssayPlate().getPlateOrdinal()+1);
+	  			if(lcp.getAssayPlate() != null){
+	          lcpPlates.add(lcp.getAssayPlate().getPlateOrdinal()+1);
+	  			}
 	  		}
 	  		getFormOne().setPlates(Joiner.on(",").join(lcpPlates));
 	    }
@@ -1260,24 +1263,26 @@ public class PlateReaderRawDataTransformer extends AbstractBackingBean
     							sheet.addCell(new jxl.write.Label(typeCol, sheetRow, abbreviation));
     							if(_screenViewer.getEntity().getScreenType() == ScreenType.RNAI) {
     								SilencingReagent sr = ((SilencingReagent)well.getLatestReleasedReagent());
-    								Gene gene = sr == null ? null : sr.getVendorGene();
-    								sheet.addCell(new jxl.write.Label(
-    								    col++, sheetRow, 
-    								    gene == null ? "" : Joiner.on(",").join(
-    								        gene.getEntrezgeneSymbols())));
-    								sheet.addCell(new jxl.write.Label(
-    								    col++, sheetRow, 
-    								    gene == null ? "" : ""+sr.getVendorGene().getEntrezgeneId()));
-    								sheet.addCell(new jxl.write.Label(
-    								    col++, sheetRow, 
-    								    gene == null ? "" : Joiner.on(",").join(
-    								        sr.getVendorGene().getGenbankAccessionNumbers())));
-    								sheet.addCell(new jxl.write.Label(
-    								    col++, sheetRow, 
-    								    sr == null || sr.getVendorId() == null ? "" : "" + sr.getVendorId()));
-    								sheet.addCell(new jxl.write.Label(
-    								    col++, sheetRow, 
-    								    gene == null || gene.getGeneName() == null ? "" : gene.getGeneName() ));
+                    GeneInfo geneInfo = _getGeneInfo(sr);
+                    sheet.addCell(new jxl.write.Label(
+                        col++, sheetRow, 
+                        Joiner.on(",").join(geneInfo.symbols)));
+                    sheet.addCell(new jxl.write.Label(
+                        col++, sheetRow, Joiner.on(",").join(geneInfo.entrezIds)));
+                    sheet.addCell(new jxl.write.Label(
+                        col++, sheetRow, 
+                        Joiner.on(",").join(geneInfo.accessionNumbers)));
+                    sheet.addCell(new jxl.write.Label(
+                        col++, sheetRow, 
+                        sr == null || sr.getVendorId() == null ? "" : "" + sr.getVendorId()));
+                    sheet.addCell(new jxl.write.Label(
+                        col++, sheetRow, sr.getSequence()));
+
+                    sheet.addCell(new jxl.write.Label(
+                        col++, sheetRow, Joiner.on(",").join(geneInfo.geneNames)));
+
+                    
+                    
     								sheet.addCell(new jxl.write.Label(
     								    col++, sheetRow, well.isDeprecated() ? "Y": ""));
     							}
@@ -1339,10 +1344,10 @@ public class PlateReaderRawDataTransformer extends AbstractBackingBean
     							sheet.addCell(new jxl.write.Label(col++, 0, "Vendor ID"));
     							sheet.addCell(new jxl.write.Label(col++, 0, "Vendor Batch ID"));
     							sheet.addCell(new jxl.write.Label(col++, 0, "Gene Symbol"));
-    							sheet.addCell(new jxl.write.Label(col++, 0, "Gene ID"));
-    							sheet.addCell(new jxl.write.Label(col++, 0, "Genbank Accession No."));
+    							sheet.addCell(new jxl.write.Label(col++, 0, "Gene IDs"));
+    							sheet.addCell(new jxl.write.Label(col++, 0, "Genbank Accession Nos"));
     							sheet.addCell(new jxl.write.Label(col++, 0, "Sequence"));
-                                sheet.addCell(new jxl.write.Label(col++, 0, "Gene Name"));
+                                sheet.addCell(new jxl.write.Label(col++, 0, "Gene Names"));
     							// choose not to include these, informatics meeting 20130207
     							//							sheet.addCell(new jxl.write.Label(col++, 0, "Pool Well Plate"));
     							//							sheet.addCell(new jxl.write.Label(col++, 0, "Pool Well"));
@@ -1458,32 +1463,26 @@ public class PlateReaderRawDataTransformer extends AbstractBackingBean
     									// In the case of the RNAi CP, the source well is a 
     								  // duplex well, so still have to find the corresponding pool well
     									SilencingReagent duplexReagent = well.getLatestReleasedReagent();
-    									Well poolWell = poolWellFinder.findWell(well.getWellKey());
+//    									Well poolWell = poolWellFinder.findWell(well.getWellKey());
     									int col = rviCol;
     									sheet.addCell(new jxl.write.Label(
     									    col++, sheetRow, ""+duplexReagent.getVendorId()));
     									sheet.addCell(new jxl.write.Label(
     									    col++, sheetRow, duplexReagent.getVendorBatchId())); 
+    									
+    									GeneInfo geneInfo = _getGeneInfo(duplexReagent);
     									sheet.addCell(new jxl.write.Label(
     									    col++, sheetRow, 
-    									    Joiner.on(",").join(
-    									        duplexReagent.getVendorGene().getEntrezgeneSymbols())));
+    									    Joiner.on(",").join(geneInfo.symbols)));
+    									sheet.addCell(new jxl.write.Label(
+    									    col++, sheetRow, Joiner.on(",").join(geneInfo.entrezIds)));
     									sheet.addCell(new jxl.write.Label(
     									    col++, sheetRow, 
-    									    duplexReagent.getVendorGene().getEntrezgeneId() == null ? 
-    									        "":duplexReagent.getVendorGene().getEntrezgeneId().toString()));
-    									sheet.addCell(new jxl.write.Label(
-    									    col++, sheetRow, 
-    									    Joiner.on(",").join(
-    									        duplexReagent.getVendorGene().getGenbankAccessionNumbers())));
+    									    Joiner.on(",").join(geneInfo.accessionNumbers)));
     									sheet.addCell(new jxl.write.Label(
     									    col++, sheetRow, duplexReagent.getSequence()));
-    
     									sheet.addCell(new jxl.write.Label(
-    									    col++, sheetRow, 
-    									    duplexReagent.getVendorGene() == null || 
-    									      duplexReagent.getVendorGene().getGeneName() == null ? 
-    									          "" : duplexReagent.getVendorGene().getGeneName() ));
+    									    col++, sheetRow, Joiner.on(",").join(geneInfo.geneNames)));
     
     									// choose not to include these, informatics meeting 20130207
     									// sheet.addCell(new jxl.write.Label(col++, sheetRow, 
@@ -1554,6 +1553,34 @@ public class PlateReaderRawDataTransformer extends AbstractBackingBean
       return REDISPLAY_PAGE_ACTION_RESULT;
 		}
 
+  }
+  
+  class GeneInfo {
+    Set<String> symbols = Sets.newHashSet();
+    Set<Integer> entrezIds = Sets.newHashSet();
+    Set<String> accessionNumbers = Sets.newHashSet();
+    Set<String> geneNames = Sets.newHashSet();
+  }
+  /**
+   * combine all of the genes into one list, then create a 
+   * set of all the value in question
+   **/
+  private GeneInfo _getGeneInfo(SilencingReagent r){
+    List<Gene> genes = Lists.newArrayList(r.getVendorGenes());
+    genes.addAll(r.getFacilityGenes());
+    
+    GeneInfo info = new GeneInfo();
+    for(Gene gene:genes){
+      if(gene.getEntrezgeneSymbols() != null)
+        info.symbols.addAll(gene.getEntrezgeneSymbols());
+      if(gene.getEntrezgeneId()!=null)
+        info.entrezIds.add(gene.getEntrezgeneId());
+      if(gene.getGenbankAccessionNumbers() != null )
+        info.accessionNumbers .addAll(gene.getGenbankAccessionNumbers());
+      if(gene.getGeneName() != null)
+        info.geneNames.add(gene.getGeneName());
+    }
+    return info;
   }
 
   private String makeOutputFileName()
