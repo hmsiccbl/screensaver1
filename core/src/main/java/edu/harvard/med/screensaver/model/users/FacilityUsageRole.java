@@ -28,7 +28,8 @@ public enum FacilityUsageRole implements VocabularyTerm
   MEDICINAL_CHEMIST_USER("medicinalChemistUser", "Medicinal Chemistry User", "Users that are medicinal chemists."),
   QPCR_USER("qpcrUser", "qPCR User", "Users that are performing Quantitative PCR analyses at the facility."),
   ICCBL_PROJECT_USER("iccblProjectUser", "ICCB-L Project User", "Users working on ICCB-L projects."),
-  MOUSE_IMAGER_USER("mouseImagerUser", "Mouse Imager User", "Users permitted to use the mouse imager.");
+  MOUSE_IMAGER_USER("mouseImagerUser", "Mouse Imager User", "Users permitted to use the mouse imager."),
+  ANALYTICAL_CHEMISTRY("analyticalChemistryUser", "Analytical Chemistry - SGM 624", "Analytical Chemistry - SGM 624");
 
   public static Function<FacilityUsageRole,String> ToDisplayableName = new Function<FacilityUsageRole,String>() {
     public String apply(FacilityUsageRole role)
