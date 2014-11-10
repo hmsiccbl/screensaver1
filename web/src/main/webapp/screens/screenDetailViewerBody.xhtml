@@ -139,12 +139,20 @@ TODO:
       editable="#{screenDetailViewer.editMode}"
       description="A summary of the screen" type="Textarea"
       editWidth="80" editHeight="6" />
+      
+      <ss:property id="assayType" label="Assay Type"
+        type="Vocabulary"
+        editable="#{screenDetailViewer.editMode}"
+        rendered="#{screenDetailViewer.entity.screenType == 'Small Molecule'}"
+        value="#{screenDetailViewer.assayType.value}"
+        selectItems="#{screenDetailViewer.assayType.selectItems}" />
+
       <ss:property id="species" label="Species"
         type="Vocabulary"
         editable="#{screenDetailViewer.editMode}"
+        rendered="#{screenDetailViewer.entity.screenType == 'Small Molecule'}"
         value="#{screenDetailViewer.species.value}"
         selectItems="#{screenDetailViewer.species.selectItems}" />
-
 
 <!--
     <ss:property id="cellLine" label="#{screenDetailViewer.entity.screenType == 'RNAi' ? 'Mammalian ' : '' }Cell Line"

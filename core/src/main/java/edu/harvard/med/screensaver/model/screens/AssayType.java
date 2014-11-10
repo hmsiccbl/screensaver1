@@ -7,49 +7,34 @@
 // at Harvard Medical School. This software is distributed under the terms of
 // the GNU General Public License.
 
-package edu.harvard.med.screensaver.model.libraries;
+package edu.harvard.med.screensaver.model.screens;
 
 import edu.harvard.med.screensaver.model.VocabularyTerm;
 import edu.harvard.med.screensaver.model.VocabularyUserType;
 
 /**
- * The library type vocabulary.
+ * The Assay type vocabulary.
  * 
  * @author <a mailto="john_sullivan@hms.harvard.edu">John Sullivan</a>
  * @author <a mailto="andrew_tolopko@hms.harvard.edu">Andrew Tolopko</a>
  */
-public enum LibraryType implements VocabularyTerm
+public enum AssayType implements VocabularyTerm
 {
 
   // the vocabulary
-  
-  COMMERCIAL("Commercial"),
-  DOS("DOS"),
-  FRAGMENT("Fragment"),
-  ANNOTATION("Annotation"),
-  ACADEMIC_COLLECTION("Academic Collection"),
-  NIH_MLP("NIH-MLP"),
-  KNOWN_BIOACTIVES("Known Bioactives"),
-  NCI("NCI"),
-  NATURAL_PRODUCTS("Natural Products"),
-  SIRNA("siRNA"),
-  SHRNA("shRNA"),
-  MIRNA_INHIBITOR("miRNA Inhibitor"),
-  MIRNA_MIMIC("miRNA Mimic"),
-  OTHER("Other")
-  ;
-
- 
-  // static inner class
+  // Note: all are used for Small Molecule screens
+  BIOCHEMICAL("Biochemical"),
+  CELL_BASED("Cell-based"),
+  MULTI_CELLULAR("Multi-cellular organism");
 
   /**
-   * A Hibernate <code>UserType</code> to map the {@link LibraryType} vocabulary.
+   * A Hibernate <code>UserType</code> to map the {@link AssayType} vocabulary.
    */
-  public static class UserType extends VocabularyUserType<LibraryType>
+  public static class UserType extends VocabularyUserType<AssayType>
   {
     public UserType()
     {
-      super(LibraryType.values());
+      super(AssayType.values());
     }
   }
 
@@ -59,10 +44,10 @@ public enum LibraryType implements VocabularyTerm
   private String _value;
 
   /**
-   * Constructs a <code>LibraryType</code> vocabulary term.
+   * Constructs a <code>AssayType</code> vocabulary term.
    * @param value The value of the term.
    */
-  private LibraryType(String value)
+  private AssayType(String value)
   {
     _value = value;
   }

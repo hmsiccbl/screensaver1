@@ -29,6 +29,8 @@ public interface EntityViewPolicy<R> extends AbstractEntityVisitor<R>
    */
   @Deprecated()
   public boolean isAllowedAccessToScreenDetails(Screen screen);
+  @Deprecated()
+  public boolean isAllowedAccessToMutualScreenDetails(Screen screen);
 
   /**
    * Determine whether the current user can see the Status Items, Lab

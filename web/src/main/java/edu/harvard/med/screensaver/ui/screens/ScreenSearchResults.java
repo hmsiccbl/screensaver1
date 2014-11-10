@@ -20,6 +20,7 @@ import com.google.common.base.Functions;
 import com.google.common.collect.Iterables;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Sets;
+
 import org.joda.time.DateTime;
 import org.joda.time.LocalDate;
 
@@ -32,12 +33,14 @@ import edu.harvard.med.screensaver.db.hqlbuilder.HqlBuilder;
 import edu.harvard.med.screensaver.model.Entity;
 import edu.harvard.med.screensaver.model.meta.RelationshipPath;
 import edu.harvard.med.screensaver.model.screenresults.ScreenResult;
+import edu.harvard.med.screensaver.model.screens.AssayType;
 import edu.harvard.med.screensaver.model.screens.CellLine;
 import edu.harvard.med.screensaver.model.screens.ProjectPhase;
 import edu.harvard.med.screensaver.model.screens.Screen;
 import edu.harvard.med.screensaver.model.screens.ScreenDataSharingLevel;
 import edu.harvard.med.screensaver.model.screens.ScreenStatus;
 import edu.harvard.med.screensaver.model.screens.ScreenType;
+import edu.harvard.med.screensaver.model.screens.Species;
 import edu.harvard.med.screensaver.model.screens.StatusItem;
 import edu.harvard.med.screensaver.model.users.LabHead;
 import edu.harvard.med.screensaver.model.users.ScreeningRoomUser;
@@ -532,16 +535,32 @@ public class ScreenSearchResults extends EntityBasedEntitySearchResults<Screen,I
     }
     
     // RNAi fields
-    columns.add(new TextEntityColumn<Screen>(RelationshipPath.from(Screen.class).toProperty("species"),
-      "Species", "The species of the cell organism", TableColumn.UNGROUPED) {
+    
+    columns.add(new EnumEntityColumn<Screen, Species>(
+        RelationshipPath.from(Screen.class).toProperty("species"),
+        "Species",
+        "The species of the cell organism",
+        TableColumn.UNGROUPED, Species.values()) {
       @Override
-      public String getCellValue(Screen screen)
-      {
-        return screen.getSpecies() == null ? null : screen.getSpecies().getValue();
+      public Species getCellValue(Screen screen) {
+        return screen.getSpecies() == null ? null : screen.getSpecies();
       }
     });
     columns.get(columns.size() - 1).setVisible(false);
 
+    // Small Molecule fields
+    columns.add(new EnumEntityColumn<Screen, AssayType>(
+            RelationshipPath.from(Screen.class).toProperty("assayType"),
+            "Assay Type",
+            "The assay type of the Screen",
+            TableColumn.UNGROUPED, AssayType.values()) {
+          @Override
+          public AssayType getCellValue(Screen screen) {
+            return screen.getAssayType() == null ? null : screen.getAssayType();
+          }
+        });
+    columns.get(columns.size() - 1).setVisible(false);
+    
     // Non-LINCS Cell Line
     
     columns.add(new TextSetEntityColumn<Screen>(RelationshipPath.from(Screen.class).to(Screen.cellLines), 

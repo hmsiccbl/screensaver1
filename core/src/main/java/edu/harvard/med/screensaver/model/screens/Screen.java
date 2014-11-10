@@ -227,6 +227,7 @@ public class Screen extends Study implements AttachedFilesEntity<ScreenAttachedF
   private Integer _maxDataLoadedReplicateCount;
   
   private Species _species;
+  private AssayType _assayType;
   
 //  private CellLine _cellLine;
   private SortedSet<CellLine> _cellLines= new TreeSet<CellLine>();
@@ -1129,6 +1130,18 @@ public class Screen extends Study implements AttachedFilesEntity<ScreenAttachedF
   public void setSpecies(Species value)
   {
     _species = value;
+  }  
+
+  @Column
+  @org.hibernate.annotations.Type(type="edu.harvard.med.screensaver.model.screens.AssayType$UserType")
+  public AssayType getAssayType()
+  {
+    return _assayType;
+  }
+
+  public void setAssayType(AssayType value)
+  {
+    _assayType = value;
   }  
 
   /**

@@ -76,6 +76,7 @@ public class IccblEntityViewPolicy extends DefaultEntityViewPolicy
   private Set<Screen> _othersVisibleScreens;
   private Map<ScreenType,Set<Screen>> _level1AndLevel2Screens;
   private Set<Screen> _mutualScreens;
+  private Set<Screen> _mutualPositiveScreens;
   private Set<String> _mutualPositiveWellIds;
   private Set<Integer> _mutualPositiveScreenResultIds;
   
@@ -298,6 +299,22 @@ public class IccblEntityViewPolicy extends DefaultEntityViewPolicy
           toQuery(session, true).list();
       }
     }));
+  }
+  
+  private Set<Screen> findMutualPositiveScreens(){
+    // NOTE: #148 - Level 2 screeners can see details for mutual positive screens
+    if(_mutualPositiveScreens == null){
+      Set<Screen> screens = Sets.newHashSet();
+      Set<Integer> mprs = findMutualPositiveScreenResultIds();
+      Set<Screen> others = findOthersVisibleScreens();
+      for( Screen s : others){
+        if(s.getScreenResult() != null && mprs.contains(s.getScreenResult().getScreenResultId())){
+          screens.add(s);
+        }
+      }
+      _mutualPositiveScreens=screens;
+    }
+    return _mutualPositiveScreens;
   }
 
   private Set<Integer> findMutualPositiveScreenResultIds()
@@ -526,6 +543,9 @@ public class IccblEntityViewPolicy extends DefaultEntityViewPolicy
    *         publishable protocol, screening summary, and screen result data.
    */
   public boolean isAllowedAccessToScreenDetails(Screen screen)
+  // NOTE: #148 - This method allows access to Screen properties and results, everything
+  // , therefore, it is not appropriate for level2 screeners viewing mutual
+  // positive screens
   {
     if (visit(screen) == null) {
       return false;
@@ -533,8 +553,24 @@ public class IccblEntityViewPolicy extends DefaultEntityViewPolicy
     return isReadEverythingAdmin() ||
     findMyScreens().contains(screen) || 
     findPublicScreens().contains(screen) || 
-      findMutualScreens().contains(screen);
+      findMutualScreens().contains(screen) ;
+    // Note: if mutual positive screens were to be completely visible to level2 screeners, 
+    // then add this clause.
+    //      || findMutualPositiveScreens().contains(screen);
   }
+  
+  public boolean isAllowedAccessToMutualScreenDetails(Screen screen){
+    // NOTE: added for #148 - Level 2 screeners can see details for mutual positive screens
+    if (visit(screen) == null) {
+      return false;
+    }
+    return isReadEverythingAdmin() ||
+    findMyScreens().contains(screen) || 
+    findPublicScreens().contains(screen) || 
+      findMutualScreens().contains(screen)
+      || findMutualPositiveScreens().contains(screen);
+  }
+
   
   /**
    * Determine whether the current user can see the Status Items, Lab

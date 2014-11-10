@@ -588,7 +588,8 @@ public class IccblEntityViewPolicyTest extends AbstractSpringPersistenceTest
     assertNull("others' level 2 screen with non-overlapping hits, non-positives data column not visible", entityViewPolicy.visit(findNonPositivesDataColumn(othersLevel2ScreenWithNonOverlappingHits)));
 
     assertNotNull("others' level 2 screen with overlapping hits visible", entityViewPolicy.visit(othersLevel2ScreenWithOverlappingHits));
-    assertFalse("others' level 2 screen with overlapping hits visible, but not details", entityViewPolicy.isAllowedAccessToScreenDetails(othersLevel2ScreenWithOverlappingHits));
+    assertFalse("others' level 2 screen with overlapping hits visible, with details", entityViewPolicy.isAllowedAccessToScreenDetails(othersLevel2ScreenWithOverlappingHits));
+    assertTrue("others' level 2 screen with overlapping hits visible, with details", entityViewPolicy.isAllowedAccessToMutualScreenDetails(othersLevel2ScreenWithOverlappingHits));
     assertNull("others' level 2 screen with overlapping hits, screen result not visible", entityViewPolicy.visit(othersLevel2ScreenWithOverlappingHits.getScreenResult()));
     assertNotNull("others' level 2 screen with overlapping hits, overlapping hits visible", entityViewPolicy.visit(findSomePositive(othersLevel2ScreenWithOverlappingHits)));
     assertNotNull("others' level 2 screen with overlapping hits, positives data column visible", entityViewPolicy.visit(findSomePositive(othersLevel2ScreenWithOverlappingHits).getDataColumn()));

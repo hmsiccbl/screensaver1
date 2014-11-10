@@ -331,6 +331,10 @@ public class DefaultEntityViewPolicy implements EntityViewPolicy<Entity>
   {
     return true;
   }
+  public boolean isAllowedAccessToMutualScreenDetails(Screen screen)
+  {
+    return true;
+  }
 
   @Override
   public boolean isAllowedAccessToScreenActivity(Screen screen)

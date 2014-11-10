@@ -59,6 +59,7 @@ import edu.harvard.med.screensaver.model.activities.ServiceActivity;
 import edu.harvard.med.screensaver.model.cells.Cell;
 import edu.harvard.med.screensaver.model.cells.ExperimentalCellInformation;
 import edu.harvard.med.screensaver.model.cherrypicks.CherryPickRequest;
+import edu.harvard.med.screensaver.model.screens.AssayType;
 import edu.harvard.med.screensaver.model.screens.BillingItem;
 import edu.harvard.med.screensaver.model.screens.CellLine;
 import edu.harvard.med.screensaver.model.screens.FundingSupport;
@@ -149,7 +150,8 @@ public class ScreenDetailViewer extends AbstractStudyDetailViewer<Screen>
 
   private AttachedFileType _publicationAttachedFileType;
 
-   private UISelectOneBean<Species> _species;
+  private UISelectOneBean<Species> _species;
+  private UISelectOneBean<AssayType> _assayType;
   
   private ScreenGenerator _screenGenerator;
 	
@@ -222,6 +224,7 @@ public class ScreenDetailViewer extends AbstractStudyDetailViewer<Screen>
     _pinTransferApprovalComments = null;
     _dataSharingLevel = null;
     _species = null;
+    _assayType = null;
     _lastDataSharingLevel = screen.getDataSharingLevel();
     _lastLabHead = screen.getLabHead();
     _lastLeadScreener = screen.getLeadScreener();
@@ -297,7 +300,8 @@ public class ScreenDetailViewer extends AbstractStudyDetailViewer<Screen>
    */
   public boolean isAllowedAccessToScreenDetails()
   {
-    return _entityViewPolicy.isAllowedAccessToScreenDetails(getEntity());
+    return _entityViewPolicy.isAllowedAccessToScreenDetails(getEntity())
+        || _entityViewPolicy.isAllowedAccessToMutualScreenDetails(getEntity());
   }
 
   /**
@@ -698,7 +702,7 @@ public class ScreenDetailViewer extends AbstractStudyDetailViewer<Screen>
       {
         speciesList = Species.getRNAiSpecies();
       }
-        _species = new UISelectOneBean<Species>(Lists.newArrayList(speciesList), getEntity().getSpecies(), true)
+      _species = new UISelectOneBean<Species>(Lists.newArrayList(speciesList), getEntity().getSpecies(), true)
       {
         @Override
         protected String getEmptyLabel()
@@ -706,7 +710,7 @@ public class ScreenDetailViewer extends AbstractStudyDetailViewer<Screen>
           return UNKNOWN_SPECIES;
         }
       };
-      _species.addObserver(new Observer() {
+     _species.addObserver(new Observer() {
         public void update(Observable arg0, Object species)
         {
           getEntity().setSpecies((Species) species);
@@ -714,6 +718,28 @@ public class ScreenDetailViewer extends AbstractStudyDetailViewer<Screen>
       });
     }
     return _species;
+  }
+  
+  public UISelectOneBean<AssayType> getAssayType()
+  {
+    if (_assayType == null) {
+      AssayType[] atList = AssayType.values();
+      _assayType = new UISelectOneBean<AssayType>(Lists.newArrayList(atList), getEntity().getAssayType(), true)
+      {
+        @Override
+        protected String getEmptyLabel()
+        {
+          return UNKNOWN_SPECIES;
+        }
+      };
+      _assayType.addObserver(new Observer() {
+        public void update(Observable arg0, Object at)
+        {
+          getEntity().setAssayType((AssayType) at);
+        }
+      });
+    }
+    return _assayType;
   }
   
   @Override

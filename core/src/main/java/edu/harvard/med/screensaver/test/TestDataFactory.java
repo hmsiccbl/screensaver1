@@ -29,6 +29,7 @@ import org.apache.log4j.Logger;
 import org.joda.time.DateTime;
 import org.joda.time.LocalDate;
 import org.springframework.transaction.annotation.Transactional;
+
 import com.google.common.collect.ArrayListMultimap;
 import com.google.common.collect.Iterables;
 import com.google.common.collect.Lists;
@@ -93,6 +94,7 @@ import edu.harvard.med.screensaver.model.screenresults.ResultValue;
 import edu.harvard.med.screensaver.model.screenresults.ScreenResult;
 import edu.harvard.med.screensaver.model.screens.AssayProtocolType;
 import edu.harvard.med.screensaver.model.screens.AssayReadoutType;
+import edu.harvard.med.screensaver.model.screens.AssayType;
 import edu.harvard.med.screensaver.model.screens.LabActivity;
 import edu.harvard.med.screensaver.model.screens.LibraryScreening;
 import edu.harvard.med.screensaver.model.screens.ProjectPhase;
@@ -698,6 +700,13 @@ public class TestDataFactory
       public Species newInstance(String callStack)
       {
         return Species.OTHER;
+      }
+    });
+    addBuilder(new AbstractBuilder<AssayType>(AssayType.class) {
+      @Override
+      public AssayType newInstance(String callStack)
+      {
+        return AssayType.BIOCHEMICAL;
       }
     });
     addBuilder(new AbstractBuilder<PlateSize>(PlateSize.class) {
