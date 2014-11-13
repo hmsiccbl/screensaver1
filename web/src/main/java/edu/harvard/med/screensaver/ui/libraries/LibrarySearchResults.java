@@ -73,6 +73,7 @@ public class LibrarySearchResults extends EntityBasedEntitySearchResults<Library
                                            LibraryType.MIRNA_INHIBITOR,
                                            LibraryType.MIRNA_MIMIC,
                                            LibraryType.OTHER,
+                                           LibraryType.FRAGMENT,
                                            LibraryType.ACADEMIC_COLLECTION));
 
 
