@@ -13,10 +13,11 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Set;
 
+import org.joda.time.LocalDate;
+
 import com.google.common.collect.Iterables;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Sets;
-import org.joda.time.LocalDate;
 
 import edu.harvard.med.iccbl.screensaver.IccblScreensaverConstants;
 import edu.harvard.med.screensaver.db.GenericEntityDAO;
@@ -24,20 +25,26 @@ import edu.harvard.med.screensaver.db.datafetcher.DataFetcherUtil;
 import edu.harvard.med.screensaver.db.datafetcher.EntityDataFetcher;
 import edu.harvard.med.screensaver.db.hqlbuilder.HqlBuilder;
 import edu.harvard.med.screensaver.model.Entity;
+import edu.harvard.med.screensaver.model.activities.AdministrativeActivityType;
+import edu.harvard.med.screensaver.model.meta.PropertyPath;
 import edu.harvard.med.screensaver.model.meta.RelationshipPath;
 import edu.harvard.med.screensaver.model.users.FacilityUsageRole;
+import edu.harvard.med.screensaver.model.users.Gender;
 import edu.harvard.med.screensaver.model.users.ScreeningRoomUser;
 import edu.harvard.med.screensaver.model.users.ScreensaverUser;
 import edu.harvard.med.screensaver.model.users.ScreensaverUserRole;
 import edu.harvard.med.screensaver.ui.arch.datatable.column.TableColumn;
 import edu.harvard.med.screensaver.ui.arch.datatable.column.entity.DateEntityColumn;
+import edu.harvard.med.screensaver.ui.arch.datatable.column.entity.EnumEntityColumn;
 import edu.harvard.med.screensaver.ui.arch.datatable.column.entity.IntegerEntityColumn;
 import edu.harvard.med.screensaver.ui.arch.datatable.column.entity.TextEntityColumn;
 import edu.harvard.med.screensaver.ui.arch.datatable.column.entity.TextSetEntityColumn;
 import edu.harvard.med.screensaver.ui.arch.datatable.column.entity.UserNameColumn;
+import edu.harvard.med.screensaver.ui.arch.datatable.column.entity.VocabularyEntityColumn;
 import edu.harvard.med.screensaver.ui.arch.datatable.model.InMemoryEntityDataModel;
 import edu.harvard.med.screensaver.ui.arch.searchresults.EntityBasedEntitySearchResults;
 import edu.harvard.med.screensaver.ui.arch.searchresults.SearchResults;
+import edu.harvard.med.screensaver.ui.arch.util.converter.VocabularyConverter;
 import edu.harvard.med.screensaver.ui.arch.view.EntityViewer;
 
 
@@ -155,7 +162,20 @@ public class UserSearchResults<E extends ScreensaverUser> extends EntityBasedEnt
       public String getCellValue(ScreensaverUser user) { return user.getMailingAddress(); }
     });
     columns.get(columns.size() - 1).setAdministrative(true);
-
+    
+    columns.add(new VocabularyEntityColumn<E, Gender>(
+        pathRoot.toProperty("Gender"), 
+        "Gender", "The gender of the user", 
+        TableColumn.UNGROUPED, 
+        new VocabularyConverter<Gender>(Gender.values()),
+        Gender.values()) {
+      @Override
+      public Gender getCellValue(E user) {
+        return user.getGender();
+      }
+    });
+    columns.get(columns.size() - 1).setVisible(false);
+    
     if (getApplicationProperties().isFeatureEnabled("manage_authentication_credentials")) {
       columns.add(new TextEntityColumn<E>(pathRoot.toProperty("loginId"),
                                           "Login ID",
@@ -208,7 +228,7 @@ public class UserSearchResults<E extends ScreensaverUser> extends EntityBasedEnt
       columns.get(columns.size() - 1).setAdministrative(true);
       columns.get(columns.size() - 1).setVisible(false);
     }
-
+        
     columns.add(new TextSetEntityColumn<E>(pathRoot.to(ScreeningRoomUser.facilityUsageRoles), // convert to a path with same root type as all other column paths 
                                            "Facility Usage Roles",
                                            "Record of what the user is doing at the facility",
