@@ -35,16 +35,17 @@ import javax.persistence.OneToMany;
 import javax.persistence.Transient;
 import javax.persistence.Version;
 
-import com.google.common.base.Function;
-import com.google.common.base.Joiner;
-import com.google.common.collect.ImmutableSet;
-import com.google.common.collect.Sets;
 import org.apache.log4j.Logger;
 import org.hibernate.annotations.Parameter;
 import org.hibernate.annotations.Sort;
 import org.hibernate.annotations.SortType;
 import org.hibernate.annotations.Type;
 import org.joda.time.LocalDate;
+
+import com.google.common.base.Function;
+import com.google.common.base.Joiner;
+import com.google.common.collect.ImmutableSet;
+import com.google.common.collect.Sets;
 
 import edu.harvard.med.screensaver.model.AuditedAbstractEntity;
 import edu.harvard.med.screensaver.model.DataModelViolationException;
@@ -107,7 +108,8 @@ abstract public class ScreensaverUser extends AuditedAbstractEntity<Integer> imp
   private String _harvardId;
   private LocalDate _harvardIdExpirationDate;
   private LocalDate _harvardIdRequestedExpirationDate;
-
+  
+  private Gender _gender;
   // public constructors
   
   /**
@@ -682,4 +684,20 @@ abstract public class ScreensaverUser extends AuditedAbstractEntity<Integer> imp
       }
     }
   }
+  
+  @Column
+  @org.hibernate.annotations.Type(type="edu.harvard.med.screensaver.model.users.Gender$UserType")
+  public Gender getGender()
+  {
+    return _gender;
+  }
+
+  public void setGender(Gender value)
+  {
+    _gender = value;
+  }  
+
+  
+  
+  
 }
