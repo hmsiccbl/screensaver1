@@ -175,6 +175,12 @@
       editable="#{userViewer.editMode}">
     </ss:property>
 
+    <ss:property id="gender" label="Gender"
+        type="Vocabulary"
+        editable="#{userViewer.editMode}"
+        value="#{userViewer.gender.value}"
+        selectItems="#{userViewer.gender.selectItems}" />
+
     <ss:property id="phone" label="Phone"
 			description="The user's phone number"
 			value="#{userViewer.entity.phone}" editable="#{userViewer.editMode}" />

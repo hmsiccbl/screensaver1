@@ -17,6 +17,8 @@ import java.util.Comparator;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Observable;
+import java.util.Observer;
 import java.util.Set;
 import java.util.SortedSet;
 import java.util.TreeSet;
@@ -25,6 +27,10 @@ import javax.faces.model.DataModel;
 import javax.faces.model.ListDataModel;
 import javax.faces.model.SelectItem;
 
+import org.apache.log4j.Logger;
+import org.joda.time.LocalDate;
+import org.springframework.transaction.annotation.Transactional;
+
 import com.google.common.base.Joiner;
 import com.google.common.collect.HashMultimap;
 import com.google.common.collect.Iterables;
@@ -32,29 +38,26 @@ import com.google.common.collect.Lists;
 import com.google.common.collect.Multimap;
 import com.google.common.collect.Ordering;
 import com.google.common.collect.Sets;
-import org.apache.log4j.Logger;
-import org.joda.time.LocalDate;
-import org.springframework.transaction.annotation.Transactional;
 
 import edu.harvard.med.iccbl.screensaver.IccblScreensaverConstants;
 import edu.harvard.med.iccbl.screensaver.policy.DataSharingLevelMapper;
 import edu.harvard.med.screensaver.ScreensaverConstants;
 import edu.harvard.med.screensaver.db.Criterion;
+import edu.harvard.med.screensaver.db.Criterion.Operator;
 import edu.harvard.med.screensaver.db.GenericEntityDAO;
 import edu.harvard.med.screensaver.db.UsersDAO;
-import edu.harvard.med.screensaver.db.Criterion.Operator;
 import edu.harvard.med.screensaver.model.AttachedFile;
 import edu.harvard.med.screensaver.model.AttachedFileType;
 import edu.harvard.med.screensaver.model.activities.Activity;
 import edu.harvard.med.screensaver.model.activities.ServiceActivity;
 import edu.harvard.med.screensaver.model.screens.Screen;
-import edu.harvard.med.screensaver.model.screens.ScreenDataSharingLevel;
 import edu.harvard.med.screensaver.model.screens.ScreenType;
 import edu.harvard.med.screensaver.model.users.AdministratorUser;
 import edu.harvard.med.screensaver.model.users.AffiliationCategory;
 import edu.harvard.med.screensaver.model.users.ChecklistItemEvent;
 import edu.harvard.med.screensaver.model.users.ChecklistItemGroup;
 import edu.harvard.med.screensaver.model.users.FacilityUsageRole;
+import edu.harvard.med.screensaver.model.users.Gender;
 import edu.harvard.med.screensaver.model.users.Lab;
 import edu.harvard.med.screensaver.model.users.LabAffiliation;
 import edu.harvard.med.screensaver.model.users.LabHead;
@@ -130,6 +133,7 @@ public class UserViewer extends SearchResultContextEditableEntityViewerBackingBe
   private ActivityViewer _activityViewer;
   private ActivitySearchResults _activitiesBrowser;
 
+  private UISelectOneBean<Gender> _gender;
 
   // constructors
 
@@ -280,6 +284,7 @@ public class UserViewer extends SearchResultContextEditableEntityViewerBackingBe
     _lastPrimaryRoles = user.getPrimaryScreensaverUserRoles();
     _newPassword1 = null;
     _newPassword2 = null;
+    _gender = null;
   }
 
   @Override
@@ -373,6 +378,29 @@ public class UserViewer extends SearchResultContextEditableEntityViewerBackingBe
       };
     }
     return _labName;
+  }
+
+  public UISelectOneBean<Gender> getGender()
+  {
+    if (_gender == null) {
+      Gender[] atList = Gender.values();
+      _gender = new UISelectOneBean<Gender>(
+          Lists.newArrayList(atList), getEntity().getGender(), true);
+//      {
+//        @Override
+//        protected String getEmptyLabel()
+//        {
+//          return UNKNOWN_SPECIES;
+//        }
+//      };
+      _gender.addObserver(new Observer() {
+        public void update(Observable arg0, Object at)
+        {
+          getEntity().setGender((Gender) at);
+        }
+      });
+    }
+    return _gender;
   }
 
   public UISelectOneEntityBean<LabAffiliation> getLabAffiliation()
