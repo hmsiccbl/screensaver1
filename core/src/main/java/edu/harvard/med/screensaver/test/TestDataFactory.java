@@ -111,6 +111,7 @@ import edu.harvard.med.screensaver.model.users.AdministratorUser;
 import edu.harvard.med.screensaver.model.users.AffiliationCategory;
 import edu.harvard.med.screensaver.model.users.ChecklistItemGroup;
 import edu.harvard.med.screensaver.model.users.FacilityUsageRole;
+import edu.harvard.med.screensaver.model.users.Gender;
 import edu.harvard.med.screensaver.model.users.ScreeningRoomUser;
 import edu.harvard.med.screensaver.model.users.ScreeningRoomUserClassification;
 import edu.harvard.med.screensaver.model.users.ScreensaverUser;
@@ -892,6 +893,13 @@ public class TestDataFactory
       public ServiceActivityType newInstance(String callStack)
       {
         return ServiceActivityType.INFORMATICS;
+      }
+    });
+    addBuilder(new AbstractBuilder<Gender>(Gender.class) {
+      @Override
+      public Gender newInstance(String callStack)
+      {
+        return Gender.FEMALE;
       }
     });
 
