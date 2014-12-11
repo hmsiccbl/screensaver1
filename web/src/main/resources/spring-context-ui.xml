@@ -552,6 +552,21 @@
   </bean>
   
   <bean
+    id="copyMinimumVolumeReportSearchResults"
+    parent="uiBean"
+    scope="session"
+    class="edu.harvard.med.screensaver.ui.libraries.CopyMinimumVolumeReportSearchResults">
+    <constructor-arg ref="genericEntityDao" />
+    <constructor-arg ref="librariesDao" />
+    <constructor-arg ref="libraryCopyViewer" />
+    <constructor-arg ref="libraryViewer" />
+    <constructor-arg ref="activitiesBrowser" />
+    <constructor-arg ref="libraryCopyPlatesBrowser" />    
+    <constructor-arg ref="screensaverProperties" />    
+    <aop:scoped-proxy/>
+  </bean>
+  
+  <bean
     id="libraryCopyViewer"
     parent="uiBean"
     scope="session"
