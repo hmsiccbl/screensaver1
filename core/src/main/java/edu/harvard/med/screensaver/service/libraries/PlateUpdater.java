@@ -198,17 +198,25 @@ public class PlateUpdater
       // update the copy with the values from the plate
       if(p.getMaxMgMlConcentration() != null)
       {
-        if(concentrationStatistics.getMaxMgMlConcentration() == null ) concentrationStatistics.setMaxMgMlConcentration(p.getMaxMgMlConcentration());
-        else if(p.getMaxMgMlConcentration().compareTo(concentrationStatistics.getMaxMgMlConcentration()) > 0 ) concentrationStatistics.setMaxMgMlConcentration(p.getMaxMgMlConcentration());
-        if(concentrationStatistics.getMinMgMlConcentration() == null) concentrationStatistics.setMinMgMlConcentration(p.getMinMgMlConcentration());
-        else if(p.getMinMgMlConcentration().compareTo(concentrationStatistics.getMinMgMlConcentration()) < 0 )  concentrationStatistics.setMinMgMlConcentration(p.getMinMgMlConcentration());
+        if(concentrationStatistics.getMaxMgMlConcentration() == null ) 
+          concentrationStatistics.setMaxMgMlConcentration(p.getMaxMgMlConcentration());
+        else if(p.getMaxMgMlConcentration().compareTo(concentrationStatistics.getMaxMgMlConcentration()) > 0 ) 
+          concentrationStatistics.setMaxMgMlConcentration(p.getMaxMgMlConcentration());
+        if(concentrationStatistics.getMinMgMlConcentration() == null) 
+          concentrationStatistics.setMinMgMlConcentration(p.getMinMgMlConcentration());
+        else if(p.getMinMgMlConcentration().compareTo(concentrationStatistics.getMinMgMlConcentration()) < 0 )  
+          concentrationStatistics.setMinMgMlConcentration(p.getMinMgMlConcentration());
       }
       if(p.getMaxMolarConcentration() != null)
       {
-        if(concentrationStatistics.getMaxMolarConcentration() == null ) concentrationStatistics.setMaxMolarConcentration(p.getMaxMolarConcentration());
-        else if(p.getMaxMolarConcentration().compareTo(concentrationStatistics.getMaxMolarConcentration()) > 0 ) concentrationStatistics.setMaxMolarConcentration(p.getMaxMolarConcentration());
-        if(concentrationStatistics.getMinMolarConcentration() == null) concentrationStatistics.setMinMolarConcentration(p.getMinMolarConcentration());
-        else if(p.getMinMolarConcentration().compareTo(concentrationStatistics.getMinMolarConcentration()) < 0 )  concentrationStatistics.setMinMolarConcentration(p.getMinMolarConcentration());
+        if(concentrationStatistics.getMaxMolarConcentration() == null ) 
+          concentrationStatistics.setMaxMolarConcentration(p.getMaxMolarConcentration());
+        else if(p.getMaxMolarConcentration().compareTo(concentrationStatistics.getMaxMolarConcentration()) > 0 ) 
+          concentrationStatistics.setMaxMolarConcentration(p.getMaxMolarConcentration());
+        if(concentrationStatistics.getMinMolarConcentration() == null) 
+          concentrationStatistics.setMinMolarConcentration(p.getMinMolarConcentration());
+        else if(p.getMinMolarConcentration().compareTo(concentrationStatistics.getMinMolarConcentration()) < 0 )  
+          concentrationStatistics.setMinMolarConcentration(p.getMinMolarConcentration());
       }
       if(!isStoredAtFacility.apply(p.getStatus()))  // consider only plates stored at this facility
       {
@@ -217,18 +225,27 @@ public class PlateUpdater
       }
     }
 
-    Map<BigDecimal,Integer> mgMlCounts = Maps.transformValues(Multimaps.index(
-                                                                              Lists.newArrayList(Iterators.filter(platesToConsider.iterator(),
-                                                                                                                  Predicates.compose(Predicates.notNull(),Plate.ToPrimaryWellMgMlConcentration))),
-                                                                                                                  Plate.ToPrimaryWellMgMlConcentration).asMap(), CollectionSize);
+    Map<BigDecimal,Integer> mgMlCounts = 
+        Maps.transformValues(Multimaps.index(
+            Lists.newArrayList(Iterators.filter(platesToConsider.iterator(),
+            Predicates.compose(Predicates.notNull(),Plate.ToPrimaryWellMgMlConcentration))),
+            Plate.ToPrimaryWellMgMlConcentration)
+              .asMap(), CollectionSize);
                                                                                                                   
-    if(!mgMlCounts.isEmpty()) concentrationStatistics.setPrimaryWellMgMlConcentration(findMaxByValueThenKey(mgMlCounts).getKey());
+    if(!mgMlCounts.isEmpty()) 
+      concentrationStatistics.setPrimaryWellMgMlConcentration(
+          findMaxByValueThenKey(mgMlCounts).getKey());
 
-    Map<MolarConcentration,Integer> molarCounts = Maps.transformValues(Multimaps.index(
-                                                                                       Lists.newArrayList(Iterators.filter(platesToConsider.iterator(),
-                                                                                                        Predicates.compose(Predicates.notNull(), Plate.ToPrimaryWellMolarConcentration))),
-                                                                                                        Plate.ToPrimaryWellMolarConcentration).asMap(), CollectionSize);
-    if(!molarCounts.isEmpty()) concentrationStatistics.setPrimaryWellMolarConcentration(findMaxByValueThenKey(molarCounts).getKey());
+    Map<MolarConcentration,Integer> molarCounts = 
+        Maps.transformValues(Multimaps.index(
+            Lists.newArrayList(Iterators.filter(platesToConsider.iterator(),
+            Predicates.compose(Predicates.notNull(), Plate.ToPrimaryWellMolarConcentration))),
+            Plate.ToPrimaryWellMolarConcentration)
+              .asMap(), CollectionSize);
+    
+    if(!molarCounts.isEmpty()) 
+      concentrationStatistics.setPrimaryWellMolarConcentration(
+          findMaxByValueThenKey(molarCounts).getKey());
   }
   
   private void updatePrimaryWellConcentration(Plate plate)
@@ -242,32 +259,46 @@ public class PlateUpdater
     {
       if(well.getMgMlConcentration() != null)
       {
-        if(concentrationStatistics.getMaxMgMlConcentration() == null ) concentrationStatistics.setMaxMgMlConcentration(well.getMgMlConcentration());
-        else if(well.getMgMlConcentration().compareTo(concentrationStatistics.getMaxMgMlConcentration()) > 0 ) concentrationStatistics.setMaxMgMlConcentration(well.getMgMlConcentration());
-        if(concentrationStatistics.getMinMgMlConcentration() == null) concentrationStatistics.setMinMgMlConcentration(well.getMgMlConcentration());
-        else if(well.getMgMlConcentration().compareTo(concentrationStatistics.getMinMgMlConcentration()) < 0 )  concentrationStatistics.setMinMgMlConcentration(well.getMgMlConcentration());
+        if(concentrationStatistics.getMaxMgMlConcentration() == null ) 
+          concentrationStatistics.setMaxMgMlConcentration(well.getMgMlConcentration());
+        else if(well.getMgMlConcentration().compareTo(concentrationStatistics.getMaxMgMlConcentration()) > 0 ) 
+          concentrationStatistics.setMaxMgMlConcentration(well.getMgMlConcentration());
+        if(concentrationStatistics.getMinMgMlConcentration() == null) 
+          concentrationStatistics.setMinMgMlConcentration(well.getMgMlConcentration());
+        else if(well.getMgMlConcentration().compareTo(concentrationStatistics.getMinMgMlConcentration()) < 0 )  
+          concentrationStatistics.setMinMgMlConcentration(well.getMgMlConcentration());
       }
       if(well.getMolarConcentration() != null)
       {
-        if(concentrationStatistics.getMaxMolarConcentration() == null ) concentrationStatistics.setMaxMolarConcentration(well.getMolarConcentration());
-        else if(well.getMolarConcentration().compareTo(concentrationStatistics.getMaxMolarConcentration()) > 0 ) concentrationStatistics.setMaxMolarConcentration(well.getMolarConcentration());
-        if(concentrationStatistics.getMinMolarConcentration() == null) concentrationStatistics.setMinMolarConcentration(well.getMolarConcentration());
-        else if(well.getMolarConcentration().compareTo(concentrationStatistics.getMinMolarConcentration()) < 0 )  concentrationStatistics.setMinMolarConcentration(well.getMolarConcentration());
+        if(concentrationStatistics.getMaxMolarConcentration() == null ) 
+          concentrationStatistics.setMaxMolarConcentration(well.getMolarConcentration());
+        else if(well.getMolarConcentration().compareTo(concentrationStatistics.getMaxMolarConcentration()) > 0 ) 
+          concentrationStatistics.setMaxMolarConcentration(well.getMolarConcentration());
+        if(concentrationStatistics.getMinMolarConcentration() == null) 
+          concentrationStatistics.setMinMolarConcentration(well.getMolarConcentration());
+        else if(well.getMolarConcentration().compareTo(concentrationStatistics.getMinMolarConcentration()) < 0 )  
+          concentrationStatistics.setMinMolarConcentration(well.getMolarConcentration());
       }
     }
     
     Map<BigDecimal,Integer> mgMlCounts = Maps.transformValues(Multimaps.index(
-                                                                            Lists.newArrayList(Iterators.filter(wells.iterator(),
-                                                                                                                Predicates.compose(Predicates.notNull(),Well.ToMgMlConcentration))),
-                                                                                                                Well.ToMgMlConcentration).asMap(), CollectionSize);
-    if(!mgMlCounts.isEmpty()) concentrationStatistics.setPrimaryWellMgMlConcentration((findMaxByValueThenKey(mgMlCounts).getKey()));
+        Lists.newArrayList(Iterators.filter(wells.iterator(),
+        Predicates.compose(Predicates.notNull(),Well.ToMgMlConcentration))),
+        Well.ToMgMlConcentration).asMap(), CollectionSize);
     
+    if(!mgMlCounts.isEmpty()) 
+      concentrationStatistics.setPrimaryWellMgMlConcentration(
+          findMaxByValueThenKey(mgMlCounts).getKey());
     
     Map<MolarConcentration,Integer> molarCounts = Maps.transformValues(Multimaps.index(
-                                                                                     Lists.newArrayList(Iterators.filter(wells.iterator(),
-                                                                                                      Predicates.compose(Predicates.notNull(), Well.ToMolarConcentration))),
-                                                                                                      Well.ToMolarConcentration).asMap(), CollectionSize);
-    if(!molarCounts.isEmpty()) concentrationStatistics.setPrimaryWellMolarConcentration(findMaxByValueThenKey(molarCounts).getKey());
+        Lists.newArrayList(Iterators.filter(wells.iterator(),
+        Predicates.compose(Predicates.notNull(), Well.ToMolarConcentration))),
+        Well.ToMolarConcentration)
+          .asMap(), CollectionSize);
+    
+    if(!molarCounts.isEmpty()) 
+      concentrationStatistics.setPrimaryWellMolarConcentration(
+          findMaxByValueThenKey(molarCounts).getKey());
   }
 
   private <T extends Comparable<? super T>, U extends Comparable<? super U>> Map.Entry<T,U> findMaxByValueThenKey(Map<T,U> map)

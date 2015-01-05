@@ -9,23 +9,21 @@
 
 package edu.harvard.med.screensaver.ui.libraries;
 
-import java.math.BigDecimal;
 import java.util.List;
 import java.util.Set;
 
 import javax.faces.model.SelectItem;
 
-import com.google.common.collect.Lists;
-import com.google.common.collect.Sets;
 import org.apache.log4j.Logger;
 import org.joda.time.LocalDate;
 import org.springframework.transaction.annotation.Transactional;
 
+import com.google.common.collect.Lists;
+import com.google.common.collect.Sets;
+
 import edu.harvard.med.screensaver.ScreensaverConstants;
 import edu.harvard.med.screensaver.db.GenericEntityDAO;
 import edu.harvard.med.screensaver.model.BusinessRuleViolationException;
-import edu.harvard.med.screensaver.model.MolarConcentration;
-import edu.harvard.med.screensaver.model.MolarUnit;
 import edu.harvard.med.screensaver.model.Volume;
 import edu.harvard.med.screensaver.model.VolumeUnit;
 import edu.harvard.med.screensaver.model.libraries.Plate;
@@ -93,10 +91,6 @@ public class LibraryCopyPlateBatchEditor extends AbstractBackingBean
   private ActivityDTO _locationChangeActivity;
   private UISelectOneBean<VolumeUnit> _volumeType;
   private String _volumeValue;
-//  private UISelectOneBean<MolarUnit> _molarConcentrationType;
-//  private String _molarConcentrationValue;
-//  private BigDecimal _mgMlConcentration;
-//  private BigDecimal _dilutionFactor;
   private String _comments;
 
 
@@ -122,9 +116,6 @@ public class LibraryCopyPlateBatchEditor extends AbstractBackingBean
     _statusChangeActivity.setPerformedBy(getScreensaverUser());
     _volumeValue = null;
     _volumeType = null;
-//    _molarConcentrationValue = null;
-//    _molarConcentrationType = null;
-//    _mgMlConcentration = null;
     _room = null;
     _freezer = null;
     _shelf = null;
@@ -185,14 +176,6 @@ public class LibraryCopyPlateBatchEditor extends AbstractBackingBean
       }
     }
     
-//    if(getWellConcentrationDilutionFactor() != null && ! StringUtils.isEmpty(getMolarConcentrationValue()) ||
-//        getWellConcentrationDilutionFactor() != null && getMgMlConcentration() !=null ||
-//        ! StringUtils.isEmpty(getMolarConcentrationValue())  && getMgMlConcentration() != null)
-//    {
-//      showMessage("libraries.enterOnlyOneConcentrationValue");
-//      valid = false;
-//    }
-
     return valid;
   }
 
@@ -210,25 +193,19 @@ public class LibraryCopyPlateBatchEditor extends AbstractBackingBean
     }
 
     int modifiedCount = 0;
-    AdministratorUser adminUser = getDao().reloadEntity((AdministratorUser) getScreensaverUser());
+    AdministratorUser adminUser = 
+        getDao().reloadEntity((AdministratorUser) getScreensaverUser());
+    
     for (Plate plate : plates) {
       boolean modified = false;
-      plate = getDao().reloadEntity(plate); // ensures that all plateUpdate method calls are working with the same instance, which is necessary if a method needs to inspect that state of a plate, as changed by an earlier method call
+      // ensures that all plateUpdate method calls are working with the same 
+      // instance, which is necessary if a method needs to inspect that state of 
+      // a plate, as changed by an earlier method call
+      plate = getDao().reloadEntity(plate); 
       if (!StringUtils.isEmpty(getVolumeValue())) {
         Volume newVolume = new Volume(getVolumeValue(), getVolumeType().getSelection());
         modified |= _plateUpdater.updateWellVolume(plate, newVolume, adminUser);
       }
-//      if (!StringUtils.isEmpty(getMolarConcentrationValue())) {
-//        MolarConcentration newConcentration = new MolarConcentration(getMolarConcentrationValue(), getMolarConcentrationType().getSelection());
-//        modified |= _plateUpdater.updateAbsolutePlateMolarConcentration(plate, newConcentration, adminUser);
-//      }
-//      if (getMgMlConcentration() != null) {
-//        modified |= _plateUpdater.updateAbsolutePlateMgMlConcentration(plate, getMgMlConcentration(), adminUser);
-//      }
-//      if( getWellConcentrationDilutionFactor() != null)
-//      {
-//        modified |= _plateUpdater.updatePlateDilutionFactor(plate, getWellConcentrationDilutionFactor() , adminUser);
-//      }
       if (getPlateType().getSelection() != null) {
         modified |= _plateUpdater.updatePlateType(plate, getPlateType().getSelection(), adminUser);
       }
@@ -240,8 +217,11 @@ public class LibraryCopyPlateBatchEditor extends AbstractBackingBean
                                                     _statusChangeActivity.getDateOfActivity());
         if(statusUpdated) {
           modified=true;
-          // recalculate the copy stats for the plate concentrations as copy stats only consider onsite plates
-          _plateUpdater.updatePrimaryPlateConcentrations(plate.getCopy());  // TODO: create a transient flag or other check so that this is not repeated for every plate in the copy
+          // recalculate the copy stats for the plate concentrations as copy 
+          // stats only consider onsite plates
+          // TODO: create a transient flag or other check so that this is not 
+          // repeated for every plate in the copy
+          _plateUpdater.updatePrimaryPlateConcentrations(getDao().reloadEntity(plate.getCopy()));  
         }
       }
       if (!StringUtils.isEmpty(_comments)) {
@@ -367,61 +347,6 @@ public class LibraryCopyPlateBatchEditor extends AbstractBackingBean
       return null;
     }
   }
-//TODO: move to copy editor
-//  public String getMolarConcentrationValue()
-//  {
-//    return _molarConcentrationValue;
-//  }
-//
-//  public void setMolarConcentrationValue(String value)
-//  {
-//    _molarConcentrationValue = value;
-//  }
-//
-//  public UISelectOneBean<MolarUnit> getMolarConcentrationType()
-//  {
-//    try {
-//      if (_molarConcentrationType == null) {
-//        MolarConcentration c = null;
-//        MolarUnit unit = (c == null ? DEFAULT_PLATE_MOLAR_CONCENTRATION_UNITS : c.getUnits());  // Todo: can we set default SM = mM, RNA = uM
-//
-//        _molarConcentrationType = new UISelectOneBean<MolarUnit>(MolarUnit.DISPLAY_VALUES, unit)
-//        {
-//          @Override
-//          protected String makeLabel(MolarUnit t)
-//          {
-//            return t.getValue();
-//          }
-//        };
-//      }
-//      return _molarConcentrationType;
-//    }
-//    catch (Exception e) {
-//      log.error("err: " + e);
-//      return null;
-//    }
-//  }
-//
-//  public BigDecimal getMgMlConcentration()
-//  {
-//    return _mgMlConcentration;
-//  }
-//
-//  public void setMgMlConcentration(BigDecimal mgMlConcentration)
-//  {
-//    _mgMlConcentration = mgMlConcentration;
-//  }
-//
-//  public void setWellConcentrationDilutionFactor(BigDecimal value)
-//  {
-//    _dilutionFactor = value;
-//    
-//  }  
-//  
-//  public BigDecimal getWellConcentrationDilutionFactor()
-//  {
-//    return _dilutionFactor;
-//  }
   
   public UISelectOneBean<PlateType> getPlateType()
   {

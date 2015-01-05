@@ -52,7 +52,8 @@ public class LibraryCopyDetail extends EditableEntityViewerBackingBean<Copy>
 {
   private static Logger log = Logger.getLogger(LibraryCopyDetail.class);
 
-  private static final MolarUnit DEFAULT_PLATE_MOLAR_CONCENTRATION_UNITS = MolarUnit.MILLIMOLAR;
+  private static final MolarUnit DEFAULT_PLATE_MOLAR_CONCENTRATION_UNITS 
+    = MolarUnit.MILLIMOLAR;
 
   private LibraryCopyViewer _libraryCopyViewer;
   private LibraryViewer _libraryViewer;
@@ -112,9 +113,12 @@ public class LibraryCopyDetail extends EditableEntityViewerBackingBean<Copy>
   {
     boolean valid = true;
 
-    if (getWellConcentrationDilutionFactor() != null && !StringUtils.isEmpty(getMolarConcentrationValue()) ||
-        getWellConcentrationDilutionFactor() != null && getMgMlConcentration() != null ||
-        !StringUtils.isEmpty(getMolarConcentrationValue()) && getMgMlConcentration() != null) {
+    if (getWellConcentrationDilutionFactor() != null 
+          && !StringUtils.isEmpty(getMolarConcentrationValue()) ||
+        getWellConcentrationDilutionFactor() != null 
+          && getMgMlConcentration() != null ||
+        !StringUtils.isEmpty(getMolarConcentrationValue()) 
+          && getMgMlConcentration() != null) {
       showMessage("libraries.enterOnlyOneConcentrationValue");
       valid = false;
     }
@@ -122,8 +126,10 @@ public class LibraryCopyDetail extends EditableEntityViewerBackingBean<Copy>
     if (!StringUtils.isEmpty(getMolarConcentrationValue())) {
       MolarConcentration newConcentration = null;
       try {
-        newConcentration = MolarConcentration.makeConcentration(getMolarConcentrationValue(),
-                                             getMolarConcentrationType().getSelection());
+        newConcentration = 
+            MolarConcentration.makeConcentration(
+                getMolarConcentrationValue(),
+                getMolarConcentrationType().getSelection());
       }
       catch (Exception e) {
         showMessage("invalidUserInput", "Concentration (molar)", e.getLocalizedMessage());
@@ -131,27 +137,49 @@ public class LibraryCopyDetail extends EditableEntityViewerBackingBean<Copy>
       }
       if(entity.getPrimaryWellMolarConcentration() == null )
       { 
-        showMessage("invalidUserInput", "Molar Concentration", "Cannot set the dilution factor using an absolute concentration if the library well concentrations for the copy plates have not been set.  Set using the dilution factor instead"); // TODO: [#2920] make an error message property for this
+        showMessage("invalidUserInput", "Molar Concentration", 
+            "Cannot set the dilution factor using an absolute concentration if "
+            + "the library well concentrations for the copy plates have not been set.  "
+            + "Set using the dilution factor instead"); 
+        // TODO: [#2920] make an error message property for this
         return false;
       }
-      if(!!! NullSafeUtils.nullSafeEquals(entity.getMaxMolarConcentration(), entity.getMinMolarConcentration()) || 
-        !!! NullSafeUtils.nullSafeEquals(entity.getMaxMolarConcentration(), entity.getPrimaryWellMolarConcentration()) )
+      if(!!! NullSafeUtils.nullSafeEquals(
+            entity.getMaxMolarConcentration(), entity.getMinMolarConcentration()) ||
+         !!! NullSafeUtils.nullSafeEquals(
+             entity.getMaxMolarConcentration(), entity.getPrimaryWellMolarConcentration()) )
       {
-        showMessage("invalidUserInput", "Molar Concentration","Cannot set the plate dilution factor using an absolute concentration if the wells of the plate have varying concentrations.  Set using the plate dilution factor instead"); // TODO:  [#2920] make an error message property for this
+        showMessage("invalidUserInput", "Molar Concentration",
+            "Cannot set the plate dilution factor using an absolute concentration "
+            + "if the wells of the plate have varying concentrations.  "
+            + "Set using the plate dilution factor instead"); 
+        // TODO:  [#2920] make an error message property for this
         valid = false;
       }        
-      if(entity.getPrimaryWellMolarConcentration().compareTo(newConcentration) < 0 ) {
+      if(entity.getPrimaryWellMolarConcentration().compareTo(
+          newConcentration) < 0 ) {
         showMessage("invalidUserInput", "molar Concentration", 
-                    "Target concentration cannot be more than the undiluted primary well concentration (" + entity.getPrimaryWellMolarConcentration()+ ") (only dilution is allowed)."); // TODO:  [#2920] make an error message property for this
+                    "Target concentration cannot be more than the undiluted "
+                    + "primary well concentration (" 
+                        + entity.getPrimaryWellMolarConcentration()
+                        + ") (only dilution is allowed)."); 
+        // TODO:  [#2920] make an error message property for this
         valid = false;
       }
       
       if(!valid) return false;
       
       // 2. calculate a dilution factor
-      BigDecimal newDilutionFactor = entity.getPrimaryWellMolarConcentration().getValue().divide(newConcentration.getValue(), RoundingMode.HALF_UP);
-      newDilutionFactor = newDilutionFactor.scaleByPowerOfTen(newConcentration.getUnits().getScale() - entity.getPrimaryWellMolarConcentration().getUnits().getScale());
-      newDilutionFactor = newDilutionFactor.setScale(ScreensaverConstants.PLATE_DILUTION_FACTOR_SCALE, RoundingMode.HALF_UP); //TODO: rename "copy dilution factor" or "dilution factor"
+      BigDecimal newDilutionFactor = 
+          entity.getPrimaryWellMolarConcentration().getValue().divide(
+              newConcentration.getValue(), RoundingMode.HALF_UP);
+      newDilutionFactor = 
+          newDilutionFactor.scaleByPowerOfTen(
+              newConcentration.getUnits().getScale() 
+              - entity.getPrimaryWellMolarConcentration().getUnits().getScale());
+      newDilutionFactor = newDilutionFactor.setScale(
+          ScreensaverConstants.PLATE_DILUTION_FACTOR_SCALE, RoundingMode.HALF_UP); 
+      //TODO: rename "copy dilution factor" or "dilution factor"
       
       _dilutionFactor = newDilutionFactor;
     }
@@ -160,33 +188,53 @@ public class LibraryCopyDetail extends EditableEntityViewerBackingBean<Copy>
       if(entity.getPrimaryWellMgMlConcentration() == null )
       {
         showMessage("invalidUserInput", "mg/mL Concentration",
-                    "Cannot set the plate dilution factor using an absolute concentration if the library well concentrations for the plate have not been set.  Set using the plate dilution factor instead"); // TODO:  [#2920] make an error message property for this
+                    "Cannot set the plate dilution factor using an absolute "
+                    + "concentration if the library well concentrations for the "
+                    + "plate have not been set.  "
+                    + "Set using the plate dilution factor instead"); 
+        // TODO:  [#2920] make an error message property for this
         return false;
       }
-      if(!!! NullSafeUtils.nullSafeEquals(entity.getMaxMgMlConcentration(), entity.getMinMgMlConcentration()) || 
-        !!! NullSafeUtils.nullSafeEquals(entity.getMaxMgMlConcentration(), entity.getPrimaryWellMgMlConcentration()) )
+      if(!!! NullSafeUtils.nullSafeEquals(
+          entity.getMaxMgMlConcentration(), entity.getMinMgMlConcentration()) || 
+        !!! NullSafeUtils.nullSafeEquals(
+            entity.getMaxMgMlConcentration(), entity.getPrimaryWellMgMlConcentration()) )
       {
         showMessage("invalidUserInput", "mg/mL Concentration",
-                    "Cannot set the plate dilution factor using an absolute concentration if the wells of the plate have varying concentrations.  Set using the plate dilution factor instead"); // TODO:  [#2920] make an error message property for this
+                    "Cannot set the plate dilution factor using an absolute "
+                    + "concentration if the wells of the plate have varying concentrations.  "
+                    + "Set using the plate dilution factor instead"); 
+        // TODO:  [#2920] make an error message property for this
         return false;
       }
       if(entity.getPrimaryWellMgMlConcentration().compareTo(getMgMlConcentration()) < 0 ) {
         showMessage("invalidUserInput", "mg/mL Concentration", 
-                    "Target concentration cannot be more than the undiluted primary well concentration (" + entity.getPrimaryWellMgMlConcentration() + ") (only dilution is allowed)."); // TODO:  [#2920] make an error message property for this
+                    "Target concentration cannot be more than the undiluted primary "
+                    + "well concentration (" + entity.getPrimaryWellMgMlConcentration() 
+                    + ") (only dilution is allowed)."); 
+        // TODO:  [#2920] make an error message property for this
         valid = false;
       }
-      BigDecimal newDilutionFactor = entity.getPrimaryWellMgMlConcentration().divide(getMgMlConcentration(), ScreensaverConstants.PLATE_DILUTION_FACTOR_SCALE, RoundingMode.HALF_UP);  // TODO: An error occurred during the requested operation: Non-terminating decimal expansion; no exact representable decimal result.
+      BigDecimal newDilutionFactor = 
+          entity.getPrimaryWellMgMlConcentration().divide(
+              getMgMlConcentration(), 
+              ScreensaverConstants.PLATE_DILUTION_FACTOR_SCALE, 
+              RoundingMode.HALF_UP);  
+      // TODO: An error occurred during the requested operation: 
+      // Non-terminating decimal expansion; no exact representable decimal result.
       _dilutionFactor = newDilutionFactor;
     }   
     
-    if(_dilutionFactor != null && _dilutionFactor.compareTo(new BigDecimal("1.0")) < 0 )
+    if (_dilutionFactor != null 
+        && _dilutionFactor.compareTo(new BigDecimal("1.0")) < 0 )
     {
-      showMessage("invalidUserInput", "dilution factor", "The dilution factor must be greater than 1");
+      showMessage("invalidUserInput", "dilution factor", 
+          "The dilution factor must be greater than 1");
       return false;
     }
 
 
-    if( !valid) return false;
+    if(!valid) return false;
     return super.validateEntity(entity);
   }
   
@@ -198,27 +246,36 @@ public class LibraryCopyDetail extends EditableEntityViewerBackingBean<Copy>
     super.updateEntityProperties(entity);
     
     ScreensaverUser screensaverUser = getCurrentScreensaverUser().getScreensaverUser();
-    if (!(screensaverUser instanceof AdministratorUser) ||
-      !((AdministratorUser) screensaverUser).isUserInRole(ScreensaverUserRole.LIBRARY_COPIES_ADMIN)) {
-      throw new BusinessRuleViolationException("only library copies administrators can edit library copy plates");
+    if (! (screensaverUser instanceof AdministratorUser) ||
+          !((AdministratorUser)screensaverUser).isUserInRole(
+              ScreensaverUserRole.LIBRARY_COPIES_ADMIN)) {
+      throw new BusinessRuleViolationException(
+          "only library copies administrators can edit library copy plates");
     }
     AdministratorUser adminUser = getDao().reloadEntity((AdministratorUser) getScreensaverUser());
 
     if( getWellConcentrationDilutionFactor() != null)
     {
-      if (!!!NullSafeUtils.nullSafeEquals(getWellConcentrationDilutionFactor(), entity.getWellConcentrationDilutionFactor())) {
+      if (!!!NullSafeUtils.nullSafeEquals(
+          getWellConcentrationDilutionFactor(), 
+          entity.getWellConcentrationDilutionFactor())) {
         StringBuilder updateComments =
           new StringBuilder().append("Dilution factor changed from '")
-          .append(NullSafeUtils.toString(entity.getWellConcentrationDilutionFactor(), "<not specified>")).append("' to '").append(getWellConcentrationDilutionFactor()).append("'");
+            .append(NullSafeUtils.toString(
+                entity.getWellConcentrationDilutionFactor(), 
+                "<not specified>"))
+            .append("' to '")
+            .append(getWellConcentrationDilutionFactor()).append("'");
         entity.createUpdateActivity(adminUser, updateComments.toString());
         entity.setWellConcentrationDilutionFactor(getWellConcentrationDilutionFactor());
       }
     }   
-    if(entity.getConcentrationStatistics() == null) { // if the concentration hasn't been set, then it may be a new entity  TODO: is there a better way to figure out if this is a new entity?
+    if(entity.getConcentrationStatistics() == null) { 
+      // if the concentration hasn't been set, then it may be a new entity  
+      // TODO: is there a better way to figure out if this is a new entity?
       _plateUpdater.updatePrimaryPlateConcentrations(entity);
     }
   }
-
 
   public String getMolarConcentrationValue()
   {
@@ -235,7 +292,9 @@ public class LibraryCopyDetail extends EditableEntityViewerBackingBean<Copy>
     try {
       if (_molarConcentrationType == null) {
         MolarConcentration c = null;
-        MolarUnit unit = (c == null ? DEFAULT_PLATE_MOLAR_CONCENTRATION_UNITS : c.getUnits()); // Todo: can we set default SM = mM, RNA = uM
+        MolarUnit unit = (c == null ? 
+            DEFAULT_PLATE_MOLAR_CONCENTRATION_UNITS 
+            : c.getUnits()); // Todo: can we set default SM = mM, RNA = uM
 
         _molarConcentrationType = new UISelectOneBean<MolarUnit>(MolarUnit.DISPLAY_VALUES, unit)
         {
@@ -267,7 +326,6 @@ public class LibraryCopyDetail extends EditableEntityViewerBackingBean<Copy>
   public void setWellConcentrationDilutionFactor(BigDecimal value)
   {
     _dilutionFactor = value;
-
   }
 
   public BigDecimal getWellConcentrationDilutionFactor()
@@ -309,7 +367,8 @@ public class LibraryCopyDetail extends EditableEntityViewerBackingBean<Copy>
       case CANCEL_NEW:
         return _libraryViewer.reload();
       case SAVE_NEW:
-        return _libraryViewer.viewEntity(getDao().reloadEntity(getEntity(), true, Copy.library).getLibrary());
+        return _libraryViewer.viewEntity(getDao().reloadEntity(getEntity(),
+            true, Copy.library).getLibrary());
       default:
         return null;
     }
@@ -319,7 +378,8 @@ public class LibraryCopyDetail extends EditableEntityViewerBackingBean<Copy>
   {
     List<CopyUsageType> values = Arrays.asList(CopyUsageType.values());
     if (getEntity().getUsageType() == null) {
-      return JSFUtils.createUISelectItemsWithEmptySelection(values, REQUIRED_VOCAB_FIELD_PROMPT);
+      return JSFUtils.createUISelectItemsWithEmptySelection(
+          values, REQUIRED_VOCAB_FIELD_PROMPT);
     }
     return JSFUtils.createUISelectItems(values);
   }

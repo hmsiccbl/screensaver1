@@ -517,7 +517,8 @@ public class LibrariesDAOImpl extends AbstractDAO implements LibrariesDAO
       css.setPlateCount(count);
     }
 
-    // calculate plate_screening_count - the total number of times individual plates from this copy have been screened, ignoring replicates)
+    // calculate plate_screening_count -
+    //    the total number of times individual plates from this copy have been screened, ignoring replicates)
     final HqlBuilder builder2 = new HqlBuilder();
     builder2.from(LibraryScreening.class, "ls")
            .from("ls", LibraryScreening.assayPlatesScreened, "ap")
