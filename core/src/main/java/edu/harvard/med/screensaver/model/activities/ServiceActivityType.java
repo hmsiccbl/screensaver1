@@ -33,6 +33,7 @@ public enum ServiceActivityType implements VocabularyTerm
   TRAINING_IXM("Training - IXM"),
   TRAINING_VELOS("Training - Velos"),
   TRAINING_QPCR_ABI("Training - QPCR-ABI"),
+  TRAINING_QPCR_QSTUDIO_7_FLEX("Training - QPCR-Qstudio 7 Flex"),
   TRAINING_QPCR_ROCHE("Training - QPCR-Roche"),
   TRAINING_WELLMATE("Training - Wellmate"),
   TRAINING_ENVISION("Training - Envision"),
