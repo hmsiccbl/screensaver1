@@ -10,6 +10,7 @@ import edu.harvard.med.screensaver.db.LibrariesDAO;
 import edu.harvard.med.screensaver.model.Volume;
 import edu.harvard.med.screensaver.model.VolumeUnit;
 import edu.harvard.med.screensaver.model.libraries.Copy;
+import edu.harvard.med.screensaver.model.libraries.CopyUsageType;
 import edu.harvard.med.screensaver.model.libraries.LibraryType;
 import edu.harvard.med.screensaver.model.screens.ScreenType;
 import edu.harvard.med.screensaver.ui.activities.ActivitySearchResults;
@@ -63,6 +64,11 @@ public class CopyMinimumVolumeReportSearchResults extends LibraryCopySearchResul
     column4.addCriterion(new Criterion<LibraryType>(Operator.NOT_EQUAL, LibraryType.DOS));
     column4.setVisible(true);
       
+    // For #156, omit cherry pick copy plates
+    TableColumn<Copy,CopyUsageType> column5 = (TableColumn<Copy,CopyUsageType>) getColumnManager().getColumn("Usage Type");
+    column5.addCriterion(new Criterion<CopyUsageType>(Operator.NOT_EQUAL, CopyUsageType.CHERRY_PICK_SOURCE_PLATES));
+    column5.setVisible(true);
+    
     setTitle("Copy Minimum Volume Remaining Report");
   }
   
