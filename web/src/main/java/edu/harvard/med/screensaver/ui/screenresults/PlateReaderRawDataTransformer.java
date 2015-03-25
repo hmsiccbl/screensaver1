@@ -58,6 +58,7 @@ import edu.harvard.med.screensaver.model.cherrypicks.ScreenerCherryPick;
 import edu.harvard.med.screensaver.model.libraries.Gene;
 import edu.harvard.med.screensaver.model.libraries.LibraryWellType;
 import edu.harvard.med.screensaver.model.libraries.PlateSize;
+import edu.harvard.med.screensaver.model.libraries.Reagent;
 import edu.harvard.med.screensaver.model.libraries.SilencingReagent;
 import edu.harvard.med.screensaver.model.libraries.Well;
 import edu.harvard.med.screensaver.model.libraries.WellKey;
@@ -1258,34 +1259,37 @@ public class PlateReaderRawDataTransformer extends AbstractBackingBean
     							    libraryControlLabels.get(new WellName(wellReadIn.getWellName()))));
     						}else {
     							Well well = finder.findWell(wellReadIn);
-    							String abbreviation = well==null ? 
-    							    "U":well.getLibraryWellType().getAbbreviation();
-    							sheet.addCell(new jxl.write.Label(typeCol, sheetRow, abbreviation));
-    							if(_screenViewer.getEntity().getScreenType() == ScreenType.RNAI) {
-    								SilencingReagent sr = ((SilencingReagent)well.getLatestReleasedReagent());
-                    GeneInfo geneInfo = _getGeneInfo(sr);
+    							if(well == null || well.getLatestReleasedReagent() == null){
+                     sheet.addCell(new jxl.write.Label(typeCol, sheetRow, "E"));
+    							}else{
                     sheet.addCell(new jxl.write.Label(
-                        col++, sheetRow, 
-                        Joiner.on(",").join(geneInfo.symbols)));
-                    sheet.addCell(new jxl.write.Label(
-                        col++, sheetRow, Joiner.on(",").join(geneInfo.entrezIds)));
-                    sheet.addCell(new jxl.write.Label(
-                        col++, sheetRow, 
-                        Joiner.on(",").join(geneInfo.accessionNumbers)));
-                    sheet.addCell(new jxl.write.Label(
-                        col++, sheetRow, 
-                        sr == null || sr.getVendorId() == null ? "" : "" + sr.getVendorId()));
-                    sheet.addCell(new jxl.write.Label(
-                        col++, sheetRow, sr.getSequence()));
+                        typeCol, sheetRow, well.getLibraryWellType().getAbbreviation()));
+                    if(well.getLatestReleasedReagent() != null &&
+                        _screenViewer.getEntity().getScreenType() == ScreenType.RNAI) {
+                      SilencingReagent sr = ((SilencingReagent)well.getLatestReleasedReagent());
+                      GeneInfo geneInfo = _getGeneInfo(sr);
+                      sheet.addCell(new jxl.write.Label(
+                          col++, sheetRow, 
+                          Joiner.on(",").join(geneInfo.symbols)));
+                      sheet.addCell(new jxl.write.Label(
+                          col++, sheetRow, Joiner.on(",").join(geneInfo.entrezIds)));
+                      sheet.addCell(new jxl.write.Label(
+                          col++, sheetRow, 
+                          Joiner.on(",").join(geneInfo.accessionNumbers)));
+                      sheet.addCell(new jxl.write.Label(
+                          col++, sheetRow, 
+                          sr == null || sr.getVendorId() == null ? "" : "" + sr.getVendorId()));
+                      sheet.addCell(new jxl.write.Label(
+                          col++, sheetRow, sr.getSequence()));
 
-                    sheet.addCell(new jxl.write.Label(
-                        col++, sheetRow, Joiner.on(",").join(geneInfo.geneNames)));
+                      sheet.addCell(new jxl.write.Label(
+                          col++, sheetRow, Joiner.on(",").join(geneInfo.geneNames)));
 
-                    
-                    
-    								sheet.addCell(new jxl.write.Label(
-    								    col++, sheetRow, well.isDeprecated() ? "Y": ""));
+                      sheet.addCell(new jxl.write.Label(
+                          col++, sheetRow, well.isDeprecated() ? "Y": ""));
+                    }
     							}
+
     						}
     					}
     				};
@@ -1451,7 +1455,8 @@ public class PlateReaderRawDataTransformer extends AbstractBackingBean
     								    libraryNameCol,sheetRow, well.getLibrary().getShortName()));
     								sheet.addCell(new jxl.write.Label(
     								    sourceWellCol,sheetRow, well.getWellName()));
-    								if(_cherryPickRequestViewer.getEntity().getScreen().getScreenType() 
+    								if(well.getLatestReleasedReagent() != null &&
+    								    _cherryPickRequestViewer.getEntity().getScreen().getScreenType() 
     								      == ScreenType.SMALL_MOLECULE) {
     									sheet.addCell(new jxl.write.Label(
     									    rviCol, sheetRow, 
@@ -1459,7 +1464,7 @@ public class PlateReaderRawDataTransformer extends AbstractBackingBean
     									sheet.addCell(new jxl.write.Label(
     									    vendorBatchCol, sheetRow, 
     									    well.getLatestReleasedReagent().getVendorBatchId()));
-    								}else {
+    								}else if(well.getLatestReleasedReagent() != null) {
     									// In the case of the RNAi CP, the source well is a 
     								  // duplex well, so still have to find the corresponding pool well
     									SilencingReagent duplexReagent = well.getLatestReleasedReagent();
