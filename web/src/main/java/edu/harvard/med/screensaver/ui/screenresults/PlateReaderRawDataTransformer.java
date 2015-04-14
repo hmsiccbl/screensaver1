@@ -1279,8 +1279,8 @@ public class PlateReaderRawDataTransformer extends AbstractBackingBean
                       sheet.addCell(new jxl.write.Label(
                           col++, sheetRow, 
                           sr == null || sr.getVendorId() == null ? "" : "" + sr.getVendorId()));
-                      sheet.addCell(new jxl.write.Label(
-                          col++, sheetRow, sr.getSequence()));
+                      //sheet.addCell(new jxl.write.Label(
+                      //    col++, sheetRow, sr.getSequence()));
 
                       sheet.addCell(new jxl.write.Label(
                           col++, sheetRow, Joiner.on(",").join(geneInfo.geneNames)));
@@ -1350,8 +1350,8 @@ public class PlateReaderRawDataTransformer extends AbstractBackingBean
     							sheet.addCell(new jxl.write.Label(col++, 0, "Gene Symbol"));
     							sheet.addCell(new jxl.write.Label(col++, 0, "Gene IDs"));
     							sheet.addCell(new jxl.write.Label(col++, 0, "Genbank Accession Nos"));
-    							sheet.addCell(new jxl.write.Label(col++, 0, "Sequence"));
-                                sheet.addCell(new jxl.write.Label(col++, 0, "Gene Names"));
+    							//sheet.addCell(new jxl.write.Label(col++, 0, "Sequence"));
+                  sheet.addCell(new jxl.write.Label(col++, 0, "Gene Names"));
     							// choose not to include these, informatics meeting 20130207
     							//							sheet.addCell(new jxl.write.Label(col++, 0, "Pool Well Plate"));
     							//							sheet.addCell(new jxl.write.Label(col++, 0, "Pool Well"));
@@ -1484,8 +1484,8 @@ public class PlateReaderRawDataTransformer extends AbstractBackingBean
     									sheet.addCell(new jxl.write.Label(
     									    col++, sheetRow, 
     									    Joiner.on(",").join(geneInfo.accessionNumbers)));
-    									sheet.addCell(new jxl.write.Label(
-    									    col++, sheetRow, duplexReagent.getSequence()));
+    									//sheet.addCell(new jxl.write.Label(
+    									//    col++, sheetRow, duplexReagent.getSequence()));
     									sheet.addCell(new jxl.write.Label(
     									    col++, sheetRow, Joiner.on(",").join(geneInfo.geneNames)));
     
