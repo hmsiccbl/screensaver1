@@ -114,10 +114,10 @@ public class PlateUpdater
       return false;
     }
     
-    if (!!!plate.getStatus().canTransitionTo(newStatus)) {
-      throw new BusinessRuleViolationException("plate status cannot be changed from '" + plate.getStatus() + "' to '" + newStatus +
-        "'");
-    }
+    //    if (!!!plate.getStatus().canTransitionTo(newStatus)) {
+    //      throw new BusinessRuleViolationException("plate status cannot be changed from '" + plate.getStatus() + "' to '" + newStatus +
+    //        "'");
+    //    }
 
     plate = _dao.reloadEntity(plate);
     recordedBy = _dao.reloadEntity(recordedBy);
