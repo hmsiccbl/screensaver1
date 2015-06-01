@@ -58,7 +58,8 @@ import edu.harvard.med.screensaver.model.screens.ScreenType;
  * @author <a mailto="john_sullivan@hms.harvard.edu">John Sullivan</a>
  */
 @Entity
-@Table(uniqueConstraints={@UniqueConstraint(columnNames={ "plateNumber", "wellName" })})
+@Table(uniqueConstraints={@UniqueConstraint(columnNames={ "plateNumber", "wellName" }),
+    @UniqueConstraint(columnNames={ "barcode" })})
 @org.hibernate.annotations.Proxy
 @edu.harvard.med.screensaver.model.annotations.ContainedEntity(containingEntityClass=Library.class)
 public class Well extends SemanticIDAbstractEntity<String> implements Comparable<Well>
