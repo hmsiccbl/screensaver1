@@ -68,6 +68,7 @@ public class Plate extends AuditedAbstractEntity<Integer> implements Comparable<
   private static final long serialVersionUID = 0L;
   
   public static final RelationshipPath<Plate> copy = RelationshipPath.from(Plate.class).to("copy", Cardinality.TO_ONE);
+  public static final RelationshipPath<Plate> library = RelationshipPath.from(Plate.class).to("copy", Cardinality.TO_ONE).to("library",Cardinality.TO_ONE);
   public static final RelationshipPath<Plate> location = RelationshipPath.from(Plate.class).to("location", Cardinality.TO_ONE);
   public static final RelationshipPath<Plate> platedActivity = RelationshipPath.from(Plate.class).to("platedActivity", Cardinality.TO_ONE);
   public static final RelationshipPath<Plate> retiredActivity = RelationshipPath.from(Plate.class).to("retiredActivity", Cardinality.TO_ONE);

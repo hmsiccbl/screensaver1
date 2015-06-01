@@ -43,7 +43,7 @@ public class CopyTest extends AbstractEntityInstanceTest<Copy>
     genericEntityDao.mergeEntity(copy);
     
     Copy copy2 = genericEntityDao.reloadEntity(copy, true, Copy.plates);
-    Plate plate2 = Sets.newTreeSet(genericEntityDao.findAllEntitiesOfType(Plate.class, true, Plate.copy)).first();
+    Plate plate2 = Sets.newTreeSet(genericEntityDao.findAllEntitiesOfType(Plate.class, true, Plate.library)).first();
     assertEquals(copy2.findPlate(plateNumber), plate2);
     assertEquals(plate2.getCopy(), copy2);
   }
