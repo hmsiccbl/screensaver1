@@ -241,55 +241,55 @@ public class PlateUpdaterTest extends AbstractSpringPersistenceTest
     });
   }
 
-  public void testInvalidPlateStatusUpdateFromNotCreatedToNotSpecified()
-  {
-    doTestInvalidStatusUpdate(PlateStatus.NOT_CREATED, PlateStatus.NOT_SPECIFIED);
-  }
+//  public void testInvalidPlateStatusUpdateFromNotCreatedToNotSpecified()
+//  {
+//    doTestInvalidStatusUpdate(PlateStatus.NOT_CREATED, PlateStatus.NOT_SPECIFIED);
+//  }
 
-  public void testInvalidPlateStatusUpdateFromNotAvailableToNotSpecified()
-  {
-    doTestInvalidStatusUpdate(PlateStatus.NOT_AVAILABLE, PlateStatus.NOT_SPECIFIED);
-  }
+//  public void testInvalidPlateStatusUpdateFromNotAvailableToNotSpecified()
+//  {
+//    doTestInvalidStatusUpdate(PlateStatus.NOT_AVAILABLE, PlateStatus.NOT_SPECIFIED);
+//  }
 
-  public void testInvalidPlateStatusUpdateFromNotAvailableToNotCreated()
-  {
-    doTestInvalidStatusUpdate(PlateStatus.NOT_AVAILABLE, PlateStatus.NOT_CREATED);
-  }
+//  public void testInvalidPlateStatusUpdateFromNotAvailableToNotCreated()
+//  {
+//    doTestInvalidStatusUpdate(PlateStatus.NOT_AVAILABLE, PlateStatus.NOT_CREATED);
+//  }
 
-  public void testInvalidPlateStatusUpdateFromAvailableToNotSpecified()
-  {
-    doTestInvalidStatusUpdate(PlateStatus.AVAILABLE, PlateStatus.NOT_SPECIFIED);
-  }
+//  public void testInvalidPlateStatusUpdateFromAvailableToNotSpecified()
+//  {
+//    doTestInvalidStatusUpdate(PlateStatus.AVAILABLE, PlateStatus.NOT_SPECIFIED);
+//  }
 
-  public void testInvalidPlateStatusUpdateFromAvailableToNotCreated()
-  {
-    doTestInvalidStatusUpdate(PlateStatus.AVAILABLE, PlateStatus.NOT_CREATED);
-  }
+//  public void testInvalidPlateStatusUpdateFromAvailableToNotCreated()
+//  {
+//    doTestInvalidStatusUpdate(PlateStatus.AVAILABLE, PlateStatus.NOT_CREATED);
+//  }
 
-  public void testInvalidPlateStatusUpdateFromRetiredToNotSpecified()
-  {
-    doTestInvalidStatusUpdate(PlateStatus.RETIRED, PlateStatus.NOT_SPECIFIED);
-  }
+//  public void testInvalidPlateStatusUpdateFromRetiredToNotSpecified()
+//  {
+//    doTestInvalidStatusUpdate(PlateStatus.RETIRED, PlateStatus.NOT_SPECIFIED);
+//  }
 
-  public void testInvalidPlateStatusUpdateFromRetiredToNotCreated()
-  {
-    doTestInvalidStatusUpdate(PlateStatus.RETIRED, PlateStatus.NOT_CREATED);
-  }
+//  public void testInvalidPlateStatusUpdateFromRetiredToNotCreated()
+//  {
+//    doTestInvalidStatusUpdate(PlateStatus.RETIRED, PlateStatus.NOT_CREATED);
+//  }
 
-  public void testInvalidPlateStatusUpdateFromRetiredToNotAvailable()
-  {
-    doTestInvalidStatusUpdate(PlateStatus.RETIRED, PlateStatus.NOT_AVAILABLE);
-  }
+//  public void testInvalidPlateStatusUpdateFromRetiredToNotAvailable()
+//  {
+//    doTestInvalidStatusUpdate(PlateStatus.RETIRED, PlateStatus.NOT_AVAILABLE);
+//  }
 
 //  public void testInvalidPlateStatusUpdateFromRetiredToAvailable()
 //  {
 //    doTestInvalidStatusUpdate(PlateStatus.RETIRED, PlateStatus.AVAILABLE);
 //  }
 
-  public void testInvalidPlateStatusUpdateFromDiscardedToLost()
-  {
-    doTestInvalidStatusUpdate(PlateStatus.DISCARDED, PlateStatus.LOST);
-  }
+//  public void testInvalidPlateStatusUpdateFromDiscardedToLost()
+//  {
+//    doTestInvalidStatusUpdate(PlateStatus.DISCARDED, PlateStatus.LOST);
+//  }
 
   private void doTestInvalidStatusUpdate(final PlateStatus initialStatus, final PlateStatus invalidStatus)
   {
