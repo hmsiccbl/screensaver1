@@ -1005,23 +1005,36 @@ public abstract class WellSearchResults extends TupleBasedEntitySearchResults<We
     if (isLINCS()) columns.get(columns.size() - 1).setVisible(false);
 
     columns.add(new TextTupleColumn<Well,String>(RelationshipPath.from(Well.class).toProperty("facilityId"),
-      "Facility ID",
-      "An alternate identifier assigned by the facility to identify this well",
-                                                 WELL_COLUMNS_GROUP)
-      {
-        @Override
-        public boolean isCommandLink()
+        "Facility ID",
+        "An alternate identifier assigned by the facility to identify this well",
+                                                   WELL_COLUMNS_GROUP)
         {
-          return isLINCS() && _mode == WellSearchResultMode.SET_OF_CANONICAL_REAGENT_WELLS;
-        }
+          @Override
+          public boolean isCommandLink()
+          {
+            return isLINCS() && _mode == WellSearchResultMode.SET_OF_CANONICAL_REAGENT_WELLS;
+          }
 
-        @Override
-        public Object cellAction(Tuple<String> row)
-        {
-          return viewSelectedEntity();
-        }
-      });
-    columns.get(columns.size() - 1).setVisible(false);
+          @Override
+          public Object cellAction(Tuple<String> row)
+          {
+            return viewSelectedEntity();
+          }
+        });
+      columns.get(columns.size() - 1).setVisible(false);
+
+      columns.add(new TextTupleColumn<Well,String>(RelationshipPath.from(Well.class).toProperty("barcode"),
+          "Barcode",
+          "Barcode identifier for this well",
+                                                     WELL_COLUMNS_GROUP)
+          {
+            @Override
+            public Object cellAction(Tuple<String> row)
+            {
+              return viewSelectedEntity();
+            }
+          });
+        columns.get(columns.size() - 1).setVisible(false);
 
     columns.add(new BooleanTupleColumn<Well,String>(RelationshipPath.from(Well.class).toProperty("deprecated"),
                                                     "Deprecated",

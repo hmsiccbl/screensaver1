@@ -109,6 +109,7 @@ public class Well extends SemanticIDAbstractEntity<String> implements Comparable
   private Map<LibraryContentsVersion,Reagent> _reagents = Maps.newHashMap();
   private Reagent _latestReleasedReagent;
   private String _facilityId;
+  private String _barcode;
   private Map<DataColumn,ResultValue> _resultValues = new HashMap<DataColumn,ResultValue>();
   private AdministrativeActivity _deprecationActivity;
   private MolarConcentration _molarConcentration;
@@ -406,6 +407,17 @@ public class Well extends SemanticIDAbstractEntity<String> implements Comparable
   public void setFacilityId(String facilityId)
   {
     _facilityId = facilityId;
+  }
+
+  @org.hibernate.annotations.Type(type="text")
+  public String getBarcode()
+  {
+    return _barcode;
+  }
+
+  public void setBarcode(String value)
+  {
+    _barcode = value;
   }
 
   @Column(nullable=false)

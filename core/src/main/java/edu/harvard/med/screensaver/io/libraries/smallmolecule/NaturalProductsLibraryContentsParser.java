@@ -50,7 +50,8 @@ public class NaturalProductsLibraryContentsParser extends WorkbookLibraryContent
   private CsvTextColumn VENDOR_REAGENT_ID = new CsvTextColumn("Vendor Reagent ID", AlphabeticCounter.toIndex("C"), false);
   private CsvTextColumn FACILITY_REAGENT_ID = new CsvTextColumn("Facility Reagent ID", AlphabeticCounter.toIndex("D"), false);
   private CsvConcentrationColumn CONCENTRATION = new CsvConcentrationColumn("Concentration", AlphabeticCounter.toIndex("E"), false);
-  
+  private CsvTextColumn BARCODE = new CsvTextColumn("BARCODE", AlphabeticCounter.toIndex("F"), false);
+    
   public NaturalProductsLibraryContentsParser(GenericEntityDAO dao, InputStream stream, Library library)
   {
     super(dao, stream, library);
@@ -87,6 +88,7 @@ public class NaturalProductsLibraryContentsParser extends WorkbookLibraryContent
     }
     
     well.setFacilityId(FACILITY_REAGENT_ID.getValue(row));
+    well.setBarcode(BARCODE.getValue(row));
     
     
     if (well.getLibraryWellType() == LibraryWellType.EXPERIMENTAL)

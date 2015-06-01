@@ -125,6 +125,7 @@ public class RNAiLibraryContentsParser extends WorkbookLibraryContentsParser<Sil
       return new WellKey(value);
     }
   };
+  private CsvTextColumn BARCODE = new CsvTextColumn("Barcode", AlphabeticCounter.toIndex("V"), false);
 
 
   public RNAiLibraryContentsParser(GenericEntityDAO dao, InputStream stream, Library library)
@@ -166,6 +167,7 @@ public class RNAiLibraryContentsParser extends WorkbookLibraryContentsParser<Sil
     }
 
     well.setFacilityId((String) FACILITY_REAGENT_ID.getValue(row));
+    well.setBarcode((String) BARCODE.getValue(row));
 
     if (wellType == LibraryWellType.EXPERIMENTAL)
     {
