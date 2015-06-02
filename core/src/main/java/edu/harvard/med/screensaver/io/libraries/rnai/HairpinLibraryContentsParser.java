@@ -100,6 +100,7 @@ public class HairpinLibraryContentsParser extends WorkbookLibraryContentsParser<
   private CsvTextListColumn FACILITY_GENE_NAME = new CsvTextListColumn("Facility Gene Name", AlphabeticCounter.toIndex("Q"), false);
   private CsvTextSubListColumn FACILITY_GENBANK_ACCESSION_NUMBERS = new CsvTextSubListColumn("Facility Genbank Accession Numbers", AlphabeticCounter.toIndex("R"), false);
   private CsvTextListColumn FACILITY_SPECIES = new CsvTextListColumn("Facility Species", AlphabeticCounter.toIndex("S"), false);
+  private CsvTextColumn BARCODE = new CsvTextColumn("Barcode", AlphabeticCounter.toIndex("T"), false);
 
 
   public HairpinLibraryContentsParser(GenericEntityDAO dao, InputStream stream, Library library)
@@ -147,6 +148,7 @@ public class HairpinLibraryContentsParser extends WorkbookLibraryContentsParser<
     }
       
     well.setFacilityId((String) FACILITY_REAGENT_ID.getValue(row));
+    well.setBarcode((String) BARCODE.getValue(row));
 
     if (wellType == LibraryWellType.EXPERIMENTAL)
     {

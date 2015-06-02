@@ -191,6 +191,7 @@ public class LibraryContentsLoaderTest extends AbstractSpringPersistenceTest
         assertEquals("M-005300-00", sr.getVendorId().getVendorIdentifier());
         assertEquals(MolarConcentration.makeConcentration("1", MolarUnit.MICROMOLAR),a05.getMolarConcentration());
         assertEquals("F-005300-00", a05.getFacilityId());
+        assertEquals("SA00112376", a05.getBarcode());
         assertEquals(SilencingReagentType.SIRNA, sr.getSilencingReagentType());
         assertEquals("GACAUGCACUGCCUAAUUA;GUACAGAACUCUCCCAUUC;GAUGAAAUGUGCCUUGAAA;GAAGGUGGAUUUGCUAUUG",
                      ((SilencingReagent)a05.getLatestReleasedReagent()).getSequence() );
@@ -445,10 +446,15 @@ public class LibraryContentsLoaderTest extends AbstractSpringPersistenceTest
     
     assertEquals("natural product reagent count", 351, genericEntityDao.findAllEntitiesOfType(NaturalProductReagent.class).size());
 
+    Well well = librariesDao.findWell(new WellKey(TEST_PLATE, "A01"));
+    assertNotNull(well);
+    assertEquals("SA00112373", well.getBarcode());
+    
     // wells w/o reagent ID are empty 
-    Well well = librariesDao.findWell(new WellKey(TEST_PLATE, "A21"));
+    well = librariesDao.findWell(new WellKey(TEST_PLATE, "A21"));
     assertNotNull(well);
     assertEquals(LibraryWellType.EMPTY, well.getLibraryWellType());
+
     
     // unspecified wells are undefined 
     well = librariesDao.findWell(new WellKey(TEST_PLATE, "A23"));
@@ -519,6 +525,7 @@ public class LibraryContentsLoaderTest extends AbstractSpringPersistenceTest
         assertEquals(LibraryWellType.EXPERIMENTAL, well.getLibraryWellType());
         assertEquals(new ReagentVendorIdentifier("Biomol-TimTec", "SPL000058"), well.<Reagent>getLatestReleasedReagent().getVendorId());
         assertEquals("ICCB-00589081", well.getFacilityId());
+        assertEquals("SA00112373", well.getBarcode());
         assertEquals("chembl id", Sets.newHashSet(100001, 100002, 111102), compound.getChemblIds());
 
         // new LINCS fields
@@ -540,6 +547,7 @@ public class LibraryContentsLoaderTest extends AbstractSpringPersistenceTest
         assertEquals(LibraryWellType.EXPERIMENTAL, well.getLibraryWellType());
         assertEquals(new ReagentVendorIdentifier("Biomol-TimTec", "ST001215"), well.<Reagent>getLatestReleasedReagent().getVendorId());
         assertEquals("ICCB-00589082", well.getFacilityId());
+        assertEquals("SA00112374", well.getBarcode());
         compound = well.<SmallMoleculeReagent>getLatestReleasedReagent();
         List<String> compoundNames = compound.getCompoundNames();
         assertEquals("compound must have one compound name", compoundNames.size(), 1);

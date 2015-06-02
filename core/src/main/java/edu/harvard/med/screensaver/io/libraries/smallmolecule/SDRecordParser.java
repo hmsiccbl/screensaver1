@@ -107,6 +107,10 @@ public class SDRecordParser
             log.info("facility reagent id: " + line);
             sdRecord.setFacilityId(line);
           }
+          else if (fieldName.equals("barcode")) {
+            log.info("barcode: " + line);
+            sdRecord.setBarcode(line);
+          }
           else if (fieldName.equals("vendor")) {
             sdRecord.setVendor(line);
           }

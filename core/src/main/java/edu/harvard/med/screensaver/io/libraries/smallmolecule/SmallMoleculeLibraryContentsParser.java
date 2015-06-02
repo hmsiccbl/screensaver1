@@ -119,6 +119,11 @@ public class SmallMoleculeLibraryContentsParser extends LibraryContentsParser<Sm
       log.warn("facility ID for well " + key + " changed from " + well.getFacilityId() + " to " + sdRecordData.getFacilityId());
       well.setFacilityId(sdRecordData.getFacilityId());
     }
+    if (sdRecordData.getBarcode() != null &&
+        !sdRecordData.getBarcode().equals(well.getBarcode())) {
+      log.warn("facility ID for well " + key + " changed from " + well.getBarcode() + " to " + sdRecordData.getBarcode());
+      well.setBarcode(sdRecordData.getBarcode());
+    }
 
     // Set the the well concentration: 
     // Note, for  [#2920] - the LibraryContentsVersionManager will invoke the PlateUpdater.updatePrimaryWellConcentrations() 

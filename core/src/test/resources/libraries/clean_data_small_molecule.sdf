@@ -37,6 +37,9 @@ EXPERIMENTAL
 >  <Facility_Reagent_ID> (3)
 ICCB-00589081
 
+>  <Barcode>
+SA00112373
+
 >  <Solvent> (3)
 DMSO
 
@@ -159,6 +162,9 @@ EXPERIMENTAL
 
 >  <Facility_Reagent_ID> (4)
 ICCB-00589082
+
+>  <Barcode>
+SA00112374
 
 >  <Solvent> (4)
 DMSO

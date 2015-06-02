@@ -61,6 +61,13 @@
          value="#{wellViewer.entity.facilityId}">
        </ss:property>
 
+       <ss:property id="Barcode" label="Barcode" 
+         type="Text" 
+         rendered="#{! empty wellViewer.entity.barcode}"
+         description="Barcode assigned to this well" 
+         value="#{wellViewer.entity.barcode}">
+       </ss:property>
+
        <ss:property id="vendorReagentId" label="Vendor Reagent Identifier" 
          type="Text" rendered="#{! empty wellViewer.restrictedReagent}" 
          description="The vendor-assigned reagent identifier provided (e.g., catalog number; reorder number)" 

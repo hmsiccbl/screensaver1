@@ -29,6 +29,7 @@ public class SDRecord
   private Integer _plateNumber;
   private WellName _wellName;
   private String _facilityId;
+  private String _barcode;
   private LibraryWellType _libraryWellType;
   private String _molfile;
   private String _vendor;
@@ -66,6 +67,16 @@ public class SDRecord
   public void setFacilityId(String facilityId)
   {
     _facilityId = facilityId;
+  }
+
+  public String getBarcode()
+  {
+    return _barcode;
+  }
+
+  public void setBarcode(String barcode)
+  {
+    _barcode = barcode;
   }
 
   public String getMolfile()
@@ -164,6 +175,7 @@ public class SDRecord
       "VEND BID = " + _vendorBatchId + "\n" +
       "FACY_ID = " + _facilityId       + "\n" +
       "FACY_BID = " + _facilityBatchId + "\n" +
+      "BARCODE = " + _barcode + "\n" +
       "SALT_ID = " + _saltFormId + "\n" +
       "C NAMES  = " + Joiner.on(",").join(_compoundNames) + "\n" +
       "PC IDS  = " + Joiner.on(",").join(_pubchemCids)+ "\n" +

@@ -58,7 +58,8 @@ import edu.harvard.med.screensaver.model.screens.ScreenType;
  * @author <a mailto="john_sullivan@hms.harvard.edu">John Sullivan</a>
  */
 @Entity
-@Table(uniqueConstraints={@UniqueConstraint(columnNames={ "plateNumber", "wellName" })})
+@Table(uniqueConstraints={@UniqueConstraint(columnNames={ "plateNumber", "wellName" }),
+    @UniqueConstraint(columnNames={ "barcode" })})
 @org.hibernate.annotations.Proxy
 @edu.harvard.med.screensaver.model.annotations.ContainedEntity(containingEntityClass=Library.class)
 public class Well extends SemanticIDAbstractEntity<String> implements Comparable<Well>
@@ -109,6 +110,7 @@ public class Well extends SemanticIDAbstractEntity<String> implements Comparable
   private Map<LibraryContentsVersion,Reagent> _reagents = Maps.newHashMap();
   private Reagent _latestReleasedReagent;
   private String _facilityId;
+  private String _barcode;
   private Map<DataColumn,ResultValue> _resultValues = new HashMap<DataColumn,ResultValue>();
   private AdministrativeActivity _deprecationActivity;
   private MolarConcentration _molarConcentration;
@@ -406,6 +408,17 @@ public class Well extends SemanticIDAbstractEntity<String> implements Comparable
   public void setFacilityId(String facilityId)
   {
     _facilityId = facilityId;
+  }
+
+  @org.hibernate.annotations.Type(type="text")
+  public String getBarcode()
+  {
+    return _barcode;
+  }
+
+  public void setBarcode(String value)
+  {
+    _barcode = value;
   }
 
   @Column(nullable=false)
