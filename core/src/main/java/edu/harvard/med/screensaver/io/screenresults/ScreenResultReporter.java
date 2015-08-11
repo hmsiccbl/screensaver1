@@ -10,6 +10,7 @@
 package edu.harvard.med.screensaver.io.screenresults;
 
 import java.math.BigDecimal;
+import java.math.BigInteger;
 import java.math.RoundingMode;
 import java.text.MessageFormat;
 import java.util.Collection;
@@ -21,6 +22,7 @@ import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
 import com.google.common.collect.Ordering;
 import com.google.common.collect.Sets;
+
 import org.apache.log4j.Logger;
 import org.hibernate.CacheMode;
 import org.hibernate.Query;
@@ -248,7 +250,7 @@ public class ScreenResultReporter
    * @return the count of reagents
    */
   @Transactional
-  public int createReagentCountStudy(AdministratorUser admin,
+  public int[] createReagentCountStudy(AdministratorUser admin,
                                      LabHead labHead,
                                      String studyName,
                                      String title,
@@ -296,111 +298,99 @@ public class ScreenResultReporter
 
   /**
    * for [#2268] new column to display # overlapping screens
+   * - new version using sql insert resolves #166
    */
   @Transactional
-  public int createScreenedReagentCounts(final ScreenType screenType,
+  public int[] createScreenedReagentCounts(final ScreenType screenType,
                                           Screen study,
-                                          AnnotationType positiveAnnotationType,
-                                          AnnotationType overallAnnotationType)
+                                          final AnnotationType positiveAnnotationType,
+                                          final AnnotationType overallAnnotationType)
   {
-    // Break this into two separate queries because of an apparent Hibernate bug:
-    // when using the "group by" clause with a full object (as opposed to an attribute of the object/table),
-    // Hibernate is requiring that every attribute of the object be specified in a "group by" and not 
-    // just the object itself.  so the workaround is to query once to get the id's then once again to 
-    // get the objects.
-//    study = _dao.mergeEntity(study);
-//    positiveAnnotationType = _dao.mergeEntity(positiveAnnotationType);
-//    overallAnnotationType = _dao.mergeEntity(overallAnnotationType);
-//    _dao.flush();
 
-    log.info("1. get the reagent id's for the positive counts");
-    ScrollableResults sr = _dao.runScrollQuery(new edu.harvard.med.screensaver.db.ScrollQuery() {
-      public ScrollableResults execute(Session session)
-            {
-              HqlBuilder builder = new HqlBuilder();
-              builder.select("r", "id").
-                selectExpression("count(*)").
-                from(AssayWell.class, "aw").
-                from("aw", AssayWell.libraryWell, "w", JoinType.INNER).
-                from("w", Well.latestReleasedReagent, "r", JoinType.INNER).
-                from("w", Well.library, "l", JoinType.INNER).
-                where("l", "screenType", Operator.EQUAL, screenType).
-                where("w", "libraryWellType", Operator.EQUAL, LibraryWellType.EXPERIMENTAL);
-              builder.where("aw", "positive", Operator.EQUAL, Boolean.TRUE);
-              builder.groupBy("r", "id");
-              log.debug("hql: " + builder.toHql());
-              return builder.toQuery(session, true).setCacheMode(CacheMode.IGNORE).
-                scroll(ScrollMode.FORWARD_ONLY);
-            }
-    });
-
-    Map<Integer,Long> positivesMap = Maps.newHashMap();
-    while (sr.next()) {
-      Object[] row = sr.get();
-      positivesMap.put((Integer) row[0], (Long) row[1]);
-    }
-
-    log.info("2. get the reagent id's for the overall counts");
-    sr = _dao.runScrollQuery(new edu.harvard.med.screensaver.db.ScrollQuery() {
-      public ScrollableResults execute(Session session)
-            {
-              HqlBuilder builder = new HqlBuilder();
-              builder.select("r", "id").
-                selectExpression("count(*)").
-                from(AssayWell.class, "aw").
-                from("aw", AssayWell.libraryWell, "w", JoinType.INNER).
-                from("w", Well.library, "l", JoinType.INNER).
-                from("w", Well.latestReleasedReagent, "r", JoinType.INNER).
-                where("l", "screenType", Operator.EQUAL, screenType).
-                where("w", "libraryWellType", Operator.EQUAL, LibraryWellType.EXPERIMENTAL).
-                groupBy("r", "id");
-              log.debug("hql: " + builder.toHql());
-              return builder.toQuery(session, true).setCacheMode(CacheMode.IGNORE).
-                scroll(ScrollMode.FORWARD_ONLY);
-            }
-    });
-
-    log.info("begin assigning values to the study");
-    int overallCount = 0;
-    Map<Integer,Long> overallMap = Maps.newHashMap();
-    while (sr.next()) {
-      Object[] row = sr.get();
-      Integer r_id = (Integer) row[0];
-      Long count = (Long) row[1];
-      Reagent r = _dao.findEntityById(Reagent.class, r_id,true);
-      // note: for memory performance, we're side-stepping the AnnotationType.createAnnotationValue() method
-      AnnotationValue av = new AnnotationValue(overallAnnotationType,
-                                               r,
-                                               null,
-                                               (double) count);
-      _dao.persistEntity(av);
-      Long positiveCount = positivesMap.get(r_id);
-      if (positiveCount != null) {
-        // note: for memory performance, we're side-stepping the AnnotationType.createAnnotationValue() method
-        av = new AnnotationValue(positiveAnnotationType,
-                                 r, null,
-                                 (double) positiveCount.intValue());
-        _dao.persistEntity(av);
-      }
-      // Note: due to memory performance, we will build the study_reagent_link later
-      if (count++ % AbstractDAO.ROWS_TO_CACHE == 0) {
-        log.debug("flushing");
-        _dao.flush();
-        _dao.clear();
-      }
-      if (++overallCount % 10000 == 0) {
-        log.info("" + overallCount + " reagents processed");
-      }
-    }
     
-    log.info("save the study");
-    // unnecessary since study is already persisted, and the reagents will be linked by the populateStudyReagentLinkTable - sde4
-    // _dao.mergeEntity(study);
+    final int[] result = new int[2];
+    _dao.runQuery(new edu.harvard.med.screensaver.db.Query() {
+      public List<?> execute(Session session)
+      {
+        String sql = 
+            "insert into annotation_value  " + 
+            "    (annotation_value_id, annotation_type_id, numeric_value, reagent_id) " + 
+            "    select nextval('annotation_value_id_seq'), :annotation_type_id, count, reagent_id  " + 
+            "    from ( " +
+            "    select " + 
+            "    r.reagent_id," + 
+            "    count(*) " + 
+            "    from assay_well aw " + 
+            "    join well w using(well_id) " + 
+            "    join reagent r on w.latest_released_reagent_id=r.reagent_id " + 
+            "    join library l using(library_id) " + 
+            "    where  " + 
+            "    aw.is_positive = true " + 
+            "    and l.screen_type = :screenType " + 
+            "    and w.library_well_type = 'experimental' " + 
+            "    group by r.reagent_id ) a;  "; 
+
+        log.info("sql: " + sql);
+
+        Query query = session.createSQLQuery(sql);
+        query.setParameter("screenType", screenType.getValue());
+        query.setParameter("annotation_type_id", positiveAnnotationType.getAnnotationTypeId());
+
+        int rows = query.executeUpdate();
+        log.info("rows: " + rows);
+        
+        if (rows == 0) {
+          log.warn("No screened positives counts rows were updated: " + 
+            query.getQueryString());
+        }
+        log.info("positive count annotation values created: " + rows);
+        result[0] = rows;
+        
+        // exact same as before, except without is_positive constraint
+        String sql2 = 
+            "insert into annotation_value  " + 
+            "    (annotation_value_id, annotation_type_id, numeric_value, reagent_id) " + 
+            "    select nextval('annotation_value_id_seq'), :annotation_type_id, count, reagent_id  " + 
+            "    from ( " +
+            "    select " + 
+            "    r.reagent_id," + 
+            "    count(*) " + 
+            "    from assay_well aw " + 
+            "    join well w using(well_id) " + 
+            "    join reagent r on w.latest_released_reagent_id=r.reagent_id " + 
+            "    join library l using(library_id) " + 
+            "    where  " + 
+            "    l.screen_type = :screenType " + 
+            "    and w.library_well_type = 'experimental' " + 
+            "    group by r.reagent_id ) a;  "; 
+            
+        log.info("sql2: " + sql2);
+
+        query = session.createSQLQuery(sql2);
+        query.setParameter("screenType", screenType.getValue() );
+        query.setParameter("annotation_type_id", overallAnnotationType.getAnnotationTypeId());
+        rows = query.executeUpdate();
+        log.info("rows: " + rows);
+
+        if (rows == 0) {
+          log.warn("No screened counts rows were updated: " +
+            query.getQueryString());
+        }
+        log.info("screened count annotation values created: " + rows);
+        result[1] = rows;
+        
+        return null;
+      }
+    });
+    int screened_positives_counts = result[0];
+    int screened_counts = result[1];
+    
     _dao.flush();
     log.info("populateStudyReagentLinkTable");
     int reagentCount = _screenDao.populateStudyReagentLinkTable(study.getScreenId());
-    log.info("done: positives: " + positivesMap.size() + ", reagents: " + overallCount);
-    return reagentCount;
+    log.info("done: positives: " + screened_positives_counts 
+        + ", screened reagents: " + screened_counts);
+    return result;
   }
 
   public static class ConfirmationReport
