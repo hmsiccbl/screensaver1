@@ -252,7 +252,7 @@ public class ScreenPositivesCountStudyCreator extends AdminEmailApplication
                                                                                  admin.getEmail(),
                                                                                  true,
                                                                                  null);
-          int count = report.createReagentCountStudy(admin,
+          int[] counts = report.createReagentCountStudy(admin,
                                                      labHead,
                                                      studyFacilityId,
                                                      title,
@@ -268,7 +268,7 @@ public class ScreenPositivesCountStudyCreator extends AdminEmailApplication
             subject = "[TEST ONLY, no commits] " + subject;
           }
           String msg = "Study: " + study.getFacilityId() + ", " + study.getTitle() + ": " + study.getSummary()
-            + "\nCross-screen Reagents found: " + count;
+            + "\nscreened reagents: " + counts[1] + ", screened positive reagents: " + counts[0];
           sendAdminEmails(subject, msg);
         }
         catch (MessagingException e) {
