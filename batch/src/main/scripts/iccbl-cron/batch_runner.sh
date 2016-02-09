@@ -3,8 +3,6 @@
 
 DIR=/groups/screensaver/batch/screensaver/
 
-export JAVA_HOME=/usr/lib/jvm/java-6-sun/
-
 if [[ $# -lt 1 ]]
 then
   echo "Usage: $0 [local || dev || stage || prod ] "
