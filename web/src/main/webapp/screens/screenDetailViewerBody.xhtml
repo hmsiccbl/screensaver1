@@ -281,6 +281,13 @@ TODO:
 
     </ss:propertyGroup>
 
+    <ss:property id="comments" label="Comments"
+      value="#{screenDetailViewer.entity.comments}"
+      rendered="#{screenDetailViewer.editMode || screenDetailViewer.screensaverUser.isUserInRoleOfNameMap['screensAdmin'] }"
+      editable="#{screenDetailViewer.editMode}"
+      description="Administrative comments" type="Textarea"
+      editWidth="80" editHeight="3" />
+
     <ss:propertyGroup label="Publishable Protocol" columns="1"
       columnClasses="column"
       rendered="#{screenDetailViewer.allowedAccessToScreenDetails}">
@@ -357,13 +364,6 @@ TODO:
         type="Date"
         adminOnly="true" rendered="#{screenDetailViewer.adminViewMode}" />
     </ss:propertyGroup>
-
-    <ss:property id="comments" label="Comments"
-      value="#{screenDetailViewer.entity.comments}"
-      rendered="#{screenDetailViewer.editMode || screenDetailViewer.adminViewMode}"
-      adminOnly="true" editable="#{screenDetailViewer.editMode}"
-      description="Administrative comments" type="Textarea"
-      editWidth="80" editHeight="3" />
 
     <ss:publications
        id="screenDetail"
