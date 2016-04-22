@@ -33,7 +33,15 @@ public class ImageLocatorUtil
             return true;
           }
         });
-        Object content = url.getContent();
+        // Image locator utility times out when displaying well images #173
+        //Object content = url.getContent();
+        //if (content != null) {
+        //  return url;
+        //}
+        int timeout_seconds = 5*1000;
+        HttpsURLConnection huc = (HttpsURLConnection) url.openConnection();
+        huc.setConnectTimeout(timeout_seconds);        
+        Object content = huc.getContent();
         if (content != null) {
           return url;
         }
