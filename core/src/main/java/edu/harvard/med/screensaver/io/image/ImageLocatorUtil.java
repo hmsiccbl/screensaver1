@@ -38,16 +38,17 @@ public class ImageLocatorUtil
         //if (content != null) {
         //  return url;
         //}
-        int timeout_seconds = 5*1000;
+        int timeout_seconds = 50*1000;
         HttpsURLConnection huc = (HttpsURLConnection) url.openConnection();
         huc.setConnectTimeout(timeout_seconds);        
+        huc.setReadTimeout(timeout_seconds);        
         Object content = huc.getContent();
         if (content != null) {
           return url;
         }
       }
       catch (IOException e) {
-      	log.error(e);
+      	log.error("image location error: " + e.toString() );
       }
     }
     log.info("image not available: " + url);
