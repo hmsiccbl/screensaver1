@@ -33,13 +33,22 @@ public class ImageLocatorUtil
             return true;
           }
         });
-        Object content = url.getContent();
+        // Image locator utility times out when displaying well images #173
+        //Object content = url.getContent();
+        //if (content != null) {
+        //  return url;
+        //}
+        int timeout_seconds = 50*1000;
+        HttpsURLConnection huc = (HttpsURLConnection) url.openConnection();
+        huc.setConnectTimeout(timeout_seconds);        
+        huc.setReadTimeout(timeout_seconds);        
+        Object content = huc.getContent();
         if (content != null) {
           return url;
         }
       }
       catch (IOException e) {
-      	log.error(e);
+      	log.error("image location error: " + e.toString() );
       }
     }
     log.info("image not available: " + url);

@@ -31,6 +31,7 @@ public enum ServiceActivityType implements VocabularyTerm
   TRAINING_HP_D300("Training - HP D300"),
   TRAINING_LUMINA_II("Training - Lumina II"),
   TRAINING_IXM("Training - IXM"),
+  TRAINING_IXM_C("Training - IXM C"),
   TRAINING_VELOS("Training - Velos"),
   TRAINING_QPCR_ABI("Training - QPCR-ABI"),
   TRAINING_QPCR_QSTUDIO_7_FLEX("Training - QPCR-Qstudio 7 Flex"),
