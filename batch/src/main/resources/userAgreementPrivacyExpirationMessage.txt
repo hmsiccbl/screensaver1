@@ -6,7 +6,7 @@ on {1}. Your current data sharing level is:
 {2}. If you wish to retain access to Screensaver
 after the expiration date, please complete and return a new user agreement.
 The agreement and related information are available online at
-http://iccb.med.harvard.edu/faq/screening-documents/.
+http://iccb.med.harvard.edu/screening-documents.
 
 If you have additional questions, please contact:
 Jen Smith (jennifer_smith@hms.harvard.edu)
