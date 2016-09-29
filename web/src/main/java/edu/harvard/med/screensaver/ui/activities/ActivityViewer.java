@@ -11,6 +11,7 @@ package edu.harvard.med.screensaver.ui.activities;
 
 import java.math.BigDecimal;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.List;
 import java.util.Set;
 import java.util.SortedSet;
@@ -856,8 +857,11 @@ public class ActivityViewer extends SearchResultContextEditableEntityViewerBacki
     List<FundingSupport> fslist = getDao().findAllEntitiesOfType(FundingSupport.class);
     List<String> fsvalues = Lists.newArrayList();
     for(FundingSupport fs:fslist){
-      fsvalues.add(fs.getValue());
+      if(!fs.isRetired()){
+        fsvalues.add(fs.getValue());
+      }
     }
+    Collections.sort(fsvalues);
     return JSFUtils.createUISelectItemsWithEmptySelection(fsvalues,"<select>");
   }
   

@@ -320,7 +320,14 @@ public class ScreenDetailViewer extends AbstractStudyDetailViewer<Screen>
     if (_newFundingSupport == null) {
       Set<FundingSupport> candidateFundingSupports = Sets.newTreeSet(getDao().findAllEntitiesOfType(FundingSupport.class));
       candidateFundingSupports.removeAll(getEntity().getFundingSupports());
-      _newFundingSupport = new UISelectOneEntityBean<FundingSupport>(candidateFundingSupports, null, true, getDao()) {
+      List<FundingSupport> newCandidates = Lists.newArrayList();
+      for(FundingSupport fs:candidateFundingSupports){
+        if(!fs.isRetired()){
+          newCandidates.add(fs);
+        }
+      }
+      Collections.sort(newCandidates);
+      _newFundingSupport = new UISelectOneEntityBean<FundingSupport>(newCandidates, null, true, getDao()) {
           @Override
         protected String getEmptyLabel()
         {
