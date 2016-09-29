@@ -37,15 +37,24 @@ public class FundingSupport extends AbstractEntity<Integer> implements Comparabl
   private static final long serialVersionUID = 1L;
   
   private String _value;
+  private boolean _isRetired;
 
   private FundingSupport()
   {
+    _isRetired = false;
   }
 
   public FundingSupport(String value)
   {
     _value = value;
+    _isRetired = false;
   }
+
+//  public FundingSupport(String value, boolean isRetired)
+//  {
+//    _value = value;
+//    _isRetired = isRetired;
+//  }
 
   @Id
   @org.hibernate.annotations.GenericGenerator(
@@ -75,7 +84,18 @@ public class FundingSupport extends AbstractEntity<Integer> implements Comparabl
   {
     _value = value;
   }
+  
+  @Column(name="isRetired", nullable=false)
+  public boolean isRetired()
+  {
+    return _isRetired;
+  }
 
+  public void setRetired(boolean value)
+  {
+    _isRetired = value;
+  }
+  
   @Override
   public String toString()
   {
