@@ -1143,6 +1143,7 @@ public class PlateReaderRawDataTransformer extends AbstractBackingBean
 	    }			
 
 			File outputFile = File.createTempFile(getFormOne().getOutputFileName(), "xls");
+			outputFile.deleteOnExit();
 			if(_screenViewer != null) {
 				// Well Finder - for caching
 		    final PlateReaderRawDataParser.WellFinder finder = 

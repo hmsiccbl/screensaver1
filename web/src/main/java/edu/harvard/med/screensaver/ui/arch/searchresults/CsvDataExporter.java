@@ -60,6 +60,7 @@ public class CsvDataExporter<T> implements TableDataExporter<T>
     CSVPrintWriter csvWriter = null;
     try {
       File file = File.createTempFile("screensaver", "csv");
+      file.deleteOnExit();
       Writer writer = new BufferedWriter(new FileWriter(file));
       csvWriter = new CSVPrintWriter(writer, "\n");
       writeFile(csvWriter, iter);

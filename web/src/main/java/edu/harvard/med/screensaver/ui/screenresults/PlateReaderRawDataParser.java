@@ -307,7 +307,7 @@ public class PlateReaderRawDataParser {
 					wellWriter,
 					wellValueWriter,
 					outputFile);
-			
+			outputFile.deleteOnExit();
 			String finalFileName = outputFileName + ".xls";
 			File outFile = new File(finalFileName);
 			copyFileUsingChannel(outputFile, outFile);

@@ -82,12 +82,11 @@ public class ExcelWorkbookDataExporter<T> implements TableDataExporter<T>
   public InputStream export(Iterator<T> iter) throws IOException
   {
     assert _columns != null : "must call setTableColumns() first";
- //   final ByteArrayOutputStream out = new ByteArrayOutputStream();
     long startTime = System.currentTimeMillis();
     log.info("----start exporting!");
     try {
       File outputFile = File.createTempFile(System.currentTimeMillis()+"_"+Math.random(), "tmp");
-
+      outputFile.deleteOnExit();
       WritableWorkbook workbook = Workbook.createWorkbook(outputFile);
       writeWorkbook(workbook, iter);
       workbook.write();
