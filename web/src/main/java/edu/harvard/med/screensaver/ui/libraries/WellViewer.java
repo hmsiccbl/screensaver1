@@ -27,6 +27,8 @@ import javax.faces.model.ListDataModel;
 import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.Iterables;
 import com.google.common.collect.Lists;
+
+import org.apache.commons.io.IOUtils;
 import org.apache.log4j.Logger;
 
 import edu.harvard.med.screensaver.ScreensaverConstants;
@@ -171,8 +173,9 @@ public class WellViewer extends SearchResultContextEntityViewerBackingBean<Well,
   @UICommand
   public String downloadSDFile()
   {
+    InputStream inputStream = null;
     try {
-      InputStream inputStream = _wellsSdfDataExporter.export(ImmutableSet.of(getEntity().getWellKey().toString()).iterator());
+      inputStream = _wellsSdfDataExporter.export(ImmutableSet.of(getEntity().getWellKey().toString()).iterator());
       JSFUtils.handleUserDownloadRequest(getFacesContext(),
                                          inputStream,
                                          _wellsSdfDataExporter.getFileName(),
@@ -180,6 +183,12 @@ public class WellViewer extends SearchResultContextEntityViewerBackingBean<Well,
     }
     catch (IOException e) {
       reportApplicationError(e.toString());
+    }
+    finally
+    {
+      if (inputStream != null){
+        IOUtils.closeQuietly(inputStream);
+      }
     }
     return REDISPLAY_PAGE_ACTION_RESULT;
   }

@@ -23,6 +23,8 @@ import javax.faces.event.ValueChangeEvent;
 import javax.servlet.http.HttpServletRequest;
 
 import com.google.common.collect.Lists;
+
+import org.apache.commons.io.IOUtils;
 import org.apache.log4j.Logger;
 
 import edu.harvard.med.screensaver.db.Criterion;
@@ -333,9 +335,9 @@ public class DataTable<R> extends AbstractBackingBean implements Observer
   /* final (CGLIB2 restriction) */
   public String downloadSearchResults()
   {
+    InputStream inputStream = null;
     try {
       DataExporter<?> dataExporter = getDataExporterSelector().getSelection();
-      InputStream inputStream;
       log.debug("starting exporting data for download");
       // TODO: TableDataExporter should be injected with the associated data table so they can retrieve the columns on demand
       if (dataExporter instanceof TableDataExporter) {
@@ -350,6 +352,13 @@ public class DataTable<R> extends AbstractBackingBean implements Observer
     }
     catch (IOException e) {
       reportApplicationError(e.toString());
+    }  
+    finally
+    {
+      if (inputStream != null){
+        log.info("close temp inputstream");
+        IOUtils.closeQuietly(inputStream);
+      }
     }
     return REDISPLAY_PAGE_ACTION_RESULT;
   }
