@@ -770,7 +770,7 @@ public class ScreenResultReporterTest extends AbstractSpringPersistenceTest
                                                              "The positives",
                                                              "Overall",
                                                              "The overall",
-                                                             screenType);
+                                                             screenType)[0];
     assertTrue(count > 0);
 
     flushAndClear();
@@ -849,7 +849,7 @@ public class ScreenResultReporterTest extends AbstractSpringPersistenceTest
                                                              "The positives",
                                                              "Overall",
                                                              "The overall",
-                                                             screenType);
+                                                             screenType)[0];
     assertTrue(count > 0);
 
     ////////////
