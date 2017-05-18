@@ -35,6 +35,8 @@ public enum LibraryScreeningStatus implements VocabularyTerm
   NOT_RECOMMENDED("Not Recommended"),
   // library is available for screening, unconditionally
   ALLOWED("Allowed"),
+  // library has been removed from the facility and can no longer be screened
+  DISCARDED("Discarded"),
   ;
 
 
