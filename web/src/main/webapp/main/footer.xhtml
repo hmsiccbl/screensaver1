@@ -23,10 +23,12 @@
 			<h:outputLink value="#{appInfo.applicationProperties.map['screensaver.ui.facility_url']}" target="_blank">
 				<h:outputText value="#{appInfo.applicationProperties.map['screensaver.ui.facility_name']}" />
 			</h:outputLink>
-			<h:outputText value=" | " />
+			<h:outputText value=" | " 
+        rendered="#{ (menu.screensaverUser != null) }" />
 	    <h:outputLink
 	      value="#{appInfo.applicationProperties.map['screensaver.ui.release_notes_url']}"
-	      target="_blank" title="Find out what's new in Screensaver!">
+	      target="_blank" title="Find out what's new in Screensaver!"
+        rendered="#{ (menu.screensaverUser != null) }" >
 	      <h:outputText value="Release Notes" />
 	    </h:outputLink>
 	    <h:outputText value=" | " />
@@ -34,9 +36,11 @@
 				title="Let us know what you think!">
 				<h:outputText value="Feedback" />
 			</h:outputLink>
-	    <h:outputText value=" | " />
+	    <h:outputText value=" | " 
+        rendered="#{ (menu.screensaverUser != null) }" />
 	    <t:commandLink action="#{menu.viewHelp}" value="Help"
-	      title="View the Screensaver help page" />
+	      title="View the Screensaver help page" 
+        rendered="#{ (menu.screensaverUser != null) }" />
     </h:form>
   </t:div>
 
