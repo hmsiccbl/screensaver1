@@ -15,20 +15,20 @@
       styleClass="title" />
 
     <div id="ie_detection_message"
-      style="display: none; color: fuchsia;">The <a href="www.mozilla.com">Mozilla
-    Firefox Browser</a> (version 3.6 or higher) is recommended for use with #{appInfo.applicationProperties.map['screensaver.ui.application_name']}.
-           <script type="text/javascript">
-            if (! Array.every) { // if not firefox
-              document.getElementById("ie_detection_message").style.display = "block";
-            }
-          </script></div>
+      style="display: none; color: fuchsia;">
+      Recommended browsers for use with #{appInfo.applicationProperties.map['screensaver.ui.application_name']} are (TBD)
+    </div>
 
     <t:div id="screenerWelcomeMessage"
       rendered="#{!menu.readAdmin}">
       <ul>
         <li>Use "Browse Libraries" to view the set of small
-          molecule and RNAi libraries available for use at the screening
-          facility. For each library, you can view descriptive
+          molecule and RNAi libraries available for use at the
+          <h:outputText value=" " />
+          <h:outputLink 
+              value="#{appInfo.applicationProperties.map['screensaver.ui.facility_url']}" target="_blank">
+            <h:outputText value="#{appInfo.applicationProperties.map['screensaver.ui.facility_name']}" />
+          </h:outputLink> Screening Facility. For each library, you can view descriptive
           information on the Library Viewer page. From that page, you
           can navigate to the Wells Browser page, to browse the contents
           of each library well and reagent information including
@@ -45,36 +45,36 @@
         performed at ICCB-L. For your own screens, you can browse, filter, sort, 
         and export your result data, and compare it to other shared screen results 
         and studies.  You can also view each screening data plate with a heat map 
-        viewer and export the screen result data as a spreadsheet.
+        viewer and export the screen result data as a spreadsheet (xls, csv, or sdf).
         <ul>
             <li style="font-size: small">If your screen result data
               is not shown, please contact <a
               href="mailto:david_wrobel@hms.harvard.edu">David
                 Wrobel</a> and we will make it a priority to import your
               data.</li>
-            <li style="font-size: small">Note that you will not be
-              able to view screen results from any screens other than
-              your own unless they have been classified as "shared" by
-              the screener, in which case they are available for
-              viewing. ICCB-L is in the process of developing guidelines
-              for data sharing. Please contact <a
-              href="mailto:caroline_shamu@hms.harvard.edu">Caroline
-                Shamu</a> or <a href="mailto:su_chiang@hms.harvard.edu">Su
-                Chiang</a> if you have any questions.</li>
+            <li style="font-size: small">The amount of screen results visible 
+            from any screens other than your own is dependent upon your 
+            small molecule and/or RNAi data sharing level. Please contact 
+            <a 
+            href="mailto:jennifer_smith@hms.harvard.edu">Jennifer Smith</a> 
+            if you have any questions.</li>
           </ul>
         </t:htmlTag>
         <li>Use "Browse Studies" to view the studies that have been
-          added to Screensaver. Studies associate biologically
-          significant annotations with library reagents.</li>
+          added to Screensaver. Studies associate annotations with library reagents.</li>
         <li>Use "Browse Lab Activities" to view the activities you
-          have performed at our facility.</li>
-        <li>Use "Browse Associates" to view the individuals you
-          have been working with, including your fellow lab members and
-          screen collaborators. Click on your account name (at the top
-          of the menu panel) to view your own information, including
-          screens, lab members, etc.</li>
+          have performed at
+          <h:outputText value=" " />
+          <h:outputLink 
+              value="#{appInfo.applicationProperties.map['screensaver.ui.facility_url']}" target="_blank">
+            <h:outputText value="#{appInfo.applicationProperties.map['screensaver.ui.facility_name']}" />
+          </h:outputLink>.</li>
         <li>Use "Data Downloads" to download SD files for all
-          ICCB-L libraries, either as a single file or as individual
+        <h:outputText value=" " />
+        <h:outputLink 
+              value="#{appInfo.applicationProperties.map['screensaver.ui.facility_url']}" target="_blank">
+            <h:outputText value="#{appInfo.applicationProperties.map['screensaver.ui.facility_name']}" />
+          </h:outputLink> libraries, either as a single file or as individual
           library files.</li>
         <li>Note: the process of downloading images of compound structures into Excel is somewhat slow. 
             For example, it may take ~10 minutes to generate an Excel file containing 1000 structures. 
