@@ -23,6 +23,8 @@ import javax.persistence.PrimaryKeyJoinColumn;
 import javax.persistence.Transient;
 
 import org.apache.log4j.Logger;
+import org.hibernate.annotations.Type;
+import org.joda.time.LocalDate;
 
 import edu.harvard.med.screensaver.model.AbstractEntityVisitor;
 import edu.harvard.med.screensaver.model.BusinessRuleViolationException;
@@ -30,6 +32,7 @@ import edu.harvard.med.screensaver.model.DataModelViolationException;
 import edu.harvard.med.screensaver.model.meta.Cardinality;
 import edu.harvard.med.screensaver.model.meta.RelationshipPath;
 import edu.harvard.med.screensaver.model.screens.Screen;
+import edu.harvard.med.screensaver.model.users.LabHeadAppointmentCategory;
 
 /**
  * The head honcho of a {@link Lab}.
@@ -57,6 +60,10 @@ public class LabHead extends ScreeningRoomUser
   private Set<Screen> _screensHeaded = new HashSet<Screen>();
   private Set<ScreeningRoomUser> _labMembers = new HashSet<ScreeningRoomUser>();
   private LabAffiliation _labAffiliation;
+
+  private LabHeadAppointmentCategory _labHeadAppointmentCategory;
+  private LabHeadAppointmentDepartment _labHeadAppointmentDepartment;
+  private LocalDate _labHeadAppointmentUpdateDate;
 
   // public constructors and methods
 
@@ -250,4 +257,48 @@ public class LabHead extends ScreeningRoomUser
     }
     super.setLabHead(labHead);
   }
+  
+  @Column(nullable=true)
+  @org.hibernate.annotations.Type(
+    type="edu.harvard.med.screensaver.model.users.LabHeadAppointmentDepartment$UserType"
+  )
+  public LabHeadAppointmentDepartment getLabHeadAppointmentDepartment()
+  {
+    return _labHeadAppointmentDepartment;
+  }
+
+  public void setLabHeadAppointmentDepartment(LabHeadAppointmentDepartment value)
+  {
+    _labHeadAppointmentDepartment = value;
+  }
+  
+  @Type(type="edu.harvard.med.screensaver.db.usertypes.LocalDateType")
+  public LocalDate getLabHeadAppointmentUpdateDate()
+  {
+    return _labHeadAppointmentUpdateDate;
+  }
+
+  public void setLabHeadAppointmentUpdateDate(LocalDate value)
+  {
+    _labHeadAppointmentUpdateDate = value;
+  }
+  
+  @Column(nullable=true)
+  @org.hibernate.annotations.Type(
+    type="edu.harvard.med.screensaver.model.users.LabHeadAppointmentCategory$UserType"
+  )
+  public LabHeadAppointmentCategory getLabHeadAppointmentCategory()
+  {
+    return _labHeadAppointmentCategory;
+  }
+
+  /**
+   */
+  public void setLabHeadAppointmentCategory(LabHeadAppointmentCategory value)
+  {
+    _labHeadAppointmentCategory = value;
+  }
+  
+  
+  
 }

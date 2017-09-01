@@ -61,6 +61,8 @@ import edu.harvard.med.screensaver.model.users.Gender;
 import edu.harvard.med.screensaver.model.users.Lab;
 import edu.harvard.med.screensaver.model.users.LabAffiliation;
 import edu.harvard.med.screensaver.model.users.LabHead;
+import edu.harvard.med.screensaver.model.users.LabHeadAppointmentCategory;
+import edu.harvard.med.screensaver.model.users.LabHeadAppointmentDepartment;
 import edu.harvard.med.screensaver.model.users.ScreeningRoomUser;
 import edu.harvard.med.screensaver.model.users.ScreeningRoomUserClassification;
 import edu.harvard.med.screensaver.model.users.ScreensaverUser;
@@ -359,6 +361,33 @@ public class UserViewer extends SearchResultContextEditableEntityViewerBackingBe
     else {
       return JSFUtils.createUISelectItems(userClassifications);
     }
+  }
+
+  public List<SelectItem> getLabHeadAppointmentCategorySelections()
+  {
+    List<LabHeadAppointmentCategory> labHeadAppointmentCategories
+      = new ArrayList<LabHeadAppointmentCategory>();
+    if (((ScreeningRoomUser) getEntity()).isHeadOfLab()) {
+      labHeadAppointmentCategories = 
+          new ArrayList<LabHeadAppointmentCategory>(
+              Arrays.asList(LabHeadAppointmentCategory.values()));
+    }
+    return JSFUtils.createUISelectItemsWithEmptySelection(
+        labHeadAppointmentCategories, "<none>");
+  }
+
+  public List<SelectItem> getLabHeadAppointmentDepartmentSelections()
+  {
+    List<LabHeadAppointmentDepartment> labHeadAppointmentDepts
+      = new ArrayList<LabHeadAppointmentDepartment>();
+    if (((ScreeningRoomUser) getEntity()).isHeadOfLab()) {
+      labHeadAppointmentDepts = 
+          new ArrayList<LabHeadAppointmentDepartment>(
+              Arrays.asList(LabHeadAppointmentDepartment.values()));
+    }
+    return JSFUtils.createUISelectItemsWithEmptySelection(
+        labHeadAppointmentDepts,
+        ScreensaverConstants.REQUIRED_VOCAB_FIELD_PROMPT);
   }
 
   public UISelectOneEntityBean<LabHead> getLabName()
