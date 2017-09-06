@@ -1219,6 +1219,9 @@
 
   <bean id="screeningRoomUserClassificationConverter" class="edu.harvard.med.screensaver.ui.arch.util.converter.ScreeningRoomUserClassificationConverter" />
 
+  <bean id="labHeadAppointmentCategoryConverter" class="edu.harvard.med.screensaver.ui.arch.util.converter.LabHeadAppointmentCategoryConverter" />
+  <bean id="labHeadAppointmentDepartmentConverter" class="edu.harvard.med.screensaver.ui.arch.util.converter.LabHeadAppointmentDepartmentConverter" />
+
   <bean id="affiliationCategoryConverter" class="edu.harvard.med.screensaver.ui.arch.util.converter.AffiliationCategoryConverter" />
   
   <bean id="normalizePlatesMethodConverter" class="edu.harvard.med.screensaver.ui.arch.util.converter.NormalizePlatesMethodConverter" />

@@ -113,6 +113,50 @@
         </t:div>
       </ui:define>
     </ss:property>
+    
+    <ss:property id="labHeadAppointmentCategory" label="App't Category"
+      description="The Lab Head Appointment Category"
+      value="#{userViewer.entity.labHeadAppointmentCategory}"
+      rendered="#{userViewer.entity.headOfLab}"
+      editable="#{userViewer.editMode &amp;&amp; (userViewer.screensaverUser.isUserInRoleOfNameMap['labHeadsAdmin'] )}"
+      converter="#{labHeadAppointmentCategoryConverter}"
+      required="false">
+      <ui:define name="editableData">
+        <t:selectOneMenu id="labHeadAppointmentCategoryMenu"
+          value="#{userViewer.entity.labHeadAppointmentCategory}"
+          converter="#{labHeadAppointmentCategoryConverter}"
+          required="false" styleClass="inputText selectMenu">
+          <f:selectItems value="#{userViewer.labHeadAppointmentCategorySelections}" />
+        </t:selectOneMenu>
+      </ui:define>
+    </ss:property>
+
+    <ss:property id="labHeadAppointmentDepartment" label="App't Department"
+      description="The Lab Head Appointment Department"
+      value="#{userViewer.entity.labHeadAppointmentDepartment}"
+      rendered="#{userViewer.entity.headOfLab}"
+      editable="#{userViewer.editMode &amp;&amp; (userViewer.screensaverUser.isUserInRoleOfNameMap['labHeadsAdmin'] )}"
+      converter="#{labHeadAppointmentDepartmentConverter}"
+      required="false">
+      <ui:define name="editableData">
+        <t:selectOneMenu id="labHeadAppointmentDepartmentMenu"
+          value="#{userViewer.entity.labHeadAppointmentDepartment}"
+          converter="#{labHeadAppointmentDepartmentConverter}"
+          required="false" styleClass="inputText selectMenu">
+          <f:selectItems value="#{userViewer.labHeadAppointmentDepartmentSelections}" />
+        </t:selectOneMenu>
+      </ui:define>
+    </ss:property>
+
+    <ss:property id="labHeadAppointmentUpdateDate" type="Date"
+      label="Date App't Updated"
+      description="The date when Lab Head Appointment was set"
+      value="#{userViewer.entity.labHeadAppointmentUpdateDate}"
+      rendered="#{userViewer.entity.headOfLab}"
+      editable="#{userViewer.editMode &amp;&amp; (userViewer.screensaverUser.isUserInRoleOfNameMap['labHeadsAdmin'] )}"
+      >
+    </ss:property>
+
 
 		<ss:property id="email" label="Email"
 			description="The user's email address "
