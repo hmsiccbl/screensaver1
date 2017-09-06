@@ -386,8 +386,7 @@ public class UserViewer extends SearchResultContextEditableEntityViewerBackingBe
               Arrays.asList(LabHeadAppointmentDepartment.values()));
     }
     return JSFUtils.createUISelectItemsWithEmptySelection(
-        labHeadAppointmentDepts,
-        ScreensaverConstants.REQUIRED_VOCAB_FIELD_PROMPT);
+        labHeadAppointmentDepts,"<none>");
   }
 
   public UISelectOneEntityBean<LabHead> getLabName()
