@@ -21,6 +21,7 @@ import com.google.common.collect.Iterables;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Sets;
 
+import org.apache.log4j.Logger;
 import org.joda.time.DateTime;
 import org.joda.time.LocalDate;
 
@@ -70,6 +71,7 @@ import edu.harvard.med.screensaver.util.NullSafeComparator;
  */
 public class ScreenSearchResults extends EntityBasedEntitySearchResults<Screen,Integer>
 {
+  private static final Logger log = Logger.getLogger(UserNameColumn.class);
   private GenericEntityDAO _dao;
 
   private UserViewer _userViewer;
@@ -460,7 +462,9 @@ public class ScreenSearchResults extends EntityBasedEntitySearchResults<Screen,I
       Screen.labHead,
       "Lab Head", "The head of the lab performing the screen", TableColumn.UNGROUPED, _userViewer) {
       @Override
-      public ScreeningRoomUser getUser(Screen screen) { return screen.getLabHead(); }
+      public ScreeningRoomUser getUser(Screen screen) { 
+        log.info("get lab head for screen: " + screen);
+        return screen.getLabHead(); }
     });
     ((HasFetchPaths<Screen>) columns.get(columns.size() - 1)).addRelationshipPath(Screen.labHead.to(LabHead.labAffiliation));
     columns.add(new TextEntityColumn<Screen>(
@@ -479,7 +483,9 @@ public class ScreenSearchResults extends EntityBasedEntitySearchResults<Screen,I
       Screen.leadScreener,
       "Lead Screener", "The scientist primarily responsible for running the screen", TableColumn.UNGROUPED, _userViewer) {
       @Override
-      public ScreeningRoomUser getUser(Screen screen) { return screen.getLeadScreener(); }
+      public ScreeningRoomUser getUser(Screen screen) { 
+        log.info("get lead screener for screen: " + screen);
+        return screen.getLeadScreener(); }
     });
 
     if (!!!getApplicationProperties().isFacility(LincsScreensaverConstants.FACILITY_KEY)) {

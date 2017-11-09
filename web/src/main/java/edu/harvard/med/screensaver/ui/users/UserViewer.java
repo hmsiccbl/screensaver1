@@ -599,6 +599,8 @@ public class UserViewer extends SearchResultContextEditableEntityViewerBackingBe
       // also returns lab members and lab head (which are shown elsewhere by
       // this viewer)
       for (Screen screen : getScreeningRoomUser().getAllAssociatedScreens()) {
+//        screen = getDao().reloadEntity(screen);
+        log.info("getAssociatedScreeningRoomUsers for screen: " + screen);
         screenAssociates.addAll(screen.getAssociatedScreeningRoomUsers());
       }
       screenAssociates.remove(getScreeningRoomUser());
