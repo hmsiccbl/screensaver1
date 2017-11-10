@@ -599,9 +599,17 @@ public class UserViewer extends SearchResultContextEditableEntityViewerBackingBe
       // also returns lab members and lab head (which are shown elsewhere by
       // this viewer)
       for (Screen screen : getScreeningRoomUser().getAllAssociatedScreens()) {
-//        screen = getDao().reloadEntity(screen);
-        log.info("getAssociatedScreeningRoomUsers for screen: " + screen);
-        screenAssociates.addAll(screen.getAssociatedScreeningRoomUsers());
+        log.debug("getAssociatedScreeningRoomUsers for screen: " + screen);
+        // NOTE: 20171109 - workaround LazyInstantiation Excptions by reloading 
+        // associated entities
+        screenAssociates.add(
+            getDao().findEntityById(
+                ScreeningRoomUser.class, screen.getLabHead().getScreensaverUserId()));
+        screenAssociates.add(
+            getDao().findEntityById(
+                ScreeningRoomUser.class, screen.getLeadScreener().getScreensaverUserId()));
+        screenAssociates.addAll(screen.getCollaborators());
+        // screenAssociates.addAll(screen.getAssociatedScreeningRoomUsers());
       }
       screenAssociates.remove(getScreeningRoomUser());
       _screenAssociatesDataModel = new ListDataModel(Lists.newArrayList(screenAssociates));

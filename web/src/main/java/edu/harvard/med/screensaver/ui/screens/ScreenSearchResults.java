@@ -462,9 +462,23 @@ public class ScreenSearchResults extends EntityBasedEntitySearchResults<Screen,I
       Screen.labHead,
       "Lab Head", "The head of the lab performing the screen", TableColumn.UNGROUPED, _userViewer) {
       @Override
+      public String getCellValue(Screen screen) {
+        log.debug("1get lab head for screen: " + screen);
+        // NOTE: 20171109 - workaround LazyInstantiation Exceptions by reloading 
+        // associated entities
+        ScreeningRoomUser user = _dao.findEntityById(
+            ScreeningRoomUser.class, 
+            screen.getLabHead().getScreensaverUserId());
+        log.debug("user:" + user);
+        return user.getLastName() + ", " + user.getFirstName();
+      }
+      @Override
       public ScreeningRoomUser getUser(Screen screen) { 
-        log.info("get lab head for screen: " + screen);
-        return screen.getLabHead(); }
+        return _dao.findEntityById(
+            ScreeningRoomUser.class, 
+            screen.getLabHead().getScreensaverUserId());
+            // return screen.getLabHead(); 
+      }
     });
     ((HasFetchPaths<Screen>) columns.get(columns.size() - 1)).addRelationshipPath(Screen.labHead.to(LabHead.labAffiliation));
     columns.add(new TextEntityColumn<Screen>(
@@ -483,9 +497,24 @@ public class ScreenSearchResults extends EntityBasedEntitySearchResults<Screen,I
       Screen.leadScreener,
       "Lead Screener", "The scientist primarily responsible for running the screen", TableColumn.UNGROUPED, _userViewer) {
       @Override
+      public String getCellValue(Screen screen) {
+        log.debug("1get lead screener for screen: " + screen);
+        // NOTE: 20171109 - workaround LazyInstantiation Exceptions by reloading 
+        // associated entities
+        ScreeningRoomUser user = _dao.findEntityById(
+            ScreeningRoomUser.class, 
+            screen.getLeadScreener().getScreensaverUserId());
+        log.debug("user:" + user);
+        return user.getLastName() + ", " + user.getFirstName();
+      }
+      
+      @Override
       public ScreeningRoomUser getUser(Screen screen) { 
-        log.info("get lead screener for screen: " + screen);
-        return screen.getLeadScreener(); }
+        return _dao.findEntityById(
+            ScreeningRoomUser.class, 
+            screen.getLeadScreener().getScreensaverUserId());
+            // return screen.getLeadScreener(); 
+      }
     });
 
     if (!!!getApplicationProperties().isFacility(LincsScreensaverConstants.FACILITY_KEY)) {
