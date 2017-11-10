@@ -457,9 +457,16 @@ public class Screen extends Study implements AttachedFilesEntity<ScreenAttachedF
   {
     Set<ScreeningRoomUser> users = new HashSet<ScreeningRoomUser>();
     if (getLabHead() != null) {
+      log.debug("Lab Head: " + getLabHead().getScreensaverUserId());
       users.add(getLabHead());
     }
+    log.debug("Lead Screener: " + getLeadScreener().getScreensaverUserId());
     users.add(getLeadScreener());
+    log.debug("add collabs...");
+    //SortedSet<ScreeningRoomUser> collabs = getCollaborators();
+    //for (ScreeningRoomUser sru: collabs) {
+    //  log.debug("Collab: " + sru.getScreensaverUserId());
+    //}
     users.addAll(getCollaborators());
     return users;
   }

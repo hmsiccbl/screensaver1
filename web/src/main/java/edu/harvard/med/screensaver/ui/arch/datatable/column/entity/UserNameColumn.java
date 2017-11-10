@@ -13,6 +13,8 @@ import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.List;
 
+import org.apache.log4j.Logger;
+
 import edu.harvard.med.screensaver.model.Entity;
 import edu.harvard.med.screensaver.model.meta.PropertyPath;
 import edu.harvard.med.screensaver.model.meta.RelationshipPath;
@@ -25,6 +27,7 @@ import edu.harvard.med.screensaver.util.NullSafeComparator;
 public abstract class UserNameColumn<E extends Entity,U extends ScreensaverUser> extends TextEntityColumn<E>/*MultiPropertyColumn<T,String>*/
 {
   private UserViewer _userViewer;
+  private static final Logger log = Logger.getLogger(UserNameColumn.class);
 
   public UserNameColumn(RelationshipPath<E> userEntityPath,
                         String name,
@@ -57,7 +60,9 @@ public abstract class UserNameColumn<E extends Entity,U extends ScreensaverUser>
   @Override
   public String/*List<String>*/ getCellValue(E t)
   {
+    log.debug("Get fullname last first for user: " + t);
     ScreensaverUser user = getUser(t);
+    log.debug("Get fullname last first for user: " + user);
     return user == null ? null : user.getFullNameLastFirst();
 //    return Arrays.asList(getUser(t).getLastName(),
 //                         getUser(t).getFirstName());
