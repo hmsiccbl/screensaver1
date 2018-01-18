@@ -30,6 +30,7 @@ public enum ServiceActivityType implements VocabularyTerm
   TRAINING_OCTET("Training - Octet"),
   TRAINING_HP_D300("Training - HP D300"),
   TRAINING_LUMINA_II("Training - Lumina II"),
+  TRAINING_IQUE("Training - iQue"),
   TRAINING_IXM("Training - IXM"),
   TRAINING_IXM_C("Training - IXM C"),
   TRAINING_VELOS("Training - Velos"),
