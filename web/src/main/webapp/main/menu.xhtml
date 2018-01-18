@@ -230,12 +230,12 @@
 
         <h:form>
           <t:panelGrid columns="1" styleClass="layoutPanel">
-            Plate/Well ID
+            384-well Plate/Well ID
             <t:panelGroup styleClass="layoutPanel">
               <t:inputTextarea id="plateWellListMenu"
                 value="#{wellFinder.plateWellList}"
                 styleClass="inputText"
-                title="Look up a library well by plate number and well name"
+                title="Look up a library well by (384 well) plate number and well name"
                 forceId="true" cols="12" rows="1" />
               <t:commandButton action="#{wellFinder.findWells}"
                 id="findWellCommand" value="Go"
