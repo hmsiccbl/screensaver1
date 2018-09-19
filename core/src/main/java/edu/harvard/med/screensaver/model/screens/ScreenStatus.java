@@ -44,7 +44,8 @@ public enum ScreenStatus implements VocabularyTerm
   NEVER_INITIATED("Never Initiated", 4),
   DROPPED_TECHNICAL("Dropped - Technical", 4),
   DROPPED_RESOURCES("Dropped - Resources", 4),
-  TRANSFERRED_TO_BROAD_INSTITUTE("Transferred to Broad Institute", 5)
+  TRANSFERRED_TO_BROAD_INSTITUTE("Transferred to Broad Institute", 5),
+  ARCHIVED("Archived", 5)
   ;
 
 
