@@ -4,7 +4,7 @@
   <modelVersion>4.0.0</modelVersion>
   <groupId>edu.harvard.med</groupId>
   <artifactId>screensaver</artifactId>
-  <version>2018-01-18</version>
+  <version>2018-09-19</version>
   <packaging>pom</packaging>
   <name>Screensaver HTS LIMS</name>
 
