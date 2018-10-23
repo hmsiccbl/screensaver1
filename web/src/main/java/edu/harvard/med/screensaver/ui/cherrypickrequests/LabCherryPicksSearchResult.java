@@ -14,6 +14,7 @@ import com.google.common.collect.Iterables;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
 import com.google.common.collect.Sets;
+import org.apache.log4j.Logger;
 
 import edu.harvard.med.screensaver.db.EntityInflator;
 import edu.harvard.med.screensaver.db.GenericEntityDAO;
@@ -53,6 +54,8 @@ import edu.harvard.med.screensaver.util.NullSafeUtils;
 
 public class LabCherryPicksSearchResult extends EntityBasedEntitySearchResults<LabCherryPick,Integer>
 {
+  private static final Logger log = Logger.getLogger(LabCherryPicksSearchResult.class);
+
   private CherryPickRequest _cherryPickRequest;
   private CherryPickRequestAllocator _cherryPickRequestAllocator;
   private WellCopyVolumeAdjuster _wellCopyVolumeAdjuster;
@@ -461,9 +464,13 @@ public class LabCherryPicksSearchResult extends EntityBasedEntitySearchResults<L
     Set<WellCopy> wellCopies = Sets.newHashSet();
     for (Map.Entry<LabCherryPick,String> lcpNewSourceCopy : lcpNewSourceCopies.entrySet()) {
       LabCherryPick lcp = new EntityInflator<LabCherryPick>(_dao, lcpNewSourceCopy.getKey(), true).
-      need(LabCherryPick.wellVolumeAdjustments.to(WellVolumeAdjustment.copy).to(Copy.plates)).need(LabCherryPick.sourceWell).inflate();
+      need(LabCherryPick.wellVolumeAdjustments.to(WellVolumeAdjustment.copy).to(Copy.plates))
+      .need(LabCherryPick.sourceWell)
+      .need(LabCherryPick.sourceWell.to(Well.library)).inflate();
       if (lcp.getSourceCopy() != null &&
         !NullSafeUtils.nullSafeEquals(lcp.getSourceCopy().getName(), lcpNewSourceCopy.getValue())) {
+        Well well = lcp.getSourceWell();
+        _dao.needReadOnly(well, Well.library);
         wellCopies.add(new WellCopy(lcp.getSourceWell(), lcp.getSourceCopy()));
       }
     }
