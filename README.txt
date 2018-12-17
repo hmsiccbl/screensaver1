@@ -1,3 +1,10 @@
+END OF LIFE NOTICE
+
+As of December 1, 2018, use of this software is discontinued by the ICCB-L facility at Harvard Medical School.
+
+Please see the screensaver2 repository for ongoing development of LIMS software at the ICCB-L.
+
+
 *******************************************************************************
 *  $HeadURL$
 *  $Id$
